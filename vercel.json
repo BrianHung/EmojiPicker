@@ -1,0 +1,9 @@
+{
+  "routes": [
+    {
+      "src": "/_assets/(.*)",
+      "headers": { "cache-control": "max-age=14400" },
+      "dest": "/_assets/$1"
+    }
+  ]
+}

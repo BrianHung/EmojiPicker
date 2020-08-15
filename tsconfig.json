@@ -1,0 +1,26 @@
+{
+  "include": ["src/*"],
+  "exclude": ["node_modules", "website"],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "noEmit": false,
+    "sourceMap": false,
+    "strict": false,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "moduleResolution": "Node",
+    "allowJs": true,
+    "target": "es2017",
+    "lib": ["es2019", "dom"],
+    "jsx": "react",
+    "types": ["react"],
+    "rootDir": "src",
+    "outDir": "dist",
+    "stripInternal": true,
+    "removeComments": true,
+    "declarationMap": true,
+    "declaration": true,
+    "declarationDir": "dist/@types",
+  }
+}

@@ -1,0 +1,103 @@
+.emoji-picker {
+  display: flex;
+  flex-direction: column;
+  border-radius: 3px;
+  background: white;
+  border: 1px solid #E1E1E0;
+  overflow: hidden;
+}
+
+.emoji-picker .emoji-picker-scroll {
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.emoji-picker .emoji-picker-scroll .emoji-picker-category-title {
+  padding: 8px 0.75em;
+  text-transform: uppercase;
+  text-align: left;
+  font-weight: 500;
+  font-size: 16px;
+  color: rgba(55, 53, 47, 0.6);
+  user-select: none;
+}
+
+.emoji-picker .emoji-picker-scroll .emoji-picker-category-emoji {
+  padding: 0em 0.50em;
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.emoji-picker .emoji-picker-emoji {
+  display: inline-block;
+  user-select: none;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 4px;
+  border-radius: 3px;
+}
+
+.emoji-picker .emoji-picker-emoji-focused {
+  background: rgba(55, 53, 47, 0.15);
+}
+
+.emoji-picker .emoji-picker-emoji:active {
+  background: rgba(55, 53, 47, 0.25);
+}
+
+.emoji-picker .emoji-picker-emoji-svg {
+  height: 100%;
+  width: 100%;
+}
+
+.emoji-picker .emoji-picker-navbar {
+  display: flex;
+  height: fit-content;
+  flex-direction: row;
+  justify-content: space-evenly;
+  border-bottom: 1px solid #E1E1E0;
+  padding: 0.25em;
+}
+
+.emoji-picker .emoji-picker-footer {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  border-top: 1px solid #E1E1E0;
+}
+
+.emoji-picker .emoji-picker-footer .emoji-picker-emoji {
+  width: 2.5em;
+  height: 2.5em;  
+  padding: 0.50em;
+  margin-right: 0.10em;
+}
+
+.emoji-picker .emoji-picker-footer .emoji-picker-name {
+  text-align: left;
+  padding-right: 0.50em;
+}
+
+.emoji-picker.emoji-picker-dark {
+  background: rgb(63, 68, 71);
+  color: white;
+}
+
+.emoji-picker.emoji-picker-dark .emoji-picker-category-title {
+  color: rgba(255, 255, 255, 0.6); 
+  background-color: rgb(63, 68, 71);
+}
+
+.emoji-picker.emoji-picker-dark .emoji-picker-emoji-focused {
+  background: rgba(225, 225, 224, 0.25);
+}
+
+.emoji-picker.emoji-picker-dark .emoji-picker-emoji:active {
+  background: rgba(225, 225, 224, 0.50);
+}
+
+.emoji-picker.emoji-picker-dark, .emoji-picker-dark .emoji-picker-navbar, .emoji-picker-dark .emoji-picker-footer {
+  border-color: rgb(63, 68, 71);
+}

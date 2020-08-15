@@ -1,0 +1,20 @@
+@import 'https://rsms.me/inter/inter.css';
+
+html { 
+  font-family: 'Inter', sans-serif; 
+  font-size: 18px;
+}
+
+#root h1 {
+  margin-bottom: 0;
+}
+
+#root .emoji-picker {
+  margin: 0.5em 0;
+}
+
+#root input {
+  font-size: 1em;
+  padding: 0.20em 0.5em;
+  margin-bottom: 1em;
+}

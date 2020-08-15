@@ -1,0 +1,35 @@
+{
+  "name": "react-twemoji-picker",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "typings": "dist/@types/index.d.ts",
+  "repository": {
+    "url": "https://github.com/brianhung/EmojiPicker"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "rm -r -f dist/ && tsc && copyfiles -u 1 src/**/*.css data/*.svg dist/",
+    "build:website": "rm -r -f dist/ && vite build"
+  },
+  "dependencies": {
+    "fuse.js": "^6.4.0",
+    "react-window": "^1.8.5",
+    "react-window-infinite-loader": "^1.0.5"
+  },
+  "peerDependencies": {
+    "react": "^16.13.1"
+  },
+  "devDependencies": {
+    "@pika/react": "^16.13.1",
+    "@pika/react-dom": "^16.13.1",
+    "@types/react": "^16.9.43",
+    "@types/react-dom": "^16.9.8",
+    "adm-zip": "^0.4.16",
+    "copyfiles": "^2.3.0",
+    "emojilib": "^2.4.0",
+    "superagent": "^5.3.1",
+    "typescript": "^3.9.6",
+    "vite": "^1.0.0-beta.3",
+    "vite-plugin-react": "^3.0.0"
+  }
+}
