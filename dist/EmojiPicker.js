@@ -50,6 +50,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({ emoj
         emoji !== focusedEmoji && setFocusedEmoji(emoji);
     };
     const handleKeyDownScroll = (event) => {
+        let emojis = Object.values(query === "" ? emojiData : searchEmojis).filter(array => array.length !== 0);
         let arrayIndex, arrayEmoji, emojiIndex, newEmoji;
         switch (event.key) {
             case "Enter":
@@ -58,58 +59,59 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({ emoj
                 break;
             case "ArrowUp":
                 event.preventDefault();
-                Object.values(emojiData).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
+                emojis.find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
                 if (emojiIndex !== -1) {
                     let newIndex = emojiIndex - emojisPerRow;
                     if (newIndex >= 0) {
                         newEmoji = arrayEmoji[newIndex];
                     }
                     else if (arrayIndex !== 0) {
-                        let arrayAbove = Object.values(emojiData)[arrayIndex - 1];
+                        let arrayAbove = emojis[arrayIndex - 1];
                         let modIndex = emojiIndex % emojisPerRow;
-                        newEmoji = arrayAbove[Math.floor((arrayAbove.length - 1 - modIndex) / emojisPerRow) * emojisPerRow + modIndex];
+                        newEmoji = arrayAbove[Math.floor((arrayAbove.length - 1 - modIndex) / emojisPerRow) * emojisPerRow + modIndex] || arrayAbove[arrayAbove.length - 1];
+                        console.log("hi", newEmoji, arrayAbove, arrayIndex, emojis, modIndex);
                     }
                 }
                 break;
             case "ArrowDown":
                 event.preventDefault();
-                Object.values(emojiData).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
+                emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
                 if (emojiIndex !== -1) {
                     let newIndex = emojiIndex + emojisPerRow;
                     if (newIndex < arrayEmoji.length) {
                         newEmoji = arrayEmoji[newIndex];
                     }
-                    else if (arrayIndex !== Object.keys(emojiData).length - 1) {
-                        let arrayBelow = Object.values(emojiData)[arrayIndex + 1];
+                    else if (arrayIndex !== emojis.length - 1) {
+                        let arrayBelow = emojis[arrayIndex + 1];
                         let modIndex = emojiIndex % emojisPerRow;
-                        newEmoji = arrayBelow[modIndex];
+                        newEmoji = arrayBelow[modIndex] || arrayBelow[0];
                     }
                 }
                 break;
             case "ArrowLeft":
                 event.preventDefault();
-                Object.values(emojiData).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
+                emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
                 if (emojiIndex !== -1) {
                     let newIndex = emojiIndex - 1;
                     if (newIndex >= 0) {
                         newEmoji = arrayEmoji[newIndex];
                     }
                     else if (arrayIndex !== 0) {
-                        let arrayAbove = Object.values(emojiData)[arrayIndex - 1];
+                        let arrayAbove = emojis[arrayIndex - 1];
                         newEmoji = arrayAbove[arrayAbove.length - 1];
                     }
                 }
                 break;
             case "ArrowRight":
                 event.preventDefault();
-                Object.values(emojiData).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
+                emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1; });
                 if (emojiIndex !== -1) {
                     let newIndex = emojiIndex + 1;
                     if (newIndex < arrayEmoji.length) {
                         newEmoji = arrayEmoji[newIndex];
                     }
-                    else if (arrayIndex !== Object.keys(emojiData).length - 1) {
-                        let arrayBelow = Object.values(emojiData)[arrayIndex + 1];
+                    else if (arrayIndex !== emojis.length - 1) {
+                        let arrayBelow = emojis[arrayIndex + 1];
                         newEmoji = arrayBelow[0];
                     }
                 }
