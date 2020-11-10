@@ -13,7 +13,7 @@ const svgPath = "./data/twemoji"
  * Callback function that's called when download completes.
  * @param {error} error
  */
-function handleZip(error = undefined) {
+function spriteCallback(error = undefined) {
   if (error !== undefined) {
     console.log(`handleZip failed! ${error.message}`)
     return
@@ -23,9 +23,8 @@ function handleZip(error = undefined) {
   let emojiJSON = readJSON("./data/twemoji.json")
   let emojiList = Object.values(emojiJSON).flat().map(emoji => emoji.unicode)
 
-  const emojiFilter = filter(filename => emojiList.includes(path.parse(filename.relative).name ))
+  const emojiFilter = filter(filename => emojiList.includes(path.parse(filename.relative).name))
   const svgSprite = sprite({ 
-    shape: { dimension: { maxWidth: 20, maxHeight: 20 }, },
     mode: { defs: { dest: '.', prefix: 'emoji-%s', sprite: 'twemoji.svg', bust: false } }
   })
 
@@ -35,4 +34,4 @@ function handleZip(error = undefined) {
     .pipe(gulp.dest('./data/')) 
 }
 
-download(zipURL, zipPath, handleZip)
+download(zipURL, zipPath, spriteCallback)
