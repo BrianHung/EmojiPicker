@@ -8,6 +8,8 @@ declare type EmojiPickerProps = {
     showFooter?: boolean;
     showScroll?: boolean;
     emojisPerRow?: number;
+    collapseCategoriesOnSearch?: boolean;
+    collapseHeightOnSearch?: boolean;
 };
 export interface EmojiPickerRef {
     search: (query: string) => void;
@@ -15,5 +17,5 @@ export interface EmojiPickerRef {
     handleKeyDownScroll: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 export declare const EmojiPicker: React.ForwardRefExoticComponent<EmojiPickerProps & React.RefAttributes<EmojiPickerRef>>;
-export default EmojiPicker;
+export {};
 //# sourceMappingURL=EmojiPicker.d.ts.map

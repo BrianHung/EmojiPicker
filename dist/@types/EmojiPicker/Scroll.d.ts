@@ -10,6 +10,7 @@ declare type ScrollProps = {
     handleMouseInScroll: (emoji: EmojiObject) => void;
     itemCount: number;
     itemRanges: itemRange[];
+    collapseHeightOnSearch: boolean;
 };
 declare const MemoizedScroll: React.NamedExoticComponent<ScrollProps>;
 export default MemoizedScroll;

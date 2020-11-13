@@ -1,4 +1,4 @@
-import React, { useState, useImperativeHandle } from "react"
+import React, { forwardRef, useState, useImperativeHandle, useMemo, useEffect, useRef } from "react"
 import { FixedSizeList as VirtualList } from 'react-window';
 import * as Fuse from 'fuse.js'; 
 
@@ -16,15 +16,8 @@ type EmojiPickerProps = {
   showFooter?: boolean;
   showScroll?: boolean;
   emojisPerRow?: number;
-}
-
-const defaultEmojiPickerProps: EmojiPickerProps = {
-  emojiData: {},
-  handleEmojiSelect: (emoji: EmojiObject) => console.log(emoji),
-  showNavbar: false,
-  showFooter: false,
-  showScroll: true,
-  emojisPerRow: 9,
+  collapseCategoriesOnSearch?: boolean;
+  collapseHeightOnSearch?: boolean;
 }
 
 // Define public methods accessible via ref.
@@ -35,17 +28,19 @@ export interface EmojiPickerRef {
   handleKeyDownScroll: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emojiData, handleEmojiSelect, showNavbar, showFooter, showScroll, emojisPerRow = 9}: EmojiPickerProps, ref: React.Ref<EmojiPickerRef>) {
+function EmojiPickerRefComponent({emojiData = {}, handleEmojiSelect = (emoji: EmojiObject) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true}: EmojiPickerProps, ref: React.Ref<EmojiPickerRef>) {
 
   // Initialize EmojiPicker state using hooks.
 
-  const [ query, setQuery ] = useState<string>("");
   const [ focusedEmoji, setFocusedEmoji ] = useState<EmojiObject | null>(Object.values(emojiData).flat()[0]);
-  const [ searchEmojis, setSearchemojis ] = useState<Record<string, EmojiObject[]>>(
-    Object.keys(emojiData).reduce((sum, category) => Object.assign(sum, {[category as string]: []}), {})
-  );
+  const [ searchEmojis, setSearchEmojis ] = useState<Record<string, EmojiObject[]> | null>(null);
 
-  const { itemCount, itemRanges } = React.useMemo(() => calcCountAndRange(query !== "" ? searchEmojis : emojiData, emojisPerRow), [query, emojisPerRow]);
+  const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(searchEmojis || emojiData, emojisPerRow), [searchEmojis, emojisPerRow]);
+
+  useEffect(function() {
+    const [ firstEmoji ] = Object.values(searchEmojis || emojiData).flat()
+    setFocusedEmoji(firstEmoji)
+  }, [searchEmojis])
 
   /**
    * TODO: Replace in-memory fuse.js with indexeddb and search index.
@@ -54,30 +49,27 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
 
   const [ emojiIndex ] = useState(
     new Fuse.default(Object.values(emojiData).flat(), { 
-      threshold: 0.10, 
-      keys: [{name: "name", weight: 0.70}, {name: "keywords", weight: 0.30}]
+      threshold: 0.20, 
+      keys: [{name: "name", weight: 0.75}, {name: "keywords", weight: 0.25}]
     })
   );
 
   const search = (query: string): void => {
-    setQuery(query)
     if (query === "") {
-      setSearchemojis(Object.keys(emojiData).reduce((sum, category) => Object.assign(sum, {[category as string]: []}), {}))
+      setSearchEmojis(null)
     } else {
-      const filter = emojiIndex.search(query).map((result: Fuse.default.FuseResult<any>) => result.item);
-      setSearchemojis(Object.entries(emojiData)
-        .map(([category, list]) => ([category, list.filter(e => filter.includes(e))]))
-        .reduce((sum, [category, list]) => Object.assign(sum, {[category as string]: list}), {})
-      )
+      const results = emojiIndex.search(query).map((result: Fuse.default.FuseResult<any>) => result.item);
+      if (collapseCategoriesOnSearch) {
+        setSearchEmojis({"Search Results": results})
+      } else {
+        const groupedResults = Object.entries(emojiData).map(([category, list]) => ([category, list.filter(emoji => results.includes(emoji))])).reduce((sum, [category, list]) => Object.assign(sum, {[category as string]: list}), {});
+        setSearchEmojis(groupedResults);
+      }
     }
   }
 
   useImperativeHandle(ref, () => {
-    return {
-      search: (query: string) => search(query),
-      emojis: query === "" ? emojiData : searchEmojis,
-      handleKeyDownScroll: handleKeyDownScroll,
-    } as EmojiPickerRef
+    return { search, handleKeyDownScroll, emojis: searchEmojis || emojiData } as EmojiPickerRef
   })
 
   // Define event handlers in scroll element.
@@ -87,12 +79,13 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
   }
   
   const handleMouseInScroll = (emoji: EmojiObject) => (event: React.MouseEvent) => {
-    if (event.movementX === 0 && event.movementY === 0) return;
-    emoji !== focusedEmoji && setFocusedEmoji(emoji)
+    if (event.movementX === 0 && event.movementY === 0 || emoji == focusedEmoji) return;
+    (event.target as HTMLElement).focus()
+    setFocusedEmoji(emoji)
   }
 
   const handleKeyDownScroll = (event: React.KeyboardEvent<HTMLElement>) => {
-    let emojis = Object.values(query === "" ? emojiData : searchEmojis).filter(array => array.length !== 0);
+    let emojis = Object.values(searchEmojis || emojiData).filter(array => array.length !== 0);
     let arrayIndex, arrayEmoji, emojiIndex, newEmoji;
     switch (event.key) {
 
@@ -104,14 +97,13 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
       case "ArrowUp":
         event.preventDefault();
         emojis.find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1;})
-        if (emojiIndex !== -1) {
+        if (emojiIndex != undefined) {
           let newIndex = emojiIndex - emojisPerRow;
           if (newIndex >= 0) { newEmoji = arrayEmoji[newIndex]; }
           else if (arrayIndex !== 0) {
             let arrayAbove = emojis[arrayIndex - 1]
             let modIndex = emojiIndex % emojisPerRow
             newEmoji = arrayAbove[Math.floor((arrayAbove.length - 1 - modIndex) / emojisPerRow) * emojisPerRow + modIndex] || arrayAbove[arrayAbove.length - 1]
-            console.log("hi", newEmoji, arrayAbove, arrayIndex, emojis, modIndex)
           }
         }
         break;
@@ -119,7 +111,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
       case "ArrowDown":
         event.preventDefault();
         emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1;})
-        if (emojiIndex !== -1) {
+        if (emojiIndex != undefined) {
           let newIndex = emojiIndex + emojisPerRow;
           if (newIndex < arrayEmoji.length) { newEmoji = arrayEmoji[newIndex] }
           else if (arrayIndex !== emojis.length - 1) {
@@ -133,7 +125,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
       case "ArrowLeft":
         event.preventDefault();
         emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1;})
-        if (emojiIndex !== -1) {
+        if (emojiIndex != undefined) {
           let newIndex = emojiIndex - 1;
           if (newIndex >= 0) { newEmoji = arrayEmoji[newIndex] }
           else if (arrayIndex !== 0) {
@@ -146,7 +138,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
       case "ArrowRight":
         event.preventDefault();
         emojis.filter(array => array.length !== 0).find((array, index) => { emojiIndex = array.findIndex(emoji => emoji === focusedEmoji), arrayIndex = index, arrayEmoji = array; return emojiIndex !== -1;})
-        if (emojiIndex !== -1) {
+        if (emojiIndex != undefined) {
           let newIndex = emojiIndex + 1;
           if (newIndex < arrayEmoji.length) { newEmoji = arrayEmoji[newIndex] }
           else if (arrayIndex !== emojis.length - 1) {
@@ -160,7 +152,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
     newEmoji && setFocusedEmoji(newEmoji);
   }
 
-  const refVirtualList = React.useRef<VirtualList>(null);
+  const refVirtualList = useRef<VirtualList>(null);
 
   const ScrollProps = {
     emojisPerRow: emojisPerRow!,
@@ -168,6 +160,7 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
     refVirtualList,
     handleClickInScroll,
     handleMouseInScroll,
+    collapseHeightOnSearch,
     itemCount, 
     itemRanges,
   }
@@ -184,21 +177,21 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
 
   // Memoize computed classes and styles.
 
-  const themeClass = React.useMemo((): string => {
+  const themeClass = useMemo((): string => {
     let darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     return darkMode ? "emoji-picker emoji-picker-dark" : "emoji-picker"
   }, [])
   
-  const styleWidth = React.useMemo((): string => {
-    return `calc(36px * ${emojisPerRow} + 1em + ${measureScrollbar()}px + 1px)`
+  const styleWidth = useMemo((): string => {
+    return `calc(36px * ${emojisPerRow} + 1em + ${measureScrollbar() + 1}px)`
   }, [])
 
   return (
     <div className={ themeClass } style={{ width: styleWidth }}>
       { showNavbar && <Navbar data={emojiData} handleClickInNavbar={handleClickInNavbar}/> }
       <div className="emoji-picker-scroll" role="grid" onKeyDown={handleKeyDownScroll}>
-        { query !== ""
-          ? searchEmojis !== undefined && Object.values(searchEmojis).flat().length !== 0
+        { searchEmojis
+          ? Object.values(searchEmojis).flat().length !== 0
             ? <Scroll {...ScrollProps} emojiData={searchEmojis}/>
             : <div className="emoji-picker-category">
                 <div className="emoji-picker-category-title">No results</div>
@@ -210,7 +203,6 @@ export const EmojiPicker = React.forwardRef(function EmojiPickerComponent({emoji
       { showFooter && <Footer emoji={focusedEmoji}/> }
     </div>
   )
-})
+}
 
-EmojiPicker.defaultProps = defaultEmojiPickerProps;
-export default EmojiPicker;
+export const EmojiPicker = forwardRef(EmojiPickerRefComponent);
