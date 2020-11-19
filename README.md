@@ -33,3 +33,18 @@ const handleSearch = (query: string) => ref.current.search(query);
 <EmojiPicker emojiData={emojiData} handleEmojiSelect={handleEmojiSelect} ref={ref}/>
 <input onChange={event => handleSearch(event.target.value)} placeholder="search"></input>
 ```
+
+### Props
+
+```ts
+emojiData: Record<string, EmojiObject[]>; // map of categories to list of emoji objects
+emojiSize?: number; // pixel size of an emoji
+onEmojiSelect?: (emoji: EmojiObject) => void, // handle emoji click or enter key here
+showNavbar?: boolean; // allows navigation to categories
+showFooter?: boolean; // show focused emoji and its name
+showScroll?: boolean; // turn off if query is always not null
+emojisPerRow?: number; // number of emojis to show per row
+onKeyDownScroll?: Function; // handle additional key events like 'ctrl-c' here
+collapseCategoriesOnSearch?: boolean; // merge categories into single 'search results' category
+collapseHeightOnSearch?: boolean; // scroll height changes with number of emojis
+```

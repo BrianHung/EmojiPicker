@@ -1,30 +1,51 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+
 import type { EmojiObject } from '../src/index';
-import { EmojiPicker, EmojiPickerRef } from '../src/index';
+import { EmojiPicker, EmojiPickerRef, unifiedToNative } from '../src/index';
 import EmojiData from "../data/twemoji.json"
-
 const emojiData = Object.freeze(EmojiData)
-const handleEmojiSelect = (emoji: EmojiObject) => console.log(emoji);
 
-const ref = React.createRef<EmojiPickerRef>()
-const handleSearch = (query: string) => ref.current.search(query);
-const onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-  const handledKeys = ["Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]
-  handledKeys.includes(event.key) && ref.current.handleKeyDownScroll(event);
+// import debounce from 'lodash-es/debounce';
+import './index.css';
+
+function ExampleSetup() {
+
+  const ref = React.createRef<EmojiPickerRef>()
+
+  const inputProps = {
+    placeholder: "search-or-navigate",
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => ref.current?.search(event.target.value),
+    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => { ["Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key) && ref.current.handleKeyDownScroll(event); event.target.focus() },
+  }
+  
+  const pickerProps = { 
+    emojiData, 
+    onEmojiSelect: (emoji: EmojiObject) => { console.log(emoji); copyToClipboard(unifiedToNative(emoji.unicode)); }, 
+    ref, 
+    showNavbar: true, 
+    showFooter: true,
+    collapseHeightOnSearch: false,
+  }
+
+  return (
+    <div style={{'display': 'flex', 'flexDirection': 'column', 'height': '100vh', 'justifyContent': 'center', 'alignItems': 'center'}}>
+      <h1>Emoji Picker</h1>
+      <p>A virtualized <a href="https://twemoji.twitter.com/">twemoji</a> picker written in React and TypeScript.</p>
+      <EmojiPicker {...pickerProps}/>
+      <input {...inputProps}/>
+      <a href="https://github.com/BrianHung/EmojiPicker">See the code →</a>
+    </div>
+  )
 }
 
-const EmojiPickerProps = { emojiData, handleEmojiSelect, ref, showNavbar: true, showFooter: true}
+ReactDOM.render(<ExampleSetup/>, document.getElementById('example-setup'));
 
-const app = (
-  <div style={{'display': 'flex', 'flexDirection': 'column', 'height': '100vh', 'justifyContent': 'center', 'alignItems': 'center'}}>
-    <h1>Emoji Picker</h1>
-    <p>a virtualized <a href="https://twemoji.twitter.com/">twemoji</a> picker written in react and typescript</p>
-    <EmojiPicker {...EmojiPickerProps}/>
-    <input onChange={event => handleSearch(event.target.value)} onKeyDown={onKeyDown} placeholder="search"></input>
-    <a href="https://github.com/BrianHung/EmojiPicker">source code</a>
-  </div>
-)
-
-ReactDOM.render(app, document.getElementById('root'));
+const copyToClipboard = (string: string) => {
+  const textArea = document.createElement('textarea');
+  textArea.value = string;
+  document.body.appendChild(textArea);
+  textArea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textArea);
+};

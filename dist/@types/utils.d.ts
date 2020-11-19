@@ -9,6 +9,7 @@ export declare type itemRange = {
     key: string;
     from: number;
     to: number;
+    length: number;
 };
 export declare function calcCountAndRange(data: Record<string, any[]>, perRow: number): {
     itemCount: number;

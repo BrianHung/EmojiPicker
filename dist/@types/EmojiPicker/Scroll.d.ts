@@ -3,11 +3,15 @@ import { FixedSizeList as VirtualList } from 'react-window';
 import { EmojiObject, itemRange } from '../utils';
 declare type ScrollProps = {
     emojisPerRow: number;
-    focusedEmoji: EmojiObject | null;
+    emojiSize: number;
+    focusedEmoji: {
+        emoji: EmojiObject;
+        row: number;
+    } | null;
     emojiData: Record<string, EmojiObject[]>;
     refVirtualList: React.MutableRefObject<VirtualList>;
-    handleClickInScroll: (emoji: EmojiObject) => void;
-    handleMouseInScroll: (emoji: EmojiObject) => void;
+    handleClickInScroll: (emoji: EmojiObject, row: number) => void;
+    handleMouseInScroll: (emoji: EmojiObject, row: number) => void;
     itemCount: number;
     itemRanges: itemRange[];
     collapseHeightOnSearch: boolean;

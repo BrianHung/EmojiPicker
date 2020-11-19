@@ -19,3 +19,4 @@ const Footer = (_a) => {
 };
 const MemoizedFooter = React.memo(Footer);
 export default MemoizedFooter;
+//# sourceMappingURL=Footer.js.map

@@ -21,7 +21,7 @@ export function calcCountAndRange(data, perRow) {
         if (array.length === 0)
             return;
         let from = itemCount, to = itemCount + 1 + Math.ceil(array.length / perRow);
-        itemRanges.push({ key, from, to });
+        itemRanges.push({ key, from, to, length: array.length });
         itemCount = to;
     });
     return { itemCount, itemRanges };
@@ -39,3 +39,4 @@ export function shallowDiffer(prev, next) {
     }
     return false;
 }
+//# sourceMappingURL=utils.js.map

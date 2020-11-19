@@ -58,7 +58,7 @@
   flex-direction: row;
   justify-content: space-evenly;
   border-bottom: 1px solid #E1E1E0;
-  padding: 0.25em;
+  padding: 0.25em 9px;
 }
 
 .emoji-picker .emoji-picker-footer {

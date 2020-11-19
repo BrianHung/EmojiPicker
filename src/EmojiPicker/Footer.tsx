@@ -2,7 +2,7 @@ import React from "react";
 import Emoji from "../Emoji"
 import { EmojiObject } from "../utils"
 
-const Footer: React.FunctionComponent<{emoji: EmojiObject | null, [key: string]: any}> = ({emoji, ...props}) => {
+const Footer: React.FunctionComponent<{emoji: EmojiObject | undefined, [key: string]: any}> = ({emoji, ...props}) => {
   return (
     <div className="emoji-picker-footer" {...props}>
       { <Emoji emoji={emoji ? emoji : {name: "wave", unicode: "1f44b"}}/> }

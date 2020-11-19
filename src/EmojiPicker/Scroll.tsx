@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, memo } from "react";
+import React, { useEffect, useRef, useState, memo, forwardRef } from "react";
 import { FixedSizeList as VirtualList } from 'react-window';
 import InfiniteLoader from "react-window-infinite-loader";
 import { EmojiObject, shallowDiffer, itemRange } from '../utils'
@@ -6,88 +6,82 @@ import Emoji from "../Emoji";
 
 type ScrollProps = {
   emojisPerRow: number, 
-  focusedEmoji: EmojiObject | null, 
+  emojiSize: number,
+  focusedEmoji: {emoji: EmojiObject, row: number} | null,
   emojiData: Record<string, EmojiObject[]>;
   refVirtualList: React.MutableRefObject<VirtualList>,
-  handleClickInScroll: (emoji: EmojiObject) => void,
-  handleMouseInScroll: (emoji: EmojiObject) => void,
+  handleClickInScroll: (emoji: EmojiObject, row: number) => void,
+  handleMouseInScroll: (emoji: EmojiObject, row: number) => void,
   itemCount: number,
   itemRanges: itemRange[],
   collapseHeightOnSearch: boolean,
 }
 
-const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch}) => {
-
-  const [arrayOfRows, setArrayOfRows] = useState<Record<number, React.ReactNode>>({});
-  const [rowStatuses, setRowStatuses] = useState<Record<number, boolean>>({});
-  const [unicodeRows, setUnicodeRows] = useState<Record<string, number>>({});
-
+const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch}) => {
+  
+  const [arrayOfRows, setArrayOfRows] = useState<Record<number, JSX.Element>>({});
   const infiniteLoaderRef = useRef<InfiniteLoader>(null);
-  const prevFocusedEmoji = useRef<EmojiObject|null>(null);
 
-  // Reset arrayOfRows and rowStatuses upon change in data or emojisPerRow.
-  useEffect(function() { 
+  // Keep track of previously focused emoji to avoid re-rendering all rows.
+  const prevFocusedEmoji = useRef<{emoji: EmojiObject, row: number} | null>(null);
+
+  // Reset arrayOfRows upon change in data or emojisPerRow.
+  useEffect(function resetScrollState() { 
     setArrayOfRows({}); 
-    setRowStatuses({}); 
-    setUnicodeRows({}); 
     infiniteLoaderRef.current && infiniteLoaderRef.current.resetloadMoreItemsCache();
     prevFocusedEmoji.current = null
-    loadMoreItems(0, 15);
+    loadMoreItems(0, 23); // minimumBatchSize + threshold - 1
     refVirtualList && refVirtualList.current.scrollToItem(0);
   }, [emojiData, emojisPerRow])
 
   // Recompute the rows of the next and previous focusedEmoji upon change in focusedEmoji.
-  useEffect(function() {
+  useEffect(function resetRowsWithFocusedEmoji() {
     const prevEmoji = prevFocusedEmoji.current, nextEmoji = focusedEmoji;
-    let prevRow = prevEmoji && unicodeRows[prevEmoji.unicode];
-    let nextRow = nextEmoji && unicodeRows[nextEmoji.unicode];
-
+    let prevRow = prevEmoji && prevEmoji.row;
+    let nextRow = nextEmoji && nextEmoji.row;
     const rowsToUpdate: Set<number> = new Set();
     prevRow && rowsToUpdate.add(prevRow);
     nextRow && rowsToUpdate.add(nextRow);
     Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row))
-
     nextRow && refVirtualList && refVirtualList.current.scrollToItem(nextRow)
     prevFocusedEmoji.current = nextEmoji;
   }, [focusedEmoji])
 
-  const isFocusedEmoji = (emoji: EmojiObject): boolean => !!focusedEmoji && emoji.name === focusedEmoji.name
-  const isItemLoaded = (index: number): boolean => !!rowStatuses[index];
+  const isItemLoaded  = (index: number): boolean => !!arrayOfRows[index];
 
   const loadMoreItems = (startIndex: number, endIndex: number) => {
-    const nextUnicodeRows = {}
     const nextArrayOfRows = {}
-    const nextRowStatuses = {}
     let i = startIndex, range: itemRange | undefined;
     while (i <= endIndex) {
 
       range = itemRanges.find(range => range.from <= i && i < range.to);
       if (range === undefined) break;
 
-      for (let j = i; j < Math.min(range.to, endIndex + 1); j++) {
-        nextRowStatuses[j] = true
-        if (j == range.from) {
-          nextArrayOfRows[j] = <div className="emoji-picker-category-title">{range.key}</div>
+      for (let rowIndex = i; rowIndex < Math.min(range.to, endIndex + 1); rowIndex++) {
+        if (rowIndex == range.from) {
+          nextArrayOfRows[rowIndex] = <div className="emoji-picker-category-title">{range.key}</div>
         } else {
-          const offset = j - range.from;
+          const offset = rowIndex - range.from;
           const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow)
 
-          nextArrayOfRows[j] = (
-            <div className="emoji-picker-category-emoji" role="row">
-              { row.map((emoji: EmojiObject) => {
-                  nextUnicodeRows[emoji.unicode] = j
+          nextArrayOfRows[rowIndex] = (
+            <div className="emoji-picker-category-emoji" role="row" aria-rowindex={rowIndex}>
+              { row.map((emoji: EmojiObject, colIndex: number) => {
                   const emojiProps = {
                     emoji, 
                     key: emoji.unicode, 
-                    onClick: handleClickInScroll(emoji), 
-                    onMouseMove: handleMouseInScroll(emoji), 
+                    onClick: handleClickInScroll(emoji, rowIndex), 
+                    onMouseMove: handleMouseInScroll(emoji, rowIndex), 
                     role: "gridcell", 
+                    "aria-rowindex": rowIndex,
+                    "aria-colindex": colIndex,
                     className: "emoji-picker-emoji",
                     tabIndex: -1,
-                    ...(focusedEmoji && emoji.name === focusedEmoji.name) && {
+                    ...(focusedEmoji && emoji === focusedEmoji.emoji) && {
                       className: "emoji-picker-emoji emoji-picker-emoji-focused",
                       tabIndex: 0,
-                      ref: span => { document.activeElement?.className.includes("emoji-picker-emoji") && span && span.focus() }
+                      // focus on render if scroll element already has focus-within
+                      ref: (span: HTMLSpanElement) => { document.activeElement?.closest(".emoji-picker-scroll") && span && span.focus() }
                     }
                   }
                   return <Emoji {...emojiProps}/>
@@ -100,8 +94,6 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, focusedEmoj
       i = range.to;
     }
     setArrayOfRows(prev => Object.assign({}, prev, nextArrayOfRows));
-    setRowStatuses(prev => Object.assign({}, prev, nextRowStatuses));
-    setUnicodeRows(prev => Object.assign({}, prev, nextUnicodeRows));
   }
 
   return (
@@ -110,8 +102,8 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, focusedEmoj
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}
-      minimumBatchSize={11}
-      threshold={4}
+      minimumBatchSize={12}
+      threshold={12}
     >
       {({onItemsRendered, ref}) => (
         <VirtualList 
@@ -119,8 +111,9 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, focusedEmoj
           ref={list => {ref(list); refVirtualList && (refVirtualList.current = list);}}
           itemCount={itemCount} 
           itemData={arrayOfRows}
-          itemSize={36} 
-          height={collapseHeightOnSearch ? Math.min(itemCount * 36, 12 * 36) : 12 * 36}
+          itemSize={emojiSize} 
+          height={collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, 12 * emojiSize) : 12 * emojiSize}
+          innerElementType={innerElementType}
         >
           {MemoizedRow}
         </VirtualList>
@@ -129,22 +122,35 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, focusedEmoj
   )
 }
 
+const MemoizedScroll = memo(Scroll)
+export default MemoizedScroll;
+
 const VirtualRow: React.FunctionComponent<{index: number, style: React.CSSProperties, data}> = ({index, style, data}) => {
   return (
     <div className="emoji-picker-virtual-row" style={style}>
-      { data[index] }
+      {data[index]}
     </div>
   )
 }
 
-// Memoize rows of the virtualList, only re-rendering when changing in data[index].
-
-const MemoizedRow = memo(VirtualRow, (prevProps, nextProps) => {
+/**
+ * memoize rows of the virtualList, only re-rendering when changing in data[index]
+ */
+const MemoizedRow = memo(VirtualRow, function compareRowProps(prevProps, nextProps) {
   const { style: prevStyle, data: prevData, index: prevIndex, ...prevRest } = prevProps;
   const { style: nextStyle, data: nextData, index: nextIndex, ...nextRest } = nextProps;
   return prevData[prevIndex] === nextData[nextIndex] && !shallowDiffer(prevStyle, nextStyle) && !shallowDiffer(prevRest, nextRest)
 })
 
 
-const MemoizedScroll = memo(Scroll)
-export default MemoizedScroll;
+/**
+ * adds padding to the bottom of virtual list
+ * See: https://github.com/bvaughn/react-window#can-i-add-padding-to-the-top-and-bottom-of-a-list
+ */
+const LIST_PADDING_SIZE = 9;
+const innerElementType = forwardRef(({style, ...props }: {style: React.CSSProperties}, ref: React.Ref<VirtualList>) => (
+  // @ts-ignore
+  <div ref={ref} style={{...style, height: `${parseFloat(style.height) + LIST_PADDING_SIZE}px`}} 
+    {...props}
+  />
+));

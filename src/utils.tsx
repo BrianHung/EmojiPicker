@@ -35,13 +35,13 @@ export function measureScrollbar() {
  * @param data key array mapping
  * @param perRow number of elements to chunk array into
  */
-export type itemRange = { key: string; from: number; to: number; }
+export type itemRange = { key: string; from: number; to: number; length: number }
 export function calcCountAndRange(data: Record<string, any[]>, perRow: number) {
   let itemCount = 0, itemRanges: itemRange[] = [];
   Object.entries(data).forEach(([key, array]) => {
     if (array.length === 0) return;
     let from = itemCount, to = itemCount + 1 + Math.ceil(array.length / perRow);
-    itemRanges.push({key, from, to});
+    itemRanges.push({key, from, to, length: array.length});
     itemCount = to;
   })
   return {itemCount, itemRanges};
