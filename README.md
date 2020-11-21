@@ -1,4 +1,9 @@
-React Twemoji Picker is an emoji component made for fast show-and-scroll and filtering. 
+<div align="center" style="margin: 0.5rem 0">
+  <br><b>React Twemoji Picker</b> is an emoji component
+  <br>made for fast show-and-scroll and filtering
+  <br><a href="https://brianhung.github.io/EmojiPicker">demo</a>
+  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./demo.png" alt="image of emoji picker" title="click to navigate to demo" style="margin-top: 0.5rem"></a>
+</div>
 
 To do this, we virtualize emoji elements with [`react-window`](https://github.com/bvaughn/react-window) 
 and `react-window-infinite-loader`, meaning elements are not rendered into the DOM until they 
@@ -33,6 +38,8 @@ const handleSearch = (query: string) => ref.current.search(query);
 <EmojiPicker emojiData={emojiData} handleEmojiSelect={handleEmojiSelect} ref={ref}/>
 <input onChange={event => handleSearch(event.target.value)} placeholder="search"></input>
 ```
+
+To see an example, look at the <a href="./website/index.tsx">source code</a> for the demo.
 
 ### Props
 

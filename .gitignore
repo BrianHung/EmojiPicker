@@ -1,5 +1,4 @@
+build
+web_modules
 node_modules
-.DS_Store
-data/twemoji/
-data/twemoji.zip
-data/emoji.json
+**/.DS_Store

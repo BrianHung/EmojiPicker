@@ -3,8 +3,8 @@ import { EmojiObject } from './utils';
 import "./EmojiPicker.css";
 declare type EmojiPickerProps = {
     emojiData: Record<string, EmojiObject[]>;
-    emojiSize: number;
-    onEmojiSelect: (emoji: EmojiObject) => void;
+    emojiSize?: number;
+    onEmojiSelect?: (emoji: EmojiObject) => void;
     showNavbar?: boolean;
     showFooter?: boolean;
     showScroll?: boolean;

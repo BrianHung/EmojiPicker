@@ -1,9 +1,13 @@
-export function unifiedToNative(unified) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.throttleIdleTask = exports.shallowDiffer = exports.calcCountAndRange = exports.measureScrollbar = exports.unifiedToNative = void 0;
+function unifiedToNative(unified) {
     const codePoints = unified.split('-').map(u => parseInt(u, 16));
     return String.fromCodePoint.apply(String, codePoints);
 }
+exports.unifiedToNative = unifiedToNative;
 let scrollbarWidth = -1;
-export function measureScrollbar() {
+function measureScrollbar() {
     if (typeof document == 'undefined')
         return 0;
     if (scrollbarWidth !== -1)
@@ -15,7 +19,8 @@ export function measureScrollbar() {
     document.body.removeChild(div);
     return scrollbarWidth;
 }
-export function calcCountAndRange(data, perRow) {
+exports.measureScrollbar = measureScrollbar;
+function calcCountAndRange(data, perRow) {
     let itemCount = 0, itemRanges = [];
     Object.entries(data).forEach(([key, array]) => {
         if (array.length === 0)
@@ -26,7 +31,8 @@ export function calcCountAndRange(data, perRow) {
     });
     return { itemCount, itemRanges };
 }
-export function shallowDiffer(prev, next) {
+exports.calcCountAndRange = calcCountAndRange;
+function shallowDiffer(prev, next) {
     for (let attribute in prev) {
         if (!(attribute in next)) {
             return true;
@@ -39,4 +45,20 @@ export function shallowDiffer(prev, next) {
     }
     return false;
 }
+exports.shallowDiffer = shallowDiffer;
+function throttleIdleTask(callback) {
+    const idleHandler = typeof requestIdleCallback === 'function' ? requestIdleCallback : setTimeout;
+    let running = false;
+    return function throttled(args) {
+        if (running) {
+            return;
+        }
+        running = true;
+        idleHandler(() => {
+            running = false;
+            callback(args);
+        });
+    };
+}
+exports.throttleIdleTask = throttleIdleTask;
 //# sourceMappingURL=utils.js.map

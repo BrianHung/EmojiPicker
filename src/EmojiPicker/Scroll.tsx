@@ -7,7 +7,7 @@ import Emoji from "../Emoji";
 type ScrollProps = {
   emojisPerRow: number, 
   emojiSize: number,
-  focusedEmoji: {emoji: EmojiObject, row: number} | null,
+  focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean} | null,
   emojiData: Record<string, EmojiObject[]>;
   refVirtualList: React.MutableRefObject<VirtualList>,
   handleClickInScroll: (emoji: EmojiObject, row: number) => void,
@@ -30,7 +30,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
     setArrayOfRows({}); 
     infiniteLoaderRef.current && infiniteLoaderRef.current.resetloadMoreItemsCache();
     prevFocusedEmoji.current = null
-    loadMoreItems(0, 23); // minimumBatchSize + threshold - 1
+    loadMoreItems(0, 17); // minimumBatchSize + threshold - 1
     refVirtualList && refVirtualList.current.scrollToItem(0);
   }, [emojiData, emojisPerRow])
 
@@ -81,7 +81,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
                       className: "emoji-picker-emoji emoji-picker-emoji-focused",
                       tabIndex: 0,
                       // focus on render if scroll element already has focus-within
-                      ref: (span: HTMLSpanElement) => { document.activeElement?.closest(".emoji-picker-scroll") && span && span.focus() }
+                      ref: (span: HTMLSpanElement) => { focusedEmoji.focusOnRender && span && span.focus() }
                     }
                   }
                   return <Emoji {...emojiProps}/>
@@ -103,7 +103,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}
       minimumBatchSize={12}
-      threshold={12}
+      threshold={6}
     >
       {({onItemsRendered, ref}) => (
         <VirtualList 

@@ -1,58 +1,57 @@
 import React, { forwardRef, useState, useImperativeHandle, useMemo, useEffect, useRef } from "react";
-import * as Fuse from 'fuse.js';
 import { measureScrollbar, calcCountAndRange } from './utils';
 import "./EmojiPicker.css";
 import Navbar from "./EmojiPicker/Navbar";
 import Footer from "./EmojiPicker/Footer";
 import Scroll from "./EmojiPicker/Scroll";
 function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect = (emoji) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, onKeyDownScroll = (event) => null, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true }, ref) {
-    const [searchEmojis, setSearchEmojis] = useState(null);
-    const [focusedEmoji, setFocusedEmoji] = useState({ row: 1, emoji: Object.values(emojiData).flat()[0] });
-    const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(searchEmojis || emojiData, emojisPerRow), [searchEmojis, emojisPerRow]);
+    const [searchEmojis, setSearchEmojis] = useState({ emojis: null, query: "" });
+    const [focusedEmoji, setFocusedEmoji] = useState({ row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: false });
+    const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(searchEmojis.emojis || emojiData, emojisPerRow), [searchEmojis, emojisPerRow]);
     useEffect(function () {
-        const [emoji] = Object.values(searchEmojis || emojiData).flat();
-        setFocusedEmoji(emoji ? { row: 1, emoji } : null);
+        var _a;
+        const [emoji] = Object.values(searchEmojis.emojis || emojiData).flat();
+        setFocusedEmoji(emoji ? { row: 1, emoji, focusOnRender: Boolean((_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.closest(".emoji-picker-scroll")) } : null);
     }, [searchEmojis]);
-    const [emojiIndex] = useState(new Fuse.default(Object.values(emojiData).flat(), {
-        threshold: 0.10,
-        keys: [{ name: "name", weight: 0.75 }, { name: "keywords", weight: 0.25 }]
-    }));
     const search = (query) => {
-        if (query === "") {
-            setSearchEmojis(null);
+        if (!query) {
+            setSearchEmojis({ emojis: null, query: "" });
+            return;
+        }
+        if (searchEmojis.emojis != null && !Object.values(searchEmojis.emojis).flat().length && searchEmojis.query.length < query.length)
+            return;
+        const index = Object.values(searchEmojis.query.length < query.length && searchEmojis.emojis != null ? searchEmojis.emojis : emojiData).flat();
+        let results = index
+            .map(emoji => ({ emoji, score: (emoji.keywords || []).map(word => word.indexOf(query) != -1).reduce((a, b) => a + Number(b), Number(emoji.name.indexOf(query) != -1) * 3) }))
+            .filter(a => a.score != 0)
+            .sort((a, b) => a.score - b.score)
+            .map(({ emoji }) => emoji);
+        if (collapseCategoriesOnSearch) {
+            setSearchEmojis({ emojis: { "Search Results": results }, query });
         }
         else {
-            const results = emojiIndex.search(query).map((result) => result.item);
-            if (collapseCategoriesOnSearch) {
-                setSearchEmojis({ "Search Results": results });
-            }
-            else {
-                const groupedResults = Object.entries(emojiData).map(([category, list]) => ([category, list.filter(emoji => results.includes(emoji))])).reduce((sum, [category, list]) => Object.assign(sum, { [category]: list }), {});
-                setSearchEmojis(groupedResults);
-            }
+            const grouped = Object.entries(emojiData).map(([category, list]) => ([category, list.filter(emoji => results.includes(emoji))])).reduce((sum, [category, list]) => Object.assign(sum, { [category]: list }), {});
+            setSearchEmojis({ emojis: grouped, query });
         }
     };
     const handleClickInScroll = (emoji, row) => (event) => {
         onEmojiSelect(emoji);
-        emoji != (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && setFocusedEmoji({ row, emoji });
-        const emojiSpan = event.target;
-        emojiSpan.focus();
+        emoji != (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && setFocusedEmoji({ row, emoji, focusOnRender: true });
     };
     const handleMouseInScroll = (emoji, row) => (event) => {
-        if (event.movementX === 0 && event.movementY === 0)
+        if (event.movementX == 0 && event.movementY == 0 || emoji == (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji))
             return;
-        emoji != (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && setFocusedEmoji({ row, emoji });
-        const emojiSpan = event.target;
-        emojiSpan.focus();
+        setFocusedEmoji({ row, emoji, focusOnRender: true });
     };
     const handleKeyDownScroll = (event) => {
-        const emojis = Object.values(searchEmojis || emojiData).filter(array => array.length !== 0);
+        var _a, _b, _c, _d, _e;
+        const emojis = Object.values(searchEmojis.emojis || emojiData).filter(array => array.length !== 0);
         switch (event.key) {
             case "Enter": {
                 event.preventDefault();
                 if (!focusedEmoji) {
-                    let emoji = Object.values(searchEmojis || emojiData).flat()[0];
-                    emoji && setFocusedEmoji({ row: 1, emoji });
+                    let emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
+                    emoji && setFocusedEmoji({ row: 1, emoji, focusOnRender: Boolean((_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.closest(".emoji-picker-scroll")) });
                 }
                 else {
                     focusedEmoji && onEmojiSelect(focusedEmoji.emoji);
@@ -63,7 +62,7 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
                 event.preventDefault();
                 let emoji, row;
                 if (!focusedEmoji) {
-                    emoji = Object.values(searchEmojis || emojiData).flat()[0];
+                    emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
                     row = 1;
                 }
                 else {
@@ -85,14 +84,14 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
                         }
                     }
                 }
-                emoji && setFocusedEmoji({ row, emoji });
+                emoji && setFocusedEmoji({ row, emoji, focusOnRender: Boolean((_b = document.activeElement) === null || _b === void 0 ? void 0 : _b.closest(".emoji-picker-scroll")) });
                 return;
             }
             case "ArrowDown": {
                 event.preventDefault();
                 let emoji, row;
                 if (!focusedEmoji) {
-                    emoji = Object.values(searchEmojis || emojiData).flat()[0];
+                    emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
                     row = 1;
                 }
                 else {
@@ -117,14 +116,14 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
                         }
                     }
                 }
-                emoji && setFocusedEmoji({ row, emoji });
+                emoji && setFocusedEmoji({ row, emoji, focusOnRender: Boolean((_c = document.activeElement) === null || _c === void 0 ? void 0 : _c.closest(".emoji-picker-scroll")) });
                 return;
             }
             case "ArrowLeft": {
                 event.preventDefault();
                 let emoji, row;
                 if (!focusedEmoji) {
-                    emoji = Object.values(searchEmojis || emojiData).flat()[0];
+                    emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
                     row = 1;
                 }
                 else {
@@ -145,14 +144,14 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
                         }
                     }
                 }
-                emoji && setFocusedEmoji({ row, emoji });
+                emoji && setFocusedEmoji({ row, emoji, focusOnRender: Boolean((_d = document.activeElement) === null || _d === void 0 ? void 0 : _d.closest(".emoji-picker-scroll")) });
                 return;
             }
             case "ArrowRight": {
                 event.preventDefault();
                 let emoji, row;
                 if (!focusedEmoji) {
-                    emoji = Object.values(searchEmojis || emojiData).flat()[0];
+                    emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
                     row = 1;
                 }
                 else {
@@ -174,14 +173,14 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
                         }
                     }
                 }
-                emoji && setFocusedEmoji({ row, emoji });
+                emoji && setFocusedEmoji({ row, emoji, focusOnRender: Boolean((_e = document.activeElement) === null || _e === void 0 ? void 0 : _e.closest(".emoji-picker-scroll")) });
                 return;
             }
             default:
                 onKeyDownScroll(event);
         }
     };
-    useImperativeHandle(ref, () => ({ search, handleKeyDownScroll, emojis: searchEmojis || emojiData, focusedEmoji: focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji }));
+    useImperativeHandle(ref, () => ({ search, handleKeyDownScroll, emojis: searchEmojis.emojis || emojiData, focusedEmoji: focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji }));
     const refVirtualList = useRef(null);
     const ScrollProps = {
         emojisPerRow: emojisPerRow,
@@ -210,9 +209,9 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, onEmojiSelect
     }, []);
     return (React.createElement("div", { className: themeClass, style: { width: styleWidth } },
         showNavbar && React.createElement(Navbar, { data: emojiData, handleClickInNavbar: handleClickInNavbar }),
-        React.createElement("div", { className: "emoji-picker-scroll", role: "grid", "aria-rowcount": itemCount, "aria-colcount": emojisPerRow, tabIndex: 0, onKeyDown: handleKeyDownScroll }, searchEmojis
-            ? Object.values(searchEmojis).flat().length !== 0
-                ? React.createElement(Scroll, Object.assign({}, ScrollProps, { emojiData: searchEmojis }))
+        React.createElement("div", { className: "emoji-picker-scroll", role: "grid", "aria-rowcount": itemCount, "aria-colcount": emojisPerRow, onKeyDown: handleKeyDownScroll }, searchEmojis.emojis
+            ? Object.values(searchEmojis.emojis).flat().length !== 0
+                ? React.createElement(Scroll, Object.assign({}, ScrollProps, { emojiData: searchEmojis.emojis }))
                 : React.createElement("div", { className: "emoji-picker-category", style: { height: collapseHeightOnSearch ? 'inherit' : '432px' } },
                     React.createElement("div", { className: "emoji-picker-category-title" }, "No results"))
             : showScroll &&

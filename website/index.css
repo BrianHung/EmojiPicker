@@ -11,35 +11,65 @@ html {
   font-size: 18px;
 }
 
-html a {
+body {
+  margin: 0;
+}
+
+a {
   text-decoration: none;
   color: #06c;
 }
 
-html a:hover,  html a:active, html a:focus {
+a:hover, a:active, html a:focus {
   text-decoration: underline;
 }
 
-html p {
+p {
   text-align: center;
 }
 
-html h1 {
-  font-size: 2.5rem;
+h1 {
+  font-size: 2.25rem;
   font-weight: 700;
   margin-bottom: 0;
   letter-spacing: -.01rem;
 }
 
-html .emoji-picker {
+.emoji-picker {
   margin: 0.5rem 0;
 }
 
-html input {
+input {
   font-size: 1rem;
   margin-top: 0.5rem; margin-bottom: 1rem;
   padding: 0.35rem 0.50rem;
   border-radius: 4px;
   border: 1px solid rgb(225, 225, 224);
+  font-family: 'Inter', var(--sansSerif); 
 }
 
+#notification {
+  position: fixed;
+  bottom: 20px;
+  display: flex;
+  justify-content: center;
+  z-index: 1;
+  pointer-events: none;
+}
+
+#notification div {
+  background: rgb(63, 68, 71);
+  color: white;
+  font-size: 1rem;
+  padding: 0.25rem 0.50rem;
+  border-radius: 4px;
+  opacity: 0.1;
+  transition: 250ms all ease-in;
+  transform: translate3d(0, 80px, 0);
+}
+
+#notification.visible div {
+  transform: translate3d(0, 0, 0);
+  transition: 120ms all cubic-bezier(0.25, 0.47, 0.44, 0.93);
+  opacity: 1;
+}
