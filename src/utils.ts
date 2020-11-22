@@ -15,18 +15,16 @@ export function unifiedToNative(unified: string) {
 
 /**
  * Measures the pixel width of a scrollbar.
- * Effectively a memoized version of https://github.com/sonicdoe/measure-scrollbar.
+ * https://github.com/sonicdoe/measure-scrollbar.
  */
-let scrollbarWidth = -1
-export function measureScrollbar() {
+export function measureScrollbar(): number {
   if (typeof document == 'undefined') return 0
-  if (scrollbarWidth !== -1) return scrollbarWidth
   const div = document.createElement('div')
   div.style.cssText = "width:100px; height:100px; overflow:scroll; position:absolute; top:-9999px"
   document.body.appendChild(div)
-  scrollbarWidth = div.offsetWidth - div.clientWidth
+  let scrollbarWidth = div.offsetWidth - div.clientWidth
   document.body.removeChild(div)
-  return scrollbarWidth
+  return scrollbarWidth;
 }
 
 /**

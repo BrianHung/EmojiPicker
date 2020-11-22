@@ -46,7 +46,6 @@ function ExampleSetup() {
     collapseHeightOnSearch: false,
   }
 
-
   /**
    * Adaptation of show-and-hide popup from https://rsms.me/inter/#charset for React hooks.
    * Ignore this if you're just using this website as an example of how to setup the emoji picker.
@@ -89,7 +88,7 @@ function ExampleSetup() {
       <p>A virtualized <a href="https://twemoji.twitter.com/">twemoji</a> picker written in React and TypeScript.</p>
       <EmojiPicker {...emojiPickerProps}/>
       <input {...inputProps}/>
-      <a href="https://github.com/BrianHung/EmojiPicker">See the code →</a>
+      <a href="https://github.com/BrianHung/EmojiPicker">source code →</a>
       <div id="notification">
         <div></div>
       </div>

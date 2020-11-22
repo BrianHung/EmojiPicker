@@ -14,7 +14,7 @@ import { FixedSizeList as VirtualList } from 'react-window';
 import InfiniteLoader from "react-window-infinite-loader";
 import { shallowDiffer } from '../utils';
 import Emoji from "../Emoji";
-const Scroll = ({ emojisPerRow, emojiSize, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch }) => {
+const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch }) => {
     const [arrayOfRows, setArrayOfRows] = useState({});
     const infiniteLoaderRef = useRef(null);
     const prevFocusedEmoji = useRef(null);
@@ -22,7 +22,7 @@ const Scroll = ({ emojisPerRow, emojiSize, focusedEmoji, emojiData, refVirtualLi
         setArrayOfRows({});
         infiniteLoaderRef.current && infiniteLoaderRef.current.resetloadMoreItemsCache();
         prevFocusedEmoji.current = null;
-        loadMoreItems(0, 17);
+        loadMoreItems(0, numberScrollRows + 6 - 1);
         refVirtualList && refVirtualList.current.scrollToItem(0);
     }, [emojiData, emojisPerRow]);
     useEffect(function resetRowsWithFocusedEmoji() {
@@ -65,9 +65,16 @@ const Scroll = ({ emojisPerRow, emojiSize, focusedEmoji, emojiData, refVirtualLi
         }
         setArrayOfRows(prev => Object.assign({}, prev, nextArrayOfRows));
     };
-    return (React.createElement(InfiniteLoader, { ref: infiniteLoaderRef, itemCount: itemCount, loadMoreItems: loadMoreItems, isItemLoaded: isItemLoaded, minimumBatchSize: 12, threshold: 6 }, ({ onItemsRendered, ref }) => (React.createElement(VirtualList, { onItemsRendered: onItemsRendered, ref: list => { ref(list); refVirtualList && (refVirtualList.current = list); }, itemCount: itemCount, itemData: arrayOfRows, itemSize: emojiSize, height: collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, 12 * emojiSize) : 12 * emojiSize, innerElementType: innerElementType }, MemoizedRow))));
+    return (React.createElement(InfiniteLoader, { ref: infiniteLoaderRef, itemCount: itemCount, loadMoreItems: loadMoreItems, isItemLoaded: isItemLoaded, minimumBatchSize: numberScrollRows, threshold: 6 }, ({ onItemsRendered, ref }) => (React.createElement(VirtualList, { onItemsRendered: onItemsRendered, ref: list => { ref(list); refVirtualList && (refVirtualList.current = list); }, itemCount: itemCount, itemData: arrayOfRows, itemSize: emojiSize, height: collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, numberScrollRows * emojiSize) : numberScrollRows * emojiSize, innerElementType: innerElementType }, MemoizedRow))));
 };
-const MemoizedScroll = memo(Scroll);
+const MemoizedScroll = memo(Scroll, function ScrollPropsAreEqual(prevProps, nextProps) {
+    var _a, _b;
+    return ((_a = prevProps.focusedEmoji) === null || _a === void 0 ? void 0 : _a.emoji) == ((_b = nextProps.focusedEmoji) === null || _b === void 0 ? void 0 : _b.emoji)
+        && prevProps.emojiData == nextProps.emojiData
+        && prevProps.collapseHeightOnSearch == nextProps.collapseHeightOnSearch
+        && prevProps.emojiSize == nextProps.emojiSize
+        && prevProps.emojisPerRow == nextProps.emojisPerRow;
+});
 export default MemoizedScroll;
 const VirtualRow = ({ index, style, data }) => {
     return (React.createElement("div", { className: "emoji-picker-virtual-row", style: style }, data[index]));

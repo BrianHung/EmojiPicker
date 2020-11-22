@@ -7,6 +7,7 @@ import Emoji from "../Emoji";
 type ScrollProps = {
   emojisPerRow: number, 
   emojiSize: number,
+  numberScrollRows: number,
   focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean} | null,
   emojiData: Record<string, EmojiObject[]>;
   refVirtualList: React.MutableRefObject<VirtualList>,
@@ -17,8 +18,7 @@ type ScrollProps = {
   collapseHeightOnSearch: boolean,
 }
 
-const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch}) => {
-  
+const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emojiData, refVirtualList, handleClickInScroll, handleMouseInScroll, itemCount, itemRanges, collapseHeightOnSearch}) => {
   const [arrayOfRows, setArrayOfRows] = useState<Record<number, JSX.Element>>({});
   const infiniteLoaderRef = useRef<InfiniteLoader>(null);
 
@@ -30,7 +30,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
     setArrayOfRows({}); 
     infiniteLoaderRef.current && infiniteLoaderRef.current.resetloadMoreItemsCache();
     prevFocusedEmoji.current = null
-    loadMoreItems(0, 17); // minimumBatchSize + threshold - 1
+    loadMoreItems(0, numberScrollRows + 6 - 1); // minimumBatchSize + threshold - 1
     refVirtualList && refVirtualList.current.scrollToItem(0);
   }, [emojiData, emojisPerRow])
 
@@ -102,7 +102,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}
-      minimumBatchSize={12}
+      minimumBatchSize={numberScrollRows}
       threshold={6}
     >
       {({onItemsRendered, ref}) => (
@@ -112,7 +112,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
           itemCount={itemCount} 
           itemData={arrayOfRows}
           itemSize={emojiSize} 
-          height={collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, 12 * emojiSize) : 12 * emojiSize}
+          height={collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, numberScrollRows * emojiSize) : numberScrollRows * emojiSize}
           innerElementType={innerElementType}
         >
           {MemoizedRow}
@@ -122,7 +122,13 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
   )
 }
 
-const MemoizedScroll = memo(Scroll)
+const MemoizedScroll = memo(Scroll, function ScrollPropsAreEqual(prevProps, nextProps) {
+  return prevProps.focusedEmoji?.emoji == nextProps.focusedEmoji?.emoji
+      && prevProps.emojiData == nextProps.emojiData
+      && prevProps.collapseHeightOnSearch == nextProps.collapseHeightOnSearch
+      && prevProps.emojiSize == nextProps.emojiSize
+      && prevProps.emojisPerRow == nextProps.emojisPerRow;
+})
 export default MemoizedScroll;
 
 const VirtualRow: React.FunctionComponent<{index: number, style: React.CSSProperties, data}> = ({index, style, data}) => {

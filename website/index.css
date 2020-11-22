@@ -58,14 +58,16 @@ input {
 }
 
 #notification div {
-  background: rgb(63, 68, 71);
+  background: black;
   color: white;
   font-size: 1rem;
-  padding: 0.25rem 0.50rem;
+  padding: 0.40rem 0.50rem;
   border-radius: 4px;
   opacity: 0.1;
   transition: 250ms all ease-in;
   transform: translate3d(0, 80px, 0);
+  display: flex;
+  align-items: center;
 }
 
 #notification.visible div {

@@ -1,8 +1,9 @@
-<div align="center" style="margin: 0.5rem 0">
+<div align="center">
   <br><b>React Twemoji Picker</b> is an emoji component
   <br>made for fast show-and-scroll and filtering
   <br><a href="https://brianhung.github.io/EmojiPicker">demo</a>
-  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./demo.png" alt="image of emoji picker" title="click to navigate to demo" style="margin-top: 0.5rem"></a>
+  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./light-theme.png" alt="image of emoji picker" title="click to navigate to demo"></a>
+  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./dark-theme.png" alt="image of emoji picker" title="click to navigate to demo"></a>
 </div>
 
 To do this, we virtualize emoji elements with [`react-window`](https://github.com/bvaughn/react-window) 
@@ -43,15 +44,17 @@ To see an example, look at the <a href="./website/index.tsx">source code</a> for
 
 ### Props
 
-```ts
-emojiData: Record<string, EmojiObject[]>; // map of categories to list of emoji objects
-emojiSize?: number; // pixel size of an emoji
-onEmojiSelect?: (emoji: EmojiObject) => void, // handle emoji click or enter key here
-showNavbar?: boolean; // allows navigation to categories
-showFooter?: boolean; // show focused emoji and its name
-showScroll?: boolean; // turn off if query is always not null
-emojisPerRow?: number; // number of emojis to show per row
-onKeyDownScroll?: Function; // handle additional key events like 'ctrl-c' here
-collapseCategoriesOnSearch?: boolean; // merge categories into single 'search results' category
-collapseHeightOnSearch?: boolean; // scroll height changes with number of emojis
-```
+| prop | default | description |
+|:-----|:--------|:------------|
+| emojiData: Record<string, EmojiObject[]> | `{}` | map of categories to list of emoji objects |
+| emojiSize?: number | `36` | pixel size of an emoji |
+| numberScrollRows?: number | `12` | number of rows in the scroll element |
+| onEmojiSelect?: (emoji: EmojiObject) => void, | `(emoji: EmojiObject) => console.log(emoji)` | handle emoji click or enter key here |
+| showNavbar?: boolean; | `false` | allows navigation to categories |
+| showFooter?: boolean; | `false` | show focused emoji and its name |
+| showScroll?: boolean; | `true` | turn off if query is always not null |
+| emojisPerRow?: number; | `9` | number of emojis to show per row |
+| onKeyDownScroll?: Function; | `(event) => null` | handle additional key events like 'ctrl-c' here |
+| collapseCategoriesOnSearch?: boolean; | `true` | merge categories into single 'search results' category |
+| collapseHeightOnSearch?: boolean; | `true` | scroll height changes with number of emojis |
+| theme?: "system", "light", "dark" | `"system"` | css theme |

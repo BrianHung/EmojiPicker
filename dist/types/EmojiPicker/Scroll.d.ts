@@ -4,6 +4,7 @@ import { EmojiObject, itemRange } from '../utils';
 declare type ScrollProps = {
     emojisPerRow: number;
     emojiSize: number;
+    numberScrollRows: number;
     focusedEmoji: {
         emoji: EmojiObject;
         row: number;

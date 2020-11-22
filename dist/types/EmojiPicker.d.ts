@@ -9,9 +9,11 @@ declare type EmojiPickerProps = {
     showFooter?: boolean;
     showScroll?: boolean;
     emojisPerRow?: number;
+    numberScrollRows?: number;
     onKeyDownScroll?: Function;
     collapseCategoriesOnSearch?: boolean;
     collapseHeightOnSearch?: boolean;
+    theme?: "system" | "light" | "dark";
 };
 export interface EmojiPickerRef {
     search: (query: string) => void;

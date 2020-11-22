@@ -16,9 +16,11 @@ type EmojiPickerProps = {
   showFooter?: boolean;
   showScroll?: boolean;
   emojisPerRow?: number;
+  numberScrollRows?: number;
   onKeyDownScroll?: Function;
   collapseCategoriesOnSearch?: boolean;
   collapseHeightOnSearch?: boolean;
+  theme?: "system" | "light" | "dark";
 }
 
 // Define public methods accessible via ref.
@@ -30,7 +32,7 @@ export interface EmojiPickerRef {
   handleKeyDownScroll: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, onEmojiSelect = (emoji: EmojiObject) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, onKeyDownScroll = (event) => null, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true}: EmojiPickerProps, ref: React.Ref<EmojiPickerRef>) {
+function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRows = 12, onEmojiSelect = (emoji: EmojiObject) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, onKeyDownScroll = (event) => null, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true, theme = "system"}: EmojiPickerProps, ref: React.Ref<EmojiPickerRef>) {
 
   // Initialize EmojiPicker state using hooks.
 
@@ -62,7 +64,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, onEmojiSelect 
     let results = index
       .map(emoji => ({emoji, score: (emoji.keywords || []).map(word => word.indexOf(query) != -1).reduce((a, b) => a + Number(b), Number(emoji.name.indexOf(query) != -1) * 3)}))
       .filter(a => a.score != 0)
-      .sort((a, b) => a.score - b.score)
+      .sort((a, b) => b.score - a.score)
       .map(({emoji}) => emoji);
 
     if (collapseCategoriesOnSearch) {
@@ -225,6 +227,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, onEmojiSelect 
   const ScrollProps = {
     emojisPerRow: emojisPerRow!,
     emojiSize,
+    numberScrollRows,
     focusedEmoji,
     refVirtualList,
     handleClickInScroll,
@@ -244,19 +247,18 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, onEmojiSelect 
     }
   }
 
-  // Memoize computed classes and styles.
-
-  const themeClass = useMemo((): string => {
-    let darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return darkMode ? "emoji-picker emoji-picker-dark" : "emoji-picker"
-  }, [])
   
-  const styleWidth = useMemo((): string => {
-    return `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar() + 1}px)`
+  // Compute width on window resize.
+  
+  const [width, setWidth] = useState(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+  useEffect(() => {
+    const resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+    window.addEventListener("resize", resizeWidth);
+    return () => window.removeEventListener("resize", resizeWidth);
   }, [])
 
   return (
-    <div className={ themeClass } style={{ width: styleWidth }}>
+    <div className={ `emoji-picker emoji-picker-${theme}` } style={{ width }}>
       { showNavbar && <Navbar data={emojiData} handleClickInNavbar={handleClickInNavbar}/> }
       <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll}>
         { searchEmojis.emojis

@@ -2,16 +2,13 @@ export function unifiedToNative(unified) {
     const codePoints = unified.split('-').map(u => parseInt(u, 16));
     return String.fromCodePoint.apply(String, codePoints);
 }
-let scrollbarWidth = -1;
 export function measureScrollbar() {
     if (typeof document == 'undefined')
         return 0;
-    if (scrollbarWidth !== -1)
-        return scrollbarWidth;
     const div = document.createElement('div');
     div.style.cssText = "width:100px; height:100px; overflow:scroll; position:absolute; top:-9999px";
     document.body.appendChild(div);
-    scrollbarWidth = div.offsetWidth - div.clientWidth;
+    let scrollbarWidth = div.offsetWidth - div.clientWidth;
     document.body.removeChild(div);
     return scrollbarWidth;
 }
