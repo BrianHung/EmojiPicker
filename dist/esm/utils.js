@@ -38,15 +38,16 @@ export function shallowDiffer(prev, next) {
 }
 export function throttleIdleTask(callback) {
     const idleHandler = typeof requestIdleCallback === 'function' ? requestIdleCallback : setTimeout;
-    let running = false;
-    return function throttled(args) {
+    let running = false, argsFunc;
+    return function throttled(...args) {
+        argsFunc = args;
         if (running) {
             return;
         }
         running = true;
         idleHandler(() => {
             running = false;
-            callback(args);
+            callback.apply(null, argsFunc);
         });
     };
 }

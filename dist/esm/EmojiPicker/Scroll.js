@@ -33,7 +33,6 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
         prevRow && rowsToUpdate.add(prevRow);
         nextRow && rowsToUpdate.add(nextRow);
         Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row));
-        nextRow && refVirtualList && refVirtualList.current.scrollToItem(nextRow);
         prevFocusedEmoji.current = nextEmoji;
     }, [focusedEmoji]);
     const isItemLoaded = (index) => !!arrayOfRows[index];

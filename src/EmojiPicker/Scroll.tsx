@@ -43,7 +43,6 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
     prevRow && rowsToUpdate.add(prevRow);
     nextRow && rowsToUpdate.add(nextRow);
     Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row))
-    nextRow && refVirtualList && refVirtualList.current.scrollToItem(nextRow)
     prevFocusedEmoji.current = nextEmoji;
   }, [focusedEmoji])
 

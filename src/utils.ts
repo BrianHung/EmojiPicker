@@ -15,15 +15,15 @@ export function unifiedToNative(unified: string) {
 
 /**
  * Measures the pixel width of a scrollbar.
- * https://github.com/sonicdoe/measure-scrollbar.
+ * source: https://github.com/sonicdoe/measure-scrollbar.
  */
 export function measureScrollbar(): number {
   if (typeof document == 'undefined') return 0
-  const div = document.createElement('div')
-  div.style.cssText = "width:100px; height:100px; overflow:scroll; position:absolute; top:-9999px"
-  document.body.appendChild(div)
-  let scrollbarWidth = div.offsetWidth - div.clientWidth
-  document.body.removeChild(div)
+  const div = document.createElement('div');
+  div.style.cssText = "width:100px; height:100px; overflow:scroll; position:absolute; top:-9999px";
+  document.body.appendChild(div);
+  let scrollbarWidth = div.offsetWidth - div.clientWidth;
+  document.body.removeChild(div);
   return scrollbarWidth;
 }
 
@@ -45,24 +45,25 @@ export function calcCountAndRange(data: Record<string, any[]>, perRow: number) {
   return {itemCount, itemRanges};
 }
 
-// Pulled from react-compat
-// https://github.com/developit/preact-compat/blob/7c5de00e7c85e2ffd011bf3af02899b63f699d3a/src/index.js#L349
+// Returns true if objects shallowly differ.
 export function shallowDiffer(prev: Object, next: Object): boolean {
   for (let attribute in prev) { if (!(attribute in next)) { return true; }}
   for (let attribute in next) { if (prev[attribute] !== next[attribute]) { return true; }}
   return false;
 }
 
+// Trailing throttle function.
 export function throttleIdleTask(callback: Function) {
   // @ts-ignore
   const idleHandler = typeof requestIdleCallback === 'function' ? requestIdleCallback : setTimeout;
-  let running = false;
-  return function throttled(args?) {
+  let running = false, argsFunc: any;
+  return function throttled(...args: any[]) {
+    argsFunc = args;
     if (running) { return; }
     running = true;
     idleHandler(() => {
       running = false; 
-      callback(args);
+      callback.apply(null, argsFunc);
     })
   }
 }

@@ -12,17 +12,16 @@ function ExampleSetup() {
   const input = createRef<HTMLInputElement>()
 
   // need reference to same function to throttle
-  const throttledQuery = useCallback(throttleIdleTask(() => picker.current?.search(input.current?.value)), [picker.current]);
+  const throttledQuery = useCallback(throttleIdleTask((query: string) => picker.current?.search(query)), [picker.current]);
 
   const inputProps = {
     ref: input,
     placeholder: "search-or-navigate",
-    onChange: () => throttledQuery(),
+    onChange: (event: React.ChangeEvent<HTMLElement>) => throttledQuery((event.target as HTMLInputElement).value),
     onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => { 
       if (!["Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
       picker.current.handleKeyDownScroll(event); 
-      event.target.focus(); 
-
+      (event.target as HTMLInputElement).focus(); 
       if (event.key == "Enter") {
         picker.current.search("");
         input.current.value = "";

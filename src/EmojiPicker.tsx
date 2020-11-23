@@ -102,7 +102,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
       }
       case "ArrowUp": {
         event.preventDefault();
-        let emoji: EmojiObject, row: number;
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
         if (!focusedEmoji) {
           emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0];
           row = 1;
@@ -124,13 +124,13 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        // @ts-ignore
-        emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && refVirtualList.current?.scrollToItem(row)
         return;
       }
       case "ArrowDown": {
         event.preventDefault();
-        let emoji: EmojiObject, row: number;
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
         if (!focusedEmoji) {
           emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0]
           row = 1;
@@ -154,13 +154,13 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        // @ts-ignore
-        emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && refVirtualList.current?.scrollToItem(row)
         return;  
       }
       case "ArrowLeft": {
         event.preventDefault();
-        let emoji: EmojiObject, row: number;
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
         if (!focusedEmoji) {
           emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0]
           row = 1;
@@ -181,13 +181,13 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        // @ts-ignore
-        emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && refVirtualList.current?.scrollToItem(row)
         return;    
       }
       case "ArrowRight": {
         event.preventDefault();
-        let emoji: EmojiObject, row: number;
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
         if (!focusedEmoji) {
           emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0]
           row = 1;
@@ -209,8 +209,8 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        // @ts-ignore
-        emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))});
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && refVirtualList.current?.scrollToItem(row)
         return; 
       }
       default:

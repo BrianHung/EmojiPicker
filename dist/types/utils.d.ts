@@ -16,5 +16,5 @@ export declare function calcCountAndRange(data: Record<string, any[]>, perRow: n
     itemRanges: itemRange[];
 };
 export declare function shallowDiffer(prev: Object, next: Object): boolean;
-export declare function throttleIdleTask(callback: Function): (args?: any) => void;
+export declare function throttleIdleTask(callback: Function): (...args: any[]) => void;
 //# sourceMappingURL=utils.d.ts.map
