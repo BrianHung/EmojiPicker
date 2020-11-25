@@ -78,7 +78,7 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
                         const emojiProps = Object.assign({ emoji, key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, className: "emoji-picker-emoji", tabIndex: -1 }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
                             className: "emoji-picker-emoji emoji-picker-emoji-focused",
                             tabIndex: 0,
-                            ref: (span) => { focusedEmoji.focusOnRender && span && span.focus(); }
+                            ref: (span) => { focusedEmoji.focusOnRender && span && span.focus({ preventScroll: focusedEmoji.preventScroll }); }
                         });
                         return react_1.default.createElement(Emoji_1.default, Object.assign({}, emojiProps));
                     })));

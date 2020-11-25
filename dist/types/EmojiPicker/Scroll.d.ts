@@ -9,6 +9,7 @@ declare type ScrollProps = {
         emoji: EmojiObject;
         row: number;
         focusOnRender: boolean;
+        preventScroll: boolean;
     } | null;
     emojiData: Record<string, EmojiObject[]>;
     refVirtualList: React.MutableRefObject<VirtualList>;

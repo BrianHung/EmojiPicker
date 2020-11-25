@@ -8,7 +8,7 @@ type ScrollProps = {
   emojisPerRow: number, 
   emojiSize: number,
   numberScrollRows: number,
-  focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean} | null,
+  focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean, preventScroll: boolean} | null,
   emojiData: Record<string, EmojiObject[]>;
   refVirtualList: React.MutableRefObject<VirtualList>,
   handleClickInScroll: (emoji: EmojiObject, row: number) => void,
@@ -80,7 +80,7 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
                       className: "emoji-picker-emoji emoji-picker-emoji-focused",
                       tabIndex: 0,
                       // focus on render if scroll element already has focus-within
-                      ref: (span: HTMLSpanElement) => { focusedEmoji.focusOnRender && span && span.focus() }
+                      ref: (span: HTMLSpanElement) => { focusedEmoji.focusOnRender && span && span.focus({preventScroll: focusedEmoji.preventScroll}) }
                     }
                   }
                   return <Emoji {...emojiProps}/>

@@ -11,6 +11,7 @@
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   display: inline-block;
+  outline: none;
 }
 
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-title {

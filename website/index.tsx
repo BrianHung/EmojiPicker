@@ -1,4 +1,4 @@
-import React, { createRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { EmojiObject } from '../src/index';
 import { EmojiPicker, EmojiPickerRef, unifiedToNative, throttleIdleTask } from '../src/index';
@@ -6,10 +6,19 @@ import EmojiData from "../data/twemoji.json"
 const emojiData = Object.freeze(EmojiData)
 import './index.css';
 
+const copyToClipboard = (string: string) => {
+  const textArea = document.createElement('textarea');
+  textArea.value = string;
+  document.body.appendChild(textArea);
+  textArea.select();
+  document.execCommand('copy');
+  document.body.removeChild(textArea);
+};
+
 function ExampleSetup() {
 
-  const picker = createRef<EmojiPickerRef>()
-  const input = createRef<HTMLInputElement>()
+  const picker = useRef<EmojiPickerRef>()
+  const input = useRef<HTMLInputElement>()
 
   // need reference to same function to throttle
   const throttledQuery = useCallback(throttleIdleTask((query: string) => picker.current?.search(query)), [picker.current]);
@@ -96,12 +105,3 @@ function ExampleSetup() {
 }
 
 ReactDOM.render(<ExampleSetup/>, document.getElementById('example-setup'));
-
-const copyToClipboard = (string: string) => {
-  const textArea = document.createElement('textarea');
-  textArea.value = string;
-  document.body.appendChild(textArea);
-  textArea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textArea);
-};

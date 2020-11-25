@@ -37,13 +37,13 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
   // Initialize EmojiPicker state using hooks.
 
   const [ searchEmojis, setSearchEmojis ] = useState<{emojis: Record<string, EmojiObject[]> | null, query: string}>({emojis: null, query: ""});
-  const [ focusedEmoji, setFocusedEmoji ] = useState<{emoji: EmojiObject, row: number, focusOnRender: boolean} | null>({row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: false});
+  const [ focusedEmoji, setFocusedEmoji ] = useState<{emoji: EmojiObject, row: number, focusOnRender: boolean, preventScroll: boolean} | null>({row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: false, preventScroll: false});
 
   const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(searchEmojis.emojis || emojiData, emojisPerRow), [searchEmojis, emojisPerRow]);
 
   useEffect(function() { 
     const [emoji] = Object.values(searchEmojis.emojis || emojiData).flat()
-    setFocusedEmoji(emoji ? {row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))} : null) 
+    setFocusedEmoji(emoji ? {row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false} : null) 
   }, [searchEmojis])
 
   /**
@@ -78,13 +78,17 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
   // Define event handlers in scroll element.
 
   const handleClickInScroll = (emoji: EmojiObject, row: number) => (event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault(); // MDN docs: keep the focus from leaving the HTMLElement
     onEmojiSelect(emoji);
-    emoji != focusedEmoji?.emoji && setFocusedEmoji({row, emoji, focusOnRender: true})
+    emoji != focusedEmoji?.emoji && setFocusedEmoji({row, emoji, focusOnRender: true, preventScroll: true})
   }
   
   const handleMouseInScroll = (emoji: EmojiObject, row: number) => (event: React.MouseEvent<HTMLElement>) => {
-    if (event.movementX == 0 && event.movementY == 0 || emoji == focusedEmoji?.emoji) return;
-    setFocusedEmoji({row, emoji, focusOnRender: true})
+    if (emoji == focusedEmoji?.emoji || event.movementX == 0 && event.movementY == 0) return;
+    // @ts-ignore
+    const isSafari = window.safari !== undefined; // safari does not support preventScroll focus
+    setFocusedEmoji({row, emoji, focusOnRender: !isSafari, preventScroll: true})
+    isSafari && refScroll.current && refScroll.current.focus();
   }
 
   const handleKeyDownScroll = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -94,7 +98,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
         event.preventDefault();
         if (!focusedEmoji) {
           let emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0]
-          emoji && setFocusedEmoji({row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+          emoji && setFocusedEmoji({row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
         } else {
           focusedEmoji && onEmojiSelect(focusedEmoji.emoji);
         }
@@ -124,7 +128,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
         row && refVirtualList.current?.scrollToItem(row)
         return;
       }
@@ -154,7 +158,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
         row && refVirtualList.current?.scrollToItem(row)
         return;  
       }
@@ -181,7 +185,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
         row && refVirtualList.current?.scrollToItem(row)
         return;    
       }
@@ -209,7 +213,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll"))})
+        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
         row && refVirtualList.current?.scrollToItem(row)
         return; 
       }
@@ -223,6 +227,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
   useImperativeHandle(ref, () => ({search, handleKeyDownScroll, emojis: searchEmojis.emojis || emojiData, focusedEmoji: focusedEmoji?.emoji}) as EmojiPickerRef)
 
   const refVirtualList = useRef<VirtualList>(null);
+  const refScroll = useRef<HTMLDivElement>(null);
 
   const ScrollProps = {
     emojisPerRow: emojisPerRow!,
@@ -249,7 +254,6 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
 
   
   // Compute width on window resize.
-  
   const [width, setWidth] = useState(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
   useEffect(() => {
     const resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
@@ -260,7 +264,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
   return (
     <div className={ `emoji-picker emoji-picker-${theme}` } style={{ width }}>
       { showNavbar && <Navbar data={emojiData} handleClickInNavbar={handleClickInNavbar}/> }
-      <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll}>
+      <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll} tabIndex={-1} ref={refScroll}>
         { searchEmojis.emojis
           ? Object.values(searchEmojis.emojis).flat().length !== 0
             ? <Scroll {...ScrollProps} emojiData={searchEmojis.emojis}/>
