@@ -15,8 +15,7 @@ import "./Emoji.css";
 const Emoji = forwardRef(function EmojiComponent(_a, ref) {
     var { emoji } = _a, props = __rest(_a, ["emoji"]);
     return (React.createElement("span", Object.assign({ className: "emoji-picker-emoji", "data-unicode": emoji.unicode }, props, { ref: ref }),
-        React.createElement("svg", { className: "emoji-picker-emoji-svg" },
-            React.createElement("use", { href: `${twemoji}#${emoji.unicode}` }))));
+        React.createElement("img", { className: "emoji-picker-emoji-img", src: `${twemoji}#${emoji.unicode}` })));
 });
 export default Emoji;
 //# sourceMappingURL=Emoji.js.map

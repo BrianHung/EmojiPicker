@@ -1,13 +1,6 @@
-// @ts-check
-const reactPlugin = require('vite-plugin-react')
+// vite.config.js
+import reactRefresh from '@vitejs/plugin-react-refresh'
 
-/**
- * @type { import('vite').UserConfig }
- */
-const config = {
-  jsx: 'react',
-  plugins: [reactPlugin],
-  base: process.env["base"] || "/EmojiPicker/",
+export default {
+  plugins: [reactRefresh()]
 }
-
-module.exports = config
