@@ -11,8 +11,8 @@ type ScrollProps = {
   focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean, preventScroll: boolean} | null,
   emojiData: Record<string, EmojiObject[]>;
   refVirtualList: React.MutableRefObject<VirtualList>,
-  handleClickInScroll: (emoji: EmojiObject, row: number) => void,
-  handleMouseInScroll: (emoji: EmojiObject, row: number) => void,
+  handleClickInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined,
+  handleMouseInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined,
   itemCount: number,
   itemRanges: itemRange[],
   collapseHeightOnSearch: boolean,
@@ -64,29 +64,37 @@ const Scroll: React.FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, 
           const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow)
 
           nextArrayOfRows[rowIndex] = (
-            <div className="emoji-picker-category-emoji" role="row" aria-rowindex={rowIndex}>
+            <ul className="emoji-picker-category-emoji" role="row" aria-rowindex={rowIndex}>
               { row.map((emoji: EmojiObject, colIndex: number) => {
-                  const emojiProps = {
-                    emoji, 
+                  const liProps = {
                     key: emoji.unicode, 
                     onClick: handleClickInScroll(emoji, rowIndex), 
                     onMouseMove: handleMouseInScroll(emoji, rowIndex), 
                     role: "gridcell", 
                     "aria-rowindex": rowIndex,
                     "aria-colindex": colIndex,
-                    className: "emoji-picker-emoji",
                     tabIndex: -1,
                     ...(focusedEmoji && emoji === focusedEmoji.emoji) && {
-                      className: "emoji-picker-emoji emoji-picker-emoji-focused",
                       tabIndex: 0,
                       // focus on render if scroll element already has focus-within
-                      ref: (span: HTMLSpanElement) => { focusedEmoji.focusOnRender && span && span.focus({preventScroll: focusedEmoji.preventScroll}) }
+                      ref: (li: HTMLLIElement) => { focusedEmoji.focusOnRender && li && li.focus({preventScroll: focusedEmoji.preventScroll}) }
                     }
                   }
-                  return <Emoji {...emojiProps}/>
+                  const emojiProps = {
+                    emoji,
+                    className: "emoji-picker-emoji",
+                    ...(focusedEmoji && emoji === focusedEmoji.emoji) && {
+                      className: "emoji-picker-emoji emoji-picker-emoji-focused",
+                    }
+                  }
+                  return (
+                    <li {...liProps}>
+                      <Emoji {...emojiProps}/>
+                    </li>
+                  )
                 }) 
               }
-            </div>
+            </ul>
           )
         }
       }

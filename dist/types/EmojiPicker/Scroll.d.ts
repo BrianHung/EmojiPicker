@@ -13,8 +13,8 @@ declare type ScrollProps = {
     } | null;
     emojiData: Record<string, EmojiObject[]>;
     refVirtualList: React.MutableRefObject<VirtualList>;
-    handleClickInScroll: (emoji: EmojiObject, row: number) => void;
-    handleMouseInScroll: (emoji: EmojiObject, row: number) => void;
+    handleClickInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined;
+    handleMouseInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined;
     itemCount: number;
     itemRanges: itemRange[];
     collapseHeightOnSearch: boolean;

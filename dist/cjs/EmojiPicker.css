@@ -27,6 +27,8 @@
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-emoji {
   padding: 0em 0.50em;
   display: flex;
+  list-style-type: none;
+  margin: 0;
 }
 
 .emoji-picker .emoji-picker-emoji {

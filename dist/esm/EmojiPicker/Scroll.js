@@ -50,13 +50,16 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
                 else {
                     const offset = rowIndex - range.from;
                     const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow);
-                    nextArrayOfRows[rowIndex] = (React.createElement("div", { className: "emoji-picker-category-emoji", role: "row", "aria-rowindex": rowIndex }, row.map((emoji, colIndex) => {
-                        const emojiProps = Object.assign({ emoji, key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, className: "emoji-picker-emoji", tabIndex: -1 }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
-                            className: "emoji-picker-emoji emoji-picker-emoji-focused",
+                    nextArrayOfRows[rowIndex] = (React.createElement("ul", { className: "emoji-picker-category-emoji", role: "row", "aria-rowindex": rowIndex }, row.map((emoji, colIndex) => {
+                        const liProps = Object.assign({ key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, tabIndex: -1 }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
                             tabIndex: 0,
-                            ref: (span) => { focusedEmoji.focusOnRender && span && span.focus({ preventScroll: focusedEmoji.preventScroll }); }
+                            ref: (li) => { focusedEmoji.focusOnRender && li && li.focus({ preventScroll: focusedEmoji.preventScroll }); }
                         });
-                        return React.createElement(Emoji, Object.assign({}, emojiProps));
+                        const emojiProps = Object.assign({ emoji, className: "emoji-picker-emoji" }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
+                            className: "emoji-picker-emoji emoji-picker-emoji-focused",
+                        });
+                        return (React.createElement("li", Object.assign({}, liProps),
+                            React.createElement(Emoji, Object.assign({}, emojiProps))));
                     })));
                 }
             }

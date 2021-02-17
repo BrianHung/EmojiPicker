@@ -10,12 +10,13 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 import React, { forwardRef } from 'react';
+import { unifiedToNative } from './utils';
 import twemoji from "./twemoji.svg";
 import "./Emoji.css";
 const Emoji = forwardRef(function EmojiComponent(_a, ref) {
     var { emoji } = _a, props = __rest(_a, ["emoji"]);
     return (React.createElement("span", Object.assign({ className: "emoji-picker-emoji", "data-unicode": emoji.unicode }, props, { ref: ref }),
-        React.createElement("img", { className: "emoji-picker-emoji-img", src: `${twemoji}#${emoji.unicode}` })));
+        React.createElement("img", { className: "emoji-picker-emoji-img", "aria-label": emoji.name, alt: unifiedToNative(emoji.unicode), src: `${twemoji}#${emoji.unicode}`, draggable: "false" })));
 });
 export default Emoji;
 //# sourceMappingURL=Emoji.js.map
