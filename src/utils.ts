@@ -18,11 +18,11 @@ export function unifiedToNative(unified: string) {
  * source: https://github.com/sonicdoe/measure-scrollbar.
  */
 export function measureScrollbar(): number {
-  if (typeof document == 'undefined') return 0
+  if (typeof document == 'undefined') return 0;
   const div = document.createElement('div');
   div.style.cssText = "width:100px; height:100px; overflow:scroll; position:absolute; top:-9999px";
   document.body.appendChild(div);
-  let scrollbarWidth = div.offsetWidth - div.clientWidth;
+  const scrollbarWidth = div.offsetWidth - div.clientWidth;
   document.body.removeChild(div);
   return scrollbarWidth;
 }

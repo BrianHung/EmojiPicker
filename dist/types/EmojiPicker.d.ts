@@ -1,10 +1,10 @@
-import React from "react";
+import React, { KeyboardEvent, MouseEvent } from "react";
 import { EmojiObject } from './utils';
 import "./EmojiPicker.css";
 declare type EmojiPickerProps = {
     emojiData: Record<string, EmojiObject[]>;
     emojiSize?: number;
-    onEmojiSelect?: (emoji: EmojiObject) => void;
+    onEmojiSelect?: (emoji: EmojiObject, event: KeyboardEvent | MouseEvent) => void;
     showNavbar?: boolean;
     showFooter?: boolean;
     showScroll?: boolean;
@@ -14,12 +14,13 @@ declare type EmojiPickerProps = {
     collapseCategoriesOnSearch?: boolean;
     collapseHeightOnSearch?: boolean;
     theme?: "system" | "light" | "dark";
+    emojiPreviewName?: (emoji: EmojiObject) => string;
 };
 export interface EmojiPickerRef {
     search: (query: string) => void;
     emojis: Record<string, EmojiObject[]>;
     focusedEmoji: EmojiObject | null;
-    handleKeyDownScroll: (event: React.KeyboardEvent<HTMLElement>) => void;
+    handleKeyDownScroll: (event: KeyboardEvent<HTMLElement>) => void;
 }
 export declare const EmojiPicker: React.ForwardRefExoticComponent<EmojiPickerProps & React.RefAttributes<EmojiPickerRef>>;
 export {};

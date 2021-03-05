@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useImperativeHandle, useMemo, useEffect, useRef } from "react"
+import React, { forwardRef, useCallback, useState, useImperativeHandle, useMemo, useLayoutEffect, useRef, Ref, useReducer, KeyboardEvent, MouseEvent, useEffect } from "react"
 import { FixedSizeList as VirtualList } from 'react-window';
 
 import { EmojiObject, measureScrollbar, calcCountAndRange, itemRange } from './utils'
@@ -11,7 +11,7 @@ import Scroll from "./EmojiPicker/Scroll";
 type EmojiPickerProps = {
   emojiData: Record<string, EmojiObject[]>;
   emojiSize?: number;
-  onEmojiSelect?: (emoji: EmojiObject) => void;
+  onEmojiSelect?: (emoji: EmojiObject, event: KeyboardEvent | MouseEvent) => void;
   showNavbar?: boolean;
   showFooter?: boolean;
   showScroll?: boolean;
@@ -21,6 +21,7 @@ type EmojiPickerProps = {
   collapseCategoriesOnSearch?: boolean;
   collapseHeightOnSearch?: boolean;
   theme?: "system" | "light" | "dark";
+  emojiPreviewName?: (emoji: EmojiObject) => string;
 }
 
 // Define public methods accessible via ref.
@@ -29,80 +30,128 @@ export interface EmojiPickerRef {
   search: (query: string) => void;
   emojis: Record<string, EmojiObject[]>;
   focusedEmoji: EmojiObject | null;
-  handleKeyDownScroll: (event: React.KeyboardEvent<HTMLElement>) => void;
+  handleKeyDownScroll: (event: KeyboardEvent<HTMLElement>) => void;
 }
 
-function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRows = 12, onEmojiSelect = (emoji: EmojiObject) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, onKeyDownScroll = (event) => null, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true, theme = "system"}: EmojiPickerProps, ref: React.Ref<EmojiPickerRef>) {
+type PickerState = {
+  searchEmojis: {emojis: Record<string, EmojiObject[]> | null, query: string},
+  focusedEmoji: {emoji: EmojiObject, row: number, focusOnRender: boolean, preventScroll: boolean} | null
+}
 
-  // Initialize EmojiPicker state using hooks.
 
-  const [ searchEmojis, setSearchEmojis ] = useState<{emojis: Record<string, EmojiObject[]> | null, query: string}>({emojis: null, query: ""});
-  const [ focusedEmoji, setFocusedEmoji ] = useState<{emoji: EmojiObject, row: number, focusOnRender: boolean, preventScroll: boolean} | null>({row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: false, preventScroll: false});
+// Use state reducer to avoid separate re-renders to changes to searchEmojis and focusedEmoji.
+function EmojiPickerReducer({emojiData}) {
+  return (prevState: PickerState, nextState: any): PickerState => {
+    // reset focusedEmoji to first emoji on searchEmojis change
+    if (nextState.searchEmojis && prevState.searchEmojis != nextState.searchEmojis) {
+      let emojis = (nextState.searchEmojis?.query && nextState.searchEmojis?.emojis) || emojiData, 
+        category = emojis[Object.keys(emojis)[0]];
+      let emoji = category[0];
+      nextState.focusedEmoji = {row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}
+    }
+    return {...prevState, ...nextState};
+  }
+}
 
-  const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(searchEmojis.emojis || emojiData, emojisPerRow), [searchEmojis, emojisPerRow]);
+function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRows = 12, onEmojiSelect = (emoji: EmojiObject) => console.log(emoji), showNavbar = false, showFooter = false, showScroll = true, emojisPerRow = 9, onKeyDownScroll = (event) => null, collapseCategoriesOnSearch = true, collapseHeightOnSearch = true, theme = "system", emojiPreviewName = (emoji: EmojiObject) => emoji.name}: EmojiPickerProps, ref: Ref<EmojiPickerRef>) {
 
-  useEffect(function() { 
-    const [emoji] = Object.values(searchEmojis.emojis || emojiData).flat()
-    setFocusedEmoji(emoji ? {row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false} : null) 
-  }, [searchEmojis])
+  const pickerStateReducer = useCallback(EmojiPickerReducer({emojiData}), [emojiData])
+  const [ pickerState, setPickerState ] = useReducer(pickerStateReducer, {
+    searchEmojis: {emojis: null, query: ""},
+    focusedEmoji: {row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}
+  })
+
+  const { itemCount, itemRanges } = useMemo(() => calcCountAndRange(pickerState.searchEmojis.emojis || emojiData, emojisPerRow), [pickerState.searchEmojis, emojisPerRow]);
 
   /**
    * TODO: Replace in-memory search with indexeddb index.
    * See as an example: https://github.com/nolanlawson/emoji-picker-element
    */
   const search = (query: string): void => {
-    // reset searchEmojis when query is empty string
-    if (!query) { setSearchEmojis({emojis: null, query: ""}); return; } 
+    const {searchEmojis} = pickerState;
+
+    // reset pickerState when query is empty string
+    if (!query)
+      return setPickerState({
+        searchEmojis: {emojis: null, query: ""},
+        focusedEmoji: {row: 1, emoji: Object.values(emojiData).flat()[0], focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}
+      });
 
     // assumption: increasing query length if prevSearchEmojis is empty will not change searchEmojis
-    if (searchEmojis.emojis != null && !Object.values(searchEmojis.emojis).flat().length && searchEmojis.query.length < query.length) return;
+    if (searchEmojis?.emojis && !Object.values(searchEmojis.emojis).flat().length && searchEmojis.query.length < query.length)
+      return setPickerState({searchEmojis: {emojis: searchEmojis.emojis, query}});
 
     // use prevSearchEmojis if query length has increased, else use full set
-    const index = Object.values(searchEmojis.query.length < query.length && searchEmojis.emojis != null ? searchEmojis.emojis : emojiData).flat();
+    const index = query.length > searchEmojis.query.length && searchEmojis.emojis != null
+      ? Object.values(searchEmojis.emojis).flat()
+      : Object.values(emojiData).flat();
 
     // simple weighted search to filter emojiObjects
     let results = index
       .map(emoji => ({emoji, score: (emoji.keywords || []).map(word => word.indexOf(query) != -1).reduce((a, b) => a + Number(b), Number(emoji.name.indexOf(query) != -1) * 3)}))
-      .filter(a => a.score != 0)
+      .filter(a => a.score)
       .sort((a, b) => b.score - a.score)
       .map(({emoji}) => emoji);
 
     if (collapseCategoriesOnSearch) {
-      setSearchEmojis({emojis: {"Search Results": results}, query});
+      return setPickerState({searchEmojis: {emojis: {"Search Results": results}, query}});
     } else {
-      const grouped = Object.entries(emojiData).map(([category, list]) => ([category, list.filter(emoji => results.includes(emoji))])).reduce((sum, [category, list]) => Object.assign(sum, {[category as string]: list}), {});
-      setSearchEmojis({emojis: grouped, query});
+      let grouped = Object.entries(emojiData).map(([category, list]) => ([category, list.filter(emoji => results.includes(emoji))])).reduce((sum, [category, list]) => Object.assign(sum, {[category as string]: list}), {});
+      return setPickerState({searchEmojis: {emojis: grouped, query}});
     }
   }
 
+  const refVirtualList = useRef<VirtualList>(null);
+  const refScroll = useRef<HTMLDivElement>(null);
+
   // Define event handlers in scroll element.
 
-  const handleClickInScroll = (emoji: EmojiObject, row: number) => (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickInScroll = (emoji: EmojiObject, row: number) => (event: MouseEvent<HTMLElement>) => {
     event.preventDefault(); // MDN docs: keep the focus from leaving the HTMLElement
-    onEmojiSelect(emoji);
-    emoji != focusedEmoji?.emoji && setFocusedEmoji({row, emoji, focusOnRender: true, preventScroll: true})
+    onEmojiSelect(emoji, event);
+    setPickerState({focusedEmoji: {row, emoji, focusOnRender: true, preventScroll: true}})
   }
   
-  const handleMouseInScroll = (emoji: EmojiObject, row: number) => (event: React.MouseEvent<HTMLElement>) => {
-    if (emoji == focusedEmoji?.emoji || event.movementX == 0 && event.movementY == 0) return;
+  const handleMouseInScroll = (emoji: EmojiObject, row: number) => (event: MouseEvent<HTMLElement>) => {
+    if (emoji == pickerState.focusedEmoji?.emoji || event.movementX == 0 && event.movementY == 0) return;
+    event.preventDefault(); // MDN docs: keep the focus from leaving the HTMLElement
     // @ts-ignore
     const isSafari = window.safari !== undefined; // safari does not support preventScroll focus
-    setFocusedEmoji({row, emoji, focusOnRender: !isSafari, preventScroll: true})
+    setPickerState({focusedEmoji: {row, emoji, focusOnRender: !isSafari, preventScroll: true}})
     isSafari && refScroll.current && refScroll.current.focus();
   }
 
-  const handleKeyDownScroll = (event: React.KeyboardEvent<HTMLElement>) => {
+  const handleKeyDownScroll = (event: KeyboardEvent<HTMLElement>) => {
+    const {searchEmojis, focusedEmoji} = pickerState;
     const emojis = Object.values(searchEmojis.emojis || emojiData).filter(array => array.length !== 0);
     switch (event.key) {
       case "Enter": {
         event.preventDefault();
         if (!focusedEmoji) {
           let emoji = Object.values(searchEmojis.emojis || emojiData).flat()[0]
-          emoji && setFocusedEmoji({row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
+          emoji && setPickerState({focusedEmoji: {row: 1, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
         } else {
-          focusedEmoji && onEmojiSelect(focusedEmoji.emoji);
+          focusedEmoji.emoji && onEmojiSelect(focusedEmoji.emoji, event);
         }
         return;
+      }
+      case 'Home': {
+        event.preventDefault();
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
+        let emojis = searchEmojis.emojis || emojiData, 
+          category = emojis[Object.keys(emojis)[0]];
+        emoji = category[0]
+        row = 1;
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
+      }
+      case 'End': {
+        event.preventDefault();
+        let emoji: EmojiObject | undefined = undefined, row: number | undefined = undefined;
+        let emojis = searchEmojis.emojis || emojiData, 
+          category = emojis[Object.keys(emojis).pop() as string];
+        emoji = category[category.length - 1]
+        row = itemRanges[itemRanges.length - 1]?.to - 1;
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}});
       }
       case "ArrowUp": {
         event.preventDefault();
@@ -128,9 +177,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
-        row && refVirtualList.current?.scrollToItem(row)
-        return;
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
       }
       case "ArrowDown": {
         event.preventDefault();
@@ -158,9 +205,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
-        row && refVirtualList.current?.scrollToItem(row)
-        return;  
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
       }
       case "ArrowLeft": {
         event.preventDefault();
@@ -185,9 +230,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
-        row && refVirtualList.current?.scrollToItem(row)
-        return;    
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
       }
       case "ArrowRight": {
         event.preventDefault();
@@ -213,27 +256,28 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
             }
           }
         }
-        row && emoji && setFocusedEmoji({row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false})
-        row && refVirtualList.current?.scrollToItem(row)
-        return; 
+        return row && emoji && setPickerState({focusedEmoji: {row, emoji, focusOnRender: Boolean(document.activeElement?.closest(".emoji-picker-scroll")), preventScroll: false}})
       }
       default:
-        onKeyDownScroll(event);
+        return onKeyDownScroll(event);
     }
   }
 
+
   // Make internal state and methods as publicly accessible via ref.
-
-  useImperativeHandle(ref, () => ({search, handleKeyDownScroll, emojis: searchEmojis.emojis || emojiData, focusedEmoji: focusedEmoji?.emoji}) as EmojiPickerRef)
-
-  const refVirtualList = useRef<VirtualList>(null);
-  const refScroll = useRef<HTMLDivElement>(null);
+  useImperativeHandle(ref, () => ({
+    search, 
+    handleKeyDownScroll, 
+    emojis: pickerState.searchEmojis.emojis || emojiData, 
+    focusedEmoji: pickerState.focusedEmoji?.emoji,
+  }) as EmojiPickerRef)
 
   const ScrollProps = {
+    emojiData: pickerState.searchEmojis.emojis || emojiData,
     emojisPerRow: emojisPerRow!,
     emojiSize,
     numberScrollRows,
-    focusedEmoji,
+    focusedEmoji: pickerState.focusedEmoji,
     refVirtualList,
     handleClickInScroll,
     handleMouseInScroll,
@@ -242,40 +286,48 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
     itemRanges,
   }
 
-  // Define event handlers for click in navbar element.
 
-  const handleClickInNavbar = (category: string) => (event: React.MouseEvent<HTMLElement>) => {
+  // Define event handler for select in navbar element.
+  const handleSelectInNavbar = (category: string) => {
     let virtualList = refVirtualList.current;
     if (virtualList) {
       let range: itemRange | undefined = itemRanges.find(range => range.key === category)
-      range && virtualList.scrollToItem(range.from, "start")
+      if (range) {
+        setPickerState({focusedEmoji: {row: range.from + 1, emoji: emojiData[category][0], focusOnRender: false, preventScroll: false}})
+        virtualList.scrollToItem(range.from, "start");
+      }
     }
   }
 
-  
+
   // Compute width on window resize.
-  const [width, setWidth] = useState(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
-  useEffect(() => {
-    const resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+  const [width, setWidth] = useState(() => `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+  useLayoutEffect(() => {
+    let resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
     window.addEventListener("resize", resizeWidth);
     return () => window.removeEventListener("resize", resizeWidth);
   }, [])
 
+
   return (
     <div className={ `emoji-picker emoji-picker-${theme}` } style={{ width }}>
-      { showNavbar && <Navbar data={emojiData} handleClickInNavbar={handleClickInNavbar}/> }
-      <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll} tabIndex={-1} ref={refScroll}>
-        { searchEmojis.emojis
-          ? Object.values(searchEmojis.emojis).flat().length !== 0
-            ? <Scroll {...ScrollProps} emojiData={searchEmojis.emojis}/>
+      { showNavbar && 
+        <Navbar data={emojiData} handleSelectInNavbar={handleSelectInNavbar}/> 
+      }
+      <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll} ref={refScroll}>
+        { pickerState.searchEmojis.emojis
+          ? Object.values(pickerState.searchEmojis.emojis).flat().length
+            ? <Scroll {...ScrollProps}/>
             : <div className="emoji-picker-category" style={{height: collapseHeightOnSearch ? 'inherit' : '432px'}}>
                 <div className="emoji-picker-category-title">No results</div>
               </div>
           : showScroll && 
-              <Scroll {...ScrollProps} emojiData={emojiData}/>
+              <Scroll {...ScrollProps}/>
         }
       </div>
-      { showFooter && <Footer emoji={focusedEmoji?.emoji}/> }
+      { showFooter && 
+        <Footer emoji={pickerState.focusedEmoji?.emoji} emojiPreviewName={emojiPreviewName}/> 
+      }
     </div>
   )
 }

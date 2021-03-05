@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MutableRefObject, MouseEvent } from "react";
 import { FixedSizeList as VirtualList } from 'react-window';
 import { EmojiObject, itemRange } from '../utils';
 declare type ScrollProps = {
@@ -12,9 +12,9 @@ declare type ScrollProps = {
         preventScroll: boolean;
     } | null;
     emojiData: Record<string, EmojiObject[]>;
-    refVirtualList: React.MutableRefObject<VirtualList>;
-    handleClickInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined;
-    handleMouseInScroll: (emoji: EmojiObject, row: number) => ((event: React.MouseEvent<HTMLLIElement, MouseEvent>) => void) | undefined;
+    refVirtualList: MutableRefObject<VirtualList>;
+    handleClickInScroll: (emoji: EmojiObject, row: number) => ((event: MouseEvent<HTMLLIElement>) => void) | undefined;
+    handleMouseInScroll: (emoji: EmojiObject, row: number) => ((event: MouseEvent<HTMLLIElement>) => void) | undefined;
     itemCount: number;
     itemRanges: itemRange[];
     collapseHeightOnSearch: boolean;

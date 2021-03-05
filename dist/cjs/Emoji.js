@@ -38,8 +38,9 @@ const utils_1 = require("./utils");
 const twemoji_svg_1 = __importDefault(require("./twemoji.svg"));
 require("./Emoji.css");
 const Emoji = react_1.forwardRef(function EmojiComponent(_a, ref) {
-    var { emoji } = _a, props = __rest(_a, ["emoji"]);
-    return (react_1.default.createElement("span", Object.assign({ className: "emoji-picker-emoji", "data-unicode": emoji.unicode }, props, { ref: ref }),
+    var { emoji, className } = _a, props = __rest(_a, ["emoji", "className"]);
+    className = className ? `emoji-picker-emoji ${className}` : `emoji-picker-emoji`;
+    return (react_1.default.createElement("span", Object.assign({ className: className, "data-unicode": emoji.unicode }, props, { ref: ref }),
         react_1.default.createElement("img", { className: "emoji-picker-emoji-img", "aria-label": emoji.name, alt: utils_1.unifiedToNative(emoji.unicode), src: `${twemoji_svg_1.default}#${emoji.unicode}`, draggable: "false" })));
 });
 exports.default = Emoji;

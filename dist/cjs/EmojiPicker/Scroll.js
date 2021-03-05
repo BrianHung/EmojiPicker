@@ -44,20 +44,21 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
     const prevFocusedEmoji = react_1.useRef(null);
     react_1.useEffect(function resetScrollState() {
         setArrayOfRows({});
-        infiniteLoaderRef.current && infiniteLoaderRef.current.resetloadMoreItemsCache();
-        prevFocusedEmoji.current = null;
-        loadMoreItems(0, numberScrollRows + 6 - 1);
-        refVirtualList && refVirtualList.current.scrollToItem(0);
+        infiniteLoaderRef === null || infiniteLoaderRef === void 0 ? void 0 : infiniteLoaderRef.current.resetloadMoreItemsCache();
+        prevFocusedEmoji.current = focusedEmoji;
+        refVirtualList === null || refVirtualList === void 0 ? void 0 : refVirtualList.current.scrollToItem(0);
+        loadMoreItems(0, Math.min(numberScrollRows + 6 - 1, itemRanges[itemRanges.length - 1].to));
     }, [emojiData, emojisPerRow]);
     react_1.useEffect(function resetRowsWithFocusedEmoji() {
-        const prevEmoji = prevFocusedEmoji.current, nextEmoji = focusedEmoji;
-        let prevRow = prevEmoji && prevEmoji.row;
-        let nextRow = nextEmoji && nextEmoji.row;
-        const rowsToUpdate = new Set();
-        prevRow && rowsToUpdate.add(prevRow);
-        nextRow && rowsToUpdate.add(nextRow);
+        var _a;
+        let prevEmoji = prevFocusedEmoji.current, nextEmoji = focusedEmoji;
+        if (prevEmoji == nextEmoji) {
+            return;
+        }
+        let rowsToUpdate = new Set([prevEmoji === null || prevEmoji === void 0 ? void 0 : prevEmoji.row, nextEmoji === null || nextEmoji === void 0 ? void 0 : nextEmoji.row]);
         Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row));
         prevFocusedEmoji.current = nextEmoji;
+        (nextEmoji === null || nextEmoji === void 0 ? void 0 : nextEmoji.row) && ((_a = refVirtualList.current) === null || _a === void 0 ? void 0 : _a.scrollToItem(nextEmoji.row));
     }, [focusedEmoji]);
     const isItemLoaded = (index) => !!arrayOfRows[index];
     const loadMoreItems = (startIndex, endIndex) => {
@@ -75,12 +76,12 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
                     const offset = rowIndex - range.from;
                     const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow);
                     nextArrayOfRows[rowIndex] = (react_1.default.createElement("ul", { className: "emoji-picker-category-emoji", role: "row", "aria-rowindex": rowIndex }, row.map((emoji, colIndex) => {
-                        const liProps = Object.assign({ key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, tabIndex: -1 }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
+                        const liProps = Object.assign({ key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, tabIndex: -1 }, emoji === (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && {
                             tabIndex: 0,
-                            ref: (li) => { focusedEmoji.focusOnRender && li && li.focus({ preventScroll: focusedEmoji.preventScroll }); }
+                            ref: (li) => focusedEmoji.focusOnRender && (li === null || li === void 0 ? void 0 : li.focus({ preventScroll: focusedEmoji.preventScroll })),
                         });
-                        const emojiProps = Object.assign({ emoji, className: "emoji-picker-emoji" }, (focusedEmoji && emoji === focusedEmoji.emoji) && {
-                            className: "emoji-picker-emoji emoji-picker-emoji-focused",
+                        const emojiProps = Object.assign({ emoji }, emoji === (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && {
+                            className: "emoji-picker-emoji-focused",
                         });
                         return (react_1.default.createElement("li", Object.assign({}, liProps),
                             react_1.default.createElement(Emoji_1.default, Object.assign({}, emojiProps))));

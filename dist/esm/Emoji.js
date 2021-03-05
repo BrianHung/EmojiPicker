@@ -14,8 +14,9 @@ import { unifiedToNative } from './utils';
 import twemoji from "./twemoji.svg";
 import "./Emoji.css";
 const Emoji = forwardRef(function EmojiComponent(_a, ref) {
-    var { emoji } = _a, props = __rest(_a, ["emoji"]);
-    return (React.createElement("span", Object.assign({ className: "emoji-picker-emoji", "data-unicode": emoji.unicode }, props, { ref: ref }),
+    var { emoji, className } = _a, props = __rest(_a, ["emoji", "className"]);
+    className = className ? `emoji-picker-emoji ${className}` : `emoji-picker-emoji`;
+    return (React.createElement("span", Object.assign({ className: className, "data-unicode": emoji.unicode }, props, { ref: ref }),
         React.createElement("img", { className: "emoji-picker-emoji-img", "aria-label": emoji.name, alt: unifiedToNative(emoji.unicode), src: `${twemoji}#${emoji.unicode}`, draggable: "false" })));
 });
 export default Emoji;

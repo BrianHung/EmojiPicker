@@ -21,6 +21,7 @@
   font-weight: 500;
   font-size: 16px;
   color: rgba(55, 53, 47, 0.6);
+  background: white;
   user-select: none;
 }
 
@@ -65,23 +66,35 @@
   padding: 0.25em 9px;
 }
 
+.emoji-picker .emoji-picker-navbar .emoji-picker-navbar-category {
+  appearance: none;
+  padding: 0;
+  border: none;
+  background-color: inherit;
+}
+
 .emoji-picker .emoji-picker-footer {
   display: flex;
   flex-flow: row;
   align-items: center;
   border-top: 1px solid #E1E1E0;
+  user-select: none;
 }
 
 .emoji-picker .emoji-picker-footer .emoji-picker-emoji {
   width: 2.5em;
   height: 2.5em;  
   padding: 0.50em;
-  margin-right: 0.10em;
+  cursor: inherit;
+}
+
+.emoji-picker .emoji-picker-footer .emoji-picker-emoji:active {
+  background: inherit;
 }
 
 .emoji-picker .emoji-picker-footer .emoji-picker-name {
   text-align: left;
-  padding-right: 0.50em;
+  padding: 0 0.25em;
 }
 
 /* DARK THEME */

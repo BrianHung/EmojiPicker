@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -14,14 +33,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const react_1 = __importDefault(require("react"));
+const react_1 = __importStar(require("react"));
 const Emoji_1 = __importDefault(require("../Emoji"));
 const Footer = (_a) => {
-    var { emoji } = _a, props = __rest(_a, ["emoji"]);
+    var { emoji, emojiPreviewName } = _a, props = __rest(_a, ["emoji", "emojiPreviewName"]);
     return (react_1.default.createElement("div", Object.assign({ className: "emoji-picker-footer" }, props),
         react_1.default.createElement(Emoji_1.default, { emoji: emoji ? emoji : { name: "wave", unicode: "1f44b" } }),
-        react_1.default.createElement("div", { className: "emoji-picker-name" }, emoji ? emoji.name : react_1.default.createElement("span", { style: { 'fontSize': '1.2em', 'fontWeight': 500 } }, "Emoji Mart"))));
+        react_1.default.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : react_1.default.createElement("span", { style: { 'fontSize': '1.2em', 'fontWeight': 500 } }, "Emoji Mart"))));
 };
-const MemoizedFooter = react_1.default.memo(Footer);
+const MemoizedFooter = react_1.memo(Footer);
 exports.default = MemoizedFooter;
 //# sourceMappingURL=Footer.js.map

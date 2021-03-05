@@ -7,9 +7,10 @@
 </div>
 
 To do this, we virtualize emoji elements with [`react-window`](https://github.com/bvaughn/react-window) 
-and `react-window-infinite-loader`, meaning elements are not rendered into the DOM until they 
-are visible through the scroll viewport. This allows `react-twemoji-picker` to be used with input or 
-contenteditable components which require fast responsivity.
+and [`react-window-infinite-loader`](), meaning elements are not rendered into the DOM until they 
+are visible through the scroll viewport. This allows [`react-twemoji-picker`](https://github.com/BrianHung/EmojiPicker) to be used with input or contenteditable components which require fast responsivity.
+
+Original svg sources for emoji spritesheet comes from Twitter's [`twemoji`](https://github.com/twitter/twemoji) library. 😊
 
 ## Installation
 
@@ -49,7 +50,7 @@ To see an example, look at the <a href="./website/index.tsx">source code</a> for
 | emojiData: Record<string, EmojiObject[]> | `{}` | map of categories to list of emoji objects |
 | emojiSize?: number | `36` | pixel size of an emoji |
 | numberScrollRows?: number | `12` | number of rows in the scroll element |
-| onEmojiSelect?: (emoji: EmojiObject) => void, | `(emoji: EmojiObject) => console.log(emoji)` | handle emoji click or enter key here |
+| onEmojiSelect?: (emoji: EmojiObject, event: KeyboardEvent | MouseEvent) => void, | `(emoji: EmojiObject) => console.log(emoji)` | handle emoji click or enter key here |
 | showNavbar?: boolean; | `false` | allows navigation to categories |
 | showFooter?: boolean; | `false` | show focused emoji and its name |
 | showScroll?: boolean; | `true` | turn off if query is always not null |

@@ -1,18 +1,25 @@
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, ChangeEvent, KeyboardEvent } from 'react';
 import ReactDOM from 'react-dom';
 import type { EmojiObject } from '../src/index';
 import { EmojiPicker, EmojiPickerRef, unifiedToNative, throttleIdleTask } from '../src/index';
 import EmojiData from "../data/twemoji.json"
-const emojiData = Object.freeze(EmojiData)
 import './index.css';
 
-const copyToClipboard = (string: string) => {
-  const textArea = document.createElement('textarea');
-  textArea.value = string;
-  document.body.appendChild(textArea);
-  textArea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textArea);
+const copyToClipboard = async (string: string) => {
+  try {
+    // Try to use the Async Clipboard API with fallback to the legacy approach.
+    // @ts-ignore
+    const {state} = await navigator.permissions.query({name: 'clipboard-write'});
+    if (state !== 'granted') { throw new Error('Clipboard permission not granted'); }
+    await navigator.clipboard.writeText(string);
+  } catch {
+    const textArea = document.createElement('textarea');
+    textArea.value = string;
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+  }
 };
 
 function ExampleSetup() {
@@ -26,12 +33,11 @@ function ExampleSetup() {
   const inputProps = {
     ref: input,
     placeholder: "search-or-navigate",
-    onChange: (event: React.ChangeEvent<HTMLElement>) => throttledQuery((event.target as HTMLInputElement).value),
-    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => { 
-      if (!["Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    onChange: (event: ChangeEvent<HTMLElement>) => throttledQuery((event.target as HTMLInputElement).value.toLowerCase()),
+    onKeyDown: (event: KeyboardEvent<HTMLElement>) => { 
+      if (!["Enter", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
       picker.current.handleKeyDownScroll(event); 
-      (event.target as HTMLInputElement).focus(); 
-      if (event.key == "Enter") {
+      if (event.key == "Enter" && !event.shiftKey) {
         picker.current.search("");
         input.current.value = "";
       }
@@ -47,7 +53,7 @@ function ExampleSetup() {
   
   const emojiPickerProps = { 
     ref: picker, 
-    emojiData, 
+    emojiData: EmojiData, 
     onEmojiSelect, 
     showNavbar: true, 
     showFooter: true,
@@ -91,7 +97,7 @@ function ExampleSetup() {
   })
 
   return (
-    <div style={{'display': 'flex', 'flexDirection': 'column', 'height': '100vh', 'justifyContent': 'center', 'alignItems': 'center'}}>
+    <div style={{'display': 'flex', 'flexDirection': 'column', 'minHeight': '100vh', 'justifyContent': 'center', 'alignItems': 'center'}}>
       <h1>Emoji Picker</h1>
       <p>A virtualized <a href="https://twemoji.twitter.com/">twemoji</a> picker written in React and TypeScript.</p>
       <EmojiPicker {...emojiPickerProps}/>

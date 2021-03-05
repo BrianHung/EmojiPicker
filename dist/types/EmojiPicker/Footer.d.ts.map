@@ -1,1 +1,1 @@
-{"version":3,"file":"Footer.d.ts","sourceRoot":"","sources":["../../../src/EmojiPicker/Footer.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,MAAM,OAAO,CAAC;AAE1B,OAAO,EAAE,WAAW,EAAE,MAAM,UAAU,CAAA;AAatC,QAAA,MAAM,cAAc;;WAX0B,WAAW,GAAG,SAAS;EAW5B,CAAA;AACzC,eAAe,cAAc,CAAC"}
+{"version":3,"file":"Footer.d.ts","sourceRoot":"","sources":["../../../src/EmojiPicker/Footer.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAkC,MAAM,OAAO,CAAC;AAEvD,OAAO,EAAE,WAAW,EAAE,MAAM,UAAU,CAAA;AAatC,QAAA,MAAM,cAAc;;WAXoB,WAAW,GAAG,SAAS;;EAW5B,CAAA;AACnC,eAAe,cAAc,CAAC"}
