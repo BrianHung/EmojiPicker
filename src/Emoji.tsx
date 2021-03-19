@@ -1,18 +1,27 @@
-import React, { forwardRef } from 'react';
+import React, { FunctionComponent } from 'react';
 import { EmojiObject, unifiedToNative } from './utils'
 import twemoji from "./twemoji.svg"
-import "./Emoji.css"
 
-type EmojiProps = { emoji: EmojiObject; [key: string]: any; }
-export { EmojiProps };
+type EmojiProps = { 
+  emoji: EmojiObject; 
+  className?: string;
+  [key: string]: any; 
+}
 
-const Emoji = forwardRef<HTMLSpanElement, EmojiProps>(function EmojiComponent({emoji, className, ...props}, ref) {
+const Emoji: FunctionComponent<EmojiProps> = ({emoji, className, ...props}) => {
   className = className ? `emoji-picker-emoji ${className}` : `emoji-picker-emoji`
   return (
-    <span className={className} data-unicode={emoji.unicode} {...props} ref={ref}>
-      <img className="emoji-picker-emoji-img" aria-label={emoji.name} alt={unifiedToNative(emoji.unicode)} src={`${twemoji}#${emoji.unicode}`} draggable="false"/>
+    <span className={className} data-unicode={emoji.unicode} {...props}>
+      <img 
+        className="emoji-picker-emoji-img" 
+        alt={unifiedToNative(emoji.unicode)} 
+        src={`${twemoji}#${emoji.unicode}`} 
+        draggable="false"
+        aria-label={emoji.name} 
+      />
     </span>
   )
-})
+}
 
+export { EmojiProps, Emoji };
 export default Emoji;

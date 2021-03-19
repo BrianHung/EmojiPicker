@@ -1,6 +1,5 @@
 import React, { forwardRef, useCallback, useState, useImperativeHandle, useMemo, useLayoutEffect, useRef, useReducer } from "react";
 import { measureScrollbar, calcCountAndRange } from './utils';
-import "./EmojiPicker.css";
 import Navbar from "./EmojiPicker/Navbar";
 import Footer from "./EmojiPicker/Footer";
 import Scroll from "./EmojiPicker/Scroll";

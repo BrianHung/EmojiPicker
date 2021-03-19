@@ -23,7 +23,7 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
         infiniteLoaderRef === null || infiniteLoaderRef === void 0 ? void 0 : infiniteLoaderRef.current.resetloadMoreItemsCache();
         prevFocusedEmoji.current = focusedEmoji;
         refVirtualList === null || refVirtualList === void 0 ? void 0 : refVirtualList.current.scrollToItem(0);
-        loadMoreItems(0, Math.min(numberScrollRows + 6 - 1, itemRanges[itemRanges.length - 1].to));
+        loadMoreItems(0, Math.min(numberScrollRows + 10 - 1, itemRanges[itemRanges.length - 1].to));
     }, [emojiData, emojisPerRow]);
     useEffect(function resetRowsWithFocusedEmoji() {
         var _a;
@@ -46,13 +46,13 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
                 break;
             for (let rowIndex = i; rowIndex < Math.min(range.to, endIndex + 1); rowIndex++) {
                 if (rowIndex == range.from) {
-                    nextArrayOfRows[rowIndex] = React.createElement("div", { className: "emoji-picker-category-title" }, range.key);
+                    nextArrayOfRows[rowIndex] = React.createElement("div", { className: "emoji-picker-category-title", "aria-rowindex": rowIndex + 1, "aria-colindex": 1 }, range.key);
                 }
                 else {
                     const offset = rowIndex - range.from;
                     const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow);
-                    nextArrayOfRows[rowIndex] = (React.createElement("ul", { className: "emoji-picker-category-emoji", role: "row", "aria-rowindex": rowIndex }, row.map((emoji, colIndex) => {
-                        const liProps = Object.assign({ key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex, "aria-colindex": colIndex, tabIndex: -1 }, emoji === (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && {
+                    nextArrayOfRows[rowIndex] = (React.createElement("ul", { className: "emoji-picker-category-emoji", role: "row", "aria-rowindex": rowIndex + 1 }, row.map((emoji, colIndex) => {
+                        const liProps = Object.assign({ key: emoji.unicode, onClick: handleClickInScroll(emoji, rowIndex), onMouseMove: handleMouseInScroll(emoji, rowIndex), role: "gridcell", "aria-rowindex": rowIndex + 1, "aria-colindex": colIndex + 1, tabIndex: -1 }, emoji === (focusedEmoji === null || focusedEmoji === void 0 ? void 0 : focusedEmoji.emoji) && {
                             tabIndex: 0,
                             ref: (li) => focusedEmoji.focusOnRender && (li === null || li === void 0 ? void 0 : li.focus({ preventScroll: focusedEmoji.preventScroll })),
                         });
@@ -68,7 +68,7 @@ const Scroll = ({ emojisPerRow, emojiSize, numberScrollRows, focusedEmoji, emoji
         }
         setArrayOfRows(prev => Object.assign({}, prev, nextArrayOfRows));
     };
-    return (React.createElement(InfiniteLoader, { ref: infiniteLoaderRef, itemCount: itemCount, loadMoreItems: loadMoreItems, isItemLoaded: isItemLoaded, minimumBatchSize: numberScrollRows, threshold: 6 }, ({ onItemsRendered, ref }) => (React.createElement(VirtualList, { onItemsRendered: onItemsRendered, ref: list => { ref(list); refVirtualList && (refVirtualList.current = list); }, itemCount: itemCount, itemData: arrayOfRows, itemSize: emojiSize, height: collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, numberScrollRows * emojiSize) : numberScrollRows * emojiSize, innerElementType: innerElementType }, MemoizedRow))));
+    return (React.createElement(InfiniteLoader, { ref: infiniteLoaderRef, itemCount: itemCount, loadMoreItems: loadMoreItems, isItemLoaded: isItemLoaded, minimumBatchSize: numberScrollRows, threshold: 10 }, ({ onItemsRendered, ref }) => (React.createElement(VirtualList, { onItemsRendered: onItemsRendered, ref: list => { ref(list); refVirtualList && (refVirtualList.current = list); }, itemCount: itemCount, itemData: arrayOfRows, itemSize: emojiSize, height: collapseHeightOnSearch ? Math.min(itemCount * emojiSize + 9, numberScrollRows * emojiSize) : numberScrollRows * emojiSize, innerElementType: innerElementType }, MemoizedRow))));
 };
 const MemoizedScroll = memo(Scroll, function ScrollPropsAreEqual(prevProps, nextProps) {
     var _a, _b;

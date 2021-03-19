@@ -1,11 +1,11 @@
-import React from 'react';
+import { FunctionComponent } from 'react';
 import { EmojiObject } from './utils';
-import "./Emoji.css";
 declare type EmojiProps = {
     emoji: EmojiObject;
+    className?: string;
     [key: string]: any;
 };
-export { EmojiProps };
-declare const Emoji: React.ForwardRefExoticComponent<Pick<EmojiProps, string | number> & React.RefAttributes<HTMLSpanElement>>;
+declare const Emoji: FunctionComponent<EmojiProps>;
+export { EmojiProps, Emoji };
 export default Emoji;
 //# sourceMappingURL=Emoji.d.ts.map

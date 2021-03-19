@@ -38,8 +38,8 @@ const Emoji_1 = __importDefault(require("../Emoji"));
 const Footer = (_a) => {
     var { emoji, emojiPreviewName } = _a, props = __rest(_a, ["emoji", "emojiPreviewName"]);
     return (react_1.default.createElement("div", Object.assign({ className: "emoji-picker-footer" }, props),
-        react_1.default.createElement(Emoji_1.default, { emoji: emoji ? emoji : { name: "wave", unicode: "1f44b" } }),
-        react_1.default.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : react_1.default.createElement("span", { style: { 'fontSize': '1.2em', 'fontWeight': 500 } }, "Emoji Mart"))));
+        react_1.default.createElement(Emoji_1.default, { emoji: emoji || { name: "wave", unicode: "1f44b" } }),
+        react_1.default.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : react_1.default.createElement("span", { style: { 'fontSize': '1.25em' } }, "Emoji Picker"))));
 };
 const MemoizedFooter = react_1.memo(Footer);
 exports.default = MemoizedFooter;

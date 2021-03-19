@@ -14,8 +14,8 @@ import Emoji from "../Emoji";
 const Footer = (_a) => {
     var { emoji, emojiPreviewName } = _a, props = __rest(_a, ["emoji", "emojiPreviewName"]);
     return (React.createElement("div", Object.assign({ className: "emoji-picker-footer" }, props),
-        React.createElement(Emoji, { emoji: emoji ? emoji : { name: "wave", unicode: "1f44b" } }),
-        React.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : React.createElement("span", { style: { 'fontSize': '1.2em', 'fontWeight': 500 } }, "Emoji Mart"))));
+        React.createElement(Emoji, { emoji: emoji || { name: "wave", unicode: "1f44b" } }),
+        React.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : React.createElement("span", { style: { 'fontSize': '1.25em' } }, "Emoji Picker"))));
 };
 const MemoizedFooter = memo(Footer);
 export default MemoizedFooter;

@@ -23,9 +23,10 @@ npm install --save github:brianhung/emojipicker
 ```js
 import { EmojiPicker } from 'react-twemoji-picker';
 import EmojiData from "react-twemoji-picker/data/twemoji.json";
+import "react-twemoji-picker/dist/EmojiPicker.css"
 
-const emojiData = Object.freeze(EmojiData)
-const handleEmojiSelect = (emoji: EmojiObject) => console.log(emoji)
+const emojiData = Object.freeze(EmojiData);
+const handleEmojiSelect = (emoji: EmojiObject) => console.log(emoji);
 
 <EmojiPicker emojiData={emojiData} handleEmojiSelect={handleEmojiSelect}/>
 ```

@@ -32,18 +32,18 @@ const Scroll: FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, number
     infiniteLoaderRef?.current.resetloadMoreItemsCache();
     prevFocusedEmoji.current = focusedEmoji; // focusedEmoji included in emojiData change render
     refVirtualList?.current.scrollToItem(0);
-    loadMoreItems(0, Math.min(numberScrollRows + 6 - 1, itemRanges[itemRanges.length - 1].to));  // minimumBatchSize + threshold - 1
-  }, [emojiData, emojisPerRow])
+    loadMoreItems(0, Math.min(numberScrollRows + 10 - 1, itemRanges[itemRanges.length - 1].to));  // minimumBatchSize + threshold - 1
+  }, [emojiData, emojisPerRow]);
 
   // Recompute the rows of the next and previous focusedEmoji upon change in focusedEmoji.
   useEffect(function resetRowsWithFocusedEmoji() {
     let prevEmoji = prevFocusedEmoji.current, nextEmoji = focusedEmoji;
     if (prevEmoji == nextEmoji) { return; }
     let rowsToUpdate = new Set([prevEmoji?.row, nextEmoji?.row]);
-    Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row))
+    Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row));
     prevFocusedEmoji.current = nextEmoji;
     nextEmoji?.row && refVirtualList.current?.scrollToItem(nextEmoji.row);
-  }, [focusedEmoji])
+  }, [focusedEmoji]);
 
   const isItemLoaded  = (index: number): boolean => !!arrayOfRows[index];
 
@@ -57,22 +57,22 @@ const Scroll: FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, number
 
       for (let rowIndex = i; rowIndex < Math.min(range.to, endIndex + 1); rowIndex++) {
         if (rowIndex == range.from) {
-          nextArrayOfRows[rowIndex] = <div className="emoji-picker-category-title">{range.key}</div>
+          nextArrayOfRows[rowIndex] = <div className="emoji-picker-category-title" aria-rowindex={rowIndex + 1} aria-colindex={1}>{range.key}</div>
         } else {
 
           const offset = rowIndex - range.from;
           const row = emojiData[range.key].slice((offset - 1) * emojisPerRow, offset * emojisPerRow)
 
           nextArrayOfRows[rowIndex] = (
-            <ul className="emoji-picker-category-emoji" role="row" aria-rowindex={rowIndex}>
+            <ul className="emoji-picker-category-emoji" role="row" aria-rowindex={rowIndex + 1}>
               { row.map((emoji: EmojiObject, colIndex: number) => {
                   const liProps = {
                     key: emoji.unicode, 
                     onClick: handleClickInScroll(emoji, rowIndex), 
                     onMouseMove: handleMouseInScroll(emoji, rowIndex), 
                     role: "gridcell", 
-                    "aria-rowindex": rowIndex,
-                    "aria-colindex": colIndex,
+                    "aria-rowindex": rowIndex + 1,
+                    "aria-colindex": colIndex + 1,
                     tabIndex: -1,
                     ...emoji === focusedEmoji?.emoji && {
                       tabIndex: 0,
@@ -108,7 +108,7 @@ const Scroll: FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, number
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}
       minimumBatchSize={numberScrollRows}
-      threshold={6}
+      threshold={10}
     >
       {({onItemsRendered, ref}) => (
         <VirtualList 
@@ -133,7 +133,8 @@ const MemoizedScroll = memo(Scroll, function ScrollPropsAreEqual(prevProps, next
       && prevProps.collapseHeightOnSearch == nextProps.collapseHeightOnSearch
       && prevProps.emojiSize == nextProps.emojiSize
       && prevProps.emojisPerRow == nextProps.emojisPerRow;
-})
+});
+
 export default MemoizedScroll;
 
 const VirtualRow: FunctionComponent<{index: number, style: CSSProperties, data}> = ({index, style, data}) => {
@@ -151,7 +152,7 @@ const MemoizedRow = memo(VirtualRow, function compareRowProps(prevProps, nextPro
   const { style: prevStyle, data: prevData, index: prevIndex, ...prevRest } = prevProps;
   const { style: nextStyle, data: nextData, index: nextIndex, ...nextRest } = nextProps;
   return prevData[prevIndex] === nextData[nextIndex] && !shallowDiffer(prevStyle, nextStyle) && !shallowDiffer(prevRest, nextRest)
-})
+});
 
 
 /**

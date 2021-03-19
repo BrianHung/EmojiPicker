@@ -5,6 +5,9 @@ import { EmojiPicker, EmojiPickerRef, unifiedToNative, throttleIdleTask } from '
 import EmojiData from "../data/twemoji.json"
 import './index.css';
 
+import "../src/EmojiPicker.css"
+import "../src/Emoji.css"
+
 const copyToClipboard = async (string: string) => {
   try {
     // Try to use the Async Clipboard API with fallback to the legacy approach.

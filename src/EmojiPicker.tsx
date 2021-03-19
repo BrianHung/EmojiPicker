@@ -1,8 +1,6 @@
 import React, { forwardRef, useCallback, useState, useImperativeHandle, useMemo, useLayoutEffect, useRef, Ref, useReducer, KeyboardEvent, MouseEvent, useEffect } from "react"
 import { FixedSizeList as VirtualList } from 'react-window';
-
 import { EmojiObject, measureScrollbar, calcCountAndRange, itemRange } from './utils'
-import "./EmojiPicker.css"
 
 import Navbar from "./EmojiPicker/Navbar";
 import Footer from "./EmojiPicker/Footer";

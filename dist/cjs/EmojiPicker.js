@@ -25,7 +25,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmojiPicker = void 0;
 const react_1 = __importStar(require("react"));
 const utils_1 = require("./utils");
-require("./EmojiPicker.css");
 const Navbar_1 = __importDefault(require("./EmojiPicker/Navbar"));
 const Footer_1 = __importDefault(require("./EmojiPicker/Footer"));
 const Scroll_1 = __importDefault(require("./EmojiPicker/Scroll"));

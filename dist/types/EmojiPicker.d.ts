@@ -1,6 +1,5 @@
 import React, { KeyboardEvent, MouseEvent } from "react";
 import { EmojiObject } from './utils';
-import "./EmojiPicker.css";
 declare type EmojiPickerProps = {
     emojiData: Record<string, EmojiObject[]>;
     emojiSize?: number;
