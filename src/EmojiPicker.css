@@ -11,13 +11,17 @@
 }
 
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-title {
-  padding: 10px 0.75em;
+  padding: 0 0.75em;
   line-height: 1;
   text-transform: uppercase;
   font-weight: 500;
   font-size: 16px;
   color: rgb(142, 142, 147);
   user-select: none;
+  height: 36px;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
 }
 
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-emoji {
@@ -37,6 +41,7 @@
   padding: 4px;
   border-radius: 3px;
   flex-shrink: 0;
+  box-sizing: content-box;
 }
 
 .emoji-picker .emoji-picker-emoji-focused {
