@@ -3,7 +3,8 @@
   flex-direction: column;
   border-radius: 3px;
   background: white;
-  border: 1px solid #E1E1E0;
+  border: 1px solid #E5E5E5;
+  contain: content;
 }
 
 .emoji-picker .emoji-picker-scroll {
@@ -12,23 +13,22 @@
 
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-title {
   padding: 0 0.75em;
-  line-height: 1;
   text-transform: uppercase;
   font-weight: 500;
   font-size: 16px;
-  color: rgb(142, 142, 147);
+  color: #A3A3A3;
   user-select: none;
-  height: 36px;
-  box-sizing: content-box;
+  height: 100%;
   display: flex;
   align-items: center;
 }
 
 .emoji-picker .emoji-picker-scroll .emoji-picker-category-emoji {
-  padding: 0em 0.50em;
+  padding: 0 0.50em;
   display: flex;
   list-style-type: none;
   margin: 0;
+  height: 100%;
 }
 
 .emoji-picker .emoji-picker-emoji {
@@ -44,17 +44,14 @@
   box-sizing: content-box;
 }
 
-.emoji-picker .emoji-picker-emoji-focused {
-  background: rgba(229, 229, 234);
+.emoji-picker .emoji-picker-emoji-focused,
+.emoji-picker .emoji-picker-scroll .emoji-picker-emoji:hover,
+.emoji-picker .emoji-picker-navbar .emoji-picker-emoji:hover {
+  background: #E5E5E5;
 }
 
-.emoji-picker .emoji-picker-emoji:active {
-  background: rgba(209, 209, 214);
-}
-
-.emoji-picker .emoji-picker-emoji-img {
-  height: 100%;
-  width: 100%;
+.emoji-picker .emoji-picker-category-emoji > li:active .emoji-picker-emoji {
+  background: #D4D4D4;
 }
 
 .emoji-picker .emoji-picker-navbar {
@@ -62,22 +59,24 @@
   height: fit-content;
   flex-direction: row;
   justify-content: space-evenly;
-  border-bottom: 1px solid #E1E1E0;
+  border-bottom: 1px solid #E5E5E5;
   padding: 0.25em 9px;
 }
 
 .emoji-picker .emoji-picker-navbar .emoji-picker-navbar-category {
   appearance: none;
+  background-color: inherit;
+  margin: 0;
   padding: 0;
   border: none;
-  background-color: inherit;
+  height: 36px;
 }
 
 .emoji-picker .emoji-picker-footer {
   display: flex;
   flex-flow: row;
   align-items: center;
-  border-top: 1px solid #E1E1E0;
+  border-top: 1px solid #E5E5E5;
   user-select: none;
 }
 
@@ -100,37 +99,43 @@
 /* DARK THEME */
 
 .emoji-picker.emoji-picker-dark {
-  background: rgb(63, 68, 71);
+  background: #404040;
   color: white;
 }
 .emoji-picker.emoji-picker-dark, .emoji-picker.emoji-picker-dark .emoji-picker-navbar, .emoji-picker.emoji-picker-dark .emoji-picker-footer {
-  border-color: rgb(63, 68, 71);
+  border-color: #404040;
 }
 .emoji-picker.emoji-picker-dark .emoji-picker-category-title {
-  color: rgba(199, 199, 204); 
+  color: #D4D4D4;
 }
-.emoji-picker.emoji-picker-dark .emoji-picker-emoji-focused {
-  background: rgba(225, 225, 224, 0.25);
+.emoji-picker.emoji-picker-dark .emoji-picker-emoji-focused,
+.emoji-picker.emoji-picker-dark .emoji-picker-scroll .emoji-picker-emoji:hover,
+.emoji-picker.emoji-picker-dark .emoji-picker-navbar .emoji-picker-emoji:hover {
+  background: #737373;
 }
-.emoji-picker.emoji-picker-dark .emoji-picker-emoji:active  {
-  background: rgba(225, 225, 224, 0.50);
+.emoji-picker.emoji-picker-dark .emoji-picker-category-emoji > li:active .emoji-picker-emoji,
+.emoji-picker.emoji-picker-dark .emoji-picker-navbar-category:active .emoji-picker-emoji {
+  background: #A3A3A3;
 }
 
 @media (prefers-color-scheme: dark)  {
   .emoji-picker.emoji-picker-system {
-    background: rgb(63, 68, 71);
+    background: #404040;
     color: white;
   }
   .emoji-picker.emoji-picker-system, .emoji-picker.emoji-picker-system .emoji-picker-navbar, .emoji-picker.emoji-picker-system .emoji-picker-footer {
-    border-color: rgb(63, 68, 71);
+    border-color: #404040;
   }
   .emoji-picker.emoji-picker-system .emoji-picker-category-title {
-    color: rgba(199, 199, 204); 
+    color: #D4D4D4;
   }
-  .emoji-picker.emoji-picker-system .emoji-picker-emoji-focused {
-    background: rgba(225, 225, 224, 0.25);
+  .emoji-picker.emoji-picker-system .emoji-picker-emoji-focused,
+  .emoji-picker.emoji-picker-system .emoji-picker-scroll .emoji-picker-emoji:hover,
+  .emoji-picker.emoji-picker-system .emoji-picker-navbar .emoji-picker-emoji:hover {
+    background: #737373;
   }
-  .emoji-picker.emoji-picker-system .emoji-picker-emoji:active  {
-    background: rgba(225, 225, 224, 0.50);
+  .emoji-picker.emoji-picker-system .emoji-picker-category-emoji > li:active .emoji-picker-emoji,
+  .emoji-picker.emoji-picker-system .emoji-picker-navbar-category:active .emoji-picker-emoji {
+    background: #A3A3A3;
   }
 }

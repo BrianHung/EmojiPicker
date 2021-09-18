@@ -41,6 +41,6 @@ const Footer = (_a) => {
         react_1.default.createElement(Emoji_1.default, { emoji: emoji || { name: "wave", unicode: "1f44b" } }),
         react_1.default.createElement("div", { className: "emoji-picker-name" }, emoji ? emojiPreviewName(emoji) : react_1.default.createElement("span", { style: { 'fontSize': '1.25em' } }, "Emoji Picker"))));
 };
-const MemoizedFooter = react_1.memo(Footer);
+const MemoizedFooter = (0, react_1.memo)(Footer);
 exports.default = MemoizedFooter;
 //# sourceMappingURL=Footer.js.map

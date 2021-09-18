@@ -74,7 +74,7 @@ function ExampleSetup() {
 
     const show = (message) => {
       const el = document.querySelector('#notification') as HTMLDivElement;
-      el.firstChild.innerText = message
+      (el.firstChild as HTMLElement).innerText = message
       el.classList.add('visible')
       if (visible) {
         hide()

@@ -39,13 +39,11 @@ const Scroll: FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, number
   useEffect(function resetRowsWithFocusedEmoji() {
     let prevEmoji = prevFocusedEmoji.current, nextEmoji = focusedEmoji;
     if (prevEmoji == nextEmoji) { return; }
-    let rowsToUpdate = new Set([prevEmoji?.row, nextEmoji?.row]);
-    Array.from(rowsToUpdate).forEach(row => row && loadMoreItems(row, row));
+    let rowsToUpdate = prevEmoji?.row == nextEmoji?.row ? [prevEmoji?.row] : [prevEmoji?.row, nextEmoji?.row]
+    rowsToUpdate.forEach(row => row && loadMoreItems(row, row));
     prevFocusedEmoji.current = nextEmoji;
     nextEmoji?.row && refVirtualList.current?.scrollToItem(nextEmoji.row);
   }, [focusedEmoji]);
-
-  const isItemLoaded  = (index: number): boolean => !!arrayOfRows[index];
 
   const loadMoreItems = (startIndex: number, endIndex: number) => {
     const nextArrayOfRows = {}
@@ -106,7 +104,7 @@ const Scroll: FunctionComponent<ScrollProps> = ({emojisPerRow, emojiSize, number
       ref={infiniteLoaderRef}
       itemCount={itemCount}
       loadMoreItems={loadMoreItems}
-      isItemLoaded={isItemLoaded}
+      isItemLoaded={index => !!arrayOfRows[index]}
       minimumBatchSize={numberScrollRows}
       threshold={10}
     >

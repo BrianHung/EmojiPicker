@@ -15,8 +15,7 @@ import twemoji from "./twemoji.svg";
 const Emoji = (_a) => {
     var { emoji, className } = _a, props = __rest(_a, ["emoji", "className"]);
     className = className ? `emoji-picker-emoji ${className}` : `emoji-picker-emoji`;
-    return (React.createElement("span", Object.assign({ className: className, "data-unicode": emoji.unicode }, props),
-        React.createElement("img", { className: "emoji-picker-emoji-img", alt: unifiedToNative(emoji.unicode), src: `${twemoji}#${emoji.unicode}`, draggable: "false", "aria-label": emoji.name })));
+    return (React.createElement("img", Object.assign({ className: className, "data-unicode": emoji.unicode, alt: unifiedToNative(emoji.unicode), src: `${twemoji}#${emoji.unicode}`, draggable: "false", "aria-label": emoji.name }, props)));
 };
 export { Emoji };
 export default Emoji;

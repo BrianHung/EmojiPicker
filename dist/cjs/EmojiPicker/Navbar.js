@@ -37,7 +37,7 @@ const react_1 = __importStar(require("react"));
 const Emoji_1 = __importDefault(require("../Emoji"));
 const Navbar = (_a) => {
     var { data, handleSelectInNavbar } = _a, props = __rest(_a, ["data", "handleSelectInNavbar"]);
-    const [index, setIndex] = react_1.useState(0);
+    const [index, setIndex] = (0, react_1.useState)(0);
     const onNavbarKeyDown = (event) => {
         switch (event.key) {
             case 'Enter':
@@ -65,6 +65,6 @@ const Navbar = (_a) => {
         return (react_1.default.createElement("button", Object.assign({}, props), react_1.default.createElement(Emoji_1.default, { emoji: list[0] })));
     })));
 };
-const MemoizedNavbar = react_1.memo(Navbar);
+const MemoizedNavbar = (0, react_1.memo)(Navbar);
 exports.default = MemoizedNavbar;
 //# sourceMappingURL=Navbar.js.map

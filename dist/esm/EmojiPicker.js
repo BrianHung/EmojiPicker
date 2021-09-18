@@ -61,7 +61,7 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, numberScrollR
             return;
         event.preventDefault();
         const isSafari = window.safari !== undefined;
-        setPickerState({ focusedEmoji: { row, emoji, focusOnRender: !isSafari, preventScroll: true } });
+        setPickerState({ focusedEmoji: { row, emoji, focusOnRender: true, preventScroll: true } });
         isSafari && refScroll.current && refScroll.current.focus();
     };
     const handleKeyDownScroll = (event) => {
@@ -246,15 +246,22 @@ function EmojiPickerRefComponent({ emojiData = {}, emojiSize = 36, numberScrollR
             }
         }
     };
-    const [width, setWidth] = useState(() => `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+    const getWidths = () => {
+        const scrollbarWidth = measureScrollbar();
+        return {
+            scrollbarWidth,
+            width: `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${scrollbarWidth}px)`
+        };
+    };
+    const [width, setWidth] = useState(getWidths);
     useLayoutEffect(() => {
-        let resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+        let resizeWidth = () => setWidth(getWidths);
         window.addEventListener("resize", resizeWidth);
         return () => window.removeEventListener("resize", resizeWidth);
     }, []);
-    return (React.createElement("div", { className: `emoji-picker emoji-picker-${theme}`, style: { width } },
+    return (React.createElement("div", { className: `emoji-picker emoji-picker-${theme}`, style: { width: width.width } },
         showNavbar &&
-            React.createElement(Navbar, { data: emojiData, handleSelectInNavbar: handleSelectInNavbar }),
+            React.createElement(Navbar, { data: emojiData, handleSelectInNavbar: handleSelectInNavbar, style: { marginRight: width.scrollbarWidth } }),
         React.createElement("div", { className: "emoji-picker-scroll", role: "grid", "aria-rowcount": itemCount, "aria-colcount": emojisPerRow, onKeyDown: handleKeyDownScroll, ref: refScroll }, pickerState.searchEmojis.emojis
             ? Object.values(pickerState.searchEmojis.emojis).flat().length
                 ? React.createElement(Scroll, Object.assign({}, ScrollProps))

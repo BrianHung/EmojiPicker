@@ -115,7 +115,7 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
     event.preventDefault(); // MDN docs: keep the focus from leaving the HTMLElement
     // @ts-ignore
     const isSafari = window.safari !== undefined; // safari does not support preventScroll focus
-    setPickerState({focusedEmoji: {row, emoji, focusOnRender: !isSafari, preventScroll: true}})
+    setPickerState({focusedEmoji: {row, emoji, focusOnRender: true, preventScroll: true}})
     isSafari && refScroll.current && refScroll.current.focus();
   }
 
@@ -297,20 +297,26 @@ function EmojiPickerRefComponent({emojiData = {}, emojiSize = 36, numberScrollRo
     }
   }
 
+  const getWidths = () => {
+    const scrollbarWidth = measureScrollbar()
+    return {
+      scrollbarWidth,
+      width: `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${scrollbarWidth}px)`
+    }
+  }
 
   // Compute width on window resize.
-  const [width, setWidth] = useState(() => `calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+  const [width, setWidth] = useState(getWidths);
   useLayoutEffect(() => {
-    let resizeWidth = () => setWidth(`calc(${emojiSize}px * ${emojisPerRow} + 1em + ${measureScrollbar()}px)`);
+    let resizeWidth = () => setWidth(getWidths);
     window.addEventListener("resize", resizeWidth);
     return () => window.removeEventListener("resize", resizeWidth);
   }, [])
 
-
   return (
-    <div className={ `emoji-picker emoji-picker-${theme}` } style={{ width }}>
+    <div className={`emoji-picker emoji-picker-${theme}`} style={{width: width.width}}>
       { showNavbar && 
-        <Navbar data={emojiData} handleSelectInNavbar={handleSelectInNavbar}/> 
+        <Navbar data={emojiData} handleSelectInNavbar={handleSelectInNavbar} style={{marginRight: width.scrollbarWidth}}/> 
       }
       <div className="emoji-picker-scroll" role="grid" aria-rowcount={itemCount} aria-colcount={emojisPerRow} onKeyDown={handleKeyDownScroll} ref={refScroll}>
         { pickerState.searchEmojis.emojis

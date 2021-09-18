@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FC } from 'react';
 import { EmojiObject, unifiedToNative } from './utils'
 import twemoji from "./twemoji.svg"
 
@@ -8,18 +8,18 @@ type EmojiProps = {
   [key: string]: any; 
 }
 
-const Emoji: FunctionComponent<EmojiProps> = ({emoji, className, ...props}) => {
+const Emoji: FC<EmojiProps> = ({emoji, className, ...props}) => {
   className = className ? `emoji-picker-emoji ${className}` : `emoji-picker-emoji`
   return (
-    <span className={className} data-unicode={emoji.unicode} {...props}>
-      <img 
-        className="emoji-picker-emoji-img" 
-        alt={unifiedToNative(emoji.unicode)} 
-        src={`${twemoji}#${emoji.unicode}`} 
-        draggable="false"
-        aria-label={emoji.name} 
-      />
-    </span>
+    <img 
+      className={className} 
+      data-unicode={emoji.unicode}
+      alt={unifiedToNative(emoji.unicode)} 
+      src={`${twemoji}#${emoji.unicode}`} 
+      draggable="false"
+      aria-label={emoji.name} 
+      {...props}
+    />
   )
 }
 

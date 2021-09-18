@@ -1,9 +1,13 @@
 {
   "name": "react-twemoji-picker",
   "version": "0.1.0",
+  "description": "👋 twitter emoji picker written in react",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "typings": "dist/types/index.d.ts",
+  "sideEffects": [
+    "*.css"
+  ],
   "repository": {
     "url": "https://github.com/brianhung/EmojiPicker"
   },
@@ -13,7 +17,8 @@
     "build:esm": "tsc --module es2020   --outDir dist/esm",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "copy": "copyfiles -u 1 data/*.svg dist/cjs && copyfiles -u 1 data/*.svg dist/esm && copyfiles -u 1 src/**/*.css dist/",
-    "build:website": "rm -r -f dist/ && vite build --sourcemap"
+    "build:website": "rm -r -f dist/ && vite build --sourcemap",
+    "dev": "npm run start"
   },
   "dependencies": {
     "react-window": "^1.8.6",
@@ -23,20 +28,20 @@
     "react": "^16.8.0 || ^17.0.0"
   },
   "devDependencies": {
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.2",
-    "@vitejs/plugin-react-refresh": "^1.3.1",
-    "adm-zip": "^0.5.4",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
+    "@vitejs/plugin-react-refresh": "^1.3.6",
+    "adm-zip": "^0.5.5",
     "copyfiles": "^2.4.1",
     "emoji-keywords": "github:brianhung/emoji-keywords",
     "gulp": "^4.0.2",
-    "gulp-filter": "^6.0.0",
+    "gulp-filter": "^7.0.0",
     "gulp-svg-sprite": "^1.5.0",
     "lodash-es": "^4.17.21",
-    "react": "^17.0.0",
-    "react-dom": "^17.0.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "superagent": "^6.1.0",
-    "typescript": "^4.2.3",
-    "vite": "^2.1.2"
+    "typescript": "^4.4.3",
+    "vite": "^2.5.8"
   }
 }
