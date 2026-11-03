@@ -51,7 +51,7 @@ const index = (link: (name: string) => string) =>
 
 type Route = { type: "text/markdown" | "text/plain"; render: () => string };
 
-export const ROUTES: Record<string, Route> = {
+const ROUTES: Record<string, Route> = {
   "docs.md": { type: "text/markdown", render: () => readme(read("../../packages/emoji-picker/README.md")) },
   "examples.md": { type: "text/markdown", render: () => `# Examples\n\nWorking integrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
   ...Object.fromEntries(EXAMPLES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => example(name) } satisfies Route])),

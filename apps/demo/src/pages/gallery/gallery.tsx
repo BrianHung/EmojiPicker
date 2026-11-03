@@ -11,7 +11,8 @@ import { FitBox, Tabs } from "@/components/site/docs";
 import { useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { SCENES, STYLES, StylePicker, sourceOf, type Style } from "@/styles";
 import { discordAutocompleteOptions } from "@/styles/discord/picker";
-import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback, toggleReaction, type Reaction } from "@/styles/variants";
+import { toggleReaction, type Reaction } from "@/styles/scene-kit";
+import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
 
 /** One exported function from a source file, up to its closing brace. */
@@ -92,7 +93,7 @@ function DropdownDemo({ appStyle, search }: { appStyle: Style; search: boolean }
   return (
     <div className="flex flex-col items-center gap-3">
       <StyleDropdown appStyle={appStyle} search={search} onSelect={setLast} triggerClassName="flex size-10 items-center justify-center rounded-full border border-border bg-background text-xl hover:bg-accent">
-        {last?.unified ? <Emoji unified={last.unified} size={22} /> : "🙂"}
+        {last?.unified ? <Emoji emoji={last.unified} size={22} /> : "🙂"}
       </StyleDropdown>
     </div>
   );

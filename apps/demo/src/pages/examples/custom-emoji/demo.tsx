@@ -2,12 +2,12 @@
 // the visitor loads. <Packs> holds the loaded packs for <BufoPicker> and <LoadPack>.
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
-import { EmojiProvider, type CategoryOption } from "@brianhung/emoji-picker";
+import { EmojiProvider, type CategoryOption, type CustomEmoji } from "@brianhung/emoji-picker";
 import { usePickedEmoji } from "@/components/site/picked";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { BUFO_PACK_URL, loadPack, usePack, type PackEmoji } from "@/lib/packs";
+import { BUFO_PACK_URL, loadPack, usePack } from "@/lib/packs";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
 
 const STANDARD: CategoryOption[] = [
@@ -21,9 +21,9 @@ const STANDARD: CategoryOption[] = [
   { id: "flags" },
 ];
 
-type Pack = { key: string; label: string; emoji: PackEmoji[] };
+type Pack = { key: string; label: string; emoji: CustomEmoji[] };
 type Status = { pending?: boolean; error?: string; count?: number };
-type PacksContext = { bufo: PackEmoji[] | null; extra: Pack[]; status: Status; addPack: (url: string) => void; pickerRef: React.RefObject<HTMLDivElement | null> };
+type PacksContext = { bufo: CustomEmoji[] | null; extra: Pack[]; status: Status; addPack: (url: string) => void; pickerRef: React.RefObject<HTMLDivElement | null> };
 
 const Context = React.createContext<PacksContext | null>(null);
 const usePacks = () => React.use(Context)!;

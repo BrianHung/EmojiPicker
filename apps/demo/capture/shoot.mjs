@@ -1,4 +1,4 @@
-// Screenshots each example alone at 2x: node demo/capture/shoot.mjs [style...] [--theme=dark]
+// Screenshots each example alone at 2x: node capture/shoot.mjs [style...] [--theme=dark]
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";

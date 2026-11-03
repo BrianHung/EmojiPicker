@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils";
 /** shadcn's menu items: icon left, 14px label, ~36px tall, rounded highlight. */
 const ITEM = "h-9 gap-2.5 rounded-md px-2.5 text-sm [&_svg]:size-4";
 
-/** One-line usage: `<CopyPage md="/docs.md" />` (any route in plugins/markdown-docs.ts). */
-export function CopyPage({ md, className }: { md: string; className?: string }) {
+function CopyPage({ md, className }: { md: string; className?: string }) {
   const [copied, setCopied] = React.useState(false);
   // Fetched ahead of the click: the clipboard write then happens inside the user gesture.
   const markdown = React.useRef<Promise<string> | null>(null);
@@ -69,8 +68,7 @@ export function CopyPage({ md, className }: { md: string; className?: string }) 
   );
 }
 
-/** A page title row: h1 and description, with Copy Page beside the title (below the description on mobile). */
-/** The page title row; `md` adds the Copy Page button for pages with a Markdown version. */
+/** The page title row: h1 and description; `md` adds Copy Page beside the title (below the description on mobile). */
 export function PageHeader({ title, description, md, className }: { title: React.ReactNode; description: React.ReactNode; md?: string; className?: string }) {
   return (
     <div className={cn("grid gap-2", md && "sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6", className)}>

@@ -38,11 +38,7 @@ export type ShortcodeCompletion = {
   match: [number, number] | null;
 };
 
-/**
- * Sorted token array + binary search. Built once per dataset; in the
- * benchmark this answered queries in <0.05 ms (1x CPU) where an IndexedDB
- * lookup took 0.2 ms and a linear scan 0.3 ms.
- */
+/** A sorted token array searched by binary search. Build it once per record list. */
 export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex {
   const entries: [token: string, id: number, kind: number][] = [];
   const shortcodes = new Map<string, number>();

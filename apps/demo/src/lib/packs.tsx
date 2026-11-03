@@ -1,13 +1,10 @@
 import * as React from "react";
 import type { CustomEmoji } from "@brianhung/emoji-picker";
 
-/** Pack fields the library is gaining (`base`, `animated`, intrinsic size); extra keys are ignored until then. */
-export type PackEmoji = CustomEmoji & { base?: string; animated?: boolean; width?: number; height?: number };
-
-const cache = new Map<string, Promise<PackEmoji[]>>();
+const cache = new Map<string, Promise<CustomEmoji[]>>();
 
 /** Fetch a pack.json (CustomEmoji[]) once per URL; image URLs resolve against the pack's URL. */
-export function loadPack(url: string): Promise<PackEmoji[]> {
+export function loadPack(url: string): Promise<CustomEmoji[]> {
   let pending = cache.get(url);
   if (!pending) {
     pending = fetch(url)
@@ -23,7 +20,7 @@ export function loadPack(url: string): Promise<PackEmoji[]> {
         return json.map((e, i) => {
           if (!e || typeof e.id !== "string" || typeof e.name !== "string" || typeof e.imageUrl !== "string")
             throw new Error(`Entry ${i} needs string id, name and imageUrl`);
-          return { ...e, imageUrl: new URL(e.imageUrl, base).href } as PackEmoji;
+          return { ...e, imageUrl: new URL(e.imageUrl, base).href } as CustomEmoji;
         });
       });
     pending.catch(() => cache.delete(url));
@@ -41,7 +38,7 @@ export const BUFO_PACK_URL = "/packs/bufo/pack.json";
 
 /** A pack's emoji once loaded, else null. */
 export function usePack(url: string) {
-  const [pack, setPack] = React.useState<PackEmoji[] | null>(null);
+  const [pack, setPack] = React.useState<CustomEmoji[] | null>(null);
   React.useEffect(() => {
     let live = true;
     loadPack(url).then((emoji) => live && setPack(emoji), () => live && setPack([]));

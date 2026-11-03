@@ -396,7 +396,7 @@ function QuickRow({ onPick }: { onPick: (s: EmojiSelection) => void }) {
               if (s) onPick(s);
             }}
           >
-            <Emoji unified={store.withSkinTone(u)} size={22} />
+            <Emoji emoji={store.withSkinTone(u)} size={22} />
           </button>
         ))}
       </div>
@@ -423,7 +423,7 @@ const ROWS_TW = `function QuickRow() {
     <div className="flex justify-between border-b px-2 pb-2">
       {top.map((u) => (
         <button key={u} onClick={() => onPick(store.select(store.withSkinTone(u)))}>
-          <Emoji unified={store.withSkinTone(u)} />
+          <Emoji emoji={store.withSkinTone(u)} />
         </button>
       ))}
     </div>
@@ -530,7 +530,7 @@ function CommandPalette() {
                 setCopied(r.name);
               }}
             >
-              <Emoji unified={r.unified} size={20} className="text-xl" />
+              <Emoji emoji={r.unified} size={20} className="text-xl" />
               <span className="flex-1 truncate">{r.name}</span>
               {r.shortcodes[0] ? <code className="font-mono text-xs text-muted-foreground">:{r.shortcodes[0]}:</code> : null}
             </button>
@@ -581,7 +581,7 @@ function HeadlessExample() {
   <ul {...ac.getListProps()} className="rounded-lg border bg-popover p-1">
     {ac.suggestions.map((s, i) => (
       <li key={s.shortcode} {...ac.getOptionProps(i)} className="data-[highlighted]:bg-accent">
-        <Emoji unified={s.record.unified} /> :{s.shortcode}:
+        <Emoji emoji={s.record.unified} /> :{s.shortcode}:
       </li>
     ))}
   </ul>

@@ -5,14 +5,14 @@
 //   2. the key's action (from the keymap) goes to the innermost region that takes it
 //      (horizontal list, search field, skin tone, reactions, tab bar, vertical list),
 //   3. picker-wide actions: close, focus-search, toggle-skin-tone,
-//   4. otherwise the engine (emoji-picker-react) gets the key as it always did.
+//   4. otherwise the engine (emoji-picker-react) gets the key.
 //
 // It runs in React's capture phase on Root, which is before the engine's own
 // listener (bubble, on the same root element). Keys handled here, and keys the
 // user unbound, are hidden from the engine; nothing stops propagation, so apps can
 // still see them (and check `defaultPrevented`).
 import * as React from "react";
-import { DEFAULT_KEYMAP, ENGINE_KEYS, actionFor, engineActionOf, isTextEditingKey, matchesChord, type KeyboardAction, type Keymap } from "./keymap";
+import { ENGINE_KEYS, actionFor, engineActionOf, isTextEditingKey, matchesChord, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
 
 /** A picker part's keydown event. Its handler runs before the picker's own. */
 export type PickerKeyboardEvent<T extends Element = Element> = React.KeyboardEvent<T> & {
@@ -23,8 +23,11 @@ export type PickerKeyboardEvent<T extends Element = Element> = React.KeyboardEve
 };
 export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerKeyboardEvent<T>) => void;
 
-/** What a region did with a key. "pass" lets an outer region (or the engine) try. */
-export type RegionResult = "handled" | "pass";
+/**
+ * What a region did with a key. "pass" lets an outer region (or the engine) try;
+ * "native" keeps it from the engine and leaves it to the browser (a caret move).
+ */
+export type RegionResult = "handled" | "pass" | "native";
 /** A region's action handler. `action` is null for keys with no binding. */
 export type RegionHandler = (action: KeyboardAction | null, event: PickerKeyboardEvent) => RegionResult;
 
@@ -38,9 +41,6 @@ type KeyboardContextValue = {
 };
 
 const KeyboardContext = React.createContext<KeyboardContextValue | null>(null);
-
-/** The picker's resolved keymap (defaults outside a Root). */
-export const useKeymap = (): Keymap => React.useContext(KeyboardContext)?.keymap ?? DEFAULT_KEYMAP;
 
 /** Keeps the latest value in a ref, registered under the element the returned ref callback receives. */
 function useRegistered<T>(registry: Registry<T> | null, value: T | undefined): React.RefCallback<Element> {
@@ -169,7 +169,7 @@ export type KeyboardProviderProps = {
 
 /** Provides registration to the parts and returns the Root element's props. */
 export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children }: KeyboardProviderProps) {
-  const keymap = React.useMemo<Keymap>(() => (overrides ? { ...DEFAULT_KEYMAP, ...overrides } : DEFAULT_KEYMAP), [overrides]);
+  const keymap = React.useMemo(() => resolveKeymap(overrides), [overrides]);
   const handlers = React.useRef<Registry<PickerKeyboardEventHandler>>(new Map()).current;
   const regions = React.useRef<Registry<RegionHandler>>(new Map()).current;
   const skinTone = React.useRef<(() => void) | null>(null);
@@ -213,7 +213,9 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children
       if (!typing) {
         for (const el of path) {
           const region = regions.get(el)?.current;
-          if (region && region(action, event) === "handled") return handled();
+          const result = region?.(action, event);
+          if (result === "handled") return handled();
+          if (result === "native") return hideFromEngine(native, rootEl);
         }
       }
 

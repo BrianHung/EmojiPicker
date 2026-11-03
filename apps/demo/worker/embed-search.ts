@@ -6,7 +6,6 @@ import type { Env } from "./env";
 import { binding, Unavailable } from "./errors";
 
 export const EMBEDDING_MODEL = "@cf/baai/bge-large-en-v1.5";
-export const DIMENSIONS = 1024;
 
 export type Hit = { unified: string; score: number; custom?: true; imageUrl?: string };
 export type EmbedSearchResponse = { hits: Hit[]; model: string; timings: { embedMs: number; queryMs: number } };

@@ -2,7 +2,7 @@
 // UI (Apple's tapback hearts, a brand's thumbs up) while they stay the same emoji
 // for selection, search and frequents.
 import * as React from "react";
-import { SKIN_TONES } from "../core/dataset";
+import { withoutTone } from "../core/dataset";
 import { EmojiImage } from "./image";
 
 /** An image URL, or any node (an inline SVG, a component). */
@@ -10,13 +10,7 @@ export type Artwork = string | React.ReactNode;
 /** Artwork by unified code. A base code ("1f44d") covers every skin tone unless a toned key is given. */
 export type ArtworkMap = Readonly<Record<string, Artwork>>;
 
-const TONES = new Set<string>(SKIN_TONES);
 const withoutFe0f = (unified: string) => unified.replace(/-fe0f/gi, "");
-const withoutTone = (unified: string) =>
-  unified
-    .split("-")
-    .filter((part) => !TONES.has(part))
-    .join("-");
 
 /**
  * The artwork for an emoji: its exact code, then without U+FE0F, then its base

@@ -6,7 +6,7 @@
 //   (y relative to the screen's top).
 import * as React from "react";
 
-export const SCREEN = { width: 402, height: 874, radius: 62.7 } as const;
+const SCREEN = { width: 402, height: 874, radius: 62.7 } as const;
 const RIM = 8.5;
 const BEZEL = 9.2;
 const FRAME = RIM + BEZEL;
@@ -15,7 +15,7 @@ const BUTTON = 5;
 
 const OUTER = { width: SCREEN.width + FRAME * 2, height: SCREEN.height + FRAME * 2 };
 /** Size of the frame including the side buttons, in pt (before `scale`). */
-export const FRAME_SIZE = { width: OUTER.width + BUTTON * 2, height: OUTER.height };
+const FRAME_SIZE = { width: OUTER.width + BUTTON * 2, height: OUTER.height };
 
 const BUTTONS: { side: "left" | "right"; top: number; bottom: number }[] = [
   { side: "left", top: 141, bottom: 177 },

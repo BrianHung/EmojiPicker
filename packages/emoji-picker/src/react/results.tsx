@@ -4,6 +4,7 @@
 import * as React from "react";
 import * as Epr from "emoji-picker-react/primitives";
 import { GROUPS, isUnified, unifiedToNative, type EmojiRecord } from "../core/dataset";
+import { nameWithTone } from "../core/shortcodes";
 import { moveByRows, rowsPerPage, type Point } from "./grid-nav";
 import { EmojiImage } from "./image";
 import { ArtworkGlyph, findArtwork, useArtwork, useArtworkMap } from "./overrides";
@@ -88,7 +89,6 @@ export function ResultsProvider({
     const previous = highlightedKey.current;
     const kept = previous.search === search && previous.unified ? results.findIndex((r) => r.unified === previous.unified) : -1;
     setHighlighted(Math.max(0, kept));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [results]);
   const move = React.useRef<ResultsState["move"]["current"]>(null);
   const [hovered, setHovered] = React.useState(-1);
@@ -129,7 +129,7 @@ export function ResultsProvider({
 
 const VISUALLY_HIDDEN: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap", border: 0 };
 
-const NAV_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
+export const NAV_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
   "move-up": "ArrowUp",
   "move-down": "ArrowDown",
   "move-left": "ArrowLeft",
@@ -142,8 +142,7 @@ const NAV_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
 
 /**
  * Keys in the search input while results show: the highlight moves and focus stays
- * in the field (a combobox). Left and Right move it only with the caret at the end
- * of the text, so they still edit the query.
+ * in the field (a combobox). Search only sends Left and Right with the caret at the end.
  */
 export function useResultsKeyboard() {
   const state = useResults();
@@ -154,8 +153,7 @@ export function useResultsKeyboard() {
       if (focusModel === "grid") {
         // Down, or Right at the end of the text, moves focus into the results.
         const input = event.target as HTMLInputElement;
-        const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
-        if (action !== "move-down" && !(atEnd && action === (getComputedStyle(input).direction === "rtl" ? "move-left" : "move-right"))) return "pass";
+        if (action !== "move-down" && action !== (getComputedStyle(input).direction === "rtl" ? "move-left" : "move-right")) return "pass";
         const cell = document.getElementById(state.cellId(Math.max(0, state.highlighted)));
         if (!cell) return "pass";
         cell.focus({ preventScroll: true });
@@ -170,11 +168,9 @@ export function useResultsKeyboard() {
       if (!key) return "pass";
       const input = event.target as HTMLInputElement;
       if (key === "ArrowLeft" || key === "ArrowRight") {
-        const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
-        if (!atEnd) return "pass";
         if (getComputedStyle(input).direction === "rtl") key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
         // At the first result, Left goes back to editing the text.
-        if (key === "ArrowLeft" && state.highlighted <= 0) return "pass";
+        if (key === "ArrowLeft" && state.highlighted <= 0) return "native";
       }
       const next = state.move.current?.(Math.max(0, state.highlighted), key) ?? null;
       if (next != null) state.setHighlighted(next);
@@ -184,8 +180,21 @@ export function useResultsKeyboard() {
   );
 }
 
-type Cell = React.ComponentType<Epr.EmojiRenderProps>;
-type Header = React.ComponentType<Epr.CategoryHeaderRenderProps>;
+export type Cell = React.ComponentType<Epr.EmojiRenderProps>;
+export type Header = React.ComponentType<Epr.CategoryHeaderRenderProps>;
+
+/** The `emoji` prop a cell slot receives in our own grids. */
+export function cellEmoji(record: EmojiRecord, unified: string, isActive: boolean): Epr.EmojiRenderProps["emoji"] {
+  return {
+    unified,
+    names: [...record.shortcodes, record.name],
+    emoji: record.imageUrl ? unified : unifiedToNative(unified),
+    isCustom: Boolean(record.imageUrl),
+    imageUrl: record.imageUrl,
+    isActive,
+    hasVariations: record.tones.length > 0,
+  } as Epr.EmojiRenderProps["emoji"];
+}
 
 /**
  * One emoji in our grids (search results, the horizontal list): native text, or an
@@ -275,20 +284,12 @@ export const ResultsList = React.forwardRef<HTMLDivElement, { cell: Cell; header
         role="gridcell"
         // "grid": the highlighted result is the tab stop. "input": none are; focus stays in the field.
         tabIndex={focusModel === "grid" && highlighted ? 0 : -1}
-        aria-label={record.name}
+        aria-label={nameWithTone(record.name, unified)}
         aria-selected={highlighted}
         data-epr-unified={unified}
         // Our own attribute, not the engine's data-epr-highlighted: the engine treats that mark as its highlight and clears it.
-          data-highlighted={highlighted ? "" : undefined}
-        emoji={{
-          unified,
-          names: [...record.shortcodes, record.name],
-          emoji: record.imageUrl ? unified : unifiedToNative(unified),
-          isCustom: Boolean(record.imageUrl),
-          imageUrl: record.imageUrl,
-          isActive: highlighted,
-          hasVariations: record.tones.length > 0,
-        } as Epr.EmojiRenderProps["emoji"]}
+        data-highlighted={highlighted ? "" : undefined}
+        emoji={cellEmoji(record, unified, highlighted)}
         data-result={index}
         data-overridden={artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined}
         // A combobox's options don't take focus: keep it (and the caret) in the search field.

@@ -100,7 +100,7 @@ export function EmojiSuggestionMenu({ editor, className }: { editor: Editor; cla
             const [start, end] = s.match ?? [0, 0];
             return (
               <li key={s.record.unified} {...menu.getOptionProps(i)} className="flex h-8 cursor-default items-center gap-2 rounded-md px-2 data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground">
-                <Emoji unified={store.withSkinTone(s.record.unified)} size={18} className="shrink-0 leading-none" />
+                <Emoji emoji={store.withSkinTone(s.record.unified)} size={18} className="shrink-0 leading-none" />
                 <span className="truncate font-mono text-[13px]">
                   :{s.shortcode.slice(0, start)}
                   <b className="font-semibold">{s.shortcode.slice(start, end)}</b>

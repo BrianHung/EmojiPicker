@@ -7,6 +7,7 @@
 //            requests as fit, all in parallel; keep each question's top options
 //   round 2  one question over those finalists; its probabilities are the ranking
 import { BUILT_IN, CUSTOM, type Entry } from "./corpus";
+import type { Hit } from "./embed-search";
 import type { Env } from "./env";
 import { binding, UpstreamError } from "./errors";
 
@@ -40,15 +41,14 @@ export type SystemOneRequest = {
 type ChoiceAnswer = { type: "choice"; choice: string; probabilities: Record<string, number>; confidence?: number };
 export type SystemOneResponse = { model: string; answers: Record<string, ChoiceAnswer>; usage: { input_tokens: number; output_tokens: number } };
 
-export type Hit = { unified: string; score: number; custom?: true; imageUrl?: string };
-export type DecisionUsage = { inputTokens: number; outputTokens: number; requests: number; costUsd: number };
+type DecisionUsage = { inputTokens: number; outputTokens: number; requests: number; costUsd: number };
 export type DecisionResponse = { hits: Hit[]; model: string; usage: DecisionUsage; timings: { round1Ms: number; round2Ms: number } };
 
 /**
  * One System One request through the AI binding, logged by AI Gateway. Clef's schema also
  * requires its short model name in the body; Jev's reply comes wrapped in `result`.
  */
-export async function ask(env: Env, model: string, request: SystemOneRequest, signal?: AbortSignal): Promise<SystemOneResponse> {
+async function ask(env: Env, model: string, request: SystemOneRequest, signal?: AbortSignal): Promise<SystemOneResponse> {
   const body = model.startsWith("@cf/cloudflare/") ? { model: model.slice(model.lastIndexOf("/") + 1), ...request } : request;
   const out = (await binding(() => env.AI.run(model, body, { gateway: { id: env.AI_GATEWAY_ID }, signal }))) as (SystemOneResponse & { result?: undefined }) | { result: SystemOneResponse };
   const response = out?.result ?? out;

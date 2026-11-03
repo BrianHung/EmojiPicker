@@ -8,11 +8,11 @@ import type { Env } from "./env";
 import { BadRequest, binding } from "./errors";
 
 /** Texts per Workers AI call. */
-export const EMBED_BATCH = 100;
+const EMBED_BATCH = 100;
 /** Workers AI calls in flight. */
 const CONCURRENCY = 6;
 /** Vectors per Vectorize upsert. */
-export const UPSERT_BATCH = 500;
+const UPSERT_BATCH = 500;
 
 export type SeedRequest = { from: number; count: number; custom?: CustomEmoji[] };
 export type SeedResponse = { total: number; from: number; next: number; done: boolean; upserted: number; mutationIds: string[] };

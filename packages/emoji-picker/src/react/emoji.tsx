@@ -1,6 +1,7 @@
 import * as React from "react";
 import { isUnified } from "../core/dataset";
 import type { Renderer } from "../core/platform";
+import { nameWithTone } from "../core/shortcodes";
 import { missingEmojiText, resolveEmoji, type EmojiInput, type ResolvedEmoji } from "../core/resolve";
 import { EmojiImage } from "./image";
 import { ArtworkGlyph, useArtwork } from "./overrides";
@@ -38,7 +39,6 @@ export type EmojiProps = BaseProps &
 export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   const { store } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status]);
   // Shortcodes and custom ids need the data: load it if no picker has yet.
   React.useEffect(() => {
@@ -68,11 +68,12 @@ export function Emoji({ emoji, unified, size, renderer: override, animate = true
     );
   }
 
+  const name = nameWithTone(resolved.name, resolved.unified);
   const a11y = decorative ? { "aria-hidden": true } : {};
   if (art !== undefined) {
-    if (typeof art === "string") return <ArtworkGlyph {...props} {...a11y} art={art} alt={decorative ? "" : resolved.name} size={size ?? "1em"} data-emoji="" data-overridden="" />;
+    if (typeof art === "string") return <ArtworkGlyph {...props} {...a11y} art={art} alt={decorative ? "" : name} size={size ?? "1em"} data-emoji="" data-overridden="" />;
     return (
-      <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": resolved.name })} data-emoji="" data-overridden="" style={{ display: "inline-flex", ...props.style }}>
+      <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" data-overridden="" style={{ display: "inline-flex", ...props.style }}>
         <ArtworkGlyph art={art} alt="" size={size ?? "1em"} />
       </span>
     );
@@ -81,10 +82,10 @@ export function Emoji({ emoji, unified, size, renderer: override, animate = true
   if (src) {
     // An unregistered CustomEmoji object has no record: lend it its own size and frames.
     const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
-    return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : resolved.name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;
+    return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;
   }
   return (
-    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": resolved.name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
+    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
       {resolved.native}
     </span>
   );

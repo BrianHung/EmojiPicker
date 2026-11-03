@@ -3,6 +3,7 @@
 // layout-transparent, so no consumer ever targets emoji-picker-react markup.
 import * as React from "react";
 import type * as Epr from "emoji-picker-react/primitives";
+import { nameWithTone } from "../core/shortcodes";
 import { CollapseContext } from "./collapse";
 import { EngineCellImage } from "./image";
 import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
@@ -175,6 +176,9 @@ function useEngineCell(props: Epr.EmojiRenderProps): { props?: Partial<Epr.Emoji
   const attrs = props as unknown as Record<string, unknown>;
   if (attrs["data-epr-part"] !== "emoji" || !info) return {};
   const drawing = engineCellDrawing(info, attrs, artwork);
+  // The engine names a variation after its base emoji.
+  const label = attrs["aria-label"];
+  if (typeof label === "string") drawing.props = { ...drawing.props, "aria-label": nameWithTone(label, info.unified) };
   if (!pressed) return drawing;
   // A reaction the user has already added (Tapback `selected`).
   const on = isPressed(pressed, info.unified);
@@ -211,7 +215,7 @@ export function rootSlots(user: Omit<Epr.PickerComponents, "CategoryHeader"> & U
         ? {
             category: { ...props.category, isActive },
             "aria-selected": isActive,
-            tabIndex: isActive || props.tabIndex === -1 && !props.category.isActive ? -1 : 0,
+            tabIndex: isActive || (props.tabIndex === -1 && !props.category.isActive) ? -1 : 0,
             // detail 0: activated from the keyboard, which never animates.
             onClick: (e: React.MouseEvent<HTMLButtonElement>) => strip.jump(id, { instant: e.detail === 0 }),
             ...{ "data-epr-active": isActive ? "" : undefined },

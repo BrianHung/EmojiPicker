@@ -4,7 +4,7 @@ import { expandDataset, unifiedToNative, withTone, type Dataset } from "../src/c
 import { createFrequencyStore, memoryStorage } from "../src/core/frequents";
 import { needsTwemoji, twemojiUrl } from "../src/core/platform";
 import { createSearchIndex } from "../src/core/search-index";
-import { replaceShortcodes, toneOf } from "../src/core/shortcodes";
+import { nameWithTone, replaceShortcodes, toneOf } from "../src/core/shortcodes";
 import { createEmojiStore } from "../src/core/store";
 
 const dataset = data as unknown as Dataset;
@@ -89,9 +89,11 @@ describe("shortcodes", () => {
     expect(replaceShortcodes(":heart::skin-tone-4:", index)).toBe("❤️"); // no tones: suffix dropped
   });
 
-  it("reads the tone of a variation", () => {
+  it("reads the tone of a variation and names it", () => {
     expect(toneOf("1f44d-1f3fe")).toBe(4);
     expect(toneOf("1f44d")).toBe(0);
+    expect(nameWithTone("thumbs up", "1f44d-1f3fe")).toBe("thumbs up: medium-dark skin tone");
+    expect(nameWithTone("thumbs up", "1f44d")).toBe("thumbs up");
   });
 });
 

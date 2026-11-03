@@ -4,8 +4,8 @@ import type { SystemOneRequest, SystemOneResponse } from "../decide";
 import { EMBEDDING_MODEL } from "../embed-search";
 import type { Env } from "../env";
 
-export type DecideCall = { model: string; input: SystemOneRequest; options: AiOptions };
-export type EmbedCall = { model: string; text: string[] };
+type DecideCall = { model: string; input: SystemOneRequest; options: AiOptions };
+type EmbedCall = { model: string; text: string[] };
 
 export function mockEnv(overrides: Partial<Env> = {}) {
   const store = new Map<string, VectorizeVector>();
@@ -15,14 +15,16 @@ export function mockEnv(overrides: Partial<Env> = {}) {
   const queries: VectorizeQueryOptions[] = [];
 
   const AI = {
-    async run(model: string, input: any, options: AiOptions) {
+    async run(model: string, input: { text: string[] } | SystemOneRequest, options: AiOptions) {
       if (model === EMBEDDING_MODEL) {
-        embedCalls.push({ model, text: input.text });
-        if (input.text.length > 100) throw new Error("batch too large");
-        return { shape: [input.text.length, 1024], data: input.text.map(fakeEmbed) };
+        const { text } = input as { text: string[] };
+        embedCalls.push({ model, text });
+        if (text.length > 100) throw new Error("batch too large");
+        return { shape: [text.length, 1024], data: text.map(fakeEmbed) };
       }
-      decideCalls.push({ model, input, options });
-      return { result: { model: model.split("/").pop()!, ...decide(input) } };
+      const request = input as SystemOneRequest;
+      decideCalls.push({ model, input: request, options });
+      return { result: { model: model.split("/").pop()!, ...decide(request) } };
     },
   } as unknown as Ai;
 
@@ -64,7 +66,7 @@ export const post = (path: string, body: unknown, headers: Record<string, string
   });
 
 /** A deterministic "embedding": words hashed into 1024 buckets, normalized. */
-export function fakeEmbed(text: string): number[] {
+function fakeEmbed(text: string): number[] {
   const v = new Array<number>(1024).fill(0);
   for (const word of text.toLowerCase().replace(/^represent this sentence for searching relevant passages: /, "").split(/[^a-z0-9]+/).filter(Boolean)) {
     let h = 2166136261;
@@ -76,7 +78,7 @@ export function fakeEmbed(text: string): number[] {
 }
 
 /** A fake System One model: probability by word overlap between the query (state) and each option. */
-export function decide(request: SystemOneRequest): Omit<SystemOneResponse, "model"> {
+function decide(request: SystemOneRequest): Omit<SystemOneResponse, "model"> {
   const words = new Set(request.state.toLowerCase().split(/\W+/).filter(Boolean));
   const answers: SystemOneResponse["answers"] = {};
   let tokens = 0;

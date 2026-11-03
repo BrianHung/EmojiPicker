@@ -4,8 +4,7 @@
 // while typing, as in Discord's own (Slate) composer. Measured from Discord web (dark), Nov 2026:
 // header 49px (0.8px rule, 16/20, padding 8 8 8 16); rows with a 40px avatar at x=16,
 // name + time + content from x=72 at 16/22; a 56px composer, radius 8, inset 8px.
-// On a phone it is Discord's mobile chat, not measured (discord.com refuses to be framed
-// and the window couldn't be resized): the same rows without the hover toolbar, press
+// On a phone it is Discord's mobile chat (not measured): the same rows without the hover toolbar, press
 // and hold a message for the picker in a bottom sheet, and a round "+" beside a pill
 // composer whose smiley opens the sheet too.
 import * as React from "react";
@@ -219,7 +218,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
                   onClick={() => onToggle(r.unified)}
                   className={cn("flex cursor-pointer items-center gap-1.5 tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[#5865f2]", discord.pill.base, discord.pill.mine)}
                 >
-                  <Emoji unified={r.unified} size={16} className="size-4" />
+                  <Emoji emoji={r.unified} size={16} className="size-4" />
                   <span>{r.count}</span>
                 </button>
               );
@@ -245,7 +244,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           >
             {quick.map((u) => (
               <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-8 cursor-pointer items-center justify-center rounded outline-none hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#5865f2]">
-                <Emoji unified={u} size={20} className="size-5" />
+                <Emoji emoji={u} size={20} className="size-5" />
               </button>
             ))}
             <span className="mx-1 h-5 w-px" style={{ background: C.rule }} />
@@ -355,7 +354,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
       onSelect={(s) => insert(s.unified)}
       triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded outline-none grayscale hover:grayscale-0 focus-visible:ring-2 focus-visible:ring-[#5865f2] data-[state=open]:grayscale-0"
     >
-      <Emoji unified="1f642" size={22} className="size-[22px]" />
+      <Emoji emoji="1f642" size={22} className="size-[22px]" />
     </ScenePicker>
   );
   if (compact)

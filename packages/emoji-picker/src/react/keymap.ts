@@ -58,7 +58,7 @@ type Chord = { key: string; ctrl: boolean; meta: boolean; alt: boolean; shift: b
 const MODIFIERS = new Set(["ctrl", "control", "meta", "cmd", "command", "alt", "option", "shift", "mod"]);
 
 /** True on macOS and iOS, where "Mod" means ⌘. */
-export function isApplePlatform(): boolean {
+function isApplePlatform(): boolean {
   if (typeof navigator === "undefined") return false;
   const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? "";
   return /mac|iphone|ipad|ipod/i.test(platform);

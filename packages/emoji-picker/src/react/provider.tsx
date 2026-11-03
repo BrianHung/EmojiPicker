@@ -46,7 +46,6 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   const resolved = renderer === "auto" ? detected : renderer;
   // Custom emoji groups are known once their packs load.
   const status = React.useSyncExternalStore(store.subscribe, store.status, store.status);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const groups = React.useMemo(() => store.customGroups(), [store, status]);
   const value = React.useMemo<ContextValue>(
     () => ({

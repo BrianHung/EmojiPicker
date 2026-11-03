@@ -28,7 +28,7 @@ export type EmojiSearch = (query: string, context: SearchContext) => Hits | Prom
 /** A pending result with something to show meanwhile: `interim` renders now, the promise replaces it. */
 export type ProgressiveHits<T = Hits> = PromiseLike<T> & { readonly interim: T };
 
-const isThenable = <T,>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
+export const isThenable = <T,>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
 
 /** Attaches interim results to a promise. */
 export function withInterim<T>(promise: PromiseLike<T>, interim: T): ProgressiveHits<T> {
@@ -87,7 +87,7 @@ export type LexicalOptions = {
 /**
  * The default: a sorted word index over shortcodes, names and tags. Every query
  * word must match and the last may be partial; a whole shortcode ranks above a
- * word in a name, which ranks above a tag. About 0.01 ms per query.
+ * word in a name, which ranks above a tag.
  */
 export function lexical({ typos = true, typoThreshold = 8 }: LexicalOptions = {}): EmojiSearch {
   return (query, { records, limit }) => {
@@ -240,5 +240,3 @@ export function fuse(Fuse: FuseConstructor<FuseDoc>, options: object = {}): Emoj
     return instance.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
   };
 }
-
-export { isThenable };

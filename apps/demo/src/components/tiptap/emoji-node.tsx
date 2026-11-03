@@ -39,7 +39,7 @@ function EmojiView({ node }: NodeViewProps) {
   const { unified } = node.attrs as EmojiNodeAttrs;
   return (
     <NodeViewWrapper as="span" className="inline-block align-[-0.2em]" data-emoji-node="">
-      <Emoji unified={unified} size={20} className="inline-block size-[1.25em] leading-none" />
+      <Emoji emoji={unified} size={20} className="inline-block size-[1.25em] leading-none" />
     </NodeViewWrapper>
   );
 }

@@ -208,26 +208,16 @@ export function useEmojiSuggestions({ query, limit = 8, matchBy = "shortcode", o
   };
 }
 
-export type ShortcodeAutocompleteOptions = {
+export type ShortcodeAutocompleteOptions = Pick<EmojiSuggestionsOptions, "limit" | "matchBy" | "order" | "columns"> & {
   /** Current text and caret position of the input. */
   value: string;
   caret: number;
-  limit?: number;
   /**
    * What a choice inserts: the emoji (iMessage) or the `:shortcode:` text
    * (Slack, rendered on send with `store.replaceShortcodes`). Custom emoji
    * always insert their shortcode. Default "emoji".
    */
   insert?: "emoji" | "shortcode";
-  /**
-   * How `:query` finds suggestions: "shortcode" (default) completes Slack shortcodes,
-   * highlighting the typed part; "search" uses the provider's `search` engine.
-   */
-  matchBy?: "shortcode" | "search";
-  /** Shortcode matches only: "relevance" (default) or "alphabetical" (prefix matches A–Z, then the rest A–Z, as Discord lists them). */
-  order?: CompletionOrder;
-  /** Render the suggestions as a grid of this many columns: Left/Right move a cell, Up/Down a row (Grok, Discord-style grids). */
-  columns?: number;
   /** Called with the new text and caret when a suggestion is chosen. */
   onChoose?: (result: AutocompleteResult, suggestion: ShortcodeSuggestion) => void;
 };

@@ -7,7 +7,7 @@ const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
 
 export type DecisionModel = "jev" | "clef-omni" | "clef-flash" | "clef";
 export type Backend = "embeddings" | DecisionModel;
-export type ApiStatus = "unknown" | "ok" | "unavailable";
+type ApiStatus = "unknown" | "ok" | "unavailable";
 
 let status: Record<Backend, ApiStatus> = { embeddings: "unknown", jev: "unknown", "clef-omni": "unknown", "clef-flash": "unknown", clef: "unknown" };
 const listeners = new Set<() => void>();

@@ -18,7 +18,7 @@ export type StripMetrics = {
   sectionMinWidth: number;
 };
 
-export type StripSection = {
+type StripSection = {
   id: string;
   /** Global index of the section's first item. */
   start: number;

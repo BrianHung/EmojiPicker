@@ -44,7 +44,15 @@ const ROOT: PropRow[] = [
   { name: "defaultSearch", type: "string" },
   { name: "onSearchChange", type: "(value: string) => void" },
   { name: "autoFocusSearch", type: "boolean" },
-  { name: "keepSearchFocus", type: "boolean", description: "Keeps focus in search while arrow keys move the highlight." },
+  { name: "focusModel", type: '"input" | "grid"', default: '"input"', description: "Where focus lives while navigating: the search field, or the cells." },
+  { name: "pointer", type: '"follows" | "independent"', default: '"follows"', description: "Whether hover moves the keyboard position." },
+  { name: "keymap", type: "Partial<Record<KeyboardAction, string[]>>", description: "Keys per action, replacing the defaults." },
+  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
+  { name: "collapsedCategories", type: "string[]", description: "Collapsed sections, controlled." },
+  { name: "defaultCollapsedCategories", type: "string[]" },
+  { name: "onCollapsedCategoriesChange", type: "(ids: string[]) => void" },
+  { name: "artwork", type: "ArtworkMap", description: "Draws these emoji with your own art." },
+  { name: "emojiVersion", type: "number", description: "Hides emoji added after this Unicode emoji version." },
   { name: "disableVariations", type: "boolean", description: "Disables skin-tone variations in the grid." },
   { name: "components", type: "PickerComponents", description: "{ CategoryButton, SkinToneButton, ClearButton, ExpandButton }" },
   { name: "colorScheme", type: '"light" | "dark" | "auto"', description: "Applies the built-in color tokens." },
@@ -66,6 +74,9 @@ const NAV: PropRow[] = [
 ];
 
 const LIST: PropRow[] = [
+  { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
+  { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
+  { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
   { name: "components", type: "{ Emoji?, CategoryHeader? }", description: "Custom cell and section title components." },
   { name: "cellClassName", type: "string", description: "Classes for each emoji cell." },
   { name: "headerClassName", type: "string", description: "Classes for each section title." },

@@ -4,8 +4,8 @@ import { useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Smile, SmilePlus } from "@/styles/icons";
-import { PickerSheet, useCompact } from "@/styles/scene-kit";
-import { StyleAutocomplete, StyleDropdown, StylePills, toggleReaction, type Reaction } from "@/styles/variants";
+import { PickerSheet, toggleReaction, useCompact, type Reaction } from "@/styles/scene-kit";
+import { StyleAutocomplete, StyleDropdown, StylePills } from "@/styles/variants";
 import { slack } from "./picker";
 
 type Message = { id: number; author: string; color: string; time: string; text: string; reactions: Reaction[] };
@@ -134,7 +134,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
       <div className="absolute -top-4 right-5 hidden items-center rounded-lg border border-[#dddddd] bg-white p-0.5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] group-focus-within:flex group-hover:flex has-[[aria-expanded=true]]:flex dark:border-[#35373b] dark:bg-[#1a1d21]">
         {quick.map((u) => (
           <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(store.withSkinTone(u))} className="flex size-8 items-center justify-center rounded hover:bg-[#f4f4f4] dark:hover:bg-[#2c2d30]">
-            <Emoji unified={store.withSkinTone(u)} size={18} className="text-[18px] leading-none" />
+            <Emoji emoji={store.withSkinTone(u)} size={18} className="text-[18px] leading-none" />
           </button>
         ))}
         <EmojiMenu sheet={compact} label="Add reaction" align="end" onSelect={(s) => onToggle(s.unified)} triggerClassName="flex size-8 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">

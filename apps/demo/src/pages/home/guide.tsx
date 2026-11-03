@@ -4,7 +4,7 @@ import registrySource from "@/registry/emoji-picker.tsx?raw";
 import { Code } from "@/components/site/code";
 import { C, CodeTabs, H2, P, Step, Steps, Tabs } from "@/components/site/docs";
 
-export const REGISTRY_URL = "https://emoji.brianhung.me/r/emoji-picker.json";
+const REGISTRY_URL = "https://emoji.brianhung.me/r/emoji-picker.json";
 
 const pm = (cmd: { npm: string; pnpm: string; yarn: string; bun: string }) => [
   { label: "pnpm", code: cmd.pnpm, lang: "bash" as const },
@@ -127,7 +127,7 @@ const ANATOMY = `import { EmojiProvider, EmojiPicker, EmojiPopover, Tapback, Emo
     </EmojiPicker.Viewport>
   </Tapback>
 
-  <Emoji unified="1f44d-1f3fd" />
+  <Emoji emoji="1f44d-1f3fd" />
 </EmojiProvider>`;
 
 export function Anatomy() {

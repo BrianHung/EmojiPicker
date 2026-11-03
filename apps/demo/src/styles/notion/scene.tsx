@@ -79,7 +79,7 @@ export function NotionScene() {
               sheet={compact}
               triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(55,53,47,0.08)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(55,53,47,0.08)]"
             >
-              <Emoji unified={icon} size={78} className="text-[78px] leading-[1.1]" />
+              <Emoji emoji={icon} size={78} className="text-[78px] leading-[1.1]" />
             </ScenePicker>
           </div>
           <div className={cn("mt-1 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100", compact && "hidden")} style={{ color: MUTED }} aria-hidden>
@@ -126,7 +126,7 @@ export function NotionScene() {
 function MobileTopBar({ icon, title }: { icon: string; title: string }) {
   return (
     <div className="flex h-11 shrink-0 items-center gap-1.5 pr-2 pl-[15px] text-[14px]" aria-hidden>
-      <Emoji unified={icon} size={18} className="text-[18px] leading-none" />
+      <Emoji emoji={icon} size={18} className="text-[18px] leading-none" />
       <span className="min-w-0 truncate" style={{ color: INK }}>
         {title}
       </span>
@@ -156,7 +156,7 @@ function TopBar({ icon, title }: { icon: string; title: string }) {
       </span>
       <span style={{ color: "rgba(55,53,47,0.35)" }}>/</span>
       <span className="flex h-6 items-center gap-1.5 rounded-[4px] px-1.5" style={{ color: INK }}>
-        <Emoji unified={icon} size={16} className="text-[16px] leading-none" />
+        <Emoji emoji={icon} size={16} className="text-[16px] leading-none" />
         {title}
       </span>
       <div className="ml-auto flex items-center gap-1">

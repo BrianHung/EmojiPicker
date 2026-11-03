@@ -3,7 +3,7 @@
 import type { EmojiSearch } from "@brianhung/emoji-picker";
 import type { WorkerRequest, WorkerResponse } from "./on-device.worker";
 
-export const MODEL = "Xenova/bge-small-en-v1.5";
+const MODEL = "Xenova/bge-small-en-v1.5";
 
 type Status = { state: "idle" | "loading" | "ready" | "error"; loaded: number; total: number; loadMs?: number; error?: string };
 let status: Status = { state: "idle", loaded: 0, total: 0 };

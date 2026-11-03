@@ -1,22 +1,29 @@
 # EmojiPicker
 
-A headless React emoji picker with Slack shortcodes, tapbacks, skin tones, custom emoji, replaceable search and platform-aware rendering. Docs: [packages/emoji-picker](packages/emoji-picker/README.md).
+Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete. See the [library documentation](packages/emoji-picker/README.md).
 
-## Layout
+## Repository layout
 
-| Path | |
+| Path | Contents |
 |---|---|
-| `packages/emoji-picker` | The library, published as `@brianhung/emoji-picker`: source, emoji data (`data/`), the data build (`scripts/`), tests |
-| `apps/demo` | The demo site, the shadcn registry item (`registry/`) and the capture tools used to check pixel parity against real apps (`capture/`) |
+| `packages/emoji-picker` | The library, published as `@brianhung/emoji-picker`, with its data build and tests |
+| `apps/demo` | The documentation site, the shadcn/ui registry item, and the site's Cloudflare Worker. See its [README](apps/demo/README.md). |
+| `docs` | Research notes, including the [keyboard and accessibility audit](docs/keyboard-accessibility-audit.md) |
 
 ## Commands
 
+Run these from the repository root.
+
 ```bash
-npm install          # all workspaces
-npm run dev          # demo at http://localhost:5199, using the library's TypeScript source directly
-npm test             # library tests
+npm install
+npm run dev          # the demo at http://localhost:5199
+npm test             # library unit tests
 npm run typecheck    # every workspace
-npm run build        # library (dist/) then the site and registry (apps/demo/dist/)
+npm run build        # the library, then the site and registry
 ```
 
-The demo imports `@brianhung/emoji-picker` by name. Its `@brianhung/source` export condition (scoped so other packages' `source` conditions are ignored) points workspace consumers at `src/`, so edits to the library hot-reload in the demo without a build.
+In the workspace, the demo resolves `@brianhung/emoji-picker` to the library's TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
+
+## License
+
+MIT. Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

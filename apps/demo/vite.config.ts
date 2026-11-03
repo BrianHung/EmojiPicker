@@ -28,7 +28,12 @@ export default defineConfig({
     markdownDocs(),
     // Transformers.js loads the ONNX Runtime wasm from jsDelivr; the bundled copy (25.6 MiB) is
     // unused and over the Workers 25 MiB asset limit.
-    { name: "drop-ort-wasm", generateBundle: (_, bundle) => Object.keys(bundle).filter((f) => /ort-wasm.*\.wasm$/.test(f)).forEach((f) => delete bundle[f]) },
+    {
+      name: "drop-ort-wasm",
+      generateBundle(_, bundle) {
+        for (const file of Object.keys(bundle)) if (/ort-wasm.*\.wasm$/.test(file)) delete bundle[file];
+      },
+    },
     // The site's Worker (worker/index.ts, /api/*) runs in workerd next to the pages. Workers AI (Clef)
     // has no local mode, so /api answers 503 in dev unless you're logged in and set
     // CLOUDFLARE_REMOTE_BINDINGS=1 to use the real ones.

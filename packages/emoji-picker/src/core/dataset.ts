@@ -29,6 +29,15 @@ export type Dataset = {
 
 export const SKIN_TONES = ["1f3fb", "1f3fc", "1f3fd", "1f3fe", "1f3ff"] as const;
 
+const TONE_CODES = new Set<string>(SKIN_TONES);
+
+/** A unified code with its skin-tone modifiers removed: 1f44d-1f3fd → 1f44d. */
+export const withoutTone = (unified: string) =>
+  unified
+    .split("-")
+    .filter((part) => !TONE_CODES.has(part))
+    .join("-");
+
 /**
  * Applies skin tone 1-5 to a unified code: drop the FE0F that follows the
  * first codepoint and insert the modifier after it.

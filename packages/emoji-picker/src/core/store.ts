@@ -132,7 +132,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     /** Base record for a unified code, a skin-tone variation or a custom emoji id. */
     get: (unified: string) => byUnified.get(unified.toLowerCase()) ?? byUnified.get(unified),
 
-    /** The search index, built on first use (16 ms at 1x CPU, 59 ms at 4x in the benchmark). */
+    /** The search index, built on first use. */
     index(): SearchIndex {
       if (status !== "ready") throw new Error("emoji data is not loaded; await store.load() first");
       return (index ??= indexFor(records));

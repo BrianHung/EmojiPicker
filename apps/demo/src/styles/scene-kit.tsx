@@ -346,6 +346,5 @@ export function EmojiText({ text, size, className }: { text: string; size: numbe
     });
     if (run) out.push(run);
     return <>{out}</>;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, store, status, size, className]);
 }

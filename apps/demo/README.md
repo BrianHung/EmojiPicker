@@ -1,129 +1,73 @@
-# emoji.brianhung.me
+# Demo site
 
-The docs site for `@brianhung/emoji-picker`: a Vite multi-page app, plus a Cloudflare Worker (`worker/`) that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy together as one Worker: the pages as static assets, `/api/*` to the Worker.
+The documentation site for `@brianhung/emoji-picker`, served at [emoji.brianhung.me](https://emoji.brianhung.me). It's a Vite multipage app plus a Cloudflare Worker that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy as one Worker.
+
+## Run locally
+
+From the repository root:
 
 ```sh
-npm install           # at the repository root
+npm install
 npm run dev -w demo   # http://localhost:5199
 ```
 
-In `npm run dev`, the Cloudflare Vite plugin runs the Worker locally. Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/decide` answer `503 {"error":"unavailable"}` and the page falls back to lexical search. To use the real bindings in dev, log in and run `CLOUDFLARE_REMOTE_BINDINGS=1 npm run dev -w demo`.
+Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/decide` return `503` in development and the page falls back to lexical search. To use the real bindings, sign in with Wrangler and set `CLOUDFLARE_REMOTE_BINDINGS=1`.
 
-## Layout
+## Project layout
 
-- `index.html`, `gallery/`, `examples/**/index.html`, `shot.html`: the page entries (Vite multi-page; the paths are the URLs).
-- `src/pages/<route>/`: each page's `main.tsx` and page-only components. The example pages are `page.mdx` (prose and code) plus their live demo.
-- `src/styles/<app>/`: each app style, a `picker.tsx` layout and a `scene.tsx` mockup; `src/styles/index.ts` lists them.
-- `src/components/`: `ui/` (shadcn), `site/` (shell, docs primitives, MDX components, table of contents), and the reusable demo components (Tiptap and Lexical integrations, autocomplete, the Base UI-style demos).
-- `registry/`: the shadcn registry item (`npm run build:registry` writes `public/r/`). The site renders it as `@/registry/emoji-picker`.
-- `plugins/`: MDX and the Markdown routes (`/docs.md`, `/examples/*.md`, `/llms.txt`, built from the package README and each `page.mdx`).
-- `worker/`: the Cloudflare Worker for `/api/*`. `capture/`: the screenshot and parity harness (`/shot.html`).
+| Path | Contents |
+|---|---|
+| `index.html`, `gallery/`, `examples/**/index.html` | Page entries. Each path is its URL. |
+| `src/pages/` | Each page's `main.tsx`. Example pages are a `page.mdx` and a live demo. |
+| `src/styles/<app>/` | An app style: a `picker.tsx` layout and a `scene.tsx` mockup. |
+| `src/components/` | shadcn components (`ui/`), site chrome (`site/`), and the Tiptap, Lexical and autocomplete integrations. |
+| `registry/` | The shadcn registry item. `npm run build:registry` writes it to `public/r/`. |
+| `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md` and `/llms.txt`. |
+| `worker/` | The Worker for `/api/*`. |
+| `capture/`, `shot.html` | Screenshot and parity tooling. |
 
-## Deploy your own
+## Deploy
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/BrianHung/EmojiPicker/tree/main/apps/demo)
 
-The semantic search page has three approaches. On device needs nothing on the server. The other two run on this Worker:
-
-| Approach | Route | Uses |
-|---|---|---|
-| Vector DB | `POST /api/embed-search` | Workers AI (`@cf/baai/bge-large-en-v1.5`) and the Vectorize index `emoji-bge-large` |
-| Decision model | `POST /api/decide` | Workers AI: Jev (`typesafe/jev`) or Clef (`clef-omni`, `clef-flash`, `clef`), through AI Gateway |
-
-What gets created in your account:
-
-| | Name | How |
-|---|---|---|
-| Worker + static assets | `emoji-picker` | the deploy |
-| Workers AI binding `AI` | | the deploy |
-| Vectorize index, 1,024 dimensions, cosine | `emoji-bge-large` | `npm run create-index` |
-| AI Gateway | `default` | created on its first request |
-| Secret | `ADMIN_TOKEN` | asked for by the button, or set with the CLI |
-
-Clef and Jev are both served by Workers AI through the `AI` binding: no other provider or API key. Nothing in the config names an account: deploys go to the account you're logged in to.
-
-### With the `cf` CLI
-
-From `apps/demo`:
+Or, from `apps/demo` with Wrangler:
 
 ```sh
-npx cf auth login
-npm run create-index    # the Vectorize index, before the first deploy
-npx cf deploy           # builds the site and the Worker
-
-# The token that guards POST /api/admin/seed
-export ADMIN_TOKEN=$(node -e "console.log(crypto.randomUUID())")
-npx cf workers secrets update --worker emoji-picker --name ADMIN_TOKEN --type secret_text --text "$ADMIN_TOKEN"
-
-# Embed every emoji into the index (about 2,000 vectors; safe to run again)
-npm run seed -- --url https://emoji-picker.<your-subdomain>.workers.dev --token "$ADMIN_TOKEN"
+npm run create-index           # Vectorize index emoji-bge-large, 1,024 dimensions, cosine
+npm run build && npm run deploy
+npx wrangler secret put ADMIN_TOKEN
+npm run seed -- --url https://emoji-picker.<subdomain>.workers.dev --token "$ADMIN_TOKEN"
 ```
 
-`https://emoji-picker.<your-subdomain>.workers.dev/examples/semantic-search/` then answers all three tabs. With more than one account, set `CLOUDFLARE_ACCOUNT_ID` first. To index your own emoji as well, add `--custom ./my-emoji.json` to the seed command.
+`npm run seed` embeds every emoji into the index and is safe to run again. Add `--custom ./my-emoji.json` to index your own emoji too.
 
-### With Wrangler
+The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `wrangler.jsonc` (for the Deploy button and Workers Builds). Keep them in sync; `npm test` fails if they differ. To call the API from another origin, add it to `ALLOWED_ORIGINS` and build the pages with `VITE_SEARCH_API_URL` set to the Worker's URL.
 
-```sh
-npm run create-index -w demo
-npm run build -w demo && npm run deploy -w demo
-npx wrangler secret put ADMIN_TOKEN    # from apps/demo
-npm run seed -w demo -- --url https://emoji-picker.<your-subdomain>.workers.dev --token "$ADMIN_TOKEN"
-```
+## API
 
-### Changing names
-
-The Worker is configured twice: `cloudflare.config.ts` for the `cf` CLI and `wrangler.jsonc` for the Deploy button and Workers Builds, which read only Wrangler config. Change both; `npm test -w demo` fails if they disagree.
-
-- Worker name: `name`. The site's URL follows it.
-- Vectorize index: `EMOJI_INDEX`'s index name, and the `create-index` script in `package.json`.
-- AI Gateway: `AI_GATEWAY_ID` (default `default`).
-- Decision models: `CATALOG` in `worker/decide.ts` (id, context window, price).
-- Pages served from another origin: add it to `ALLOWED_ORIGINS` (comma-separated; `*` matches any characters), and build the pages with `VITE_SEARCH_API_URL=https://<worker>` so they call it instead of their own origin.
-
-## The API
-
-| Route | Body | Returns |
+| Route | Body | Response |
 |---|---|---|
-| `POST /api/embed-search` | `{ query, limit?, custom? }` | `{ hits: [{ unified, score }], model, timings: { embedMs, queryMs } }` |
-| `POST /api/decide` | `{ query, model: "clef-flash" \| "clef-omni" \| "clef" \| "jev", limit?, custom? }` | `{ hits, model, usage: { inputTokens, outputTokens, requests, costUsd }, timings: { round1Ms, round2Ms } }` |
-| `POST /api/admin/seed` | `{ from?, count?, custom? }`, `Authorization: Bearer <ADMIN_TOKEN>` | `{ total, from, next, done, upserted, mutationIds }` |
-| `GET /api/health` | | corpus size, vectors in the index, the decision model ids |
+| `POST /api/embed-search` | `{ query, limit?, custom? }` | `{ hits, model, timings }` |
+| `POST /api/decide` | `{ query, model, limit?, custom? }` | `{ hits, model, usage, timings }` |
+| `POST /api/admin/seed` | `{ from?, count?, custom? }` with `Authorization: Bearer <ADMIN_TOKEN>` | `{ total, from, next, done, upserted, mutationIds }` |
+| `GET /api/health` | | Corpus size, index size and model ids |
 
-`limit` is 1–50 (default 24). `custom: true` includes custom emoji. A binding that can't be reached, or an empty index, answers `503 {"error":"unavailable","message":…}`.
+`limit` is 1–50 and defaults to 24. `custom: true` includes custom emoji. `model` is one of the keys of `CATALOG` in `worker/decide.ts`: `clef-flash`, `clef-omni`, `clef` or `jev`. An unreachable binding or an empty index returns `503`.
 
-### Models and costs
-
-**Vector DB.** bge-large-en-v1.5 embeds the query (about 20 tokens) at $0.204 per 1M input tokens, and Vectorize queries about 2,000 stored vectors of 1,024 dimensions at $0.01 per 1M queried dimensions. Seeding embeds about 40,000 tokens once. Per search, both round to a fraction of a cent.
-
-**Decision model.** Jev and Clef speak the same System One protocol: `env.AI.run(model, { state, questions })` returns `{ answers, usage }` (Jev wraps it in `result`; Clef's schema also takes its short name as `model`). A choice question gets a probability per option. A question takes 2–255 options and a request at most 64 questions, within the model's context. So the Worker asks in two rounds: the emoji names in groups of 250, then one question over the top picks of each group. Measured on the deployed site (six queries, about 31,500 input tokens per search; output tokens are free):
-
-| Model | Context | Per M input tokens | Per search | Latency |
-|---|---|---|---|---|
-| `typesafe/jev` | 65,536 | $0.042 | $0.0007 | 0.5–1.7 s |
-| `@cf/cloudflare/clef-omni` | 64,000 | $0.15 | $0.0047 | 1.7 s |
-| `@cf/cloudflare/clef-flash` | 24,576 | $0.038 | $0.0012 | 5.8 s (three requests) |
-| `@cf/cloudflare/clef` | 65,536 | $0.24 | $0.0075 | 4–4.7 s |
+`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks a decision model in two rounds, since a question takes at most 255 options: the emoji names in groups of 250, then one question over each group's top picks.
 
 ## Custom emoji
 
-Custom emoji use the library's `CustomEmoji` shape (`id`, `name`, `imageUrl`, `shortcodes?`, `tags?`, `group?`), plus an optional one-line `description` that is embedded with the name. The page's sample set is `src/lib/semantic-search/custom-emoji.json`; the Worker bundles the same file, so the seed indexes it and the decision models offer those names too.
+The search corpus includes `src/lib/semantic-search/custom-emoji.json`, in the library's `CustomEmoji` shape with an optional `description`. To build the on-device index for your own set:
 
 ```sh
-# On device: the same int8 format as the built-in index
 npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/custom.i8
 ```
 
-```sh
-# Vector DB: embed them into the index next to the built-in set
-npm run seed -- --url https://emoji-picker.<your-subdomain>.workers.dev --token "$ADMIN_TOKEN" --custom ./my-emoji.json
-```
-
-To have the decision models offer them as well, replace `src/lib/semantic-search/custom-emoji.json` and redeploy.
-
-## Tests
+## Test
 
 ```sh
-npm test -w demo        # the Worker, with Workers AI and Vectorize mocked
-npm run typecheck -w demo
-npx tsx worker/test/mock-server.ts --port 8799   # the real Worker over mocked bindings, for offline UI work
+npm test            # Worker tests, with Workers AI and Vectorize mocked
+npm run typecheck
+npx tsx worker/test/mock-server.ts --port 8799   # the Worker over mocked bindings
 ```

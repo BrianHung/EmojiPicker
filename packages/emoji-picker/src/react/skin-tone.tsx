@@ -5,7 +5,7 @@ import { Emoji } from "./emoji";
 import { useSkinTone } from "./hooks";
 import { mergeRefs, useKeyRegion, useSkinToneToggle } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
-import { SLOTS } from "./slots";
+import { SLOTS, joinClasses } from "./slots";
 
 const TONE_IDS = ["neutral", ...SKIN_TONES] as const;
 const TONE_LABELS = ["Default skin tone", "Light skin tone", "Medium-light skin tone", "Medium skin tone", "Medium-dark skin tone", "Dark skin tone"];
@@ -45,7 +45,7 @@ function withButtonProps(Base: React.ComponentType<SkinToneButtonProps & { emoji
   if (!own && !className) return Base as React.ComponentType<SkinToneButtonProps>;
   return function ToneButton(props: SkinToneButtonProps) {
     // Only the built-in emoji button takes `emoji`; custom buttons spread props onto the DOM.
-    return <Base {...props} {...(own ? { emoji } : {})} className={[className, props.className].filter(Boolean).join(" ") || undefined} />;
+    return <Base {...props} {...(own ? { emoji } : {})} className={joinClasses(className, props.className)} />;
   };
 }
 

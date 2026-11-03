@@ -115,7 +115,7 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
                 pickerClassName={POPUP_SHADOW}
                 triggerClassName="absolute top-[59.8px] -left-10 flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-[state=open]:bg-(--hover)"
               >
-                <Emoji unified={icon} size={20} className="text-[20px] leading-none" />
+                <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
               </ScenePicker>
               <h1 className="text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
                 Emoji popover clips under the toolbar
@@ -174,7 +174,7 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
           <SidebarIcon />
         </span>
         <span className="ml-3 flex min-w-0 items-center gap-1.5">
-          <Emoji unified={icon} size={14} className="text-[14px] leading-none" />
+          <Emoji emoji={icon} size={14} className="text-[14px] leading-none" />
           <span className="shrink-0">ABC-12</span>
           <span className="truncate">Emoji popover clips under the toolbar</span>
         </span>
@@ -220,7 +220,7 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
               onSelect={(s) => setIcon(s.unified)}
               triggerClassName="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
             >
-              <Emoji unified={icon} size={20} className="text-[20px] leading-none" />
+              <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
             </ScenePicker>
           </div>
           {/* Status, priority, assignee, labels: 24px chips, 6px apart. */}
@@ -287,7 +287,7 @@ function Breadcrumb({ icon }: { icon: string }) {
       <span>Issues</span>
       <Chevron />
       <span className="flex items-center gap-1.5">
-        <Emoji unified={icon} size={14} className="text-[14px] leading-none" />
+        <Emoji emoji={icon} size={14} className="text-[14px] leading-none" />
         <span style={{ color: C.muted }}>ABC-12</span> Emoji popover clips under the toolbar
       </span>
       <span className="ml-1" style={{ color: C.muted }}>
@@ -371,7 +371,7 @@ function Pills({ reactions, onToggle }: { reactions: Reaction[]; onToggle: (unif
             onClick={() => onToggle(r.unified)}
             className={cn("flex shrink-0 cursor-pointer items-center gap-1 tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]", linear.pill.base, linear.pill.mine)}
           >
-            <Emoji unified={r.unified} size={14} className="text-[14px] leading-none" />
+            <Emoji emoji={r.unified} size={14} className="text-[14px] leading-none" />
             <span className="font-medium">{r.count}</span>
           </button>
         );
@@ -572,7 +572,7 @@ const TEAM_TABS = (
 function TeamIconPopover({ value, onChange, sheet = false }: { value: string; onChange: (unified: string) => void; sheet?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const t = themed(THEME);
-  const tile = <Emoji unified={value} size={18} className="text-[18px] leading-none" />;
+  const tile = <Emoji emoji={value} size={18} className="text-[18px] leading-none" />;
   if (sheet)
     return (
       <PickerSheet

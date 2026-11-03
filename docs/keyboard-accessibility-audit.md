@@ -34,18 +34,19 @@ The Instagram reaction bar is a `dialog` of buttons named by their emoji charact
 - Slack exposes structure well (tabs, per-section grids, descriptive names) but moves focus out of the search field, has no combobox semantics, and announces no result count.
 - No app supports Page Up / Page Down; none lets users remap keys.
 
-## @brianhung/emoji-picker (target, verified before release)
+## @brianhung/emoji-picker
 
-Defaults follow Discord; the rest is configurable.
+Defaults follow Discord; the rest is configurable. Each row is checked in Chrome by `npm run test:e2e` and `npm run test:a11y` in `packages/emoji-picker`.
 
 | | Behaviour |
 |---|---|
 | Search field | `combobox` with `aria-controls`, `aria-expanded`, `aria-activedescendant` |
-| Grid | `grid` › `row` › `gridcell`; names include the skin tone |
+| Grid | `grid` › `row` › `gridcell` (the vertical list adds a `rowgroup` per section); names include the skin tone (“thumbs up: medium skin tone”) |
 | Results | polite live region (“24 results”) |
-| Arrows, Home / End, Page Up / Down | move the highlight; Left / Right edit text unless the caret is at an edge |
+| Arrows, Page Up / Down | move the highlight; Left / Right edit the query unless the caret is at its end |
+| Home / End | move the caret in the search field; Ctrl+Home / Ctrl+End move the highlight to the first and last emoji |
 | Hover | sets the highlight (`pointer="follows"`), or stays separate (`"independent"`) |
 | Focus | stays in search (`focusModel="input"`), or moves into the grid (`"grid"`) |
 | After a pick | focus and highlight stay when the picker stays open |
-| Escape | closes; focus returns to the trigger |
-| Customisation | `keymap` remaps actions; `onKeyDown` runs first and can call `preventDefaultHandler()` |
+| Escape | clears the query, then closes; focus returns to the trigger |
+| Customisation | `keymap` remaps actions; a part’s `onKeyDown` runs first and can call `event.preventEmojiPickerHandler()` |

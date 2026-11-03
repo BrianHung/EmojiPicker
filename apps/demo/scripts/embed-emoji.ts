@@ -16,7 +16,7 @@ import type { CustomEmoji, Dataset } from "@brianhung/emoji-picker";
 import { emojiText } from "../src/lib/semantic-search/emoji-text";
 import { encodeIndex } from "../src/lib/semantic-search/vectors";
 
-export const MODEL = "Xenova/bge-small-en-v1.5";
+const MODEL = "Xenova/bge-small-en-v1.5";
 const BATCH = 64;
 const here = dirname(fileURLToPath(import.meta.url));
 

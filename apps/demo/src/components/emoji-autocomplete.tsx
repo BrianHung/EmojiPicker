@@ -1,4 +1,4 @@
-// shadcn/ui-styled :shortcode: autocomplete (future registry item). The hook
+// shadcn/ui-styled :shortcode: autocomplete. The hook
 // owns matching, highlight, keys and ARIA; this file is only markup and classes.
 import * as React from "react";
 import { Emoji, useShortcodeAutocomplete, type ShortcodeAutocomplete, type ShortcodeAutocompleteOptions } from "@brianhung/emoji-picker";
@@ -71,7 +71,7 @@ export function EmojiAutocomplete({ autocomplete: ac, appearance = SURFACE, clas
               renderItem(s, i === ac.highlightedIndex)
             ) : (
               <>
-                <Emoji unified={s.record.unified} size={20} className="text-xl leading-none" />
+                <Emoji emoji={s.record.unified} size={20} className="text-xl leading-none" />
                 <span className="font-medium">:{s.shortcode}:</span>
                 <span className="ml-auto truncate pl-3 text-xs text-muted-foreground">{s.record.name}</span>
               </>

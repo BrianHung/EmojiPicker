@@ -1,10 +1,10 @@
 import * as React from "react";
 import * as Epr from "emoji-picker-react/primitives";
 import type { EmojiClickData, EmojiData as EprEmojiData } from "emoji-picker-react/primitives";
-import type { EmojiSelection } from "../core/store";
+import type { EmojiSelection, EmojiStore } from "../core/store";
 import { fromEprTone, toEprCategories, toEprCustomEmojis, toEprData, toEprTone, type CategoryOption } from "./adapter";
 import { useFrequentEmoji, useSkinTone } from "./hooks";
-import { useEmojiContext, useStoreSnapshot } from "./provider";
+import { useEmojiContext, useStoreSnapshot, type EmojiLabels } from "./provider";
 import { SkinTone as OwnSkinTone, SkinToneButtonProvider } from "./skin-tone";
 import { NavContext, SIZE_VARIABLES, SLOTS, listSlots, rootSlots, slotted, useStructureStyles } from "./slots";
 import { ResultsList, ResultsProvider, useResults, useResultsKeyboard, type SearchResultsMode } from "./results";
@@ -21,9 +21,7 @@ import { useRovingRow } from "./reactions";
 import { StripList } from "./strip";
 import { PickerDataContext, StripActiveEmojiContext, StripNavContext, StripProvider, type FocusModel, type PickerData, type PointerModel } from "./strip-context";
 
-export type { SearchResultsMode };
-
-export type { CategoryOption, FocusModel, PointerModel };
+export type { CategoryOption, FocusModel, PointerModel, SearchResultsMode };
 
 /**
  * Props for a custom section header. Spread everything except `category` onto the
@@ -91,7 +89,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   pointer?: PointerModel;
   /** Draw these emoji with your own art in this picker; see EmojiOverrides. */
   artwork?: ArtworkMap;
-  /** @deprecated Use `focusModel` ("input" is `keepSearchFocus`). */
+  /** @deprecated Use `focusModel`: `true` is "input", `false` is "grid". */
   keepSearchFocus?: boolean;
   /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
   emojiVersion?: number;
@@ -136,8 +134,8 @@ const NO_HIDDEN: string[] = [];
 /** Pickers share one loader per store, so epr's data cache sees a stable identity. */
 const loaders = new WeakMap<object, () => Promise<EprEmojiData>>();
 /** And, once loaded, one converted dataset per store (and labels). */
-const resolved = new WeakMap<object, { labels: unknown; data: EprEmojiData }>();
-function resolvedData(store: ReturnType<typeof useEmojiContext>["store"], labels: ReturnType<typeof useEmojiContext>["labels"]): EprEmojiData {
+const resolved = new WeakMap<object, { labels: EmojiLabels; data: EprEmojiData }>();
+function resolvedData(store: EmojiStore, labels: EmojiLabels): EprEmojiData {
   const cached = resolved.get(store);
   if (cached && cached.labels === labels) return cached.data;
   const data = toEprData(store.records(), store.groupNames(), labels);
@@ -200,7 +198,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const hideSuggested = engine?.hideSuggested ?? false;
   const suggestedEmojis = React.useMemo(
     () => (hideSuggested ? [] : (suggested ?? (frequent === false ? [] : top)).map((u) => store.withSkinTone(u))),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [suggested, frequent, top, store, tone, hideSuggested],
   );
   useStructureStyles(rest.nonce);
@@ -231,54 +228,54 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   return (
     <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={close}>
       {(keyboard) => (
-    <Epr.Root
-      ref={mergeRefs(ref, rootRef, keyboard.ref)}
-      data-slot={SLOTS.root}
-      {...rest}
-      onKeyDownCapture={(e: React.KeyboardEvent<HTMLElement>) => {
-        onKeyDownCapture?.(e);
-        if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
-      }}
-      autoFocusSearch={autoFocus}
-      keepSearchFocus={focusModel === "input"}
-      cssLayer={cssLayer}
-      components={slottedComponents}
-      columns={columns}
-      style={{ ...SIZE_VARIABLES, ...(columns ? { "--emoji-results-columns": columns } : {}), ...style } as React.CSSProperties}
-      // Once loaded, the data itself rather than the loader: the engine then gets it in
-      // the same render as customEmojis, instead of a frame with only the customs
-      // (which mounts, and requests the images of, emoji the user never sees).
-      emojiData={engine?.data ?? fullData ?? emojiData}
-      customEmojis={customEmojis}
-      hiddenEmojis={engine?.hiddenCustoms.length ? engine.hiddenCustoms : NO_HIDDEN}
-      emojiStyle={renderer === "twemoji" ? Epr.EmojiStyle.TWITTER : Epr.EmojiStyle.NATIVE}
-      getEmojiUrl={imageUrl}
-      skinTone={toEprTone(tone)}
-      onSkinToneChange={(t) => setTone(fromEprTone(t))}
-      suggestedEmojis={suggestedEmojis}
-      onEmojiClick={handleClick}
-      onReactionClick={handleClick}
-      reactions={heldReactions ? [...heldReactions] : undefined}
-      variationsDisabled={disableVariations}
-      emojiVersion={emojiVersion != null ? String(emojiVersion) : undefined}
-      labels={searchPlaceholder ? { ...LABELS, searchPlaceholder } : LABELS}
-      searchValue={search}
-      defaultSearchValue={defaultSearch}
-      onSearchChange={onSearchChange}
-      {...(categoryProps ?? {})}
-    >
-      <ResultsProvider mode={searchResults} limit={searchLimit} categoryNames={categoryNames} emojiVersion={emojiVersion} onPick={pickResult}>
-        <CollapseContext.Provider value={collapse}>
-          <NavContext.Provider value={nav}>
-            <PickerDataContext.Provider value={pickerData}>
-              <StripProvider>
-                <SkinToneButtonProvider value={components?.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
-              </StripProvider>
-            </PickerDataContext.Provider>
-          </NavContext.Provider>
-        </CollapseContext.Provider>
-      </ResultsProvider>
-    </Epr.Root>
+        <Epr.Root
+          ref={mergeRefs(ref, rootRef, keyboard.ref)}
+          data-slot={SLOTS.root}
+          {...rest}
+          onKeyDownCapture={(e: React.KeyboardEvent<HTMLElement>) => {
+            onKeyDownCapture?.(e);
+            if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
+          }}
+          autoFocusSearch={autoFocus}
+          keepSearchFocus={focusModel === "input"}
+          cssLayer={cssLayer}
+          components={slottedComponents}
+          columns={columns}
+          style={{ ...SIZE_VARIABLES, ...(columns ? { "--emoji-results-columns": columns } : {}), ...style } as React.CSSProperties}
+          // Once loaded, the data itself rather than the loader: the engine then gets it in
+          // the same render as customEmojis, instead of a frame with only the customs
+          // (which mounts, and requests the images of, emoji the user never sees).
+          emojiData={engine?.data ?? fullData ?? emojiData}
+          customEmojis={customEmojis}
+          hiddenEmojis={engine?.hiddenCustoms.length ? engine.hiddenCustoms : NO_HIDDEN}
+          emojiStyle={renderer === "twemoji" ? Epr.EmojiStyle.TWITTER : Epr.EmojiStyle.NATIVE}
+          getEmojiUrl={imageUrl}
+          skinTone={toEprTone(tone)}
+          onSkinToneChange={(t) => setTone(fromEprTone(t))}
+          suggestedEmojis={suggestedEmojis}
+          onEmojiClick={handleClick}
+          onReactionClick={handleClick}
+          reactions={heldReactions ? [...heldReactions] : undefined}
+          variationsDisabled={disableVariations}
+          emojiVersion={emojiVersion != null ? String(emojiVersion) : undefined}
+          labels={searchPlaceholder ? { ...LABELS, searchPlaceholder } : LABELS}
+          searchValue={search}
+          defaultSearchValue={defaultSearch}
+          onSearchChange={onSearchChange}
+          {...(categoryProps ?? {})}
+        >
+          <ResultsProvider mode={searchResults} limit={searchLimit} categoryNames={categoryNames} emojiVersion={emojiVersion} onPick={pickResult}>
+            <CollapseContext.Provider value={collapse}>
+              <NavContext.Provider value={nav}>
+                <PickerDataContext.Provider value={pickerData}>
+                  <StripProvider>
+                    <SkinToneButtonProvider value={components?.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
+                  </StripProvider>
+                </PickerDataContext.Provider>
+              </NavContext.Provider>
+            </CollapseContext.Provider>
+          </ResultsProvider>
+        </Epr.Root>
       )}
     </KeyboardProvider>
   );
@@ -332,6 +329,8 @@ export type ListProps = Omit<React.ComponentProps<typeof Epr.List>, "components"
   /** Classes for every section title (`data-slot="category-header"`). */
   headerClassName?: string;
 };
+const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
+
 export type CategoryNavProps = Omit<React.ComponentProps<typeof Epr.CategoryNav>, "onKeyDown"> & {
   /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
@@ -354,6 +353,8 @@ export const Search = React.forwardRef<HTMLDivElement, SearchProps>(function Sea
   const region = useKeyRegion((action, event) => {
     const field = event.target;
     if (!(field instanceof HTMLInputElement) || !action) return "pass";
+    // Left and Right edit the query unless the caret is at its end.
+    if ((action === "move-left" || action === "move-right") && !caretAtEnd(field)) return "native";
     if (results?.active) return resultsKeys(action, event);
     if (focusModel === "grid") {
       // A horizontal List isn't one of the engine's regions: Down from the field enters it here.
@@ -375,13 +376,13 @@ export const Search = React.forwardRef<HTMLDivElement, SearchProps>(function Sea
   });
   const merged = React.useMemo(() => mergeRefs(ref, region, userKeys), [ref, region, userKeys]);
   useOwnHighlightEscape(searchRef, () => strip?.clear());
-  // data-autofocus: an EmojiPopover focuses it once visible (autoFocus misses a hidden field).
   // The highlighted result or strip cell, while focus stays in the field (the engine's list sets its own).
   const activeDescendant = focusModel !== "input" ? undefined : results?.active ? (results.highlighted >= 0 ? results.cellId(results.highlighted) : undefined) : strip?.activeDescendant;
   useActiveDescendant(searchRef, activeDescendant);
   useControlsList(searchRef);
   const engineInput = {
     "data-slot": SLOTS.searchInput,
+    // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
     ...(autoFocusSearch ? { "data-autofocus": "" } : {}),
     ...input,
     onBlur: (e: React.FocusEvent<HTMLInputElement>) => {

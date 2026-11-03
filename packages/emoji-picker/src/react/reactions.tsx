@@ -1,18 +1,12 @@
 // Internal: a tapback's reaction row on top of the engine's (a <ul> of buttons).
 import * as React from "react";
-import { SKIN_TONES } from "../core/dataset";
+import { withoutTone } from "../core/dataset";
 
 /** The user's current reactions (base unified codes), for aria-pressed on their buttons. */
 export const SelectedReactionsContext = React.createContext<ReadonlySet<string> | null>(null);
 
-const TONES = new Set<string>(SKIN_TONES);
 /** A code without skin-tone modifiers, lowercased: how reactions are compared. */
-export const reactionKey = (unified: string) =>
-  unified
-    .toLowerCase()
-    .split("-")
-    .filter((part) => !TONES.has(part))
-    .join("-");
+export const reactionKey = (unified: string) => withoutTone(unified.toLowerCase());
 
 /** Whether a reaction button's emoji is one of the user's, in any skin tone. */
 export const isPressed = (selected: ReadonlySet<string>, unified: string) => selected.has(reactionKey(unified));

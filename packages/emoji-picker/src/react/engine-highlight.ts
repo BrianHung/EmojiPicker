@@ -20,7 +20,7 @@ let ids = 0;
 const releasing = new WeakSet<HTMLInputElement>();
 
 /** The highlighted cell under `scroller`, if any. */
-export const engineHighlighted = (scroller: Element | null) => scroller?.querySelector<HTMLElement>(`[${MARK}]`) ?? null;
+const engineHighlighted = (scroller: Element | null) => scroller?.querySelector<HTMLElement>(`[${MARK}]`) ?? null;
 
 /** Scrolls only the picker's own scroller so `cell` is in view (scrollIntoView would also scroll the page). */
 function reveal(scroller: HTMLElement, cell: HTMLElement) {
@@ -36,7 +36,7 @@ function reveal(scroller: HTMLElement, cell: HTMLElement) {
  * the input's aria-activedescendant, and the preview (footer). The engine's next
  * arrow and Enter start from here.
  */
-export function highlightEngineCell(input: HTMLInputElement, cell: HTMLElement, { scroll = true } = {}) {
+function highlightEngineCell(input: HTMLInputElement, cell: HTMLElement, { scroll = true } = {}) {
   const scroller = cell.closest<HTMLElement>(SCROLLER);
   engineHighlighted(scroller)?.removeAttribute(MARK);
   cell.setAttribute(MARK, "");

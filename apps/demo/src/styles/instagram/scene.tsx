@@ -7,8 +7,7 @@
 // (radius 22, 11px in, a 32px emoji button).
 // On a phone it is the mobile web thread at real size: press and hold (or right-click,
 // or Enter) a bubble for the reaction bar, double-tap for ❤️, and "+" and the composer's
-// smiley open the picker as a bottom sheet. The phone header is not measured (Chrome
-// couldn't take a phone viewport: Instagram refuses frames and the window won't resize).
+// smiley open the picker as a bottom sheet. The phone header is not measured.
 import * as React from "react";
 import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
@@ -281,7 +280,7 @@ function ReactionChip({ unified, mine, onRemove }: { unified: string; mine: bool
       className={cn("absolute -bottom-[18px] flex h-[22px] min-w-[26px] items-center justify-center rounded-full px-1 outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]", mine ? "right-2" : "left-2")}
       style={{ background: C.chip, border: `2px solid ${C.page}` }}
     >
-      <Emoji unified={unified} size={14} className="text-[14px] leading-none" />
+      <Emoji emoji={unified} size={14} className="text-[14px] leading-none" />
     </button>
   );
 }
@@ -334,7 +333,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
                 }}
                 className="cursor-pointer outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[#708dff]"
               >
-                <Emoji unified={store.withSkinTone(u)} />
+                <Emoji emoji={store.withSkinTone(u)} />
               </button>
             ))}
             {onMore ? (

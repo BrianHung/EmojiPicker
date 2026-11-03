@@ -40,7 +40,6 @@ export function P({ children, className }: { children: React.ReactNode; classNam
   return <p className={cn("text-[15px] leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:decoration-foreground/25 [&_a]:underline-offset-[5px] [&_a]:transition-colors [&_a:hover]:decoration-foreground [&_a:has(>code)]:underline-offset-[7px] [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground", className)}>{children}</p>;
 }
 
-/** Inline code. */
 export function C({ children }: { children: React.ReactNode }) {
   return <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px] text-foreground">{children}</code>;
 }
@@ -197,7 +196,7 @@ export function Collapsible({ lines, collapse, resetKey, children }: { lines: nu
 /* ------------------------------------------------------------ preview card */
 
 /** The live preview surface: a bordered, rounded card that centers its content. */
-export function Preview({ children, className }: { children: React.ReactNode; className?: string }) {
+function Preview({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("flex min-h-[320px] items-center justify-center rounded-xl border border-border bg-background p-6 sm:p-10", className)}>{children}</div>;
 }
 

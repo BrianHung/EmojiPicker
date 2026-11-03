@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import worker from "../index";
 import { BUILT_IN, CUSTOM, emojiText } from "../corpus";
-import { CATALOG, MAX_OPTIONS, MAX_QUESTIONS, chunk, labelOptions, pack } from "../decide";
+import { CATALOG, MAX_OPTIONS, MAX_QUESTIONS, chunk, labelOptions, pack, type DecisionResponse } from "../decide";
+import type { EmbedSearchResponse } from "../embed-search";
 import { mockEnv, post } from "./mocks";
 
 type Mock = ReturnType<typeof mockEnv>;
@@ -13,6 +14,7 @@ const seeded = async (overrides = {}) => {
   return mock;
 };
 const unreachable = () => Promise.reject(new Error("Binding AI needs to be run remotely"));
+const search = async (path: string, body: object, env: Mock["env"]) => (await (await fetch(post(path, body), env)).json()) as EmbedSearchResponse & DecisionResponse;
 
 describe("CORS", () => {
   it("answers preflight for allowed origins, wildcard ports included", async () => {
@@ -91,19 +93,19 @@ describe("POST /api/embed-search", () => {
     const res = await fetch(post("/api/embed-search", { query: "thumbs up", limit: 5 }), env);
     expect(res.status).toBe(200);
     expect(res.headers.get("server-timing")).toMatch(/embed;dur=\d+, vectorize;dur=\d+/);
-    const body = (await res.json()) as any;
+    const body = (await res.json()) as EmbedSearchResponse;
     expect(embedCalls.at(-1)!.text).toEqual(["Represent this sentence for searching relevant passages: thumbs up"]);
     expect(body.hits).toHaveLength(5);
-    expect(body.hits.map((h: any) => h.unified)).toContain("1f44d");
-    expect(body.hits[0].score).toBeGreaterThan(body.hits[4].score);
+    expect(body.hits.map((h) => h.unified)).toContain("1f44d");
+    expect(body.hits[0]!.score).toBeGreaterThan(body.hits[4]!.score);
     expect(body).toMatchObject({ model: "@cf/baai/bge-large-en-v1.5", timings: { embedMs: expect.any(Number), queryMs: expect.any(Number) } });
   });
   it("includes custom emoji only when asked", async () => {
     const { env, queries } = await seeded();
-    const without = (await (await fetch(post("/api/embed-search", { query: "rubber duck", limit: 10 }), env)).json()) as any;
-    expect(without.hits.some((h: any) => h.custom)).toBe(false);
+    const without = await search("/api/embed-search", { query: "rubber duck", limit: 10 }, env);
+    expect(without.hits.some((h) => h.custom)).toBe(false);
     expect(queries.at(-1)).toMatchObject({ topK: 50, returnMetadata: "all" });
-    const withCustom = (await (await fetch(post("/api/embed-search", { query: "rubber duck", limit: 10, custom: true }), env)).json()) as any;
+    const withCustom = await search("/api/embed-search", { query: "rubber duck", limit: 10, custom: true }, env);
     expect(withCustom.hits[0]).toMatchObject({ unified: "rubber-duck", custom: true, imageUrl: expect.stringMatching(/^data:image\/svg/) });
     expect(queries.at(-1)).toMatchObject({ topK: 10 });
   });
@@ -111,13 +113,6 @@ describe("POST /api/embed-search", () => {
     const res = await fetch(post("/api/embed-search", { query: "cat" }), mockEnv().env);
     expect(res.status).toBe(503);
     expect(await res.json()).toMatchObject({ error: "unavailable", message: expect.stringMatching(/seed/) });
-  });
-  it("answers 503 when the bindings can't be reached (local dev without remote bindings)", async () => {
-    const { env } = mockEnv();
-    env.AI = { run: unreachable } as unknown as Ai;
-    const res = await fetch(post("/api/embed-search", { query: "cat" }), env);
-    expect(res.status).toBe(503);
-    expect(await res.json()).toMatchObject({ error: "unavailable", message: expect.stringMatching(/remotely/) });
   });
 });
 
@@ -138,15 +133,18 @@ describe("POST /api/decide", () => {
     { model: "jev", returned: "jev", keys: ["questions", "state"], requests: 2 },
   ] as const)("$model", ({ model, returned, keys, requests }) => {
     const { id, price } = CATALOG[model];
-    it("runs the model on Workers AI through AI Gateway, with the model's request body", async () => {
+    it("runs the model through AI Gateway with its request body, unwraps `result` and prices the tokens", async () => {
       const { env, decideCalls } = mockEnv();
-      await fetch(post("/api/decide", { query: "cat", model }), env);
-      expect(decideCalls.length).toBeGreaterThan(0);
+      const body = await search("/api/decide", { query: "cat", model }, env);
       for (const call of decideCalls) {
         expect(call.model).toBe(id);
         expect(call.options).toMatchObject({ gateway: { id: "default" } });
         expect(Object.keys(call.input).sort()).toEqual(keys);
       }
+      expect(body.model).toBe(returned);
+      expect(body.usage.requests).toBe(requests);
+      expect(body.usage.inputTokens).toBeGreaterThan(0);
+      expect(body.usage.costUsd).toBeCloseTo(body.usage.inputTokens * price.input + body.usage.outputTokens * price.output, 12);
     });
     it("asks in two rounds: every name in <=255-option questions, then the finalists", async () => {
       const { env, decideCalls } = mockEnv();
@@ -162,32 +160,18 @@ describe("POST /api/decide", () => {
       expect(questions).toHaveLength(Math.ceil(BUILT_IN.length / 250));
       expect(questions.reduce((n, q) => n + Object.keys(q.criteria).length, 0)).toBe(BUILT_IN.length);
       expect(Object.keys(round2!.questions.q0!.criteria).length).toBeLessThanOrEqual(MAX_OPTIONS);
-      const body = (await res.json()) as any;
-      expect(body.hits[0].unified).toBe("1f44d");
+      const body = (await res.json()) as DecisionResponse;
+      expect(body.hits[0]!.unified).toBe("1f44d");
       expect(body.hits).toHaveLength(8);
       expect(body.timings).toEqual({ round1Ms: expect.any(Number), round2Ms: expect.any(Number) });
     });
-    it("unwraps `result` and prices the tokens", async () => {
-      const body = (await (await fetch(post("/api/decide", { query: "cat", model }), mockEnv().env)).json()) as any;
-      expect(body.model).toBe(returned);
-      expect(body.usage.requests).toBe(requests);
-      expect(body.usage.inputTokens).toBeGreaterThan(0);
-      expect(body.usage.costUsd).toBeCloseTo(body.usage.inputTokens * price.input + body.usage.outputTokens * price.output, 12);
-    });
-    it("offers custom emoji when asked", async () => {
-      const { env, decideCalls } = mockEnv();
-      const body = (await (await fetch(post("/api/decide", { query: "rubber duck", limit: 3, custom: true, model }), env)).json()) as any;
-      expect(decideCalls.slice(0, -1).some((c) => Object.values(c.input.questions).some((q) => "rubber duck (custom)" in q.criteria))).toBe(true);
-      expect(body.hits[0]).toMatchObject({ unified: "rubber-duck", custom: true, imageUrl: expect.stringMatching(/^data:image\/svg/) });
-    });
   });
 
-  it("answers 503 when the binding can't be reached (local dev without remote bindings)", async () => {
-    const { env } = mockEnv();
-    env.AI = { run: unreachable } as unknown as Ai;
-    const res = await fetch(post("/api/decide", { query: "cat", model: "jev" }), env);
-    expect(res.status).toBe(503);
-    expect(await res.json()).toMatchObject({ error: "unavailable", message: expect.stringMatching(/remotely/) });
+  it("offers custom emoji when asked", async () => {
+    const { env, decideCalls } = mockEnv();
+    const body = await search("/api/decide", { query: "rubber duck", limit: 3, custom: true, model: "jev" }, env);
+    expect(decideCalls.slice(0, -1).some((c) => Object.values(c.input.questions).some((q) => "rubber duck (custom)" in q.criteria))).toBe(true);
+    expect(body.hits[0]).toMatchObject({ unified: "rubber-duck", custom: true, imageUrl: expect.stringMatching(/^data:image\/svg/) });
   });
   it("answers 502 when the model returns no answers", async () => {
     const { env } = mockEnv();
@@ -210,13 +194,22 @@ describe("decision helpers", () => {
   });
 });
 
-describe("GET /api/health", () => {
-  it("404s other paths", async () => {
+describe("routing", () => {
+  it("404s unknown paths", async () => {
     expect((await fetch(post("/api/clef", { query: "cat" }), mockEnv().env)).status).toBe(404);
   });
-  it("reports what's configured", async () => {
+  it("answers 503 on both search routes when the AI binding can't be reached (local dev without remote bindings)", async () => {
+    const { env } = mockEnv();
+    env.AI = { run: unreachable } as unknown as Ai;
+    for (const [path, body] of [["/api/embed-search", { query: "cat" }], ["/api/decide", { query: "cat", model: "jev" }]] as const) {
+      const res = await fetch(post(path, body), env);
+      expect(res.status).toBe(503);
+      expect(await res.json()).toMatchObject({ error: "unavailable", message: expect.stringMatching(/remotely/) });
+    }
+  });
+  it("GET /api/health reports what's configured", async () => {
     const { env } = await seeded();
-    const body = (await (await fetch(new Request("https://w.dev/api/health", { headers: { origin: "http://localhost:5199" } }), env)).json()) as any;
+    const body = (await (await fetch(new Request("https://w.dev/api/health", { headers: { origin: "http://localhost:5199" } }), env)).json()) as Record<string, unknown>;
     expect(body).toMatchObject({
       corpus: BUILT_IN.length + CUSTOM.length,
       embed: { model: "@cf/baai/bge-large-en-v1.5", vectors: BUILT_IN.length + CUSTOM.length },

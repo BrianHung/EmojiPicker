@@ -4,14 +4,15 @@
 // Viewport, which scrolls sideways. Only the columns near the viewport render.
 import * as React from "react";
 import * as Epr from "emoji-picker-react/primitives";
-import { GROUPS, unifiedToNative } from "../core/dataset";
+import { GROUPS } from "../core/dataset";
+import { nameWithTone } from "../core/shortcodes";
 import { CollapseContext } from "./collapse";
 import { useSkinTone } from "./hooks";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 import { useKeyRegion, useUserKeyDown, mergeRefs, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { findArtwork, useArtworkMap } from "./overrides";
-import { Glyph, useResults, type NavKey } from "./results";
+import { Glyph, NAV_KEYS, cellEmoji, useResults, type Cell, type Header, type NavKey } from "./results";
 import { SLOTS } from "./slots";
 import { PickerDataContext, StripRegisterContext, StripSetActiveEmojiContext } from "./strip-context";
 import {
@@ -32,9 +33,6 @@ import {
   type StripLayout,
   type StripMetrics,
 } from "./strip-layout";
-
-type Cell = React.ComponentType<Epr.EmojiRenderProps>;
-type Header = React.ComponentType<Epr.CategoryHeaderRenderProps>;
 
 const CELL = "calc(var(--emoji-size, 30px) + 10px)";
 /** Read through a probe's computed style, so any CSS length (calc, rem, var) works. */
@@ -75,17 +73,6 @@ const sameMetrics = (a: Metrics, b: Metrics) => (Object.keys(a) as (keyof Metric
 const OVERSCAN = 4;
 const ORDER = [...GROUPS, "custom"] as string[];
 
-const ACTION_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
-  "move-up": "ArrowUp",
-  "move-down": "ArrowDown",
-  "move-left": "ArrowLeft",
-  "move-right": "ArrowRight",
-  "page-up": "PageUp",
-  "page-down": "PageDown",
-  first: "Home",
-  last: "End",
-};
-
 /** Where a logical key moves from `index`: arrows and Home/End as the grid does, a page by the columns in view. */
 function navigate(layout: StripLayout, index: number, key: NavKey, viewportWidth: number): number | null {
   if (key === "PageUp" || key === "PageDown") return pageInStrip(layout, index, key === "PageDown" ? 1 : -1, columnsPerPage(layout, viewportWidth));
@@ -116,7 +103,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   const engineCategories = Epr.useCategoryNavigation().categories;
   // A new array on every render; keep one per distinct list.
   const categoriesKey = engineCategories.map((c) => `${c.id}\u0000${c.name}`).join("\u0001");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const categories = React.useMemo(() => engineCategories, [categoriesKey]);
   const collapse = React.useContext(CollapseContext);
   const data = React.useContext(PickerDataContext);
@@ -138,7 +124,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       get: store.get,
       withSkinTone: (u) => store.withSkinTone(u),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, searching, results?.results, results?.mode, categories, data.suggested, data.emojiVersion, collapse, groups, store, tone]);
 
   const items = React.useMemo(() => sections.flatMap((s) => s.items), [sections]);
@@ -154,14 +139,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
 
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const probeRef = React.useRef<HTMLDivElement | null>(null);
-  const setRef = React.useCallback(
-    (el: HTMLDivElement | null) => {
-      listRef.current = el;
-      if (typeof forwardedRef === "function") forwardedRef(el);
-      else if (forwardedRef) forwardedRef.current = el;
-    },
-    [forwardedRef],
-  );
   const viewport = () => listRef.current?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? listRef.current?.parentElement ?? null;
 
   // Sizes come from CSS variables; re-read them after every render (cheap, and a
@@ -177,7 +154,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   latest.current = { layout, sections };
   /** Last scroll position, read at render (renders happen per window step, not per scroll event). */
   const scroll = React.useRef({ left: 0, width: 0 });
-  const [window_, setWindow] = React.useState({ from: 0, to: 0 });
+  const [scrollWindow, setWindow] = React.useState({ from: 0, to: 0 });
   const [active, setActive] = React.useState<string | null>(null);
   /** Target of a tab jump: the current section stays put until the scroll gets there. */
   const jumping = React.useRef<number | null>(null);
@@ -222,20 +199,17 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       el.removeEventListener("pointerdown", release);
       ro?.disconnect();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sync]);
   // Layout changes (data loaded, sizes, sections) can move the current section.
   React.useLayoutEffect(() => {
     const el = viewport();
     if (el) sync(el);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout, sync]);
 
   // A new query starts at the beginning, as does leaving search.
   React.useLayoutEffect(() => {
     const el = viewport();
     if (el && startOf(el)) el.scrollLeft = 0;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searching, results?.results]);
 
   // --- Focus (roving tabindex) and hover --------------------------------------
@@ -266,7 +240,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
         el.scrollLeft = toScrollLeft(el, left);
         sync(el);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [sync],
   );
@@ -310,7 +283,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       const reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
       el.scrollTo({ left: toScrollLeft(el, left), behavior: instant || reduce ? "auto" : "smooth" });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
   const focusGrid = React.useCallback(() => {
@@ -327,7 +299,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     }
     focusCell(index);
     return true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusIndex, focusCell]);
 
   // focusModel "input": keys from the search field move a highlight; focus stays there.
@@ -341,11 +312,9 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
         if (item) data.pick(item.record);
         return true;
       }
-      let key = ACTION_KEYS[action];
+      let key = NAV_KEYS[action];
       if (!key) return false;
-      const sideways = key === "ArrowLeft" || key === "ArrowRight";
-      if (sideways && !(input.selectionStart === input.value.length && input.selectionEnd === input.value.length)) return false;
-      if (sideways && isRtl(input)) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+      if ((key === "ArrowLeft" || key === "ArrowRight") && isRtl(input)) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
       const el = viewport();
       if (inputIndex == null) {
         // Down (or Right/End-ward keys) starts at the first emoji in view.
@@ -363,7 +332,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       } else if (key === "ArrowUp") setInputIndex(null); // back to typing
       return true;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [inputIndex, items, data, reveal],
   );
   const clearInputHighlight = React.useCallback(() => setInputIndex(null), []);
@@ -384,7 +352,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
         clear: clearInputHighlight,
         activeDescendant: !searching && inputIndex != null ? cellId(inputIndex) : undefined,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [register, active, jump, focusGrid, searching, keyFromInput, clearInputHighlight, inputIndex],
   );
   React.useEffect(() => () => register(null), [register]);
@@ -438,7 +405,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       cellEl.click();
       return "handled";
     }
-    let key = ACTION_KEYS[action];
+    let key = NAV_KEYS[action];
     if (!key) return "pass";
     if (listRef.current && isRtl(listRef.current) && (key === "ArrowLeft" || key === "ArrowRight")) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
     const next = navigate(layout, Number(cellEl.dataset.index), key, viewport()?.clientWidth ?? 0);
@@ -447,7 +414,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     return "handled";
   });
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const ref = React.useMemo(() => mergeRefs(setRef, region, userKeys), [setRef, region, userKeys]);
+  const ref = React.useMemo(() => mergeRefs(listRef, forwardedRef, region, userKeys), [forwardedRef, region, userKeys]);
 
   const pick = (item: StripItem) => {
     if (item.result != null && results) results.pick(item.result);
@@ -455,8 +422,8 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   };
 
   // --- Render ---------------------------------------------------------------
-  const ranges = visibleRange(layout, window_.from, window_.to);
-  const headers = visibleSections(layout, window_.from, window_.to);
+  const ranges = visibleRange(layout, scrollWindow.from, scrollWindow.to);
+  const headers = visibleSections(layout, scrollWindow.from, scrollWindow.to);
   let columnsBefore = 0;
   const columnOffset = layout.sections.map((s) => {
     const c = columnsBefore;
@@ -479,7 +446,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
           type="button"
           role="gridcell"
           tabIndex={index === current ? 0 : -1}
-          aria-label={item.record.name}
+          aria-label={nameWithTone(item.record.name, item.unified)}
           aria-selected={highlighted || undefined}
           aria-colindex={columnOffset[place.section]! + place.column + 1}
           data-index={index}
@@ -487,17 +454,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
           data-epr-unified={item.unified}
           // Our own attribute, not the engine's data-epr-highlighted: the engine treats that mark as its highlight and clears it.
           data-highlighted={highlighted ? "" : undefined}
-          emoji={
-            {
-              unified: item.unified,
-              names: [...item.record.shortcodes, item.record.name],
-              emoji: item.record.imageUrl ? item.unified : unifiedToNative(item.unified),
-              isCustom: Boolean(item.record.imageUrl),
-              imageUrl: item.record.imageUrl,
-              isActive,
-              hasVariations: item.record.tones.length > 0,
-            } as Epr.EmojiRenderProps["emoji"]
-          }
+          emoji={cellEmoji(item.record, item.unified, isActive)}
           onClick={() => pick(item)}
           onPointerEnter={(e: React.PointerEvent<HTMLElement>) => {
             if (!isActive) activeEmoji(index);

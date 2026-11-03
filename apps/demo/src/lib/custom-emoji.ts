@@ -1,7 +1,7 @@
 import type { CustomEmoji } from "@brianhung/emoji-picker";
 
 /** Self-contained custom emoji images (data URIs), standing in for your team's uploads. */
-export const badge = (label: string, bg: string, fg = "#fff") =>
+const badge = (label: string, bg: string, fg = "#fff") =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="${bg}"/><text x="32" y="42" font-family="system-ui,sans-serif" font-size="${label.length > 2 ? 20 : 28}" font-weight="700" text-anchor="middle" fill="${fg}">${label}</text></svg>`,
   )}`;

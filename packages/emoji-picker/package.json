@@ -2,7 +2,22 @@
   "name": "@brianhung/emoji-picker",
   "version": "3.0.0-alpha.0",
   "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
+  "keywords": [
+    "react",
+    "emoji",
+    "emoji-picker",
+    "headless",
+    "shortcodes",
+    "slack",
+    "tapback",
+    "twemoji",
+    "skin-tone",
+    "autocomplete"
+  ],
   "license": "MIT",
+  "author": "Brian Hung",
+  "homepage": "https://emoji.brianhung.me",
+  "bugs": "https://github.com/BrianHung/EmojiPicker/issues",
   "type": "module",
   "repository": {
     "type": "git",
@@ -15,7 +30,8 @@
   "files": [
     "dist",
     "data",
-    "src/styles"
+    "src/styles",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "exports": {
     ".": {

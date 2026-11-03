@@ -170,7 +170,7 @@ function Footer({ kind, layout, className }: { kind: NonNullable<PickerLayout["f
     const shown = active ?? fallback;
     return (
       <div className={className}>
-        <span className="flex size-7 items-center justify-center">{shown ? <Emoji unified={shown.unified} size={28} /> : null}</span>
+        <span className="flex size-7 items-center justify-center">{shown ? <Emoji emoji={shown.unified} size={28} /> : null}</span>
         <span className="truncate text-base leading-5 font-semibold">{shown ? shown.shortcodes.map((c) => `:${c}:`).join(" ") || shown.name : ""}</span>
       </div>
     );

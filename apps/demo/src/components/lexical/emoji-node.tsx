@@ -2,7 +2,7 @@
 // show as their image and Twemoji applies when the provider uses it. As text it is the
 // character (or `:shortcode:` for custom emoji), so content round-trips through Markdown.
 import * as React from "react";
-import { $applyNodeReplacement, DecoratorNode, TextNode, type EditorConfig, type LexicalNode, type NodeKey, type SerializedLexicalNode, type Spread } from "lexical";
+import { $applyNodeReplacement, DecoratorNode, TextNode, type EditorConfig, type NodeKey, type SerializedLexicalNode, type Spread } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { Emoji, useEmojiStore } from "@brianhung/emoji-picker";
 import type { EmojiStore } from "@brianhung/emoji-picker/core";
@@ -71,16 +71,12 @@ export class EmojiNode extends DecoratorNode<React.JSX.Element> {
   }
 
   decorate() {
-    return <Emoji unified={this.__attrs.unified} size={20} className="inline-block size-[1.25em] leading-none" />;
+    return <Emoji emoji={this.__attrs.unified} size={20} className="inline-block size-[1.25em] leading-none" />;
   }
 }
 
 export function $createEmojiNode(attrs: EmojiAttrs) {
   return $applyNodeReplacement(new EmojiNode(attrs));
-}
-
-export function $isEmojiNode(node: LexicalNode | null | undefined): node is EmojiNode {
-  return node instanceof EmojiNode;
 }
 
 const SHORTCODE = /:([a-z0-9_+'-]+):/i;

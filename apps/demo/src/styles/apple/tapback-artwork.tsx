@@ -41,8 +41,8 @@ const native = (char: string) => (
 );
 
 /** The six tapbacks' artwork by unified code (❤ is drawn as the pink heart). */
-export const TAPBACK_ARTWORK: Record<string, React.ReactNode> = {
-  "2764-fe0f": <Emoji unified="1fa77" style={{ fontSize: "1em", lineHeight: 1 }} />,
+const TAPBACK_ARTWORK: Record<string, React.ReactNode> = {
+  "2764-fe0f": <Emoji emoji="1fa77" style={{ fontSize: "1em", lineHeight: 1 }} />,
   "1f44d": native("👍"),
   "1f44e": native("👎"),
   "1f602": <Haha />,
@@ -60,16 +60,10 @@ export const TAPBACKS: { unified: string; label: string }[] = [
   { unified: "2753", label: "Question" },
 ];
 
-export const isTapback = (unified: string) => unified in TAPBACK_ARTWORK;
-
-/**
- * One emoji at `size`, drawn with the tapback artwork when it is one (`tapback`), or as
- * the standard emoji. Stand-in for `<EmojiOverrides artwork={TAPBACK_ARTWORK}>` until the
- * library ships it.
- */
+/** One emoji at `size`, drawn with the tapback artwork when `tapback` is set and it is one. */
 export function TapbackGlyph({ unified, size, tapback = true }: { unified: string; size: number; tapback?: boolean }) {
   const art = tapback ? TAPBACK_ARTWORK[unified] : undefined;
-  if (art === undefined) return <Emoji unified={unified} size={size} style={{ fontSize: size, lineHeight: 1 }} />;
+  if (art === undefined) return <Emoji emoji={unified} size={size} style={{ fontSize: size, lineHeight: 1 }} />;
   return (
     <span className="inline-flex items-center justify-center" style={{ fontSize: size, lineHeight: 1 }}>
       {art}

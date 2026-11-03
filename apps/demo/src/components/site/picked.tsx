@@ -3,7 +3,7 @@ import type { EmojiSelection } from "@brianhung/emoji-picker";
 import { toast } from "@/components/ui/toast";
 
 /** Copies a picked emoji (or a custom emoji's :shortcode:) and confirms with a toast: the emoji, its shortcode and name. */
-export function copyEmoji(selection: EmojiSelection) {
+function copyEmoji(selection: EmojiSelection) {
   const shortcode = selection.shortcode || `:${selection.shortcodes[0] ?? selection.unified}:`;
   navigator.clipboard?.writeText(selection.emoji || shortcode).catch(() => {});
   const icon = (

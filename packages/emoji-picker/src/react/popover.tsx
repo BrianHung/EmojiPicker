@@ -376,4 +376,3 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
 
 /** Popover for pickers: `<EmojiPopover.Root><EmojiPopover.Trigger/><EmojiPopover.Content>…</EmojiPopover.Content></EmojiPopover.Root>`. */
 export const EmojiPopover = { Root, Trigger, Content };
-export { PopoverContext };

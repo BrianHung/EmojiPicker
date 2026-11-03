@@ -13,6 +13,14 @@ export function toneOf(unified: string): number {
   return 0;
 }
 
+const TONE_NAMES = ["light skin tone", "medium-light skin tone", "medium skin tone", "medium-dark skin tone", "dark skin tone"];
+
+/** A name with the variation's skin tone, as emojibase writes it: "thumbs up: medium skin tone". */
+export function nameWithTone(name: string, unified: string): string {
+  const tone = toneOf(unified);
+  return tone ? `${name}: ${TONE_NAMES[tone - 1]}` : name;
+}
+
 /** ":thumbsup:" or ":thumbsup::skin-tone-3:", or undefined when the emoji has no shortcode. */
 export function formatShortcode(record: EmojiRecord, tone = 0): string | undefined {
   const code = record.shortcodes[0];

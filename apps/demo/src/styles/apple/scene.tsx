@@ -9,13 +9,14 @@
 import * as React from "react";
 import { AnimatePresence, MotionGlobalConfig, motion, type Transition } from "motion/react";
 import { useSmoothCorners } from "@lisse/react";
-import { Emoji, EmojiPicker, useEmojiStatus, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import * as I from "@/styles/icons";
 import { StyleAutocomplete } from "@/styles/variants";
+import { EmojiText } from "@/styles/scene-kit";
 import { IPhoneFrame } from "./iphone-frame";
 import { apple } from "./picker";
 import { TAPBACKS, TapbackGlyph } from "./tapback-artwork";
@@ -55,7 +56,7 @@ export type Message = {
 export type Incoming = { id: number; unified: string };
 /** A message as drawn: only the last bubble in a run from one sender has a tail. */
 type Shown = Message & { tail: boolean };
-export type Contact = { name: string; initials?: string; /** @deprecated use initials */ initial?: string; avatar?: React.ReactNode };
+export type Contact = { name: string; initials?: string; avatar?: React.ReactNode };
 
 const W = 402;
 const H = 874;
@@ -89,7 +90,7 @@ const ROOM: Transition = { type: "spring", duration: 0.28, bounce: 0 };
 const FADE: Transition = { duration: 0.33, ease: [0.2, 0, 0, 1] };
 const OUT: Transition = { duration: 0.15, ease: "easeIn" };
 
-export const ALEX: Message[] = [
+const ALEX: Message[] = [
   { id: 1, from: "them", text: "are we still on for dinner tonight?", reactions: [], time: "Today 6:02 PM" },
   { id: 2, from: "me", text: "yes!! 7pm at the ramen place", reactions: ["2764-fe0f"], tapback: true },
   { id: 3, from: "them", text: "perfect, I'll grab a table 🍜", reactions: [] },
@@ -97,8 +98,6 @@ export const ALEX: Message[] = [
 
 // ---------------------------------------------------------------------------
 // Tapbacks: standard emoji identities drawn as iOS's own glyphs (tapback-artwork.tsx).
-
-export { TAPBACKS };
 
 /** A reaction: tapbacks (the pill's first six) in their iOS artwork, anything else as the emoji. */
 function Reaction({ id, size, tapback = true }: { id: string; size: number; tapback?: boolean }) {
@@ -231,7 +230,6 @@ export function IMessageScreen({
     if (initialMode === "idle") return;
     const t = setTimeout(() => open(messages[messages.length - 1]!.id, initialMode), 150);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // One reaction per person in iOS 27: picking another replaces it, the same one removes it.
@@ -345,7 +343,7 @@ export function IMessageScreen({
         {active && mode === "emoji" ? <EmojiLayer key="emoji" rect={selected.rect} message={message} onClose={close} /> : null}
       </AnimatePresence>
 
-      <AnimatePresence>{incoming ? <IncomingReaction key={incoming.id} {...incoming} initials={contact.initials ?? contact.initial ?? contact.name.slice(0, 1)} avatar={contact.avatar} onArrive={() => setIncoming(null)} /> : null}</AnimatePresence>
+      <AnimatePresence>{incoming ? <IncomingReaction key={incoming.id} {...incoming} initials={contact.initials ?? contact.name.slice(0, 1)} avatar={contact.avatar} onArrive={() => setIncoming(null)} /> : null}</AnimatePresence>
 
       {/* Pointer dismissal is ours (the dim layer, the compose overlay, the "+"), so a tap on "+" toggles cleanly. */}
       <Drawer
@@ -408,7 +406,7 @@ function StatusBar({ time }: { time: string }) {
 const glass = "bg-[linear-gradient(#fdfdfd,#f6f6f6)] shadow-[0_0_0_0.34px_rgb(0_0_0/0.38),0_1px_4px_rgb(0_0_0/0.025)]";
 
 function Header({ contact }: { contact: Contact }) {
-  const initials = contact.initials ?? contact.initial ?? contact.name.slice(0, 1);
+  const initials = contact.initials ?? contact.name.slice(0, 1);
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-[4] h-[160px] bg-[linear-gradient(#fcfcfc_70%,#fcfcfc00)]">
       <span className={cn("absolute top-[61.3px] left-[15.3px] flex size-[45.3px] items-center justify-center rounded-full", glass)}>
@@ -664,7 +662,7 @@ function BubbleShape({ message, lifted, className }: { message: Message & { tail
       <span ref={fill} aria-hidden className="absolute inset-0" style={{ background: color, transition: "background-color 80ms" }} />
       {message.tail === false ? null : <Tail me={me} color={color} />}
       <span data-text="" className="relative">
-        <MessageText text={message.text} />
+        <EmojiText text={message.text} size={20} className="inline-block align-[-3px]" />
       </span>
     </div>
   );
@@ -1185,7 +1183,7 @@ const SHEET: React.CSSProperties = { background: C.sheet, boxShadow: "inset 0 0 
  * sideways (frequently used first), category bar and delete key. The library's
  * picker parts with a horizontal List; styled with classes and size variables only.
  */
-export function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelection) => void; onDelete?: () => void; className?: string }) {
+function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelection) => void; onDelete?: () => void; className?: string }) {
   const sheet = React.useRef<HTMLDivElement>(null);
   useSmoothCorners(sheet, {
     topLeft: { radius: 30, smoothing: 0.6 },
@@ -1237,26 +1235,8 @@ export function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: Emo
 
 // ---------------------------------------------------------------------------
 
-/** Renders message text, swapping emoji for <Emoji> so Twemoji applies inside messages too. */
-function MessageText({ text }: { text: string }) {
-  const store = useEmojiStore();
-  const status = useEmojiStatus();
-  const parts = React.useMemo(() => {
-    const out: React.ReactNode[] = [];
-    let i = 0;
-    for (const seg of segment(text)) {
-      const record = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(seg) ? store.get(toUnified(seg)) : undefined;
-      out.push(record ? <Emoji key={i++} unified={toUnified(seg)} size={20} className="inline-block align-[-3px]" /> : seg);
-    }
-    return out;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, store, status]);
-  return <>{parts}</>;
-}
-
 const segmenter = typeof Intl !== "undefined" && "Segmenter" in Intl ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
 const segment = (text: string) => (segmenter ? [...segmenter.segment(text)].map((s) => s.segment) : [text]);
-const toUnified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
 const BUFO: Contact = { name: "Bufo", avatar: <img src={avatarFor("Bufo")} alt="" className="size-full bg-[#e6e6eb] object-contain" /> };
 

@@ -15,7 +15,7 @@ function subscribeReducedMotion(onChange: () => void) {
 }
 
 /** Whether the user asked for reduced motion; follows changes. */
-export function usePrefersReducedMotion(): boolean {
+function usePrefersReducedMotion(): boolean {
   return React.useSyncExternalStore(
     subscribeReducedMotion,
     () => typeof matchMedia === "function" && matchMedia(REDUCED_MOTION).matches,

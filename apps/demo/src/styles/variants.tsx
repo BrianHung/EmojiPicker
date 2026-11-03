@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { EmojiAutocomplete } from "@/components/emoji-autocomplete";
 import { EmojiPickerPopover } from "@/registry/emoji-picker";
 import { SmilePlus } from "./icons";
-import { FitViewport } from "./scene-kit";
+import { FitViewport, type Reaction } from "./scene-kit";
 import { StylePicker, useStyleTokens, type Style } from "./style-picker";
 
 /** Popover picker from a trigger, with or without search. */
@@ -71,7 +71,7 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
                 if (s) onSelect(s);
               }}
             >
-              <Emoji unified={unified} />
+              <Emoji emoji={unified} />
             </button>
           );
         })}
@@ -101,7 +101,7 @@ export function StyleAutocomplete({ appStyle, autocomplete, className }: { appSt
         const [start, end] = s.match ?? [0, 0];
         return (
           <>
-            <Emoji unified={store.withSkinTone(s.record.unified)} size={22} renderer={appStyle.renderer} className="shrink-0 text-[22px] leading-none" />
+            <Emoji emoji={store.withSkinTone(s.record.unified)} size={22} renderer={appStyle.renderer} className="shrink-0 text-[22px] leading-none" />
             <span className="truncate">
               :{code.slice(0, start)}
               {end > start ? <mark data-active={highlighted || undefined} className={cn("bg-transparent text-inherit", a.match, a.matchActive)}>{code.slice(start, end)}</mark> : null}
@@ -114,8 +114,6 @@ export function StyleAutocomplete({ appStyle, autocomplete, className }: { appSt
     />
   );
 }
-
-export type Reaction = { unified: string; count: number; mine: boolean };
 
 /** Reaction pills with counts, plus an add-reaction picker (Slack / Discord / Linear / Notion). */
 export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style; reactions: Reaction[]; onToggle: (unified: string) => void }) {
@@ -134,7 +132,7 @@ export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style;
             onClick={() => onToggle(r.unified)}
             className={cn("flex items-center gap-1 tabular-nums transition-colors", appStyle.pill.base, appStyle.pill.mine)}
           >
-            <Emoji unified={r.unified} size={16} className="text-[16px] leading-none" />
+            <Emoji emoji={r.unified} size={16} className="text-[16px] leading-none" />
             <span className="font-semibold">{r.count}</span>
           </button>
         );
@@ -144,12 +142,4 @@ export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style;
       </StyleDropdown>
     </div>
   );
-}
-
-export function toggleReaction(list: Reaction[], unified: string): Reaction[] {
-  const existing = list.find((r) => r.unified === unified);
-  if (!existing) return [...list, { unified, count: 1, mine: true }];
-  return list
-    .map((r) => (r.unified === unified ? { ...r, count: r.count + (r.mine ? -1 : 1), mine: !r.mine } : r))
-    .filter((r) => r.count > 0);
 }
