@@ -55,9 +55,12 @@ function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<No
       const list = scrollRef.current;
       const el = list && scroller(list);
       if (!el || !list) return;
-      const current = visibleOffset(el, list, horizontal, dir === "rtl");
-      if (horizontal) el.scrollLeft += (rect.x - current) * (dir === "rtl" ? -1 : 1);
-      else el.scrollTop += rect.y - current;
+      // The list may start below the scroller's edge (its padding, a row above it): only its own offset moves.
+      const current = Math.max(0, visibleOffset(el, list, horizontal, dir === "rtl"));
+      const delta = (horizontal ? rect.x : rect.y) - current;
+      if (!delta) return;
+      if (horizontal) el.scrollLeft += delta * (dir === "rtl" ? -1 : 1);
+      else el.scrollTop += delta;
     },
     persistedKeys,
     layoutOptions,
@@ -73,8 +76,15 @@ function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<No
       if (!el || !list) return;
       const rtl = getComputedStyle(list).direction === "rtl";
       const offset = visibleOffset(el, list, horizontal, rtl);
-      const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(list.clientWidth, el.clientHeight);
-      const rect = horizontal ? new Rect(offset, 0, el.clientWidth, list.clientHeight) : new Rect(0, offset, list.clientWidth, el.clientHeight);
+      // The list's fractional width (clientWidth rounds), with an ancestor's scale undone.
+      const box = list.getBoundingClientRect().width;
+      const ratio = list.offsetWidth ? box / list.offsetWidth : 1;
+      const width = Math.abs(ratio - 1) > 0.02 ? box / ratio : box;
+      const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);
+      // What of the list is in the scroller's window.
+      const start = Math.max(0, offset);
+      const extent = Math.max(0, (horizontal ? el.clientWidth : el.clientHeight) + Math.min(0, offset));
+      const rect = horizontal ? new Rect(start, 0, extent, list.clientHeight) : new Rect(0, start, width, extent);
       const { virtualizer, setSize, setVisibleRect } = latest.current;
       if (virtualizer.size.equals(size) && virtualizer.visibleRect.equals(rect) && (rtl ? "rtl" : "ltr") === dirRef.current) return;
       const apply = () => {
@@ -146,7 +156,6 @@ function wrapperStyle(info: LayoutInfo, parent: LayoutInfo | null, dir: "ltr" | 
     height: info.rect.height,
     overflow: info.allowOverflow ? "visible" : "hidden",
     zIndex: info.zIndex || undefined,
-    contain: info.type === "section" ? undefined : "size layout style",
   };
 }
 

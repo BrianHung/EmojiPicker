@@ -54,6 +54,8 @@ export type PickerLayout = {
   frequent?: number;
   /** Scrollbar classes for the viewport. Default thin. */
   scrollbar?: string;
+  /** Keep `columns` per row even when the list is a little narrower (cells run under the scrollbar). */
+  fixedColumns?: boolean;
   cell: string;
   header: string;
   /** macOS shows no section titles. */
@@ -272,6 +274,7 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
   return (
     <EmojiPicker.Root
       columns={fluid ? undefined : layout.columns}
+      fitColumns={!layout.fixedColumns}
       categories={categories}
       suggested={layout.suggested}
       frequent={layout.frequent}

@@ -36,6 +36,12 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
   /** Emoji per row; by default as many as the width fits. */
   columns?: number;
+  /**
+   * With `columns`: false keeps that many per row even when the width is a little
+   * short (the last column runs into the end padding, or under a scrollbar). Default
+   * true: fewer columns when they don't fit.
+   */
+  fitColumns?: boolean;
   /** Which categories show, in order, with optional names and icons. */
   categories?: readonly CategoryOption[];
   /** Size of the "Frequently used" section; false hides it. Default 16. */
@@ -98,7 +104,7 @@ type InternalRootProps = RootProps & {
 const NO_COMPONENTS: PickerComponents = {};
 
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(
-  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories: categoryOptions, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, components = NO_COMPONENTS, cssLayer = "base", nonce, colorScheme, style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest },
+  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories: categoryOptions, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, components = NO_COMPONENTS, cssLayer = "base", nonce, colorScheme, style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest },
   ref,
 ) {
   const { store, labels: providerLabels, groups, maxVersion } = useEmojiContext();
@@ -187,6 +193,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       disableVariations,
       components,
       columns,
+      fitColumns,
       emojiVersion,
       categories,
       categorySections: sections,
@@ -208,7 +215,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       listId,
       cellKey: (key) => `${listId}-${String(key)}`,
     }),
-    [store, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, emojiVersion, categories, sections, collapse, query, setQuery, searching, searchResults, searchLimit, results, searchState.pending, pick, close, activeSection, activeEmoji, searchCount, mounted, registerSearch, listId],
+    [store, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, categories, sections, collapse, query, setQuery, searching, searchResults, searchLimit, results, searchState.pending, pick, close, activeSection, activeEmoji, searchCount, mounted, registerSearch, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: heldReactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),

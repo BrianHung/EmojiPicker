@@ -23,7 +23,6 @@ export type ListEmoji = {
 export type EmojiCellProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
   emoji: ListEmoji;
   children: React.ReactNode;
-  ref?: React.Ref<HTMLElement>;
 };
 
 export type CategoryHeaderProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {

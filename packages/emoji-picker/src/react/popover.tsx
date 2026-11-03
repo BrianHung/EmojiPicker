@@ -223,7 +223,8 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     placement: placementOf(side, align),
     transform: false,
     elements: { reference: mounted ? reference : null },
-    whileElementsMounted: autoUpdate,
+    // Follows scroll and resizes, not the anchor's own transitions (a trigger's press scale).
+    whileElementsMounted: (reference, floating, update) => autoUpdate(reference, floating, update, { layoutShift: false }),
     middleware: [
       offset(sideOffset),
       flip({ padding: collisionPadding, fallbackStrategy: "initialPlacement", crossAxis: false }),

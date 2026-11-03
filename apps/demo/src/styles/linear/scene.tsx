@@ -554,6 +554,7 @@ const TEAM_PICKER: PickerLayout = {
   searchRow: "border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1",
   input: "h-7 w-full rounded-[8px] bg-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",
   scrollbar: "[scrollbar-width:thin]",
+  fixedColumns: false,
 };
 
 const ACCENT = "lch(52.418 61.103 288.421)";

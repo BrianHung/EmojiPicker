@@ -19,6 +19,7 @@ import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
 import { useEmojiContext } from "./provider";
 import { itemFactory, resultSections, type EmojiItem, type EmojiSection } from "./sections";
 import { SLOTS, joinClasses } from "./slots";
+import { useDrawable } from "./native-support";
 import { useEmptyState } from "./viewport";
 import { ViewportVirtualizer } from "./virtualizer";
 
@@ -97,12 +98,13 @@ const PROBE: React.CSSProperties = {
   paddingLeft: "var(--ep-pad)",
   paddingRight: "var(--emoji-section-gap, var(--ep-pad))",
   paddingBottom: "var(--emoji-section-min-width, 0px)",
+  marginRight: "var(--emoji-list-padding-end, var(--ep-pad))",
 };
 
 function readProbe(probe: HTMLElement): GridMetrics {
   const cs = getComputedStyle(probe);
   const px = (v: string) => parseFloat(v) || 0;
-  return { cellWidth: px(cs.width) || 40, cellHeight: px(cs.height) || 40, headerHeight: px(cs.paddingTop), padding: px(cs.paddingLeft), sectionGap: px(cs.paddingRight), sectionMinWidth: px(cs.paddingBottom) };
+  return { cellWidth: px(cs.width) || 40, cellHeight: px(cs.height) || 40, headerHeight: px(cs.paddingTop), padding: px(cs.paddingLeft), paddingEnd: px(cs.marginRight), sectionGap: px(cs.paddingRight), sectionMinWidth: px(cs.paddingBottom) };
 }
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
@@ -123,9 +125,24 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     (group: string) => picker.categories.find((c) => c.id === group)?.name ?? (group === "custom" ? labels.custom : (groupNames[GROUPS.indexOf(group as (typeof GROUPS)[number])] ?? group)),
     [picker.categories, labels, groupNames],
   );
+  // The vertical category list leaves out emoji the system can't draw (and repeats within a section).
+  const probeRoot = React.useRef<HTMLElement | null>(null);
+  const { drawable, request } = useDrawable(probeRoot);
+  const categories = React.useMemo(
+    () =>
+      horizontal
+        ? picker.categorySections
+        : picker.categorySections.flatMap((s) => {
+            const seen = new Set<string>();
+            const items = s.items.filter((i) => drawable(i.record, i.unified) && !seen.has(i.unified) && seen.add(i.unified));
+            if (items.length === s.items.length) return [s];
+            return items.length || s.collapsed ? [{ ...s, items }] : [];
+          }),
+    [horizontal, picker.categorySections, drawable],
+  );
   const sections = React.useMemo(
-    () => (searching ? resultSections(picker.results, picker.searchResults, categoryName, (u) => store.withSkinTone(u), item, labels.searchResults) : picker.categorySections),
-    [searching, picker.results, picker.searchResults, categoryName, store, item, labels.searchResults, picker.categorySections],
+    () => (searching ? resultSections(picker.results, picker.searchResults, categoryName, (u) => store.withSkinTone(u), item, labels.searchResults) : categories),
+    [searching, picker.results, picker.searchResults, categoryName, store, item, labels.searchResults, categories],
   );
   const items = React.useMemo(() => new Map(sections.flatMap((s) => s.items.map((i) => [i.id, i] as const))), [sections]);
   // Position in its section (aria-posinset/setsize: React Aria counts across sections, and the title).
@@ -142,8 +159,8 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const results = searching ? picker.searchResults : undefined;
   const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(
-    () => ({ orientation, metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
-    [orientation, metrics, picker.columns, horizontal, results, searching, searchRows, rows],
+    () => ({ orientation, metrics, columns: picker.columns, fitColumns: picker.fitColumns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
+    [orientation, metrics, picker.columns, picker.fitColumns, horizontal, results, searching, searchRows, rows],
   );
   // Sizes come from CSS: the probe reads the variables; a rendered cell and title give their
   // real size (classes may change them). Re-read after every render of the list or its rows.
@@ -422,6 +439,8 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   const onRendered = React.useCallback(() => {
     measure();
     applyHighlightRef.current();
+    const shown = virtualizer.current?.virtualizer.getVisibleLayoutInfos();
+    if (shown && !latest.current.horizontal) request([...shown.keys()].flatMap((key) => latest.current.items.get(String(key))?.unified ?? []));
     const rect = visibleRect();
     if (!rect) return;
     const horizontal = layout.orientation === "horizontal";
@@ -448,7 +467,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       const visible = r && (horizontal ? r.maxX > rect.x && r.x < rect.maxX : r.maxY > rect.y && r.y < rect.maxY);
       if (!visible || !latest.current.items.has(String(stop))) cellsState.tabStop.set(lastFocused.current != null && latest.current.items.has(String(lastFocused.current)) && isVisible(lastFocused.current) ? lastFocused.current : firstVisible());
     }
-  }, [measure, layout, picker.activeSection, searching, cellsState, firstVisible]);
+  }, [measure, layout, picker.activeSection, searching, cellsState, firstVisible, request]);
   const isVisible = (key: Key) => {
     const r = layout.getLayoutInfo(key)?.rect;
     const rect = visibleRect();
@@ -467,7 +486,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     return handle.key(action, "list", event) ? "handled" : "pass";
   });
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs(listRef, ref, userKeys, region), [ref, userKeys, region]);
+  const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region), [ref, userKeys, region]);
 
   const cells = React.useMemo<Cells>(
     () => ({

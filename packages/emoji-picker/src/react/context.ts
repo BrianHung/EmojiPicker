@@ -75,6 +75,7 @@ export type PickerContextValue = {
   disableVariations: boolean;
   components: PickerComponents;
   columns?: number;
+  fitColumns: boolean;
   emojiVersion?: number;
   /** Sections in order with names and icons (all of them, empty or not). */
   categories: readonly Category[];

@@ -42,7 +42,7 @@ export const instagram: Style = {
     categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "activities" }, { id: "travel_places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
     cell: "rounded-lg hover:bg-picker-hover data-[highlighted]:bg-picker-selected",
     header:
-      "flex h-[34px] bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-epr-category=suggested]>&]:after:ml-auto [[data-epr-category=suggested]>&]:after:text-(--instagram-link) [[data-epr-category=suggested]>&]:after:content-['Customize']",
+      "flex h-[34px] bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']",
     // The list starts at the field's bottom edge, so a scrolled sticky title never covers its border.
     searchRow: "px-2 pt-3 pb-0 [--search-icon-x:20px]",
     input: "h-10 w-full rounded-full border border-picker-input-border bg-picker-input pr-4 pl-[33.3px] text-[14px] text-picker-foreground outline-none placeholder:text-(--instagram-placeholder)",

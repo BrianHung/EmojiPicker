@@ -10,6 +10,7 @@ import { mergeRefs, useEdgeKeys } from "./keyboard";
 import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
 import { useEmojiContext } from "./provider";
 import { EmojiImage } from "./image";
+import { useDrawable } from "./native-support";
 import { SLOTS } from "./slots";
 import { isUnified, unifiedToNative } from "../core/dataset";
 import { nameWithTone } from "../core/shortcodes";
@@ -116,6 +117,12 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
   const artwork = useArtworkMap();
   const edges = useEdgeKeys(BUTTONS);
   const row = React.useRef<HTMLDivElement | null>(null);
+  const { drawable, request } = useDrawable(row);
+  const shown = (state?.reactions ?? []).map((base) => store.withSkinTone(base)).filter((unified) => {
+    const record = store.get(unified);
+    return record != null && drawable(record, unified);
+  });
+  React.useEffect(() => request(shown));
   const expandFocus = React.useRef(false);
   React.useEffect(() => {
     if (!expandFocus.current || state?.open) return;
@@ -135,8 +142,8 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
   const Expand = components.ExpandButton;
   return (
     <ReactionBar {...props} ref={mergeRefs(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
-      {state.reactions.map((base) => {
-        const unified = store.withSkinTone(base);
+      {shown.map((unified) => {
+        const base = unified;
         const record = store.get(unified);
         const name = nameWithTone(record?.name ?? unified, unified, labels.withSkinTone);
         const on = state.pressed ? isPressed(state.pressed, unified) : undefined;

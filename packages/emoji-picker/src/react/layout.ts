@@ -13,6 +13,8 @@ export type GridMetrics = {
   headerHeight: number;
   /** Inline padding of the grid (and the gap before the first horizontal section). */
   padding: number;
+  /** Vertical, without `columns`: the grid's inline-end padding (`--emoji-list-padding-end`; may be negative). */
+  paddingEnd: number;
   /** Horizontal only: space between sections, and the narrowest a section gets. */
   sectionGap: number;
   sectionMinWidth: number;
@@ -23,6 +25,8 @@ export type EmojiGridLayoutOptions = {
   metrics: GridMetrics;
   /** Vertical: most columns per row (Root `columns`). Default: as many as fit. */
   columns?: number;
+  /** Vertical: false keeps `columns` even when the width is short of them (the grid runs past its end padding). */
+  fitColumns?: boolean;
   /** Vertical search results lay out in exactly `columns` columns (CSS-grid tracks); categories never exceed the fit. */
   results?: "ranked" | "grouped";
   /** Horizontal: rows per section. */
@@ -36,7 +40,7 @@ const same = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridM
 
 export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOptions> {
   orientation: "vertical" | "horizontal" = "vertical";
-  metrics: GridMetrics = { cellWidth: 40, cellHeight: 40, headerHeight: 40, padding: 10, sectionGap: 10, sectionMinWidth: 0 };
+  metrics: GridMetrics = { cellWidth: 40, cellHeight: 40, headerHeight: 40, padding: 10, paddingEnd: 10, sectionGap: 10, sectionMinWidth: 0 };
   /** Cells per row (vertical) or per column (horizontal). */
   lanes = 1;
   groups: CellGroup[] = [];
@@ -47,7 +51,7 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
   private size = new Size();
 
   shouldInvalidateLayoutOptions(next: EmojiGridLayoutOptions, prev: EmojiGridLayoutOptions) {
-    return next.orientation !== prev.orientation || next.columns !== prev.columns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
+    return next.orientation !== prev.orientation || next.columns !== prev.columns || next.fitColumns !== prev.fitColumns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
   }
 
   update({ layoutOptions }: { layoutOptions?: EmojiGridLayoutOptions }) {
@@ -74,11 +78,12 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
   }
   private loader: LayoutInfo | null = null;
 
-  private vertical(sections: { section: Node<unknown>; header: Node<unknown> | null; keys: Key[] }[], { columns, results }: EmojiGridLayoutOptions) {
-    const { cellWidth, cellHeight, headerHeight, padding } = this.metrics;
+  private vertical(sections: { section: Node<unknown>; header: Node<unknown> | null; keys: Key[] }[], { columns, results, fitColumns = true }: EmojiGridLayoutOptions) {
+    const { cellWidth, cellHeight, headerHeight, padding, paddingEnd } = this.metrics;
     const width = this.virtualizer!.size.width;
-    // The grid's width as the browser rounds it (an element's clientWidth).
-    const rowWidth = Math.max(0, Math.round(width - 2 * padding));
+    // The grid's width as the browser rounds it (an element's clientWidth). With `columns` it spans
+    // the padded width (or all the columns, when they needn't fit); else it ends at its end padding.
+    const rowWidth = Math.max(0, Math.round(columns ? Math.max(fitColumns ? 0 : columns * cellWidth, width - 2 * padding) : width - padding - paddingEnd));
     const fit = Math.max(1, Math.floor(rowWidth / cellWidth));
     const lanes = results && columns ? columns : columns ? Math.min(columns, fit) : fit;
     const gap = lanes > 1 ? Math.max(0, rowWidth - lanes * cellWidth) / (lanes - 1) : 0;
@@ -107,6 +112,8 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
       this.groups.push({ key: section.key, info, header: headerInfo, keys, start: top });
       y = end;
     }
+    // Ranked results are one padded row, even with nothing in it.
+    if (!sections.length && results === "ranked") y = 2 * padding;
     this.size = new Size(width, y);
   }
 
