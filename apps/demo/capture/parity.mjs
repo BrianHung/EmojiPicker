@@ -1,11 +1,12 @@
 // Key part boxes in our examples vs the numbers measured from the real apps (CSS px, picker-relative).
 import { chromium } from "playwright";
-// Re-measured Nov 2026 (Slack light at scrollTop 0, Discord dark, Linear light). "glyph" is the
+// Re-measured Nov 2026 (Slack light at scrollTop 0, Discord dark, Linear light, Notion light). "glyph" is the
 // drawn emoji (the native span's content box) (Slack's 35×32 hover box is a ::before around a 33px cell, so the cell box differs).
 const REAL = {
   slack: { theme: "light", parts: { root: [0, 0, 361, 454], tab: [42.3, 4, 34.3, 38], input: [17.5, 56, 326, 36], glyph: [21.5, 132.5, 22, 22] } },
   discord: { theme: "dark", parts: { root: [0, 0, 498, 486], input: [16.8, 58.8, 414.4, 40], tone: [443.2, 59.8, 38, 38], tab: [8.8, 119.8, 32, 32], emoji: [56.8, 143.6, 48, 48] } },
   linear: { theme: "light", parts: { root: [0, 0, 273, 321], input: [5.5, 4.5, 262, 28], emoji: [10.5, 65.5, 28, 28] } },
+  notion: { theme: "light", parts: { root: [0, 0, 408, 390], input: [8, 48, 322, 28], tone: [372, 48, 28, 28], tab: [12, 348, 32, 32], emoji: [12, 124.5, 32, 32] } },
 };
 const SEL = { root: "[data-slot=emoji-picker]", tab: "[data-slot=category-tab]", input: "[data-slot=search-input]", viewport: "[data-slot=viewport]", emoji: "[data-slot=emoji]", tone: "[data-slot=skin-tone] > button", header: "[data-slot=category-header]", glyph: "[data-slot=emoji] > *" };
 const b = await chromium.launch({ channel: "chrome", headless: true });

@@ -1,8 +1,9 @@
 // Notion style, in situ: a page (light). The page icon opens the Notion style picker
 // (Emoji / Icons / Upload) to change it, and the body is a real Tiptap editor where
 // ":" plus a few letters opens Notion-style emoji suggestions at the caret.
-// Notion's page metrics: warm ink #37352f, 40px/1.2 bold title, 16px/1.5 body,
-// a 78px icon, 96px side padding on a wide page.
+// Notion's page metrics (measured signed in, Nov 2026): ink #2c2c2b, a 78px icon whose left edge
+// lines up with the title text, a 28px controls row 8px under it, then the 40/48 bold title 4px
+// lower and the 16/24 body 8px under that; 96px side padding on a wide page.
 // On a phone it is Notion's mobile page: a 44px top bar with the 18px icon at x=15
 // and the title 40/48 bold (both measured on a public page in a 390px frame, Nov 2026),
 // 24px side padding (not measured: Notion picks its mobile layout by device, not width),
@@ -20,8 +21,8 @@ const W = 760;
 const H = 600;
 const THEME = "light";
 
-const INK = "#37352f";
-const MUTED = "rgba(55, 53, 47, 0.5)";
+const INK = "#2c2c2b";
+const MUTED = "#7d7a75";
 const FONT = "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif";
 
 const CONTENT = `
@@ -30,13 +31,13 @@ const CONTENT = `
 <ul><li><p>Hiking boots 🥾</p></li><li><p>Board games 🎲</p></li><li><p>Snacks for the drive</p></li></ul>
 <p></p>`;
 
-// Notion's inline menu: a 10px-radius white card with its layered shadow, 28px rows,
-// the highlighted row in an 8% ink wash. (Overrides the menu's default shadcn look.)
+// Notion's inline menu: 28px rows in a 10px-radius white card. The card shadow and the 5% hover
+// wash are the picker's measured ones; the menu itself is not measured. (Overrides the menu's default shadcn look.)
 const MENU = [
-  "w-[260px] rounded-[10px] border-0 bg-white p-1 text-[14px] text-[#37352f] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]",
-  "shadow-[0_0_0_1px_rgb(15_15_15/0.05),0_3px_6px_rgb(15_15_15/0.1),0_9px_24px_rgb(15_15_15/0.2)]",
+  "w-[260px] rounded-[10px] border-0 bg-white p-1 text-[14px] text-[#2c2c2b] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]",
+  "shadow-[0_20px_24px_rgb(25_25_25/0.05),0_5px_8px_rgb(25_25_25/0.027),0_0_0_1px_rgb(42_28_0/0.07)]",
   "[&>li]:h-7 [&>li]:gap-2 [&>li]:rounded-[6px] [&>li]:px-2",
-  "[&>li[data-highlighted]]:bg-[rgba(55,53,47,0.08)] [&>li[data-highlighted]]:text-[#37352f]",
+  "[&>li[data-highlighted]]:bg-[rgba(33,27,23,0.051)] [&>li[data-highlighted]]:text-[#2c2c2b]",
   "[&_span]:[font-family:inherit] [&_span]:text-[14px] [&_b]:font-semibold",
 ].join(" ");
 
@@ -52,7 +53,7 @@ export function NotionScene() {
       attributes: {
         "aria-label": "Page content",
         class: [
-          "outline-none text-[16px] leading-[1.5] text-[#37352f] caret-[#37352f]",
+          "outline-none text-[16px] leading-[1.5] text-[#2c2c2b] caret-[#2c2c2b]",
           "[&_p]:my-[2px] [&_p]:py-[3px] [&_p]:px-[2px]",
           "[&_h3]:mt-4 [&_h3]:mb-px [&_h3]:px-[2px] [&_h3]:py-[3px] [&_h3]:text-[1.25em] [&_h3]:leading-[1.3] [&_h3]:font-semibold",
           "[&_ul]:my-0 [&_ul]:list-disc [&_ul]:pl-[26px] [&_li]:pl-[2px] [&_li>p]:my-px [&_li>p]:py-[3px]",
@@ -68,7 +69,7 @@ export function NotionScene() {
       {compact ? <MobileTopBar icon={icon} title={title} /> : <TopBar icon={icon} title={title} />}
       <div className={cn("min-h-0 flex-1 overflow-y-auto pb-16 [scrollbar-width:thin]", compact ? "px-6 pt-8" : "px-24 pt-12")}>
         <div className="group/header">
-          <div className="-ml-0.5 flex h-[78px] w-[78px] items-center">
+          <div className="ml-[2px] flex h-[78px] w-[78px] items-center">
             <ScenePicker
               appStyle={notion}
               theme={THEME}
@@ -77,16 +78,16 @@ export function NotionScene() {
               onSelect={(s) => setIcon(s.unified)}
               font={FONT}
               sheet={compact}
-              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(55,53,47,0.08)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(55,53,47,0.08)]"
+              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(33,27,23,0.051)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(33,27,23,0.051)]"
             >
               <Emoji emoji={icon} size={78} className="text-[78px] leading-[1.1]" />
             </ScenePicker>
           </div>
-          <div className={cn("mt-1 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100", compact && "hidden")} style={{ color: MUTED }} aria-hidden>
-            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(55,53,47,0.08)]">🖼 Add cover</span>
-            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(55,53,47,0.08)]">💬 Add comment</span>
+          <div className={cn("mt-2 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100", compact && "hidden")} style={{ color: MUTED }} aria-hidden>
+            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)]">🖼 Add cover</span>
+            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)]">💬 Add comment</span>
           </div>
-          <h1 className="mt-1 mb-2 px-[2px] pt-[3px] text-[40px] leading-[1.2] font-bold" style={{ color: INK }}>
+          <h1 className="mt-1 mb-2 px-[2px] text-[40px] leading-[1.2] font-bold" style={{ color: INK }}>
             {title}
           </h1>
         </div>
