@@ -6,7 +6,11 @@ export type { FrequencyStorage, FrequencyStore, FrequencyStoreOptions } from "./
 export { needsTwemoji, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer } from "./platform";
 export type { Dataset, EmojiRecord, Group } from "./dataset";
-export type { CompletionOrder, SearchIndex } from "./search-index";
+export type { CompletionOrder, SearchIndex, SearchIndexOptions } from "./search-index";
+export { createTokenizer, normalizer } from "./tokenize";
+export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./tokenize";
+export { defaultLabels, plural } from "./labels";
+export type { EmojiLabels, PluralForms, SkinToneNames } from "./labels";
 export { nativeToUnified, resolveEmoji } from "./resolve";
 export type { EmojiInput, EmojiLookup, ResolvedEmoji } from "./resolve";
 export { splitWords } from "./custom";

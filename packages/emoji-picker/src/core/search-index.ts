@@ -1,4 +1,5 @@
 import type { EmojiRecord } from "./dataset";
+import { canonicalLocale, normalizer, tokenizerFor, type Tokenizer } from "./tokenize";
 
 // Lower is better: how a token matched the query. A whole shortcode beats a
 // word inside one ("thu" → thumbsup before hand_with_index_finger_and_thumb_crossed).
@@ -6,13 +7,16 @@ const SHORTCODE = 0;
 const WORD = 1;
 const TAG = 2;
 
-export const tokenize = (text: string) =>
-  text
-    .toLowerCase()
-    .split(/[\s_\-:,.()]+/)
-    .filter(Boolean);
+export type SearchIndexOptions = {
+  /** BCP 47 tag for case folding, word segmentation and A–Z order. Default: the runtime's. */
+  locale?: string;
+  /** Replaces the default tokenizer, for indexing and queries alike. */
+  tokenize?: Tokenizer;
+};
 
 export type SearchIndex = {
+  /** The tokenizer the index was built with. */
+  tokenize: Tokenizer;
   /** AND across words; the last word matches as a prefix. Ranked by match quality, then dataset order. */
   search(query: string, limit?: number): EmojiRecord[];
   /** Every indexed word with the number of emoji it appears in, for typo correction. */
@@ -39,7 +43,9 @@ export type ShortcodeCompletion = {
 };
 
 /** A sorted token array searched by binary search. Build it once per record list. */
-export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex {
+export function createSearchIndex(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
+  const normalize = normalizer(locale);
+  const collator = new Intl.Collator(canonicalLocale(locale));
   const entries: [token: string, id: number, kind: number][] = [];
   const shortcodes = new Map<string, number>();
   const shortcodeList: [code: string, id: number][] = [];
@@ -51,7 +57,7 @@ export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex 
       if (prev === undefined || kind < prev) best.set(token, kind);
     };
     for (const code of record.shortcodes) {
-      const lower = code.toLowerCase();
+      const lower = normalize(code);
       if (!shortcodes.has(lower)) shortcodes.set(lower, id);
       shortcodeList.push([lower, id]);
       add(lower, SHORTCODE);
@@ -83,6 +89,8 @@ export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex 
   const idOf = new Map(records.map((r, i) => [r, i] as const));
   let vocabulary: Map<string, number> | undefined;
   const api: SearchIndex = {
+    tokenize,
+
     vocabulary() {
       if (!vocabulary) {
         vocabulary = new Map();
@@ -122,12 +130,12 @@ export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex 
     },
 
     byShortcode(code) {
-      const id = shortcodes.get(code.toLowerCase().replace(/^:|:$/g, ""));
+      const id = shortcodes.get(normalize(code).replace(/^:|:$/g, ""));
       return id === undefined ? undefined : records[id];
     },
 
     completeShortcode(prefix, limit = 8, order = "relevance") {
-      const p = prefix.toLowerCase();
+      const p = normalize(prefix);
       // One candidate per emoji: its best-matching shortcode and score.
       const best = new Map<number, ShortcodeCompletion & { score: number }>();
       const offer = (id: number, shortcode: string, score: number, match: [number, number] | null) => {
@@ -153,12 +161,12 @@ export function createSearchIndex(records: readonly EmojiRecord[]): SearchIndex 
       // 3: name or tag matches ("smiling" → :blush: via "smiling face with smiling eyes"), shown by their first code.
       if (!/[_\-]/.test(p)) for (const record of api.search(p, limit * 2)) {
         const id = idOf.get(record)!;
-        if (record.shortcodes[0]) offer(id, record.shortcodes[0].toLowerCase(), 3, null);
+        if (record.shortcodes[0]) offer(id, normalize(record.shortcodes[0]), 3, null);
       }
       const relevance = (a: { score: number; shortcode: string; record: EmojiRecord }, b: typeof a) => a.score - b.score || a.shortcode.length - b.shortcode.length || a.record.order - b.record.order;
       // Alphabetical: exact, then prefixes A–Z, then everything else A–Z.
       const tier = (score: number) => (score <= 1 ? score : 2);
-      const alphabetical = (a: { score: number; shortcode: string }, b: typeof a) => tier(a.score) - tier(b.score) || (a.shortcode < b.shortcode ? -1 : a.shortcode > b.shortcode ? 1 : 0);
+      const alphabetical = (a: { score: number; shortcode: string }, b: typeof a) => tier(a.score) - tier(b.score) || collator.compare(a.shortcode, b.shortcode);
       return [...best.values()]
         .sort(order === "alphabetical" ? alphabetical : relevance)
         .slice(0, limit)

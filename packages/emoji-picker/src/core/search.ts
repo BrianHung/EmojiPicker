@@ -2,7 +2,8 @@
 // one; everything here (lexical, typos, fallback, merge, rerank, adapters) is an
 // optional building block for writing one.
 import type { EmojiRecord } from "./dataset";
-import { createSearchIndex, tokenize, type SearchIndex } from "./search-index";
+import { createSearchIndex, type SearchIndex, type SearchIndexOptions } from "./search-index";
+import { canonicalLocale, createTokenizer, tokenizerFor, type Tokenizer, type WordSegmenter } from "./tokenize";
 
 /** One result. `score` is the engine's own relevance, higher is better; only its order is used. */
 export type SearchHit = { unified: string; score?: number };
@@ -16,6 +17,8 @@ export type SearchContext = {
   signal: AbortSignal;
   /** The user's decayed use count for a base emoji; 0 when unused. */
   frequency(unified: string): number;
+  /** BCP 47 tag of the data: the store's `locale`, else the dataset's. */
+  locale?: string;
 };
 
 type Hits = readonly SearchHit[];
@@ -54,12 +57,19 @@ const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike
 };
 const all = <T,>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
-const indexes = new WeakMap<readonly EmojiRecord[], SearchIndex>();
-/** One index per record list, shared by every search that uses it. */
-export function indexFor(records: readonly EmojiRecord[]): SearchIndex {
-  let index = indexes.get(records);
-  if (!index) indexes.set(records, (index = createSearchIndex(records)));
-  return index;
+const cached = <K, V>(map: Map<K, V>, key: K, create: () => V): V => {
+  let value = map.get(key);
+  if (value === undefined) map.set(key, (value = create()));
+  return value;
+};
+
+const indexes = new WeakMap<readonly EmojiRecord[], Map<Tokenizer, Map<string, SearchIndex>>>();
+/** One index per record list, tokenizer and locale, shared by every search that uses it. */
+export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
+  let byTokenizer = indexes.get(records);
+  if (!byTokenizer) indexes.set(records, (byTokenizer = new Map()));
+  const byLocale = cached(byTokenizer, tokenize, () => new Map<string, SearchIndex>());
+  return cached(byLocale, canonicalLocale(locale) ?? "", () => createSearchIndex(records, { locale, tokenize }));
 }
 
 const toHits = (records: readonly EmojiRecord[]): Hits => records.map((r) => ({ unified: r.unified }));
@@ -82,6 +92,12 @@ export type LexicalOptions = {
    */
   typos?: boolean;
   typoThreshold?: number;
+  /** BCP 47 tag for case folding, word segmentation and A–Z order. Default: the dataset's (`context.locale`). */
+  locale?: string;
+  /** Finds words in text without spaces. Default `Intl.Segmenter(locale, { granularity: "word" })`; `false` splits on spaces and punctuation only. */
+  segmenter?: WordSegmenter | false;
+  /** Replaces tokenization altogether (an n-gram or morphological tokenizer); `locale` and `segmenter` are then unused for words. */
+  tokenize?: Tokenizer;
 };
 
 /**
@@ -89,9 +105,14 @@ export type LexicalOptions = {
  * word must match and the last may be partial; a whole shortcode ranks above a
  * word in a name, which ranks above a tag.
  */
-export function lexical({ typos = true, typoThreshold = 8 }: LexicalOptions = {}): EmojiSearch {
-  return (query, { records, limit }) => {
-    const index = indexFor(records);
+export function lexical({ typos = true, typoThreshold = 8, locale, segmenter, tokenize }: LexicalOptions = {}): EmojiSearch {
+  const tokenizers = new Map<string, Tokenizer>();
+  const tokenizerOf = (tag: string | undefined) =>
+    tokenize ?? (segmenter === undefined ? tokenizerFor(tag) : cached(tokenizers, tag ?? "", () => createTokenizer({ locale: tag, segmenter })));
+  return (query, context) => {
+    const { records, limit } = context;
+    const tag = locale ?? context.locale;
+    const index = indexFor(records, { locale: tag, tokenize: tokenizerOf(tag) });
     const exact = index.search(query, limit);
     if (!typos || exact.length >= typoThreshold) return toHits(exact);
     const corrected = correctQuery(query, index).flatMap((q) => index.search(q, limit));
@@ -127,7 +148,7 @@ function editDistance(a: string, b: string, max: number): number {
  * Ties go to the word more emoji use ("hart" → heart, not harp).
  */
 function correctQuery(query: string, index: SearchIndex): string[] {
-  const words = tokenize(query);
+  const words = index.tokenize(query);
   const vocabulary = index.vocabulary();
   // Some indexed word starts with it: a partial word, not a typo.
   const known = (w: string) => index.search(w, 1).length > 0;

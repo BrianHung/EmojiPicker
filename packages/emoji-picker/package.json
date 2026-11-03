@@ -27,6 +27,9 @@
   "sideEffects": [
     "*.css"
   ],
+  "bin": {
+    "emoji-picker": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "data",
@@ -55,7 +58,7 @@
     "./shadcn.css": "./src/styles/shadcn.css"
   },
   "scripts": {
-    "build:data": "tsx scripts/build-data.ts",
+    "build:data": "tsx scripts/cli.ts build-data en --out data/en.json",
     "build": "npm run build:data && tsup",
     "test": "vitest run",
     "test:e2e": "node test/e2e/run.mjs",
@@ -65,7 +68,13 @@
   },
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "react-dom": "^18.2.0 || ^19.0.0",
+    "emojibase-data": ">=16.0.0"
+  },
+  "peerDependenciesMeta": {
+    "emojibase-data": {
+      "optional": true
+    }
   },
   "dependencies": {
     "emoji-picker-react": "^5.1.4"

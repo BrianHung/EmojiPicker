@@ -28,6 +28,8 @@ export type EmojiStoreOptions = {
    * the helpers in `@brianhung/emoji-picker/search`.
    */
   search?: EmojiSearch;
+  /** BCP 47 tag for search (case folding, word segmentation, A–Z order). Default: the dataset's `locale`. */
+  locale?: string;
 };
 
 export type EmojiStoreStatus = "idle" | "loading" | "ready" | "error";
@@ -51,7 +53,7 @@ export type EmojiStore = ReturnType<typeof createEmojiStore>;
 
 const defaultSearch = lexical();
 
-export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch }: EmojiStoreOptions) {
+export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch, locale: localeOption }: EmojiStoreOptions) {
   const sources = customSources(customEmojis);
   const listeners = new Set<() => void>();
   const emit = () => listeners.forEach((l) => l());
@@ -62,6 +64,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
   let pending: Promise<void> | null = null;
   let records: EmojiRecord[] = [];
   let groupNames: readonly string[] = [];
+  let locale = localeOption;
   let byUnified = new Map<string, EmojiRecord>();
   let index: SearchIndex | null = null;
   let customs: readonly CustomEmoji[] = [];
@@ -78,6 +81,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     customGroups = new Map(loaded.map((c) => [c.id, c.group]));
     records = [...base, ...customRecords(loaded, base.length, (u) => byCode.get(u.toLowerCase()))];
     groupNames = dataset.groups;
+    locale = localeOption ?? dataset.locale;
     byUnified = new Map();
     for (const r of records) {
       byUnified.set(r.unified, r);
@@ -128,6 +132,8 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     records: (): readonly EmojiRecord[] => records,
     /** Localized category names from the dataset, in GROUPS order. */
     groupNames: () => groupNames,
+    /** The `locale` option, else the dataset's once loaded. */
+    locale: () => locale,
 
     /** Base record for a unified code, a skin-tone variation or a custom emoji id. */
     get: (unified: string) => byUnified.get(unified.toLowerCase()) ?? byUnified.get(unified),
@@ -135,7 +141,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     /** The search index, built on first use. */
     index(): SearchIndex {
       if (status !== "ready") throw new Error("emoji data is not loaded; await store.load() first");
-      return (index ??= indexFor(records));
+      return (index ??= indexFor(records, { locale }));
     },
 
     /** Record for a Slack shortcode ("tada" or ":tada:"), including custom emoji. */
@@ -158,7 +164,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
         }
         return [...seen];
       };
-      const result = search(text, { records, limit, signal, frequency: (u) => frequents.score(u) });
+      const result = search(text, { records, limit, signal, frequency: (u) => frequents.score(u), locale });
       if (!isThenable(result)) return resolve(result);
       const settled = Promise.resolve(result).then(resolve);
       const interim = interimOf(result);
