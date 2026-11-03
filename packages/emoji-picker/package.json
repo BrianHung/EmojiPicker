@@ -1,0 +1,66 @@
+{
+  "name": "@brianhung/emoji-picker",
+  "version": "3.0.0-alpha.0",
+  "description": "Headless, shadcn-style React emoji picker with Slack shortcodes, tapbacks and platform-aware rendering, built on emoji-picker-react primitives.",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianHung/EmojiPicker",
+    "directory": "packages/emoji-picker"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "dist",
+    "data",
+    "src/styles"
+  ],
+  "exports": {
+    ".": {
+      "@brianhung/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./core": {
+      "@brianhung/source": "./src/core/index.ts",
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./search": {
+      "@brianhung/source": "./src/search.ts",
+      "types": "./dist/search.d.ts",
+      "import": "./dist/search.js"
+    },
+    "./data/en.json": "./data/en.json",
+    "./tokens.css": "./src/styles/tokens.css",
+    "./theme.css": "./src/styles/theme.css",
+    "./shadcn.css": "./src/styles/shadcn.css"
+  },
+  "scripts": {
+    "build:data": "tsx scripts/build-data.ts",
+    "build": "npm run build:data && tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0 || ^19.0.0",
+    "react-dom": "^18.2.0 || ^19.0.0"
+  },
+  "dependencies": {
+    "emoji-picker-react": "^5.1.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "emojibase-data": "^18.0.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

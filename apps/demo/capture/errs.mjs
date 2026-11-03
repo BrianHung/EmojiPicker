@@ -1,0 +1,10 @@
+import { chromium } from "playwright";
+const [skin, theme = "light"] = process.argv.slice(2);
+const b = await chromium.launch({ channel: "chrome", headless: true });
+const p = await b.newPage();
+const seen = new Set();
+p.on("console", (m) => { if (m.type() === "error" && !seen.has(m.text().slice(0, 200))) { seen.add(m.text().slice(0, 200)); console.log("console:", m.text().slice(0, 700)); } });
+p.on("pageerror", (e) => { const k = e.message.slice(0, 120); if (!seen.has(k)) { seen.add(k); console.log("pageerror:", e.message.slice(0, 300), "\n", (e.stack ?? "").split("\n").slice(0, 6).join("\n")); } });
+await p.goto(`http://localhost:5199/shot.html?skin=${skin}&theme=${theme}`);
+await p.waitForTimeout(3000);
+await b.close();

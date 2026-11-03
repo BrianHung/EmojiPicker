@@ -1,0 +1,25 @@
+/*
+ * Emoji picker color and shape tokens.
+ *
+ * Each role reads the MCP Apps standard variable first (so a host or app theme
+ * applies automatically), then a light-dark() default that follows the page's
+ * `color-scheme`. Override any subset: set --emoji-picker-* on the picker or
+ * any ancestor, in plain CSS or with Tailwind arbitrary properties.
+ */
+:where(:root) {
+  --emoji-picker-background: var(--color-background-primary, light-dark(#ffffff, #171717));
+  --emoji-picker-foreground: var(--color-text-primary, light-dark(#171717, #fafafa));
+  --emoji-picker-muted: var(--color-text-secondary, light-dark(#737373, #a3a3a3));
+  --emoji-picker-subtle: var(--color-text-tertiary, light-dark(#a3a3a3, #737373));
+  --emoji-picker-border: var(--color-border-primary, light-dark(#e5e5e5, #2e2e2e));
+  --emoji-picker-input: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+  --emoji-picker-input-border: var(--color-border-secondary, light-dark(#d4d4d4, #404040));
+  --emoji-picker-panel: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
+  --emoji-picker-hover: var(--color-background-tertiary, light-dark(#f0f0f0, #2a2a2a));
+  --emoji-picker-selected: var(--color-background-tertiary, light-dark(#ebebeb, #333333));
+  --emoji-picker-accent: var(--color-ring-primary, light-dark(#171717, #fafafa));
+  --emoji-picker-ring: var(--color-ring-primary, light-dark(#a3a3a3, #737373));
+  --emoji-picker-radius: var(--border-radius-lg, 10px);
+  --emoji-picker-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
+  --emoji-picker-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+}

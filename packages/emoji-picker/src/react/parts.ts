@@ -1,0 +1,21 @@
+// The `EmojiPicker.*` namespace. Internal-only exports (PickerRoot) stay out.
+export {
+  Root,
+  Search,
+  SearchInput,
+  CategoryNav,
+  Viewport,
+  List,
+  Preview,
+  SkinTone,
+  Empty,
+  Loading,
+  LoadError,
+  Reactions,
+  Panel,
+  useActiveEmoji,
+  useCategoryNavigation,
+  useCollapsedCategories,
+  useSearchActions,
+  useSearchState,
+} from "./picker";

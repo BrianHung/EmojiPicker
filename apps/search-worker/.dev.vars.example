@@ -1,0 +1,9 @@
+# Secrets. The Deploy to Cloudflare button asks for these; for local dev copy this
+# file to .dev.vars. Config vars live in wrangler.jsonc / cloudflare.config.ts.
+
+# TypeSafe API key for Jev (POST /jev). Leave empty to serve only /embed-search.
+TYPESAFE_API_KEY=
+
+# Bearer token for POST /admin/seed. Any long random string:
+# node -e "console.log(crypto.randomUUID())"
+ADMIN_TOKEN=

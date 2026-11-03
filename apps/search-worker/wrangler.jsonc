@@ -1,0 +1,19 @@
+// Wrangler config, for the Deploy to Cloudflare button and Workers Builds (they read
+// only Wrangler config). The `cf` CLI reads cloudflare.config.ts; keep both in step
+// (test/config.test.ts checks). No account id: deploys go to the account you use.
+{
+  "name": "emoji-search",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-30",
+  "observability": { "enabled": true },
+  "ai": { "binding": "AI" },
+  // 1024 dimensions, cosine. `npm run deploy` creates it first if it is missing.
+  "vectorize": [{ "binding": "EMOJI_INDEX", "index_name": "emoji-bge-large" }],
+  "vars": {
+    "ALLOWED_ORIGINS": "http://localhost:*,https://emoji.brianhung.me",
+    "AI_GATEWAY_ID": "default",
+    "JEV_PROVIDER": "custom-typesafe",
+    "JEV_MODEL": "jev-latest"
+  }
+  // Secrets (not in config): TYPESAFE_API_KEY, ADMIN_TOKEN. See .dev.vars.example.
+}

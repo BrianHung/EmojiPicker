@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "paths": { "@/lib/utils": ["./lib/utils.ts"], "@/*": ["./*"] }
+  },
+  "include": ["."],
+  "exclude": ["dist", "node_modules", "capture/out"]
+}

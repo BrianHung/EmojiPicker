@@ -1,0 +1,24 @@
+/*
+ * shadcn/ui bridge: the picker follows your shadcn theme (light, dark and any
+ * custom palette) with no per-token setup. Import it after tokens.css:
+ *   @import "@brianhung/emoji-picker/tokens.css";
+ *   @import "@brianhung/emoji-picker/shadcn.css";
+ * Requires shadcn's Tailwind v4 variables (full colors, e.g. oklch). With the older
+ * HSL-triplet variables, set --emoji-picker-* yourself, e.g. hsl(var(--popover)).
+ * `:root` beats tokens.css's `:where(:root)`, so import order doesn't matter.
+ */
+:root {
+  --emoji-picker-background: var(--popover);
+  --emoji-picker-foreground: var(--popover-foreground);
+  --emoji-picker-muted: var(--muted-foreground);
+  --emoji-picker-subtle: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  --emoji-picker-border: var(--border);
+  --emoji-picker-input: transparent;
+  --emoji-picker-input-border: var(--input);
+  --emoji-picker-panel: var(--muted);
+  --emoji-picker-hover: var(--accent);
+  --emoji-picker-selected: var(--accent);
+  --emoji-picker-accent: var(--primary);
+  --emoji-picker-ring: var(--ring);
+  --emoji-picker-radius: var(--radius);
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "brianhung-emoji",
+  "homepage": "https://emoji.brianhung.me",
+  "items": [
+    {
+      "name": "emoji-picker",
+      "type": "registry:ui",
+      "title": "Emoji Picker",
+      "description": "Emoji picker, popover and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker.",
+      "dependencies": ["@brianhung/emoji-picker"],
+      "registryDependencies": ["utils"],
+      "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }]
+    }
+  ]
+}
