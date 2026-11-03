@@ -1,22 +1,18 @@
 /**
- * Builds data/<locale>.json from emojibase-data + iamcal (Slack) shortcodes.
+ * Builds a dataset (data/<locale>.json's format) from emojibase-data: names,
+ * tags and categories in the locale, Slack (iamcal) shortcodes plus the
+ * locale's CLDR ones.
  *
  * Skin-tone variations are not stored: `withTone()` computes them, and this
- * script verifies the rule against emojibase, keeping only the exceptions.
+ * verifies the rule against emojibase, keeping only the exceptions.
  */
-import { fileURLToPath } from "node:url";
 import fs from "node:fs";
-import path from "node:path";
 import { createRequire } from "node:module";
-import { gzipSync } from "node:zlib";
+import path from "node:path";
 import { GROUPS, withTone, type Dataset, type DatasetEmoji } from "../src/core/dataset";
 
-const require = createRequire(import.meta.url);
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const locale = process.argv[2] ?? "en";
-
 type Skin = { hexcode: string; emoji: string; tone?: number | number[] };
-type Record_ = {
+type EmojibaseEmoji = {
   hexcode: string;
   emoji: string;
   label: string;
@@ -27,93 +23,130 @@ type Record_ = {
   emoticon?: string | string[];
   skins?: Skin[];
 };
+type Messages = { groups: { key: string; message: string }[] };
+type ShortcodeSet = Record<string, string | string[]>;
+type Load = <T>(file: string) => T;
 
-const records: Record_[] = require(`emojibase-data/${locale}/data.json`);
-const messages: { groups: { key: string; message: string; order: number }[] } = require(`emojibase-data/${locale}/messages.json`);
-const iamcal: Record<string, string | string[]> = require(`emojibase-data/${locale}/shortcodes/iamcal.json`);
-const { version: emojibaseVersion } = require("emojibase-data/package.json");
+export type BuildDataOptions = {
+  /** An emojibase-data locale: "ja", "zh", "zh-hant", "pt", "en-gb". */
+  locale: string;
+  /** emojibase shortcode sets, in priority order. Default `iamcal` for English, `iamcal,cldr` otherwise. */
+  shortcodes?: readonly string[];
+  /** Reads a file from emojibase-data ("ja/data.json"). Default: the package resolved by `findEmojibase()`. */
+  load?: Load;
+};
 
-// emojibase group index → our group (smileys + people merge, components are dropped)
+export type BuildDataResult = {
+  dataset: Dataset;
+  stats: { emoji: number; withShortcodes: number; computedTones: number; toneExceptions: number };
+};
+
+/** emojibase-data from the current project, else next to this package; undefined when neither has it. */
+export function findEmojibase(): { root: string; load: Load } | undefined {
+  for (const base of [path.join(process.cwd(), "package.json"), import.meta.url]) {
+    const require = createRequire(base);
+    try {
+      const root = path.dirname(require.resolve("emojibase-data/package.json"));
+      return { root, load: (file) => require(`emojibase-data/${file}`) };
+    } catch {}
+  }
+  return undefined;
+}
+
+/** Locales emojibase-data has data for. */
+export const emojibaseLocales = (root: string) => fs.readdirSync(root).filter((name) => fs.existsSync(path.join(root, name, "data.json"))).sort();
+
+const isEnglish = (locale: string) => locale.split("-")[0] === "en";
+
+export const defaultShortcodeSets = (locale: string) => (isEnglish(locale) ? ["iamcal"] : ["iamcal", "cldr"]);
+
+// emojibase group index → ours (smileys and people merge, components are dropped).
 const GROUP_OF: Record<number, number> = { 0: 0, 1: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7 };
-
-const stripFE0F = (hex: string) => hex.split("-").filter((c) => c !== "FE0F").join("-");
-const shortcodesByHex = new Map<string, string[]>();
-for (const [hex, codes] of Object.entries(iamcal)) shortcodesByHex.set(stripFE0F(hex), Array.isArray(codes) ? codes : [codes]);
+const MESSAGE_KEY: Record<(typeof GROUPS)[number], string> = {
+  smileys_people: "people-body",
+  animals_nature: "animals-nature",
+  food_drink: "food-drink",
+  travel_places: "travel-places",
+  activities: "activities",
+  objects: "objects",
+  symbols: "symbols",
+  flags: "flags",
+};
+// emojibase's English messages are lowercase and split smileys from people; these are Slack's and emoji-mart's.
+const ENGLISH_GROUPS = ["Smileys & People", "Animals & Nature", "Food & Drink", "Travel & Places", "Activities", "Objects", "Symbols", "Flags"];
 
 const toArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
-
+const stripFE0F = (hex: string) => hex.toLowerCase().split("-").filter((c) => c !== "fe0f").join("-");
 // emojibase's hexcode can omit FE0F (❤️ is "2764"); the fully qualified `emoji`
 // string is what renders as emoji, and what emoji-picker-react and Twemoji key on.
 const qualified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
-let computed = 0;
-const exceptions: Record<string, string[]> = {};
-const emojis: DatasetEmoji[] = [];
-
-for (const r of [...records].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
-  const group = GROUP_OF[r.group ?? -1];
-  if (group === undefined) continue;
-  const unified = qualified(r.emoji);
-
-  // Single-tone variations only (uniform tone across all people), in tone order 1..5.
-  const tones = (r.skins ?? [])
-    .filter((s) => toArray(s.tone).length > 0 && new Set(toArray(s.tone)).size === 1)
-    .sort((a, b) => toArray(a.tone)[0]! - toArray(b.tone)[0]!)
-    .filter((s, i, all) => all.findIndex((x) => toArray(x.tone)[0] === toArray(s.tone)[0]) === i)
-    .map((s) => qualified(s.emoji));
-
-  let toneFlag: 0 | 1 = 0;
-  if (tones.length === 5) {
-    toneFlag = 1;
-    const expected = [1, 2, 3, 4, 5].map((t) => withTone(unified, t));
-    if (expected.every((e, i) => e === tones[i])) computed++;
-    else exceptions[unified] = tones;
-  } else if (tones.length > 0) {
-    exceptions[unified] = tones;
+function loadShortcodes(load: Load, locale: string, sets: readonly string[]): Map<string, string[]> {
+  const byHex = new Map<string, string[]>();
+  for (const set of sets) {
+    // iamcal, github and joypixels exist in English only.
+    const codes = tryLoad<ShortcodeSet>(load, `${locale}/shortcodes/${set}.json`) ?? tryLoad<ShortcodeSet>(load, `en/shortcodes/${set}.json`);
+    if (!codes) throw new Error(`emojibase-data has no "${set}" shortcodes`);
+    for (const [hex, value] of Object.entries(codes)) {
+      const key = stripFE0F(hex);
+      byHex.set(key, [...new Set([...(byHex.get(key) ?? []), ...toArray(value)])]);
+    }
   }
-
-  const tags = toArray(r.tags).map((t) => t.toLowerCase());
-  const emoticons = toArray(r.emoticon);
-  emojis.push([
-    unified,
-    r.label.toLowerCase(),
-    [...new Set([...tags, ...emoticons])],
-    shortcodesByHex.get(stripFE0F(r.hexcode)) ?? [],
-    group,
-    r.version,
-    toneFlag,
-  ]);
+  return byHex;
 }
 
-// emojibase's group messages are lowercase ("people & body") and split smileys
-// from people, which the picker merges. English gets the names Slack and
-// emoji-mart use; other locales get the people group, capitalized.
-const EN_GROUP_NAMES: Record<string, string> = {
-  smileys_people: "Smileys & People",
-  animals_nature: "Animals & Nature",
-  food_drink: "Food & Drink",
-  travel_places: "Travel & Places",
-  activities: "Activities",
-  objects: "Objects",
-  symbols: "Symbols",
-  flags: "Flags",
-};
-const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase(locale) + s.slice(1);
-const groupNames = GROUPS.map((key) => {
-  if (locale === "en") return EN_GROUP_NAMES[key] ?? key;
-  const source = { smileys_people: "people-body", animals_nature: "animals-nature", food_drink: "food-drink", travel_places: "travel-places", activities: "activities", objects: "objects", symbols: "symbols", flags: "flags" }[key];
-  return capitalize(messages.groups.find((g) => g.key === source)?.message ?? key);
-});
+function tryLoad<T>(load: Load, file: string): T | undefined {
+  try {
+    return load<T>(file);
+  } catch {
+    return undefined;
+  }
+}
 
-const dataset: Dataset = { format: 1, locale, emojibase: emojibaseVersion, groups: groupNames, emojis, toneExceptions: exceptions };
-const out = path.join(root, "data", `${locale}.json`);
-fs.mkdirSync(path.dirname(out), { recursive: true });
-const json = JSON.stringify(dataset);
-fs.writeFileSync(out, json);
+export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(locale), load = findEmojibase()?.load }: BuildDataOptions): BuildDataResult {
+  if (!load) throw new Error("emojibase-data is not installed");
+  const records = tryLoad<EmojibaseEmoji[]>(load, `${locale}/data.json`);
+  if (!records) throw new Error(`emojibase-data has no locale "${locale}"`);
+  const messages = load<Messages>(`${locale}/messages.json`);
+  const { version } = load<{ version: string }>("package.json");
+  const shortcodesByHex = loadShortcodes(load, locale, sets);
+  const lower = (s: string) => s.toLocaleLowerCase(locale);
 
-const withShortcodes = emojis.filter((e) => e[3].length).length;
-console.log(
-  `${out}: ${emojis.length} emoji, ${withShortcodes} with shortcodes, ` +
-    `${computed} tone sets computed, ${Object.keys(exceptions).length} exceptions, ` +
-    `${(json.length / 1024).toFixed(1)} KB raw / ${(gzipSync(json, { level: 9 }).length / 1024).toFixed(1)} KB gz`,
-);
+  let computedTones = 0;
+  const toneExceptions: Record<string, string[]> = {};
+  const emojis: DatasetEmoji[] = [];
+
+  for (const r of [...records].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
+    const group = GROUP_OF[r.group ?? -1];
+    if (group === undefined) continue;
+    const unified = qualified(r.emoji);
+
+    // Single-tone variations only (uniform tone across all people), in tone order 1..5.
+    const tones = (r.skins ?? [])
+      .filter((s) => toArray(s.tone).length > 0 && new Set(toArray(s.tone)).size === 1)
+      .sort((a, b) => toArray(a.tone)[0]! - toArray(b.tone)[0]!)
+      .filter((s, i, all) => all.findIndex((x) => toArray(x.tone)[0] === toArray(s.tone)[0]) === i)
+      .map((s) => qualified(s.emoji));
+
+    let hasTones: 0 | 1 = 0;
+    if (tones.length === 5) {
+      hasTones = 1;
+      if (tones.every((t, i) => t === withTone(unified, i + 1))) computedTones++;
+      else toneExceptions[unified] = tones;
+    } else if (tones.length > 0) {
+      toneExceptions[unified] = tones;
+    }
+
+    const tags = [...toArray(r.tags).map(lower), ...toArray(r.emoticon)];
+    emojis.push([unified, lower(r.label), [...new Set(tags)], shortcodesByHex.get(stripFE0F(r.hexcode)) ?? [], group, r.version, hasTones]);
+  }
+
+  const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase(locale) + s.slice(1);
+  const groups =
+    isEnglish(locale) ? ENGLISH_GROUPS : GROUPS.map((key) => capitalize(messages.groups.find((g) => g.key === MESSAGE_KEY[key])?.message ?? key));
+
+  return {
+    dataset: { format: 1, locale, emojibase: version, groups, emojis, toneExceptions },
+    stats: { emoji: emojis.length, withShortcodes: emojis.filter((e) => e[3].length).length, computedTones, toneExceptions: Object.keys(toneExceptions).length },
+  };
+}

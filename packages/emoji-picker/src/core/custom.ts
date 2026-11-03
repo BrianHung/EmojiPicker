@@ -1,7 +1,7 @@
 // Custom emoji: their shape, where they come from (inline, a URL, a loader), and
 // how they become records the picker and search treat like any other emoji.
 import type { EmojiRecord } from "./dataset";
-import { tokenize } from "./search-index";
+import { tokenizerFor } from "./tokenize";
 
 export type CustomEmoji = {
   id: string;
@@ -96,6 +96,7 @@ export async function loadCustomEmojis(sources: readonly CustomEmojiSource[], si
  * (so `sleepyFrogFamily` matches "frog family") and their base emoji's name and tags.
  */
 export function customRecords(customs: readonly CustomEmoji[], firstOrder: number, base: (unified: string) => EmojiRecord | undefined): EmojiRecord[] {
+  const tokenize = tokenizerFor();
   return customs.map((c, i) => {
     const shortcodes = c.shortcodes ?? [];
     const words = new Set([...(c.tags ?? []), ...splitWords(c.id), ...shortcodes.flatMap(splitWords)]);

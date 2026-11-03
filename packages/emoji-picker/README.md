@@ -54,7 +54,7 @@ It adds `components/ui/emoji-picker.tsx` with `EmojiPickerCard`, `EmojiPickerPop
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker` | Components and hooks |
-| `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, and Twemoji helpers. No React. |
+| `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, and `EmojiLabels`. No React. |
 | `@brianhung/emoji-picker/search` | Building blocks for the provider's `search` |
 | `@brianhung/emoji-picker/data/en.json` | The English dataset |
 | `@brianhung/emoji-picker/tokens.css`, `theme.css`, `shadcn.css` | Color tokens, Tailwind utilities, and the shadcn/ui bridge |
@@ -174,7 +174,7 @@ const semantic = progressive(lexical(), remote((query, { signal }) => fetchEmoji
 
 | Function | Description |
 |---|---|
-| `lexical({ typos, typoThreshold })` | The default. A sorted word index over shortcodes, names, and tags, with typo correction. |
+| `lexical({ typos, typoThreshold, locale, segmenter, tokenize })` | The default. A sorted word index over shortcodes, names, and tags, with typo correction. |
 | `fallback(primary, secondary, { min })` | Uses `secondary` when `primary` finds fewer than `min` results |
 | `merge(...searches)` | Reciprocal rank fusion |
 | `rerank(search, ...rerankers)`, `preferFrequent({ weight })` | Reorders results |
@@ -251,7 +251,51 @@ Set sizes with CSS variables on `Root` or an ancestor:
 
 ## Data
 
-`npm run build:data` builds `data/en.json` from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
+`data/en.json` is built from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
+
+## Localization
+
+The package ships English. To build a dataset for another language, run the `build-data` command with an [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales):
+
+```bash
+npm install --save-dev emojibase-data
+npx @brianhung/emoji-picker build-data ja --out public/emoji/ja.json
+```
+
+The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps Slack's English shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
+
+Pass the dataset as `data`:
+
+```tsx
+<EmojiProvider data="/emoji/ja.json">…</EmojiProvider>
+```
+
+Search follows the dataset's `locale`: it normalizes text (NFKC, so full-width `ｆｉｒｅ` finds 🔥), lowercases by the locale's rules (Turkish `İ` becomes `i`), splits Japanese, Chinese, and Thai into words with `Intl.Segmenter`, and orders alphabetical shortcode completion with `Intl.Collator`. Set `locale` on the provider to override the dataset's tag.
+
+To change how text becomes words, pass a `segmenter` (any object with `Intl.Segmenter`'s `segment()`) or replace the tokenizer. A tokenizer receives text and returns words; it splits both the indexed names and the query.
+
+```tsx
+import { lexical } from "@brianhung/emoji-picker/search";
+
+const bigrams = (text: string) => Array.from({ length: Math.max(1, text.length - 1) }, (_, i) => text.slice(i, i + 2));
+
+<EmojiProvider data="/emoji/zh.json" search={lexical({ tokenize: bigrams })}>…</EmojiProvider>
+```
+
+Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker/core` with English defaults in `defaultLabels`. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:
+
+```ts
+import { defaultLabels, plural, type EmojiLabels } from "@brianhung/emoji-picker/core";
+
+const ja: EmojiLabels = {
+  ...defaultLabels,
+  searchPlaceholder: "検索",
+  resultCount: plural("ja", { "=0": "結果なし", other: "#件の結果" }),
+  // …
+};
+```
+
+> Note: The components read `labels.suggested` and `labels.custom` today. The rest of `EmojiLabels` takes effect when the React layer adopts it.
 
 ## Development
 

@@ -1,8 +1,9 @@
 import { SKIN_TONES, unifiedToNative, type EmojiRecord } from "./dataset";
+import { defaultLabels, type EmojiLabels } from "./labels";
 import type { SearchIndex } from "./search-index";
 
-/** Slack writes skin tones as a second shortcode: :thumbsup::skin-tone-3: (2-6 map to tones 1-5). */
-const SHORTCODE = /:([a-z0-9_+\-']+):(?::skin-tone-([2-6]):)?/gi;
+/** Slack writes skin tones as a second shortcode: :thumbsup::skin-tone-3: (2-6 map to tones 1-5). Localized codes may be in any script. */
+const SHORTCODE = /:([\p{L}\p{M}\p{N}_+\-']+):(?::skin-tone-([2-6]):)?/giu;
 
 /** Skin tone 1-5 of a variation, or 0 for the base emoji. */
 export function toneOf(unified: string): number {
@@ -13,12 +14,10 @@ export function toneOf(unified: string): number {
   return 0;
 }
 
-const TONE_NAMES = ["light skin tone", "medium-light skin tone", "medium skin tone", "medium-dark skin tone", "dark skin tone"];
-
 /** A name with the variation's skin tone, as emojibase writes it: "thumbs up: medium skin tone". */
-export function nameWithTone(name: string, unified: string): string {
+export function nameWithTone(name: string, unified: string, format: EmojiLabels["withSkinTone"] = defaultLabels.withSkinTone): string {
   const tone = toneOf(unified);
-  return tone ? `${name}: ${TONE_NAMES[tone - 1]}` : name;
+  return tone ? format(name, tone) : name;
 }
 
 /** ":thumbsup:" or ":thumbsup::skin-tone-3:", or undefined when the emoji has no shortcode. */
