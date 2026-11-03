@@ -3,12 +3,17 @@
 // and the reaction shows as a chip under the bubble. The composer's smiley opens the
 // picker too. Measured from Instagram web DMs (dark), Nov 2026: page #0c1014; 12px
 // sender labels at x=59; 28px avatars at x=16; bubbles 15/18 with 8×12 padding,
-// radius 18 and a 4px corner on the avatar side inside a group; a 44px pill composer.
+// radius 18 and a 4px corner on the avatar side inside a group; a 44px pill composer
+// (radius 22, 11px in, a 32px emoji button).
+// On a phone it is the mobile web thread at real size: press and hold (or right-click,
+// or Enter) a bubble for the reaction bar, double-tap for ❤️, and "+" and the composer's
+// smiley open the picker as a bottom sheet. The phone header is not measured (Chrome
+// couldn't take a phone viewport: Instagram refuses frames and the window won't resize).
 import * as React from "react";
 import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
-import { Avatar, EmojiText, FitViewport, SceneFrame, ScenePicker, themed } from "@/styles/scene-kit";
+import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, useCompact, useLongPress } from "@/styles/scene-kit";
 import { StylePicker } from "@/styles/style-picker";
 
 const W = 720;
@@ -40,11 +45,14 @@ const INITIAL: Message[] = [
   { id: 3, from: JORDAN, text: "count me in!!", reaction: "1f525" },
   { id: 4, from: JORDAN, text: "I'll bring snacks" },
   { id: 5, from: "me", text: "same, I'm in 🙌", time: "Today 10:20 AM" },
-  { id: 6, from: "me", text: "hover a message to react 👀" },
+  { id: 6, from: "me", text: "hover or hold a message to react 👀" },
   { id: 7, from: MAYA, text: "perfect, leaving at 9 ☀️" },
 ];
 
+const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
 export function InstagramScene() {
+  const { ref, compact } = useCompact();
   const [messages, setMessages] = React.useState(INITIAL);
   const list = React.useRef<HTMLDivElement>(null);
   const react = (id: number, unified: string) => setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, reaction: m.reaction === unified ? undefined : unified } : m)));
@@ -53,19 +61,54 @@ export function InstagramScene() {
     requestAnimationFrame(() => list.current?.scrollTo({ top: list.current.scrollHeight }));
   };
   return (
-    <SceneFrame
-      width={W}
-      height={H}
-      theme={THEME}
-      label="Instagram style direct messages"
-      appStyle={instagram}
-      className="flex flex-col rounded-[12px] shadow-2xl ring-1 ring-white/10"
-      style={{ background: C.page, color: C.text, fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}
-    >
-      <Header />
-      <Thread messages={messages} listRef={list} onReact={react} />
-      <Composer onSend={send} />
-    </SceneFrame>
+    <div ref={ref} className="w-full">
+      {compact ? (
+        <MobileFrame theme={THEME} label="Instagram style direct messages" appStyle={instagram} style={{ background: C.page, color: C.text, fontFamily: FONT }}>
+          <MobileHeader />
+          <Thread messages={messages} listRef={list} onReact={react} compact />
+          <Composer onSend={send} compact />
+        </MobileFrame>
+      ) : (
+        <SceneFrame
+          width={W}
+          height={H}
+          theme={THEME}
+          label="Instagram style direct messages"
+          appStyle={instagram}
+          className="flex flex-col rounded-[12px] shadow-2xl ring-1 ring-white/10"
+          style={{ background: C.page, color: C.text, fontFamily: FONT }}
+        >
+          <Header />
+          <Thread messages={messages} listRef={list} onReact={react} />
+          <Composer onSend={send} />
+        </SceneFrame>
+      )}
+    </div>
+  );
+}
+
+/** The phone thread's top bar: back, the group's avatars and name, call and video. */
+function MobileHeader() {
+  return (
+    <div className="flex h-[60px] shrink-0 items-center gap-3 pr-4 pl-3" style={{ borderBottom: `1px solid ${C.rule}` }} aria-hidden>
+      <span style={{ color: C.icon }}>
+        <Back />
+      </span>
+      <div className="relative size-9 shrink-0">
+        <Avatar name={MAYA.name} size={26} color={MAYA.color} className="absolute top-0 left-0" />
+        <Avatar name={JORDAN.name} size={26} color={JORDAN.color} className="absolute right-0 bottom-0 ring-2 ring-[#0c1014]" />
+      </div>
+      <div className="min-w-0">
+        <div className="truncate text-[16px] leading-5 font-semibold">Lake weekend</div>
+        <div className="truncate text-[12px] leading-4" style={{ color: C.muted }}>
+          Maya, Jordan
+        </div>
+      </div>
+      <div className="ml-auto flex items-center gap-5" style={{ color: C.icon }}>
+        <Phone />
+        <Video />
+      </div>
+    </div>
   );
 }
 
@@ -92,7 +135,7 @@ function Header() {
 }
 
 /** Groups consecutive messages by sender: sender labels, corners and avatars follow from it. */
-function Thread({ messages, listRef, onReact }: { messages: Message[]; listRef: React.RefObject<HTMLDivElement | null>; onReact: (id: number, unified: string) => void }) {
+function Thread({ messages, listRef, onReact, compact = false }: { messages: Message[]; listRef: React.RefObject<HTMLDivElement | null>; onReact: (id: number, unified: string) => void; compact?: boolean }) {
   // Sent bubbles read their gradient slice from the thread's scroll position.
   const [scroll, setScroll] = React.useState(0);
   return (
@@ -114,7 +157,7 @@ function Thread({ messages, listRef, onReact }: { messages: Message[]; listRef: 
                 {m.time}
               </div>
             ) : null}
-            <Row message={m} first={first} last={last} scroll={scroll} listRef={listRef} onReact={(u) => onReact(m.id, u)} />
+            <Row message={m} first={first} last={last} scroll={scroll} listRef={listRef} onReact={(u) => onReact(m.id, u)} compact={compact} />
           </React.Fragment>
         );
       })}
@@ -122,10 +165,18 @@ function Thread({ messages, listRef, onReact }: { messages: Message[]; listRef: 
   );
 }
 
-function Row({ message, first, last, scroll, listRef, onReact }: { message: Message; first: boolean; last: boolean; scroll: number; listRef: React.RefObject<HTMLDivElement | null>; onReact: (unified: string) => void }) {
+type RowProps = { message: Message; first: boolean; last: boolean; scroll: number; listRef: React.RefObject<HTMLDivElement | null>; onReact: (unified: string) => void; compact: boolean };
+
+function Row({ message, first, last, scroll, listRef, onReact, compact }: RowProps) {
   const mine = message.from === "me";
   const person = mine ? undefined : (message.from as Person);
   const [barOpen, setBarOpen] = React.useState(false);
+  const [sheetOpen, setSheetOpen] = React.useState(false);
+  const hold = useLongPress(() => setBarOpen(true));
+  const pick = (s: EmojiSelection) => {
+    onReact(s.unified);
+    setBarOpen(false);
+  };
   const bubble = React.useRef<HTMLDivElement>(null);
   const [top, setTop] = React.useState(0);
   React.useLayoutEffect(() => {
@@ -146,7 +197,7 @@ function Row({ message, first, last, scroll, listRef, onReact }: { message: Mess
       {!mine ? (
         <div className="flex w-[31px] shrink-0 items-end">{last ? <Avatar name={person!.name} size={28} color={person!.color} fontSize={12} /> : null}</div>
       ) : null}
-      <div className={cn("flex max-w-[60%] flex-col", mine ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col", compact ? "max-w-[75%]" : "max-w-[60%]", mine ? "items-end" : "items-start")}>
         {first && !mine ? (
           <div className="pb-1 pl-3 text-[12px] leading-4" style={{ color: C.muted }}>
             {person!.name}
@@ -155,7 +206,26 @@ function Row({ message, first, last, scroll, listRef, onReact }: { message: Mess
         <div className={cn("flex items-center gap-1", mine && "flex-row-reverse")}>
           <div
             ref={bubble}
-            className="relative px-3 py-2 text-[15px] leading-[18px] break-words whitespace-pre-wrap text-white"
+            {...(compact
+              ? {
+                  ...hold,
+                  role: "button",
+                  tabIndex: 0,
+                  "aria-haspopup": "dialog" as const,
+                  "aria-expanded": barOpen,
+                  "aria-label": `${mine ? "You" : person!.name}: ${message.text}. Hold to react, double-tap to like`,
+                  onDoubleClick: () => onReact("2764-fe0f"),
+                  onKeyDown: (e: React.KeyboardEvent) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    setBarOpen(true);
+                  },
+                }
+              : {})}
+            className={cn(
+              "relative px-3 py-2 text-[15px] leading-[18px] break-words whitespace-pre-wrap text-white",
+              compact && "touch-manipulation outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-2 focus-visible:ring-[#708dff]",
+            )}
             style={{
               borderRadius: radius,
               background: mine ? SENT_GRADIENT : C.received,
@@ -166,24 +236,33 @@ function Row({ message, first, last, scroll, listRef, onReact }: { message: Mess
             <EmojiText text={message.text} size={15} className="inline-block h-[18px] align-top leading-[18px]" />
             {message.reaction ? <ReactionChip unified={message.reaction} mine={mine} onRemove={() => onReact(message.reaction!)} /> : null}
           </div>
-          {/* Hover actions beside the bubble: react, reply, more. */}
-          <div className={cn("flex items-center gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100", barOpen && "opacity-100", mine && "flex-row-reverse")} style={{ color: C.muted }}>
-            <ReactionBar
-              open={barOpen}
-              onOpenChange={setBarOpen}
-              onSelect={(s) => {
-                onReact(s.unified);
-                setBarOpen(false);
-              }}
-              align={mine ? "end" : "start"}
-            />
-            <span className="flex size-8 items-center justify-center" aria-hidden>
-              <ReplyIcon />
-            </span>
-            <span className="flex size-8 items-center justify-center" aria-hidden>
-              <MoreIcon />
-            </span>
-          </div>
+          {compact ? (
+            <>
+              <ReactionBar
+                open={barOpen}
+                onOpenChange={setBarOpen}
+                onSelect={pick}
+                align={mine ? "end" : "start"}
+                anchor={bubble}
+                onMore={() => {
+                  setBarOpen(false);
+                  setSheetOpen(true);
+                }}
+              />
+              <PickerSheet appStyle={instagram} theme={THEME} label="Choose a reaction" open={sheetOpen} onOpenChange={setSheetOpen} onSelect={(s) => onReact(s.unified)} />
+            </>
+          ) : (
+            // Hover actions beside the bubble: react, reply, more.
+            <div className={cn("flex items-center gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100", barOpen && "opacity-100", mine && "flex-row-reverse")} style={{ color: C.muted }}>
+              <ReactionBar open={barOpen} onOpenChange={setBarOpen} onSelect={pick} align={mine ? "end" : "start"} />
+              <span className="flex size-8 items-center justify-center" aria-hidden>
+                <ReplyIcon />
+              </span>
+              <span className="flex size-8 items-center justify-center" aria-hidden>
+                <MoreIcon />
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -207,22 +286,46 @@ function ReactionChip({ unified, mine, onRemove }: { unified: string; mine: bool
   );
 }
 
+type ReactionBarProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelect: (s: EmojiSelection) => void;
+  align: "start" | "end";
+  /** On a phone: the bar opens over this bubble (no react button) and "+" calls `onMore` for the sheet. */
+  anchor?: React.RefObject<HTMLElement | null>;
+  onMore?: () => void;
+};
+
 /** The react button and its bar: six pinned reactions and "+" for the full Instagram picker. */
-function ReactionBar({ open, onOpenChange, onSelect, align }: { open: boolean; onOpenChange: (open: boolean) => void; onSelect: (s: EmojiSelection) => void; align: "start" | "end" }) {
+function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: ReactionBarProps) {
   const store = useEmojiStore();
   const t = themed(THEME);
   const tb = instagram.tapback;
+  const first = React.useRef<HTMLButtonElement>(null);
+  const moreClass = cn(tb.more!.className, "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]");
   return (
     <EmojiPopover.Root open={open} onOpenChange={onOpenChange}>
-      <EmojiPopover.Trigger aria-label="React" title="React" className="flex size-8 cursor-pointer items-center justify-center rounded-full outline-none hover:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]">
-        <SmileIcon size={16} />
-      </EmojiPopover.Trigger>
-      <EmojiPopover.Content side="top" align={align} sideOffset={6} aria-label="Reactions" className={t.className} style={t.style}>
+      {anchor ? null : (
+        <EmojiPopover.Trigger aria-label="React" title="React" className="flex size-8 cursor-pointer items-center justify-center rounded-full outline-none hover:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]">
+          <SmileIcon size={16} />
+        </EmojiPopover.Trigger>
+      )}
+      <EmojiPopover.Content
+        side="top"
+        align={align}
+        sideOffset={6}
+        anchor={anchor ? () => anchor.current?.getBoundingClientRect() : undefined}
+        initialFocus={anchor ? first : undefined}
+        aria-label="Reactions"
+        className={t.className}
+        style={t.style}
+      >
         <div data-style="instagram" className={tb.className} role="toolbar" aria-label="Reactions">
           <div className={tb.reactions}>
-            {tb.pinned!.map((u) => (
+            {tb.pinned!.map((u, i) => (
               <button
                 key={u}
+                ref={i === 0 ? first : undefined}
                 type="button"
                 aria-label={store.get(u)?.name ?? u}
                 onClick={() => {
@@ -234,16 +337,22 @@ function ReactionBar({ open, onOpenChange, onSelect, align }: { open: boolean; o
                 <Emoji unified={store.withSkinTone(u)} />
               </button>
             ))}
-            <EmojiPopover.Root>
-              <EmojiPopover.Trigger aria-label="More reactions" className={cn(tb.more!.className, "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]")}>
+            {onMore ? (
+              <button type="button" aria-label="More reactions" onClick={onMore} className={moreClass}>
                 {tb.more!.icon}
-              </EmojiPopover.Trigger>
-              <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker" className={t.className} style={t.style}>
-                <FitViewport width={instagram.size.width}>
-                  <StylePicker layout={instagram.layout} onSelect={onSelect} autoFocus />
-                </FitViewport>
-              </EmojiPopover.Content>
-            </EmojiPopover.Root>
+              </button>
+            ) : (
+              <EmojiPopover.Root>
+                <EmojiPopover.Trigger aria-label="More reactions" className={moreClass}>
+                  {tb.more!.icon}
+                </EmojiPopover.Trigger>
+                <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker" className={t.className} style={t.style}>
+                  <FitViewport width={instagram.size.width}>
+                    <StylePicker layout={instagram.layout} onSelect={onSelect} autoFocus />
+                  </FitViewport>
+                </EmojiPopover.Content>
+              </EmojiPopover.Root>
+            )}
           </div>
         </div>
       </EmojiPopover.Content>
@@ -251,7 +360,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align }: { open: boolean; o
   );
 }
 
-function Composer({ onSend }: { onSend: (text: string) => void }) {
+function Composer({ onSend, compact = false }: { onSend: (text: string) => void; compact?: boolean }) {
   const [value, setValue] = React.useState("");
   const input = React.useRef<HTMLInputElement>(null);
   const caret = React.useRef(0);
@@ -278,6 +387,7 @@ function Composer({ onSend }: { onSend: (text: string) => void }) {
         theme={THEME}
         label="Choose an emoji"
         side="top"
+        sheet={compact}
         onSelect={(s) => insert(s.emoji)}
         triggerClassName="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#f5f5f5] outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]"
       >
@@ -332,6 +442,7 @@ const SmileIcon = ({ size }: { size: number }) =>
     </>,
     size,
   );
+const Back = () => stroke(<path d="M15 4 7 12l8 8" />, 26);
 const Phone = () => stroke(<path d="M7.9 2.8 5.5 3a2.6 2.6 0 0 0-2.4 2.8c.6 7.8 7.3 14.5 15.1 15.1a2.6 2.6 0 0 0 2.8-2.4l.2-2.4-4.6-2-1.7 2.2a12.2 12.2 0 0 1-5.8-5.8l2.2-1.7-2-4.6Z" />);
 const Video = () =>
   stroke(

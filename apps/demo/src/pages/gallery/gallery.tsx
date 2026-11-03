@@ -134,7 +134,8 @@ export function GalleryPage() {
       <Tabs label="App" value={styleId} onChange={select} items={STYLES.map((s) => ({ value: s.id, label: s.label }))} />
       {/* Remount per style: each card's state belongs to one app. */}
       <div key={appStyle.id} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <GalleryCard code={sourceOf(appStyle.id, "scene")} file={`styles/${appStyle.id}/scene.tsx`} className="md:col-span-2 xl:col-span-3" previewClassName="overflow-x-auto p-4 sm:p-8">
+        {/* On a phone the app scenes fill the card (they are the phone's screen); Apple's is a device mockup. */}
+        <GalleryCard code={sourceOf(appStyle.id, "scene")} file={`styles/${appStyle.id}/scene.tsx`} className="overflow-hidden md:col-span-2 xl:col-span-3" previewClassName={cn("overflow-x-auto sm:p-8", appStyle.id === "apple" ? "p-4" : "p-0")}>
           <Scene />
         </GalleryCard>
         <GalleryCard title="Inline picker" description="A picker placed in the page." code={sourceOf(appStyle.id, "picker")} file={file} className="md:row-span-2" previewClassName="md:min-h-[560px]">

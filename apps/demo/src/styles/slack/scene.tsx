@@ -1,8 +1,10 @@
 import * as React from "react";
-import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { avatarFor } from "@/lib/people";
+import { cn } from "@/lib/utils";
 import { Smile, SmilePlus } from "@/styles/icons";
+import { PickerSheet, useCompact } from "@/styles/scene-kit";
 import { StyleAutocomplete, StyleDropdown, StylePills, toggleReaction, type Reaction } from "@/styles/variants";
 import { slack } from "./picker";
 
@@ -55,8 +57,24 @@ function SlackText({ text }: { text: string }) {
   return <>{nodes}</>;
 }
 
+/** The Slack picker: a popover, or on a phone a bottom sheet as in Slack's mobile app. */
+function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, children }: { sheet: boolean; label: string; onSelect: (s: EmojiSelection) => void; triggerClassName: string; side?: "top"; align?: "end"; children: React.ReactNode }) {
+  if (sheet)
+    return (
+      <PickerSheet appStyle={slack} label={label} onSelect={onSelect} triggerClassName={triggerClassName}>
+        {children}
+      </PickerSheet>
+    );
+  return (
+    <StyleDropdown appStyle={slack} side={side} align={align} label={label} onSelect={onSelect} triggerClassName={triggerClassName}>
+      {children}
+    </StyleDropdown>
+  );
+}
+
 /** Slack mockup: shortcodes in messages, reaction pills, hover toolbar, add-reaction picker, :shortcode: composer. */
 export function SlackScene() {
+  const { ref, compact } = useCompact();
   const [messages, setMessages] = React.useState(INITIAL);
   const list = React.useRef<HTMLDivElement>(null);
   const toggle = (id: number, unified: string) => setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, reactions: toggleReaction(m.reactions, unified) } : m)));
@@ -66,22 +84,29 @@ export function SlackScene() {
   };
 
   return (
-    <div className="mx-auto flex h-[640px] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-[#dddddd] bg-white font-[Lato,system-ui,sans-serif] text-[#1d1c1d] shadow-2xl dark:border-[#35373b] dark:bg-[#1a1d21] dark:text-[#d1d2d3]">
-      <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
-        <span className="text-[18px] font-black"># general</span>
-        <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
+    <div ref={ref} className="w-full">
+      <div
+        className={cn(
+          "mx-auto flex h-[640px] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-[#dddddd] bg-white font-[Lato,system-ui,sans-serif] text-[#1d1c1d] shadow-2xl dark:border-[#35373b] dark:bg-[#1a1d21] dark:text-[#d1d2d3]",
+          compact && "rounded-none border-0 shadow-none",
+        )}
+      >
+        <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
+          <span className="text-[18px] font-black"># general</span>
+          <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
+        </div>
+        <div ref={list} className="flex flex-1 flex-col justify-end overflow-y-auto py-2">
+          {messages.map((m) => (
+            <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
+          ))}
+        </div>
+        <SlackComposer onSend={send} compact={compact} />
       </div>
-      <div ref={list} className="flex flex-1 flex-col justify-end overflow-y-auto py-2">
-        {messages.map((m) => (
-          <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} />
-        ))}
-      </div>
-      <SlackComposer onSend={send} />
     </div>
   );
 }
 
-function SlackMessage({ message, onToggle }: { message: Message; onToggle: (unified: string) => void }) {
+function SlackMessage({ message, onToggle, compact }: { message: Message; onToggle: (unified: string) => void; compact: boolean }) {
   const store = useEmojiStore();
   useEmojiStatus(); // re-render once the dataset is ready
   const quick = useFrequentEmoji(3);
@@ -112,15 +137,15 @@ function SlackMessage({ message, onToggle }: { message: Message; onToggle: (unif
             <Emoji unified={store.withSkinTone(u)} size={18} className="text-[18px] leading-none" />
           </button>
         ))}
-        <StyleDropdown appStyle={slack} label="Add reaction" align="end" onSelect={(s) => onToggle(s.unified)} triggerClassName="flex size-8 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
+        <EmojiMenu sheet={compact} label="Add reaction" align="end" onSelect={(s) => onToggle(s.unified)} triggerClassName="flex size-8 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
           <SmilePlus size={18} />
-        </StyleDropdown>
+        </EmojiMenu>
       </div>
     </div>
   );
 }
 
-function SlackComposer({ onSend }: { onSend: (text: string) => void }) {
+function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
   // Slack keeps :shortcodes: as text in the composer and renders them in the message.
   const { value, setText, insertAtCaret, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ insert: "shortcode", limit: 8 });
   const submit = () => {
@@ -149,9 +174,9 @@ function SlackComposer({ onSend }: { onSend: (text: string) => void }) {
         <div className="flex items-center gap-0.5 px-1.5 pb-1.5">
           <span className="flex size-7 items-center justify-center rounded-full bg-[#f4f4f4] text-lg text-[#616061] dark:bg-[#2c2d30]">+</span>
           <span className="flex h-7 items-center px-1.5 text-[15px] font-medium text-[#616061] dark:text-[#ababad]">Aa</span>
-          <StyleDropdown appStyle={slack} side="top" label="Emoji" onSelect={(s) => insertAtCaret(`${s.shortcode ?? s.emoji} `)} triggerClassName="flex size-7 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
+          <EmojiMenu sheet={compact} side="top" label="Emoji" onSelect={(s) => insertAtCaret(`${s.shortcode ?? s.emoji} `)} triggerClassName="flex size-7 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
             <Smile size={18} />
-          </StyleDropdown>
+          </EmojiMenu>
           <span className="flex size-7 items-center justify-center text-[15px] text-[#616061] dark:text-[#ababad]">@</span>
           <button type="button" onClick={submit} disabled={!value.trim()} className="ml-auto flex h-7 items-center rounded bg-[#007a5a] px-2.5 text-xs font-bold text-white disabled:bg-transparent disabled:text-[#bbbabb]">
             Send

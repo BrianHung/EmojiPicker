@@ -1,11 +1,13 @@
 // Shared pieces for the in-situ scenes: a fixed-size app frame that scales down to
-// fit, a popover that keeps the app's theme when it portals out of the frame, and
-// small helpers (fonts, avatars).
+// fit, the app's mobile layout at real size when the container is phone-narrow, a
+// popover (or, on mobile, a bottom sheet) that keeps the app's theme when it portals
+// out of the frame, and small helpers (fonts, avatars, press-and-hold).
 import * as React from "react";
 import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
-import { StylePicker, useStyleTokens, type Style } from "./style-picker";
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { StylePicker, useStyleTokens, type PickerLayout, type Style } from "./style-picker";
 
 export type SceneTheme = "light" | "dark";
 
@@ -64,6 +66,44 @@ export function SceneFrame({ width, height, theme, label, appStyle, className, s
   );
 }
 
+/**
+ * Whether the scene's container is phone-narrow: below `breakpoint` the scenes switch
+ * from the scaled desktop window to the app's mobile web layout at real size.
+ */
+export function useCompact(breakpoint = 640) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [compact, setCompact] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setCompact(el.clientWidth < breakpoint);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [breakpoint]);
+  return { ref, compact };
+}
+
+export type MobileFrameProps = Omit<SceneFrameProps, "width" | "height"> & { height?: number };
+
+/** An app's mobile layout at its real size: the container's width (up to a large phone's) and a fixed height. */
+export function MobileFrame({ height = 640, theme, label, appStyle, className, style, children }: MobileFrameProps) {
+  useStyleTokens(appStyle?.id, appStyle?.layout.tokens);
+  return (
+    <div
+      role="region"
+      aria-label={label}
+      data-scene-theme={theme}
+      data-style={appStyle?.id}
+      className={cn(theme === "dark" && "dark", "relative mx-auto flex w-full max-w-[430px] flex-col overflow-hidden", className)}
+      style={{ height, colorScheme: theme, ...style }}
+    >
+      {children}
+    </div>
+  );
+}
+
 /** Props for a portaled layer (popover content) so it keeps the scene's theme outside the frame. */
 export const themed = (theme: SceneTheme) => ({ className: theme === "dark" ? "dark" : undefined, style: { colorScheme: theme } as React.CSSProperties });
 
@@ -116,10 +156,18 @@ export type ScenePickerProps = {
   pickerClassName?: string;
   /** Font for the portaled popover, which otherwise inherits the site's. */
   font?: string;
+  /** Open as a bottom sheet, as the mobile apps do, instead of a popover. */
+  sheet?: boolean;
 };
 
 /** A trigger that opens the app style's full picker; picking closes it. */
-export function ScenePicker({ appStyle: style, theme, onSelect, children, label, triggerClassName, side = "bottom", align = "start", open, onOpenChange, title, pickerClassName, font }: ScenePickerProps) {
+export function ScenePicker({ appStyle: style, theme, onSelect, children, label, triggerClassName, side = "bottom", align = "start", open, onOpenChange, title, pickerClassName, font, sheet }: ScenePickerProps) {
+  if (sheet)
+    return (
+      <PickerSheet appStyle={style} theme={theme} onSelect={onSelect} label={label} title={title} triggerClassName={triggerClassName} open={open} onOpenChange={onOpenChange} font={font}>
+        {children}
+      </PickerSheet>
+    );
   const t = themed(theme);
   return (
     <EmojiPopover.Root open={open} onOpenChange={onOpenChange}>
@@ -133,6 +181,110 @@ export function ScenePicker({ appStyle: style, theme, onSelect, children, label,
       </EmojiPopover.Content>
     </EmojiPopover.Root>
   );
+}
+
+export type PickerSheetProps = {
+  appStyle: Style;
+  /** The app's theme; omit to follow the site's. */
+  theme?: SceneTheme;
+  onSelect: (selection: EmojiSelection) => void;
+  /** The sheet's accessible title (and the trigger's label). */
+  label: string;
+  /** Trigger content; omit to drive the sheet with `open` (a long-press, a "+" in a reaction bar). */
+  children?: React.ReactNode;
+  title?: string;
+  triggerClassName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  font?: string;
+  /** A layout other than the style's own (Linear's team icon picker). */
+  layout?: PickerLayout;
+  /** Above the picker, under the handle (a tab row). */
+  top?: React.ReactNode;
+};
+
+/** The app style's picker in a bottom sheet at full width, the way the mobile apps show it. Picking closes it. */
+export function PickerSheet({ appStyle: style, theme, onSelect, label, children, title, triggerClassName, open, onOpenChange, font, layout = style.layout, top }: PickerSheetProps) {
+  const [uncontrolled, setUncontrolled] = React.useState(false);
+  const isOpen = open ?? uncontrolled;
+  const setOpen = (next: boolean) => {
+    if (open === undefined) setUncontrolled(next);
+    onOpenChange?.(next);
+  };
+  const t = theme ? themed(theme) : undefined;
+  const body = React.useRef<HTMLDivElement>(null);
+  return (
+    <Drawer open={isOpen} onOpenChange={setOpen} showSwipeHandle>
+      {children ? (
+        <DrawerTrigger aria-label={label} title={title} className={triggerClassName}>
+          {children}
+        </DrawerTrigger>
+      ) : null}
+      <DrawerContent
+        data-style={style.id}
+        className={cn(t?.className, "border-picker-border bg-picker-background font-picker text-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-picker-muted/40")}
+        style={{ ...t?.style, fontFamily: font }}
+        // From the keyboard, straight into search; a tap doesn't raise the phone's keyboard.
+        initialFocus={(type) => (type === "touch" ? true : (body.current?.querySelector("input") ?? true))}
+      >
+        <DrawerTitle className="sr-only">{label}</DrawerTitle>
+        <div ref={body} className="flex min-h-0 flex-col">
+          {top}
+          <StylePicker
+            layout={layout}
+            fluid
+            onSelect={(s) => {
+              onSelect(s);
+              setOpen(false);
+            }}
+            // A phone may be narrower than the category bar: it scrolls sideways.
+            className="h-[min(420px,55dvh)] w-full rounded-none border-0 bg-transparent shadow-none backdrop-blur-none [&_[data-epr-part=category-nav]]:min-w-0 [&_[data-epr-part=category-nav]]:overflow-x-auto [&_[data-epr-part=category-nav]]:[scrollbar-width:none]"
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
+/**
+ * Press and hold (touch or mouse), or the context menu key / right click: how the mobile
+ * apps open a message's reactions. Spread onto the message.
+ */
+export function useLongPress(onLongPress: () => void, delay = 450) {
+  const timer = React.useRef(0);
+  const start = React.useRef<{ x: number; y: number } | null>(null);
+  const latest = React.useRef(onLongPress);
+  latest.current = onLongPress;
+  const cancel = () => {
+    window.clearTimeout(timer.current);
+    start.current = null;
+  };
+  React.useEffect(() => cancel, []);
+  // React bubbles events from portals (a sheet opened from inside the message): not a press on it.
+  const outside = (e: React.SyntheticEvent) => !(e.currentTarget as Node).contains(e.target as Node);
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.button !== 0 || outside(e)) return;
+      start.current = { x: e.clientX, y: e.clientY };
+      timer.current = window.setTimeout(() => {
+        start.current = null;
+        latest.current();
+      }, delay);
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const s = start.current;
+      if (s && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 8) cancel();
+    },
+    onPointerUp: cancel,
+    onPointerCancel: cancel,
+    onPointerLeave: cancel,
+    onContextMenu: (e: React.MouseEvent) => {
+      if (outside(e)) return;
+      e.preventDefault();
+      cancel();
+      latest.current();
+    },
+  };
 }
 
 /** Loads a Google Fonts stylesheet once (the gallery page doesn't load every app's font). */

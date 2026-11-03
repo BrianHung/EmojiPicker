@@ -3,13 +3,18 @@
 // ":" plus a few letters opens Notion-style emoji suggestions at the caret.
 // Notion's page metrics: warm ink #37352f, 40px/1.2 bold title, 16px/1.5 body,
 // a 78px icon, 96px side padding on a wide page.
+// On a phone it is Notion's mobile page: a 44px top bar with the 18px icon at x=15
+// and the title 40/48 bold (both measured on a public page in a 390px frame, Nov 2026),
+// 24px side padding (not measured: Notion picks its mobile layout by device, not width),
+// and the icon opens the picker as a bottom sheet.
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Emoji } from "@brianhung/emoji-picker";
 import { notion } from "./picker";
 import { EmojiSuggestion, EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
-import { SceneFrame, ScenePicker } from "@/styles/scene-kit";
+import { cn } from "@/lib/utils";
+import { MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
 
 const W = 760;
 const H = 600;
@@ -36,6 +41,7 @@ const MENU = [
 ].join(" ");
 
 export function NotionScene() {
+  const { ref, compact } = useCompact();
   const [icon, setIcon] = React.useState("1f3d5-fe0f"); // 🏕️
   const title = "Team offsite";
   const editor = useEditor({
@@ -57,18 +63,10 @@ export function NotionScene() {
       },
     },
   });
-  return (
-    <SceneFrame
-      width={W}
-      height={H}
-      theme={THEME}
-      label="Notion style page"
-      appStyle={notion}
-      className="flex flex-col rounded-[12px] bg-white shadow-2xl ring-1 ring-[rgba(55,53,47,0.16)]"
-      style={{ color: INK, fontFamily: FONT }}
-    >
-      <TopBar icon={icon} title={title} />
-      <div className="min-h-0 flex-1 overflow-y-auto px-24 pt-12 pb-16 [scrollbar-width:thin]">
+  const page = (
+    <>
+      {compact ? <MobileTopBar icon={icon} title={title} /> : <TopBar icon={icon} title={title} />}
+      <div className={cn("min-h-0 flex-1 overflow-y-auto pb-16 [scrollbar-width:thin]", compact ? "px-6 pt-8" : "px-24 pt-12")}>
         <div className="group/header">
           <div className="-ml-0.5 flex h-[78px] w-[78px] items-center">
             <ScenePicker
@@ -78,12 +76,13 @@ export function NotionScene() {
               title="Change icon"
               onSelect={(s) => setIcon(s.unified)}
               font={FONT}
+              sheet={compact}
               triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(55,53,47,0.08)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(55,53,47,0.08)]"
             >
               <Emoji unified={icon} size={78} className="text-[78px] leading-[1.1]" />
             </ScenePicker>
           </div>
-          <div className="mt-1 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100" style={{ color: MUTED }} aria-hidden>
+          <div className={cn("mt-1 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100", compact && "hidden")} style={{ color: MUTED }} aria-hidden>
             <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(55,53,47,0.08)]">🖼 Add cover</span>
             <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(55,53,47,0.08)]">💬 Add comment</span>
           </div>
@@ -98,7 +97,54 @@ export function NotionScene() {
           </>
         ) : null}
       </div>
-    </SceneFrame>
+    </>
+  );
+  return (
+    <div ref={ref} className="w-full">
+      {compact ? (
+        <MobileFrame theme={THEME} label="Notion style page" appStyle={notion} className="bg-white" style={{ color: INK, fontFamily: FONT }}>
+          {page}
+        </MobileFrame>
+      ) : (
+        <SceneFrame
+          width={W}
+          height={H}
+          theme={THEME}
+          label="Notion style page"
+          appStyle={notion}
+          className="flex flex-col rounded-[12px] bg-white shadow-2xl ring-1 ring-[rgba(55,53,47,0.16)]"
+          style={{ color: INK, fontFamily: FONT }}
+        >
+          {page}
+        </SceneFrame>
+      )}
+    </div>
+  );
+}
+
+/** Notion's mobile top bar: the page's icon and title, then share and more. */
+function MobileTopBar({ icon, title }: { icon: string; title: string }) {
+  return (
+    <div className="flex h-11 shrink-0 items-center gap-1.5 pr-2 pl-[15px] text-[14px]" aria-hidden>
+      <Emoji unified={icon} size={18} className="text-[18px] leading-none" />
+      <span className="min-w-0 truncate" style={{ color: INK }}>
+        {title}
+      </span>
+      <div className="ml-auto flex items-center" style={{ color: INK }}>
+        <span className="flex size-9 items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 12.5V3M6.5 6.2 10 2.8l3.5 3.4M6 9H5a1.5 1.5 0 0 0-1.5 1.5v5A1.5 1.5 0 0 0 5 17h10a1.5 1.5 0 0 0 1.5-1.5v-5A1.5 1.5 0 0 0 15 9h-1" />
+          </svg>
+        </span>
+        <span className="flex size-9 items-center justify-center">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <circle cx="4.5" cy="10" r="1.4" />
+            <circle cx="10" cy="10" r="1.4" />
+            <circle cx="15.5" cy="10" r="1.4" />
+          </svg>
+        </span>
+      </div>
+    </div>
   );
 }
 
