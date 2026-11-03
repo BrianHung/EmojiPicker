@@ -3,7 +3,7 @@
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["vite/client", "node"],
-    "paths": { "@/lib/utils": ["../../../../apps/demo/lib/utils.ts"], "@/*": ["../../../../apps/demo/*"] }
+    "paths": { "@/registry/*": ["../../../../apps/demo/registry/*"], "@/*": ["../../../../apps/demo/src/*"] }
   },
   "include": ["harness.tsx", "host.tsx"]
 }
