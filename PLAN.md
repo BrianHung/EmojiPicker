@@ -25,7 +25,7 @@ Replace the 2021 `react-twemoji-picker` (react-window + a 3 MB Twemoji SVG sprit
 
 ### Benchmark: IndexedDB vs in-memory
 
-Headless Chrome on an M-series Mac, iamcal dataset, 7 runs, 1x / 4x CPU throttle. The harness was in the session scratchpad (`run.mjs`, `bench.js`).
+Headless Chrome on an M-series Mac, iamcal dataset, 7 runs, 1x / 4x CPU throttle.
 
 | | Startup | Median search | Worst p95 | "heart eyes" typed (8 keystrokes) | JS heap |
 |---|---|---|---|---|---|
