@@ -119,14 +119,7 @@ async function ask(env: Env, model: keyof typeof MODELS, query: string, names: s
 }
 ```
 
-Measured on this site:
-
-| Model | Context | Per search | Latency |
-|---|---|---|---|
-| Jev | 65,536 | $0.0007 | 0.5–1.7 s |
-| Clef Omni | 64,000 | $0.0047 | 1.7 s |
-| Clef Flash | 24,576 | $0.0012 | 5.8 s (three requests) |
-| Clef | 65,536 | $0.0075 | 4–4.7 s |
+On this site, Jev is the fastest and cheapest (about 1 s, $0.0007 a search), with Clef Omni close behind.
 
 ```tsx title="search.tsx"
 const decision = (model: "jev" | "clef-omni" | "clef-flash" | "clef") =>
