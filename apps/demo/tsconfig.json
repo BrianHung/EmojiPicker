@@ -1,9 +1,20 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vite/client", "node"],
-    "paths": { "@/lib/utils": ["./lib/utils.ts"], "@/*": ["./*"] }
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "customConditions": ["@brianhung/source"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client", "node", "mdx"],
+    "paths": { "@/registry/*": ["./registry/*"], "@/*": ["./src/*"] }
   },
-  "include": ["."],
-  "exclude": ["dist", "node_modules", "capture/out"]
+  "include": ["src", "registry", "capture", "scripts", "plugins", "vite.config.ts"],
+  "exclude": ["capture/out"]
 }

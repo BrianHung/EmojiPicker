@@ -1,37 +1,54 @@
-// Precomputes the on-device index: embeds every emoji with bge-small-en-v1.5 (the
-// model the page runs in the browser) and writes int8 vectors to public/embeddings/.
+// Precomputes the on-device index: embeds emoji with bge-small-en-v1.5 (the model
+// the page runs in the browser) and writes int8 vectors (vectors.ts has the format).
 //
-//   npm run embed -w demo
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+//   npx tsx scripts/embed-emoji.ts                                          built-in emoji → public/embeddings/emoji.i8
+//   npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/custom.i8
+//
+// --custom takes the library's CustomEmoji[] (a Slack or Discord export mapped to
+// { id, name, imageUrl, shortcodes?, tags? }), plus an optional `description`.
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseArgs } from "node:util";
 import { pipeline } from "@huggingface/transformers";
-import type { Dataset } from "@brianhung/emoji-picker";
-import { emojiText } from "../examples/semantic-search/emoji-text";
-import { encodeIndex } from "../examples/semantic-search/vectors";
+import type { CustomEmoji, Dataset } from "@brianhung/emoji-picker";
+import { emojiText } from "../src/lib/semantic-search/emoji-text";
+import { encodeIndex } from "../src/lib/semantic-search/vectors";
 
 export const MODEL = "Xenova/bge-small-en-v1.5";
-const OUT = fileURLToPath(new URL("../public/embeddings/bge-small-en-v1.5.int8.bin", import.meta.url));
 const BATCH = 64;
+const here = dirname(fileURLToPath(import.meta.url));
 
-const require = createRequire(import.meta.url);
-const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@brianhung/emoji-picker/data/en.json"), "utf8"));
-const emojis = dataset.emojis.map(([unified, name, tags, shortcodes]) => ({ unified, name, tags, shortcodes }));
+const { values } = parseArgs({ options: { custom: { type: "string" }, out: { type: "string" } } });
 
-// q8 matches the browser; CLS pooling + normalize is how BGE is meant to be pooled.
+type Item = { id: string; name: string; shortcodes?: readonly string[]; tags?: readonly string[]; description?: string };
+let items: Item[];
+if (values.custom) {
+  const list = JSON.parse(readFileSync(values.custom, "utf8")) as (CustomEmoji & { description?: string })[];
+  if (!Array.isArray(list) || list.some((c) => typeof c?.id !== "string" || typeof c?.name !== "string")) throw new Error(`${values.custom}: expected [{ id, name, imageUrl, shortcodes?, tags?, description? }]`);
+  items = list;
+} else {
+  const require = createRequire(import.meta.url);
+  const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@brianhung/emoji-picker/data/en.json"), "utf8"));
+  items = dataset.emojis.map(([id, name, tags, shortcodes]) => ({ id, name, tags, shortcodes }));
+}
+const out = resolve(values.out ?? resolve(here, "../public/embeddings", values.custom ? "custom.i8" : "emoji.i8"));
+
+// q8 matches the browser; BGE is pooled on the CLS token, then normalized.
 const extract = await pipeline("feature-extraction", MODEL, { dtype: "q8" });
 const vectors: Float32Array[] = [];
 let dims = 0;
 const start = performance.now();
-for (let i = 0; i < emojis.length; i += BATCH) {
-  const batch = emojis.slice(i, i + BATCH);
-  const out = await extract(batch.map(emojiText), { pooling: "cls", normalize: true });
-  dims = out.dims[1]!;
-  const data = out.data as Float32Array;
+for (let i = 0; i < items.length; i += BATCH) {
+  const batch = items.slice(i, i + BATCH);
+  const output = await extract(batch.map(emojiText), { pooling: "cls", normalize: true });
+  dims = output.dims[1]!;
+  const data = output.data as Float32Array;
   for (let j = 0; j < batch.length; j++) vectors.push(data.slice(j * dims, (j + 1) * dims));
-  process.stdout.write(`\r${vectors.length}/${emojis.length}`);
+  process.stdout.write(`\r${vectors.length}/${items.length}`);
 }
-const bytes = encodeIndex(emojis.map((e) => e.unified), vectors, dims);
-mkdirSync(new URL("../public/embeddings/", import.meta.url), { recursive: true });
-writeFileSync(OUT, bytes);
-console.log(`\n${emojis.length} × ${dims} in ${((performance.now() - start) / 1000).toFixed(1)} s → ${OUT} (${(bytes.length / 1024).toFixed(0)} KB)`);
+const bytes = encodeIndex(items.map((e) => e.id), vectors, dims);
+mkdirSync(dirname(out), { recursive: true });
+writeFileSync(out, bytes);
+console.log(`\n${items.length} × ${dims} in ${((performance.now() - start) / 1000).toFixed(1)} s → ${out} (${(bytes.length / 1024).toFixed(0)} KB)`);

@@ -2,6 +2,12 @@ export type Renderer = "native" | "twemoji";
 
 /** jdecked/twemoji, the maintained Twemoji fork. Pin the version; self-host with `twemojiBaseUrl`. */
 export const TWEMOJI_BASE_URL = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/";
+/**
+ * Newest Unicode emoji version the pinned set (17.0.3) draws. With Twemoji, newer
+ * emoji are left out of pickers; set the provider's `twemojiVersion` when you
+ * self-host another set.
+ */
+export const TWEMOJI_EMOJI_VERSION = 17;
 
 /**
  * Twemoji's file naming: FE0F is dropped unless the sequence has a ZWJ.

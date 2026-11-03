@@ -1,7 +1,7 @@
 {
   "name": "@brianhung/emoji-picker",
   "version": "3.0.0-alpha.0",
-  "description": "Headless, shadcn-style React emoji picker with Slack shortcodes, tapbacks and platform-aware rendering, built on emoji-picker-react primitives.",
+  "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
   "license": "MIT",
   "type": "module",
   "repository": {
@@ -42,6 +42,9 @@
     "build:data": "tsx scripts/build-data.ts",
     "build": "npm run build:data && tsup",
     "test": "vitest run",
+    "test:e2e": "node test/e2e/run.mjs",
+    "test:a11y": "node test/e2e/a11y.mjs",
+    "e2e:serve": "vite --config test/e2e/vite.config.mjs",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {

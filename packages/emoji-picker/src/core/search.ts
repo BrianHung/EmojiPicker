@@ -19,12 +19,39 @@ export type SearchContext = {
 };
 
 type Hits = readonly SearchHit[];
-/** Sync results render in the same frame; a promise keeps the previous results until it settles. */
+/**
+ * Sync results render in the same frame. A promise keeps the previous results until
+ * it settles, unless it carries `interim` hits (see `progressive`), which render at once.
+ */
 export type EmojiSearch = (query: string, context: SearchContext) => Hits | PromiseLike<Hits>;
 
+/** A pending result with something to show meanwhile: `interim` renders now, the promise replaces it. */
+export type ProgressiveHits<T = Hits> = PromiseLike<T> & { readonly interim: T };
+
 const isThenable = <T,>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
-/** Run `fn` on a value that may or may not be a promise, staying sync when it is sync. */
-const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike<U>): U | PromiseLike<U> => (isThenable(value) ? value.then(fn) : fn(value));
+
+/** Attaches interim results to a promise. */
+export function withInterim<T>(promise: PromiseLike<T>, interim: T): ProgressiveHits<T> {
+  return Object.assign(Promise.resolve(promise), { interim });
+}
+
+/** The interim results of a progressive promise, if it has them. */
+export function interimOf<T>(value: T | PromiseLike<T>): T | undefined {
+  return isThenable(value) ? (value as Partial<ProgressiveHits<T>>).interim : undefined;
+}
+
+/**
+ * Run `fn` on a value that may or may not be a promise, staying sync when it is
+ * sync. Interim results go through `fn` too, when it answers them synchronously.
+ */
+const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike<U>): U | PromiseLike<U> => {
+  if (!isThenable(value)) return fn(value);
+  const next = value.then(fn);
+  const interim = interimOf(value);
+  if (interim === undefined) return next;
+  const early = fn(interim);
+  return isThenable(early) ? next : withInterim(next, early);
+};
 const all = <T,>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
 const indexes = new WeakMap<readonly EmojiRecord[], SearchIndex>();
@@ -129,6 +156,25 @@ export function fallback(primary: EmojiSearch, secondary: EmojiSearch, { min = 8
     then(primary(query, context), (first) =>
       first.length >= min ? first : then(secondary(query, context), (more) => dedupe([...first, ...more], context.limit)),
     );
+}
+
+/**
+ * Show `fast` results at once and replace them with `slow` ones when they arrive:
+ * lexical results while an embedding or remote search runs. A newer query aborts
+ * the slow one (through `context.signal`); if it fails, the fast results stay.
+ */
+export function progressive(fast: EmojiSearch, slow: EmojiSearch): EmojiSearch {
+  return (query, context) => {
+    const later = slow(query, context);
+    if (!isThenable(later)) return later;
+    const now = fast(query, context);
+    const settled = Promise.resolve(later).catch((error: unknown) => {
+      if (context.signal.aborted) throw error;
+      return now;
+    });
+    // A `fast` that is itself async has nothing to show early.
+    return isThenable(now) ? settled : withInterim(settled, now);
+  };
 }
 
 /** Run searches together and fuse their rankings (reciprocal rank fusion). */

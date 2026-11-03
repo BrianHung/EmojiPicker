@@ -52,7 +52,12 @@ export type EmojiRecord = {
   /** Variations for tones 1-5, empty when the emoji has none. */
   tones: readonly string[];
   order: number;
+  /** Custom emoji only: the image, its still frame when it animates, and its intrinsic size. */
   imageUrl?: string;
+  stillUrl?: string;
+  animated?: boolean;
+  width?: number;
+  height?: number;
 };
 
 const UNIFIED = /^[0-9a-f]{2,6}(?:-[0-9a-f]{2,6})*$/i;

@@ -1,0 +1,124 @@
+/* SF on Apple platforms; Inter (and JetBrains Mono for code) elsewhere. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap");
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@brianhung/emoji-picker/tokens.css";
+@import "@brianhung/emoji-picker/theme.css";
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* shadcn/ui tokens (neutral) */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(0.985 0 0);
+  --popover: oklch(1 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.95 0 0);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --input: oklch(0.922 0 0);
+  --radius: 0.625rem;
+  --code: oklch(0.985 0 0);
+  --type: oklch(0.45 0.12 265);
+  --imessage-blue: #0a84ff;
+  --imessage-gray: #e9e9eb;
+  --imessage-gray-fg: #000;
+  color-scheme: light;
+}
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.18 0 0);
+  --popover: oklch(0.205 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.3 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --ring: oklch(0.556 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --input: oklch(1 0 0 / 15%);
+  --code: oklch(0.18 0 0);
+  --type: oklch(0.78 0.09 265);
+  --imessage-gray: #26252a;
+  --imessage-gray-fg: #fff;
+  color-scheme: dark;
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-popover: var(--popover);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-code: var(--code);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: Inter, ui-sans-serif, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "JetBrains Mono", monospace;
+  --color-imessage-blue: var(--imessage-blue);
+  --color-imessage-gray: var(--imessage-gray);
+  --color-imessage-gray-fg: var(--imessage-gray-fg);
+}
+
+/* shadcn's base layer: borders and outlines default to the theme tokens. */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
+html {
+  background: var(--background);
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+html,
+body {
+  overflow-x: clip;
+}
+::selection {
+  background: color-mix(in oklab, var(--foreground) 15%, transparent);
+}
+
+/* Apple platforms get SF via system-ui (the `apple` class is set before render). */
+.apple {
+  --font-sans: system-ui, -apple-system, sans-serif;
+}

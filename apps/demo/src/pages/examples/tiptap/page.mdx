@@ -1,0 +1,50 @@
+---
+title: Tiptap
+description: Shortcode suggestions and an emoji picker for the Tiptap editor.
+---
+
+import { Editor } from "./editor";
+
+<Editor />
+
+## Usage
+
+```tsx title="editor.tsx"
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { EmojiProvider } from "@brianhung/emoji-picker";
+import { EmojiSuggestion, EmojiSuggestionMenu } from "./emoji-suggestion";
+
+function Editor() {
+  const editor = useEditor({ extensions: [StarterKit, EmojiSuggestion] });
+  return (
+    <EmojiProvider data="/emoji/en.json">
+      <EditorContent editor={editor} />
+      {editor && <EmojiSuggestionMenu editor={editor} />}
+    </EmojiProvider>
+  );
+}
+```
+
+## How it works
+
+The extension passes the query from `@tiptap/suggestion` to `useEmojiSuggestions` and positions the menu at the caret with `EmojiPopover`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+
+```tsx title="emoji-suggestion.tsx (excerpt)"
+const menu = useEmojiSuggestions({
+  query,
+  onChoose: (s) => editor.chain().focus().deleteRange(range).insertContent(menu.textFor(s) + " ").run(),
+});
+
+Suggestion({
+  editor,
+  char: ":",
+  render: () => ({
+    onKeyDown: ({ event }) => menu.onKeyDown(event),
+  }),
+});
+
+<EmojiPopover.Root open={menu.open}>
+  <EmojiPopover.Content anchor={() => clientRect()}>…</EmojiPopover.Content>
+</EmojiPopover.Root>
+```

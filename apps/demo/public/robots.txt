@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /shot.html
+
+Sitemap: https://emojis.brianhung.me/sitemap.xml

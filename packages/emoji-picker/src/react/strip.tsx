@@ -8,14 +8,19 @@ import { GROUPS, unifiedToNative } from "../core/dataset";
 import { CollapseContext } from "./collapse";
 import { useSkinTone } from "./hooks";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
-import { Glyph, useResults } from "./results";
+import { useKeyRegion, useUserKeyDown, mergeRefs, type PickerKeyboardEventHandler } from "./keyboard";
+import type { KeyboardAction } from "./keymap";
+import { findArtwork, useArtworkMap } from "./overrides";
+import { Glyph, useResults, type NavKey } from "./results";
 import { SLOTS } from "./slots";
 import { PickerDataContext, StripRegisterContext, StripSetActiveEmojiContext } from "./strip-context";
 import {
   activeSection,
   categorySections,
+  columnsPerPage,
   layoutStrip,
   moveInStrip,
+  pageInStrip,
   placeCell,
   resultSections,
   revealCell,
@@ -24,7 +29,7 @@ import {
   visibleRange,
   visibleSections,
   type StripItem,
-  type StripKey,
+  type StripLayout,
   type StripMetrics,
 } from "./strip-layout";
 
@@ -68,10 +73,39 @@ const sameMetrics = (a: Metrics, b: Metrics) => (Object.keys(a) as (keyof Metric
 
 /** Columns rendered beyond each side of the viewport. */
 const OVERSCAN = 4;
-const KEYS = new Set<string>(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End"]);
 const ORDER = [...GROUPS, "custom"] as string[];
 
-export type StripProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML"> & { rows: number; searchRows?: number; cell: Cell; header: Header };
+const ACTION_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
+  "move-up": "ArrowUp",
+  "move-down": "ArrowDown",
+  "move-left": "ArrowLeft",
+  "move-right": "ArrowRight",
+  "page-up": "PageUp",
+  "page-down": "PageDown",
+  first: "Home",
+  last: "End",
+};
+
+/** Where a logical key moves from `index`: arrows and Home/End as the grid does, a page by the columns in view. */
+function navigate(layout: StripLayout, index: number, key: NavKey, viewportWidth: number): number | null {
+  if (key === "PageUp" || key === "PageDown") return pageInStrip(layout, index, key === "PageDown" ? 1 : -1, columnsPerPage(layout, viewportWidth));
+  return moveInStrip(layout, index, key);
+}
+
+// In a right-to-left Viewport the strip starts at the right and scrollLeft runs
+// from 0 to negative (every current engine). Positions here are logical: distance
+// scrolled from the start.
+const startOf = (el: HTMLElement) => Math.abs(el.scrollLeft);
+const isRtl = (el: HTMLElement) => getComputedStyle(el).direction === "rtl";
+const toScrollLeft = (el: HTMLElement, start: number) => (isRtl(el) ? -start : start);
+
+export type StripProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "onKeyDown"> & {
+  rows: number;
+  searchRows?: number;
+  cell: Cell;
+  header: Header;
+  onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
+};
 
 export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function StripList({ rows, searchRows, cell: CellSlot, header: HeaderSlot, className, style, onKeyDown, ...rest }, forwardedRef) {
   const { store, groups } = useEmojiContext();
@@ -86,6 +120,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   const categories = React.useMemo(() => engineCategories, [categoriesKey]);
   const collapse = React.useContext(CollapseContext);
   const data = React.useContext(PickerDataContext);
+  const artwork = useArtworkMap();
   const register = React.useContext(StripRegisterContext);
   const setActiveEmoji = React.useContext(StripSetActiveEmojiContext);
 
@@ -149,7 +184,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
 
   const sync = React.useCallback((el: HTMLElement) => {
     const { layout, sections } = latest.current;
-    const left = el.scrollLeft;
+    const left = startOf(el);
     const width = el.clientWidth;
     // The rendered window moves in steps of OVERSCAN columns, so most scroll events re-render nothing.
     const step = Math.max(1, layout.cellWidth * OVERSCAN);
@@ -199,13 +234,17 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   // A new query starts at the beginning, as does leaving search.
   React.useLayoutEffect(() => {
     const el = viewport();
-    if (el && el.scrollLeft) el.scrollLeft = 0;
+    if (el && startOf(el)) el.scrollLeft = 0;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searching, results?.results]);
 
   // --- Focus (roving tabindex) and hover --------------------------------------
   const [focusIndex, setFocusIndex] = React.useState(0);
   const [hovered, setHovered] = React.useState(-1);
+  /** focusModel "input": the cell highlighted from the search field (null: none, the user is typing). */
+  const [inputIndex, setInputIndex] = React.useState<number | null>(null);
+  const stripId = React.useId();
+  const cellId = (index: number) => `${stripId}-${index}`;
   const pendingFocus = React.useRef<number | null>(null);
   const [focusWithin, setFocusWithin] = React.useState(false);
   // The tab stop: the last focused cell, or, once it has scrolled out of view while
@@ -221,9 +260,10 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     (index: number) => {
       const el = viewport();
       if (!el) return;
-      const left = revealCell(latest.current.layout, index, el.scrollLeft, el.clientWidth);
-      if (left !== el.scrollLeft) {
-        el.scrollLeft = left;
+      const start = startOf(el);
+      const left = revealCell(latest.current.layout, index, start, el.clientWidth);
+      if (left !== start) {
+        el.scrollLeft = toScrollLeft(el, left);
         sync(el);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -256,7 +296,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
 
   // --- Navigation shared with CategoryNav, Search and useActiveEmoji ---------------
   const jump = React.useCallback(
-    (id: string) => {
+    (id: string, { instant = false }: { instant?: boolean } = {}) => {
       const el = viewport();
       const { layout } = latest.current;
       const index = layout.sections.findIndex((s) => s.id === id);
@@ -264,10 +304,11 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       const left = sectionScrollLeft(layout, index, el.clientWidth);
       setActive(id);
       setFocusIndex(layout.sections[index]!.start);
-      if (Math.abs(left - el.scrollLeft) <= 1) return;
+      if (Math.abs(left - startOf(el)) <= 1) return;
       jumping.current = left;
+      // A tab picked with the keyboard jumps; a click scrolls (unless motion is reduced).
       const reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-      el.scrollTo({ left, behavior: reduce ? "auto" : "smooth" });
+      el.scrollTo({ left: toScrollLeft(el, left), behavior: instant || reduce ? "auto" : "smooth" });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -279,8 +320,9 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     // The current cell if it's in view, else the first one in view.
     let index = Math.min(focusIndex, layout.total - 1);
     const place = placeCell(layout, index);
-    if (el && place && (place.x + layout.cellWidth <= el.scrollLeft || place.x >= el.scrollLeft + el.clientWidth)) {
-      const range = visibleRange(layout, el.scrollLeft + layout.padding, el.scrollLeft + el.clientWidth);
+    const start = el ? startOf(el) : 0;
+    if (el && place && (place.x + layout.cellWidth <= start || place.x >= start + el.clientWidth)) {
+      const range = visibleRange(layout, start + layout.padding, start + el.clientWidth);
       index = range[0]?.first ?? 0;
     }
     focusCell(index);
@@ -288,7 +330,63 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusIndex, focusCell]);
 
-  React.useEffect(() => register({ active: searching ? null : active, jump, focus: focusGrid }), [register, active, jump, focusGrid, searching]);
+  // focusModel "input": keys from the search field move a highlight; focus stays there.
+  const keyFromInput = React.useCallback(
+    (action: KeyboardAction, input: HTMLInputElement) => {
+      const { layout } = latest.current;
+      if (!layout.total) return false;
+      if (action === "select") {
+        if (inputIndex == null) return false;
+        const item = items[inputIndex];
+        if (item) data.pick(item.record);
+        return true;
+      }
+      let key = ACTION_KEYS[action];
+      if (!key) return false;
+      const sideways = key === "ArrowLeft" || key === "ArrowRight";
+      if (sideways && !(input.selectionStart === input.value.length && input.selectionEnd === input.value.length)) return false;
+      if (sideways && isRtl(input)) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+      const el = viewport();
+      if (inputIndex == null) {
+        // Down (or Right/End-ward keys) starts at the first emoji in view.
+        if (key === "ArrowUp" || key === "ArrowLeft" || key === "PageUp") return false;
+        const start = el ? startOf(el) : 0;
+        const first = key === "End" ? layout.total - 1 : key === "Home" ? 0 : (visibleRange(layout, start + layout.padding, start + (el?.clientWidth ?? 0))[0]?.first ?? 0);
+        setInputIndex(first);
+        reveal(first);
+        return true;
+      }
+      const next = navigate(layout, inputIndex, key, el?.clientWidth ?? 0);
+      if (next != null) {
+        setInputIndex(next);
+        reveal(next);
+      } else if (key === "ArrowUp") setInputIndex(null); // back to typing
+      return true;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [inputIndex, items, data, reveal],
+  );
+  const clearInputHighlight = React.useCallback(() => setInputIndex(null), []);
+  // Leaving search mode or changing what's listed drops the highlight.
+  React.useEffect(() => setInputIndex(null), [searching, sections]);
+  React.useEffect(() => {
+    const record = inputIndex != null ? items[inputIndex]?.record : undefined;
+    if (record) setActiveEmoji(record);
+  }, [inputIndex, items, setActiveEmoji]);
+
+  React.useEffect(
+    () =>
+      register({
+        active: searching ? null : active,
+        jump,
+        focus: focusGrid,
+        key: keyFromInput,
+        clear: clearInputHighlight,
+        activeDescendant: !searching && inputIndex != null ? cellId(inputIndex) : undefined,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [register, active, jump, focusGrid, searching, keyFromInput, clearInputHighlight, inputIndex],
+  );
   React.useEffect(() => () => register(null), [register]);
 
   // Arrow keys from the search field move the results highlight through the strip.
@@ -296,7 +394,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     if (!results) return;
     const toGlobal = (result: number) => items.findIndex((it) => it.result === result);
     results.move.current = (from, key) => {
-      const next = moveInStrip(latest.current.layout, Math.max(0, toGlobal(from)), key as StripKey);
+      const next = navigate(latest.current.layout, Math.max(0, toGlobal(from)), key, viewport()?.clientWidth ?? 0);
       return next == null ? null : (items[next]?.result ?? null);
     };
     return () => {
@@ -332,17 +430,24 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     return true;
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    onKeyDown?.(e);
-    if (e.defaultPrevented || !KEYS.has(e.key) || e.altKey || e.metaKey || e.ctrlKey) return;
-    const from = Number((e.target as HTMLElement).closest<HTMLElement>("[data-index]")?.dataset.index ?? current);
-    let key = e.key as StripKey;
-    if (getComputedStyle(e.currentTarget).direction === "rtl" && (key === "ArrowLeft" || key === "ArrowRight")) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
-    e.preventDefault();
-    const next = moveInStrip(layout, from, key);
+  // Keys on a focused cell, from Root's dispatcher (the keymap's actions).
+  const region = useKeyRegion((action, event) => {
+    const cellEl = (event.target as Element).closest<HTMLElement>("[data-index]");
+    if (!action || !cellEl || !listRef.current?.contains(cellEl)) return "pass";
+    if (action === "select") {
+      cellEl.click();
+      return "handled";
+    }
+    let key = ACTION_KEYS[action];
+    if (!key) return "pass";
+    if (listRef.current && isRtl(listRef.current) && (key === "ArrowLeft" || key === "ArrowRight")) key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+    const next = navigate(layout, Number(cellEl.dataset.index), key, viewport()?.clientWidth ?? 0);
     if (next != null) focusCell(next);
     else if (key === "ArrowUp" || key === "ArrowDown") leave(key);
-  };
+    return "handled";
+  });
+  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
+  const ref = React.useMemo(() => mergeRefs(setRef, region, userKeys), [setRef, region, userKeys]);
 
   const pick = (item: StripItem) => {
     if (item.result != null && results) results.pick(item.result);
@@ -365,11 +470,12 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
     for (let index = range.first; index <= range.last; index++) {
       const item = items[index]!;
       const place = placeCell(layout, index)!;
-      const highlighted = searching && item.result === results?.highlighted;
+      const highlighted = searching ? item.result === results?.highlighted : index === inputIndex;
       const isActive = index === hovered;
       rowsOfCells[place.row]!.push(
         <CellSlot
           key={`${layout.sections[place.section]!.id}:${item.record.unified}:${index}`}
+          id={cellId(index)}
           type="button"
           role="gridcell"
           tabIndex={index === current ? 0 : -1}
@@ -377,8 +483,10 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
           aria-selected={highlighted || undefined}
           aria-colindex={columnOffset[place.section]! + place.column + 1}
           data-index={index}
+          data-overridden={artwork && findArtwork(artwork, item.unified) !== undefined ? "" : undefined}
           data-epr-unified={item.unified}
-          data-epr-highlighted={highlighted ? "" : undefined}
+          // Our own attribute, not the engine's data-epr-highlighted: the engine treats that mark as its highlight and clears it.
+          data-highlighted={highlighted ? "" : undefined}
           emoji={
             {
               unified: item.unified,
@@ -391,17 +499,23 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
             } as Epr.EmojiRenderProps["emoji"]
           }
           onClick={() => pick(item)}
-          onPointerEnter={() => {
+          onPointerEnter={(e: React.PointerEvent<HTMLElement>) => {
             if (!isActive) activeEmoji(index);
+            if (data.pointer !== "follows") return;
+            // Hover moves the keyboard position: the results highlight, the highlight
+            // driven from the field, or (once focus is in the strip) focus itself.
             if (searching && item.result != null && results && results.highlighted !== item.result) results.setHighlighted(item.result);
+            const focused = document.activeElement;
+            if (!searching && data.focusModel === "input" && focused instanceof HTMLInputElement && listRef.current?.closest('[data-epr-part="root"]')?.contains(focused)) setInputIndex(index);
+            if (data.focusModel === "grid" && focused !== e.currentTarget && focused instanceof HTMLElement && listRef.current?.contains(focused)) e.currentTarget.focus({ preventScroll: true });
           }}
           onFocus={() => {
             if (index !== focusIndex) setFocusIndex(index);
             if (!isActive) activeEmoji(index);
           }}
-          style={{ position: "absolute", left: place.x, top: 0, width: layout.cellWidth, height: layout.cellHeight, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+          style={{ position: "absolute", insetInlineStart: place.x, top: 0, width: layout.cellWidth, height: layout.cellHeight, padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
         >
-          <Glyph record={item.record} unified={item.unified} />
+          <Glyph record={item.record} unified={item.unified} active={isActive || highlighted} />
         </CellSlot>,
       );
     }
@@ -410,7 +524,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
   return (
     <div
       {...rest}
-      ref={setRef}
+      ref={ref}
       role="grid"
       aria-label={rest["aria-label"] ?? (searching ? "Search results" : "Emoji")}
       aria-rowcount={layout.rows}
@@ -420,7 +534,6 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
       data-orientation="horizontal"
       data-results={searching ? results?.mode : undefined}
       className={className}
-      onKeyDown={handleKeyDown}
       onPointerLeave={() => activeEmoji(-1)}
       onFocus={() => setFocusWithin(true)}
       onBlur={(e) => {
@@ -436,7 +549,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
         const name = sections[i]!.name;
         if (!name) return null;
         return (
-          <div key={s.id} role="presentation" data-slot={SLOTS.category} style={{ position: "absolute", left: s.x, top: 0, width: s.width, height: layout.headerHeight }}>
+          <div key={s.id} role="presentation" data-slot={SLOTS.category} style={{ position: "absolute", insetInlineStart: s.x, top: 0, width: s.width, height: layout.headerHeight }}>
             <HeaderSlot
               category={{ id: s.id, name } as Epr.CategoryHeaderRenderProps["category"]}
               aria-hidden
@@ -448,7 +561,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
         );
       })}
       {rowsOfCells.map((cells, row) => (
-        <div key={row} role="row" aria-rowindex={row + 1} style={{ position: "absolute", left: 0, top: layout.headerHeight + row * layout.cellHeight, width: layout.width, height: layout.cellHeight }}>
+        <div key={row} role="row" aria-rowindex={row + 1} style={{ position: "absolute", insetInlineStart: 0, top: layout.headerHeight + row * layout.cellHeight, width: layout.width, height: layout.cellHeight }}>
           {cells}
         </div>
       ))}

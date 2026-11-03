@@ -26,13 +26,14 @@ export function toEprData(records: readonly EmojiRecord[], groupNames: readonly 
   return { categories, emojis };
 }
 
-export function toEprCustomEmojis(records: readonly EmojiRecord[], groups: Map<string, string | undefined>): EprCustomEmoji[] {
+export function toEprCustomEmojis(records: readonly EmojiRecord[], groups: ReadonlyMap<string, string | undefined>): EprCustomEmoji[] {
   return records
     .filter((r) => r.group === "custom")
     .map((r) => ({
       id: r.unified,
       names: [...new Set([...r.shortcodes, ...r.tags, r.name])].filter((n) => n !== r.name).concat(r.name),
-      imgUrl: r.imageUrl!,
+      // The still frame: the cell swaps in the animation while it's active.
+      imgUrl: r.stillUrl ?? r.imageUrl!,
       ...(groups.get(r.unified) ? { group: groups.get(r.unified) } : {}),
     }));
 }

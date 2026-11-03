@@ -1,35 +1,91 @@
 import * as React from "react";
-import { isUnified, unifiedToNative } from "../core/dataset";
+import { isUnified } from "../core/dataset";
 import type { Renderer } from "../core/platform";
-import { useEmojiContext } from "./provider";
+import { missingEmojiText, resolveEmoji, type EmojiInput, type ResolvedEmoji } from "../core/resolve";
+import { EmojiImage } from "./image";
+import { ArtworkGlyph, useArtwork } from "./overrides";
+import { useEmojiContext, useStoreSnapshot } from "./provider";
 
-export type EmojiProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
-  /** Unified code ("1f44d", "1f44d-1f3fd") or a custom emoji id. */
-  unified: string;
+type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
   /** Pixel size for image renderers; native text follows font-size. */
   size?: number;
   /** Draw with this renderer instead of the provider's (e.g. Twemoji for one product's UI). */
   renderer?: Renderer;
+  /** Play an animated custom emoji. Default true; never with reduced motion. */
+  animate?: boolean;
+  /** Purely decorative (next to text that names it): hidden from assistive technology. */
+  decorative?: boolean;
 };
 
+export type EmojiProps = BaseProps &
+  (
+    | {
+        /** "🎉", ":tada:", "tada", "1f389", a custom id, a CustomEmoji, an EmojiRecord or an EmojiSelection. */
+        emoji: EmojiInput;
+        unified?: never;
+      }
+    | {
+        /** @deprecated Use `emoji`, which also takes unified codes. */
+        unified: string;
+        emoji?: never;
+      }
+  );
+
+/**
+ * The emoji an input names, resolved against the provider's data (null when unknown).
+ * Re-resolves once the data loads, so shortcodes and custom ids work on first render.
+ */
+export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
+  const { store } = useEmojiContext();
+  const status = useStoreSnapshot((s) => s.status());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status]);
+  // Shortcodes and custom ids need the data: load it if no picker has yet.
+  React.useEffect(() => {
+    if (!resolved && status === "idle") store.load().catch(() => {});
+  }, [resolved, status, store]);
+  return resolved;
+}
+
 /** One emoji, rendered the same way the pickers render it (native, Twemoji or custom image). */
-export function Emoji({ unified, size, renderer: override, ...props }: EmojiProps) {
+export function Emoji({ emoji, unified, size, renderer: override, animate = true, decorative = false, ...props }: EmojiProps) {
   const context = useEmojiContext();
-  const { store, imageUrl } = context;
+  const input: EmojiInput = emoji ?? unified ?? "";
+  const resolved = useEmoji(input);
+  const art = useArtwork(resolved?.unified);
+  const status = useStoreSnapshot((s) => s.status());
   const renderer = override ?? context.renderer;
-  const record = store.get(unified);
-  const label = record?.name ?? unified;
-  // A custom emoji id before data loads (or an unknown one): keep the space, render nothing.
-  if (!record?.imageUrl && !isUnified(unified)) {
-    return <span {...props} role="img" aria-label={label} data-emoji="" style={{ display: "inline-block", width: size ?? "1em", height: size ?? "1em", ...props.style }} />;
+
+  if (!resolved) {
+    // Before data loads a shortcode or custom id may still resolve: hold its space.
+    if (status !== "ready" && status !== "error") {
+      return <span {...props} aria-hidden data-emoji="" style={{ display: "inline-block", width: size ?? "1em", height: size ?? "1em", ...props.style }} />;
+    }
+    return (
+      <span {...props} data-emoji="" data-emoji-missing="">
+        {missingEmojiText(input)}
+      </span>
+    );
   }
-  const src = record?.imageUrl ?? (renderer === "twemoji" ? imageUrl(unified) : undefined);
+
+  const a11y = decorative ? { "aria-hidden": true } : {};
+  if (art !== undefined) {
+    if (typeof art === "string") return <ArtworkGlyph {...props} {...a11y} art={art} alt={decorative ? "" : resolved.name} size={size ?? "1em"} data-emoji="" data-overridden="" />;
+    return (
+      <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": resolved.name })} data-emoji="" data-overridden="" style={{ display: "inline-flex", ...props.style }}>
+        <ArtworkGlyph art={art} alt="" size={size ?? "1em"} />
+      </span>
+    );
+  }
+  const src = resolved.imageUrl ?? (renderer === "twemoji" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
   if (src) {
-    return <img {...props} src={src} alt={record?.imageUrl ? `:${record.shortcodes[0] ?? record.name}:` : unifiedToNative(unified)} aria-label={label} width={size} height={size} draggable={false} data-emoji="" />;
+    // An unregistered CustomEmoji object has no record: lend it its own size and frames.
+    const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
+    return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : resolved.name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;
   }
   return (
-    <span {...props} role="img" aria-label={label} data-emoji="">
-      {unifiedToNative(unified)}
+    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": resolved.name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
+      {resolved.native}
     </span>
   );
 }

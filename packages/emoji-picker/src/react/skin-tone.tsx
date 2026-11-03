@@ -3,6 +3,8 @@ import type { SkinToneButtonRenderProps } from "emoji-picker-react/primitives";
 import { SKIN_TONES, withTone } from "../core/dataset";
 import { Emoji } from "./emoji";
 import { useSkinTone } from "./hooks";
+import { mergeRefs, useKeyRegion, useSkinToneToggle } from "./keyboard";
+import type { KeyboardAction } from "./keymap";
 import { SLOTS } from "./slots";
 
 const TONE_IDS = ["neutral", ...SKIN_TONES] as const;
@@ -32,7 +34,7 @@ function EmojiToneButton({ tone, emoji = "270b", ...props }: SkinToneButtonProps
   const toned = index > 0 ? withTone(emoji, index) : emoji;
   return (
     <button {...props}>
-      <Emoji unified={toned} style={{ width: "1em", height: "1em" }} />
+      <Emoji emoji={toned} style={{ width: "1em", height: "1em" }} />
     </button>
   );
 }
@@ -90,30 +92,44 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
   }, [open, tone]);
 
   const label = (i: number) => TONE_LABELS[i]!;
+  // Closing from inside the options returns focus to the button, as a menu does.
+  const close = React.useCallback(() => {
+    const root = rootRef.current;
+    const inside = root?.querySelector(`[data-slot="${SLOTS.skinToneOptions}"]`)?.contains(document.activeElement);
+    setOpen(false);
+    if (inside) root?.querySelector<HTMLElement>("button")?.focus();
+  }, []);
   const choose = (i: number) => {
     setTone(i);
-    setOpen(false);
+    close();
   };
-  // No aria-orientation on the group: the engine gives [aria-orientation=horizontal] contain:inline-size.
-  const onKeyDown = (e: React.KeyboardEvent, i: number) => {
-    const next = orientation === "vertical" ? ["ArrowDown", "ArrowUp"] : ["ArrowRight", "ArrowLeft"];
-    if (e.key === "Escape") {
-      e.preventDefault();
-      setOpen(false);
-    } else if (e.key === next[0] || e.key === next[1]) {
-      e.preventDefault();
-      focusOption((i + (e.key === next[0] ? 1 : 5)) % 6);
-    }
-  };
+  useSkinToneToggle(() => (open ? close() : setOpen(true)));
 
+  // Keys among the options: the keymap's moves along their axis (mirrored right to
+  // left), first/last, and close.
+  const region = useKeyRegion((action, event) => {
+    if (!open || !action) return "pass";
+    if (action === "close") {
+      close();
+      return "handled";
+    }
+    const options = [...(rootRef.current?.querySelectorAll<HTMLElement>(`[data-slot="${SLOTS.skinToneOption}"]`) ?? [])];
+    const i = options.indexOf(event.target as HTMLElement);
+    if (i < 0) return "pass";
+    const rtl = orientation === "horizontal" && rootRef.current != null && getComputedStyle(rootRef.current).direction === "rtl";
+    const steps: Partial<Record<KeyboardAction, number>> =
+      orientation === "vertical" ? { "move-down": 1, "move-up": -1 } : { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
+    if (action === "first" || action === "last") focusOption(action === "first" ? 0 : options.length - 1);
+    else if (steps[action]) focusOption((i + steps[action]! + options.length) % options.length);
+    else return "pass";
+    return "handled";
+  });
+
+  const merged = React.useMemo(() => mergeRefs(ref, rootRef, region), [ref, region]);
   return (
     <div
       {...props}
-      ref={(node) => {
-        rootRef.current = node;
-        if (typeof ref === "function") ref(node);
-        else if (ref) ref.current = node;
-      }}
+      ref={merged}
       data-slot={SLOTS.skinTone}
       data-state={open ? "open" : "closed"}
     >
@@ -125,6 +141,7 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       />
+      {/* No aria-orientation on the group: the engine gives [aria-orientation=horizontal] contain:inline-size. */}
       {open ? (
         <div role="radiogroup" aria-label="Skin tone" data-slot={SLOTS.skinToneOptions} data-orientation={orientation} className={optionsClassName} style={orientation === "vertical" ? { flexDirection: "column" } : undefined}>
           {TONE_IDS.map((id, i) => (
@@ -138,7 +155,6 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
               data-slot={SLOTS.skinToneOption}
               tone={{ skinTone: id as SkinToneButtonProps["tone"]["skinTone"], isActive: i === tone, isOpen: true }}
               onClick={() => choose(i)}
-              onKeyDown={(e: React.KeyboardEvent) => onKeyDown(e, i)}
             />
           ))}
         </div>

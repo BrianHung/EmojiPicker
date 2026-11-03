@@ -1,0 +1,52 @@
+---
+title: Lexical
+description: Shortcode suggestions and an emoji picker for the Lexical editor.
+---
+
+import { Editor } from "./editor";
+
+<Editor />
+
+## Usage
+
+```tsx title="editor.tsx"
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { EmojiProvider } from "@brianhung/emoji-picker";
+import { EmojiTypeaheadPlugin } from "./emoji-typeahead-plugin";
+
+export function Editor() {
+  return (
+    <EmojiProvider data="/emoji/en.json">
+      <LexicalComposer initialConfig={{ namespace: "editor", onError: console.error }}>
+        <RichTextPlugin contentEditable={<ContentEditable />} ErrorBoundary={LexicalErrorBoundary} />
+        <EmojiTypeaheadPlugin />
+      </LexicalComposer>
+    </EmojiProvider>
+  );
+}
+```
+
+## How it works
+
+Lexical's typeahead menu handles the trigger, caret position and keyboard. `useEmojiSuggestions` supplies the ranked options and the text to insert. Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
+
+```tsx title="emoji-typeahead-plugin.tsx (excerpt)"
+const menu = useEmojiSuggestions({ query });
+const options = menu.suggestions.map((s, i) => new EmojiOption(s, i));
+
+<LexicalTypeaheadMenuPlugin
+  onQueryChange={setQuery}
+  options={options}
+  triggerFn={useBasicTypeaheadTriggerMatch(":", { minLength: 1 })}
+  onSelectOption={(option, node, close) => {
+    editor.update(() => {
+      node?.replace($createTextNode(menu.textFor(option.suggestion) + " "));
+      close();
+    });
+  }}
+  menuRenderFn={…}
+/>
+```

@@ -1,25 +1,22 @@
 import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord } from "./dataset";
+import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type FrequencyStore } from "./frequents";
 import type { CompletionOrder, SearchIndex } from "./search-index";
-import { indexFor, isThenable, lexical, type EmojiSearch, type SearchHit } from "./search";
+import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
 /** A dataset object, a URL to one, or a loader. Load it as a separate asset, not inlined into JS. */
 export type EmojiDataSource = Dataset | string | ((options: { signal: AbortSignal }) => Promise<Dataset>);
 
-export type CustomEmoji = {
-  id: string;
-  name: string;
-  imageUrl: string;
-  shortcodes?: string[];
-  tags?: string[];
-  /** Customs sharing a group render as their own section. */
-  group?: string;
-};
+export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
 export type EmojiStoreOptions = {
   data: EmojiDataSource;
-  customEmojis?: readonly CustomEmoji[];
+  /**
+   * Custom emoji: an array, a pack's JSON URL, a loader `({ signal }) => Promise<CustomEmoji[]>`,
+   * or an array mixing them (several packs). Packs load with the data, in parallel.
+   */
+  customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   /** Drop emoji from the picker and search. */
   filter?: (record: EmojiRecord) => boolean;
   frequents?: FrequencyStore;
@@ -54,7 +51,8 @@ export type EmojiStore = ReturnType<typeof createEmojiStore>;
 
 const defaultSearch = lexical();
 
-export function createEmojiStore({ data, customEmojis = [], filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch }: EmojiStoreOptions) {
+export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch }: EmojiStoreOptions) {
+  const sources = customSources(customEmojis);
   const listeners = new Set<() => void>();
   const emit = () => listeners.forEach((l) => l());
   const toneStorage = localStorageAdapter("emoji-picker:skin-tone");
@@ -66,23 +64,19 @@ export function createEmojiStore({ data, customEmojis = [], filter, frequents = 
   let groupNames: readonly string[] = [];
   let byUnified = new Map<string, EmojiRecord>();
   let index: SearchIndex | null = null;
+  let customs: readonly CustomEmoji[] = [];
+  let customGroups = new Map<string, string | undefined>();
+  let packErrors: readonly Error[] = [];
   let skinTone = clampTone(Number(toneStorage.read() ?? defaultSkinTone));
 
-  function ingest(dataset: Dataset) {
-    const base = expandDataset(dataset).filter((r) => !filter || filter(r));
-    const customs: EmojiRecord[] = customEmojis.map((c, i) => ({
-      unified: c.id,
-      emoji: "",
-      name: c.name,
-      tags: c.tags ?? [],
-      shortcodes: c.shortcodes ?? [],
-      group: "custom",
-      version: 0,
-      tones: [],
-      order: base.length + i,
-      imageUrl: c.imageUrl,
-    }));
-    records = [...base, ...customs];
+  function ingest(dataset: Dataset, loaded: readonly CustomEmoji[]) {
+    const all = expandDataset(dataset);
+    const base = all.filter((r) => !filter || filter(r));
+    // A custom emoji's base may be filtered out of the picker and still lend its words.
+    const byCode = new Map(all.map((r) => [r.unified, r]));
+    customs = loaded;
+    customGroups = new Map(loaded.map((c) => [c.id, c.group]));
+    records = [...base, ...customRecords(loaded, base.length, (u) => byCode.get(u.toLowerCase()))];
     groupNames = dataset.groups;
     byUnified = new Map();
     for (const r of records) {
@@ -93,8 +87,13 @@ export function createEmojiStore({ data, customEmojis = [], filter, frequents = 
   }
 
   const store = {
-    customEmojis,
     frequents,
+    /** Custom emoji once loaded (inline ones and every pack). */
+    customEmojis: (): readonly CustomEmoji[] => customs,
+    /** Custom emoji id → its group, once loaded. */
+    customGroups: (): ReadonlyMap<string, string | undefined> => customGroups,
+    /** Packs that failed to load; they're left out, the rest of the picker works. */
+    packErrors: (): readonly Error[] => packErrors,
 
     /** Fetch and expand the dataset. Idempotent; safe to call from many pickers. */
     load(): Promise<void> {
@@ -102,9 +101,10 @@ export function createEmojiStore({ data, customEmojis = [], filter, frequents = 
       status = "loading";
       emit();
       const controller = new AbortController();
-      pending = resolve(data, controller.signal)
-        .then((dataset) => {
-          ingest(dataset);
+      pending = Promise.all([resolve(data, controller.signal), loadCustomEmojis(sources, controller.signal)])
+        .then(([dataset, packs]) => {
+          packErrors = packs.errors;
+          ingest(dataset, packs.emojis);
           status = "ready";
           emit();
         })
@@ -144,9 +144,10 @@ export function createEmojiStore({ data, customEmojis = [], filter, frequents = 
 
     /**
      * Run the configured search. Sync engines return records directly; async ones
-     * a promise. Unknown codes are dropped and duplicates removed.
+     * a promise, which has `interim` records when the search shows some meanwhile
+     * (`progressive`). Unknown codes are dropped and duplicates removed.
      */
-    query(text: string, { limit = 200, signal = new AbortController().signal }: { limit?: number; signal?: AbortSignal } = {}): EmojiRecord[] | Promise<EmojiRecord[]> {
+    query(text: string, { limit = 200, signal = new AbortController().signal }: { limit?: number; signal?: AbortSignal } = {}): EmojiRecord[] | Promise<EmojiRecord[]> | ProgressiveHits<EmojiRecord[]> {
       if (status !== "ready" || !text.trim()) return [];
       const resolve = (hits: readonly SearchHit[]) => {
         const seen = new Set<EmojiRecord>();
@@ -158,7 +159,10 @@ export function createEmojiStore({ data, customEmojis = [], filter, frequents = 
         return [...seen];
       };
       const result = search(text, { records, limit, signal, frequency: (u) => frequents.score(u) });
-      return isThenable(result) ? Promise.resolve(result).then(resolve) : resolve(result);
+      if (!isThenable(result)) return resolve(result);
+      const settled = Promise.resolve(result).then(resolve);
+      const interim = interimOf(result);
+      return interim ? withInterim(settled, resolve(interim)) : settled;
     },
     completeShortcode: (prefix: string, limit?: number, order?: CompletionOrder) => (status === "ready" ? store.index().completeShortcode(prefix, limit, order) : []),
     replaceShortcodes: (text: string) => (status === "ready" ? replaceShortcodes(text, store.index()) : text),

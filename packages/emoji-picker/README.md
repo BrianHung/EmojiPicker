@@ -32,7 +32,7 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url"; // a separate, cac
 ### shadcn/ui
 
 ```bash
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
+npx shadcn@latest add https://emojis.brianhung.me/r/emoji-picker.json
 ```
 
 This adds `components/ui/emoji-picker.tsx` (you own it) with `EmojiPickerCard`, `EmojiPickerPopover`, `EmojiTapback`, `EmojiPickerBody` and `EmojiPickerFooter`, styled with your theme's tokens:
@@ -47,7 +47,7 @@ The source is `apps/demo/registry/emoji-picker.tsx`; `npm run build:registry -w 
 
 ### Popover
 
-`EmojiPopover` is unstyled: it positions the content next to the trigger (flipping and clamping to the viewport), closes on Escape, an outside click, or a pick from any picker inside, and returns focus to the trigger. Popovers nest (a tapback's "+" inside a message menu).
+`EmojiPopover` is unstyled: it positions the content next to the trigger (flipping and clamping to the viewport), closes on Escape, an outside click, or a pick from any picker inside, and returns focus to the trigger. Popovers nest (a tapback's "+" inside a message menu). Once positioned it focuses `initialFocus` (a ref or function; `false` to leave focus alone), by default the first `[data-autofocus]` inside: a picker's search field. `closeOnSelect={false}` keeps it open after a pick, with focus and the highlight where they were.
 
 ```tsx
 <EmojiPopover.Root>
@@ -57,6 +57,33 @@ The source is `apps/demo/registry/emoji-picker.tsx`; `npm run build:registry -w 
   </EmojiPopover.Content>
 </EmojiPopover.Root>
 ```
+
+#### Animating
+
+Nothing animates by default. Content exposes what CSS transitions need:
+
+| | |
+|---|---|
+| `data-starting-style` | on the first frame after mounting: style the closed state here |
+| `data-ending-style` | while closing; the content unmounts when its transitions and animations finish |
+| `data-state` | `"open"` / `"closed"` |
+| `data-side`, `data-align` | where it ended up after flipping |
+| `--transform-origin` | the trigger's center on the edge facing it, in the content's coordinates |
+
+```css
+.emoji-popover {
+  transform-origin: var(--transform-origin);
+  transition: opacity 150ms cubic-bezier(0.23, 1, 0.32, 1), scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.emoji-popover[data-starting-style],
+.emoji-popover[data-ending-style] { opacity: 0; scale: 0.95; }
+.emoji-popover[data-ending-style] { transition-duration: 100ms; }
+@media (prefers-reduced-motion: reduce) {
+  .emoji-popover[data-starting-style], .emoji-popover[data-ending-style] { scale: 1; } /* fade only */
+}
+```
+
+Use transitions, not keyframes: reopening mid-exit reverses from where it is. While closing, the content is `inert` and focus is already back on the trigger. Tailwind: `origin-(--transform-origin) transition-[opacity,scale] duration-150 data-starting-style:opacity-0 data-ending-style:opacity-0 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95`.
 
 Pass `anchor` to position against something other than the Trigger: an element, a virtual element (`{ getBoundingClientRect }`), or a function returning a rect, such as an editor's caret. Then control `open` yourself; no Trigger is needed.
 
@@ -80,9 +107,64 @@ const menu = useEmojiSuggestions({
 </EmojiPopover.Root>
 ```
 
-A complete Tiptap extension is in [apps/demo/examples/tiptap](../../apps/demo/examples/tiptap/emoji-suggestion.tsx).
+A complete Tiptap extension is in [apps/demo/src/components/tiptap](../../apps/demo/src/components/tiptap/emoji-suggestion.tsx).
 
 Shortcode matches are ordered by relevance: exact, then prefix, then a word inside a code, then name and tag matches. `order: "alphabetical"` lists prefix matches A–Z, then the rest A–Z, as Discord does (`:smi` → `smile`, `smile_cat`, `smiley`, …, `blush`, `grimacing`). Both hooks take it.
+
+### Rendering one emoji
+
+`<Emoji emoji={…} />` draws one emoji the way the pickers do (native, Twemoji or a custom image), from whatever your app stores:
+
+```tsx
+<Emoji emoji="🎉" />                 // native text, skin tones and ZWJ sequences included
+<Emoji emoji=":tada:" />             // a shortcode, with or without colons; custom ones too (":partyparrot:")
+<Emoji emoji="1f389" size={20} />    // a unified code or a custom emoji id
+<Emoji emoji={selection} />          // an EmojiSelection from onSelect, an EmojiRecord, or a CustomEmoji object
+```
+
+Resolution order: object, native emoji, `:shortcode:`, unified code or custom id, bare shortcode. Unknown input renders as its literal text (`:code:`) with `data-emoji-missing`; while data loads, a shortcode holds its space. `useEmoji(input)` returns the resolved `{ unified, record, imageUrl, name, native }`, and `resolveEmoji(store, input)` is the same without React. `unified` still works as a deprecated alias of `emoji`.
+
+### Artwork overrides
+
+Draw particular standard emoji with your own art in part of the UI. They stay the same emoji: `onSelect`, search and frequents see the standard code.
+
+```tsx
+// iMessage-style tapback art
+const tapbackArt = {
+  "2764-fe0f": "/tapback/heart.svg",   // ❤️
+  "1f44d": "/tapback/thumbs-up.svg",   // 👍 (every skin tone, unless a toned key is given)
+  "1f44e": "/tapback/thumbs-down.svg", // 👎
+  "1f602": "/tapback/haha.svg",        // 😂
+  "203c-fe0f": "/tapback/emphasis.svg",// ‼️
+  "2753": <QuestionMark />,            // ❓ any node: an inline SVG, a component
+};
+
+<Tapback artwork={tapbackArt} onSelect={react} />
+<EmojiOverrides artwork={tapbackArt}><MessageReactions /></EmojiOverrides>
+```
+
+- `EmojiOverrides` applies to everything inside: `<Emoji>`, picker cells, search results, the horizontal list, tapback reactions. Nested scopes merge; the inner one wins. Root and Tapback take the same map as `artwork`.
+- Keys are unified codes, matched with or without U+FE0F; a base code covers its skin tones.
+- Overridden cells have `data-overridden`. For a preview footer, render `<Emoji emoji={useActiveEmoji()} />` to get the art; the engine's `Preview` part draws the standard emoji.
+
+### Large custom emoji packs
+
+`customEmojis` takes an array, a pack's JSON URL, a loader, or an array mixing them (one per pack). Packs load with the data, in parallel, when a picker first needs them (or in idle time); a URL is fetched once per page. A pack that fails is left out (`store.packErrors()`), and the rest of the picker works.
+
+```tsx
+<EmojiProvider data={en} customEmojis={["/packs/frogs.json", ({ signal }) => fetchSlackEmoji(signal), [{ id: "shipit", name: "ship it", imageUrl: "/shipit.png" }]]}>
+```
+
+| `CustomEmoji` field | |
+|---|---|
+| `id`, `name`, `imageUrl`, `shortcodes`, `tags`, `group` | as before; `group` makes a section (`categories={[{ id: "custom:frogs" }]}`) |
+| `width`, `height` | intrinsic size (default square); non-square images fit inside the cell |
+| `animated`, `stillUrl` | grids show the still and play `imageUrl` only while the emoji is hovered or highlighted; `<Emoji animate={false}>` keeps it still. Never animates with `prefers-reduced-motion` |
+| `base` | a standard emoji (`"1f35e"`) whose name and tags it also matches: a bread frog found by "bread" |
+
+- Search also matches the words of ids and shortcodes: `sleepyFrogFamily`, `sleepy_frog-family` match "frog family".
+- Only rows on screen render, so only their images load: a 1,500-emoji pack requests nothing until scrolled to, then about one viewport (~60 images). Every image is `loading="lazy"`, `decoding="async"`, sized up front (no layout shift), not draggable, with the emoji's name as `alt`.
+- An image that fails to load (a Twemoji asset missing for a new emoji) shows the native character, or an empty, named box for a custom emoji; never a broken image. With `renderer="twemoji"`, emoji newer than the Twemoji set (`TWEMOJI_EMOJI_VERSION`, 17 for the pinned 17.0.3; `twemojiVersion` on the provider for a self-hosted set) are left out of pickers.
 
 ## Search
 
@@ -103,6 +185,7 @@ import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianh
 
 - **`lexical({ typos })`**: a sorted word index over shortcodes, names and tags. A whole shortcode ranks above a name word, above a tag; the last word matches as a prefix. When it finds fewer than 8, misspelled words are corrected against the index (`rokcet` → 🚀, `thumsb up` → 👍). About 0.04 ms per query, no dependencies.
 - **`fallback(a, b, { min })`**, **`merge(...searches)`** (reciprocal rank fusion), **`rerank(search, ...rerankers)`**, **`preferFrequent({ weight })`**, **`remote(fetcher)`**, **`fuse(Fuse, options)`** (Fuse is passed in, so it stays optional).
+- **`progressive(fast, slow)`**: `fast` results render at once, `slow` ones replace them when they arrive (`progressive(lexical(), remote(…))`); a failed slow search keeps the fast results, and `pending` is true meanwhile. Any async search can do the same by returning `withInterim(promise, hits)`.
 - Sync searches render in the same frame. An async search keeps the previous results on screen (the grid is `aria-busy`) until it settles, and each new query aborts the last request.
 
 Results replace the category list while a query is active:
@@ -176,14 +259,93 @@ function Header({ category, children, ...props }: CategoryHeaderProps) {
 - The same parts, slots and props apply: `data-slot="list"` (with `data-orientation="horizontal"`), `category-header` and `emoji` cells, `data-highlighted` / `data-active`, `cellClassName`, `headerClassName`, `components`, custom emoji, the shared skin tone, the frequently used / `suggested` section, and `categories` (order, names, `nav: false`).
 - Only the columns near the viewport render, about 100 of the ~1,900 cells at a time; the rendered window moves four columns at a time.
 - `CategoryNav` follows the horizontal scroll, and a tab scrolls the strip to its section. `useCategoryNavigation()` reports the same.
-- Keys: Up and Down move within a column; Left and Right move along a row and continue into the next or previous section; Home and End go to the first and last emoji; Enter picks. Up from the top row focuses the search field and Down from the bottom row the category bar, when they sit on that side. Down from the search field enters the grid. One cell is in the tab order (`role="grid"`, `role="row"`, `role="gridcell"`).
+- Keys: Up and Down move within a column; Left and Right move along a row and continue into the next or previous section; PageUp and PageDown move a viewport of columns; Home and End go to the first and last emoji; Enter picks. Up from the top row focuses the search field and Down from the bottom row the category bar, when they sit on that side. Down from the search field enters the grid. One cell is in the tab order (`role="grid"`, `role="row"`, `role="gridcell"`).
+- Right to left (`dir="rtl"`), the strip starts at the right and scrolls left; Left goes to the next emoji.
 - Titles are `position: sticky`, so a title stays at the start edge while its section scrolls past. A section is at least `--emoji-section-min-width` wide, so a short section still fits its title.
 - Search results use the same layout: one untitled section (`searchResults="ranked"`, the default) or one per category (`"grouped"`), starting at the beginning of the strip. Arrow keys in the search field move the highlight through it. iOS shows results as one row; pass `searchRows={1}` for that.
 - Collapsed sections are left out of the strip. Their tab expands them and scrolls there.
 - The Viewport gets `overflow-x: auto` and `overscroll-behavior-x: contain`, so a swipe past either end doesn't trigger the browser's back or forward navigation. `scrollbar-width: none` on the Viewport hides the scrollbar.
 - The Viewport needs a height (or `flex-none`); the List is as tall as its title band plus `rows` cells.
 
-Known limits: no long-press skin-tone menu on cells (the `SkinTone` part and the shared tone still apply); right-to-left pages get mirrored arrow keys but a left-to-right strip; in development the engine logs that the Viewport has no `<List>`, because the horizontal List renders its own grid.
+Known limits: no long-press skin-tone menu on cells (the `SkinTone` part and the shared tone still apply); in development the engine logs that the Viewport has no `<List>`, because the horizontal List renders its own grid.
+
+## Keyboard
+
+Keys are actions; Root's `keymap` binds them. Every layout (vertical List, search results, horizontal List, Tapback) gives the same action the same meaning.
+
+| Action | Default | |
+|---|---|---|
+| `move-up` / `move-down` | ArrowUp / ArrowDown | a row; from the search field Down enters the grid |
+| `move-left` / `move-right` | ArrowLeft / ArrowRight | a cell. Physical: right to left, Left goes to the next emoji. In the search field only with the caret at the end |
+| `page-up` / `page-down` | PageUp / PageDown | the rows that fit in the Viewport (horizontal List: its columns) |
+| `first` / `last` | Home, Ctrl+Home / End, Ctrl+End | first and last emoji; the reaction row's and tab bar's ends. In the search field Home/End move the caret, so use Ctrl+Home/End |
+| `select` | Enter | pick the focused or highlighted emoji |
+| `close` | Escape | close the surrounding `EmojiPopover` (or an open skin-tone menu) |
+| `focus-search` | / | from anywhere in the picker but a text field |
+| `toggle-skin-tone` | (none) | open or close `SkinTone` |
+
+Two Root options decide where the keyboard position lives:
+
+| | `focusModel="input"` (default) | `focusModel="grid"` |
+|---|---|---|
+| Arrows from the search field | move a highlight; focus stays in the field (combobox, `aria-activedescendant`) | Down (or Right at the end of the text) moves focus into the cells (roving tabindex) |
+| Enter | picks the highlight | picks the focused cell |
+| Like | Linear, Discord | Slack |
+
+| | `pointer="follows"` (default) | `pointer="independent"` |
+|---|---|---|
+| Hover | becomes the highlight; arrows continue from it, Enter picks it. In `"grid"`, focus follows the pointer once it's in the grid | a hover style only; arrows continue from the keyboard position |
+| Like | Discord, v0.1 of this picker | Linear, Slack |
+
+The footer (`useActiveEmoji`) previews the hovered emoji in every mode. Left and Right only leave the text when the caret is at its end. The highlight is `data-highlighted` on the cell (the focused cell is `:focus-visible`).
+
+After a pick, the position stays: the field keeps focus and the highlight, a focused cell keeps focus, and results don't take focus when clicked (`"input"`). The frequently used row doesn't reorder while focus or the pointer is in the picker. Keys never animate: scrolling for a key is instant. Escape ends a highlight, then clears the query, then closes.
+
+```tsx
+import { DEFAULT_KEYMAP } from "@brianhung/emoji-picker";
+
+<EmojiPicker.Root keymap={{ "move-down": ["ArrowDown", "j"], "move-up": ["ArrowUp", "k"], select: ["Enter", "Mod+Enter"], "toggle-skin-tone": ["Shift+T"] }}>
+```
+
+- A binding replaces the action's defaults; `[]` unbinds it. Keys are `KeyboardEvent.key` values with `Ctrl+`, `Alt+`, `Shift+`, `Meta+` or `Mod+` (⌘ on Apple platforms, Ctrl elsewhere). Letters match either case; Shift is optional for symbols like `?` unless written. On macOS, Alt (Option) changes `event.key` (Alt+t is "†"), so prefer Ctrl, Mod or Shift chords.
+- Printable keys and Home/End in the search field always type: `j` above still types a "j" there.
+- Not remappable: Space (skin-tone variations on a cell), Tab, type-to-search from the grid.
+- The search field and the grid read the same keymap, so a binding applies in both: `{ "move-down": ["ArrowDown", "Tab"] }` also makes Tab enter the list.
+
+**Intercepting.** A part's `onKeyDown` (Root, Search, `Search inputProps`, Viewport, List, CategoryNav) runs before the picker's handling, innermost first. Call `event.preventEmojiPickerHandler()` to keep the picker out of it; the event still propagates, and `event.emojiPickerHandlerPrevented` reports it. Calling `preventDefault()` also stops the picker.
+
+```tsx
+<EmojiPicker.List
+  onKeyDown={(event) => {
+    if (event.key === "Enter" && event.shiftKey) {
+      event.preventEmojiPickerHandler();
+      insertAndKeepOpen(); // your own handling
+    }
+  }}
+/>
+```
+
+Escape is the exception: with text in the search field, the engine clears it before any handler runs; the next Escape is `close`.
+
+## Accessibility
+
+Each part follows its WAI-ARIA APG pattern; `npm run test:a11y` runs axe-core and these checks in a browser.
+
+| Part | Roles and states | Keys |
+|---|---|---|
+| Search field | `combobox` with `aria-controls` (the list shown) and, in `focusModel="input"`, `aria-activedescendant` (the highlighted cell) | the keymap; Escape ends a highlight, then clears the query |
+| Search status | one `status` live region: "24 results", "No results" | |
+| List, search results, horizontal list | `grid` > `row` > `gridcell` buttons named by the emoji ("thumbs up: medium skin tone", a custom emoji's name); `aria-selected` on the highlight; `aria-busy` while an async search runs | the keymap; one tab stop in `"grid"` |
+| CategoryNav | `tablist` of `tab`s with `aria-selected` | arrows, Home/End |
+| Section titles | collapsed sections' headers carry `data-collapsed`; a custom header with a button sets `aria-expanded` (see Collapsible sections) | |
+| SkinTone | a button with `aria-haspopup`/`aria-expanded`, opening a `radiogroup` of `radio`s | arrows, Home/End; Escape closes and returns focus |
+| Tapback | a labelled list of buttons, one tab stop (roving); `selected` marks the user's reactions `aria-pressed` | arrows, Home/End |
+| EmojiPopover | trigger: `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`; content: `dialog`, named "Emoji picker" unless you pass `aria-label`/`aria-labelledby` | Escape closes; focus moves in once visible and back to the trigger. Not modal, so no focus trap |
+| Autocomplete hooks | `combobox` + `listbox`/`option`, `aria-activedescendant` (`getInputProps`, `getListProps`, `getOptionProps`) | arrows, Enter/Tab, Escape |
+| `<Emoji>` | `role="img"` named by the emoji; `decorative` hides it | |
+| Empty, Loading | `status` | |
+
+Focus styles: the highlight is `data-highlighted`, the focused cell `:focus-visible`. Motion: the library animates nothing; animated custom emoji stay still and `prefers-reduced-motion` is honoured everywhere it could move (popover hooks, smooth tab jumps). Known: the engine renders its list as `ul[role=grid] > li[role=rowgroup]` (axe's minor `aria-allowed-role`; the accessibility tree is right).
 
 ## Styling
 

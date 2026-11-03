@@ -1,0 +1,152 @@
+---
+title: Semantic search
+description: On-device embeddings, a vector DB, or a decision model, plugged into the picker's search prop.
+toc: true
+---
+
+import { Demo } from "./demo";
+
+<Demo />
+
+## Build it
+
+A search is a function from a query to ranked hits, sync or async. Each approach below is one, wrapped in `fallback(…, lexical())` so the built-in search fills in when it returns nothing.
+
+### On device
+
+bge-small-en-v1.5 runs in a Web Worker with transformers.js. Emoji vectors are computed once at build time from each emoji's name, shortcodes and tags, and stored as int8 (746 KB for 1,923 emoji). A search is one embedding and a dot product per emoji.
+
+```ts title="on-device.worker.ts"
+import { pipeline } from "@huggingface/transformers";
+
+const extract = await pipeline("feature-extraction", "Xenova/bge-small-en-v1.5", { dtype: "q8" });
+const index = decodeIndex(await fetch("/embeddings/emoji.i8").then((r) => r.arrayBuffer()));
+
+self.onmessage = async ({ data: { id, query, limit } }) => {
+  const { data } = await extract(QUERY_PREFIX + query, { pooling: "cls", normalize: true });
+  self.postMessage({ id, hits: rank(index, data, limit) });
+};
+
+function rank({ ids, dims, vectors, scales }, query, limit) {
+  return ids
+    .map((unified, i) => {
+      let dot = 0;
+      for (let d = 0; d < dims; d++) dot += vectors[i * dims + d] * query[d];
+      return { unified, score: dot * scales[i] };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+```
+
+```tsx title="on-device.ts"
+const worker = new Worker(new URL("./on-device.worker.ts", import.meta.url), { type: "module" });
+
+const onDeviceSearch: EmojiSearch = (query, { limit }) =>
+  new Promise((resolve) => {
+    const id = nextId++;
+    pending.set(id, resolve);
+    worker.postMessage({ id, query, limit });
+  });
+
+<EmojiProvider data={en} search={fallback(onDeviceSearch, lexical())}>
+```
+
+```bash title="Terminal"
+npx tsx scripts/embed-emoji.ts
+```
+
+### Vector DB
+
+Workers AI embeds each emoji once with bge-large-en-v1.5 (1,024 dimensions), and Vectorize stores the vectors. A search embeds the query on the server and asks Vectorize for the nearest emoji by cosine similarity. Nothing downloads to the browser.
+
+```ts title="worker/embed-search.ts"
+const { data } = await env.AI.run("@cf/baai/bge-large-en-v1.5", { text: [QUERY_PREFIX + query] });
+const { matches } = await env.EMOJI_INDEX.query(data[0], { topK: limit });
+return matches.map((match) => ({ unified: match.id, score: match.score }));
+```
+
+```ts title="worker/seed.ts"
+const { data } = await env.AI.run("@cf/baai/bge-large-en-v1.5", { text: batch.map(emojiText) });
+await env.EMOJI_INDEX.upsert(batch.map((emoji, i) => ({ id: emoji.id, values: data[i] })));
+```
+
+```tsx title="search.tsx"
+const embeddings = remote((query, { limit, signal }) =>
+  fetch("/api/embed-search", { method: "POST", body: JSON.stringify({ query, limit }), signal })
+    .then((r) => r.json())
+    .then((r) => r.hits),
+);
+
+<EmojiProvider data={en} search={fallback(embeddings, lexical())}>
+```
+
+```bash title="Terminal"
+npm run create-index
+npm run seed -- --url https://emoji-picker.<you>.workers.dev --token $ADMIN_TOKEN
+```
+
+### Decision model
+
+A decision model answers a choice question with a probability per option. Clef, from Cloudflare, and Jev, from TypeSafe, both run on Workers AI and take the same request, so switching between them changes only the model id. Every emoji name is an option. A question takes up to 255 options and a request up to 64 questions, so the Worker asks once per group of names, then once more over the top picks.
+
+```ts title="worker/decide.ts"
+const MODELS = { clef: "@cf/cloudflare/clef-flash", jev: "typesafe/jev" };
+
+async function ask(env: Env, model: keyof typeof MODELS, query: string, names: string[]) {
+  const { result } = await env.AI.run(
+    MODELS[model],
+    {
+      state: query,
+      questions: {
+        emoji: {
+          type: "choice",
+          instructions: "Which emoji best matches what the user is searching for?",
+          criteria: Object.fromEntries(names.map((name) => [name, null])),
+        },
+      },
+    },
+    { gateway: { id: "default" } },
+  );
+  return result.answers.emoji.probabilities;
+}
+```
+
+```tsx title="search.tsx"
+const decision = (model: "clef" | "jev") =>
+  remote((query, { limit, signal }) =>
+    fetch("/api/decide", { method: "POST", body: JSON.stringify({ query, limit, model }), signal })
+      .then((r) => r.json())
+      .then((r) => r.hits),
+  );
+
+<EmojiProvider data={en} search={fallback(decision("jev"), lexical())}>
+```
+
+### Your own emoji
+
+Custom emoji exported from Slack or Discord use the library's `CustomEmoji` shape, plus an optional one-line `description` that is embedded with the name. Pass the same list to `customEmojis` so the picker renders the images. On device, custom vectors are ranked next to the built-in ones. The vector DB indexes them with `npm run seed -- --custom ./my-emoji.json`, and a decision model sees their names as options.
+
+```json title="my-emoji.json"
+[
+  {
+    "id": "rubber-duck",
+    "name": "rubber duck",
+    "imageUrl": "https://example.com/emoji/rubber-duck.png",
+    "shortcodes": ["rubber_duck", "rubberduck"],
+    "description": "Debugging by explaining the problem out loud."
+  }
+]
+```
+
+```bash title="Terminal"
+npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/custom.i8
+```
+
+### Deploy
+
+The site and its API deploy together as one Worker. [Deploy your own](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/README.md).
+
+---
+
+[Emoji search without Jev](https://maxleiter.com/blog/embedding-emoji-search), Max Leiter: the same comparison on 4,668 Slack emoji, with binary-quantized embeddings in the browser.

@@ -1,6 +1,7 @@
 // An unstyled popover for pickers: trigger, portaled content positioned next to it
 // (flips, clamps to the viewport, follows scroll), Escape and outside-click to close,
-// focus back to the trigger, and close-on-pick for any EmojiPicker.Root inside.
+// focus in on open and back to the trigger on close, close-on-pick for any
+// EmojiPicker.Root inside, and enter/exit hooks for CSS transitions.
 import * as React from "react";
 import { createPortal } from "react-dom";
 
@@ -40,14 +41,15 @@ function Root({ open: controlled, defaultOpen = false, onOpenChange, closeOnSele
   const open = controlled ?? uncontrolled;
   const triggerRef = React.useRef<HTMLElement | null>(null);
   const contentId = React.useId();
-  const setOpen = React.useCallback(
-    (next: boolean) => {
-      if (controlled === undefined) setUncontrolled(next);
-      onOpenChange?.(next);
-    },
-    [controlled, onOpenChange],
-  );
-  const value = React.useMemo<PopoverState>(() => ({ open, setOpen, close: () => setOpen(false), closeOnSelect, triggerRef, contentId }), [open, setOpen, closeOnSelect, contentId]);
+  // Stable across renders, so an inline onOpenChange doesn't re-run the content's effects.
+  const latest = React.useRef({ controlled, onOpenChange });
+  latest.current = { controlled, onOpenChange };
+  const setOpen = React.useCallback((next: boolean) => {
+    if (latest.current.controlled === undefined) setUncontrolled(next);
+    latest.current.onOpenChange?.(next);
+  }, []);
+  const close = React.useCallback(() => setOpen(false), [setOpen]);
+  const value = React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, triggerRef, contentId }), [open, setOpen, close, closeOnSelect, contentId]);
   return <PopoverContext.Provider value={value}>{children}</PopoverContext.Provider>;
 }
 
@@ -111,6 +113,9 @@ const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(functio
   );
 });
 
+/** Where focus goes when the content opens. */
+export type PopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | false;
+
 export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   /** Preferred side; flips when there's no room. Default "bottom". */
   side?: Side;
@@ -127,20 +132,80 @@ export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
    * Root then works without a Trigger; drive it with `open` / `onOpenChange`.
    */
   anchor?: PopoverAnchor;
+  /**
+   * Focused once the content is positioned and visible. Default: the first
+   * `[data-autofocus]` element inside (a picker's search field when the picker
+   * autofocuses), else the picker's first emoji. `false` leaves focus where it is (an editor's caret).
+   */
+  initialFocus?: PopoverInitialFocus;
 };
 
+type Position = { top: number; left: number; side: Side; origin: string };
+
+/**
+ * Mount and enter/exit state. Content mounts with "starting" (one frame, so CSS
+ * transitions have a start), is "idle" while open, and "ending" until its exit
+ * animations finish; reopening during the exit reverses it in place.
+ */
+type TransitionStatus = "starting" | "idle" | "ending";
+
+function useTransition(open: boolean) {
+  const [mounted, setMounted] = React.useState(open);
+  const [status, setStatus] = React.useState<TransitionStatus>(open ? "starting" : "idle");
+  // Derived during render (no extra commit): open mounts, close starts the exit.
+  if (open && !mounted) {
+    setMounted(true);
+    setStatus("starting");
+  } else if (!open && mounted && status !== "ending") setStatus("ending");
+  else if (open && status === "ending") setStatus("idle");
+  return { mounted, status, setStatus, unmount: React.useCallback(() => setMounted(false), []) };
+}
+
+/** Longest transition or animation on an element, in ms (for browsers without getAnimations). */
+function longestMotion(el: HTMLElement): number {
+  const cs = getComputedStyle(el);
+  const ms = (list: string) => list.split(",").map((v) => parseFloat(v) * (v.trim().endsWith("ms") ? 1 : 1000) || 0);
+  const total = (durations: string, delays: string) => {
+    const d = ms(durations);
+    const l = ms(delays);
+    return Math.max(0, ...d.map((x, i) => x + (l[i % l.length] ?? 0)));
+  };
+  return Math.max(total(cs.transitionDuration, cs.transitionDelay), total(cs.animationDuration, cs.animationDelay));
+}
+
+/** Resolves when the element's running transitions and animations end (at once when there are none). */
+function motionFinished(el: HTMLElement, done: () => void): () => void {
+  let cancelled = false;
+  const finish = () => !cancelled && done();
+  if (typeof el.getAnimations === "function") {
+    // Reading animations flushes style, so the ending-style transitions exist by now.
+    const animations = el.getAnimations();
+    if (!animations.length) finish();
+    else void Promise.allSettled(animations.map((a) => a.finished)).then(finish);
+    return () => void (cancelled = true);
+  }
+  const timer = setTimeout(finish, longestMotion(el));
+  return () => {
+    cancelled = true;
+    clearTimeout(timer);
+  };
+}
+
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, style, children, ...props },
   ref,
 ) {
   const state = useRequired("Content");
+  const { mounted, status, setStatus, unmount } = useTransition(state.open);
   const node = React.useRef<HTMLDivElement | null>(null);
   const nested = React.useRef(new Set<HTMLElement>());
   const registerInParent = React.useContext(NestedContext);
-  const [position, setPosition] = React.useState<{ top: number; left: number; side: Side } | null>(null);
-  // Read through a ref so a new anchor function each render doesn't re-run positioning.
+  const [position, setPosition] = React.useState<Position | null>(null);
+  // Read through refs so new anchor/initialFocus values each render don't re-run effects.
   const anchorRef = React.useRef(anchor);
   anchorRef.current = anchor;
+  const initialFocusRef = React.useRef(initialFocus);
+  initialFocusRef.current = initialFocus;
 
   // Children popovers register their content so clicks inside them stay "inside".
   const register = React.useCallback((el: HTMLElement | null) => {
@@ -151,14 +216,16 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   React.useLayoutEffect(() => (state.open && registerInParent ? registerInParent(node.current) : undefined), [state.open, registerInParent]);
 
   React.useLayoutEffect(() => {
-    if (!state.open) return setPosition(null);
+    if (!mounted) return setPosition(null);
     let frame = 0;
     const update = () => {
       const a = anchorRef.current;
       const trigger = (typeof a === "function" ? a() : a?.getBoundingClientRect()) ?? state.triggerRef.current?.getBoundingClientRect();
       const el = node.current;
       if (!trigger || !el) return;
-      const { width, height } = el.getBoundingClientRect();
+      // offsetWidth/Height: the layout size, unaffected by a scale transition in progress.
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const pad = collisionPadding;
@@ -167,8 +234,12 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       const below = side === "bottom" ? fitsBelow || !fitsAbove : !fitsAbove && fitsBelow;
       const x = align === "start" ? trigger.left : align === "end" ? trigger.right - width : trigger.left + trigger.width / 2 - width / 2;
       const left = Math.min(Math.max(x, pad), Math.max(pad, vw - width - pad));
-      const top = below ? trigger.bottom + sideOffset : trigger.top - sideOffset - height;
-      setPosition({ top: Math.max(pad, Math.min(top, vh - height - pad)), left, side: below ? "bottom" : "top" });
+      const top = Math.max(pad, Math.min(below ? trigger.bottom + sideOffset : trigger.top - sideOffset - height, vh - height - pad));
+      // Scale from the trigger: its center along the edge facing it.
+      const originX = Math.min(Math.max(trigger.left + trigger.width / 2 - left, 0), width);
+      const originY = below ? trigger.bottom - top : trigger.top - top;
+      const origin = `${Math.round(originX)}px ${Math.round(originY)}px`;
+      setPosition((p) => (p && p.top === top && p.left === left && p.origin === origin && p.side === (below ? "bottom" : "top") ? p : { top, left, side: below ? "bottom" : "top", origin }));
     };
     const schedule = () => {
       cancelAnimationFrame(frame);
@@ -185,32 +256,89 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       window.removeEventListener("scroll", schedule, true);
       window.removeEventListener("resize", schedule);
     };
-  }, [state.open, state.triggerRef, side, align, sideOffset, collisionPadding]);
+  }, [mounted, state.triggerRef, side, align, sideOffset, collisionPadding]);
 
-  // Escape and outside clicks close; focus goes back to the trigger.
+  const positioned = position != null;
+
+  // Enter: one frame with data-starting-style (the position read above flushed
+  // style with it applied, so the transition has a start), then idle.
+  React.useLayoutEffect(() => {
+    if (status !== "starting" || !positioned) return;
+    const frame = requestAnimationFrame(() => setStatus("idle"));
+    return () => cancelAnimationFrame(frame);
+  }, [status, positioned, setStatus]);
+
+  // Exit: unmount once the ending-style transitions finish.
+  React.useLayoutEffect(() => {
+    if (status !== "ending" || !node.current) return;
+    return motionFinished(node.current, unmount);
+  }, [status, unmount]);
+
+  // Focus in once visible: a hidden element can't take focus, so autofocus during
+  // the measuring render is lost.
+  React.useLayoutEffect(() => {
+    const el = node.current;
+    if (!state.open || !positioned || !el || el.contains(document.activeElement)) return;
+    const option = initialFocusRef.current;
+    if (option === false) return;
+    if (typeof option === "function" || option) {
+      (typeof option === "function" ? option() : option.current)?.focus({ preventScroll: true });
+      return;
+    }
+    // Default: the search field, or the first emoji when the picker has no search, so arrows work
+    // at once. The grid renders (and re-renders) its cells after the popover is positioned, which
+    // can drop focus to the body: while open, put it back.
+    const focusDefault = () => el.querySelector<HTMLElement>('[data-autofocus], [data-slot="emoji-picker"] button[data-unified]')?.focus({ preventScroll: true });
+    focusDefault();
+    const observer = new MutationObserver(() => {
+      const active = document.activeElement;
+      if (!el.contains(active) && (active === null || active === document.body || active === state.triggerRef.current)) focusDefault();
+    });
+    observer.observe(el, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [state.open, positioned]);
+
+  // Focus back to the trigger when it closes (not on unrelated re-renders).
+  const wasOpen = React.useRef(state.open);
+  React.useLayoutEffect(() => {
+    if (wasOpen.current && !state.open) {
+      const active = document.activeElement;
+      if (node.current?.contains(active) || active === document.body || active == null) state.triggerRef.current?.focus({ preventScroll: true });
+    }
+    wasOpen.current = state.open;
+  }, [state.open, state.triggerRef]);
+
+  // Escape and outside clicks close. A picker inside handles its own keys (its
+  // keymap's "close"), so Escape from inside one is left to it.
+  const { close, triggerRef } = state;
   React.useEffect(() => {
     if (!state.open) return;
-    const trigger = state.triggerRef.current;
     const inside = (target: EventTarget | null) =>
-      target instanceof Node && (node.current?.contains(target) || trigger?.contains(target) || [...nested.current].some((n) => n.contains(target)));
-    const down = (e: PointerEvent) => !inside(e.target) && state.close();
+      target instanceof Node && (node.current?.contains(target) || triggerRef.current?.contains(target) || [...nested.current].some((n) => n.contains(target)));
+    const down = (e: PointerEvent) => !inside(e.target) && close();
     const key = (e: KeyboardEvent) => {
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // Only the innermost open popover handles Escape.
       if (nested.current.size) return;
+      if (e.target instanceof Element && node.current?.contains(e.target) && e.target.closest('[data-epr-part="root"]')) return;
       e.preventDefault();
-      state.close();
+      close();
     };
     document.addEventListener("pointerdown", down);
     document.addEventListener("keydown", key);
     return () => {
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("keydown", key);
-      if (node.current?.contains(document.activeElement) || document.activeElement === document.body) trigger?.focus({ preventScroll: true });
     };
-  }, [state]);
+  }, [state.open, close, triggerRef]);
 
-  if (!state.open) return null;
+  // An exiting popover can't be clicked or focused.
+  React.useLayoutEffect(() => {
+    if (node.current) node.current.inert = status === "ending";
+  }, [status, mounted]);
+
+  if (!mounted) return null;
+  const transitionAttrs = status === "starting" ? { "data-starting-style": "" } : status === "ending" ? { "data-ending-style": "" } : {};
   const content = (
     <div
       {...props}
@@ -220,11 +348,24 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       }}
       id={state.contentId}
       role="dialog"
+      // A dialog needs a name; pass aria-label or aria-labelledby for another.
+      aria-label={props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Emoji picker")}
       data-slot="popover-content"
-      data-state="open"
+      data-state={state.open ? "open" : "closed"}
       data-side={position?.side ?? side}
       data-align={align}
-      style={{ position: "fixed", zIndex: 50, top: position?.top ?? 0, left: position?.left ?? 0, visibility: position ? undefined : "hidden", ...style }}
+      {...transitionAttrs}
+      style={
+        {
+          position: "fixed",
+          zIndex: 50,
+          top: position?.top ?? 0,
+          left: position?.left ?? 0,
+          visibility: positioned ? undefined : "hidden",
+          "--transform-origin": position?.origin,
+          ...style,
+        } as React.CSSProperties
+      }
     >
       <NestedContext.Provider value={register}>{children}</NestedContext.Provider>
     </div>

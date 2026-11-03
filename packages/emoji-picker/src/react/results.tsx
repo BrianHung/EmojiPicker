@@ -4,11 +4,20 @@
 import * as React from "react";
 import * as Epr from "emoji-picker-react/primitives";
 import { GROUPS, isUnified, unifiedToNative, type EmojiRecord } from "../core/dataset";
+import { moveByRows, rowsPerPage, type Point } from "./grid-nav";
+import { EmojiImage } from "./image";
+import { ArtworkGlyph, findArtwork, useArtwork, useArtworkMap } from "./overrides";
 import { useEmojiSearchState } from "./hooks";
+import { mergeRefs, useKeyRegion, type PickerKeyboardEvent, type RegionResult } from "./keyboard";
+import type { KeyboardAction } from "./keymap";
 import { useEmojiContext } from "./provider";
 import { SLOTS } from "./slots";
+import { PickerDataContext } from "./strip-context";
 
 export type SearchResultsMode = "ranked" | "grouped";
+
+/** Logical keys a results renderer moves the highlight by (Left/Right already mirrored for right-to-left). */
+export type NavKey = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "PageUp" | "PageDown" | "Home" | "End";
 
 type ResultsState = {
   /** A query is active, so results replace the category list. */
@@ -19,10 +28,15 @@ type ResultsState = {
   /** Index into `results`; -1 when nothing is highlighted. */
   highlighted: number;
   setHighlighted: (index: number) => void;
+  /** Hovered result with pointer "independent" (previewed, not highlighted); -1 when none. */
+  hovered: number;
+  setHovered: (index: number) => void;
+  /** DOM id of a result's cell, for aria-activedescendant. */
+  cellId: (index: number) => string;
+  gridId: string;
   pick: (index: number) => void;
-  columns: React.MutableRefObject<number>;
-  /** Set by a horizontal List: where an arrow key moves the highlight (null: stay). */
-  move: React.MutableRefObject<((from: number, key: string) => number | null) | null>;
+  /** Set by the mounted results renderer: where a key moves the highlight (null: stay). */
+  move: React.MutableRefObject<((from: number, key: NavKey) => number | null) | null>;
   categoryName: (group: string) => string;
 };
 
@@ -34,7 +48,6 @@ const NATIVE_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Col
 export function ResultsProvider({
   mode,
   limit,
-  columns,
   categoryNames,
   emojiVersion,
   onPick,
@@ -42,7 +55,6 @@ export function ResultsProvider({
 }: {
   mode: SearchResultsMode;
   limit: number;
-  columns?: number;
   /** Leave out emoji newer than this emoji version. */
   emojiVersion?: number;
   categoryNames: Record<string, string>;
@@ -59,11 +71,28 @@ export function ResultsProvider({
   const { store, labels } = useEmojiContext();
   const active = search.trim().length > 0;
   // The top result is highlighted as you type (Enter picks it), like Slack and Discord.
-  const [highlighted, setHighlighted] = React.useState(0);
-  React.useEffect(() => setHighlighted(0), [results]);
-  const measured = React.useRef(columns ?? 1);
+  // New results for the same query (an async engine settling, a rerank after a pick)
+  // keep the highlighted emoji, so picking with the picker open doesn't move it.
+  const [highlighted, setHighlightedIndex] = React.useState(0);
+  const highlightedKey = React.useRef<{ search: string; unified?: string }>({ search: "" });
+  const latestResults = React.useRef(results);
+  latestResults.current = results;
+  const setHighlighted = React.useCallback(
+    (index: number) => {
+      highlightedKey.current = { search, unified: latestResults.current[index]?.unified };
+      setHighlightedIndex(index);
+    },
+    [search],
+  );
+  React.useEffect(() => {
+    const previous = highlightedKey.current;
+    const kept = previous.search === search && previous.unified ? results.findIndex((r) => r.unified === previous.unified) : -1;
+    setHighlighted(Math.max(0, kept));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [results]);
   const move = React.useRef<ResultsState["move"]["current"]>(null);
-  if (columns) measured.current = columns;
+  const [hovered, setHovered] = React.useState(-1);
+  const gridId = React.useId();
 
   const value = React.useMemo<ResultsState>(() => {
     const groupNames = store.groupNames();
@@ -74,62 +103,101 @@ export function ResultsProvider({
       pending,
       highlighted: results.length ? Math.min(highlighted, results.length - 1) : -1,
       setHighlighted,
+      hovered: hovered < results.length ? hovered : -1,
+      setHovered,
+      cellId: (i) => `${gridId}-${i}`,
+      gridId,
       pick: (i) => {
         const record = results[i];
         if (record) onPick(record);
       },
-      columns: measured,
       move,
       categoryName: (group) => categoryNames[group] ?? (group === "custom" ? labels.custom : groupNames[GROUPS.indexOf(group as (typeof GROUPS)[number])] ?? group),
     };
-  }, [active, mode, results, pending, highlighted, onPick, categoryNames, store, labels]);
-  return <ResultsContext.Provider value={value}>{children}</ResultsContext.Provider>;
+  }, [active, mode, results, pending, highlighted, setHighlighted, hovered, gridId, onPick, categoryNames, store, labels]);
+  // One polite announcement of the results shown, once they settle.
+  const announcement = !active || pending ? "" : results.length ? `${results.length} ${results.length === 1 ? "result" : "results"}` : "No results";
+  return (
+    <ResultsContext.Provider value={value}>
+      {children}
+      <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+        {announcement}
+      </span>
+    </ResultsContext.Provider>
+  );
 }
 
-/** Keyboard handling for the search input while results are showing. */
+const VISUALLY_HIDDEN: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap", border: 0 };
+
+const NAV_KEYS: Partial<Record<KeyboardAction, NavKey>> = {
+  "move-up": "ArrowUp",
+  "move-down": "ArrowDown",
+  "move-left": "ArrowLeft",
+  "move-right": "ArrowRight",
+  "page-up": "PageUp",
+  "page-down": "PageDown",
+  first: "Home",
+  last: "End",
+};
+
+/**
+ * Keys in the search input while results show: the highlight moves and focus stays
+ * in the field (a combobox). Left and Right move it only with the caret at the end
+ * of the text, so they still edit the query.
+ */
 export function useResultsKeyboard() {
   const state = useResults();
+  const { focusModel } = React.useContext(PickerDataContext);
   return React.useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (!state?.active || !state.results.length) return;
-      const input = e.currentTarget;
-      const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
-      if (state.move.current) {
-        const sideways = e.key === "ArrowLeft" || e.key === "ArrowRight";
-        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key) && (!sideways || atEnd)) {
-          e.preventDefault();
-          e.stopPropagation();
-          const next = state.move.current(Math.max(0, state.highlighted), e.key);
-          if (next != null) state.setHighlighted(next);
-          return;
-        }
+    (action: KeyboardAction | null, event: PickerKeyboardEvent): RegionResult => {
+      if (!state?.active || !state.results.length || !action) return "pass";
+      if (focusModel === "grid") {
+        // Down, or Right at the end of the text, moves focus into the results.
+        const input = event.target as HTMLInputElement;
+        const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+        if (action !== "move-down" && !(atEnd && action === (getComputedStyle(input).direction === "rtl" ? "move-left" : "move-right"))) return "pass";
+        const cell = document.getElementById(state.cellId(Math.max(0, state.highlighted)));
+        if (!cell) return "pass";
+        cell.focus({ preventScroll: true });
+        return "handled";
       }
-      const cols = Math.max(1, state.columns.current);
-      const move = { ArrowDown: cols, ArrowUp: -cols, ArrowRight: atEnd ? 1 : 0, ArrowLeft: atEnd && state.highlighted > 0 ? -1 : 0 }[e.key];
-      if (move) {
-        e.preventDefault();
-        e.stopPropagation();
-        state.setHighlighted(Math.max(0, Math.min(state.results.length - 1, state.highlighted + move)));
-      } else if (e.key === "Enter" && state.highlighted >= 0) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (action === "select") {
+        if (state.highlighted < 0) return "pass";
         state.pick(state.highlighted);
+        return "handled";
       }
+      let key = NAV_KEYS[action];
+      if (!key) return "pass";
+      const input = event.target as HTMLInputElement;
+      if (key === "ArrowLeft" || key === "ArrowRight") {
+        const atEnd = input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+        if (!atEnd) return "pass";
+        if (getComputedStyle(input).direction === "rtl") key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+        // At the first result, Left goes back to editing the text.
+        if (key === "ArrowLeft" && state.highlighted <= 0) return "pass";
+      }
+      const next = state.move.current?.(Math.max(0, state.highlighted), key) ?? null;
+      if (next != null) state.setHighlighted(next);
+      return "handled";
     },
-    [state],
+    [state, focusModel],
   );
 }
 
 type Cell = React.ComponentType<Epr.EmojiRenderProps>;
 type Header = React.ComponentType<Epr.CategoryHeaderRenderProps>;
 
-export function Glyph({ record, unified }: { record: EmojiRecord; unified: string }) {
+/**
+ * One emoji in our grids (search results, the horizontal list): native text, or an
+ * image for custom emoji and Twemoji. `active` (hovered or highlighted) plays an
+ * animated custom emoji.
+ */
+export function Glyph({ record, unified, active = false }: { record: EmojiRecord; unified: string; active?: boolean }) {
   const { renderer, imageUrl } = useEmojiContext();
+  const art = useArtwork(unified);
+  if (art !== undefined) return <ArtworkGlyph art={art} alt={record.name} size="var(--emoji-image-size, var(--epr-emoji-size))" />;
   const src = record.imageUrl ?? (renderer === "twemoji" && isUnified(unified) ? imageUrl(unified) : undefined);
-  if (src) {
-    const size = "var(--emoji-image-size, var(--epr-emoji-size))";
-    return <img src={src} alt="" draggable={false} style={{ width: size, height: size }} />;
-  }
+  if (src) return <EmojiImage src={src} alt={record.name} record={record} size="var(--emoji-image-size, var(--epr-emoji-size))" animate={active} fallback={record.imageUrl ? undefined : unifiedToNative(unified)} />;
   return (
     <span aria-hidden style={{ fontFamily: `var(--epr-emoji-font-family, ${NATIVE_FONT})`, fontSize: "var(--epr-emoji-size)", lineHeight: "100%", letterSpacing: 0 }}>
       {unifiedToNative(unified)}
@@ -148,16 +216,42 @@ const ROW: React.CSSProperties = {
 };
 
 /** The results grid, in place of the category list while searching. */
-export function ResultsList({ cell: CellSlot, header: HeaderSlot, className, style }: { cell: Cell; header: Header; className?: string; style?: React.CSSProperties }) {
+export const ResultsList = React.forwardRef<HTMLDivElement, { cell: Cell; header: Header; className?: string; style?: React.CSSProperties }>(function ResultsList({ cell: CellSlot, header: HeaderSlot, className, style }, ref) {
   const state = useResults()!;
   const { store } = useEmojiContext();
+  const { focusModel, pointer } = React.useContext(PickerDataContext);
+  const artwork = useArtworkMap();
   const gridRef = React.useRef<HTMLDivElement | null>(null);
-
-  // Columns for Up/Down: the Root's `columns`, else whatever the grid fits.
-  React.useLayoutEffect(() => {
-    const grid = gridRef.current?.querySelector<HTMLElement>("[data-results-row]");
-    if (grid) state.columns.current = getComputedStyle(grid).gridTemplateColumns.split(" ").filter(Boolean).length;
+  // focusModel "grid": keys on a focused result move focus with the highlight; Up
+  // from the top row goes back to the search field.
+  const region = useKeyRegion((action, event) => {
+    const cell = (event.target as Element).closest<HTMLElement>("[data-result]");
+    if (!action || !cell || !gridRef.current?.contains(cell)) return "pass";
+    if (action === "select") {
+      cell.click();
+      return "handled";
+    }
+    let key = NAV_KEYS[action];
+    if (!key) return "pass";
+    if ((key === "ArrowLeft" || key === "ArrowRight") && getComputedStyle(cell).direction === "rtl") key = key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft";
+    const next = state.move.current?.(Number(cell.dataset.result), key) ?? null;
+    if (next != null) {
+      state.setHighlighted(next);
+      document.getElementById(state.cellId(next))?.focus({ preventScroll: true });
+    } else if (key === "ArrowUp") {
+      gridRef.current?.closest('[data-epr-part="root"]')?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`)?.focus();
+    }
+    return "handled";
   });
+  const setRef = React.useMemo(() => mergeRefs(gridRef, region, ref), [region, ref]);
+
+  // Moves follow what's on screen (grouped results reorder them), read from the cells.
+  React.useEffect(() => {
+    state.move.current = (from, key) => moveInResults(gridRef.current, from, key);
+    return () => {
+      state.move.current = null;
+    };
+  }, [state.move]);
   // Keep the highlighted cell visible by scrolling the results' own scroller only;
   // scrollIntoView would also scroll the page to the picker.
   React.useEffect(() => {
@@ -176,13 +270,16 @@ export function ResultsList({ cell: CellSlot, header: HeaderSlot, className, sty
     return (
       <CellSlot
         key={record.unified}
+        id={state.cellId(index)}
         type="button"
         role="gridcell"
-        tabIndex={-1}
+        // "grid": the highlighted result is the tab stop. "input": none are; focus stays in the field.
+        tabIndex={focusModel === "grid" && highlighted ? 0 : -1}
         aria-label={record.name}
         aria-selected={highlighted}
         data-epr-unified={unified}
-        data-epr-highlighted={highlighted ? "" : undefined}
+        // Our own attribute, not the engine's data-epr-highlighted: the engine treats that mark as its highlight and clears it.
+          data-highlighted={highlighted ? "" : undefined}
         emoji={{
           unified,
           names: [...record.shortcodes, record.name],
@@ -192,11 +289,22 @@ export function ResultsList({ cell: CellSlot, header: HeaderSlot, className, sty
           isActive: highlighted,
           hasVariations: record.tones.length > 0,
         } as Epr.EmojiRenderProps["emoji"]}
+        data-result={index}
+        data-overridden={artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined}
+        // A combobox's options don't take focus: keep it (and the caret) in the search field.
+        onMouseDown={focusModel === "input" ? (e: React.MouseEvent) => e.preventDefault() : undefined}
         onClick={() => state.pick(index)}
-        onPointerMove={() => highlighted || state.setHighlighted(index)}
+        onPointerMove={(e: React.PointerEvent<HTMLElement>) => {
+          if (pointer === "independent") return state.hovered === index || state.setHovered(index);
+          if (!highlighted) state.setHighlighted(index);
+          // Focus follows the pointer once it's in the results (focusModel "grid").
+          const active = document.activeElement;
+          if (focusModel === "grid" && active !== e.currentTarget && active instanceof HTMLElement && active.dataset.result != null && gridRef.current?.contains(active)) e.currentTarget.focus({ preventScroll: true });
+        }}
+        onPointerLeave={pointer === "independent" ? () => state.setHovered(-1) : undefined}
         style={{ width: "var(--epr-emoji-fullsize)", height: "var(--epr-emoji-fullsize)", padding: 0 }}
       >
-        <Glyph record={record} unified={unified} />
+        <Glyph record={record} unified={unified} active={highlighted} />
       </CellSlot>
     );
   };
@@ -204,7 +312,8 @@ export function ResultsList({ cell: CellSlot, header: HeaderSlot, className, sty
   let body: React.ReactNode;
   if (state.mode === "ranked") {
     body = (
-      <div role="row" data-results-row="" style={ROW}>
+      // No section headers above: inset the grid on every side.
+      <div role="row" data-results-row="" style={{ ...ROW, paddingBlock: "var(--epr-horizontal-padding)" }}>
         {state.results.map(cellFor)}
       </div>
     );
@@ -234,8 +343,36 @@ export function ResultsList({ cell: CellSlot, header: HeaderSlot, className, sty
   }
 
   return (
-    <div ref={gridRef} role="grid" aria-label="Search results" aria-busy={state.pending || undefined} data-slot={SLOTS.list} data-results={state.mode} className={className} style={style}>
+    <div ref={setRef} id={state.gridId} role="grid" aria-label="Search results" aria-busy={state.pending || undefined} data-slot={SLOTS.list} data-results={state.mode} className={className} style={style}>
       {body}
     </div>
   );
+});
+
+/** Where `key` moves the highlight in the vertical results grid, by the cells' positions. */
+function moveInResults(grid: HTMLElement | null, from: number, key: NavKey): number | null {
+  if (!grid) return null;
+  const cells = [...grid.querySelectorAll<HTMLElement>("[data-result]")];
+  const at = cells.findIndex((c) => Number(c.dataset.result) === from);
+  if (at < 0) return cells.length ? Number(cells[0]!.dataset.result) : null;
+  const resultAt = (i: number | null) => (i == null || !cells[i] ? null : Number(cells[i]!.dataset.result));
+  switch (key) {
+    case "Home":
+      return resultAt(0);
+    case "End":
+      return resultAt(cells.length - 1);
+    case "ArrowLeft":
+      return resultAt(at > 0 ? at - 1 : null);
+    case "ArrowRight":
+      return resultAt(at < cells.length - 1 ? at + 1 : null);
+  }
+  const points: Point[] = cells.map((c) => {
+    const r = c.getBoundingClientRect();
+    return { x: r.left, y: r.top };
+  });
+  const scroller = grid.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`);
+  const header = grid.querySelector<HTMLElement>(`[data-slot="${SLOTS.categoryHeader}"]`);
+  const page = rowsPerPage(scroller?.clientHeight ?? 0, cells[at]!.offsetHeight, header?.offsetHeight ?? 0);
+  const rows = key === "ArrowDown" ? 1 : key === "ArrowUp" ? -1 : key === "PageDown" ? page : -page;
+  return resultAt(moveByRows(points, at, rows));
 }

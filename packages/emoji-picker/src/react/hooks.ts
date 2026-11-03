@@ -1,5 +1,6 @@
 import * as React from "react";
 import { unifiedToNative, type EmojiRecord } from "../core/dataset";
+import type { ProgressiveHits } from "../core/search";
 import type { CompletionOrder, ShortcodeCompletion } from "../core/search-index";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
@@ -71,7 +72,10 @@ export function useEmojiSearchState(query: string, { limit = 50 }: { limit?: num
     };
   }, [run]);
   if ("results" in run && run.results) return { results: run.results, pending: false };
-  return { results: settled.results, pending: settled.run !== run };
+  if (settled.run === run) return { results: settled.results, pending: false };
+  // Still working: interim results (a progressive search) if any, else the previous ones.
+  const interim = "promise" in run ? (run.promise as Partial<ProgressiveHits<EmojiRecord[]>>).interim : undefined;
+  return { results: interim ?? settled.results, pending: true };
 }
 
 export type ShortcodeSuggestion = ShortcodeCompletion;

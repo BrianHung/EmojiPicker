@@ -1,0 +1,3 @@
+/* The demo's styles, with its files as Tailwind sources (this server's root is test/e2e). */
+@import "../../../../apps/demo/styles.css";
+@source "../../../../apps/demo";

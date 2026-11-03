@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
 import { expandDataset, unifiedToNative, type Dataset } from "../src/core/dataset";
 import { createFrequencyStore, memoryStorage } from "../src/core/frequents";
-import { fallback, fuse, lexical, merge, preferFrequent, remote, rerank, type EmojiSearch, type SearchContext } from "../src/core/search";
+import { fallback, fuse, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "../src/core/search";
 import { createEmojiStore } from "../src/core/store";
 
 const records = expandDataset(data as unknown as Dataset);
@@ -49,6 +49,28 @@ describe("composition", () => {
     expect((await out).map((h) => h.unified)).toEqual(["1f525", "1f680"]);
   });
 
+  it("progressive shows the fast results at once and the slow ones when they arrive", async () => {
+    const out = progressive(only("1f525"), later("1f680", "1f525"))("x", context());
+    expect(interimOf(out)?.map((h) => h.unified)).toEqual(["1f525"]);
+    expect((await out).map((h) => h.unified)).toEqual(["1f680", "1f525"]);
+  });
+
+  it("progressive keeps the fast results when the slow search fails, and passes a sync slow one through", async () => {
+    const failing: EmojiSearch = () => Promise.reject(new Error("offline"));
+    expect((await progressive(only("1f525"), failing)("x", context())).map((h) => h.unified)).toEqual(["1f525"]);
+    const aborted = new AbortController();
+    aborted.abort();
+    await expect(progressive(only("1f525"), failing)("x", context({ signal: aborted.signal }))).rejects.toThrow("offline");
+    expect(run(progressive(only("1f525"), only("1f680")), "x").map((h) => h.unified)).toEqual(["1f680"]);
+  });
+
+  it("rerank keeps interim results flowing", async () => {
+    const reversed = rerank(progressive(only("1f525", "1f680"), later("1f44d", "1f389")), (hits) => [...hits].reverse());
+    const out = reversed("x", context());
+    expect(interimOf(out)?.map((h) => h.unified)).toEqual(["1f680", "1f525"]);
+    expect((await out).map((h) => h.unified)).toEqual(["1f389", "1f44d"]);
+  });
+
   it("merge fuses rankings: agreement wins", () => {
     const out = run(merge(only("a", "b", "c"), only("b", "a", "d")), "x").map((h) => h.unified);
     expect(out.slice(0, 2).sort()).toEqual(["a", "b"]);
@@ -90,6 +112,18 @@ describe("store.query", () => {
     const out = await store.query("shipit");
     expect(out.map((r) => r.unified)).toEqual(["shipit"]);
     expect(store.query("   ")).toEqual([]);
+  });
+
+  it("returns interim records for a progressive search", async () => {
+    const store = createEmojiStore({
+      data: data as unknown as Dataset,
+      frequents: createFrequencyStore({ storage: memoryStorage() }),
+      search: progressive(lexical(), remote(async () => ["1f680"])),
+    });
+    await store.load();
+    const out = store.query("fire");
+    expect(interimOf(out)?.[0]?.emoji).toBe("🔥");
+    expect((await out).map((r) => r.emoji)).toEqual(["🚀"]);
   });
 
   it("defaults to lexical, synchronously", async () => {

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { needsTwemoji, TWEMOJI_BASE_URL, twemojiUrl, type Renderer } from "../core/platform";
+import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../core/platform";
 import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../core/store";
 
 export type EmojiProviderProps = EmojiStoreOptions & {
@@ -7,6 +7,8 @@ export type EmojiProviderProps = EmojiStoreOptions & {
   renderer?: Renderer | "auto";
   /** Where Twemoji SVGs live (self-host jdecked/twemoji assets/svg). Default: pinned jsDelivr URL. */
   twemojiBaseUrl?: string;
+  /** Newest emoji version your Twemoji set draws; newer emoji are hidden while rendering with Twemoji. Default TWEMOJI_EMOJI_VERSION (17). */
+  twemojiVersion?: number;
   /** Start loading data and building the index in idle time on mount. Default true. */
   prepare?: boolean;
   labels?: Partial<EmojiLabels>;
@@ -20,7 +22,9 @@ type ContextValue = {
   renderer: Renderer;
   imageUrl: (unified: string) => string;
   labels: EmojiLabels;
-  groups: Map<string, string | undefined>;
+  groups: ReadonlyMap<string, string | undefined>;
+  /** Newest emoji version the renderer can draw (Twemoji's set), or undefined (no limit). */
+  maxVersion?: number;
 };
 
 const EmojiContext = React.createContext<ContextValue | null>(null);
@@ -29,7 +33,7 @@ const EmojiContext = React.createContext<ContextValue | null>(null);
  * One store per app: dataset, search index, frequents and skin tone are
  * shared by every picker, tapback and autocomplete below it.
  */
-export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, prepare = true, labels, children, ...options }: EmojiProviderProps) {
+export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, children, ...options }: EmojiProviderProps) {
   // Options are read once, like a store; remount the provider to change data.
   const [store] = React.useState(() => createEmojiStore(options));
   const [detected, setDetected] = React.useState<Renderer>("native");
@@ -40,7 +44,10 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   }, [renderer, prepare, store]);
 
   const resolved = renderer === "auto" ? detected : renderer;
-  const groups = React.useMemo(() => new Map(store.customEmojis.map((c) => [c.id, c.group])), [store]);
+  // Custom emoji groups are known once their packs load.
+  const status = React.useSyncExternalStore(store.subscribe, store.status, store.status);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const groups = React.useMemo(() => store.customGroups(), [store, status]);
   const value = React.useMemo<ContextValue>(
     () => ({
       store,
@@ -48,8 +55,9 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
       imageUrl: (unified) => twemojiUrl(unified, twemojiBaseUrl),
       labels: { suggested: "Frequently used", custom: "Custom", ...labels },
       groups,
+      maxVersion: resolved === "twemoji" ? twemojiVersion : undefined,
     }),
-    [store, resolved, twemojiBaseUrl, labels?.suggested, labels?.custom, groups],
+    [store, resolved, twemojiBaseUrl, twemojiVersion, labels?.suggested, labels?.custom, groups],
   );
   return <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
 }

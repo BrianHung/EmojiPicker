@@ -1,6 +1,6 @@
 # iOS 27 Messages parity: per-part bounding boxes (pt) and % changed pixels, ref vs ours,
 # plus side-by-side images (real | ours | diff). Called by imessage27-parity.mjs.
-#   python3 imessage27-compare.py reacted pill keyboard
+#   python3 imessage27-compare.py reacted pill keyboard menu
 # Every part is measured the same way in both images: the bounding box of the pixels in
 # a region (pt) that differ from the region's corner colour, or that match a colour.
 import json, sys
@@ -44,6 +44,25 @@ STATES = {
         "smiley": ((70, 228, 115, 262), ("ink", 200)),
         "spam": ((5, 276, 400, 318), ("bg", 12)),
         "report-spam": ((100, 318, 300, 354), ("bg", 4)),
+    },
+    "menu": {
+        "bubble": ((0, 225, 42, 300), ("color", (230, 230, 232), 5)),
+        "card": ((42, 245, 310, 630), ("ink", 225)),
+        "tapbacks": ((50, 262, 295, 305), ("sat", 60)),
+        "recents": ((50, 318, 250, 355), ("sat", 60)),
+        "more-emoji": ((250, 318, 290, 355), ("ink", 120)),
+        "details-icon": ((60, 375, 100, 415), ("ink", 120)),
+        "details-text": ((100, 375, 290, 415), ("ink", 120)),
+        "divider": ((50, 420, 290, 435), ("color", (230, 230, 230), 5)),
+        "copy-icon": ((60, 440, 100, 480), ("ink", 120)),
+        "copy-text": ((100, 440, 290, 480), ("ink", 120)),
+        "translate-icon": ((60, 483, 100, 523), ("ink", 120)),
+        "translate-text": ((100, 483, 290, 523), ("ink", 120)),
+        "select-icon": ((60, 525, 100, 566), ("ink", 120)),
+        "select-text": ((100, 525, 290, 566), ("ink", 120)),
+        "more-icon": ((60, 568, 100, 608), ("ink", 120)),
+        "more-text": ((100, 568, 290, 608), ("ink", 120)),
+        "shadow-below": ((150, 620, 250, 680), ("bg", 4)),
     },
     "keyboard": {
         "sheet": ((0, 470, 402, 874), ("bg", 6)),
@@ -154,4 +173,4 @@ def main(states):
     print(json.dumps(report))
 
 
-main(sys.argv[1:] or ["reacted", "pill", "keyboard"])
+main(sys.argv[1:] or ["reacted", "pill", "keyboard", "menu"])

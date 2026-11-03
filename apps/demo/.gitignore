@@ -1,0 +1,6 @@
+# Build output (Vite and the Cloudflare plugin), generated types, local state and secrets
+dist/
+.cloudflare/
+.wrangler/
+.dev.vars*
+!.dev.vars.example

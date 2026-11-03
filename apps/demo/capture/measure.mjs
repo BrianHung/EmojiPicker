@@ -1,9 +1,9 @@
 // Dump geometry of one example's parts, relative to the picker root.
 import { chromium } from "playwright";
-const [skin = "slack", theme = "light"] = process.argv.slice(2);
+const [style = "slack", theme = "light"] = process.argv.slice(2);
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 800, height: 900 } });
-await page.goto(`http://localhost:5199/shot.html?skin=${skin}&theme=${theme}`);
+await page.goto(`http://localhost:5199/shot.html?style=${style}&theme=${theme}`);
 await page.locator('[data-epr-part="emoji"]').first().waitFor();
 await page.evaluate(() => document.fonts.ready);
 const data = await page.evaluate(() => {

@@ -7,9 +7,9 @@ const REAL = {
 };
 const SEL = { root: "[data-slot=emoji-picker]", tab: "[data-slot=category-tab]", input: "[data-slot=search-input]", viewport: "[data-slot=viewport]", emoji: "[data-slot=emoji]", tone: "[data-slot=skin-tone] > button", header: "[data-slot=category-header]" };
 const b = await chromium.launch({ channel: "chrome", headless: true });
-for (const [skin, { theme, parts }] of Object.entries(REAL)) {
+for (const [style, { theme, parts }] of Object.entries(REAL)) {
   const p = await (await b.newContext({ deviceScaleFactor: 2 })).newPage();
-  await p.goto(`http://localhost:5199/shot.html?skin=${skin}&theme=${theme}`);
+  await p.goto(`http://localhost:5199/shot.html?style=${style}&theme=${theme}`);
   await p.locator(SEL.emoji).first().waitFor();
   const boxes = await p.evaluate((sel) => {
     const R = document.querySelector(sel.root).getBoundingClientRect();
@@ -22,6 +22,6 @@ for (const [skin, { theme, parts }] of Object.entries(REAL)) {
     worst = Math.max(worst, d);
     return `${k} ${d.toFixed(1)}px`;
   });
-  console.log(`${skin.padEnd(8)} worst ${worst.toFixed(1)}px  (${rows.join(", ")})`);
+  console.log(`${style.padEnd(8)} worst ${worst.toFixed(1)}px  (${rows.join(", ")})`);
 }
 await b.close();

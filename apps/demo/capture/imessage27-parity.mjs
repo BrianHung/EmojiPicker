@@ -1,6 +1,6 @@
 // iOS 27.2 Messages parity: screenshot our screen at 3x (402×874 pt → 1206×2622, like the
 // simulator captures in ref/imessage27-*.png) in each state, then compare per part.
-//   node capture/imessage27-parity.mjs [reacted pill keyboard]   (dev server on :5199)
+//   node capture/imessage27-parity.mjs [reacted pill keyboard menu selected incoming]   (dev server on :5199)
 // Writes out/imessage27-<state>.png, out/imessage27-<state>-compare.png,
 // out/imessage27-side-by-side.png and out/imessage27-parity.json.
 import { chromium } from "playwright";
@@ -10,8 +10,10 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const states = process.argv.slice(2).length ? process.argv.slice(2) : ["reacted", "pill", "keyboard"];
-const ready = { reacted: '[data-imessage] [role="button"]', pill: '[role="toolbar"]', keyboard: "[data-emoji-keyboard] [data-slot=emoji]" };
+const states = process.argv.slice(2).length ? process.argv.slice(2) : ["reacted", "pill", "keyboard", "menu", "selected", "incoming"];
+const ready = { reacted: '[data-imessage] [role="button"]', pill: '[role="toolbar"]', selected: '[role="toolbar"]', menu: '[role="menu"]', incoming: '[aria-label="Reaction received"]', keyboard: "[data-emoji-keyboard] [data-slot=emoji]" };
+// States without a reference capture: screenshot only (no compare).
+const noRef = new Set(["selected", "incoming"]);
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const errors = [];
@@ -30,7 +32,8 @@ for (const state of states) {
 }
 await browser.close();
 
-const report = JSON.parse(execFileSync("python3", ["imessage27-compare.py", ...states], { cwd: here, encoding: "utf8" }));
+const compared = states.filter((s) => !noRef.has(s));
+const report = compared.length ? JSON.parse(execFileSync("python3", ["imessage27-compare.py", ...compared], { cwd: here, encoding: "utf8" })) : {};
 writeFileSync(`${here}/out/imessage27-parity.json`, JSON.stringify(report, null, 2));
 for (const [state, r] of Object.entries(report)) {
   const parts = Object.entries(r.parts);

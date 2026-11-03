@@ -1,7 +1,8 @@
 // Drives the iOS 27 mockup end to end (real animations, not skipped): double-click the
-// bubble → pill, tap the smiley → emoji sheet, pick → reaction; right-click → pill, pick a
-// tapback; long-press. Also screenshots the Device Hub frame and checks the homepage for
-// console errors.  node capture/imessage27-flow.mjs
+// bubble → pill, tap the smiley → emoji sheet, pick → reaction; right-click → context menu,
+// pick a tapback; long-press. Then: send a message → the other person's reaction card →
+// badge; the pill with my reaction selected, and removing it. Also screenshots the Device
+// Hub frame and checks the homepage for console errors.  node capture/imessage27-flow.mjs
 import { chromium } from "playwright";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,18 +29,19 @@ const watch = (page, tag) => {
   await page.waitForSelector('[role="toolbar"]');
   await page.screenshot({ path: out("1-pill") });
   await page.locator('[aria-label="More emoji"]').first().click();
-  await page.waitForSelector("[data-emoji-keyboard] button[aria-label]");
+  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji]");
   await page.waitForTimeout(700);
   await page.screenshot({ path: out("2-sheet") });
-  await page.locator("[data-emoji-keyboard] button[aria-label]").nth(3).click();
+  await page.locator("[data-emoji-keyboard] [data-slot=emoji]").nth(3).click();
   await page.waitForTimeout(900);
   await page.screenshot({ path: out("3-reacted") });
   const sheetGone = (await page.locator("[data-emoji-keyboard]").count()) === 0;
-  // Right-click the first bubble, pick the thumbs up.
+  // Right-click the first bubble: the context menu; pick the thumbs up there.
   await page.locator('[data-imessage] [role="button"]').first().click({ button: "right" });
-  await page.waitForSelector('[role="toolbar"]');
+  await page.waitForSelector('[role="menu"]');
   await page.waitForTimeout(500);
-  await page.locator('[aria-label="Like"]').click();
+  await page.screenshot({ path: out("4-menu") });
+  await page.locator('[role="menu"] [aria-label="Like"]').click();
   await page.waitForTimeout(700);
   await page.screenshot({ path: out("4-like") });
   // Long-press the second bubble.
@@ -56,9 +58,9 @@ const watch = (page, tag) => {
   await page.waitForTimeout(500);
   const plus = page.getByRole("button", { name: "Emoji", exact: true });
   await plus.click();
-  await page.waitForSelector("[data-emoji-keyboard] button[aria-label]");
+  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji]");
   await page.waitForTimeout(600);
-  const keys = page.locator("[data-emoji-keyboard] button[aria-label]");
+  const keys = page.locator("[data-emoji-keyboard] [data-slot=emoji]");
   await keys.nth(0).click();
   await keys.nth(1).click();
   await keys.nth(2).click();
@@ -70,6 +72,44 @@ const watch = (page, tag) => {
   await page.waitForTimeout(600);
   const composeClosed = (await page.locator("[data-emoji-keyboard]").count()) === 0;
   console.log({ sheetGone, longPress, composed, composeClosed });
+  await ctx.close();
+}
+
+// 3. Incoming reaction: send → ~1.2 s → the card springs in over the header → shrinks into
+// the badge. Then my own tapback on that message shows selected in the pill; picking it
+// again removes it (their reaction is replaced by mine: one per message in this mockup).
+{
+  const ctx = await browser.newContext({ deviceScaleFactor: 2, viewport: { width: 402, height: 874 } });
+  const page = await ctx.newPage();
+  watch(page, "incoming");
+  await page.goto("http://localhost:5199/shot.html?view=imessage27&state=reacted&anim=1");
+  await page.locator('[data-imessage] [role="button"]').first().waitFor();
+  await page.waitForTimeout(400);
+  await page.locator('input[aria-label="Message"]').fill("hello there");
+  await page.keyboard.press("Enter");
+  const t0 = Date.now();
+  const seen = {};
+  for (const t of [600, 1450, 2300, 2650, 3400]) {
+    await page.waitForTimeout(Math.max(0, t - (Date.now() - t0)));
+    seen[t] = await page.locator('[aria-label="Reaction received"]').count();
+    await page.screenshot({ path: out(`7-incoming-${t}`) });
+  }
+  const mine = page.locator('[data-imessage] [role="button"]').last();
+  await mine.click({ button: "right" });
+  await page.waitForSelector('[role="menu"]');
+  await page.waitForTimeout(500);
+  await page.locator('[role="menu"] [aria-label="Heart"]').click();
+  await page.waitForTimeout(600);
+  await mine.dblclick();
+  await page.waitForSelector('[role="toolbar"]');
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: out("8-pill-selected") });
+  const selected = await page.locator('[role="toolbar"] [aria-pressed="true"]').getAttribute("aria-label");
+  await page.locator('[role="toolbar"] [aria-pressed="true"]').click();
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: out("9-removed") });
+  const badges = await page.evaluate(() => document.querySelectorAll("[data-imessage] [role=button] svg circle").length);
+  console.log({ cardSeenAt: seen, selected, badgeCirclesAfterRemove: badges });
   await ctx.close();
 }
 

@@ -177,6 +177,27 @@ export function moveInStrip(layout: StripLayout, index: number, key: StripKey): 
   return next.start + column * rows + Math.min(place.row, inColumn - 1);
 }
 
+/** Whole columns visible in a viewport this wide (at least one). */
+export function columnsPerPage(layout: StripLayout, viewportWidth: number): number {
+  if (!(layout.cellWidth > 0)) return 1;
+  return Math.max(1, Math.floor((viewportWidth - 2 * layout.padding) / layout.cellWidth));
+}
+
+/**
+ * A page sideways: `columns` steps along the row (crossing sections as Left and
+ * Right do), stopping at the first or last column. Null when no step is possible.
+ */
+export function pageInStrip(layout: StripLayout, index: number, direction: 1 | -1, columns: number): number | null {
+  const key: StripKey = direction > 0 ? "ArrowRight" : "ArrowLeft";
+  let current = index;
+  for (let i = 0; i < Math.max(1, columns); i++) {
+    const next = moveInStrip(layout, current, key);
+    if (next == null) break;
+    current = next;
+  }
+  return current === index ? null : current;
+}
+
 // ---------------------------------------------------------------------------
 // Section contents
 

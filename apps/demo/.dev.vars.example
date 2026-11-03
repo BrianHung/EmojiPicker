@@ -1,0 +1,5 @@
+# Secrets. The Deploy to Cloudflare button asks for these; for local dev copy this
+# file to .dev.vars. Config vars live in wrangler.jsonc / cloudflare.config.ts.
+
+# Bearer token for POST /api/admin/seed (npm run seed). Leave empty to turn seeding off.
+ADMIN_TOKEN=
