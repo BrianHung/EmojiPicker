@@ -10,8 +10,8 @@ export const TEAM_EMOJI: CustomEmoji[] = [
   { id: "ship-it", name: "ship it", imageUrl: badge("🚢", "#2563eb"), shortcodes: ["shipit", "ship_it"], group: "Team" },
   { id: "nit", name: "nit", imageUrl: badge("nit", "#a855f7"), shortcodes: ["nit"], group: "Team" },
   { id: "plus-one-k", name: "plus one thousand", imageUrl: badge("+1k", "#f59e0b", "#111"), shortcodes: ["plus1000"], group: "Team" },
-  { id: "on-call", name: "on call", imageUrl: badge("📟", "#dc2626"), shortcodes: ["oncall"], group: "Status" },
-  { id: "ooo", name: "out of office", imageUrl: badge("OOO", "#475569"), shortcodes: ["ooo"], group: "Status" },
-  { id: "focus", name: "focus time", imageUrl: badge("🎧", "#0d9488"), shortcodes: ["focus"], group: "Status" },
+  { id: "on-call", name: "on call", imageUrl: badge("📟", "#dc2626"), shortcodes: ["oncall"], group: "Team" },
+  { id: "ooo", name: "out of office", imageUrl: badge("OOO", "#475569"), shortcodes: ["ooo"], group: "Team" },
+  { id: "focus", name: "focus time", imageUrl: badge("🎧", "#0d9488"), shortcodes: ["focus"], group: "Team" },
 ];
 
