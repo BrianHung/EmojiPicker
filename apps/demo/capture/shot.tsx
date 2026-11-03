@@ -7,6 +7,7 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { SCENES, StylePicker, styleById } from "@/styles";
+import { StyleTapback } from "@/styles/variants";
 import { AppleScene, IMessageScreen, type IMessageMode, type Message } from "@/styles/apple/scene";
 import { OgImage } from "./og-image";
 import { OgVideo } from "./og-video";
@@ -108,6 +109,20 @@ function Shot() {
             />
           </div>
         </Seeded>
+      </EmojiProvider>
+    );
+  }
+  if (view === "tapback") {
+    // A style's reaction bar alone: /shot.html?view=tapback&style=instagram
+    return (
+      <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? "native"}>
+        <div style={{ padding: 24, display: "inline-block" }}>
+          <div data-shot={appStyle.id} style={{ display: "inline-block" }}>
+            <Seeded>
+              <StyleTapback appStyle={appStyle} count={Number(params.get("count") ?? 3)} onSelect={() => {}} />
+            </Seeded>
+          </div>
+        </div>
       </EmojiProvider>
     );
   }

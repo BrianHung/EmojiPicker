@@ -1,24 +1,28 @@
 import * as I from "@/styles/icons";
 import { type Style, type Tokens } from "@/styles/style-picker";
 
-// Measured from Instagram's web DMs (dark theme), Nov 2026. Reaction bar: 308×56, radius 26,
-// six 40px cells with 32px emoji from x=12, then a 40px "+" circle. Picker: 340×316, radius 6,
-// a 40px pill search at (8,12), 12px/600 section titles, eight 40px columns from x=10, and a
-// category bar of 32px buttons on a 41px pitch under a divider. Light values by eye (Messenger web).
+// Measured from Instagram's web DMs (dark theme, then light theme), Nov 2026. Reaction bar:
+// 308×56, radius 26, six 40px cells with 32px emoji from x=12, then a 40px "+" circle.
+// Picker: 340×316, radius 6, a 40px pill search at (8,12) with a 1px border and a 14px icon
+// at x=20, 12px/600 section titles at x=14 (a 12px/600 "Customize" link on the first), eight
+// 40px columns from x=10, and a 42px category bar of 32px buttons (16px icons) on a 41px pitch.
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(#ffffff, #262626)",
-  "--emoji-picker-foreground": "light-dark(#000000, #f5f5f5)",
-  "--emoji-picker-muted": "light-dark(#65676b, #a8a8a8)",
-  "--emoji-picker-subtle": "light-dark(#65676b, #8e8e8e)",
+  "--emoji-picker-foreground": "light-dark(#0c1014, #f5f5f5)",
+  "--emoji-picker-muted": "light-dark(#6a717a, #a8a8a8)",
+  "--emoji-picker-subtle": "#8e8e8e",
+  "--instagram-placeholder": "light-dark(#6a717a, #8e8e8e)",
   "--emoji-picker-border": "light-dark(#dbdbdb, #363636)",
-  "--emoji-picker-input": "light-dark(#f0f2f5, rgb(37 41 46))",
+  "--emoji-picker-input": "light-dark(#f3f5f7, rgb(37 41 46))",
+  "--emoji-picker-input-border": "light-dark(#dbdfe4, transparent)",
   "--emoji-picker-hover": "light-dark(#f2f2f2, #363636)",
   "--emoji-picker-selected": "light-dark(#f2f2f2, #363636)",
   "--emoji-picker-accent": "light-dark(#000000, rgb(112 141 255))",
   "--emoji-picker-radius": "6px",
-  "--emoji-picker-shadow": "0 4px 12px rgb(0 0 0 / 0.15)",
+  "--emoji-picker-shadow": "0 4px 12px rgb(12 16 20 / 0.15)",
   "--emoji-picker-font": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-  "--instagram-more": "light-dark(#f0f2f5, #363636)",
+  "--instagram-more": "light-dark(#efefef, #363636)",
+  "--instagram-link": "light-dark(#4150f7, rgb(112 141 255))",
 };
 
 /** Instagram's default reactions: ❤️ 😂 😮 😢 😡 👍. */
@@ -37,22 +41,24 @@ export const instagram: Style = {
     suggested: REACTIONS,
     categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "activities" }, { id: "travel_places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
     cell: "rounded-lg hover:bg-picker-hover data-[highlighted]:bg-picker-selected",
-    header: "h-[34px] bg-picker-background pt-[9.5px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted",
-    searchRow: "-mb-px px-2 pt-3 pb-0 [--search-icon-x:18px]",
-    input: "h-10 w-full rounded-full bg-picker-input pr-4 pl-[32px] text-[14px] outline-none placeholder:text-picker-subtle",
+    header:
+      "flex h-[34px] bg-picker-background pt-[9.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-epr-category=suggested]>&]:after:ml-auto [[data-epr-category=suggested]>&]:after:text-(--instagram-link) [[data-epr-category=suggested]>&]:after:content-['Customize']",
+    searchRow: "-mb-px px-2 pt-3 pb-0 [--search-icon-x:20px]",
+    input: "h-10 w-full rounded-full border border-picker-input-border bg-picker-input pr-4 pl-[33.3px] text-[14px] text-picker-foreground outline-none placeholder:text-(--instagram-placeholder)",
     searchIcon: "left",
     // Centered on the field, not the row (which has 12px of top padding).
-    searchIconClass: "top-[calc(50%+6px)] text-picker-subtle",
+    searchIconClass: "top-[calc(50%+6px)] size-[14px] text-picker-subtle",
     scrollbar: "[scrollbar-width:none]",
     nav: {
       placement: "bottom",
-      className: "h-11 border-t border-picker-border px-[11px] pt-2 pb-1",
+      className: "h-[42px] border-t border-picker-border px-[10.5px]",
       listClassName: "flex w-full justify-between",
       button: "flex size-8 items-center justify-center rounded-full text-picker-subtle hover:text-picker-foreground",
       active: "data-active:text-picker-foreground",
       icons: I.ICONS.instagram,
-      iconSize: 20,
-      strokeWidth: 1.75,
+      // Instagram's 16px glyphs fill their box; ours have a 24px grid's padding.
+      iconSize: 18,
+      strokeWidth: 2,
       hide: ["suggested", "custom"],
     },
   },

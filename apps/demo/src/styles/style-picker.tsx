@@ -69,6 +69,8 @@ export type PickerLayout = {
   /** Controls after the input (Notion shuffle, macOS add, Discord "Add Emoji"). */
   trailing?: (pick: (s: EmojiSelection) => void) => React.ReactNode;
   skinTone?: "hand" | "dot";
+  /** The emoji the "hand" control shows in each tone. Default ✋ (Discord: 👏). */
+  toneEmoji?: string;
   /** Where the skin-tone control sits. Default "search". */
   skinTonePlacement?: "search" | "footer";
   toneButton?: string;
@@ -156,7 +158,7 @@ function DotTone({ tone, className, children: _children, ...props }: SkinToneBut
 /** The layout's skin-tone control: Slack/Discord's ✋ in each tone, or a dot. */
 function Tone({ layout }: { layout: PickerLayout }) {
   if (layout.skinTone === "dot") return <EmojiPicker.SkinTone button={DotTone} />;
-  return <EmojiPicker.SkinTone emoji="270b" buttonClassName={cn("flex items-center justify-center", layout.toneButton, "leading-none")} />;
+  return <EmojiPicker.SkinTone emoji={layout.toneEmoji ?? "270b"} buttonClassName={cn("flex items-center justify-center", layout.toneButton, "leading-none")} />;
 }
 
 /** Footer previews: Discord ":code: :alias:" and Slack's "Add Emoji" + skin tone. */
@@ -178,7 +180,7 @@ function Footer({ kind, layout, className }: { kind: NonNullable<PickerLayout["f
   // Slack: "Add Emoji" on the left, the skin-tone control on the right.
   return (
     <div className={className}>
-      <button type="button" className="h-7 rounded border border-picker-input-border bg-picker-background px-3 pb-px text-[13px] font-bold hover:bg-picker-hover">
+      <button type="button" className="h-7 rounded border border-(--slack-button-border,var(--emoji-picker-input-border)) bg-picker-background px-3 pt-[0.5px] text-[13px] font-bold hover:bg-picker-hover">
         Add Emoji
       </button>
       <div className="ml-auto flex items-center gap-[3px] text-[14.4px] font-bold text-picker-muted">
@@ -330,6 +332,7 @@ export type Style = {
     more?: { className: string; icon: React.ReactNode };
   };
   autocomplete: { className: string; item: string; match: string; matchActive?: string; header?: (q: string) => React.ReactNode; showName?: boolean };
-  pill: { base: string; mine: string; add: string };
+  /** `emoji`: pill emoji size in px (default 16). */
+  pill: { base: string; mine: string; add: string; emoji?: number };
 };
 

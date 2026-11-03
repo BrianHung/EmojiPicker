@@ -132,7 +132,7 @@ export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style;
             onClick={() => onToggle(r.unified)}
             className={cn("flex items-center gap-1 tabular-nums transition-colors", appStyle.pill.base, appStyle.pill.mine)}
           >
-            <Emoji emoji={r.unified} size={16} className="text-[16px] leading-none" />
+            <Emoji emoji={r.unified} size={appStyle.pill.emoji ?? 16} className="leading-none" style={{ fontSize: appStyle.pill.emoji ?? 16 }} />
             <span className="font-semibold">{r.count}</span>
           </button>
         );

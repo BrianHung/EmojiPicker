@@ -38,7 +38,7 @@ const C = {
   rule: "color-mix(in oklab, #97979f 12%, transparent)",
   hover: "color-mix(in oklab, #000 6%, transparent)",
   toolbar: "#242429",
-  toolbarBorder: "color-mix(in oklab, #97979f 12%, transparent)",
+  toolbarBorder: "color-mix(in oklab, #97979f 4%, transparent)",
 };
 
 type Message = { id: number; author: string; color: string; nameColor?: string; time: string; lines: string[]; reactions: Reaction[] };
@@ -218,7 +218,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
                   onClick={() => onToggle(r.unified)}
                   className={cn("flex cursor-pointer items-center gap-1.5 tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[#5865f2]", discord.pill.base, discord.pill.mine)}
                 >
-                  <Emoji emoji={r.unified} size={16} className="size-4" />
+                  <Emoji emoji={r.unified} size={discord.pill.emoji} className="size-5" />
                   <span>{r.count}</span>
                 </button>
               );
@@ -237,13 +237,14 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           </div>
         ) : null}
         {compact ? null : (
-          // Hover toolbar: three quick reactions, Add Reaction (the picker), Reply, More.
+          // Hover toolbar (measured): 33.6px tall, 28px buttons with radius 6, three quick reactions,
+          // Add Reaction (the picker), Reply, More.
           <div
-            className={cn("pointer-events-none absolute -top-4 right-3.5 z-10 flex items-center rounded-[8px] p-0.5 opacity-0 shadow-[0_4px_8px_rgb(0_0_0/0.16)] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100", pickerOpen && "pointer-events-auto opacity-100")}
+            className={cn("pointer-events-none absolute -top-4 right-3.5 z-10 flex items-center rounded-[8px] p-0.5 opacity-0 shadow-[0_1px_4px_rgb(0_0_0/0.14)] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100", pickerOpen && "pointer-events-auto opacity-100")}
             style={{ background: C.toolbar, border: `0.8px solid ${C.toolbarBorder}`, color: C.icon }}
           >
             {quick.map((u) => (
-              <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-8 cursor-pointer items-center justify-center rounded outline-none hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#5865f2]">
+              <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#5865f2]">
                 <Emoji emoji={u} size={20} className="size-5" />
               </button>
             ))}
@@ -257,14 +258,14 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
               open={pickerOpen}
               onOpenChange={setPickerOpen}
               onSelect={(s) => onToggle(s.unified)}
-              triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded outline-none hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-[#5865f2]"
+              triggerClassName="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-[#5865f2]"
             >
               <SmilePlus />
             </ScenePicker>
-            <span className="flex size-8 items-center justify-center" aria-hidden>
+            <span className="flex size-7 items-center justify-center" aria-hidden>
               <Reply />
             </span>
-            <span className="flex size-8 items-center justify-center" aria-hidden>
+            <span className="flex size-7 items-center justify-center" aria-hidden>
               <More />
             </span>
           </div>
