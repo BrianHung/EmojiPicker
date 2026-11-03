@@ -32,7 +32,7 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url"; // a separate, cac
 ### shadcn/ui
 
 ```bash
-npx shadcn@latest add https://emojis.brianhung.me/r/emoji-picker.json
+npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
 ```
 
 This adds `components/ui/emoji-picker.tsx` (you own it) with `EmojiPickerCard`, `EmojiPickerPopover`, `EmojiTapback`, `EmojiPickerBody` and `EmojiPickerFooter`, styled with your theme's tokens:

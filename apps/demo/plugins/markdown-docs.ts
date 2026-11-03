@@ -6,7 +6,7 @@ import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
-const SITE = "https://emojis.brianhung.me";
+const SITE = "https://emoji.brianhung.me";
 const GITHUB = "https://github.com/BrianHung/EmojiPicker/blob/main";
 const EXAMPLES = ["tiptap", "lexical", "custom-emoji", "semantic-search"];
 

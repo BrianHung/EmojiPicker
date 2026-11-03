@@ -9,10 +9,6 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   /** AI Gateway id for the decision models. `default` is created on first use. */
   AI_GATEWAY_ID: string;
-  /** Workers AI model for `model: "clef"`: `@cf/cloudflare/clef-flash` or `@cf/cloudflare/clef`. */
-  CLEF_MODEL: string;
-  /** Workers AI model for `model: "jev"`: `typesafe/jev`. */
-  JEV_MODEL: string;
   /** Secret. Bearer token for POST /api/admin/seed; without it, seeding is off. */
   ADMIN_TOKEN?: string;
 }

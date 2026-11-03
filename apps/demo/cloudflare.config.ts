@@ -10,8 +10,8 @@ import * as entrypoint from "./worker/index.ts" with { type: "cf-worker" };
 export default defineConfig({
   worker: {
     name: "emoji-picker",
-    // A custom domain for this deploy only (CF_DOMAIN=emoji.example.com cf deploy); forks get workers.dev.
-    domains: process.env.CF_DOMAIN ? [process.env.CF_DOMAIN] : [],
+    // Custom domains for this deploy only (CF_DOMAIN=emoji.example.com,www.example.com cf deploy); forks get workers.dev.
+    domains: process.env.CF_DOMAIN?.split(",").filter(Boolean) ?? [],
     compatibilityDate: "2026-10-30",
     entrypoint,
     assets: { runWorkerFirst: ["/api/*"] },
@@ -22,8 +22,6 @@ export default defineConfig({
       EMOJI_INDEX: bindings.vectorize({ name: "emoji-bge-large" }),
       ALLOWED_ORIGINS: bindings.text("http://localhost:*"),
       AI_GATEWAY_ID: bindings.text("default"),
-      CLEF_MODEL: bindings.text("@cf/cloudflare/clef-flash"),
-      JEV_MODEL: bindings.text("typesafe/jev"),
       ADMIN_TOKEN: bindings.secret(),
     },
   },

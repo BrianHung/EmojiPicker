@@ -88,15 +88,22 @@ npm run seed -- --url https://emoji-picker.<you>.workers.dev --token $ADMIN_TOKE
 
 ### Decision model
 
-A decision model answers a choice question with a probability per option. Clef, from Cloudflare, and Jev, from TypeSafe, both run on Workers AI and take the same request, so switching between them changes only the model id. Every emoji name is an option. A question takes up to 255 options and a request up to 64 questions, so the Worker asks once per group of names, then once more over the top picks.
+A decision model answers a choice question with a probability per option. Jev, from TypeSafe, and Clef, from Cloudflare, run on Workers AI and take the same request, so switching between them changes only the model id. Every emoji name is an option. A question takes up to 255 options and a request up to 64 questions, so the Worker asks once per group of names, then once more over the top picks.
 
 ```ts title="worker/decide.ts"
-const MODELS = { clef: "@cf/cloudflare/clef-flash", jev: "typesafe/jev" };
+const MODELS = {
+  jev: "typesafe/jev",
+  "clef-omni": "@cf/cloudflare/clef-omni",
+  "clef-flash": "@cf/cloudflare/clef-flash",
+  clef: "@cf/cloudflare/clef",
+};
 
 async function ask(env: Env, model: keyof typeof MODELS, query: string, names: string[]) {
-  const { result } = await env.AI.run(
+  const out = await env.AI.run(
     MODELS[model],
     {
+      // Clef's schema also takes its short name.
+      ...(model === "jev" ? {} : { model }),
       state: query,
       questions: {
         emoji: {
@@ -108,12 +115,21 @@ async function ask(env: Env, model: keyof typeof MODELS, query: string, names: s
     },
     { gateway: { id: "default" } },
   );
-  return result.answers.emoji.probabilities;
+  return (out.result ?? out).answers.emoji.probabilities;
 }
 ```
 
+Measured on this site with six queries over 1,945 names, two rounds each:
+
+| Model | Context | Per search | Latency |
+|---|---|---|---|
+| Jev | 65,536 | $0.0007 | 0.5–1.7 s |
+| Clef Omni | 64,000 | $0.0047 | 1.7 s |
+| Clef Flash | 24,576 | $0.0012 | 5.8 s (three requests) |
+| Clef | 65,536 | $0.0075 | 4–4.7 s |
+
 ```tsx title="search.tsx"
-const decision = (model: "clef" | "jev") =>
+const decision = (model: "jev" | "clef-omni" | "clef-flash" | "clef") =>
   remote((query, { limit, signal }) =>
     fetch("/api/decide", { method: "POST", body: JSON.stringify({ query, limit, model }), signal })
       .then((r) => r.json())

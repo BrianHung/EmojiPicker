@@ -198,10 +198,12 @@ export type StylePickerProps = {
   autoFocus?: boolean;
   /** "ranked" (default) or "grouped" search results. */
   searchResults?: "ranked" | "grouped";
+  /** Fit as many columns as the width allows instead of the layout's count (a full-width sheet). */
+  fluid?: boolean;
   className?: string;
 };
 
-export function StylePicker({ layout, onSelect, search = true, autoFocus = false, searchResults, className }: StylePickerProps) {
+export function StylePicker({ layout, onSelect, search = true, autoFocus = false, searchResults, fluid = false, className }: StylePickerProps) {
   useStyleTokens(layout.id, layout.tokens);
   const categories = React.useMemo(() => categoriesFor(layout), [layout]);
   const headers = React.useMemo(() => headerComponent(layout), [layout]);
@@ -231,7 +233,7 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
   );
   return (
     <EmojiPicker.Root
-      columns={layout.columns}
+      columns={fluid ? undefined : layout.columns}
       categories={categories}
       suggested={layout.suggested}
       frequent={layout.frequent}

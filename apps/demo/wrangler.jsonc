@@ -14,9 +14,7 @@
   "vectorize": [{ "binding": "EMOJI_INDEX", "index_name": "emoji-bge-large" }],
   "vars": {
     "ALLOWED_ORIGINS": "http://localhost:*",
-    "AI_GATEWAY_ID": "default",
-    "CLEF_MODEL": "@cf/cloudflare/clef-flash",
-    "JEV_MODEL": "typesafe/jev"
+    "AI_GATEWAY_ID": "default"
   }
   // Secrets: ADMIN_TOKEN (see .dev.vars.example).
 }

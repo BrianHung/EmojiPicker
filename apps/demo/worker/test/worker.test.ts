@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import worker from "../index";
 import { BUILT_IN, CUSTOM, emojiText } from "../corpus";
-import { MAX_OPTIONS, MAX_QUESTIONS, PRICES, chunk, labelOptions, pack } from "../decide";
+import { CATALOG, MAX_OPTIONS, MAX_QUESTIONS, chunk, labelOptions, pack } from "../decide";
 import { mockEnv, post } from "./mocks";
 
 type Mock = ReturnType<typeof mockEnv>;
@@ -124,17 +124,20 @@ describe("POST /api/embed-search", () => {
 describe("POST /api/decide", () => {
   it("validates the body, model included", async () => {
     const { env } = mockEnv();
-    for (const body of [...INVALID_SEARCHES.map((b) => ({ ...b, model: "clef" })), { query: "cat" }, { query: "cat", model: "gpt" }]) {
+    for (const body of [...INVALID_SEARCHES.map((b) => ({ ...b, model: "clef-flash" })), { query: "cat" }, { query: "cat", model: "gpt" }]) {
       expect((await fetch(post("/api/decide", body), env)).status).toBe(400);
     }
   });
 
-  // Clef and Jev share the transport and the two-round ranking. Clef's schema also takes its
-  // short model name, and its smaller per-request limit splits round 1 in two.
+  // The models share the transport and the two-round ranking. Clef's schema also takes its
+  // short model name, and clef-flash's smaller context splits round 1 in two.
   describe.each([
-    { model: "clef", id: "@cf/cloudflare/clef-flash", returned: "clef-flash", keys: ["model", "questions", "state"], requests: 3 },
-    { model: "jev", id: "typesafe/jev", returned: "jev", keys: ["questions", "state"], requests: 2 },
-  ])("$model", ({ model, id, returned, keys, requests }) => {
+    { model: "clef-flash", returned: "clef-flash", keys: ["model", "questions", "state"], requests: 3 },
+    { model: "clef-omni", returned: "clef-omni", keys: ["model", "questions", "state"], requests: 2 },
+    { model: "clef", returned: "clef", keys: ["model", "questions", "state"], requests: 2 },
+    { model: "jev", returned: "jev", keys: ["questions", "state"], requests: 2 },
+  ] as const)("$model", ({ model, returned, keys, requests }) => {
+    const { id, price } = CATALOG[model];
     it("runs the model on Workers AI through AI Gateway, with the model's request body", async () => {
       const { env, decideCalls } = mockEnv();
       await fetch(post("/api/decide", { query: "cat", model }), env);
@@ -166,7 +169,6 @@ describe("POST /api/decide", () => {
     });
     it("unwraps `result` and prices the tokens", async () => {
       const body = (await (await fetch(post("/api/decide", { query: "cat", model }), mockEnv().env)).json()) as any;
-      const price = PRICES[id]!;
       expect(body.model).toBe(returned);
       expect(body.usage.requests).toBe(requests);
       expect(body.usage.inputTokens).toBeGreaterThan(0);
@@ -180,12 +182,6 @@ describe("POST /api/decide", () => {
     });
   });
 
-  it("uses CLEF_MODEL and JEV_MODEL", async () => {
-    const { env, decideCalls } = mockEnv({ CLEF_MODEL: "@cf/cloudflare/clef" });
-    const body = (await (await fetch(post("/api/decide", { query: "cat", model: "clef" }), env)).json()) as any;
-    expect(decideCalls.every((c) => c.model === "@cf/cloudflare/clef")).toBe(true);
-    expect(body.usage.costUsd).toBeCloseTo((body.usage.inputTokens + body.usage.outputTokens) * PRICES["@cf/cloudflare/clef"]!.input, 12);
-  });
   it("answers 503 when the binding can't be reached (local dev without remote bindings)", async () => {
     const { env } = mockEnv();
     env.AI = { run: unreachable } as unknown as Ai;
@@ -196,7 +192,7 @@ describe("POST /api/decide", () => {
   it("answers 502 when the model returns no answers", async () => {
     const { env } = mockEnv();
     env.AI = { run: async () => ({ answers: {} }) } as unknown as Ai;
-    expect((await fetch(post("/api/decide", { query: "cat", model: "clef" }), env)).status).toBe(502);
+    expect((await fetch(post("/api/decide", { query: "cat", model: "clef-flash" }), env)).status).toBe(502);
   });
 });
 
@@ -224,7 +220,7 @@ describe("GET /api/health", () => {
     expect(body).toMatchObject({
       corpus: BUILT_IN.length + CUSTOM.length,
       embed: { model: "@cf/baai/bge-large-en-v1.5", vectors: BUILT_IN.length + CUSTOM.length },
-      decide: { gateway: "default", clef: "@cf/cloudflare/clef-flash", jev: "typesafe/jev" },
+      decide: { gateway: "default", models: { "clef-flash": "@cf/cloudflare/clef-flash", "clef-omni": "@cf/cloudflare/clef-omni", clef: "@cf/cloudflare/clef", jev: "typesafe/jev" } },
     });
   });
 });

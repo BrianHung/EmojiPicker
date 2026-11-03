@@ -6,7 +6,7 @@
 //   POST /api/admin/seed    embeds the emoji into Vectorize (Bearer ADMIN_TOKEN)
 import { allowedOrigin, corsHeaders } from "./cors";
 import { BUILT_IN, CUSTOM } from "./corpus";
-import { decisionSearch, MODELS, modelId, type ModelName } from "./decide";
+import { CATALOG, decisionSearch, MODELS, type ModelName } from "./decide";
 import { embedSearch, EMBEDDING_MODEL } from "./embed-search";
 import type { Env } from "./env";
 import { BadRequest, Unavailable, UpstreamError } from "./errors";
@@ -55,7 +55,7 @@ export default {
           return json({
             corpus: BUILT_IN.length + CUSTOM.length,
             embed: { model: EMBEDDING_MODEL, vectors: index?.vectorCount ?? null },
-            decide: { gateway: env.AI_GATEWAY_ID, clef: modelId(env, "clef"), jev: modelId(env, "jev") },
+            decide: { gateway: env.AI_GATEWAY_ID, models: Object.fromEntries(MODELS.map((m) => [m, CATALOG[m].id])) },
           });
         }
         case "POST /api/embed-search": {

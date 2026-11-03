@@ -25,8 +25,10 @@ const searchFor = (tab: Tab, model: DecisionModel): EmojiSearch => {
   return fallback(decisionSearch(model), lexical());
 };
 const MODELS: { value: DecisionModel; label: string }[] = [
-  { value: "clef", label: "Clef" },
   { value: "jev", label: "Jev" },
+  { value: "clef-omni", label: "Clef Omni" },
+  { value: "clef-flash", label: "Clef Flash" },
+  { value: "clef", label: "Clef" },
 ];
 
 /** Reports how many results the provider's search returned and how long it took. */
@@ -52,7 +54,7 @@ export function Demo() {
   const renderer = useRenderer();
   const [tab, setTab] = React.useState<Tab>("device");
   const [query, setQuery] = React.useState("jurassic park");
-  const [model, setModel] = React.useState<DecisionModel>("clef");
+  const [model, setModel] = React.useState<DecisionModel>("jev");
   const [timing, setTiming] = React.useState<{ query: string; count: number; ms: number } | null>(null);
   const device = useStore(onDeviceStatus);
   const api = useStore(apiStatus);

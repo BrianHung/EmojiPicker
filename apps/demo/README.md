@@ -1,6 +1,6 @@
-# emojis.brianhung.me
+# emoji.brianhung.me
 
-The docs site for `@brianhung/emoji-picker`: a Vite multi-page app, plus a Cloudflare Worker (`worker/`) that serves `/api/*` for the [semantic search example](https://emojis.brianhung.me/examples/semantic-search/). Both deploy together as one Worker: the pages as static assets, `/api/*` to the Worker.
+The docs site for `@brianhung/emoji-picker`: a Vite multi-page app, plus a Cloudflare Worker (`worker/`) that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy together as one Worker: the pages as static assets, `/api/*` to the Worker.
 
 ```sh
 npm install           # at the repository root
@@ -28,7 +28,7 @@ The semantic search page has three approaches. On device needs nothing on the se
 | Approach | Route | Uses |
 |---|---|---|
 | Vector DB | `POST /api/embed-search` | Workers AI (`@cf/baai/bge-large-en-v1.5`) and the Vectorize index `emoji-bge-large` |
-| Decision model | `POST /api/decide` | Workers AI: Clef (`@cf/cloudflare/clef-flash`) or Jev (`typesafe/jev`), through AI Gateway |
+| Decision model | `POST /api/decide` | Workers AI: Jev (`typesafe/jev`) or Clef (`clef-omni`, `clef-flash`, `clef`), through AI Gateway |
 
 What gets created in your account:
 
@@ -77,8 +77,7 @@ The Worker is configured twice: `cloudflare.config.ts` for the `cf` CLI and `wra
 - Worker name: `name`. The site's URL follows it.
 - Vectorize index: `EMOJI_INDEX`'s index name, and the `create-index` script in `package.json`.
 - AI Gateway: `AI_GATEWAY_ID` (default `default`).
-- Clef model: `CLEF_MODEL` (`@cf/cloudflare/clef-flash`, or the larger `@cf/cloudflare/clef`).
-- Jev model: `JEV_MODEL` (`typesafe/jev`).
+- Decision models: `CATALOG` in `worker/decide.ts` (id, context window, price).
 - Pages served from another origin: add it to `ALLOWED_ORIGINS` (comma-separated; `*` matches any characters), and build the pages with `VITE_SEARCH_API_URL=https://<worker>` so they call it instead of their own origin.
 
 ## The API
@@ -86,7 +85,7 @@ The Worker is configured twice: `cloudflare.config.ts` for the `cf` CLI and `wra
 | Route | Body | Returns |
 |---|---|---|
 | `POST /api/embed-search` | `{ query, limit?, custom? }` | `{ hits: [{ unified, score }], model, timings: { embedMs, queryMs } }` |
-| `POST /api/decide` | `{ query, model: "clef" \| "jev", limit?, custom? }` | `{ hits, model, usage: { inputTokens, outputTokens, requests, costUsd }, timings: { round1Ms, round2Ms } }` |
+| `POST /api/decide` | `{ query, model: "clef-flash" \| "clef-omni" \| "clef" \| "jev", limit?, custom? }` | `{ hits, model, usage: { inputTokens, outputTokens, requests, costUsd }, timings: { round1Ms, round2Ms } }` |
 | `POST /api/admin/seed` | `{ from?, count?, custom? }`, `Authorization: Bearer <ADMIN_TOKEN>` | `{ total, from, next, done, upserted, mutationIds }` |
 | `GET /api/health` | | corpus size, vectors in the index, the decision model ids |
 
@@ -96,13 +95,14 @@ The Worker is configured twice: `cloudflare.config.ts` for the `cf` CLI and `wra
 
 **Vector DB.** bge-large-en-v1.5 embeds the query (about 20 tokens) at $0.204 per 1M input tokens, and Vectorize queries about 2,000 stored vectors of 1,024 dimensions at $0.01 per 1M queried dimensions. Seeding embeds about 40,000 tokens once. Per search, both round to a fraction of a cent.
 
-**Decision model.** Clef and Jev speak the same System One protocol: `env.AI.run(model, { state, questions })` returns `{ result: { model, answers, usage } }`, where a choice question gets a probability per option. A question takes 2–255 options, a request at most 64 questions, within a 65,536-token context. So the Worker asks in two rounds: the emoji names in groups of 250 (one request), then one question over the top picks of each group. That is about 11,500 input tokens per search for the built-in set:
+**Decision model.** Jev and Clef speak the same System One protocol: `env.AI.run(model, { state, questions })` returns `{ answers, usage }` (Jev wraps it in `result`; Clef's schema also takes its short name as `model`). A choice question gets a probability per option. A question takes 2–255 options and a request at most 64 questions, within the model's context. So the Worker asks in two rounds: the emoji names in groups of 250, then one question over the top picks of each group. Measured on the deployed site (six queries, about 31,500 input tokens per search; output tokens are free):
 
-| Model | Input, per 1M tokens | Output | Per search |
-|---|---|---|---|
-| `@cf/cloudflare/clef-flash` | $0.09 | $0.09 | about $0.0010 |
-| `@cf/cloudflare/clef` | $0.24 | $0.24 | about $0.0028 |
-| `typesafe/jev` | $0.042 | free | about $0.00048 |
+| Model | Context | Per M input tokens | Per search | Latency |
+|---|---|---|---|---|
+| `typesafe/jev` | 65,536 | $0.042 | $0.0007 | 0.5–1.7 s |
+| `@cf/cloudflare/clef-omni` | 64,000 | $0.15 | $0.0047 | 1.7 s |
+| `@cf/cloudflare/clef-flash` | 24,576 | $0.038 | $0.0012 | 5.8 s (three requests) |
+| `@cf/cloudflare/clef` | 65,536 | $0.24 | $0.0075 | 4–4.7 s |
 
 ## Custom emoji
 

@@ -1,4 +1,4 @@
-// POST /api/decide { query, model: "clef" | "jev", limit?, custom? }
+// POST /api/decide { query, model: "clef-flash" | "clef-omni" | "clef" | "jev", limit?, custom? }
 // Clef (Cloudflare) and Jev (TypeSafe) are decision models on Workers AI with the same
 // System One protocol: a "choice" question gets a probability per option. They differ
 // only in the model id. A question takes at most 255 options, so every emoji name can't
@@ -10,28 +10,28 @@ import { BUILT_IN, CUSTOM, type Entry } from "./corpus";
 import type { Env } from "./env";
 import { binding, UpstreamError } from "./errors";
 
-export const MODELS = ["clef", "jev"] as const;
-export type ModelName = (typeof MODELS)[number];
+/** USD per token. Clef and Jev bill input tokens only. */
+export type Price = { input: number; output: number };
+const perMillion = (input: number): Price => ({ input: input / 1_000_000, output: 0 });
+
+/** The decision models on Workers AI: id, context window and price. */
+export const CATALOG = {
+  "clef-flash": { id: "@cf/cloudflare/clef-flash", context: 24_576, price: perMillion(0.038) },
+  "clef-omni": { id: "@cf/cloudflare/clef-omni", context: 64_000, price: perMillion(0.15) },
+  clef: { id: "@cf/cloudflare/clef", context: 65_536, price: perMillion(0.24) },
+  jev: { id: "typesafe/jev", context: 65_536, price: perMillion(0.042) },
+} as const;
+export type ModelName = keyof typeof CATALOG;
+export const MODELS = Object.keys(CATALOG) as ModelName[];
 
 export const MAX_OPTIONS = 255;
 export const MAX_QUESTIONS = 64;
 const OPTIONS_PER_QUESTION = 250;
-/**
- * Estimated input tokens per request (`estimate` units). Workers AI caps a Clef request at
- * 24,576 real tokens, about 2.3× the estimate for emoji-name options; Jev takes up to 65,536.
- */
-const TOKENS_PER_REQUEST: Record<ModelName, number> = { clef: 9_000, jev: 40_000 };
+/** Real tokens per `estimate` unit for emoji-name options (Clef's tokenizer, the stricter). */
+const TOKENS_PER_ESTIMATE = 2.3;
+/** A request's budget in `estimate` units: 85% of the context, leaving room for the state and instructions. */
+const budget = (name: ModelName) => Math.floor((CATALOG[name].context * 0.85) / TOKENS_PER_ESTIMATE);
 const INSTRUCTIONS = "Which emoji best matches what the user is searching for? Consider meaning, slang and abbreviations, not only exact words.";
-
-/** USD per token. */
-export type Price = { input: number; output: number };
-const perMillion = (input: number, output = input): Price => ({ input: input / 1_000_000, output: output / 1_000_000 });
-export const PRICES: Record<string, Price> = {
-  "@cf/cloudflare/clef-flash": perMillion(0.09),
-  "@cf/cloudflare/clef": perMillion(0.24),
-  // Output tokens are free.
-  "typesafe/jev": perMillion(0.042, 0),
-};
 
 export type SystemOneRequest = {
   state: string;
@@ -43,9 +43,6 @@ export type SystemOneResponse = { model: string; answers: Record<string, ChoiceA
 export type Hit = { unified: string; score: number; custom?: true; imageUrl?: string };
 export type DecisionUsage = { inputTokens: number; outputTokens: number; requests: number; costUsd: number };
 export type DecisionResponse = { hits: Hit[]; model: string; usage: DecisionUsage; timings: { round1Ms: number; round2Ms: number } };
-
-/** The Workers AI model id for a name: CLEF_MODEL or JEV_MODEL. */
-export const modelId = (env: Env, name: ModelName) => (name === "clef" ? env.CLEF_MODEL : env.JEV_MODEL);
 
 /**
  * One System One request through the AI binding, logged by AI Gateway. Clef's schema also
@@ -103,8 +100,7 @@ const top = (probabilities: Record<string, number>, n: number) =>
     .slice(0, n);
 
 export async function decisionSearch(env: Env, { query, limit, custom, model: name }: { query: string; limit: number; custom: boolean; model: ModelName }, signal?: AbortSignal): Promise<DecisionResponse> {
-  const model = modelId(env, name);
-  const price = PRICES[model] ?? perMillion(0);
+  const { id: model, price } = CATALOG[name];
   const byLabel = labelOptions(custom ? [...BUILT_IN, ...CUSTOM] : BUILT_IN);
   const usage: DecisionUsage = { inputTokens: 0, outputTokens: 0, requests: 0, costUsd: 0 };
   const request = async (questions: string[][]) => {
@@ -120,7 +116,7 @@ export async function decisionSearch(env: Env, { query, limit, custom, model: na
   const questions = chunk([...byLabel.keys()], OPTIONS_PER_QUESTION);
   // Enough finalists from each question that round 2 can fill `limit`, within 255 options.
   const perQuestion = Math.max(4, Math.min(Math.ceil((limit * 2) / questions.length), Math.floor(MAX_OPTIONS / questions.length)));
-  const round1 = await Promise.all(pack(questions, TOKENS_PER_REQUEST[name]).map(request));
+  const round1 = await Promise.all(pack(questions, budget(name)).map(request));
   const finalists = round1.flatMap((r) => Object.values(r.answers).flatMap((a) => top(a.probabilities, perQuestion).map(([label]) => label)));
   const t1 = performance.now();
 

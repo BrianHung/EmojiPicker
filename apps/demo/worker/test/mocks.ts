@@ -50,8 +50,6 @@ export function mockEnv(overrides: Partial<Env> = {}) {
     EMOJI_INDEX,
     ALLOWED_ORIGINS: "http://localhost:*,https://emoji.example.com",
     AI_GATEWAY_ID: "default",
-    CLEF_MODEL: "@cf/cloudflare/clef-flash",
-    JEV_MODEL: "typesafe/jev",
     ADMIN_TOKEN: "admin",
     ...overrides,
   };

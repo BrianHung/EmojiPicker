@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "brianhung-emoji",
-  "homepage": "https://emojis.brianhung.me",
+  "homepage": "https://emoji.brianhung.me",
   "items": [
     {
       "name": "emoji-picker",
