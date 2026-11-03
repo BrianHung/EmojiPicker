@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { EmojiAutocomplete } from "@/components/emoji-autocomplete";
 import { EmojiPickerPopover } from "@/registry/emoji-picker";
 import { SmilePlus } from "./icons";
+import { FitViewport } from "./scene-kit";
 import { StylePicker, useStyleTokens, type Style } from "./style-picker";
 
 /** Popover picker from a trigger, with or without search. */
@@ -35,7 +36,12 @@ export function StyleDropdown({
       align={align}
       label={label}
       triggerClassName={triggerClassName}
-      picker={<StylePicker layout={appStyle.layout} onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />}
+      picker={
+        // Wider than a phone (Discord's 498px): zoom to fit, keeping the app's layout.
+        <FitViewport width={appStyle.size.width}>
+          <StylePicker layout={appStyle.layout} onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
+        </FitViewport>
+      }
     >
       {children}
     </EmojiPickerPopover>
