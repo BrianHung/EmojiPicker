@@ -370,7 +370,7 @@ const tabStops = async () => {
     await press("Tab", 60);
     const f = await page.evaluate(() => {
       const a = document.activeElement;
-      return { inside: !!a?.closest('#harness, [data-slot="popover-content"]'), slot: a?.matches("button.epr-emoji, [data-slot=emoji]") ? "cell" : a?.getAttribute("role") === "tab" ? "tab" : (a?.getAttribute("data-slot") ?? a?.tagName) };
+      return { inside: !!a?.closest('#harness, [data-slot="popover-content"]'), slot: a?.matches("[data-slot=emoji]") ? "cell" : a?.getAttribute("role") === "tab" ? "tab" : (a?.getAttribute("data-slot") ?? a?.tagName) };
     });
     if (!f.inside) return { left: true, stops };
     stops.push(f.slot);
@@ -387,7 +387,7 @@ await press("Home", 500);
 const homeHl = await highlighted(page);
 check("empty search field: Home highlights the first emoji", homeHl != null && homeHl !== "flag: wales" && (await focused(page)).slot === "search-input", homeHl);
 check("empty search field: Home/End don't scroll the page", (await page.evaluate(() => scrollY)) === pageScroll);
-const tabbable = await page.evaluate(() => [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.tabIndex >= 0).length);
+const tabbable = await page.evaluate(() => [...document.querySelectorAll("#harness [data-slot=emoji]")].filter((c) => c.tabIndex >= 0).length);
 check("vertical list: one cell is tabbable (roving tabindex)", tabbable === 1, String(tabbable));
 await search().focus();
 const fromSearch = await tabStops();
@@ -398,7 +398,7 @@ await search().click();
 await press("ArrowDown", 200);
 await press("ArrowRight", 150);
 const gridHover = await page.evaluate(() => {
-  const cells = [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.getBoundingClientRect().width > 0);
+  const cells = [...document.querySelectorAll("#harness [data-slot=emoji]")].filter((c) => c.getBoundingClientRect().width > 0);
   const c = cells[18];
   const r = c.getBoundingClientRect();
   return { label: c.getAttribute("aria-label"), x: r.x + r.width / 2, y: r.y + r.height / 2, left: r.x, top: r.y };
@@ -508,7 +508,7 @@ await $('[data-slot="emoji"][data-unified="1f44d"]').first().click();
 check("artwork: picking an overridden emoji selects the standard one", (await page.evaluate(() => window.__picks.at(-1))) === "1f44d");
 await search().fill("thumbs up");
 await page.waitForTimeout(200);
-check("artwork: search results draw it too", (await overridden('#harness [data-slot="emoji"][data-result="0"]'))?.flag === true);
+check("artwork: search results draw it too", (await overridden('#harness [data-results] [data-slot="emoji"][data-index="0"]'))?.flag === true);
 await mount(page, { kind: "horizontal", root: { artwork } });
 check("artwork: the horizontal list draws it", (await overridden('#harness [data-slot="emoji"][data-overridden]')) != null);
 await mount(page, { kind: "tapback", root: { artwork } });

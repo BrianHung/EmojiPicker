@@ -77,7 +77,8 @@
     }
   },
   "dependencies": {
-    "emoji-picker-react": "^5.1.4"
+    "@floating-ui/react-dom": "^2.1.9",
+    "react-aria-components": "^1.22.1"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

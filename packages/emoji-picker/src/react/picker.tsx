@@ -1,45 +1,25 @@
 import * as React from "react";
-import * as Epr from "emoji-picker-react/primitives";
-import type { EmojiClickData, EmojiData as EprEmojiData } from "emoji-picker-react/primitives";
-import type { EmojiSelection, EmojiStore } from "../core/store";
-import { fromEprTone, toEprCategories, toEprCustomEmojis, toEprData, toEprTone, type CategoryOption } from "./adapter";
-import { useFrequentEmoji, useSkinTone } from "./hooks";
-import { useEmojiContext, useStoreSnapshot, type EmojiLabels } from "./provider";
-import { SkinTone as OwnSkinTone, SkinToneButtonProvider } from "./skin-tone";
-import { NavContext, SIZE_VARIABLES, SLOTS, listSlots, rootSlots, slotted, useStructureStyles } from "./slots";
-import { ResultsList, ResultsProvider, useResults, useResultsKeyboard, type SearchResultsMode } from "./results";
-import { useEmojiPopover } from "./popover";
-import { CollapseContext, NoCollapse, collapseEngineInput, useCollapseState } from "./collapse";
-import { engineGridKeys } from "./engine-grid";
-import { moveEngineHighlight, useActiveDescendant, useControlsList, useEnginePointer, useEngineTabStop, useHighlightMirror, useOwnHighlightEscape, useTabBarStop } from "./engine-highlight";
+import { Autocomplete } from "react-aria-components";
+import type { EmojiRecord } from "../core/dataset";
+import type { EmojiSelection } from "../core/store";
+import { CollapseContext, useCollapseState } from "./collapse";
+import type { PickerComponents } from "./components";
+import { PickerContext, signal, usePicker, useSignal, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
+import { useEmojiSearchState, useFrequentEmoji, useSkinTone } from "./hooks";
 import { useHeldWhileActive } from "./hold";
-import { useClippedScrollGuard } from "./scroll-guard";
-import { KeyboardProvider, mergeRefs, useEdgeKeys, useKeyRegion, useUserKeyDown, withCurrentTarget, type PickerKeyboardEvent, type PickerKeyboardEventHandler } from "./keyboard";
+import { KeyboardProvider, mergeRefs, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { EmojiOverrides, type ArtworkMap } from "./overrides";
-import { useExpandFocus, useRovingRow } from "./reactions";
-import { StripList } from "./strip";
-import { PickerDataContext, StripActiveEmojiContext, StripNavContext, StripProvider, type FocusModel, type PickerData, type PointerModel } from "./strip-context";
+import { useEmojiPopover } from "./popover";
+import { useEmojiContext, useStoreSnapshot } from "./provider";
+import { ReactionsContext, type ReactionsState } from "./reactions";
+import { useClippedScrollGuard } from "./scroll-guard";
+import { categoryList, categorySections, itemFactory, type CategoryOption } from "./sections";
+import { SkinToneButtonProvider } from "./skin-tone";
+import { SLOTS, VISUALLY_HIDDEN, useStructureStyles } from "./slots";
+import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
-export type { CategoryOption, FocusModel, PointerModel, SearchResultsMode };
-
-/**
- * Props for a custom section header. Spread everything except `category` onto the
- * header element; it stays sticky and measured. `category.toggleCollapsed` collapses
- * or expands the section (a no-op in search results, which ignore collapse).
- */
-export type CategoryHeaderProps = Omit<Epr.CategoryHeaderRenderProps, "category"> & {
-  category: { id: string; name: string; collapsed: boolean; toggleCollapsed: () => void };
-};
-export type ListComponents = Omit<Epr.ListComponents, "CategoryHeader"> & { CategoryHeader?: React.ComponentType<CategoryHeaderProps> };
-/** Custom markup for parts. Spread the given props onto your element and keep its ref/geometry. */
-export type PickerComponents = Omit<Epr.PickerComponents, "CategoryHeader"> & ListComponents;
-export type EmojiCellProps = Epr.EmojiRenderProps;
-
-export type SelectDetails = {
-  /** Return a tapback to its compact row. */
-  collapse?: () => void;
-};
+export type { CategoryOption, FocusModel, PointerModel, SearchResultsMode, SelectDetails };
 
 export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "onKeyDown"> & {
   onSelect?: (selection: EmojiSelection, details: SelectDetails) => void;
@@ -51,7 +31,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   keymap?: Partial<Record<KeyboardAction, readonly string[]>>;
   /**
    * Runs before the picker handles the key (after any part's own `onKeyDown`). Call
-   * `event.preventEmojiPickerHandler()` to keep the picker from handling it.
+   * `event.preventEmojiPickerHandler()` to keep the picker (and React Aria) from handling it.
    */
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
   /** Emoji per row; by default as many as the width fits. */
@@ -75,7 +55,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   searchResults?: SearchResultsMode;
   /** Most results to show for a query. Default 200. */
   searchLimit?: number;
-  /** Placeholder of the search input. Default "Search". */
+  /** Placeholder of the search input. Default: the provider's `labels.searchPlaceholder`. */
   searchPlaceholder?: string;
   /** Controlled search text. */
   search?: string;
@@ -91,14 +71,17 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   artwork?: ArtworkMap;
   /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
   emojiVersion?: number;
-  /** Turn off skin-tone variations in the grid (no long press). */
+  /** Turn off skin-tone variations in the grid (Shift+Space and long press). */
   disableVariations?: boolean;
   components?: PickerComponents;
-  /** Built-in light/dark color tokens; omit to style everything yourself. */
+  /**
+   * @deprecated The picker draws no colors of its own; use the tokens (`tokens.css`) or your
+   * own CSS. Still sets `color-scheme` on Root.
+   */
   colorScheme?: "light" | "dark" | "auto";
   nonce?: string;
   /**
-   * Cascade layer for the engine's CSS. Default "base": after Tailwind's preflight
+   * Cascade layer for the structural CSS. Default "base": after Tailwind's preflight
    * and before its utilities, so classes and plain CSS override it with no setup.
    */
   cssLayer?: string;
@@ -109,173 +92,184 @@ type InternalRootProps = RootProps & {
   reactions?: readonly string[];
   reactionsDefaultOpen?: boolean;
   allowExpandReactions?: boolean;
+  pressed?: ReadonlySet<string> | null;
 };
 
-// epr's defaults read "Skin tone MEDIUM_DARK"; these are what a screen reader should say.
-const LABELS = {
-  skinToneNeutral: "Default skin tone",
-  skinToneLight: "Light skin tone",
-  skinToneMediumLight: "Medium-light skin tone",
-  skinToneMedium: "Medium skin tone",
-  skinToneMediumDark: "Medium-dark skin tone",
-  skinToneDark: "Dark skin tone",
-  expandReactions: "More emoji",
-  searchPlaceholder: "Search",
-  // The engine counts its own search, not the results shown; ResultsProvider announces those.
-  searchResultsNone: "",
-  searchResultsOne: "",
-  searchResultsMany: "",
-};
-
-const NO_HIDDEN: string[] = [];
-
-/** Pickers share one loader per store, so epr's data cache sees a stable identity. */
-const loaders = new WeakMap<object, () => Promise<EprEmojiData>>();
-/** And, once loaded, one converted dataset per store (and labels). */
-const resolved = new WeakMap<object, { labels: EmojiLabels; data: EprEmojiData }>();
-function resolvedData(store: EmojiStore, labels: EmojiLabels): EprEmojiData {
-  const cached = resolved.get(store);
-  if (cached && cached.labels === labels) return cached.data;
-  const data = toEprData(store.records(), store.groupNames(), labels);
-  resolved.set(store, { labels, data });
-  return data;
-}
+const NO_COMPONENTS: PickerComponents = {};
 
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(
-  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations, reactions, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, components, cssLayer = "base", style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest },
+  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories: categoryOptions, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, components = NO_COMPONENTS, cssLayer = "base", nonce, colorScheme, style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest },
   ref,
 ) {
-  const { store, renderer, imageUrl, labels, groups, maxVersion } = useEmojiContext();
+  const { store, labels: providerLabels, groups, maxVersion } = useEmojiContext();
+  const labels = React.useMemo(() => (searchPlaceholder ? { ...providerLabels, searchPlaceholder } : providerLabels), [providerLabels, searchPlaceholder]);
   // Inside an EmojiPopover: picking closes it (unless closeOnSelect={false}).
   const popover = useEmojiPopover();
-  const notify = React.useCallback(
-    (selection: EmojiSelection, details: SelectDetails) => {
-      onSelect?.(selection, details);
-      if (popover?.closeOnSelect) popover.close();
-    },
-    [onSelect, popover],
-  );
   const status = useStoreSnapshot((s) => s.status());
+  const [tone] = useSkinTone();
   // The renderer's limit (Twemoji's set) applies on top of the picker's own.
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
-  const [tone, setTone] = useSkinTone();
   const rootRef = React.useRef<HTMLElement | null>(null);
   // Frequents change with every pick; held while the user is in the picker so
   // nothing moves under the pointer or the focused cell.
   const top = useHeldWhileActive(useFrequentEmoji(frequent || 1), rootRef);
   const heldReactions = useHeldWhileActive(reactions, rootRef);
   useClippedScrollGuard(rootRef);
-  const autoFocus = autoFocusSearch ?? Boolean(popover);
-  useEnginePointer(rootRef, focusModel, pointer);
-  useEngineTabStop(rootRef);
-  useHighlightMirror(rootRef);
+  useStructureStyles(cssLayer, nonce);
+
+  const collapse = useCollapseState(collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange);
+  const groupNames = status === "ready" ? store.groupNames() : [];
+  const categories = React.useMemo(() => categoryList(categoryOptions, groupNames, labels, [...groups.values()].filter((g): g is string => !!g)), [categoryOptions, groupNames, labels, groups]);
+  const suggestedEmojis = React.useMemo(() => (suggested ?? (frequent === false ? [] : top)).map((u) => store.withSkinTone(u)), [suggested, frequent, top, store, tone]);
+  const item = React.useMemo(() => itemFactory(labels), [labels]);
+  const sections = React.useMemo(
+    () =>
+      status === "ready"
+        ? categorySections({ categories, records: store.records(), suggested: suggestedEmojis, customGroup: (u) => groups.get(u), collapsed: collapse.isCollapsed, emojiVersion, get: store.get, withSkinTone: (u) => store.withSkinTone(u), item })
+        : [],
+    [status, categories, store, suggestedEmojis, groups, collapse, emojiVersion, tone, item],
+  );
+
+  const [ownQuery, setOwnQuery] = React.useState(defaultSearch ?? "");
+  const query = search ?? ownQuery;
+  const latestSearch = React.useRef(onSearchChange);
+  latestSearch.current = onSearchChange;
+  const setQuery = React.useCallback((value: string) => {
+    setOwnQuery(value);
+    latestSearch.current?.(value);
+  }, []);
+  const searchState = useEmojiSearchState(query, { limit: searchLimit });
+  const results = React.useMemo(() => (emojiVersion == null ? searchState.results : searchState.results.filter((r) => r.imageUrl || r.version <= emojiVersion)), [searchState.results, emojiVersion]);
+  const searching = query.trim().length > 0;
+
+  const list = React.useRef<ListHandle | null>(null);
+  const [activeSection] = React.useState(() => signal<string | null>(null));
+  const [activeEmoji] = React.useState(() => signal<EmojiRecord | null>(null));
+  const [searchCount, setSearchCount] = React.useState(0);
+  // Assume a search field until mount shows there's none, so the list starts in the right focus mode.
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+  const registerSearch = React.useCallback(() => {
+    setSearchCount((n) => n + 1);
+    return () => setSearchCount((n) => n - 1);
+  }, []);
+  const listId = React.useId();
+
+  const [reactionsOpen, setReactionsOpen] = React.useState(Boolean(reactions && reactionsDefaultOpen !== false));
+  const collapseToReactions = React.useCallback(() => setReactionsOpen(true), []);
+  const latest = React.useRef({ onSelect, popover });
+  latest.current = { onSelect, popover };
+  const pick = React.useCallback(
+    (unified: string, details: SelectDetails = {}) => {
+      const selection = store.select(unified);
+      if (!selection) return undefined;
+      const { onSelect, popover } = latest.current;
+      onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
+      if (popover?.closeOnSelect) popover.close();
+      return selection;
+    },
+    [store, reactions, collapseToReactions],
+  );
   const close = React.useCallback(() => {
+    const { popover } = latest.current;
     if (!popover) return false;
     popover.close();
     return true;
-  }, [popover]);
+  }, []);
 
-  let emojiData = loaders.get(store);
-  if (!emojiData) {
-    emojiData = () => store.load().then(() => toEprData(store.records(), store.groupNames(), labels));
-    loaders.set(store, emojiData);
-  }
-  const customEmojis = React.useMemo(() => (status === "ready" ? toEprCustomEmojis(store.records(), groups) : []), [status, store, groups]);
-  const collapse = useCollapseState(collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange);
-  // The engine has no collapse: collapsed sections go to it with no emoji. It keeps
-  // their header (shown by the structure CSS) and drops their rows. With nothing
-  // collapsed, every picker shares one dataset object, so nothing is rebuilt.
-  const fullData = React.useMemo(() => (status === "ready" ? resolvedData(store, labels) : null), [status, store, labels]);
-  const engine = React.useMemo(
-    () => (fullData && collapse.collapsed.length ? collapseEngineInput(fullData, new Set(collapse.collapsed), customEmojis.map((c) => ({ id: c.id, group: c.group }))) : null),
-    [fullData, collapse.collapsed, customEmojis],
+  const value = React.useMemo<PickerContextValue>(
+    () => ({
+      store,
+      labels,
+      focusModel,
+      pointer,
+      autoFocusSearch: autoFocusSearch ?? Boolean(popover),
+      disableVariations,
+      components,
+      columns,
+      emojiVersion,
+      categories,
+      categorySections: sections,
+      collapse,
+      query,
+      setQuery,
+      searching,
+      searchResults,
+      searchLimit,
+      results,
+      pending: searchState.pending,
+      pick,
+      close,
+      list,
+      activeSection,
+      activeEmoji,
+      hasSearch: searchCount > 0 || !mounted,
+      registerSearch,
+      listId,
+      cellKey: (key) => `${listId}-${String(key)}`,
+    }),
+    [store, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, emojiVersion, categories, sections, collapse, query, setQuery, searching, searchResults, searchLimit, results, searchState.pending, pick, close, activeSection, activeEmoji, searchCount, mounted, registerSearch, listId],
   );
-  const categoryProps = React.useMemo(() => (categories ? toEprCategories(categories) : null), [categories]);
-  const slottedComponents = React.useMemo(() => rootSlots(components), [components]);
-  // The engine renders suggested IDs verbatim, so the shared skin tone is applied here.
-  const hideSuggested = engine?.hideSuggested ?? false;
-  const suggestedEmojis = React.useMemo(
-    () => (hideSuggested ? [] : (suggested ?? (frequent === false ? [] : top)).map((u) => store.withSkinTone(u))),
-    [suggested, frequent, top, store, tone, hideSuggested],
-  );
-  useStructureStyles(rest.nonce);
-
-  const nav = React.useMemo(() => ({ hidden: new Set((categories ?? []).filter((c) => c.nav === false).map((c) => c.id)) }), [categories]);
-  const categoryNames = React.useMemo(() => Object.fromEntries((categories ?? []).filter((c) => c.name).map((c) => [c.id, c.name!])), [categories]);
-  const pickResult = React.useCallback(
-    (record: { unified: string; imageUrl?: string }) => {
-      const selection = store.select(record.imageUrl ? record.unified : store.withSkinTone(record.unified));
-      if (selection) notify(selection, {});
-    },
-    [store, notify],
-  );
-
-  const pickerData = React.useMemo<PickerData>(
-    () => ({ suggested: suggestedEmojis, emojiVersion, pick: pickResult, autoFocusSearch: autoFocus, focusModel, pointer }),
-    [suggestedEmojis, emojiVersion, pickResult, autoFocus, focusModel, pointer],
+  const reactionsState = React.useMemo<ReactionsState | null>(
+    () => (reactions ? { reactions: heldReactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),
+    [reactions, heldReactions, reactionsOpen, allowExpandReactions, pressed],
   );
 
-  const handleClick = React.useCallback(
-    (data: EmojiClickData, _event: MouseEvent, api?: { collapseToReactions: () => void }) => {
-      const selection = store.select(data.unified);
-      if (selection) notify(selection, { collapse: api?.collapseToReactions });
-    },
-    [store, notify],
+  const escape = () => {
+    if (query) {
+      setQuery("");
+      list.current?.clear();
+      return true;
+    }
+    return Boolean(list.current?.clear()) || close();
+  };
+  const focusSearch = () => {
+    const input = rootRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`);
+    input?.focus();
+    return Boolean(input);
+  };
+  const emptyState = useEmptyStateSlots();
+  const count = !searching || searchState.pending ? "" : labels.resultCount(results.length);
+  const body = (
+    <PickerContext.Provider value={value}>
+      <CollapseContext.Provider value={collapse}>
+        <ReactionsContext.Provider value={reactionsState}>
+          <EmptyStateContext.Provider value={emptyState}>
+            <SkinToneButtonProvider value={components.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
+          </EmptyStateContext.Provider>
+        </ReactionsContext.Provider>
+      </CollapseContext.Provider>
+    </PickerContext.Provider>
   );
 
   return (
-    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={close}>
+    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={escape} focusSearch={focusSearch} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
       {(keyboard) => (
-        <Epr.Root
+        <aside
           ref={mergeRefs(ref, rootRef, keyboard.ref)}
           data-slot={SLOTS.root}
           // The root is an <aside> landmark, which needs a name; pass aria-label or aria-labelledby for another.
-          aria-label={rest["aria-labelledby"] ? undefined : "Emoji picker"}
+          aria-label={rest["aria-labelledby"] ? undefined : labels.picker}
           {...rest}
+          data-columns={columns ?? undefined}
+          data-search={searching ? "" : undefined}
           onKeyDownCapture={(e: React.KeyboardEvent<HTMLElement>) => {
             onKeyDownCapture?.(e);
             if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
           }}
-          autoFocusSearch={autoFocus}
-          keepSearchFocus={focusModel === "input"}
-          cssLayer={cssLayer}
-          components={slottedComponents}
-          columns={columns}
-          style={{ ...SIZE_VARIABLES, ...(columns ? { "--emoji-results-columns": columns } : {}), ...style } as React.CSSProperties}
-          // Once loaded, the data itself rather than the loader: the engine then gets it in
-          // the same render as customEmojis, instead of a frame with only the customs
-          // (which mounts, and requests the images of, emoji the user never sees).
-          emojiData={engine?.data ?? fullData ?? emojiData}
-          customEmojis={customEmojis}
-          hiddenEmojis={engine?.hiddenCustoms.length ? engine.hiddenCustoms : NO_HIDDEN}
-          emojiStyle={renderer === "twemoji" ? Epr.EmojiStyle.TWITTER : Epr.EmojiStyle.NATIVE}
-          getEmojiUrl={imageUrl}
-          skinTone={toEprTone(tone)}
-          onSkinToneChange={(t) => setTone(fromEprTone(t))}
-          suggestedEmojis={suggestedEmojis}
-          onEmojiClick={handleClick}
-          onReactionClick={handleClick}
-          reactions={heldReactions ? [...heldReactions] : undefined}
-          variationsDisabled={disableVariations}
-          emojiVersion={emojiVersion != null ? String(emojiVersion) : undefined}
-          labels={searchPlaceholder ? { ...LABELS, searchPlaceholder } : LABELS}
-          searchValue={search}
-          defaultSearchValue={defaultSearch}
-          onSearchChange={onSearchChange}
-          {...(categoryProps ?? {})}
+          style={{ ...(columns ? { "--ep-columns": columns } : {}), ...(colorScheme ? { colorScheme: colorScheme === "auto" ? "light dark" : colorScheme } : {}), ...style } as React.CSSProperties}
         >
-          <ResultsProvider mode={searchResults} limit={searchLimit} categoryNames={categoryNames} emojiVersion={emojiVersion} onPick={pickResult}>
-            <CollapseContext.Provider value={collapse}>
-              <NavContext.Provider value={nav}>
-                <PickerDataContext.Provider value={pickerData}>
-                  <StripProvider>
-                    <SkinToneButtonProvider value={components?.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
-                  </StripProvider>
-                </PickerDataContext.Provider>
-              </NavContext.Provider>
-            </CollapseContext.Provider>
-          </ResultsProvider>
-        </Epr.Root>
+          {focusModel === "input" ? (
+            <Autocomplete inputValue={query} onInputChange={setQuery} disableAutoFocusFirst>
+              {body}
+            </Autocomplete>
+          ) : (
+            body
+          )}
+          <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+            {count}
+          </span>
+        </aside>
       )}
     </KeyboardProvider>
   );
@@ -283,193 +277,64 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
 
 export const Root = PickerRoot as React.ForwardRefExoticComponent<RootProps & React.RefAttributes<HTMLElement>>;
 
-/** The hovered or focused emoji, resolved against the shared dataset. */
-export function useActiveEmoji() {
-  const { store } = useEmojiContext();
-  const active = Epr.useActiveEmoji();
-  const results = useResults();
-  const strip = React.useContext(StripActiveEmojiContext);
-  if (results?.active) return results.results[results.hovered >= 0 ? results.hovered : results.highlighted] ?? null;
-  if (strip) return strip;
-  return active ? (store.get(active.unified) ?? null) : null;
+/** The hovered or highlighted emoji, resolved against the shared dataset. */
+export function useActiveEmoji(): EmojiRecord | null {
+  return useSignal(usePicker("useActiveEmoji").activeEmoji);
 }
 
-/** Sections, the current one, and a jump to one (what CategoryNav uses). Follows a horizontal List's scroll when one is mounted. */
-export function useCategoryNavigation(): ReturnType<typeof Epr.useCategoryNavigation> {
-  const engine = Epr.useCategoryNavigation();
-  const strip = React.useContext(StripNavContext);
-  return strip ? { ...engine, activeCategory: strip.active, jumpToCategory: strip.jump } : engine;
+/** Sections that have a tab, the current one, and a jump to one (what CategoryNav uses). */
+export function useCategoryNavigation() {
+  const picker = usePicker("useCategoryNavigation");
+  const activeCategory = useSignal(picker.activeSection);
+  const categories = React.useMemo(() => {
+    const shown = new Set(picker.categorySections.map((s) => s.id));
+    return picker.categories.filter((c) => c.nav && shown.has(c.id)).map(({ id, name, icon }) => ({ id, name, icon }));
+  }, [picker.categories, picker.categorySections]);
+  const jumpToCategory = React.useCallback((id: string, options?: { instant?: boolean }) => picker.list.current?.jump(id, options), [picker.list]);
+  return { categories, activeCategory: picker.searching ? null : activeCategory, jumpToCategory };
 }
 
-export { useSearchActions, useSearchState } from "emoji-picker-react/primitives";
+/** The applied query and how many results it shows (null while no query is applied). */
+export function useSearchState(): { search: string; resultCount: number | null } {
+  const picker = usePicker("useSearchState");
+  return { search: picker.query, resultCount: picker.searching && !picker.pending ? picker.results.length : null };
+}
+
+/** Set or clear the query; clearing also returns focus to the search field. */
+export function useSearchActions() {
+  const { setQuery } = usePicker("useSearchActions");
+  return React.useMemo(
+    () => ({
+      setValue: setQuery,
+      clear: () => setQuery(""),
+    }),
+    [setQuery],
+  );
+}
+
 export { useCollapsedCategories, type CollapsedCategories } from "./collapse";
 
-type EngineSearchProps = React.ComponentProps<typeof Epr.Search>;
-export type SearchProps = Omit<EngineSearchProps, "onKeyDown" | "inputProps"> & {
-  /** Runs before the picker handles the key; see Root's `onKeyDown`. */
-  onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
-  inputProps?: Omit<NonNullable<EngineSearchProps["inputProps"]>, "onKeyDown"> & { onKeyDown?: PickerKeyboardEventHandler<HTMLInputElement> };
-};
-export type ListProps = Omit<React.ComponentProps<typeof Epr.List>, "components" | "onKeyDown"> & {
-  /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
-  onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-  components?: ListComponents;
-  /**
-   * "vertical" (default): sections stacked, scrolling down. "horizontal": sections side
-   * by side, each a column-major grid of `rows` rows with its title above its first
-   * column, scrolling sideways (the iOS and Gboard emoji keyboards).
-   */
-  orientation?: "vertical" | "horizontal";
-  /** Horizontal only: rows per section. Default 5. */
-  rows?: number;
-  /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
-  searchRows?: number;
-  /** Classes for every emoji cell (`data-slot="emoji"`); state via data-highlighted, data-active. */
-  cellClassName?: string;
-  /** Classes for every section title (`data-slot="category-header"`). */
-  headerClassName?: string;
-};
-const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
-
-export type CategoryNavProps = Omit<React.ComponentProps<typeof Epr.CategoryNav>, "onKeyDown"> & {
-  /** Runs before the picker handles the key; see Root's `onKeyDown`. */
-  onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
-  /** Classes for every tab (`data-slot="category-tab"`); the current one has data-active. */
-  tabClassName?: string;
-};
-export type ViewportProps = Omit<React.ComponentProps<typeof Epr.Viewport>, "onKeyDown"> & {
+export type ViewportProps = Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> & {
   /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
 };
 
-// Every part's root element carries a stable `data-slot`; style those, never the engine's markup.
-export const Search = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ inputProps, onKeyDown, ...props }, ref) {
-  const resultsKeys = useResultsKeyboard();
-  const strip = React.useContext(StripNavContext);
-  const results = useResults();
-  const { autoFocusSearch, focusModel } = React.useContext(PickerDataContext);
-  const searchRef = React.useRef<HTMLDivElement | null>(null);
-  const { onKeyDown: onInputKeyDown, onBlur: onInputBlur, ...input } = inputProps ?? {};
-  const region = useKeyRegion((action, event) => {
-    const field = event.target;
-    if (!(field instanceof HTMLInputElement) || !action) return "pass";
-    // Left and Right edit the query unless the caret is at its end.
-    if ((action === "move-left" || action === "move-right") && !caretAtEnd(field)) return "native";
-    if (results?.active) return resultsKeys(action, event);
-    if (focusModel === "grid") {
-      // A horizontal List isn't one of the engine's regions: Down from the field enters it here.
-      return action === "move-down" && strip?.focus() ? "handled" : "pass";
-    }
-    if (strip) return strip.key(action, field) ? "handled" : "pass";
-    // The engine's list moves its own highlight with arrows and Enter; pages and ends are ours.
-    if (action === "page-up" || action === "page-down" || action === "first" || action === "last") {
-      const scroller = field.closest('[data-epr-part="root"]')?.querySelector<HTMLElement>(".epr-body");
-      return scroller && moveEngineHighlight(field, scroller, action) ? "handled" : "pass";
-    }
-    return "pass";
-  });
-  // The input's handler, then the Search row's, as bubbling would call them.
-  const userKeys = useUserKeyDown((event) => {
-    const field = event.target instanceof HTMLInputElement ? event.target : null;
-    if (field && onInputKeyDown) withCurrentTarget(event, field, () => onInputKeyDown(event as PickerKeyboardEvent<HTMLInputElement>));
-    if (!event.isPropagationStopped()) onKeyDown?.(event as PickerKeyboardEvent<HTMLDivElement>);
-  });
-  const merged = React.useMemo(() => mergeRefs(ref, region, userKeys), [ref, region, userKeys]);
-  useOwnHighlightEscape(searchRef, () => strip?.clear());
-  // The highlighted result or strip cell, while focus stays in the field (the engine's list sets its own).
-  const activeDescendant = focusModel !== "input" ? undefined : results?.active ? (results.highlighted >= 0 ? results.cellId(results.highlighted) : undefined) : strip?.activeDescendant;
-  useActiveDescendant(searchRef, activeDescendant);
-  useControlsList(searchRef);
-  const engineInput = {
-    "data-slot": SLOTS.searchInput,
-    // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
-    ...(autoFocusSearch ? { "data-autofocus": "" } : {}),
-    ...input,
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => {
-      strip?.clear();
-      onInputBlur?.(e);
-    },
-  } as EngineSearchProps["inputProps"];
-  return <Epr.Search data-slot={SLOTS.search} {...props} ref={mergeRefs(merged, searchRef)} inputProps={engineInput} />;
-});
-export const SearchInput = slotted(Epr.SearchInput, SLOTS.searchInput, "SearchInput");
-const SlottedNav = slotted(Epr.CategoryNav, SLOTS.categoryNav, "CategoryNav");
-export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ tabClassName, onKeyDown, ...props }, ref) {
-  const parent = React.useContext(NavContext);
-  const value = React.useMemo(() => ({ ...parent, tabClassName }), [parent, tabClassName]);
-  const edges = useEdgeKeys('[role="tab"]');
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const bar = React.useRef<HTMLDivElement | null>(null);
-  useTabBarStop(bar);
-  const merged = React.useMemo(() => mergeRefs(ref, edges, userKeys, bar), [ref, edges, userKeys]);
-  return (
-    <NavContext.Provider value={value}>
-      <SlottedNav {...props} ref={merged} />
-    </NavContext.Provider>
-  );
-});
-const SlottedViewport = slotted(Epr.Viewport, SLOTS.viewport, "Viewport");
+/** The scroll container: holds one List, and Empty, Loading and LoadError (which the List shows when it has nothing). */
 export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function Viewport({ onKeyDown, ...props }, ref) {
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
   const merged = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
-  return <SlottedViewport {...props} ref={merged} />;
+  return <div data-slot={SLOTS.viewport} {...props} ref={merged} />;
 });
-export const List = React.forwardRef<HTMLUListElement, ListProps>(function List({ components, cellClassName, headerClassName, orientation = "vertical", rows = 5, searchRows, onKeyDown, ...props }, ref) {
-  const slots = React.useMemo(() => listSlots(components, { cell: cellClassName, header: headerClassName }), [components, cellClassName, headerClassName]);
-  const results = useResults();
-  const collapse = React.useContext(CollapseContext);
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const engineKeys = useKeyRegion(engineGridKeys);
-  // The engine's keys only on the engine's list; the results grid registers its own region.
-  const merged = React.useMemo(() => mergeRefs(ref, userKeys, engineKeys), [ref, userKeys, engineKeys]);
-  const resultsRef = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
-  if (orientation === "horizontal")
-    // Our own renderer for both the categories and the results (one element, so it
-    // keeps its state across search); collapse applies to categories only.
-    return (
-      <CollapseContext.Provider value={results?.active ? NoCollapse : collapse}>
-        <StripList {...(props as React.HTMLAttributes<HTMLDivElement>)} ref={ref as unknown as React.Ref<HTMLDivElement>} onKeyDown={onKeyDown as PickerKeyboardEventHandler<HTMLDivElement> | undefined} rows={rows} searchRows={searchRows} cell={slots.Emoji!} header={slots.CategoryHeader!} />
-      </CollapseContext.Provider>
-    );
-  // Search results ignore collapse.
-  if (results?.active)
-    return (
-      <CollapseContext.Provider value={NoCollapse}>
-        <ResultsList ref={resultsRef as React.Ref<HTMLDivElement>} cell={slots.Emoji!} header={slots.CategoryHeader!} className={props.className} style={props.style} />
-      </CollapseContext.Provider>
-    );
-  return <Epr.List data-slot={SLOTS.list} {...props} ref={merged} components={slots} />;
-});
-export const Preview = slotted(Epr.Preview, SLOTS.preview, "Preview");
-export const SkinTone = OwnSkinTone;
-const EngineEmpty = slotted(Epr.Empty, SLOTS.empty, "Empty");
-/** Shown when a search finds nothing. */
-export const Empty = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof Epr.Empty>>(function Empty(props, ref) {
-  const results = useResults();
-  const { search } = Epr.useSearchState();
-  if (!results?.active) return <EngineEmpty {...props} ref={ref} />;
-  if (results.results.length || results.pending) return null;
-  const { children, ...rest } = props;
+
+export type PreviewProps = React.HTMLAttributes<HTMLDivElement>;
+
+/** The hovered or highlighted emoji with its name, or the caption when there's none. */
+export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function Preview({ children, ...props }, ref) {
+  const { labels } = usePicker("EmojiPicker.Preview");
+  const active = useActiveEmoji();
   return (
-    <div {...rest} ref={ref} role="status" data-slot={SLOTS.empty}>
-      {typeof children === "function" ? children({ search }) : children}
+    <div data-slot={SLOTS.preview} {...props} ref={ref}>
+      {children ?? (active ? `${active.imageUrl ? "" : active.emoji} ${active.name}`.trim() : labels.previewCaption)}
     </div>
   );
 });
-export const Loading = slotted(Epr.Loading, SLOTS.loading, "Loading");
-export const LoadError = Epr.LoadError;
-const SlottedReactions = slotted(Epr.Reactions, SLOTS.reactions, "Reactions");
-/**
- * A tapback's reaction row: one tab stop (roving tabindex); arrows, Home and End
- * (the keymap's moves and first/last) move along it. "+" expands into the full
- * picker with focus in its search field.
- */
-export const Reactions = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof Epr.Reactions>>(function Reactions(props, ref) {
-  const edges = useEdgeKeys("button");
-  const row = React.useRef<HTMLDivElement | null>(null);
-  useRovingRow(row);
-  useExpandFocus(row);
-  const merged = React.useMemo(() => mergeRefs(ref, edges, row), [ref, edges]);
-  return <SlottedReactions {...props} ref={merged} />;
-});
-export const Panel = slotted(Epr.Panel, SLOTS.panel, "Panel");

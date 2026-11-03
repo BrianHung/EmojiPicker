@@ -1,9 +1,7 @@
 // Internal: collapsible category sections. Root owns the state; headers, tabs and
-// the hook read it from context. The engine has no collapse support, so a collapsed
-// section is passed to it with no emoji (see `collapseEngineInput`), which keeps its
-// header and drops its rows from layout, virtualization and keyboard navigation.
+// the hook read it from context. A collapsed section keeps its title and no emoji,
+// which drops its rows from layout, virtualization and keyboard navigation.
 import * as React from "react";
-import type { EmojiData as EprEmojiData } from "emoji-picker-react/primitives";
 
 /** `ids` with `id` added (collapsed) or removed (expanded). Returns `ids` itself when nothing changes. */
 export function setCategoryCollapsed(ids: readonly string[], id: string, collapsed: boolean): readonly string[] {
@@ -17,31 +15,6 @@ export function toggleCategoryCollapsed(ids: readonly string[], id: string): rea
 }
 
 const NONE: never[] = [];
-/** Engine data key for emoji of collapsed groups; no category config names it. */
-export const PARKED = "collapsed";
-
-/**
- * What the engine gets for the current collapse state: the dataset with collapsed
- * groups emptied (other groups keep their array identity), whether the suggested
- * section is empty, and the custom emoji ids to hide.
- */
-export function collapseEngineInput(
-  data: EprEmojiData,
-  collapsed: ReadonlySet<string>,
-  customs: readonly { id: string; group?: string }[],
-): { data: EprEmojiData; hideSuggested: boolean; hiddenCustoms: string[] } {
-  let emojis = data.emojis;
-  for (const group of Object.keys(data.emojis)) {
-    if (!collapsed.has(group)) continue;
-    if (emojis === data.emojis) emojis = { ...data.emojis, [PARKED]: [] };
-    // Parked under a key no section renders: the engine still resolves them by
-    // code (frequents in the suggested section, clicks), but lays none out.
-    emojis[PARKED] = emojis[PARKED]!.concat(data.emojis[group]!);
-    emojis[group] = NONE;
-  }
-  const hiddenCustoms = customs.filter((c) => collapsed.has(c.group ? `custom:${c.group}` : "custom")).map((c) => c.id);
-  return { data: emojis === data.emojis ? data : { ...data, emojis }, hideSuggested: collapsed.has("suggested"), hiddenCustoms };
-}
 
 export type CollapsedCategories = {
   /** Ids of the collapsed sections, in the order they were collapsed. */

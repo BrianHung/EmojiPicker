@@ -2,8 +2,6 @@
 // Sections sit side by side; each is a column-major grid with a fixed number of
 // rows (item i is in column floor(i / rows), row i % rows), its title above its
 // first column. Pure functions in pixels, so they can be tested without a DOM.
-import type { EmojiRecord } from "../core/dataset";
-
 export type StripMetrics = {
   rows: number;
   cellWidth: number;
@@ -196,86 +194,4 @@ export function pageInStrip(layout: StripLayout, index: number, direction: 1 | -
     current = next;
   }
   return current === index ? null : current;
-}
-
-// ---------------------------------------------------------------------------
-// Section contents
-
-export type StripItem = {
-  record: EmojiRecord;
-  /** What the cell shows and picks: skin tone applied where the emoji has one. */
-  unified: string;
-  /** Index into the search results (results only). */
-  result?: number;
-};
-export type StripSectionData = { id: string; name: string; items: StripItem[] };
-
-/**
- * The category list's sections, in the picker's order: `categories` are the
- * picker's visible sections (ids and names, as CategoryNav shows them). Collapsed
- * and empty sections are left out.
- */
-export function categorySections({
-  categories,
-  records,
-  suggested,
-  customGroup,
-  collapsed,
-  emojiVersion,
-  get,
-  withSkinTone,
-}: {
-  categories: readonly { id: string; name: string }[];
-  records: readonly EmojiRecord[];
-  /** Unified codes of the suggested section, skin tone already applied. */
-  suggested: readonly string[];
-  /** A custom emoji's group, if any. */
-  customGroup: (unified: string) => string | undefined;
-  collapsed: (id: string) => boolean;
-  emojiVersion?: number;
-  get: (unified: string) => EmojiRecord | undefined;
-  withSkinTone: (unified: string) => string;
-}): StripSectionData[] {
-  const byGroup = new Map<string, EmojiRecord[]>();
-  for (const r of records) {
-    if (emojiVersion != null && !r.imageUrl && r.version > emojiVersion) continue;
-    const key = r.group === "custom" ? (customGroup(r.unified) ? `custom:${customGroup(r.unified)}` : "custom") : r.group;
-    let list = byGroup.get(key);
-    if (!list) byGroup.set(key, (list = []));
-    list.push(r);
-  }
-  const item = (record: EmojiRecord): StripItem => ({ record, unified: record.imageUrl ? record.unified : withSkinTone(record.unified) });
-  const out: StripSectionData[] = [];
-  for (const { id, name } of categories) {
-    if (collapsed(id)) continue;
-    let items: StripItem[];
-    if (id === "suggested") {
-      items = [];
-      for (const unified of suggested) {
-        const record = get(unified);
-        if (record) items.push({ record, unified });
-      }
-    } else items = (byGroup.get(id) ?? []).map(item);
-    if (items.length) out.push({ id, name, items });
-  }
-  return out;
-}
-
-/** Search results as sections: one unnamed section (ranked) or one per category (grouped). */
-export function resultSections(
-  results: readonly EmojiRecord[],
-  mode: "ranked" | "grouped",
-  order: readonly string[],
-  name: (group: string) => string,
-  withSkinTone: (unified: string) => string,
-): StripSectionData[] {
-  const item = (record: EmojiRecord, result: number): StripItem => ({ record, unified: record.imageUrl ? record.unified : withSkinTone(record.unified), result });
-  if (mode === "ranked") return results.length ? [{ id: "results", name: "", items: results.map(item) }] : [];
-  const groups = new Map<string, StripItem[]>();
-  results.forEach((r, i) => {
-    let list = groups.get(r.group);
-    if (!list) groups.set(r.group, (list = []));
-    list.push(item(r, i));
-  });
-  return [...groups.keys()].sort((a, b) => order.indexOf(a) - order.indexOf(b)).map((group) => ({ id: group, name: name(group), items: groups.get(group)! }));
 }

@@ -1,14 +1,21 @@
 export { EmojiProvider, useEmojiStore } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps } from "./react/provider";
 export * as EmojiPicker from "./react/parts";
-export type { CategoryHeaderProps, CategoryNavProps, CategoryOption, CollapsedCategories, FocusModel, PointerModel, EmojiCellProps, ListComponents, ListProps, PickerComponents, RootProps, SearchProps, SearchResultsMode, SelectDetails, ViewportProps } from "./react/picker";
+export type { CategoryOption, CollapsedCategories, FocusModel, PointerModel, RootProps, SearchResultsMode, SelectDetails, ViewportProps, PreviewProps } from "./react/picker";
+export type { CategoryButtonProps, CategoryHeaderProps, EmojiCellProps, HeaderActionsProps, ListComponents, ListEmoji, PickerComponents, SkinToneButtonProps, SkinToneId } from "./react/components";
+export type { ListProps } from "./react/list";
+export type { SearchProps, SearchInputProps } from "./react/search";
+export type { CategoryNavProps } from "./react/category-nav";
+export type { EmptyProps, LoadingProps, LoadErrorProps } from "./react/viewport";
+export { ReactionBar } from "./react/reactions";
+export type { ReactionBarProps } from "./react/reactions";
 export type { SkinToneProps } from "./react/skin-tone";
 export { DEFAULT_KEYMAP } from "./react/keymap";
 export type { KeyboardAction, Keymap } from "./react/keymap";
 export type { PickerKeyboardEvent, PickerKeyboardEventHandler } from "./react/keyboard";
 export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";
 export { Tapback } from "./react/tapback";
-export { EmojiPopover, useEmojiPopover } from "./react/popover";
+export { EmojiPopover, pickerInitialFocus, useEmojiPopover } from "./react/popover";
 export type { PopoverAnchor } from "./react/popover";
 export type { PopoverContentProps, PopoverInitialFocus, PopoverRootProps, PopoverTriggerProps } from "./react/popover";
 export type { TapbackProps } from "./react/tapback";
@@ -22,6 +29,8 @@ export { useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiSuggestion
 export type { AutocompleteResult, EmojiSearchState, EmojiSuggestions, EmojiSuggestionsOptions, KeyLike, ShortcodeAutocomplete, ShortcodeAutocompleteOptions, ShortcodeSuggestion } from "./react/hooks";
 
 export { createFrequencyStore, memoryStorage, DEFAULT_FREQUENT } from "./core/frequents";
+export { defaultLabels, plural } from "./core/labels";
+export type { PluralForms, SkinToneNames } from "./core/labels";
 export type { FrequencyStorage, FrequencyStore, FrequencyStoreOptions } from "./core/frequents";
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiDataSource, EmojiSelection } from "./core/store";
 export type { Dataset, EmojiRecord } from "./core/dataset";

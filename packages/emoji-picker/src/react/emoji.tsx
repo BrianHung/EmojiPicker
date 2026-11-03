@@ -58,7 +58,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
     );
   }
 
-  const name = nameWithTone(resolved.name, resolved.unified);
+  const name = nameWithTone(resolved.name, resolved.unified, context.labels.withSkinTone);
   const a11y = decorative ? { "aria-hidden": true } : {};
   if (art !== undefined) {
     if (typeof art === "string") return <ArtworkGlyph {...props} {...a11y} art={art} alt={decorative ? "" : name} size={size ?? "1em"} data-emoji="" data-overridden="" />;

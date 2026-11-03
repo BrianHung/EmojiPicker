@@ -16,7 +16,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     conditions: ["@brianhung/source", ...defaultClientConditions],
-    alias: [{ find: /^@\//, replacement: `${repo}apps/demo/` }],
+    // The demo's aliases: `@/registry/…` is the registry item, `@/…` is src/.
+    alias: [
+      { find: /^@\/registry\//, replacement: `${repo}apps/demo/registry/` },
+      { find: /^@\//, replacement: `${repo}apps/demo/src/` },
+    ],
   },
   server: { port: 5299, strictPort: true, fs: { allow: [repo] } },
 });
