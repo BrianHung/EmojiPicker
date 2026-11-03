@@ -191,8 +191,8 @@ Keys trigger actions, and `Root`'s `keymap` binds them. Every layout gives an ac
 | `move-up`, `move-down` | ArrowUp, ArrowDown | A row. Down from the search field enters the grid. |
 | `move-left`, `move-right` | ArrowLeft, ArrowRight | A cell, in screen direction. In the search field, only with the caret at the end. |
 | `page-up`, `page-down` | PageUp, PageDown | The rows (or columns) that fit in the Viewport |
-| `first`, `last` | Home, Ctrl+Home, End, Ctrl+End | The first and last emoji. In the search field, Home and End move the caret. |
-| `select` | Enter | Picks the focused or highlighted emoji |
+| `first`, `last` | Home, Ctrl+Home, End, Ctrl+End | The first and last emoji. In a search field with a query, Home and End move the caret. |
+| `select` | Enter, Space | Picks the focused or highlighted emoji (Space types in the search field; Shift+Space opens an emoji's skin-tone variations) |
 | `close` | Escape | Closes the skin-tone menu or the surrounding popover |
 | `focus-search` | / | Focuses the search field |
 | `toggle-skin-tone` | None | Opens or closes `SkinTone` |
@@ -203,7 +203,7 @@ Keys trigger actions, and `Root`'s `keymap` binds them. Every layout gives an ac
 
 A binding replaces the action's defaults, and `[]` unbinds it. `Mod` is ⌘ on Apple platforms and Ctrl elsewhere. Printable keys still type in the search field.
 
-`focusModel="input"` (the default) keeps focus in the search field and moves a highlight (`aria-activedescendant`); `"grid"` moves focus into the cells. `pointer="follows"` (the default) makes the hovered emoji the keyboard position; `"independent"` leaves hover as a style. After a pick, focus and the highlight stay where they were.
+`focusModel="input"` (the default) keeps focus in the search field and moves a highlight (`aria-activedescendant`); `"grid"` moves focus into the cells. `pointer="follows"` (the default) makes the hovered emoji the keyboard position: the next arrow continues from it, and hover never takes focus from outside the picker; `"independent"` leaves hover as a style. Without a search field, focus is on the cells either way. The grid, the category tabs and a tapback's reactions are one tab stop each (roving tabindex). After a pick, focus and the highlight stay where they were.
 
 A part's `onKeyDown` runs before the picker handles a key, innermost first. Call `event.preventEmojiPickerHandler()` to keep the picker from handling it.
 

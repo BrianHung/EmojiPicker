@@ -9,7 +9,7 @@ import { EmojiAutocomplete, useAutocompleteInput } from "@/components/emoji-auto
 import { EmojiPickerCard } from "@/registry/emoji-picker";
 
 export type Fixture = {
-  kind: "vertical" | "horizontal" | "popover" | "tapback" | "registry" | "autocomplete";
+  kind: "vertical" | "horizontal" | "popover" | "popover-row" | "tapback" | "registry" | "autocomplete";
   dir?: "ltr" | "rtl";
   keymap?: Partial<Record<KeyboardAction, string[]>>;
   /** Generated custom emoji in one "pack" section. */
@@ -25,6 +25,8 @@ export type Fixture = {
   renderer?: "native" | "twemoji";
   /** Tapback: the user's current reactions. */
   selected?: string[];
+  /** Leave out the Search part. */
+  noSearch?: boolean;
   /** Extra Root props (focusModel, pointer, …). */
   root?: Partial<React.ComponentProps<typeof EmojiPicker.Root>>;
   /** Root's onKeyDown calls preventEmojiPickerHandler() for this key. */
@@ -111,9 +113,11 @@ function Picker({ f, horizontal }: { f: Fixture; horizontal?: boolean }) {
         if (f.intercept && e.key === f.intercept) e.preventEmojiPickerHandler();
       }}
     >
-      <EmojiPicker.Search>
-        <EmojiPicker.SkinTone />
-      </EmojiPicker.Search>
+      {f.noSearch ? null : (
+        <EmojiPicker.Search>
+          <EmojiPicker.SkinTone />
+        </EmojiPicker.Search>
+      )}
       <EmojiPicker.Viewport style={horizontal ? { flex: "none", height: 260 } : undefined}>
         <EmojiPicker.List
           orientation={horizontal ? "horizontal" : "vertical"}
@@ -151,6 +155,20 @@ function App({ f }: { f: Fixture }) {
         <EmojiPopover.Trigger data-testid="trigger">Open</EmojiPopover.Trigger>
         <EmojiPopover.Content className="hx-pop" data-testid="content">
           <Picker f={f} />
+        </EmojiPopover.Content>
+      </EmojiPopover.Root>
+    );
+  else if (f.kind === "popover-row")
+    // A popover that isn't a picker: a row of buttons (an app's own reaction bar).
+    body = (
+      <EmojiPopover.Root>
+        <EmojiPopover.Trigger data-testid="trigger">React</EmojiPopover.Trigger>
+        <button type="button" data-testid="after">after</button>
+        <EmojiPopover.Content className="hx-pop" data-testid="content">
+          <div role="toolbar" aria-label="Reactions">
+            <button type="button">👍</button>
+            <button type="button">❤️</button>
+          </div>
         </EmojiPopover.Content>
       </EmojiPopover.Root>
     );

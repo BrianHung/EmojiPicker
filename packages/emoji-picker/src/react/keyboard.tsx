@@ -10,7 +10,8 @@
 // It runs in React's capture phase on Root, which is before the engine's own
 // listener (bubble, on the same root element). Keys handled here, and keys the
 // user unbound, are hidden from the engine; nothing stops propagation, so apps can
-// still see them (and check `defaultPrevented`).
+// still see them (and check `defaultPrevented`), except an Escape the picker used,
+// which stops at Root so a dialog or sheet around it stays open.
 import * as React from "react";
 import { ENGINE_KEYS, actionFor, engineActionOf, isTextEditingKey, matchesChord, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
 
@@ -118,6 +119,20 @@ function hideFromEngine(event: KeyboardEvent, root: Element) {
   setTimeout(() => restore(event), 0);
 }
 
+/**
+ * Stops one keydown once it has bubbled to the picker's root: everything inside
+ * still sees it, nothing around the picker does (as the engine does with Escape).
+ */
+function stopAtRoot(event: KeyboardEvent, root: Element) {
+  const stop = (e: Event) => {
+    if (e !== event) return;
+    e.stopPropagation();
+    root.removeEventListener("keydown", stop);
+  };
+  root.addEventListener("keydown", stop);
+  setTimeout(() => root.removeEventListener("keydown", stop), 0);
+}
+
 /** Sends `key` to the engine as if pressed on `target` (a remapped binding). */
 export function resendKey(target: Element, key: string, init: KeyboardEventInit = {}) {
   const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, composed: true, ...init });
@@ -203,10 +218,13 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children
       }
       if (event.defaultPrevented) return;
 
-      const typing = isTextField(target) && isTextEditingKey(event);
+      // Home and End edit the query, except in an empty field, where there's no caret to move: they go to the first and last emoji.
+      const typing = isTextField(target) && isTextEditingKey(event) && !((event.key === "Home" || event.key === "End") && target.value === "");
       const handled = () => {
         event.preventDefault();
         hideFromEngine(native, rootEl);
+        // An Escape the picker used (closing the skin tones, ending a highlight) mustn't also close a dialog or sheet around it.
+        if (action === "close") stopAtRoot(native, rootEl);
       };
 
       // 2. Regions, innermost first.

@@ -118,26 +118,27 @@ export function useHighlightMirror(root: React.RefObject<HTMLElement | null>) {
 }
 
 /**
- * Hover over the engine's cells. The engine itself previews the hovered emoji and,
- * unless focus is in a text field, moves focus to it: kept for focusModel "grid"
- * with pointer "follows" (focus follows the pointer). Otherwise hover only previews,
- * and with "input" + "follows" it also moves the highlight while the user is in
- * the search field.
+ * Hover over the engine's cells. The engine's own hover moves focus to the hovered
+ * cell even from outside the picker; that's replaced here. With pointer "follows",
+ * hover moves the keyboard position where the keyboard is: the highlight while
+ * focus is in the search field, focus itself (without scrolling) once it's on one
+ * of the cells. From anywhere else, and with "independent", hover only previews.
  */
 export function useEnginePointer(root: React.RefObject<HTMLElement | null>, focusModel: FocusModel, pointer: PointerModel) {
   React.useEffect(() => {
     const el = root.current;
-    if (!el || (focusModel === "grid" && pointer === "follows")) return;
+    if (!el) return;
     const onPointer = (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       const cell = target?.closest<HTMLElement>(ENGINE_CELL);
       const scroller = cell?.closest<HTMLElement>(SCROLLER);
       if (!cell || !scroller || !el.contains(scroller)) return;
-      // Keep the engine from moving focus; preview (and maybe highlight) instead.
+      // Keep the engine from moving focus; preview (and maybe move the position) instead.
       event.stopPropagation();
       if (event.type !== "mouseover") return;
-      const input = document.activeElement;
-      if (focusModel === "input" && pointer === "follows" && input instanceof HTMLInputElement && el.contains(input)) highlightEngineCell(input, cell, { scroll: false });
+      const active = document.activeElement;
+      if (pointer === "follows" && focusModel === "input" && active instanceof HTMLInputElement && el.contains(active)) highlightEngineCell(active, cell, { scroll: false });
+      else if (pointer === "follows" && active instanceof HTMLElement && active !== cell && active.matches(ENGINE_CELL) && scroller.contains(active)) cell.focus({ preventScroll: true });
       else cell.dispatchEvent(new FocusEvent("focus"));
     };
     el.addEventListener("mouseover", onPointer, true);
@@ -147,6 +148,70 @@ export function useEnginePointer(root: React.RefObject<HTMLElement | null>, focu
       el.removeEventListener("mousemove", onPointer, true);
     };
   }, [root, focusModel, pointer]);
+}
+
+/**
+ * One tab stop for the engine's list (roving tabindex): the cell that last had
+ * focus while it's rendered, else the first cell in view. The engine renders every
+ * cell tabbable, so this sets tabIndex on its markup as rows mount.
+ */
+export function useEngineTabStop(root: React.RefObject<HTMLElement | null>) {
+  React.useEffect(() => {
+    const el = root.current;
+    if (!el || typeof MutationObserver === "undefined") return;
+    let last: HTMLElement | null = null;
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      const scroller = el.querySelector<HTMLElement>(SCROLLER);
+      if (!scroller) return;
+      const cells = scroller.querySelectorAll<HTMLElement>(ENGINE_CELL);
+      if (!cells.length) return;
+      let stop = last?.isConnected && scroller.contains(last) ? last : null;
+      if (!stop) {
+        const top = scroller.getBoundingClientRect().top;
+        for (const c of cells) {
+          if (c.matches(VISIBLE_CELL) && c.getBoundingClientRect().bottom > top + 1) {
+            stop = c;
+            break;
+          }
+        }
+      }
+      stop ??= cells[0]!;
+      for (const c of cells) {
+        const want = c === stop ? 0 : -1;
+        if (c.tabIndex !== want) c.tabIndex = want;
+      }
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+    const onFocus = (event: FocusEvent) => {
+      const cell = event.target instanceof HTMLElement && event.target.matches(ENGINE_CELL) ? event.target : null;
+      if (!cell) return;
+      last = cell;
+      // Now, not next frame: Shift+Tab from here must leave the list.
+      apply();
+    };
+    // Scrolled away while focus is elsewhere: Tab enters where the user looks.
+    const onScroll = (event: Event) => {
+      if (event.target instanceof Element && event.target.matches(SCROLLER) && !(document.activeElement instanceof HTMLElement && el.contains(document.activeElement) && document.activeElement.matches(ENGINE_CELL))) {
+        last = null;
+        schedule();
+      }
+    };
+    apply();
+    const observer = new MutationObserver(schedule);
+    observer.observe(el, { childList: true, subtree: true });
+    el.addEventListener("focusin", onFocus);
+    el.addEventListener("scroll", onScroll, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      el.removeEventListener("focusin", onFocus);
+      el.removeEventListener("scroll", onScroll, true);
+    };
+  }, [root]);
 }
 
 /**
@@ -228,4 +293,42 @@ export function useControlsList(search: React.RefObject<HTMLElement | null>) {
     observer.observe(input, { attributes: true, attributeFilter: ["aria-controls"] });
     return () => observer.disconnect();
   });
+}
+
+/**
+ * One tab stop for a tab bar (roving tabindex): the current tab (aria-selected), or
+ * the one focused last while it's focused. The engine renders every tab tabbable;
+ * arrows already move between them.
+ */
+export function useTabBarStop(bar: React.RefObject<HTMLElement | null>) {
+  React.useEffect(() => {
+    const el = bar.current;
+    if (!el || typeof MutationObserver === "undefined") return;
+    const apply = () => {
+      const tabs = [...el.querySelectorAll<HTMLElement>('[role="tab"]')];
+      if (!tabs.length) return;
+      const active = document.activeElement;
+      // While search results show, the tabs do nothing: none is a stop (as the engine has it).
+      const searching = Boolean(rootEl?.querySelector<HTMLInputElement>('[data-slot="search-input"]')?.value);
+      const stop = searching ? null : (tabs.find((t) => t === active) ?? tabs.find((t) => t.getAttribute("aria-selected") === "true") ?? tabs[0]!);
+      for (const t of tabs) {
+        const want = t === stop ? 0 : -1;
+        if (t.tabIndex !== want) t.tabIndex = want;
+      }
+    };
+    const rootEl = el.closest('[data-epr-part="root"]');
+    apply();
+    const observer = new MutationObserver(apply);
+    // tabindex too: the engine re-renders its own values as the current tab changes.
+    observer.observe(el, { childList: true, subtree: true, attributes: true, attributeFilter: ["aria-selected", "tabindex"] });
+    el.addEventListener("focusin", apply);
+    el.addEventListener("focusout", apply);
+    rootEl?.addEventListener("input", apply);
+    return () => {
+      observer.disconnect();
+      el.removeEventListener("focusin", apply);
+      el.removeEventListener("focusout", apply);
+      rootEl?.removeEventListener("input", apply);
+    };
+  }, [bar]);
 }

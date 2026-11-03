@@ -56,6 +56,8 @@ for (const focusModel of ["input", "grid"]) {
 }
 
 await mount(page, { kind: "vertical" });
+const landmark = await page.evaluate((scope) => (({ tagName, ariaLabel }) => ({ tagName, ariaLabel }))(document.querySelector(`${scope} [data-slot="emoji-picker"]`)), SCOPE);
+check("root: a named landmark (aside, default \"Emoji picker\")", landmark.tagName === "ASIDE" && landmark.ariaLabel === "Emoji picker", JSON.stringify(landmark));
 await page.locator(`${SCOPE} [data-slot="skin-tone"] > button`).click();
 await page.locator(`${SCOPE} [data-slot="skin-tone-option"]`).nth(3).evaluate((b) => b.click());
 await page.waitForTimeout(200);

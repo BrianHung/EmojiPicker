@@ -104,6 +104,23 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
     close();
   };
   useSkinToneToggle(() => (open ? close() : setOpen(true)));
+  // Escape from the options closes them, before the engine sees it: in its window
+  // capture listener it would end a search highlight instead and stop the key.
+  // A layout effect, so it's added before the engine's.
+  const latestClose = React.useRef(close);
+  latestClose.current = close;
+  React.useLayoutEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
+      const options = rootRef.current?.querySelector(`[data-slot="${SLOTS.skinToneOptions}"]`);
+      if (!options || !(event.target instanceof Node) || !rootRef.current?.contains(event.target)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      latestClose.current();
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
 
   // Keys among the options: the keymap's moves along their axis (mirrored right to
   // left), first/last, and close.

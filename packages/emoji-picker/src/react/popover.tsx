@@ -135,7 +135,7 @@ export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
   /**
    * Focused once the content is positioned and visible. Default: the first
    * `[data-autofocus]` element inside (a picker's search field when the picker
-   * autofocuses), else the picker's first emoji. `false` leaves focus where it is (an editor's caret).
+   * autofocuses), else the picker's first emoji, else the first thing Tab stops on. `false` leaves focus where it is (an editor's caret).
    */
   initialFocus?: PopoverInitialFocus;
 };
@@ -288,14 +288,23 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     // Default: the search field, or the first emoji when the picker has no search, so arrows work
     // at once. The grid renders (and re-renders) its cells after the popover is positioned, which
     // can drop focus to the body: while open, put it back.
-    const focusDefault = () => el.querySelector<HTMLElement>('[data-autofocus], [data-slot="emoji-picker"] button[data-unified]')?.focus({ preventScroll: true });
+    // Content that isn't a picker (a row of reactions): its first stop.
+    const focusDefault = () => (el.querySelector<HTMLElement>('[data-autofocus], [data-slot="emoji-picker"] button[data-unified]') ?? tabbables(el)[0])?.focus({ preventScroll: true });
     focusDefault();
+    // Only until the user does something: Tab past the content's end also leaves focus on the body.
     const observer = new MutationObserver(() => {
       const active = document.activeElement;
       if (!el.contains(active) && (active === null || active === document.body || active === state.triggerRef.current)) focusDefault();
     });
     observer.observe(el, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    const stop = () => observer.disconnect();
+    document.addEventListener("keydown", stop, true);
+    document.addEventListener("pointerdown", stop, true);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("keydown", stop, true);
+      document.removeEventListener("pointerdown", stop, true);
+    };
   }, [state.open, positioned]);
 
   // Focus back to the trigger when it closes (not on unrelated re-renders).
@@ -317,11 +326,25 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       target instanceof Node && (node.current?.contains(target) || triggerRef.current?.contains(target) || [...nested.current].some((n) => n.contains(target)));
     const down = (e: PointerEvent) => !inside(e.target) && close();
     const key = (e: KeyboardEvent) => {
+      if (e.key === "Tab" && !e.defaultPrevented && !nested.current.size) return tabOut(e);
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // Only the innermost open popover handles Escape.
       if (nested.current.size) return;
       if (e.target instanceof Element && node.current?.contains(e.target) && e.target.closest('[data-epr-part="root"]')) return;
       e.preventDefault();
+      close();
+    };
+    // The content is portaled (at the end of the page): Tab past either end goes back
+    // to where the trigger is in the page, as if the content followed it, and closes.
+    const tabOut = (e: KeyboardEvent) => {
+      const el = node.current;
+      const trigger = triggerRef.current;
+      if (!el || !trigger || !(e.target instanceof Element) || !el.contains(e.target)) return;
+      const stops = tabbables(el);
+      if (e.shiftKey ? e.target !== stops[0] : e.target !== stops[stops.length - 1]) return;
+      e.preventDefault();
+      const next = e.shiftKey ? trigger : (tabbables(document.body).find((t) => !el.contains(t) && trigger.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING && !trigger.contains(t)) ?? trigger);
+      next.focus();
       close();
     };
     document.addEventListener("pointerdown", down);
@@ -373,6 +396,12 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   if (container === false || typeof document === "undefined") return content;
   return createPortal(content, container ?? document.body);
 });
+
+/** Elements Tab stops on under `root`, in document order. */
+function tabbables(root: Element): HTMLElement[] {
+  const candidates = root.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex], [contenteditable="true"]');
+  return [...candidates].filter((el) => el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled && !el.closest("[inert]") && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden");
+}
 
 /** Popover for pickers: `<EmojiPopover.Root><EmojiPopover.Trigger/><EmojiPopover.Content>…</EmojiPopover.Content></EmojiPopover.Root>`. */
 export const EmojiPopover = { Root, Trigger, Content };

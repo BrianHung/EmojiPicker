@@ -33,7 +33,8 @@ export const DEFAULT_KEYMAP: Keymap = Object.freeze({
   "page-down": ["PageDown"],
   first: ["Home", "Ctrl+Home"],
   last: ["End", "Ctrl+End"],
-  select: ["Enter"],
+  // Space as a button's own key; Shift+Space opens an emoji's skin-tone variations.
+  select: ["Enter", " "],
   close: ["Escape"],
   "focus-search": ["/"],
   "toggle-skin-tone": [],
@@ -97,7 +98,8 @@ export function parseChord(chord: string, apple = isApplePlatform()): Chord {
   return out;
 }
 
-const isPrintableSymbol = (key: string) => [...key].length === 1 && key.toLowerCase() === key.toUpperCase();
+// Space takes no Shift on any layout, so Shift+Space stays a separate key.
+const isPrintableSymbol = (key: string) => key !== " " && [...key].length === 1 && key.toLowerCase() === key.toUpperCase();
 
 /** Whether an event is this chord. */
 export function matchesChord(event: KeyChordEvent, chord: string | Chord, apple = isApplePlatform()): boolean {
@@ -120,7 +122,8 @@ export function actionFor(event: KeyChordEvent, keymap: Keymap, apple = isAppleP
 /**
  * Keys a text field keeps for editing: printable characters (Alt included, which
  * types characters on macOS) and Home/End without Ctrl or ⌘. In the search field
- * these never trigger an action, so "first" there needs its Ctrl+Home binding.
+ * these never trigger an action (except Home/End while the field is empty), so
+ * "first" with a query needs its Ctrl+Home binding.
  * Left/Right are decided by the caret instead (see the results keyboard).
  */
 export function isTextEditingKey(event: KeyChordEvent): boolean {

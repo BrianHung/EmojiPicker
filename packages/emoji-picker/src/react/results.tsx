@@ -298,9 +298,9 @@ export const ResultsList = React.forwardRef<HTMLDivElement, { cell: Cell; header
         onPointerMove={(e: React.PointerEvent<HTMLElement>) => {
           if (pointer === "independent") return state.hovered === index || state.setHovered(index);
           if (!highlighted) state.setHighlighted(index);
-          // Focus follows the pointer once it's in the results (focusModel "grid").
+          // Focus follows the pointer once it's in the results.
           const active = document.activeElement;
-          if (focusModel === "grid" && active !== e.currentTarget && active instanceof HTMLElement && active.dataset.result != null && gridRef.current?.contains(active)) e.currentTarget.focus({ preventScroll: true });
+          if (active !== e.currentTarget && active instanceof HTMLElement && active.dataset.result != null && gridRef.current?.contains(active)) e.currentTarget.focus({ preventScroll: true });
         }}
         onPointerLeave={pointer === "independent" ? () => state.setHovered(-1) : undefined}
         style={{ width: "var(--epr-emoji-fullsize)", height: "var(--epr-emoji-fullsize)", padding: 0 }}

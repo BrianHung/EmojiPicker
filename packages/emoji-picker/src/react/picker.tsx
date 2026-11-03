@@ -11,13 +11,13 @@ import { ResultsList, ResultsProvider, useResults, useResultsKeyboard, type Sear
 import { useEmojiPopover } from "./popover";
 import { CollapseContext, NoCollapse, collapseEngineInput, useCollapseState } from "./collapse";
 import { engineGridKeys } from "./engine-grid";
-import { moveEngineHighlight, useActiveDescendant, useControlsList, useEnginePointer, useHighlightMirror, useOwnHighlightEscape } from "./engine-highlight";
+import { moveEngineHighlight, useActiveDescendant, useControlsList, useEnginePointer, useEngineTabStop, useHighlightMirror, useOwnHighlightEscape, useTabBarStop } from "./engine-highlight";
 import { useHeldWhileActive } from "./hold";
 import { useClippedScrollGuard } from "./scroll-guard";
 import { KeyboardProvider, mergeRefs, useEdgeKeys, useKeyRegion, useUserKeyDown, withCurrentTarget, type PickerKeyboardEvent, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { EmojiOverrides, type ArtworkMap } from "./overrides";
-import { useRovingRow } from "./reactions";
+import { useExpandFocus, useRovingRow } from "./reactions";
 import { StripList } from "./strip";
 import { PickerDataContext, StripActiveEmojiContext, StripNavContext, StripProvider, type FocusModel, type PickerData, type PointerModel } from "./strip-context";
 
@@ -167,6 +167,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   useClippedScrollGuard(rootRef);
   const autoFocus = autoFocusSearch ?? Boolean(popover);
   useEnginePointer(rootRef, focusModel, pointer);
+  useEngineTabStop(rootRef);
   useHighlightMirror(rootRef);
   const close = React.useCallback(() => {
     if (!popover) return false;
@@ -228,6 +229,8 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
         <Epr.Root
           ref={mergeRefs(ref, rootRef, keyboard.ref)}
           data-slot={SLOTS.root}
+          // The root is an <aside> landmark, which needs a name; pass aria-label or aria-labelledby for another.
+          aria-label={rest["aria-labelledby"] ? undefined : "Emoji picker"}
           {...rest}
           onKeyDownCapture={(e: React.KeyboardEvent<HTMLElement>) => {
             onKeyDownCapture?.(e);
@@ -396,7 +399,9 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
   const value = React.useMemo(() => ({ ...parent, tabClassName }), [parent, tabClassName]);
   const edges = useEdgeKeys('[role="tab"]');
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs(ref, edges, userKeys), [ref, edges, userKeys]);
+  const bar = React.useRef<HTMLDivElement | null>(null);
+  useTabBarStop(bar);
+  const merged = React.useMemo(() => mergeRefs(ref, edges, userKeys, bar), [ref, edges, userKeys]);
   return (
     <NavContext.Provider value={value}>
       <SlottedNav {...props} ref={merged} />
@@ -456,12 +461,14 @@ export const LoadError = Epr.LoadError;
 const SlottedReactions = slotted(Epr.Reactions, SLOTS.reactions, "Reactions");
 /**
  * A tapback's reaction row: one tab stop (roving tabindex); arrows, Home and End
- * (the keymap's moves and first/last) move along it.
+ * (the keymap's moves and first/last) move along it. "+" expands into the full
+ * picker with focus in its search field.
  */
 export const Reactions = React.forwardRef<HTMLDivElement, React.ComponentProps<typeof Epr.Reactions>>(function Reactions(props, ref) {
   const edges = useEdgeKeys("button");
   const row = React.useRef<HTMLDivElement | null>(null);
   useRovingRow(row);
+  useExpandFocus(row);
   const merged = React.useMemo(() => mergeRefs(ref, edges, row), [ref, edges]);
   return <SlottedReactions {...props} ref={merged} />;
 });

@@ -36,17 +36,21 @@ The Instagram reaction bar is a `dialog` of buttons named by their emoji charact
 
 ## @brianhung/emoji-picker
 
-Defaults follow Discord; the rest is configurable. Each row is checked in Chrome by `npm run test:e2e` and `npm run test:a11y` in `packages/emoji-picker`.
+Defaults follow Discord; the rest is configurable. Each row is checked in Chrome by `npm run test:e2e` and `npm run test:a11y` in `packages/emoji-picker`, and on every demo surface (gallery, home page, examples) by the keyboard audit script.
 
-| | Behaviour |
-|---|---|
-| Search field | `combobox` with `aria-controls`, `aria-expanded`, `aria-activedescendant` |
-| Grid | `grid` › `row` › `gridcell` (the vertical list adds a `rowgroup` per section); names include the skin tone (“thumbs up: medium skin tone”) |
-| Results | polite live region (“24 results”) |
-| Arrows, Page Up / Down | move the highlight; Left / Right edit the query unless the caret is at its end |
-| Home / End | move the caret in the search field; Ctrl+Home / Ctrl+End move the highlight to the first and last emoji |
-| Hover | sets the highlight (`pointer="follows"`), or stays separate (`"independent"`) |
-| Focus | stays in search (`focusModel="input"`), or moves into the grid (`"grid"`) |
-| After a pick | focus and highlight stay when the picker stays open |
-| Escape | clears the query, then closes; focus returns to the trigger |
-| Customisation | `keymap` remaps actions; a part’s `onKeyDown` runs first and can call `event.preventEmojiPickerHandler()` |
+| | With a search field | Without a search field |
+|---|---|---|
+| Structure | search field is a `combobox` with `aria-controls`, `aria-expanded`, `aria-activedescendant`; grid is `grid` › `row` › `gridcell` (the vertical list adds a `rowgroup` per section); names include the skin tone (“thumbs up: medium skin tone”); results have a polite live region (“24 results”) | the same grid |
+| On open | focus in the search field (inline: once clicked; popover: on open), and it stays there | focus on the first emoji (or the one that was focused last) |
+| Arrows, Page Up / Down | move a highlight through the grid or results (`aria-activedescendant`); Left / Right edit the query unless the caret is at its end | move focus cell to cell (roving tabindex) |
+| Home / End | first / last emoji while the field is empty; with a query they move the caret, and Ctrl+Home / Ctrl+End move the highlight | first / last emoji |
+| Hover (`pointer="follows"`) | moves the highlight; the next arrow continues from the hovered emoji; focus never moves | the next arrow continues from the hovered emoji (focus follows the pointer once it is in the grid; hover never takes focus from outside the picker and never scrolls the page). `"independent"`: hover is only a style |
+| Enter / Space | Enter picks the highlighted emoji (Space types a space) | Enter or Space picks; Shift+Space opens the emoji's skin-tone variations |
+| After a pick | focus and highlight stay when the picker stays open; a popover closes and focus returns to the trigger | same |
+| Escape | clears the query, then closes the popover; focus returns to the trigger | closes the popover; focus returns to the trigger |
+| Tab | leaves: the grid is one tab stop, the category tabs are one tab stop; past the end of a popover, focus goes to what follows the trigger and the popover closes | same |
+| Category tabs | arrows move between tabs; Enter, Space or a click scrolls the list (at once from the keyboard), never the page | same |
+| Skin tone | Enter or Space opens the tones with the current one focused; arrows, Home and End move; Enter or Space chooses; Escape closes; focus returns to the button either way, and the Escape goes no further (an enclosing sheet stays open) | same |
+| Tapback row | one tab stop; Left / Right / Home / End move between reactions; the next arrow continues from a hovered reaction; Enter or Space picks; “+” expands into the full picker with focus in its search field | same |
+| Focus model | `focusModel="input"` (default) keeps focus in search; `"grid"` moves it into the cells | same |
+| Customisation | `keymap` remaps actions; a part’s `onKeyDown` runs first and can call `event.preventEmojiPickerHandler()` | same |

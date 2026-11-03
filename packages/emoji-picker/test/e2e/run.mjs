@@ -354,6 +354,130 @@ check("tapback: End / Home focus the ends of the reaction row", lastReaction && 
 await press("ArrowRight");
 check("tapback: arrows move along the row", (await page.evaluate(() => [...document.querySelectorAll('#harness [data-slot="reactions"] button')].indexOf(document.activeElement))) === 1);
 
+const rowIndex = () => page.evaluate(() => [...document.querySelectorAll('#harness [data-slot="reactions"] button')].indexOf(document.activeElement));
+await $('[data-slot="reactions"] button').first().focus();
+await $('[data-slot="reactions"] button').nth(2).hover();
+await page.waitForTimeout(100);
+await press("ArrowRight");
+check("tapback: arrows continue from the hovered reaction", (await rowIndex()) === 3, String(await rowIndex()));
+await page.mouse.move(0, 0);
+
+// --- Tab stops, Space, Home/End from an empty field, hover in the grid ------------------------
+/** Tab from the focused element until focus leaves the harness: what it stopped on. */
+const tabStops = async () => {
+  const stops = [];
+  for (let i = 0; i < 16; i++) {
+    await press("Tab", 60);
+    const f = await page.evaluate(() => {
+      const a = document.activeElement;
+      return { inside: !!a?.closest('#harness, [data-slot="popover-content"]'), slot: a?.matches("button.epr-emoji, [data-slot=emoji]") ? "cell" : a?.getAttribute("role") === "tab" ? "tab" : (a?.getAttribute("data-slot") ?? a?.tagName) };
+    });
+    if (!f.inside) return { left: true, stops };
+    stops.push(f.slot);
+  }
+  return { left: false, stops };
+};
+const count = (list, x) => list.filter((s) => s === x).length;
+await mount(page, { kind: "vertical" });
+await search().click();
+const pageScroll = await page.evaluate(() => scrollY);
+await press("End", 500);
+check("empty search field: End highlights the last emoji, focus stays", (await highlighted(page)) === "flag: wales" && (await focused(page)).slot === "search-input", await highlighted(page));
+await press("Home", 500);
+const homeHl = await highlighted(page);
+check("empty search field: Home highlights the first emoji", homeHl != null && homeHl !== "flag: wales" && (await focused(page)).slot === "search-input", homeHl);
+check("empty search field: Home/End don't scroll the page", (await page.evaluate(() => scrollY)) === pageScroll);
+const tabbable = await page.evaluate(() => [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.tabIndex >= 0).length);
+check("vertical list: one cell is tabbable (roving tabindex)", tabbable === 1, String(tabbable));
+await search().focus();
+const fromSearch = await tabStops();
+check("Tab from search: the grid and the category tabs are one stop each, then Tab leaves", fromSearch.left && count(fromSearch.stops, "cell") === 1 && count(fromSearch.stops, "tab") === 1, fromSearch.stops.join(", "));
+
+await mount(page, { kind: "vertical", root: GRID });
+await search().click();
+await press("ArrowDown", 200);
+await press("ArrowRight", 150);
+const gridHover = await page.evaluate(() => {
+  const cells = [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.getBoundingClientRect().width > 0);
+  const c = cells[18];
+  const r = c.getBoundingClientRect();
+  return { label: c.getAttribute("aria-label"), x: r.x + r.width / 2, y: r.y + r.height / 2, left: r.x, top: r.y };
+});
+const gridScroll = await page.evaluate(() => scrollY);
+await page.mouse.move(gridHover.x, gridHover.y, { steps: 3 });
+await page.waitForTimeout(150);
+check("grid: hover leaves the page scroll alone", (await page.evaluate(() => scrollY)) === gridScroll);
+await press("ArrowRight", 200);
+const afterGridHover = await page.evaluate(() => (({ x, y }) => ({ x, y }))(document.activeElement.getBoundingClientRect()));
+check("grid: arrows continue from the hovered emoji", Math.abs(afterGridHover.y - gridHover.top) < 2 && afterGridHover.x > gridHover.left, `${gridHover.label}: ${JSON.stringify(afterGridHover)}`);
+const picksBeforeSpace = await page.evaluate(() => window.__picks.length);
+await press(" ", 250);
+check("grid: Space picks the focused emoji", (await page.evaluate(() => window.__picks.length)) === picksBeforeSpace + 1 && (await focused(page)).slot === "emoji");
+await page.mouse.move(0, 0);
+await page.evaluate(() => {
+  const b = document.createElement("button");
+  b.id = "outside";
+  b.textContent = "outside";
+  document.body.append(b);
+  b.focus();
+});
+await page.mouse.move(gridHover.x, gridHover.y, { steps: 3 });
+await page.waitForTimeout(150);
+check("grid: hover doesn't take focus from outside the picker", (await page.evaluate(() => document.activeElement.id)) === "outside");
+await page.evaluate(() => document.getElementById("outside")?.remove());
+await page.mouse.move(0, 0);
+
+await mount(page, { kind: "popover", noSearch: true });
+await $('[data-testid="trigger"]').focus();
+await press("Enter", 400);
+const noSearchOpen = await focused(page);
+check("popover without search: focus on the first emoji", noSearchOpen.slot === "emoji", JSON.stringify(noSearchOpen));
+await press("ArrowRight", 150);
+check("popover without search: arrows move focus between cells", (await focused(page)).slot === "emoji" && (await focused(page)).label !== noSearchOpen.label);
+await press("Tab", 150);
+const afterGridTab = await page.evaluate(() => [document.activeElement.getAttribute("data-slot"), document.activeElement.getAttribute("aria-selected"), [...document.querySelectorAll('[data-slot="popover-content"] [role=tab][aria-selected=true]')].map((t) => t.getAttribute("aria-label")).join()]);
+check("popover without search: Tab from the grid goes to the current category tab", afterGridTab[0] === "category-tab" && afterGridTab[1] === "true", JSON.stringify(afterGridTab));
+await press("Tab", 300);
+check("popover without search: Tab past the last stop leaves the popover and closes it", (await focused(page)).slot !== "emoji" && (await page.locator('[data-slot="popover-content"][data-state="open"]').count()) === 0, JSON.stringify(await focused(page)));
+await $('[data-testid="trigger"]').focus();
+await press("Enter", 400);
+await press("Escape", 300);
+check("popover without search: Escape closes, focus back on the trigger", (await focused(page)).slot === "popover-trigger" && (await page.locator('[data-slot="popover-content"]').count()) === 0);
+
+await mount(page, { kind: "popover-row" });
+await $('[data-testid="trigger"]').focus();
+await press("Enter", 400);
+check("popover of buttons (no picker): focus moves to its first button", (await page.evaluate(() => document.activeElement.textContent)) === "👍");
+await press("Tab", 100);
+await press("Tab", 300);
+check("popover: Tab past the content's end goes to what follows the trigger, and closes", (await page.evaluate(() => document.activeElement.getAttribute("data-testid"))) === "after" && (await page.locator('[data-slot="popover-content"][data-state="open"]').count()) === 0);
+
+// --- Skin tone: Escape closes the options only ------------------------------------------------
+await mount(page, { kind: "vertical" });
+await search().fill("smile");
+await page.waitForTimeout(250);
+await page.evaluate(() => {
+  window.__escapes = 0;
+  document.addEventListener("keydown", (e) => e.key === "Escape" && window.__escapes++);
+});
+await $('[data-slot="skin-tone"] > button').focus();
+await press("Enter", 200);
+await press("ArrowRight", 100);
+await press("Escape", 200);
+check(
+  "skin tone: Escape (with search results showing) closes the options, back to the button, and goes no further",
+  (await $('[data-slot="skin-tone-option"]').count()) === 0 && (await page.evaluate(() => document.activeElement.parentElement?.getAttribute("data-slot"))) === "skin-tone" && (await page.evaluate(() => window.__escapes)) === 0 && (await search().inputValue()) === "smile",
+);
+await press("Enter", 200);
+await press("ArrowRight", 100);
+const toneChosen = await page.evaluate(() => document.activeElement.getAttribute("aria-label"));
+await press(" ", 200);
+check("skin tone: Space chooses, back to the button", (await page.evaluate(() => document.activeElement.getAttribute("aria-label"))) === toneChosen && (await $('[data-slot="skin-tone-option"]').count()) === 0);
+await $('[data-slot="skin-tone"] > button').focus();
+await press("Enter", 200);
+await press("Home", 100);
+await press("Enter", 200);
+
 // --- Twemoji: a missing asset falls back to the native emoji; newer emoji are left out ---
 const SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><circle cx="18" cy="18" r="18" fill="#fc3"/></svg>';
 await page.route("**/twemoji@*/assets/svg/**", (route) =>

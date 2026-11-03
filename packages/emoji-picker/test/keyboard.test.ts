@@ -18,6 +18,9 @@ describe("keymap", () => {
     expect(actionFor(key("Home"), DEFAULT_KEYMAP)).toBe("first");
     expect(actionFor(key("End", { ctrl: true }), DEFAULT_KEYMAP)).toBe("last");
     expect(actionFor(key("Enter"), DEFAULT_KEYMAP)).toBe("select");
+    expect(actionFor(key(" "), DEFAULT_KEYMAP)).toBe("select");
+    // Shift+Space is the engine's: it opens an emoji's skin-tone variations.
+    expect(actionFor(key(" ", { shift: true }), DEFAULT_KEYMAP)).toBeNull();
     expect(actionFor(key("Escape"), DEFAULT_KEYMAP)).toBe("close");
     expect(actionFor(key("/"), DEFAULT_KEYMAP)).toBe("focus-search");
     expect(DEFAULT_KEYMAP["toggle-skin-tone"]).toEqual([]);

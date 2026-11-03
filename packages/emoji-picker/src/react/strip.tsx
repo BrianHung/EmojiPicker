@@ -464,7 +464,7 @@ export const StripList = React.forwardRef<HTMLDivElement, StripProps>(function S
             if (searching && item.result != null && results && results.highlighted !== item.result) results.setHighlighted(item.result);
             const focused = document.activeElement;
             if (!searching && data.focusModel === "input" && focused instanceof HTMLInputElement && listRef.current?.closest('[data-epr-part="root"]')?.contains(focused)) setInputIndex(index);
-            if (data.focusModel === "grid" && focused !== e.currentTarget && focused instanceof HTMLElement && listRef.current?.contains(focused)) e.currentTarget.focus({ preventScroll: true });
+            if (focused !== e.currentTarget && focused instanceof HTMLElement && listRef.current?.contains(focused)) e.currentTarget.focus({ preventScroll: true });
           }}
           onFocus={() => {
             if (index !== focusIndex) setFocusIndex(index);
