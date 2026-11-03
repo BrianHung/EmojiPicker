@@ -1,0 +1,31 @@
+- listbox:
+  - option "grinning face with smiling eyes :smile:" [selected]:
+    - img "grinning face with smiling eyes": 😄
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smirking face :smirk:":
+    - img "smirking face": 😏
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning face with big eyes :smiley:":
+    - img "grinning face with big eyes": 😃
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat with smiling eyes :smile_cat:":
+    - img "grinning cat with smiling eyes": 😸
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "cat with wry smile :smirk_cat:":
+    - img "cat with wry smile": 😼
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat :smiley_cat:":
+    - img "grinning cat": 😺
+    - text: ""
+    - mark: smi
+    - text: ""

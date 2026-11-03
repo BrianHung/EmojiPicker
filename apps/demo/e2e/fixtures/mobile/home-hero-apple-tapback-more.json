@@ -1,0 +1,88 @@
+{
+  "opened": {
+    "focus": "body",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 40
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 40
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": -40
+    },
+    {
+      "key": "End",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 20147
+    },
+    {
+      "key": "Home",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": -20187
+    },
+    {
+      "key": "PageDown",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": 804
+    },
+    {
+      "key": "PageUp",
+      "focus": "body",
+      "highlight": null,
+      "scrolled": -804
+    }
+  ],
+  "enter": {
+    "open": true,
+    "focus": "body",
+    "focusReturned": false,
+    "toast": null
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "body",
+      "focusReturned": false,
+      "toast": null
+    }
+  ],
+  "tab": {
+    "focus": "button \"Close\"",
+    "highlight": null,
+    "open": true,
+    "inside": false
+  }
+}

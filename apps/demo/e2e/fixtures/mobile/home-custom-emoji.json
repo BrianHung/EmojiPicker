@@ -1,0 +1,97 @@
+{
+  "opened": {
+    "focus": "combobox \"Type to search for an emoji\"",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs down\" 1f44e",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"bufo party\" bufo-party",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"bufo no\" bufo-no",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "scrolled": 0
+    },
+    {
+      "key": "End",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"black square button\" 1f532",
+      "scrolled": 0
+    },
+    {
+      "key": "Home",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    },
+    {
+      "key": "PageDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"bufo pog\" bufo-pog",
+      "scrolled": 0
+    },
+    {
+      "key": "PageUp",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": true,
+    "focus": "combobox \"Type to search for an emoji\"",
+    "focusReturned": true,
+    "toast": "❤️ :heart: red heart",
+    "field": ""
+  },
+  "escape": [
+    {
+      "open": true,
+      "focus": "combobox \"Type to search for an emoji\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ""
+    },
+    {
+      "open": true,
+      "focus": "combobox \"Type to search for an emoji\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ""
+    }
+  ],
+  "tab": {
+    "focus": "button \"Default skin tone\"",
+    "highlight": null,
+    "open": true,
+    "inside": true
+  }
+}

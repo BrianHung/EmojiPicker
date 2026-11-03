@@ -1,0 +1,61 @@
+- listbox:
+  - option "grinning face with smiling eyes :smile:" [selected]:
+    - img "grinning face with smiling eyes": 😄
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smirking face :smirk:":
+    - img "smirking face": 😏
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning face with big eyes :smiley:":
+    - img "grinning face with big eyes": 😃
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat with smiling eyes :smile_cat:":
+    - img "grinning cat with smiling eyes": 😸
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "cat with wry smile :smirk_cat:":
+    - img "cat with wry smile": 😼
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat :smiley_cat:":
+    - img "grinning cat": 😺
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with horns :smiling_imp:":
+    - img "smiling face with horns": 😈
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with tear :smiling_face_with_tear:":
+    - img "smiling face with tear": 🥲
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with hearts :smiling_face_with_3_hearts:":
+    - img "smiling face with hearts": 🥰
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "face with hand over mouth :smiling_face_with_smiling_eyes_and_hand_covering_mouth:":
+    - img "face with hand over mouth": 🤭
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning face with sweat :sweat_smile:":
+    - img "grinning face with sweat": 😅
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "kissing face with smiling eyes :kissing_smiling_eyes:":
+    - img "kissing face with smiling eyes": 😙
+    - text: ""
+    - mark: smi
+    - text: ""

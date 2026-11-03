@@ -1,0 +1,78 @@
+{
+  "opened": {
+    "focus": "combobox \"Message\"",
+    "highlight": "option \"😄:smile:grinning face with smiling eyes\""
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😏:smirk:smirking face\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😃:smiley:grinning face with big eyes\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😏:smirk:smirking face\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😄:smile:grinning face with smiling eyes\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😺:smiley_cat:grinning cat\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😄:smile:grinning face with smiling eyes\"",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "combobox \"Message\"",
+    "focusReturned": true,
+    "toast": null,
+    "field": "😄"
+  },
+  "hover": {
+    "hovered": {
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😏:smirk:smirking face\""
+    },
+    "then": {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message\"",
+      "highlight": "option \"😃:smiley:grinning face with big eyes\"",
+      "scrolled": 0
+    }
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "combobox \"Message\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ":smi"
+    }
+  ],
+  "tab": {
+    "focus": "combobox \"Message\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}

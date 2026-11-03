@@ -1,0 +1,97 @@
+{
+  "opened": {
+    "focus": "combobox \"Type to search for an emoji\"",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 80
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs down\" 1f44e",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"grinning face with smiling eyes\" 1f604",
+      "scrolled": 68
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"grinning face with big eyes\" 1f603",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "scrolled": 0
+    },
+    {
+      "key": "End",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "scrolled": 0
+    },
+    {
+      "key": "Home",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    },
+    {
+      "key": "PageDown",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"face without mouth\" 1f636",
+      "scrolled": 141
+    },
+    {
+      "key": "PageUp",
+      "focus": "combobox \"Type to search for an emoji\"",
+      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": true,
+    "focus": "combobox \"Type to search for an emoji\"",
+    "focusReturned": true,
+    "toast": "❤️ :heart: red heart",
+    "field": ""
+  },
+  "escape": [
+    {
+      "open": true,
+      "focus": "combobox \"Type to search for an emoji\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ""
+    },
+    {
+      "open": true,
+      "focus": "combobox \"Type to search for an emoji\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ""
+    }
+  ],
+  "tab": {
+    "focus": "button \"Default skin tone\"",
+    "highlight": null,
+    "open": true,
+    "inside": true
+  }
+}

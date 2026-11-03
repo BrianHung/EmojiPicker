@@ -13,9 +13,15 @@
     "seed": "tsx scripts/seed.ts",
     "test": "vitest run --config worker/vitest.config.ts",
     "deploy": "wrangler deploy",
+    "test:visual": "playwright test visual",
+    "test:visual:update": "playwright test visual --update-snapshots",
+    "test:behavior": "playwright test behavior",
+    "test:behavior:update": "playwright test behavior --update-snapshots",
+    "test:e2e": "playwright test",
     "test:a11y": "playwright test -c e2e/a11y/playwright.config.ts",
     "test:sr:voiceover": "playwright test -c e2e/sr/playwright.config.ts --project voiceover",
-    "test:sr:nvda": "playwright test -c e2e/sr/playwright.config.ts --project nvda"
+    "test:sr:nvda": "playwright test -c e2e/sr/playwright.config.ts --project nvda",
+    "test:baseline": "E2E_BUILD=1 playwright test --update-snapshots"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

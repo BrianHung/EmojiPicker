@@ -1,0 +1,66 @@
+{
+  "opened": {
+    "focus": "combobox \"Leave a comment\"",
+    "highlight": "option \"😄:smile:\""
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😏:smirk:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😃:smiley:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😏:smirk:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😄:smile:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😙:kissing_smiling_eyes:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Leave a comment\"",
+      "highlight": "option \"😄:smile:\"",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "combobox \"Leave a comment\"",
+    "focusReturned": true,
+    "toast": null,
+    "field": "😄"
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "combobox \"Leave a comment\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ":smi"
+    }
+  ],
+  "tab": {
+    "focus": "combobox \"Leave a comment\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}
