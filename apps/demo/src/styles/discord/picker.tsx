@@ -33,7 +33,7 @@ const tokens: Tokens = {
   "--discord-popup-border": "light-dark(#e1e2e4, color-mix(in oklab, #3f3f46 60%, transparent))",
   "--discord-pill-foreground": "light-dark(#5c5e66, #b5bac1)",
   "--discord-mine": "color-mix(in oklab, #5865f2 24%, transparent)",
-  "--discord-mine-foreground": "light-dark(#4752c4, #b9c8ff)",
+  "--discord-mine-foreground": "light-dark(#4752c4, oklab(0.840364 0.0038172 -0.0788282))",
   "--discord-thumb": "light-dark(#c4c9ce, #5f606a)",
   "--discord-icon": "light-dark(#5c5e66, #abacb2)",
   "--discord-autocomplete": "light-dark(#ffffff, oklab(0.2624 0.0025 -0.0089))",

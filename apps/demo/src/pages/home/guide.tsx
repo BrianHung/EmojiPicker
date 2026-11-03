@@ -2,7 +2,7 @@
 import * as React from "react";
 import registrySource from "@/registry/emoji-picker.tsx?raw";
 import { Code } from "@/components/site/code";
-import { C, CodeTabs, H2, P, Step, Steps, Tabs } from "@/components/site/docs";
+import { C, CodeTabs, H2, H3, P, Step, Steps, Tabs } from "@/components/site/docs";
 
 const REGISTRY_URL = "https://emoji.brianhung.me/r/emoji-picker.json";
 
@@ -32,6 +32,32 @@ const CSS = `@import "tailwindcss";
 
 const SHADCN_CSS = `@import "@brianhung/emoji-picker/tokens.css";
 @import "@brianhung/emoji-picker/shadcn.css";`;
+
+const DATA = [
+  {
+    label: "Package",
+    file: "app/providers.tsx",
+    code: `import en from "@brianhung/emoji-picker/data/en.json?url";
+
+<EmojiProvider data={en}>`,
+  },
+  {
+    label: "Self-hosted",
+    file: "app/providers.tsx",
+    code: `// cp node_modules/@brianhung/emoji-picker/data/en.json public/emoji/en.json
+<EmojiProvider data="/emoji/en.json">`,
+  },
+  {
+    label: "Loader",
+    file: "app/providers.tsx",
+    code: `<EmojiProvider data={({ signal }) => fetch(\`/emoji/\${locale}.json\`, { signal }).then((r) => r.json())}>`,
+  },
+  {
+    label: "Filter",
+    file: "app/providers.tsx",
+    code: `<EmojiProvider data={en} filter={(e) => e.group !== "flags" && e.version <= 15}>`,
+  },
+];
 
 export function Installation() {
   const [mode, setMode] = React.useState<"cli" | "manual">("cli");
@@ -92,6 +118,15 @@ export function Installation() {
           </Step>
         </Steps>
       )}
+      <div className="flex flex-col gap-3">
+        {/* "data" was the Data sources example's anchor. */}
+        <H3 id="data">Emoji data</H3>
+        <P>
+          <C>en.json</C> ships with the package: 1,923 emoji from Emojibase with Slack shortcodes. Pass its URL so it loads as a separate, cacheable file, or copy it to
+          your server and pass that URL. <C>data</C> also takes a loader or the dataset object, and <C>filter</C> removes emoji from pickers and search.
+        </P>
+        <CodeTabs tabs={DATA} />
+      </div>
     </section>
   );
 }

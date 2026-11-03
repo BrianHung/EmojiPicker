@@ -5,6 +5,7 @@ import Fuse from "fuse.js";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import {
   Emoji,
+  EmojiOverrides,
   EmojiProvider,
   useEmojiSearch,
   useEmojiStore,
@@ -259,78 +260,77 @@ function SearchExample() {
   );
 }
 
-/* -------------------------------------------------------------- renderers */
+/* -------------------------------------------------------------- rendering */
 
-const SAMPLE = "🥹😂❤️‍🔥🫶🏽👩🏾‍💻🇯🇵🏳️‍🌈🐙";
+// Original art, drawn for this page: a glossy heart and a thumbs up.
+const svg = (body: string) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${body}</svg>`)}`;
 
-function RendererColumn({ renderer, title, note }: { renderer: Renderer; title: string; note: string }) {
-  return (
-    <EmojiProvider data={enUrl} renderer={renderer}>
-      <div className="flex min-w-0 flex-col items-center gap-3">
-        <div className="text-center">
-          <div className="text-sm font-medium">{title}</div>
-          <div className="text-xs text-muted-foreground">{note}</div>
-        </div>
-        <EmojiTapback onSelect={() => {}} />
-        <EmojiPickerCard autoFocusSearch={false} footer={false} className="h-[300px] w-[300px]" />
-      </div>
-    </EmojiProvider>
+const HEART = svg(
+  `<defs><radialGradient id="h" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#ff8a9b"/><stop offset=".55" stop-color="#f2294b"/><stop offset="1" stop-color="#a50d2a"/></radialGradient></defs>` +
+    `<path d="M32 57C13 44 4 33 4 21 4 11.6 11.2 5 19.5 5 25 5 29.4 8 32 12.6 34.6 8 39 5 44.5 5 52.8 5 60 11.6 60 21 60 33 51 44 32 57Z" fill="url(#h)"/>` +
+    `<ellipse cx="19" cy="17" rx="8" ry="5" transform="rotate(-30 19 17)" fill="#fff" opacity=".6"/>`,
+);
+
+const THUMBS_UP = svg(
+  `<defs><linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd96a"/><stop offset="1" stop-color="#f0a020"/></linearGradient></defs>` +
+    `<rect x="6" y="28" width="12" height="28" rx="3" fill="#3f73d9"/>` +
+    `<path d="M22 30 31 9c1.6-3.7 8-2.6 7.6 2.2L37 26h15c3.4 0 5.8 3.2 5 6.4l-4.6 18.4A7 7 0 0 1 45.6 56H26a4 4 0 0 1-4-4Z" fill="url(#t)" stroke="#c27a12" stroke-width="2" stroke-linejoin="round"/>` +
+    `<path d="M38 36h17M37 43h15M36 50h13" stroke="#c27a12" stroke-width="2" stroke-linecap="round" opacity=".7"/>`,
+);
+
+const ARTWORK = { "2764-fe0f": HEART, "1f44d": THUMBS_UP };
+
+const RENDERING_CODE = {
+  renderer: (renderer: string) => `<EmojiProvider data={en} renderer="${renderer}">
+  …
+</EmojiProvider>`,
+  artwork: `import { EmojiOverrides } from "@brianhung/emoji-picker";
+
+const artwork = {
+  "2764-fe0f": "/reactions/heart.svg",
+  "1f44d": "/reactions/thumbs-up.svg", // every skin tone
+};
+
+<EmojiOverrides artwork={artwork}>
+  <Tapback onSelect={(e) => react(message.id, e.unified)} />
+</EmojiOverrides>
+
+// Or on one picker:
+<EmojiPicker.Root artwork={artwork}>…</EmojiPicker.Root>`,
+};
+
+function RenderingExample() {
+  const [renderer, setRenderer] = React.useState<Renderer | "auto">("auto");
+  const [custom, setCustom] = React.useState(true);
+  const [, setPicked] = usePickedEmoji();
+  const body = (
+    <div className="flex flex-col items-center gap-4">
+      <EmojiTapback onSelect={setPicked} />
+      <EmojiPickerCard autoFocusSearch={false} footer={false} onSelect={setPicked} className="h-[300px]" />
+    </div>
   );
-}
-
-function RenderersExample() {
   return (
     <Example
-      id="renderers"
-      title="Renderers"
-      description={
-        <>
-          Renders system emoji, or Twemoji where the system can't draw flags. Sample in your system font: <span className="text-base">{SAMPLE}</span>
-        </>
-      }
-      previewClassName="grid gap-8 md:grid-cols-2"
-      code={[{ label: "providers.tsx", code: `<EmojiProvider data={en} renderer="auto">\n  …\n</EmojiProvider>` }]}
-    >
-      <RendererColumn renderer="native" title="Native" note="System font" />
-      <RendererColumn renderer="twemoji" title="Twemoji" note="jdecked/twemoji SVGs" />
-    </Example>
-  );
-}
-
-/* ------------------------------------------------------------------- data */
-
-function DataExample() {
-  const [hideFlags, setHideFlags] = React.useState(true);
-  const [picked, setPicked] = usePickedEmoji();
-  return (
-    <Example
-      id="data"
-      title="Data sources"
-      description="Loads emoji data from a URL, a loader or an object, with an optional filter."
-      previewClassName="flex-col gap-3"
+      id="rendering"
+      title="Rendering"
+      description="The provider draws emoji with the system font or Twemoji. Artwork replaces particular emoji with your own images; they keep their name, shortcode and selection."
+      previewClassName="flex-col gap-4"
       code={[
-        {
-          label: "URL",
-          file: "providers.tsx",
-          code: `import en from "@brianhung/emoji-picker/data/en.json?url";
-
-<EmojiProvider data={en}>`,
-        },
-        {
-          label: "Loader",
-          file: "providers.tsx",
-          code: `<EmojiProvider data={({ signal }) => fetch(\`/emoji/\${locale}.json\`, { signal }).then((r) => r.json())}>`,
-        },
-        { label: "Object", file: "providers.tsx", code: `<EmojiProvider data={dataset}>` },
-        { label: "Filter", file: "providers.tsx", code: `<EmojiProvider data={en} filter={(e) => e.group !== "flags" && e.version <= 15}>` },
+        { label: "Renderer", file: "providers.tsx", code: RENDERING_CODE.renderer(renderer) },
+        { label: "Artwork", file: "reactions.tsx", code: RENDERING_CODE.artwork },
       ]}
     >
-      <Label className="flex items-center gap-2 text-sm font-normal">
-        <Checkbox checked={hideFlags} onCheckedChange={(checked) => setHideFlags(checked)} />
-        Hide flags and Emoji 15.1+
-      </Label>
-      <EmojiProvider key={String(hideFlags)} data={enUrl} filter={hideFlags ? (e) => e.group !== "flags" && e.version <= 15 : undefined}>
-        <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} footer={false} />
+      {/* The old Renderers example's anchor. */}
+      <span id="renderers" className="sr-only scroll-mt-20" aria-hidden />
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
+        <Chips label="Renderer" value={renderer} onChange={setRenderer} options={[["auto", "Auto"], ["native", "Native"], ["twemoji", "Twemoji"]]} />
+        <Label className="flex items-center gap-2 text-sm font-normal">
+          <Checkbox checked={custom} onCheckedChange={(checked) => setCustom(checked)} />
+          Custom ❤️ and 👍
+        </Label>
+      </div>
+      <EmojiProvider data={enUrl} renderer={renderer}>
+        {custom ? <EmojiOverrides artwork={ARTWORK}>{body}</EmojiOverrides> : body}
       </EmojiProvider>
     </Example>
   );
@@ -377,7 +377,7 @@ function CustomEmojiExample() {
   );
 }
 
-/* --------------------------------------------------------- rows and cells */
+/* ------------------------------------------------- custom cells and rows */
 
 function QuickRow({ onPick }: { onPick: (s: EmojiSelection) => void }) {
   const store = useEmojiStore();
@@ -482,9 +482,9 @@ function RowsExample() {
   const [picked, setPicked] = usePickedEmoji();
   return (
     <Example
-      id="rows-and-cells"
-      title="Rows and cells"
-      description="Custom rows around the grid, and custom cell and header components."
+      id="custom-cells-and-rows"
+      title="Custom cells and rows"
+      description="Replace the cell and header components, and add rows of your own around the grid."
       previewClassName="flex-col gap-3"
       code={[
         { label: "Tailwind", file: "index.tsx", code: ROWS_TW },
@@ -497,6 +497,8 @@ function RowsExample() {
         },
       ]}
     >
+      {/* The old Rows and cells example's anchor. */}
+      <span id="rows-and-cells" className="sr-only" aria-hidden />
       <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} rows={<QuickRow onPick={setPicked} />} components={{ Emoji: RoundCell }} columns={7} frequent={false} className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]" />
     </Example>
   );
@@ -615,8 +617,7 @@ export function Examples() {
       <PopoverExample />
       <TapbackExample />
       <SearchExample />
-      <RenderersExample />
-      <DataExample />
+      <RenderingExample />
       <CustomEmojiExample />
       <RowsExample />
       <HeadlessExample />
