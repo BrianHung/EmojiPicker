@@ -78,3 +78,22 @@ npm test            # Worker tests, with Workers AI and Vectorize mocked
 npm run typecheck
 npx tsx worker/test/mock-server.ts --port 8799   # the Worker over mocked bindings
 ```
+
+### Accessibility
+
+```sh
+npm run test:a11y            # axe-core (WCAG 2.2 A/AA + best practice) on every page and picker surface, light and dark
+npm run test:sr:voiceover    # VoiceOver on macOS (Guidepup)
+npm run test:sr:nvda         # NVDA on Windows (Guidepup)
+```
+
+`e2e/a11y/` opens every surface in `e2e/surfaces.ts` and requires zero axe violations, except the ones listed in `e2e/a11y/known.ts` (rule id + element pattern, each a bug to fix). `e2e/sr/scenarios.ts` holds eight keyboard scenarios that assert what the screen reader says (search field and result count, emoji names with skin tone, section names, the pick, Escape, the tapback, Discord's collapsible sections). They run on CI in `.github/workflows/screen-readers.yml`.
+
+The screen reader suites skip locally until the machine is set up for automation. Once per machine (this changes OS settings: on macOS it enables "Allow VoiceOver to be controlled with AppleScript"; see [Guidepup's manual VoiceOver setup](https://www.guidepup.dev/docs/guides/manual-voiceover-setup) if SIP blocks it), then once per Guidepup version:
+
+```sh
+npx @guidepup/setup setup
+npx @guidepup/setup install   # from apps/demo
+```
+
+JAWS isn't automated (it needs a licence and Guidepup has no JAWS driver). Before a release, run the same scenarios by hand in JAWS with Chrome.
