@@ -8,3 +8,4 @@ apps/demo/capture/out
 apps/demo/capture/frames
 apps/demo/capture/baseline
 apps/demo/capture/ref
+.claude/worktrees/
