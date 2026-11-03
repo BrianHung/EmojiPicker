@@ -6,11 +6,12 @@ import { EmojiAutocomplete } from "@/components/emoji-autocomplete";
 import { EmojiPickerPopover } from "@/registry/emoji-picker";
 import { SmilePlus } from "./icons";
 import { FitViewport, type Reaction } from "./scene-kit";
-import { StylePicker, useStyleTokens, type Style } from "./style-picker";
+import { StylePicker, useStyleTokens, type PickerLayout, type Style } from "./style-picker";
 
 /** Popover picker from a trigger, with or without search. */
 export function StyleDropdown({
   appStyle,
+  layout = appStyle.layout,
   onSelect,
   search = true,
   children,
@@ -20,6 +21,8 @@ export function StyleDropdown({
   triggerClassName,
 }: {
   appStyle: Style;
+  /** A layout other than the style's own (its reaction picker). */
+  layout?: PickerLayout;
   onSelect: (s: EmojiSelection) => void;
   search?: boolean;
   children: React.ReactNode;
@@ -39,7 +42,7 @@ export function StyleDropdown({
       picker={
         // Wider than a phone (Discord's 498px): zoom to fit, keeping the app's layout.
         <FitViewport width={appStyle.size.width}>
-          <StylePicker layout={appStyle.layout} onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
+          <StylePicker layout={layout} onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
         </FitViewport>
       }
     >
@@ -75,7 +78,7 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
             </button>
           );
         })}
-        <StyleDropdown appStyle={appStyle} onSelect={onSelect} label="More emoji" triggerClassName={appStyle.tapback.more?.className ?? "text-[20px] opacity-60"}>
+        <StyleDropdown appStyle={appStyle} layout={appStyle.reaction} onSelect={onSelect} label="More emoji" triggerClassName={appStyle.tapback.more?.className ?? "text-[20px] opacity-60"}>
           {appStyle.tapback.more?.icon ?? <SmilePlus size={20} />}
         </StyleDropdown>
       </div>
@@ -94,20 +97,23 @@ export function StyleAutocomplete({ appStyle, autocomplete, className }: { appSt
       autocomplete={autocomplete}
       appearance={a.className}
       className={className}
+      listClassName={a.list}
       itemClassName={cn("gap-3", a.item)}
       header={a.header}
+      headerClassName={a.headerClassName}
       renderItem={(s, highlighted) => {
         const code = s.shortcode;
         const [start, end] = s.match ?? [0, 0];
         return (
           <>
-            <Emoji emoji={store.withSkinTone(s.record.unified)} size={22} renderer={appStyle.renderer} className="shrink-0 text-[22px] leading-none" />
+            <Emoji emoji={store.withSkinTone(s.record.unified)} size={a.emoji ?? 22} renderer={appStyle.renderer} className="flex shrink-0 justify-center leading-none" style={{ fontSize: a.emoji ?? 22, width: a.emoji ?? 22 }} />
             <span className="truncate">
               :{code.slice(0, start)}
               {end > start ? <mark data-active={highlighted || undefined} className={cn("bg-transparent text-inherit", a.match, a.matchActive)}>{code.slice(start, end)}</mark> : null}
               {code.slice(end)}:
             </span>
             {a.showName ? <span className="ml-auto truncate pl-3 text-[0.85em] opacity-55">{s.record.name}</span> : null}
+            {a.hint && highlighted ? <span className="ml-auto shrink-0 pl-3">{a.hint}</span> : null}
           </>
         );
       }}
@@ -132,13 +138,13 @@ export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style;
             onClick={() => onToggle(r.unified)}
             className={cn("flex items-center gap-1 tabular-nums transition-colors", appStyle.pill.base, appStyle.pill.mine)}
           >
-            <Emoji emoji={r.unified} size={appStyle.pill.emoji ?? 16} className="leading-none" style={{ fontSize: appStyle.pill.emoji ?? 16 }} />
-            <span className="font-semibold">{r.count}</span>
+            <Emoji emoji={r.unified} size={appStyle.pill.emoji ?? 16} className="flex justify-center leading-none" style={{ fontSize: appStyle.pill.emoji ?? 16, width: appStyle.pill.emoji ?? 16 }} />
+            <span className={appStyle.pill.count ?? "font-semibold"}>{r.count}</span>
           </button>
         );
       })}
-      <StyleDropdown appStyle={appStyle} label="Add reaction" onSelect={(s) => onToggle(s.unified)} triggerClassName={cn("flex items-center", appStyle.pill.add)}>
-        <SmilePlus size={15} strokeWidth={2} />
+      <StyleDropdown appStyle={appStyle} layout={appStyle.reaction} label="Add reaction" onSelect={(s) => onToggle(s.unified)} triggerClassName={cn("flex items-center", appStyle.pill.add)}>
+        {appStyle.pill.addIcon ?? <SmilePlus size={15} strokeWidth={2} />}
       </StyleDropdown>
     </div>
   );

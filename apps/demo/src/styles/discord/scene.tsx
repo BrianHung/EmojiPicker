@@ -3,7 +3,8 @@
 // `:smi` autocomplete. The composer is a Tiptap editor, so emoji show as Twemoji
 // while typing, as in Discord's own (Slate) composer. Measured from Discord web (dark), Nov 2026:
 // header 49px (0.8px rule, 16/20, padding 8 8 8 16); rows with a 40px avatar at x=16,
-// name + time + content from x=72 at 16/22; a 56px composer, radius 8, inset 8px.
+// name + time + content from x=72 at 16/22; a 56px composer, radius 8, inset 8px, no border
+// (re-measured Nov 2026: oklab(0.2568 …) fill, 16px/22px text).
 // On a phone it is Discord's mobile chat (not measured): the same rows without the hover toolbar, press
 // and hold a message for the picker in a bottom sheet, and a round "+" beside a pill
 // composer whose smiley opens the sheet too.
@@ -19,7 +20,6 @@ import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import { useShortcodeAutocomplete } from "@brianhung/emoji-picker";
 import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
-import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { Avatar, EmojiText, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
 
 const W = 760;
@@ -68,7 +68,7 @@ export function DiscordScene() {
   const { ref, compact } = useCompact();
   return (
     // Discord draws Twemoji everywhere, so the scene has its own provider.
-    <EmojiProvider data={enUrl} renderer="twemoji" customEmojis={TEAM_EMOJI}>
+    <EmojiProvider data={enUrl} renderer="twemoji">
       <div ref={ref} className="w-full">
         {compact ? (
           <MobileFrame theme={THEME} label="Discord style channel" appStyle={discord} style={{ background: C.chat, color: C.text, fontFamily: FONT }}>
@@ -374,7 +374,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   return (
     <div className="relative mx-2 mb-4 shrink-0">
       <StyleAutocomplete appStyle={discord} autocomplete={autocomplete} className="absolute inset-x-0 bottom-full mb-2" />
-      <div className="flex h-14 items-center rounded-[8px]" style={{ background: C.composer, border: `0.8px solid ${C.rule}` }}>
+      <div className="flex h-14 items-center rounded-[8px]" style={{ background: C.composer }}>
         <span className="flex h-full w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
           <PlusCircle />
         </span>

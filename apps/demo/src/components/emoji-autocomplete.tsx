@@ -48,6 +48,10 @@ export type EmojiAutocompleteProps = Omit<React.HTMLAttributes<HTMLDivElement>, 
   itemClassName?: string;
   /** Header above the options; receives the typed query. */
   header?: (query: string) => React.ReactNode;
+  /** Header classes; replace the default. */
+  headerClassName?: string;
+  /** List classes (padding, height); replace the default. */
+  listClassName?: string;
   /** Replace an option's contents. */
   renderItem?: (suggestion: ShortcodeAutocomplete["suggestions"][number], highlighted: boolean) => React.ReactNode;
 };
@@ -55,12 +59,12 @@ export type EmojiAutocompleteProps = Omit<React.HTMLAttributes<HTMLDivElement>, 
 /** The popup. Position it yourself (e.g. absolute, above the composer). */
 const SURFACE = "rounded-lg border border-border bg-popover text-sm text-foreground shadow-lg";
 
-export function EmojiAutocomplete({ autocomplete: ac, appearance = SURFACE, className, itemClassName, header, renderItem, ...props }: EmojiAutocompleteProps) {
+export function EmojiAutocomplete({ autocomplete: ac, appearance = SURFACE, className, itemClassName, header, headerClassName, listClassName, renderItem, ...props }: EmojiAutocompleteProps) {
   if (!ac.open) return null;
   return (
     <div {...props} className={cn("overflow-hidden", appearance, className)}>
-      {header ? <div className="border-b border-border px-3 py-1.5 text-xs text-muted-foreground">{header(ac.query)}</div> : null}
-      <ul {...ac.getListProps()} className="max-h-64 overflow-y-auto p-1">
+      {header ? <div className={headerClassName ?? "border-b border-border px-3 py-1.5 text-xs text-muted-foreground"}>{header(ac.query)}</div> : null}
+      <ul {...ac.getListProps()} className={cn("overflow-y-auto", listClassName ?? "max-h-64 p-1")}>
         {ac.suggestions.map((s, i) => (
           <li
             key={`${s.record.unified}:${s.shortcode}`}

@@ -1,3 +1,8 @@
+// Slack style, in situ: a channel with shortcodes rendered as emoji, reaction pills, the
+// hover toolbar and the composer's ":" autocomplete. The composer is Slack's, measured in
+// a DM (light, Nov 2026): radius 8, a 1px rgba(94,93,96,.45) border and 0 1px 3px shadow,
+// a 36px formatting bar over the 15px/22px editor (padding 8px 12px) and a 42px toolbar,
+// 118px in all; the autocomplete's bottom sits 3px into the editor, over the formatting bar.
 import * as React from "react";
 import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { useAutocompleteInput } from "@/components/emoji-autocomplete";
@@ -20,7 +25,7 @@ const INITIAL: Message[] = [
     reactions: [
       { unified: "1f389", count: 3, mine: true },
       { unified: "1f680", count: 2, mine: false },
-      { unified: "ship-it", count: 1, mine: false },
+      { unified: "1f6a2", count: 1, mine: false },
     ],
   },
   {
@@ -31,7 +36,7 @@ const INITIAL: Message[] = [
     text: "the tapback feels exactly like iMessage :exploding_head: skin tones too? :wave::skin-tone-4:",
     reactions: [{ unified: "1f44d", count: 2, mine: false }],
   },
-  { id: 3, author: "You", color: "#4a154b", time: "10:06 AM", text: "yep :+1::skin-tone-3: and custom ones like :shipit: work everywhere", reactions: [] },
+  { id: 3, author: "You", color: "#4a154b", time: "10:06 AM", text: "yep :+1::skin-tone-3: and the skin tone sticks everywhere :ship:", reactions: [] },
 ];
 
 // Slack renders :shortcodes: (with :skin-tone-N:) as emoji; custom ones as images.
@@ -147,31 +152,40 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
 
 function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
   // Slack keeps :shortcodes: as text in the composer and renders them in the message.
-  const { value, setText, insertAtCaret, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ insert: "shortcode", limit: 8 });
+  const { value, setText, insertAtCaret, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ insert: "shortcode", limit: 25 });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);
     setText("");
   };
   return (
-    <div className="relative shrink-0 px-5 pb-5">
-      <StyleAutocomplete appStyle={slack} autocomplete={autocomplete} className="absolute inset-x-5 bottom-full mb-1" />
-      <div className="rounded-lg border border-[#bbbabb] focus-within:border-[#868686] dark:border-[#565856]">
-        <textarea
-          {...inputProps}
-          rows={2}
-          aria-label="Message #general"
-          placeholder="Message #general"
-          className="block w-full resize-none bg-transparent px-3 pt-2.5 text-[15px] outline-none placeholder:text-[#868686]"
-          onKeyDown={(e) => {
-            if (autocomplete.onKeyDown(e)) return;
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              submit();
-            }
-          }}
-        />
-        <div className="flex items-center gap-0.5 px-1.5 pb-1.5">
+    <div className="shrink-0 px-5 pb-5">
+      <div className="rounded-[8px] border border-[rgba(94,93,96,0.45)] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:border-[#565856] dark:bg-[#222529]">
+        <div className="flex h-9 items-center gap-0.5 px-1.5 text-[15px] text-[#616061] dark:text-[#ababad]" aria-hidden>
+          <span className="flex size-7 items-center justify-center font-bold">B</span>
+          <span className="flex size-7 items-center justify-center font-serif italic">I</span>
+          <span className="flex size-7 items-center justify-center line-through">S</span>
+          <span className="mx-1 h-5 w-px bg-[#dddddd] dark:bg-[#35373b]" />
+          <span className="flex size-7 items-center justify-center font-mono text-[13px]">{"</>"}</span>
+        </div>
+        <div className="relative">
+          <StyleAutocomplete appStyle={slack} autocomplete={autocomplete} className="absolute bottom-[calc(100%-3px)] left-0 z-10" />
+          <textarea
+            {...inputProps}
+            rows={1}
+            aria-label="Message #general"
+            placeholder="Message #general"
+            className="block h-[38px] w-full resize-none bg-transparent px-3 py-2 text-[15px] leading-[22px] text-[#1d1c1d] outline-none placeholder:text-[#868686] dark:text-[#d1d2d3]"
+            onKeyDown={(e) => {
+              if (autocomplete.onKeyDown(e)) return;
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit();
+              }
+            }}
+          />
+        </div>
+        <div className="flex h-[42px] items-center gap-0.5 px-1.5">
           <span className="flex size-7 items-center justify-center rounded-full bg-[#f4f4f4] text-lg text-[#616061] dark:bg-[#2c2d30]">+</span>
           <span className="flex h-7 items-center px-1.5 text-[15px] font-medium text-[#616061] dark:text-[#ababad]">Aa</span>
           <EmojiMenu sheet={compact} side="top" label="Emoji" onSelect={(s) => insertAtCaret(`${s.shortcode ?? s.emoji} `)} triggerClassName="flex size-7 items-center justify-center rounded text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
@@ -183,7 +197,7 @@ function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; co
           </button>
         </div>
       </div>
-      <p className="mt-1 text-right text-[11px] text-[#868686]">Type :tad or :shipit</p>
+      <p className="mt-1 text-right text-[11px] text-[#868686]">Type :tad or :smi</p>
     </div>
   );
 }

@@ -4,6 +4,10 @@ import { type Style, type Tokens } from "@/styles/style-picker";
 // 273×321 popover, borderless 28px search (radius 8) at (5.5,4.5), a lch(97.3) divider
 // at 37, 28px section titles with 12px/500 text at x=14.5, 28px cells (radius 8, 19px
 // emoji) on a 28px pitch from x=10.5. Its thin scrollbar sits over the ninth column.
+// The comment composer's ":" autocomplete (light, Nov 2026) opens above the caret: a card
+// 190.6px wide for ":smi" (it fits Linear's short codes; ours truncate), radius 10, the popup border and shadow,
+// 4px list padding; twelve 34px rows, a 15px emoji at x=14 then 8px to the 13px/450
+// lch(10) `:code:`, the highlight inset 4px at radius 6 on lch(95). No header.
 
 // Light and dark values measured from Linear with DevTools (its own lch() palette).
 const tokens: Tokens = {
@@ -22,6 +26,7 @@ const tokens: Tokens = {
   "--linear-thumb": "light-dark(lch(64.94 1.25 282), lch(38 1.25 282))",
   "--linear-pill": "light-dark(lch(98 0 282), lch(14 1 282))",
   "--linear-pill-foreground": "light-dark(lch(40 1 282), lch(70 1 282))",
+  "--linear-menu-text": "light-dark(lch(10 0 282), lch(100 0 272))",
 };
 
 const POPUP = "rounded-picker border-[0.5px] border-picker-border bg-picker-background shadow-picker";
@@ -50,10 +55,11 @@ export const linear: Style = {
     reactions: "flex items-center gap-0.5 p-1 [--emoji-image-size:18px] [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[8px] [&_button]:text-[18px] [&_button:hover]:bg-picker-hover",
   },
   autocomplete: {
-    className: `${POPUP} p-1 font-picker`,
-    item: "h-7 rounded-md px-2 text-[13px] data-[highlighted]:bg-picker-selected",
-    match: "font-semibold",
-    showName: true,
+    className: "w-[190.6px] max-w-full rounded-[10px] border-[0.5px] border-picker-border bg-picker-background font-picker text-(--linear-menu-text) shadow-picker",
+    list: "max-h-[416px] p-1",
+    item: "h-[34px] gap-2 rounded-[6px] px-[10px] py-0 text-[13px] font-[450] data-[highlighted]:bg-picker-selected",
+    match: "",
+    emoji: 15,
   },
   pill: {
     base: "h-6 rounded-full border-[0.5px] border-picker-border bg-(--linear-pill) px-2 text-[12px] text-(--linear-pill-foreground)",

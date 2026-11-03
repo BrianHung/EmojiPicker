@@ -5,6 +5,13 @@ import { type Style, type Tokens } from "@/styles/style-picker";
 // 361×454 popover (no Emoji/GIFs tabs any more), a 38px bar of ten 34.3px tabs from
 // x=8 at y=4, a 36px search at (17.5,56), 35×32 cells on a 36×33 pitch from x=15,
 // 27px section titles at x=21 with 1px between sections, a 60px gray footer.
+// The composer's ":" autocomplete (Nov 2026): a 473.5px card (radius 6, #f8f8f8, the
+// picker's shadow) about 6.9 rows tall, 8px over the list; 32px rows (padding 0 16px,
+// 22px emoji 12px before 15px/22.4px text, no match styling), the selected one full
+// width on rgba(29,28,29,.06) with a 13px "Enter" at the right; ~25 options.
+// Reaction pills: 24px, fully round, padding 0 8px, 16px emoji 4px before a 12px/700
+// count; mine on #e3f8ff with a 1px #1264a3 ring and count; the 34px add pill on the
+// 6% wash with an 18px #1d1c1d icon.
 
 /** Slack's first section, pinned rather than learned. */
 const GETTING_WORK_DONE = [
@@ -53,11 +60,9 @@ const tokens: Tokens = {
   "--slack-track-rule": "light-dark(#e8e8e8, #3a3a3a)",
   "--slack-icon": "light-dark(#616061, #ababad)",
   "--slack-link": "light-dark(#1264a3, #1d9bd1)",
-  "--slack-pill": "light-dark(#f1f1f1, #2c2d30)",
-  "--slack-match": "light-dark(#fdf2d0, #5c4813)",
-  "--slack-match-foreground": "light-dark(#1d1c1d, #f2c744)",
-  "--slack-match-active": "#f2c744",
-  "--slack-mine-border": "#1d9bd1",
+  "--slack-wash": "light-dark(rgb(29 28 29 / 0.06), rgb(232 232 232 / 0.06))",
+  "--slack-mine": "light-dark(#e3f8ff, color-mix(in oklab, #1d9bd1 20%, transparent))",
+  "--slack-mine-foreground": "light-dark(#1264a3, #1d9bd1)",
   "--slack-pill-hover-border": "#bdbdbd",
 };
 
@@ -131,14 +136,17 @@ export const slack: Style = {
     more: { className: "text-(--slack-icon)", icon: <I.SmilePlus size={18} strokeWidth={1.75} /> },
   },
   autocomplete: {
-    className: "rounded-lg bg-picker-background py-1 font-picker shadow-picker",
-    item: "h-8 rounded-none px-4 text-[15px] text-picker-foreground data-[highlighted]:bg-(--slack-link) data-[highlighted]:text-white",
-    match: "rounded-[2px] bg-(--slack-match) text-(--slack-match-foreground)",
-    matchActive: "data-active:bg-(--slack-match-active) data-active:text-[#1d1c1d]",
+    className: "w-[473.5px] max-w-full rounded-picker bg-picker-panel font-picker shadow-picker",
+    list: "max-h-[220px] pt-2",
+    item: "h-8 gap-3 rounded-none px-4 py-0 text-[15px] leading-[22.4px] text-picker-foreground data-[highlighted]:bg-(--slack-wash)",
+    match: "",
+    hint: <span className="text-[13px] text-picker-foreground">Enter</span>,
   },
   pill: {
-    base: "h-6 rounded-[12px] border border-transparent bg-(--slack-pill) px-1.5 text-[12px] text-picker-foreground hover:border-(--slack-pill-hover-border) hover:bg-picker-background",
-    mine: "aria-pressed:border-(--slack-mine-border) aria-pressed:bg-picker-selected aria-pressed:text-(--slack-link)",
-    add: "h-6 rounded-[12px] bg-(--slack-pill) px-1.5 text-picker-muted",
+    base: "h-6 rounded-full bg-(--slack-wash) px-2 text-[12px] leading-3 text-picker-foreground not-aria-pressed:hover:shadow-[0_0_0_1px_var(--slack-pill-hover-border)]",
+    mine: "aria-pressed:bg-(--slack-mine) aria-pressed:text-(--slack-mine-foreground) aria-pressed:shadow-[0_0_0_1px_var(--slack-mine-foreground)]",
+    count: "font-bold",
+    add: "h-6 rounded-full bg-(--slack-wash) px-2 text-picker-foreground",
+    addIcon: <I.SmilePlus size={18} strokeWidth={1.75} />,
   },
 };

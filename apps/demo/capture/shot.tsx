@@ -5,7 +5,6 @@ import { createRoot } from "react-dom/client";
 import { MotionGlobalConfig } from "motion/react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
-import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { SCENES, StylePicker, styleById } from "@/styles";
 import { StyleTapback } from "@/styles/variants";
 import { AppleScene, IMessageScreen, type IMessageMode, type Message } from "@/styles/apple/scene";
@@ -71,7 +70,7 @@ function Shot() {
     const Scene = SCENES[params.get("style") ?? "discord"];
     document.body.style.margin = "0";
     return (
-      <EmojiProvider data={enUrl} renderer="native" customEmojis={TEAM_EMOJI}>
+      <EmojiProvider data={enUrl} renderer="native">
         <div style={{ padding: 24, boxSizing: "border-box", width: params.get("width") ? Number(params.get("width")) : undefined }}>
           <div data-shot="scene">{Scene ? <Scene /> : `No scene "${params.get("style")}"`}</div>
         </div>

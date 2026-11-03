@@ -34,7 +34,6 @@ import inlineModulesCss from "@/components/demos/inline-picker/css-modules/index
 import tapbackTailwindSource from "@/components/demos/tapback/tailwind.tsx?raw";
 import tapbackModulesSource from "@/components/demos/tapback/css-modules/index.tsx?raw";
 import tapbackModulesCss from "@/components/demos/tapback/css-modules/index.module.css?raw";
-import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { BUFO_PACK_URL } from "@/lib/packs";
 
 
@@ -173,7 +172,8 @@ function TapbackExample() {
       id="tapback"
       title="Tapback"
       description="A row of the most-used emoji with a button that expands into the full picker."
-      previewClassName="min-h-[480px] items-start"
+      // Collapsed, the 54px bar sits centered in the Popover example's 180px; expanded, the preview grows downward under it.
+      previewClassName="min-h-[180px] items-start pt-[62px] sm:pt-[62px]"
       code={variantsCode(tapbackTailwindSource, tapbackModulesSource, tapbackModulesCss)}
       variants={{ Tailwind: preview(<TapbackTailwind onSelect={setPicked} />), "CSS Modules": preview(<TapbackModules onSelect={setPicked} />) }}
     />
@@ -208,7 +208,7 @@ import { fallback, fuse, lexical } from "@brianhung/emoji-picker/search";
   },
   frequent: { label: "+ Frequents", note: "Ranks frequently used emoji higher.", search: rerank(lexical(), preferFrequent({ weight: 0.6 })), code: `<EmojiProvider data={en} search={rerank(lexical(), preferFrequent({ weight: 0.6 }))}>` },
   remote: {
-    label: "Remote (400 ms)",
+    label: "Async",
     note: "Calls an async source and aborts stale requests.",
     search: slowEndpoint,
     code: `import { remote } from "@brianhung/emoji-picker/search";
@@ -252,7 +252,7 @@ function SearchExample() {
       <Chips label="Search engine" value={engine} onChange={setEngine} options={Object.entries(ENGINES).map(([id, e]) => [id as EngineId, e.label])} />
       <Chips label="Results" value={mode} onChange={setMode} options={[["ranked", "Ranked"], ["grouped", "Grouped"]]} />
       {/* Remount per engine: provider options are read once, like a store. */}
-      <EmojiProvider key={engine} data={enUrl} customEmojis={TEAM_EMOJI} search={current.search}>
+      <EmojiProvider key={engine} data={enUrl} search={current.search}>
         <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} searchResults={mode} search={query} onSearchChange={setQuery} />
       </EmojiProvider>
     </Example>

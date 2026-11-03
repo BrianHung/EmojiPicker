@@ -1,5 +1,4 @@
 import type { ShortcodeAutocompleteOptions } from "@brianhung/emoji-picker";
-import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { Tabs, type Style, type Tokens } from "@/styles/style-picker";
 
@@ -37,10 +36,11 @@ const tokens: Tokens = {
   "--discord-mine-foreground": "light-dark(#4752c4, #b9c8ff)",
   "--discord-thumb": "light-dark(#c4c9ce, #5f606a)",
   "--discord-icon": "light-dark(#5c5e66, #abacb2)",
-  "--discord-autocomplete": "light-dark(#ffffff, #2b2d31)",
-  "--discord-autocomplete-text": "light-dark(#313338, #dbdee1)",
-  "--discord-autocomplete-muted": "light-dark(#5c5e66, #b5bac1)",
-  "--discord-autocomplete-hover": "light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.06))",
+  "--discord-autocomplete": "light-dark(#ffffff, oklab(0.2624 0.0025 -0.0089))",
+  "--discord-autocomplete-text": "light-dark(#313338, oklab(0.988 0 0))",
+  "--discord-autocomplete-muted": "light-dark(#5c5e66, oklab(0.7454 0.0013 -0.0085))",
+  "--discord-autocomplete-hover": "light-dark(rgb(0 0 0 / 0.06), oklab(0.6789 0.0033 -0.0112 / 0.12))",
+  "--discord-autocomplete-shadow": "0 0 0 1px light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08)), 0 12px 24px rgb(0 0 0 / 0.24)",
 };
 
 /**
@@ -131,23 +131,19 @@ export const discord: Style = {
     reactions: "flex items-center p-0.5 [--emoji-image-size:20px] [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[20px] [&_button:hover]:bg-picker-hover",
     more: { className: "text-(--discord-icon)", icon: <I.SmilePlus size={20} strokeWidth={2} /> },
   },
-  // Discord's ":smi" popup (dark): as wide as the composer, a 32px "Emoji matching :smi"
-  // row in 12px muted text, then 28.5px rows (20px Twemoji at x=16, 14px `:code:`),
-  // about 14 visible before a thin scrollbar. Ordered A–Z: `discordAutocompleteOptions`.
+  // Discord's ":smi" popup (dark, re-measured Nov 2026): 12px narrower than the composer
+  // on each side, radius 5, a 1px 8% white ring over a 0 12 24 shadow; an "Emoji matching
+  // :smi" title (14px/18.67px, 500) 8px in and 8px down, rows from 42.7px: 31.2px tall,
+  // padding 0 8px in an 8px inset, 20px Twemoji 8px before the 16px `:code:`, the
+  // selected one on a 12% wash at radius 3. Ordered A–Z: `discordAutocompleteOptions`.
   autocomplete: {
-    className: cn(
-      "rounded-[8px] border border-(--discord-popup-border) bg-(--discord-autocomplete) font-picker text-(--discord-autocomplete-text) shadow-[0_8px_16px_rgb(0_0_0/0.24)]",
-      // The header row and the list are the popup's own elements.
-      "[&>div:first-child]:flex [&>div:first-child]:h-8 [&>div:first-child]:items-center [&>div:first-child]:border-0 [&>div:first-child]:px-2 [&>div:first-child]:py-0 [&>div:first-child]:text-[12px] [&>div:first-child]:text-(--discord-autocomplete-muted)",
-      "[&>ul]:max-h-[407px] [&>ul]:px-2 [&>ul]:pt-0 [&>ul]:pb-2 [&>ul]:[scrollbar-width:thin]",
-    ),
-    item: "h-[28.5px] gap-2 rounded px-2 py-0 text-[14px] leading-[18px] data-[highlighted]:bg-(--discord-autocomplete-hover) [&_[data-emoji]]:size-5 [&_[data-emoji]]:text-[20px]",
+    className: "mx-3 rounded-[5px] bg-(--discord-autocomplete) font-picker text-(--discord-autocomplete-text) shadow-(--discord-autocomplete-shadow)",
+    headerClassName: "px-2 pt-2 pb-4 text-[14px] leading-[18.67px] font-medium text-(--discord-autocomplete-muted)",
+    list: "max-h-[437px] px-2 pb-2 [scrollbar-width:thin]",
+    item: "h-[31.2px] gap-2 rounded-[3px] px-2 py-0 text-[16px] leading-5 font-normal data-[highlighted]:bg-(--discord-autocomplete-hover)",
     match: "",
-    header: (q) => (
-      <span className="font-medium">
-        Emoji matching :{q}
-      </span>
-    ),
+    emoji: 20,
+    header: (q) => `Emoji matching :${q}`,
   },
   // 29.6px pills, radius 8, a 0.8px border, 20px Twemoji 6px before a 16px/600 count.
   pill: {

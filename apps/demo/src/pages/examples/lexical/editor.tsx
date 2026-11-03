@@ -11,7 +11,6 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { $createEmojiNode, EmojiNode, EmojiShortcodePlugin, emojiAttrs } from "@/components/lexical/emoji-node";
 import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
-import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { EmojiPickerPopover } from "@/registry/emoji-picker";
 
 function Toolbar() {
@@ -40,7 +39,7 @@ function Toolbar() {
   );
 }
 
-const PLACEHOLDER_TEXT = "Type : followed by a shortcode, such as :tada or the custom :shipit. A complete :shipit: converts too.";
+const PLACEHOLDER_TEXT = "Type : followed by a shortcode, such as :tada or :rocket. A complete :rocket: converts too.";
 
 function LexicalEditor() {
   return (
@@ -64,7 +63,7 @@ function LexicalEditor() {
 
 export function Editor() {
   return (
-    <EmojiProvider data={enUrl} customEmojis={TEAM_EMOJI}>
+    <EmojiProvider data={enUrl}>
       <LexicalEditor />
     </EmojiProvider>
   );

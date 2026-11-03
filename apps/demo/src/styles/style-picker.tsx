@@ -205,8 +205,42 @@ export type StylePickerProps = {
   className?: string;
 };
 
+/**
+ * Keeps the active tab of a scrolling category bar in view. It sets the bar's own
+ * scroll offset (scrollIntoView would also scroll the page).
+ */
+function useActiveTabInView(vertical: boolean) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const bar = ref.current;
+    if (!bar) return;
+    const reveal = () => {
+      const tab = bar.querySelector<HTMLElement>("[data-active]");
+      if (!tab) return;
+      const b = bar.getBoundingClientRect();
+      const t = tab.getBoundingClientRect();
+      // Rects are in screen px; a scaled picker (FitBox) scrolls in its own px.
+      if (vertical) {
+        const k = bar.offsetHeight / b.height || 1;
+        if (t.top < b.top) bar.scrollTop -= (b.top - t.top) * k;
+        else if (t.bottom > b.bottom) bar.scrollTop += (t.bottom - b.bottom) * k;
+      } else {
+        const k = bar.offsetWidth / b.width || 1;
+        if (t.left < b.left) bar.scrollLeft -= (b.left - t.left) * k;
+        else if (t.right > b.right) bar.scrollLeft += (t.right - b.right) * k;
+      }
+    };
+    reveal();
+    const observer = new MutationObserver(reveal);
+    observer.observe(bar, { subtree: true, attributes: true, attributeFilter: ["data-active"] });
+    return () => observer.disconnect();
+  }, [vertical]);
+  return ref;
+}
+
 export function StylePicker({ layout, onSelect, search = true, autoFocus = false, searchResults, fluid = false, className }: StylePickerProps) {
   useStyleTokens(layout.id, layout.tokens);
+  const navRef = useActiveTabInView(layout.nav?.placement === "left");
   const categories = React.useMemo(() => categoriesFor(layout), [layout]);
   const headers = React.useMemo(() => headerComponent(layout), [layout]);
   const pick = (s: EmojiSelection) => onSelect?.(s);
@@ -214,12 +248,14 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
     <div className={cn("flex shrink-0", layout.nav.placement === "left" ? "flex-col" : "items-center", layout.nav.className)}>
       {layout.nav.leading}
       <EmojiPicker.CategoryNav
+        ref={navRef}
         orientation={layout.nav.placement === "left" ? "vertical" : "horizontal"}
         // `nav.active` is written with data-active: variants, so it applies only to the current tab.
         tabClassName={cn("shrink-0", layout.nav.button, layout.nav.active)}
         className={cn(
           "flex",
-          layout.nav.placement === "left" ? "min-h-0 w-full flex-1 flex-col items-center overflow-y-auto [scrollbar-width:none]" : "flex-1 items-center justify-between",
+          // Tabs that don't fit scroll (the bar's scrollbar hidden, as the apps hide theirs).
+          layout.nav.placement === "left" ? "min-h-0 w-full flex-1 flex-col items-center overflow-y-auto [scrollbar-width:none]" : "min-w-0 flex-1 items-center justify-between overflow-x-auto [scrollbar-width:none]",
           layout.nav.listClassName ?? (layout.nav.placement === "left" ? "gap-1" : "gap-0"),
         )}
       />
@@ -319,6 +355,8 @@ export type Style = {
   id: string;
   label: string;
   layout: PickerLayout;
+  /** The picker reactions open, when it differs from `layout` (Notion's has no tabs or shuffle). */
+  reaction?: PickerLayout;
   /** Fixed renderer for this style (Discord draws Twemoji everywhere). */
   renderer?: "native" | "twemoji";
   /** Popover size, for positioning. */
@@ -331,8 +369,22 @@ export type Style = {
     /** Classes and contents of the "+" that opens the full picker. */
     more?: { className: string; icon: React.ReactNode };
   };
-  autocomplete: { className: string; item: string; match: string; matchActive?: string; header?: (q: string) => React.ReactNode; showName?: boolean };
-  /** `emoji`: pill emoji size in px (default 16). */
-  pill: { base: string; mine: string; add: string; emoji?: number };
+  autocomplete: {
+    className: string;
+    /** The options list (padding, height); replaces the default `max-h-64 p-1`. */
+    list?: string;
+    item: string;
+    match: string;
+    matchActive?: string;
+    header?: (q: string) => React.ReactNode;
+    headerClassName?: string;
+    showName?: boolean;
+    /** Emoji size in px (default 22). */
+    emoji?: number;
+    /** Shown at the end of the highlighted option (Slack's "Enter"). */
+    hint?: React.ReactNode;
+  };
+  /** `emoji`: pill emoji size in px (default 16); `count`: count classes (default semibold). */
+  pill: { base: string; mine: string; add: string; emoji?: number; count?: string; addIcon?: React.ReactNode };
 };
 

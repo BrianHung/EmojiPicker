@@ -2,7 +2,6 @@ import { createRoot } from "react-dom/client";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider } from "@brianhung/emoji-picker";
 import { SiteShell, useRenderer } from "@/components/site/shell";
-import { TEAM_EMOJI } from "@/lib/custom-emoji";
 import { GalleryPage } from "./gallery";
 import "@/globals.css";
 
@@ -14,7 +13,7 @@ function Gallery() {
         <h1 className="text-3xl font-semibold tracking-tight">Gallery</h1>
         <p className="max-w-2xl text-base text-muted-foreground">Pickers, popovers, tapbacks and autocomplete in the style of each app.</p>
       </div>
-      <EmojiProvider key={renderer} data={enUrl} renderer={renderer} customEmojis={TEAM_EMOJI}>
+      <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
         <GalleryPage />
       </EmojiProvider>
     </main>

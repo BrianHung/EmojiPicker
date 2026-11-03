@@ -52,13 +52,14 @@ const FONT = "'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe
 // Linear's popups (measured): lch(12.72) fill, 0.5px lch(25.68) border, three soft shadows.
 const POPUP_SHADOW = "shadow-[0_3px_8px_lch(0_0_0/0.125),0_2px_5px_lch(0_0_0/0.125),0_1px_1px_lch(0_0_0/0.125)]";
 
-// (B) The inline ":" menu in Linear's editors: 189.6px wide, 34px rows in a 4px inset,
-// a 15px glyph at x=16.5 and the 13px/450 ":code:" at x=42, a 6px-radius highlight.
-// (Overrides the shared Tiptap menu's default look.)
+// (B) The inline ":" menu in Linear's editors, the same as its composer autocomplete
+// (re-measured Nov 2026): above the caret, 190.6px wide, radius 10, 4px
+// list padding, twelve 34px rows with the highlight inset 4px (radius 6), a 15px emoji
+// at x=14 and 8px to the 13px/450 ":code:". (Overrides the shared Tiptap menu's default look.)
 const INLINE_MENU = [
-  `w-[189.6px] rounded-[8px] border-[0.5px] border-[lch(25.68_1.93_272)] bg-[lch(12.72_0.85_272)] p-1 text-[lch(100_0_272)] ${POPUP_SHADOW}`,
+  `w-[190.6px] rounded-[10px] border-[0.5px] border-[lch(25.68_1.93_272)] bg-[lch(12.72_0.85_272)] p-1 text-[lch(100_0_272)] ${POPUP_SHADOW}`,
   "[font-family:'Inter_Variable',Inter,-apple-system,sans-serif] [color-scheme:dark]",
-  "[&>li]:h-[34px] [&>li]:gap-[10.5px] [&>li]:rounded-[6px] [&>li]:pr-2 [&>li]:pl-[12.5px]",
+  "[&>li]:h-[34px] [&>li]:gap-2 [&>li]:rounded-[6px] [&>li]:px-[10px]",
   "[&>li[data-highlighted]]:bg-[lch(18_1_272)] [&>li[data-highlighted]]:text-[lch(100_0_272)]",
   "[&_[data-emoji]]:w-[15px] [&_[data-emoji]]:text-[15px] [&_span]:[font-family:inherit] [&_span]:text-[13px] [&_span]:[font-weight:450] [&_b]:[font-weight:inherit]",
 ].join(" ");
@@ -422,7 +423,7 @@ function CommentCard({ comment, onToggle, compact = false }: { comment: Comment;
 }
 
 function Composer({ onSend, compact = false }: { onSend: (text: string) => void; compact?: boolean }) {
-  const { value, setText, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ limit: 8 });
+  const { value, setText, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ limit: 12 });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);
@@ -430,13 +431,13 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   };
   return (
     <div className={cn("relative", !compact && "mt-4 -ml-2 w-[612px]")}>
-      <StyleAutocomplete appStyle={linear} autocomplete={autocomplete} className={cn("absolute bottom-full left-4 mb-1", compact ? "right-4" : "w-[300px]")} />
+      <StyleAutocomplete appStyle={linear} autocomplete={autocomplete} className="absolute bottom-full left-4 mb-1 max-w-[calc(100%-32px)]" />
       <div className="relative h-[83px] rounded-[8px] px-4 py-3" style={{ background: C.card, border: `0.5px solid ${C.cardBorder}`, boxShadow: "0 0.5px 1px 1px lch(0 0 0 / 0.3)" }}>
         <textarea
           {...inputProps}
           rows={1}
           aria-label="Leave a comment"
-          placeholder="Leave a comment…"
+          placeholder="Leave a comment..."
           className={cn("block h-6 w-full resize-none bg-transparent outline-none placeholder:text-(--ph)", BODY)}
           style={{ color: "lch(90.826 1.425 272)", "--ph": C.muted } as React.CSSProperties}
           onKeyDown={(e) => {
@@ -537,7 +538,7 @@ function Description({ compact = false }: { compact?: boolean }) {
   return (
     <div style={{ color: C.text }}>
       <EditorContent editor={editor} />
-      <EmojiSuggestionMenu editor={editor} className={INLINE_MENU} />
+      <EmojiSuggestionMenu editor={editor} className={INLINE_MENU} limit={12} side="top" />
     </div>
   );
 }

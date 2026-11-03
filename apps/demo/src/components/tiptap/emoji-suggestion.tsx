@@ -5,6 +5,7 @@
 // `EmojiPopover` positions the menu at the caret through its `anchor` prop.
 // The extension only bridges the two with a tiny external store, so the menu is
 // a plain React component rendered next to <EditorContent> (inside EmojiProvider).
+// `useEmojiSuggestionQuery` is that bridge, for a menu of your own (Notion's grid).
 import * as React from "react";
 import { Extension, type Editor, type Range } from "@tiptap/react";
 import Suggestion, { type SuggestionKeyDownProps, type SuggestionProps } from "@tiptap/suggestion";
@@ -70,28 +71,66 @@ export const EmojiSuggestion = Extension.create<EmojiSuggestionOptions>({
   },
 });
 
-/** The menu: render it once, anywhere under <EmojiProvider>, with the editor that has `EmojiSuggestion`. */
-export function EmojiSuggestionMenu({ editor, className }: { editor: Editor; className?: string }) {
+/** The open `:` query and how to complete it: what a menu is built on. */
+export type EmojiSuggestionQuery = {
+  /** What follows the `:`; "" while closed. */
+  query: string;
+  open: boolean;
+  /** The typed `:query` on screen, for anchoring a popover. */
+  rect: () => DOMRect | null;
+  /** Replace the typed `:query` with the suggestion (`text` is what `useEmojiSuggestions().textFor` gives). */
+  insert: (suggestion: ShortcodeSuggestion, text: string) => void;
+  close: () => void;
+};
+
+/**
+ * The editor's `:` query, for a menu of your own (a grid, sections). Keys typed in the
+ * editor go to `keys.current` first while the query is open; return true when handled.
+ */
+export function useEmojiSuggestionQuery(editor: Editor, keys: React.RefObject<((event: KeyboardEvent) => boolean) | null>): EmojiSuggestionQuery {
   const bridge = bridgeFor(editor);
   const state = React.useSyncExternalStore(bridge.subscribe, bridge.get, bridge.get);
-  const store = useEmojiStore();
-  const insert = (s: ShortcodeSuggestion) => {
-    if (!state) return;
-    // The emoji in the user's skin tone; custom emoji insert their :shortcode: (render it however your schema does).
-    const chain = editor.chain().focus().deleteRange(state.range);
-    // Custom emoji become an inline image node when the editor has EmojiNode; standard emoji stay text.
-    if (s.record.imageUrl && editor.schema.nodes.emoji) chain.insertEmoji({ unified: s.record.unified, shortcode: s.shortcode, text: null }).run();
-    else chain.insertContent(`${menu.textFor(s)} `).run();
-  };
-  const menu = useEmojiSuggestions({ query: state?.query ?? "", limit: 8, onChoose: insert, onDismiss: () => bridge.set(null) });
   // Tiptap hands key events to the plugin first; route them to the menu while it's open.
-  bridge.keyHandler = (event) => menu.onKeyDown(event);
-  React.useEffect(() => () => void (bridge.keyHandler = null), [bridge]);
+  React.useEffect(() => {
+    bridge.keyHandler = (event) => keys.current?.(event) ?? false;
+    return () => void (bridge.keyHandler = null);
+  }, [bridge, keys]);
+  return {
+    query: state?.query ?? "",
+    open: Boolean(state),
+    rect: () => state?.rect() ?? null,
+    insert(s, text) {
+      if (!state) return;
+      const chain = editor.chain().focus().deleteRange(state.range);
+      // Custom emoji become an inline image node when the editor has EmojiNode; standard emoji stay text.
+      if (s.record.imageUrl && editor.schema.nodes.emoji) chain.insertEmoji({ unified: s.record.unified, shortcode: s.shortcode, text: null }).run();
+      else chain.insertContent(`${text} `).run();
+    },
+    close: () => bridge.set(null),
+  };
+}
 
-  const open = Boolean(state) && menu.open;
+export type EmojiSuggestionMenuProps = {
+  editor: Editor;
+  /** Classes for the list (its look); rows are `li`, the highlighted one `[data-highlighted]`. */
+  className?: string;
+  /** Most suggestions shown. Default 8. */
+  limit?: number;
+  /** Side of the caret it opens on (flips when there's no room). Default "bottom". */
+  side?: "top" | "bottom";
+};
+
+/** The menu: render it once, anywhere under <EmojiProvider>, with the editor that has `EmojiSuggestion`. */
+export function EmojiSuggestionMenu({ editor, className, limit = 8, side = "bottom" }: EmojiSuggestionMenuProps) {
+  const keys = React.useRef<(event: KeyboardEvent) => boolean>(null);
+  const suggestion = useEmojiSuggestionQuery(editor, keys);
+  const store = useEmojiStore();
+  const menu = useEmojiSuggestions({ query: suggestion.query, limit, onChoose: (s) => suggestion.insert(s, menu.textFor(s)), onDismiss: suggestion.close });
+  keys.current = (event) => menu.onKeyDown(event);
+
   return (
-    <EmojiPopover.Root open={open} onOpenChange={(next) => !next && bridge.set(null)} closeOnSelect={false}>
-      <EmojiPopover.Content anchor={() => state?.rect() ?? null} sideOffset={6} onMouseDown={(e) => e.preventDefault()}>
+    <EmojiPopover.Root open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} closeOnSelect={false}>
+      <EmojiPopover.Content anchor={suggestion.rect} side={side} sideOffset={6} onMouseDown={(e) => e.preventDefault()}>
         <ul
           {...menu.getListProps()}
           className={cn("w-64 overflow-hidden rounded-lg border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg", className)}
