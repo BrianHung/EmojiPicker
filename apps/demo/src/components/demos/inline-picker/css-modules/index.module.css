@@ -24,6 +24,32 @@
   padding: 12px;
 }
 
+.tone {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 1;
+  border-radius: 6px;
+  outline: none;
+}
+.tone:hover,
+.tone:focus-visible {
+  background: var(--emoji-picker-hover);
+}
+
+.tones {
+  display: flex;
+  padding: 2px;
+  background: var(--emoji-picker-background);
+  border: 1px solid var(--emoji-picker-border);
+  border-radius: 8px;
+  box-shadow: var(--emoji-picker-shadow);
+}
+
 .input {
   width: 100%;
   height: 32px;

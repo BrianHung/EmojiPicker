@@ -14,7 +14,11 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
             "h-8 w-full rounded-md border border-picker-input-border bg-picker-input px-3 text-sm text-picker-foreground outline-none placeholder:text-picker-subtle focus-visible:border-picker-ring",
         }}
       >
-        <EmojiPicker.SkinTone />
+        <EmojiPicker.SkinTone
+          emoji="270b"
+          buttonClassName="flex size-8 shrink-0 items-center justify-center rounded-md text-lg leading-none outline-none hover:bg-picker-hover focus-visible:bg-picker-hover"
+          optionsClassName="flex rounded-lg border border-picker-border bg-picker-background p-0.5 shadow-picker"
+        />
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1">
         <EmojiPicker.List

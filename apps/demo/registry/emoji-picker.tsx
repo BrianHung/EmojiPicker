@@ -52,7 +52,7 @@ export function EmojiPickerBody({ rows, components, footer = true, empty = "No e
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
         </svg>
-        <EmojiPicker.SkinTone emoji="270b" buttonClassName="flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent" />
+        <EmojiPicker.SkinTone emoji="270b" buttonClassName="flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent" optionsClassName="flex rounded-lg border border-border bg-popover p-0.5 shadow-md" />
       </EmojiPicker.Search>
       {rows}
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">

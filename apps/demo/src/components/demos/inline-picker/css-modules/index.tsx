@@ -5,7 +5,7 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
   return (
     <EmojiPicker.Root onSelect={onSelect} autoFocusSearch={false} className={styles.root}>
       <EmojiPicker.Search className={styles.search} inputProps={{ className: styles.input }}>
-        <EmojiPicker.SkinTone />
+        <EmojiPicker.SkinTone emoji="270b" buttonClassName={styles.tone} optionsClassName={styles.tones} />
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className={styles.viewport}>
         <EmojiPicker.List cellClassName={styles.cell} headerClassName={styles.header} />
