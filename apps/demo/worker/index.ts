@@ -2,11 +2,11 @@
 //
 //   GET  /api/health        what's configured, and the index size
 //   POST /api/embed-search  Workers AI embeddings + Vectorize
-//   POST /api/decide        a decision model on Workers AI: Clef or Jev
+//   POST /api/decide        Jev, a decision model on Workers AI
 //   POST /api/admin/seed    embeds the emoji into Vectorize (Bearer ADMIN_TOKEN)
 import { allowedOrigin, corsHeaders } from "./cors";
 import { BUILT_IN, CUSTOM } from "./corpus";
-import { CATALOG, decisionSearch, MODELS, type ModelName } from "./decide";
+import { decisionSearch, MODEL } from "./decide";
 import { embedSearch, EMBEDDING_MODEL } from "./embed-search";
 import type { Env } from "./env";
 import { BadRequest, Unavailable, UpstreamError } from "./errors";
@@ -26,12 +26,6 @@ function parseSearch(body: unknown): SearchBody {
   if (typeof limit !== "number" || !Number.isInteger(limit) || limit < 1 || limit > MAX_LIMIT) throw new BadRequest(`limit: expected an integer from 1 to ${MAX_LIMIT}`);
   if (typeof custom !== "boolean") throw new BadRequest("custom: expected a boolean");
   return { query: query.trim(), limit, custom };
-}
-
-function parseDecide(body: unknown): SearchBody & { model: ModelName } {
-  const { model } = (body ?? {}) as Record<string, unknown>;
-  if (!MODELS.includes(model as ModelName)) throw new BadRequest(`model: expected ${MODELS.map((m) => `"${m}"`).join(" or ")}`);
-  return { ...parseSearch(body), model: model as ModelName };
 }
 
 const readJson = (request: Request) => request.json().catch(() => null);
@@ -55,7 +49,7 @@ export default {
           return json({
             corpus: BUILT_IN.length + CUSTOM.length,
             embed: { model: EMBEDDING_MODEL, vectors: index?.vectorCount ?? null },
-            decide: { gateway: env.AI_GATEWAY_ID, models: Object.fromEntries(MODELS.map((m) => [m, CATALOG[m].id])) },
+            decide: { gateway: env.AI_GATEWAY_ID, model: MODEL },
           });
         }
         case "POST /api/embed-search": {
@@ -63,7 +57,7 @@ export default {
           return json(result, 200, { "server-timing": `embed;dur=${result.timings.embedMs}, vectorize;dur=${result.timings.queryMs}` });
         }
         case "POST /api/decide": {
-          const result = await decisionSearch(env, parseDecide(await readJson(request)), request.signal);
+          const result = await decisionSearch(env, parseSearch(await readJson(request)), request.signal);
           return json(result, 200, { "server-timing": `round1;dur=${result.timings.round1Ms}, round2;dur=${result.timings.round2Ms}` });
         }
         case "POST /api/admin/seed": {

@@ -88,22 +88,13 @@ npm run seed -- --url https://emoji-picker.<you>.workers.dev --token $ADMIN_TOKE
 
 ### Decision model
 
-A decision model scores every emoji name as an option. Jev and Clef take the same request, so switching is just the model id.
+Jev, a decision model on Workers AI, scores every emoji name as an option. On this site it answers in about 0.8 s for $0.0007 a search; Cloudflare's Clef takes the same request but took 2–6 s.
 
 ```ts title="worker/decide.ts"
-const MODELS = {
-  jev: "typesafe/jev",
-  "clef-omni": "@cf/cloudflare/clef-omni",
-  "clef-flash": "@cf/cloudflare/clef-flash",
-  clef: "@cf/cloudflare/clef",
-};
-
-async function ask(env: Env, model: keyof typeof MODELS, query: string, names: string[]) {
-  const out = await env.AI.run(
-    MODELS[model],
+async function ask(env: Env, query: string, names: string[]) {
+  const { result } = await env.AI.run(
+    "typesafe/jev",
     {
-      // Clef's schema also takes its short name.
-      ...(model === "jev" ? {} : { model }),
       state: query,
       questions: {
         emoji: {
@@ -115,21 +106,18 @@ async function ask(env: Env, model: keyof typeof MODELS, query: string, names: s
     },
     { gateway: { id: "default" } },
   );
-  return (out.result ?? out).answers.emoji.probabilities;
+  return result.answers.emoji.probabilities;
 }
 ```
 
-On this site, Jev is the fastest and cheapest (about 1 s, $0.0007 a search), with Clef Omni close behind.
-
 ```tsx title="search.tsx"
-const decision = (model: "jev" | "clef-omni" | "clef-flash" | "clef") =>
-  remote((query, { limit, signal }) =>
-    fetch("/api/decide", { method: "POST", body: JSON.stringify({ query, limit, model }), signal })
-      .then((r) => r.json())
-      .then((r) => r.hits),
-  );
+const decision = remote((query, { limit, signal }) =>
+  fetch("/api/decide", { method: "POST", body: JSON.stringify({ query, limit }), signal })
+    .then((r) => r.json())
+    .then((r) => r.hits),
+);
 
-<EmojiProvider data={en} search={fallback(decision("jev"), lexical())}>
+<EmojiProvider data={en} search={fallback(decision, lexical())}>
 ```
 
 ### Your own emoji

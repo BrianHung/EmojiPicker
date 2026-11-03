@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import worker from "../index";
 import { BUILT_IN, CUSTOM, emojiText } from "../corpus";
-import { CATALOG, MAX_OPTIONS, MAX_QUESTIONS, chunk, labelOptions, pack, type DecisionResponse } from "../decide";
+import { MAX_OPTIONS, MODEL, PRICE, MAX_QUESTIONS, chunk, labelOptions, pack, type DecisionResponse } from "../decide";
 import type { EmbedSearchResponse } from "../embed-search";
 import { mockEnv, post } from "./mocks";
 
@@ -29,14 +29,14 @@ describe("CORS", () => {
     const pre = await fetch(new Request("https://w.dev/api/decide", { method: "OPTIONS", headers: { origin: "https://evil.example" } }), env);
     expect(pre.status).toBe(403);
     expect(pre.headers.get("access-control-allow-origin")).toBeNull();
-    expect((await fetch(post("/api/decide", { query: "cat", model: "clef" }, { origin: "https://evil.example" }), env)).status).toBe(403);
+    expect((await fetch(post("/api/decide", { query: "cat" }, { origin: "https://evil.example" }), env)).status).toBe(403);
   });
   it("doesn't treat dots in the allowlist as wildcards", async () => {
-    const res = await fetch(post("/api/decide", { query: "cat", model: "clef" }, { origin: "https://emojixexample.com" }), mockEnv().env);
+    const res = await fetch(post("/api/decide", { query: "cat" }, { origin: "https://emojixexample.com" }), mockEnv().env);
     expect(res.status).toBe(403);
   });
   it("lets same-origin calls through without an allowlist entry", async () => {
-    const res = await fetch(post("/api/decide", { query: "cat", model: "clef" }, { origin: "https://emoji-search.example.workers.dev" }), mockEnv({ ALLOWED_ORIGINS: "" }).env);
+    const res = await fetch(post("/api/decide", { query: "cat" }, { origin: "https://emoji-search.example.workers.dev" }), mockEnv({ ALLOWED_ORIGINS: "" }).env);
     expect(res.status).toBe(200);
   });
   it("lets server-to-server calls (no Origin) through", async () => {
@@ -117,66 +117,51 @@ describe("POST /api/embed-search", () => {
 });
 
 describe("POST /api/decide", () => {
-  it("validates the body, model included", async () => {
+  it("validates the body", async () => {
     const { env } = mockEnv();
-    for (const body of [...INVALID_SEARCHES.map((b) => ({ ...b, model: "clef-flash" })), { query: "cat" }, { query: "cat", model: "gpt" }]) {
-      expect((await fetch(post("/api/decide", body), env)).status).toBe(400);
-    }
+    for (const body of INVALID_SEARCHES) expect((await fetch(post("/api/decide", body), env)).status).toBe(400);
   });
-
-  // The models share the transport and the two-round ranking. Clef's schema also takes its
-  // short model name, and clef-flash's smaller context splits round 1 in two.
-  describe.each([
-    { model: "clef-flash", returned: "clef-flash", keys: ["model", "questions", "state"], requests: 3 },
-    { model: "clef-omni", returned: "clef-omni", keys: ["model", "questions", "state"], requests: 2 },
-    { model: "clef", returned: "clef", keys: ["model", "questions", "state"], requests: 2 },
-    { model: "jev", returned: "jev", keys: ["questions", "state"], requests: 2 },
-  ] as const)("$model", ({ model, returned, keys, requests }) => {
-    const { id, price } = CATALOG[model];
-    it("runs the model through AI Gateway with its request body, unwraps `result` and prices the tokens", async () => {
-      const { env, decideCalls } = mockEnv();
-      const body = await search("/api/decide", { query: "cat", model }, env);
-      for (const call of decideCalls) {
-        expect(call.model).toBe(id);
-        expect(call.options).toMatchObject({ gateway: { id: "default" } });
-        expect(Object.keys(call.input).sort()).toEqual(keys);
-      }
-      expect(body.model).toBe(returned);
-      expect(body.usage.requests).toBe(requests);
-      expect(body.usage.inputTokens).toBeGreaterThan(0);
-      expect(body.usage.costUsd).toBeCloseTo(body.usage.inputTokens * price.input + body.usage.outputTokens * price.output, 12);
-    });
-    it("asks in two rounds: every name in <=255-option questions, then the finalists", async () => {
-      const { env, decideCalls } = mockEnv();
-      const res = await fetch(post("/api/decide", { query: "thumbs up", limit: 8, model }), env);
-      expect(res.status).toBe(200);
-      expect(res.headers.get("server-timing")).toMatch(/round1;dur=\d+, round2;dur=\d+/);
-      expect(decideCalls).toHaveLength(requests);
-      const inputs = decideCalls.map((c) => c.input);
-      const round1 = inputs.slice(0, -1);
-      const round2 = inputs.at(-1);
-      expect(round1.every((r) => r.state === "thumbs up" && Object.keys(r.questions).length <= MAX_QUESTIONS)).toBe(true);
-      const questions = round1.flatMap((r) => Object.values(r.questions));
-      expect(questions).toHaveLength(Math.ceil(BUILT_IN.length / 250));
-      expect(questions.reduce((n, q) => n + Object.keys(q.criteria).length, 0)).toBe(BUILT_IN.length);
-      expect(Object.keys(round2!.questions.q0!.criteria).length).toBeLessThanOrEqual(MAX_OPTIONS);
-      const body = (await res.json()) as DecisionResponse;
-      expect(body.hits[0]!.unified).toBe("1f44d");
-      expect(body.hits).toHaveLength(8);
-      expect(body.timings).toEqual({ round1Ms: expect.any(Number), round2Ms: expect.any(Number) });
-    });
+  it("runs Jev through AI Gateway with only state and questions, unwraps `result` and prices the tokens", async () => {
+    const { env, decideCalls } = mockEnv();
+    const body = await search("/api/decide", { query: "cat" }, env);
+    for (const call of decideCalls) {
+      expect(call.model).toBe(MODEL);
+      expect(call.options).toMatchObject({ gateway: { id: "default" } });
+      expect(Object.keys(call.input).sort()).toEqual(["questions", "state"]);
+    }
+    expect(body.model).toBe("jev");
+    expect(body.usage.requests).toBe(2);
+    expect(body.usage.costUsd).toBeCloseTo(body.usage.inputTokens * PRICE, 12);
+  });
+  it("asks in two rounds: every name in <=255-option questions, then the finalists", async () => {
+    const { env, decideCalls } = mockEnv();
+    const res = await fetch(post("/api/decide", { query: "thumbs up", limit: 8 }), env);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("server-timing")).toMatch(/round1;dur=\d+, round2;dur=\d+/);
+    expect(decideCalls).toHaveLength(2);
+    const [round1, round2] = decideCalls.map((c) => c.input);
+    expect(round1!.state).toBe("thumbs up");
+    const questions = Object.values(round1!.questions);
+    expect(questions.length).toBeLessThanOrEqual(MAX_QUESTIONS);
+    expect(questions).toHaveLength(Math.ceil(BUILT_IN.length / 250));
+    expect(questions.reduce((n, q) => n + Object.keys(q.criteria).length, 0)).toBe(BUILT_IN.length);
+    expect(Object.keys(round2!.questions.q0!.criteria).length).toBeLessThanOrEqual(MAX_OPTIONS);
+    const body = (await res.json()) as DecisionResponse;
+    expect(body.hits[0]!.unified).toBe("1f44d");
+    expect(body.hits).toHaveLength(8);
+    expect(body.timings).toEqual({ round1Ms: expect.any(Number), round2Ms: expect.any(Number) });
   });
 
   it("offers custom emoji when asked", async () => {
     const { env, decideCalls } = mockEnv();
-    const body = await search("/api/decide", { query: "rubber duck", limit: 3, custom: true, model: "jev" }, env);
+    const body = await search("/api/decide", { query: "rubber duck", limit: 3, custom: true }, env);
     expect(decideCalls.slice(0, -1).some((c) => Object.values(c.input.questions).some((q) => "rubber duck (custom)" in q.criteria))).toBe(true);
     expect(body.hits[0]).toMatchObject({ unified: "rubber-duck", custom: true, imageUrl: expect.stringMatching(/^data:image\/svg/) });
   });
   it("answers 502 when the model returns no answers", async () => {
     const { env } = mockEnv();
-    env.AI = { run: async () => ({ answers: {} }) } as unknown as Ai;
-    expect((await fetch(post("/api/decide", { query: "cat", model: "clef-flash" }), env)).status).toBe(502);
+    env.AI = { run: async () => ({ result: { answers: {} } }) } as unknown as Ai;
+    expect((await fetch(post("/api/decide", { query: "cat" }), env)).status).toBe(502);
   });
 });
 
@@ -213,7 +198,7 @@ describe("routing", () => {
     expect(body).toMatchObject({
       corpus: BUILT_IN.length + CUSTOM.length,
       embed: { model: "@cf/baai/bge-large-en-v1.5", vectors: BUILT_IN.length + CUSTOM.length },
-      decide: { gateway: "default", models: { "clef-flash": "@cf/cloudflare/clef-flash", "clef-omni": "@cf/cloudflare/clef-omni", clef: "@cf/cloudflare/clef", jev: "typesafe/jev" } },
+      decide: { gateway: "default", model: "typesafe/jev" },
     });
   });
 });

@@ -1,5 +1,5 @@
 // The semantic search demo: one picker, three approaches (on device, a vector DB, a
-// decision model with Clef or Jev).
+// decision model).
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, type CustomEmoji, type EmojiSearch } from "@brianhung/emoji-picker";
@@ -7,7 +7,7 @@ import { fallback, lexical } from "@brianhung/emoji-picker/search";
 import { useRenderer } from "@/components/site/shell";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { apiStatus, decisionSearch, embeddingsSearch, type Backend, type DecisionModel } from "@/lib/semantic-search/api";
+import { apiStatus, decisionSearch, embeddingsSearch } from "@/lib/semantic-search/api";
 import customEmojiJson from "@/lib/semantic-search/custom-emoji.json";
 import { loadOnDevice, onDeviceSearch, onDeviceStatus } from "@/lib/semantic-search/on-device";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
@@ -19,17 +19,11 @@ const LIMIT = 48;
 const EMPTY_BEFORE_DOWNLOAD = "Download the model to search by meaning.";
 
 type Tab = "device" | "vector" | "decision";
-const searchFor = (tab: Tab, model: DecisionModel): EmojiSearch => {
-  if (tab === "device") return fallback(onDeviceSearch, lexical());
-  if (tab === "vector") return fallback(embeddingsSearch, lexical());
-  return fallback(decisionSearch(model), lexical());
+const SEARCHES: Record<Tab, EmojiSearch> = {
+  device: fallback(onDeviceSearch, lexical()),
+  vector: fallback(embeddingsSearch, lexical()),
+  decision: fallback(decisionSearch, lexical()),
 };
-const MODELS: { value: DecisionModel; label: string }[] = [
-  { value: "jev", label: "Jev" },
-  { value: "clef-omni", label: "Clef Omni" },
-  { value: "clef-flash", label: "Clef Flash" },
-  { value: "clef", label: "Clef" },
-];
 
 /** Reports how many results the provider's search returned and how long it took. */
 function timed(search: EmojiSearch, report: (t: { query: string; count: number; ms: number }) => void): EmojiSearch {
@@ -54,13 +48,12 @@ export function Demo() {
   const renderer = useRenderer();
   const [tab, setTab] = React.useState<Tab>("device");
   const [query, setQuery] = React.useState("jurassic park");
-  const [model, setModel] = React.useState<DecisionModel>("jev");
   const [timing, setTiming] = React.useState<{ query: string; count: number; ms: number } | null>(null);
   const device = useStore(onDeviceStatus);
   const api = useStore(apiStatus);
-  const search = React.useMemo(() => timed(searchFor(tab, model), setTiming), [tab, model]);
+  const search = React.useMemo(() => timed(SEARCHES[tab], setTiming), [tab]);
 
-  const backend: Backend | null = tab === "vector" ? "embeddings" : tab === "decision" ? model : null;
+  const backend = tab === "vector" ? "embeddings" : tab === "decision" ? "decision" : null;
   const unavailable = backend !== null && api[backend] === "unavailable";
   const current = timing && timing.query === query ? timing : null;
   let status: React.ReactNode = current ? `${current.count} results · ${current.ms < 10 ? current.ms.toFixed(1) : Math.round(current.ms)} ms` : null;
@@ -89,21 +82,10 @@ export function Demo() {
             Download model (35 MB)
           </Button>
         ) : null}
-        {tab === "decision" ? (
-          <Tabs value={model} onValueChange={(v) => setModel(v as DecisionModel)} className="sm:ml-auto">
-            <TabsList aria-label="Model">
-              {MODELS.map((m) => (
-                <TabsTrigger key={m.value} value={m.value}>
-                  {m.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        ) : null}
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
         {/* The provider reads `search` once: remount it per backend, and when the model arrives. */}
-        <EmojiProvider key={`${tab}:${model}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} search={search}>
+        <EmojiProvider key={`${tab}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} search={search}>
           <EmojiPickerCard search={query} onSearchChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
         </EmojiProvider>
         <p className="min-h-5 text-sm text-muted-foreground tabular-nums" data-testid="status" aria-live="polite">

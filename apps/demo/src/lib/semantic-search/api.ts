@@ -5,11 +5,10 @@ import { remote } from "@brianhung/emoji-picker/search";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
 
-export type DecisionModel = "jev" | "clef-omni" | "clef-flash" | "clef";
-export type Backend = "embeddings" | DecisionModel;
+export type Backend = "embeddings" | "decision";
 type ApiStatus = "unknown" | "ok" | "unavailable";
 
-let status: Record<Backend, ApiStatus> = { embeddings: "unknown", jev: "unknown", "clef-omni": "unknown", "clef-flash": "unknown", clef: "unknown" };
+let status: Record<Backend, ApiStatus> = { embeddings: "unknown", decision: "unknown" };
 const listeners = new Set<() => void>();
 export const apiStatus = {
   get: () => status,
@@ -50,6 +49,5 @@ function api(backend: Backend, path: string, body: Record<string, unknown> = {})
 /** Workers AI embeddings (bge-large-en-v1.5), nearest neighbors from Vectorize. */
 export const embeddingsSearch = api("embeddings", "/api/embed-search");
 
-const DECISION = Object.fromEntries((["jev", "clef-omni", "clef-flash", "clef"] as const).map((m) => [m, api(m, "/api/decide", { model: m })])) as Record<DecisionModel, EmojiSearch>;
-/** A decision model on Workers AI (Jev or a Clef) picks from every emoji name. */
-export const decisionSearch = (model: DecisionModel): EmojiSearch => DECISION[model];
+/** Jev, a decision model on Workers AI, picks from every emoji name. */
+export const decisionSearch = api("decision", "/api/decide");

@@ -48,13 +48,20 @@ The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `
 | Route | Body | Response |
 |---|---|---|
 | `POST /api/embed-search` | `{ query, limit?, custom? }` | `{ hits, model, timings }` |
-| `POST /api/decide` | `{ query, model, limit?, custom? }` | `{ hits, model, usage, timings }` |
+| `POST /api/decide` | `{ query, limit?, custom? }` | `{ hits, model, usage, timings }` |
 | `POST /api/admin/seed` | `{ from?, count?, custom? }` with `Authorization: Bearer <ADMIN_TOKEN>` | `{ total, from, next, done, upserted, mutationIds }` |
 | `GET /api/health` | | Corpus size, index size and model ids |
 
-`limit` is 1–50 and defaults to 24. `custom: true` includes custom emoji. `model` is one of the keys of `CATALOG` in `worker/decide.ts`: `clef-flash`, `clef-omni`, `clef` or `jev`. An unreachable binding or an empty index returns `503`.
+`limit` is 1–50 and defaults to 24. `custom: true` includes custom emoji. An unreachable binding or an empty index returns `503`.
 
-`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks a decision model in two rounds, since a question takes at most 255 options: the emoji names in groups of 250, then one question over each group's top picks.
+`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks Jev (`typesafe/jev`) in two rounds, since a question takes at most 255 options: the emoji names in groups of 250, then one question over each group's top picks. Cloudflare's Clef takes the same request (Clef also wants its short name as `model` in the body); measured on this site, per search:
+
+| Model | Latency | Cost |
+|---|---|---|
+| `typesafe/jev` | 0.8 s | $0.0007 |
+| `@cf/cloudflare/clef-omni` | 2.0 s | $0.0047 |
+| `@cf/cloudflare/clef` | 4.3 s | $0.0075 |
+| `@cf/cloudflare/clef-flash` | 5.9 s | $0.0012 |
 
 ## Custom emoji
 
