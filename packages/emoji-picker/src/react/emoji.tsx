@@ -18,19 +18,10 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
   decorative?: boolean;
 };
 
-export type EmojiProps = BaseProps &
-  (
-    | {
-        /** "🎉", ":tada:", "tada", "1f389", a custom id, a CustomEmoji, an EmojiRecord or an EmojiSelection. */
-        emoji: EmojiInput;
-        unified?: never;
-      }
-    | {
-        /** @deprecated Use `emoji`, which also takes unified codes. */
-        unified: string;
-        emoji?: never;
-      }
-  );
+export type EmojiProps = BaseProps & {
+  /** "🎉", ":tada:", "tada", "1f389", a custom id, a CustomEmoji, an EmojiRecord or an EmojiSelection. */
+  emoji: EmojiInput;
+};
 
 /**
  * The emoji an input names, resolved against the provider's data (null when unknown).
@@ -48,9 +39,8 @@ export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
 }
 
 /** One emoji, rendered the same way the pickers render it (native, Twemoji or custom image). */
-export function Emoji({ emoji, unified, size, renderer: override, animate = true, decorative = false, ...props }: EmojiProps) {
+export function Emoji({ emoji: input, size, renderer: override, animate = true, decorative = false, ...props }: EmojiProps) {
   const context = useEmojiContext();
-  const input: EmojiInput = emoji ?? unified ?? "";
   const resolved = useEmoji(input);
   const art = useArtwork(resolved?.unified);
   const status = useStoreSnapshot((s) => s.status());

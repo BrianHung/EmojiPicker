@@ -342,7 +342,7 @@ export function EmojiText({ text, size, className }: { text: string; size: numbe
       if (!record) return void (run += seg);
       if (run) out.push(run);
       run = "";
-      out.push(<Emoji key={i} unified={store.get(unified) ? unified : record.unified} size={size} className={className} title={record.shortcodes[0] ? `:${record.shortcodes[0]}:` : record.name} />);
+      out.push(<Emoji key={i} emoji={store.get(unified) ? unified : record.unified} size={size} className={className} title={record.shortcodes[0] ? `:${record.shortcodes[0]}:` : record.name} />);
     });
     if (run) out.push(run);
     return <>{out}</>;

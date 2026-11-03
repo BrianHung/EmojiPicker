@@ -89,8 +89,6 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   pointer?: PointerModel;
   /** Draw these emoji with your own art in this picker; see EmojiOverrides. */
   artwork?: ArtworkMap;
-  /** @deprecated Use `focusModel`: `true` is "input", `false` is "grid". */
-  keepSearchFocus?: boolean;
   /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
   emojiVersion?: number;
   /** Turn off skin-tone variations in the grid (no long press). */
@@ -144,7 +142,7 @@ function resolvedData(store: EmojiStore, labels: EmojiLabels): EprEmojiData {
 }
 
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(
-  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations, reactions, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, components, cssLayer = "base", style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel: focusModelProp, pointer = "follows", keepSearchFocus, artwork, children, ...rest },
+  { onSelect, frequent = 16, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations, reactions, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, components, cssLayer = "base", style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest },
   ref,
 ) {
   const { store, renderer, imageUrl, labels, groups, maxVersion } = useEmojiContext();
@@ -168,7 +166,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const heldReactions = useHeldWhileActive(reactions, rootRef);
   useClippedScrollGuard(rootRef);
   const autoFocus = autoFocusSearch ?? Boolean(popover);
-  const focusModel: FocusModel = focusModelProp ?? (keepSearchFocus === false ? "grid" : "input");
   useEnginePointer(rootRef, focusModel, pointer);
   useHighlightMirror(rootRef);
   const close = React.useCallback(() => {

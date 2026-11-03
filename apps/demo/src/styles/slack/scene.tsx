@@ -48,7 +48,7 @@ function SlackText({ text }: { text: string }) {
       if (!record) continue;
       out.push(text.slice(last, m.index));
       const tone = m[2] ? record.tones[Number(m[2]) - 2] : undefined;
-      out.push(<Emoji key={m.index} unified={tone ?? record.unified} size={22} className="mx-px inline-block align-[-5px] text-[22px] leading-none" title={m[0]} />);
+      out.push(<Emoji key={m.index} emoji={tone ?? record.unified} size={22} className="mx-px inline-block align-[-5px] text-[22px] leading-none" title={m[0]} />);
       last = m.index! + m[0].length;
     }
     out.push(text.slice(last));
