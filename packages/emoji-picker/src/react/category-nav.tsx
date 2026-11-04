@@ -3,6 +3,7 @@
 // keyboard). One tab stop: the current tab, else the last focused, else the first.
 // While search results show, the tabs are disabled.
 import * as React from "react";
+import { useFocusVisible } from "react-aria/useFocusVisible";
 import { DefaultCategoryIcon } from "./category-icons";
 import type { CategoryButtonProps } from "./components";
 import { usePicker } from "./context";
@@ -28,6 +29,8 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
   const id = React.useId();
   // The focused tab, and whether focus is still in the list (then it stays the tab stop).
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
+  const [pointer, setPointer] = React.useState<{ hovered: string | null; pressed: string | null }>({ hovered: null, pressed: null });
+  const { isFocusVisible } = useFocusVisible();
   const User = picker.components.CategoryButton;
   if (categories.length <= 1) return null;
 
@@ -80,6 +83,11 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus((f) => ({ ...f, within: false }));
       }}
+      onPointerOver={(e) => e.pointerType !== "touch" && setPointer((p) => ({ ...p, hovered: keyOf(e) }))}
+      onPointerLeave={() => setPointer({ hovered: null, pressed: null })}
+      onPointerDown={(e) => setPointer((p) => ({ ...p, pressed: keyOf(e) }))}
+      onPointerUp={() => setPointer((p) => ({ ...p, pressed: null }))}
+      onPointerCancel={() => setPointer((p) => ({ ...p, pressed: null }))}
       onClick={(e) => {
         const key = keyOf(e);
         if (key != null && !disabled) choose(key, e.detail === 0);
@@ -102,6 +110,10 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
           "data-key": c.id,
           "data-selected": isSelected || undefined,
           "data-disabled": disabled || undefined,
+          "data-focused": (focus.within && focus.key === c.id) || undefined,
+          "data-focus-visible": (focus.within && focus.key === c.id && isFocusVisible) || undefined,
+          "data-hovered": (!disabled && pointer.hovered === c.id) || undefined,
+          "data-pressed": (!disabled && pointer.pressed === c.id) || undefined,
           "data-active": active ? "" : undefined,
           children: icon,
         };
