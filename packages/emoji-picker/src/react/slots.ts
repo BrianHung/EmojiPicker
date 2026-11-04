@@ -1,6 +1,7 @@
 // The styling contract: every part carries a stable `data-slot`, sizes come from
 // public CSS variables, and the few structural rules the layout needs live here.
 import * as React from "react";
+import { useStyleSheet } from "./style-sheet";
 
 export const SLOTS = {
   root: "emoji-picker",
@@ -44,6 +45,7 @@ const STRUCTURE = (layer: string) => `@layer ${layer}{
 ${S("root")}{position:relative;display:flex;flex-direction:column;overflow:clip}
 :where([data-slot="popover-content"]) ${S("root")}{max-height:var(--available-height)}
 :where(${S("root")} *){box-sizing:border-box}
+@media (forced-colors:active){${S("emoji")}:is([data-highlighted],[data-focus-visible]){outline:2px solid Highlight!important;outline-offset:-2px!important}}
 @media (prefers-reduced-motion:reduce){${S("root")},${S("root")} *{transition-duration:0s}}
 :where(${S("root")}[data-columns]){width:fit-content;max-width:100%}
 :where(${S("root")}[data-columns] :is(${S("preview")},${S("search")})){contain:inline-size}
@@ -81,21 +83,6 @@ ${S("headerActions")} > *{pointer-events:auto}
 }`;
 
 /** Injects the structural stylesheet once per document (and per cascade layer). */
-export function useStructureStyles(layer: string, nonce?: string) {
-  const useIsoEffect = typeof window === "undefined" ? React.useEffect : React.useLayoutEffect;
-  useIsoEffect(() => {
-    const css = STRUCTURE(layer);
-    const existing = document.querySelector<HTMLStyleElement>(`style[data-emoji-picker-structure="${layer}"]`);
-    if (existing) {
-      if (existing.textContent !== css) existing.textContent = css;
-      return;
-    }
-    const style = document.createElement("style");
-    style.setAttribute("data-emoji-picker-structure", layer);
-    if (nonce) style.nonce = nonce;
-    style.textContent = css;
-    document.head.appendChild(style);
-  }, [layer, nonce]);
-}
+export const useStructureStyles = (layer: string, nonce?: string) => useStyleSheet(`structure-${layer}`, STRUCTURE(layer), nonce);
 
 export const VISUALLY_HIDDEN: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap", border: 0 };

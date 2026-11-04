@@ -1,4 +1,5 @@
 import { findShortcodeTrigger, isComposingKey } from "../core/shortcodes";
+import { useForcedColorsHighlight } from "./style-sheet";
 import * as React from "react";
 import { unifiedToNative, type EmojiRecord } from "../core/dataset";
 import type { ProgressiveHits } from "../core/search";
@@ -140,6 +141,7 @@ export function useEmojiSuggestions({ query, limit = 8, matchBy = "shortcode", o
   const { store } = useEmojiContext();
   const status = useEmojiStatus();
   const id = React.useId();
+  useForcedColorsHighlight();
   // "search" ranks with the provider's `search` (any engine, sync or async) instead of the shortcode index.
   const searched = useEmojiSearchState(matchBy === "search" ? query : "", { limit }).results;
   const suggestions = React.useMemo(

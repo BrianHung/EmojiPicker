@@ -48,6 +48,7 @@ export default defineConfig({
     project("desktop", "behavior.spec.ts", { ...desktop, colorScheme: "light" }),
     project("mobile", "behavior.spec.ts", { ...mobile, colorScheme: "light" }),
     project("editors", "editors.spec.ts", { ...desktop, colorScheme: "light" }),
+    project("grid", "grid.spec.ts", { ...desktop, colorScheme: "light" }),
   ],
   webServer: {
     command: BUILD ? `npx vite build && npx vite preview --port ${PORT} --strictPort` : `npx vite --port ${PORT} --strictPort`,
