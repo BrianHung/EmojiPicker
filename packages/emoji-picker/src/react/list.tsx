@@ -804,12 +804,12 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
         >
           <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
           <div ref={probeRef} aria-hidden style={PROBE} />
+          {isEmpty ? (
+            <div role="option" style={{ display: "contents" }}>
+              {empty}
+            </div>
+          ) : null}
         </div>
-        {isEmpty ? (
-          <div role="option" style={{ display: "contents" }}>
-            {empty}
-          </div>
-        ) : null}
       </LoadMoreContext.Provider>
       {varied ? (
         <Variations

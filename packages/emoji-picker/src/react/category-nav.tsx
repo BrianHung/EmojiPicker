@@ -99,6 +99,7 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
         const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
         // The tabs scroll one list rather than switch panels: no aria-controls to a panel that doesn't exist.
         const tabProps = {
+          "data-slot": SLOTS.categoryTab,
           id: `${id}-tab-${c.id}`,
           role: "tab",
           "aria-label": c.name,
@@ -106,7 +107,6 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
           "aria-disabled": disabled || undefined,
           tabIndex: disabled ? undefined : c.id === stop ? 0 : -1,
           className: joinClasses(tabClassName) ?? "",
-          "data-slot": SLOTS.categoryTab,
           "data-key": c.id,
           "data-selected": isSelected || undefined,
           "data-disabled": disabled || undefined,
