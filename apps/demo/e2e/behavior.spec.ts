@@ -115,3 +115,25 @@ for (const s of SURFACES)
     // Keyboard moves never scroll the page (the surface's own scroller may).
     expect(keys.filter((k) => k.scrolled !== 0).map((k) => k.key), "keys that scrolled the page").toEqual(PAGE_SCROLLS[`${info.project.name}:${s.id}`] ?? []);
   });
+
+// The "Bring your own virtualizer" recipe: useEmojiGrid on TanStack Virtual keeps the List's keyboard.
+test("examples/virtualizer", async ({ page }) => {
+  await visit(page, "/examples/virtualizer/");
+  const root = page.locator('main [data-slot="emoji-picker"]');
+  const search = root.locator('[data-slot="search-input"]');
+  const viewport = root.locator('[data-slot="viewport"]');
+  await search.fill("face");
+  const highlighted = async () => (await probe(page, root)).highlight;
+  await expect.poll(highlighted).toMatch(/^option /);
+  const first = await highlighted();
+  for (let i = 0; i < 10; i++) await page.keyboard.press("ArrowDown");
+  await stableProbe(page, root);
+  const cell = root.locator(`[id="${await search.getAttribute("aria-activedescendant")}"]`);
+  const name = (await cell.getAttribute("aria-label"))!;
+  expect(await highlighted()).not.toBe(first);
+  const [box, frame] = [(await cell.boundingBox())!, (await viewport.boundingBox())!];
+  expect(box.y >= frame.y && box.y + box.height <= frame.y + frame.height, "highlight scrolled into view").toBe(true);
+  expect(await viewport.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  await page.keyboard.press("Enter");
+  await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);
+});

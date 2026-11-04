@@ -1,11 +1,12 @@
-// A Virtualizer layout for emoji sections. Vertical: each section is a header over a
-// grid of fixed-size cells spread across the width (the CSS-grid look of
-// `repeat(auto-fill, cell)` with `space-between`). Horizontal: sections side by side,
-// each a column-major grid of `rows` rows under its title (the iOS keyboard), from
-// strip-layout. It is also the grid's geometry for keyboard navigation and jumps.
+// A Virtualizer layout for emoji sections. Vertical: the rows of core/grid, cells spread across
+// the width (the CSS-grid look of `repeat(auto-fill, cell)` with `space-between`). Horizontal:
+// sections side by side, each a column-major grid of `rows` rows under its title (the iOS
+// keyboard), from strip-layout. It is also the geometry for keyboard navigation and jumps.
 import type { Key, Node } from "@react-types/shared";
 import { Layout, LayoutInfo, Rect, Size } from "react-stately/useVirtualizerState";
-import { layoutStrip, type StripLayout } from "./strip-layout";
+import { createEmojiGrid, type EmojiGrid } from "../core/grid";
+import type { EmojiSection } from "./sections";
+import { layoutStrip, placeCell, type StripLayout } from "./strip-layout";
 
 export type GridMetrics = {
   cellWidth: number;
@@ -33,23 +34,20 @@ export type EmojiGridLayoutOptions = {
   rows?: number;
 };
 
-/** One section's cells, in order; `place` gives a cell's offset by its index. */
-export type CellGroup = { key: Key; info: LayoutInfo; header: LayoutInfo | null; keys: readonly Key[]; start: number; place: (index: number) => readonly [number, number] };
+/** A section's box and title, and its rows in `grid` (vertical). */
+type SectionBox = { key: Key; info: LayoutInfo; header: LayoutInfo | null; rows: number[] };
 
 const same = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => a[k] === b[k]);
-// A cell's group and index, packed in one number.
-const SPAN = 1 << 20;
-
-type Section = { section: Node<unknown>; header: Node<unknown> | null; keys: Key[] };
 
 export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOptions> {
   orientation: "vertical" | "horizontal" = "vertical";
   metrics: GridMetrics = { cellWidth: 40, cellHeight: 40, headerHeight: 40, padding: 10, paddingEnd: 10, sectionGap: 10, sectionMinWidth: 0 };
   /** Cells per row (vertical) or per column (horizontal). */
   lanes = 1;
-  groups: CellGroup[] = [];
+  grid: EmojiGrid<EmojiSection> = createEmojiGrid([], { columns: 1, rowHeight: 0 });
   strip: StripLayout | null = null;
-  private cells = new Map<Key, number>();
+  sections: SectionBox[] = [];
+  private x: (column: number) => number = () => 0;
   /** Sections, titles and the loader; cells' infos are made as they're asked for. */
   private infos = new Map<Key, LayoutInfo>();
   private cellInfos = new Map<Key, LayoutInfo>();
@@ -60,33 +58,20 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     return next.orientation !== prev.orientation || next.columns !== prev.columns || next.fitColumns !== prev.fitColumns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
   }
 
-  /** A cell's section (index into `groups`) and its index in it. */
-  position(key: Key): readonly [number, number] | null {
-    const p = this.cells.get(key);
-    return p == null ? null : [Math.floor(p / SPAN), p % SPAN];
-  }
-
   update({ layoutOptions }: { layoutOptions?: EmojiGridLayoutOptions }) {
     const options = layoutOptions ?? { orientation: "vertical", metrics: this.metrics };
     this.orientation = options.orientation;
     this.metrics = options.metrics;
     this.infos = new Map();
     this.cellInfos = new Map();
-    this.cells = new Map();
-    this.groups = [];
+    this.sections = [];
+    this.strip = null;
     const collection = this.virtualizer!.collection;
-    const sections: Section[] = [];
+    const sections: EmojiSection[] = [];
     let loader: Node<unknown> | null = null;
     for (const n of collection) {
       if (n.type === "loader") loader = n;
-      if (n.type !== "section") continue;
-      let header: Node<unknown> | null = null;
-      const keys: Key[] = [];
-      for (const c of collection.getChildren!(n.key)) {
-        if (c.type === "header") header = c;
-        else if (c.type === "item") keys.push(c.key);
-      }
-      sections.push({ section: n, header, keys });
+      if (n.type === "section") sections.push(n.value as EmojiSection);
     }
     if (options.orientation === "horizontal") this.horizontal(sections, options.rows ?? 5);
     else this.vertical(sections, options);
@@ -98,7 +83,24 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     } else this.loader = null;
   }
 
-  private vertical(sections: Section[], { columns, results, fitColumns = true }: EmojiGridLayoutOptions) {
+  private section(s: EmojiSection, rect: Rect, results?: string) {
+    const info = new LayoutInfo("section", s.id, rect);
+    info.allowOverflow = true;
+    this.infos.set(s.id, info);
+    let header: LayoutInfo | null = null;
+    if (s.header) {
+      header = new LayoutInfo("header", `header:${s.id}`, new Rect(rect.x, rect.y, rect.width, this.orientation === "horizontal" ? this.strip!.headerHeight : this.metrics.headerHeight));
+      header.parentKey = s.id;
+      header.isSticky = true;
+      if (this.orientation === "vertical") header.zIndex = results ? 1 : 2;
+      this.infos.set(header.key, header);
+    }
+    const box = { key: s.id, info, header, rows: [] };
+    this.sections.push(box);
+    return box;
+  }
+
+  private vertical(sections: EmojiSection[], { columns, results, fitColumns = true }: EmojiGridLayoutOptions) {
     const { cellWidth, cellHeight, headerHeight, padding, paddingEnd } = this.metrics;
     const width = this.virtualizer!.size.width;
     // The grid's width as the browser rounds it (an element's clientWidth). With `columns` it spans
@@ -108,76 +110,41 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     const lanes = results && columns ? columns : columns ? Math.min(columns, fit) : fit;
     const gap = lanes > 1 ? Math.max(0, rowWidth - lanes * cellWidth) / (lanes - 1) : 0;
     // Category cells snap to whole pixels; results are CSS-grid tracks and don't.
-    const x = (lane: number) => padding + (results ? lane * (cellWidth + gap) : Math.round(lane * (cellWidth + gap)));
+    this.x = (lane) => padding + (results ? lane * (cellWidth + gap) : Math.round(lane * (cellWidth + gap)));
     this.lanes = lanes;
-    const inset = results === "ranked" ? padding : 0;
-    let y = 0;
-    for (const { section, header, keys } of sections) {
-      const info = new LayoutInfo("section", section.key, new Rect(0, y, width, 0));
-      info.allowOverflow = true;
-      this.infos.set(section.key, info);
-      let headerInfo: LayoutInfo | null = null;
-      if (header) {
-        headerInfo = new LayoutInfo("header", header.key, new Rect(0, y, width, headerHeight));
-        headerInfo.parentKey = section.key;
-        headerInfo.isSticky = true;
-        headerInfo.zIndex = results ? 1 : 2;
-        this.infos.set(header.key, headerInfo);
-      }
-      const top = y + (header ? headerHeight : 0) + inset;
-      const end = top + Math.ceil(keys.length / lanes) * cellHeight + inset;
-      info.rect.height = end - y;
-      this.addGroup({ key: section.key, info, header: headerInfo, keys, start: top, place: (i) => [x(i % lanes), top + Math.floor(i / lanes) * cellHeight] });
-      y = end;
-    }
     // Ranked results are one padded row, even with nothing in it.
-    if (!sections.length && results === "ranked") y = 2 * padding;
-    this.size = new Size(width, y);
+    this.grid = createEmojiGrid(sections, { columns: lanes, rowHeight: cellHeight, headerHeight, padding: results === "ranked" ? padding : 0 });
+    let box: SectionBox | null = null;
+    for (const [r, row] of this.grid.rows.entries()) {
+      if (box?.key !== row.section.id) box = this.section(row.section, new Rect(0, box ? row.offset : 0, width, 0), results);
+      box.info.rect.height = row.offset + row.size - box.info.rect.y;
+      if (row.type === "emojis") box.rows.push(r);
+    }
+    if (box) box.info.rect.height = this.grid.size - box.info.rect.y;
+    this.size = new Size(width, this.grid.size);
   }
 
-  private horizontal(sections: Section[], rows: number) {
+  private horizontal(sections: EmojiSection[], rows: number) {
     const strip = layoutStrip(
-      sections.map((s) => ({ id: String(s.section.key), count: s.keys.length })),
+      sections.map((s) => ({ id: s.id, count: s.items.length })),
       { ...this.metrics, rows },
     );
     this.strip = strip;
     this.lanes = strip.rows;
-    const { cellWidth, headerHeight } = strip;
-    let s = 0;
-    for (const { section, header, keys } of sections) {
-      if (!keys.length) continue;
-      const box = strip.sections[s++]!;
-      const info = new LayoutInfo("section", section.key, new Rect(box.x, 0, box.width, strip.height));
-      info.allowOverflow = true;
-      this.infos.set(section.key, info);
-      let headerInfo: LayoutInfo | null = null;
-      if (header) {
-        headerInfo = new LayoutInfo("header", header.key, new Rect(box.x, 0, box.width, headerHeight));
-        headerInfo.parentKey = section.key;
-        headerInfo.isSticky = true;
-        this.infos.set(header.key, headerInfo);
-      }
-      this.addGroup({ key: section.key, info, header: headerInfo, keys, start: box.x, place: (i) => [box.x + Math.floor(i / strip.rows) * cellWidth, headerHeight + (i % strip.rows) * strip.cellHeight] });
-    }
+    this.grid = createEmojiGrid(sections, { columns: strip.rows, rowHeight: 0 });
+    for (const box of strip.sections) this.section(sections.find((s) => s.id === box.id)!, new Rect(box.x, 0, box.width, strip.height));
     this.size = new Size(strip.width, strip.height);
-  }
-
-  private addGroup(group: CellGroup) {
-    const g = this.groups.length * SPAN;
-    group.keys.forEach((key, i) => this.cells.set(key, g + i));
-    this.groups.push(group);
   }
 
   getLayoutInfo(key: Key) {
     const known = this.infos.get(key) ?? this.cellInfos.get(key);
     if (known) return known;
-    const p = this.position(key);
-    if (!p) return null;
-    const group = this.groups[p[0]]!;
-    const [x, y] = group.place(p[1]);
-    const { cellWidth, cellHeight } = this.metrics;
-    const info = new LayoutInfo("item", key, new Rect(x, y, cellWidth, cellHeight));
-    info.parentKey = group.key;
+    const index = this.grid.indexOf(String(key));
+    const at = this.grid.locate(index);
+    if (!at) return null;
+    const cell = this.strip ? placeCell(this.strip, index)! : { x: this.x(at.column), y: this.grid.rows[at.row]!.offset };
+    const info = new LayoutInfo("item", key, new Rect(cell.x, cell.y, this.metrics.cellWidth, this.metrics.cellHeight));
+    info.parentKey = at.section.id;
     this.cellInfos.set(key, info);
     return info;
   }
@@ -196,26 +163,30 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
         out.push(info);
       }
     };
-    const horizontal = this.orientation === "horizontal";
-    const size = horizontal ? this.metrics.cellWidth : this.metrics.cellHeight;
-    for (const group of this.groups) {
-      if (!group.info.rect.intersects(rect)) continue;
-      add(group.info);
-      add(group.header);
-      const from = horizontal ? rect.x : rect.y;
-      const to = horizontal ? rect.maxX : rect.maxY;
-      const lines = Math.ceil(group.keys.length / this.lanes);
-      const first = Math.max(0, Math.floor((from - group.start) / size));
-      const last = Math.min(lines - 1, Math.floor((to - group.start) / size));
-      for (let line = first; line <= last; line++) for (let i = line * this.lanes; i < Math.min(group.keys.length, (line + 1) * this.lanes); i++) add(this.getLayoutInfo(group.keys[i]!));
+    const strip = this.strip;
+    for (const box of this.sections) {
+      if (!box.info.rect.intersects(rect)) continue;
+      add(box.info);
+      add(box.header);
+      if (strip) {
+        const s = strip.sections.find((s) => s.id === box.key)!;
+        const first = Math.max(0, Math.floor((rect.x - s.x) / strip.cellWidth));
+        const last = Math.min(s.columns - 1, Math.floor((rect.maxX - s.x) / strip.cellWidth));
+        for (let i = first * strip.rows; i < Math.min(s.count, (last + 1) * strip.rows); i++) add(this.getLayoutInfo(this.grid.at(s.start + i)!.id));
+      } else
+        for (const r of box.rows) {
+          const row = this.grid.rows[r]!;
+          if (row.type === "emojis" && row.offset + row.size > rect.y && row.offset <= rect.maxY) for (const item of row.items) add(this.getLayoutInfo(item.id));
+        }
     }
     add(this.loader);
     for (const key of this.virtualizer!.persistedKeys) {
-      const group = this.groups[this.position(key)?.[0] ?? -1];
-      if (!group) continue;
-      add(group.info);
-      add(group.header);
-      add(this.getLayoutInfo(key));
+      const cell = this.getLayoutInfo(key);
+      const box = cell?.parentKey == null ? undefined : this.sections.find((b) => b.key === cell.parentKey);
+      if (!box) continue;
+      add(box.info);
+      add(box.header);
+      add(cell);
     }
     return out;
   }
@@ -224,10 +195,10 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
   sectionAt(offset: number): Key | null {
     const horizontal = this.orientation === "horizontal";
     let current: Key | null = null;
-    for (const g of this.groups) {
-      const start = horizontal ? g.info.rect.x : g.info.rect.y;
-      const end = horizontal ? g.info.rect.maxX : g.info.rect.maxY;
-      if (end > offset + 1 && (current == null || start <= offset + 1)) current = g.key;
+    for (const { key, info } of this.sections) {
+      const start = horizontal ? info.rect.x : info.rect.y;
+      const end = horizontal ? info.rect.maxX : info.rect.maxY;
+      if (end > offset + 1 && (current == null || start <= offset + 1)) current = key;
       if (start > offset + 1) break;
     }
     return current;

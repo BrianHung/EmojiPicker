@@ -81,68 +81,6 @@ export function placeCell(layout: StripLayout, index: number): CellPlace | null 
   return { section, column, row, x: s.x + column * layout.cellWidth, y: layout.headerHeight + row * layout.cellHeight };
 }
 
-export type VisibleRange = { section: number; first: number; last: number };
-
-/**
- * Sections and items (global indices, inclusive) whose columns intersect [from, to).
- * Whole columns are rendered, so a column is in when any part of it is.
- */
-export function visibleRange(layout: StripLayout, from: number, to: number): VisibleRange[] {
-  const out: VisibleRange[] = [];
-  const cw = layout.cellWidth || 1;
-  layout.sections.forEach((s, section) => {
-    const end = s.x + s.columns * cw;
-    if (end <= from || s.x >= to) return;
-    const firstColumn = Math.max(0, Math.floor((from - s.x) / cw));
-    const lastColumn = Math.min(s.columns - 1, Math.ceil((to - s.x) / cw) - 1);
-    if (lastColumn < firstColumn) return;
-    out.push({ section, first: s.start + firstColumn * layout.rows, last: s.start + Math.min(s.count, (lastColumn + 1) * layout.rows) - 1 });
-  });
-  return out;
-}
-
-/** Sections whose box (title included) intersects [from, to): their titles render. */
-export function visibleSections(layout: StripLayout, from: number, to: number): number[] {
-  const out: number[] = [];
-  layout.sections.forEach((s, i) => {
-    if (s.x < to && s.x + s.width > from) out.push(i);
-  });
-  return out;
-}
-
-/**
- * The current section for a scroll position: the one under the viewport's start
- * edge (half a column in), or the last one once the strip is scrolled to its end,
- * so a short last section can still become current.
- */
-export function activeSection(layout: StripLayout, scrollLeft: number, viewportWidth: number): number {
-  const { sections } = layout;
-  if (!sections.length) return -1;
-  if (viewportWidth > 0 && scrollLeft + viewportWidth >= layout.width - 1 && scrollLeft > 0) return sections.length - 1;
-  const probe = scrollLeft + layout.padding + layout.cellWidth / 2;
-  let current = 0;
-  for (let i = 0; i < sections.length; i++) if (sections[i]!.x <= probe) current = i;
-  return current;
-}
-
-/** scrollLeft that puts a section's first column at the start (after the padding). */
-export function sectionScrollLeft(layout: StripLayout, section: number, viewportWidth = 0): number {
-  const s = layout.sections[section];
-  if (!s) return 0;
-  const max = Math.max(0, layout.width - viewportWidth);
-  return Math.max(0, Math.min(s.x - layout.padding, viewportWidth ? max : Infinity));
-}
-
-/** scrollLeft that brings an item's column fully into view (unchanged when it already is). */
-export function revealCell(layout: StripLayout, index: number, scrollLeft: number, viewportWidth: number): number {
-  const place = placeCell(layout, index);
-  if (!place) return scrollLeft;
-  if (place.x < scrollLeft) return Math.max(0, place.x - layout.padding);
-  const right = place.x + layout.cellWidth;
-  if (right > scrollLeft + viewportWidth) return right + layout.padding - viewportWidth;
-  return scrollLeft;
-}
-
 export type StripKey = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home" | "End";
 
 /**

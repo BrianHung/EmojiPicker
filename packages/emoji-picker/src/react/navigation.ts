@@ -1,123 +1,43 @@
-// Keyboard navigation over EmojiGridLayout's geometry, as a React Aria KeyboardDelegate.
-// React Aria's ListKeyboardDelegate moves Down to the next item with the same x, so
-// from a column a short last row doesn't reach, Down skips that row; this one clamps
-// to the row's last cell and crosses into the next section, as the picker always has.
-// Directions are logical (Left is "before" in reading order); callers mirror for RTL.
-import type { Collection, Key, KeyboardDelegate, Node } from "@react-types/shared";
-import type { EmojiGridLayout } from "./layout";
-import { moveInStrip, pageInStrip, type StripKey } from "./strip-layout";
+// Keyboard navigation over the grid's rows (core/grid), or the horizontal strip, as a React Aria
+// KeyboardDelegate. React Aria's ListKeyboardDelegate moves Down to the next item with the same
+// x, skipping a short last row; this one clamps to it. Directions are logical; callers mirror for RTL.
+import type { Key, KeyboardDelegate } from "@react-types/shared";
+import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../core/grid";
+import type { EmojiSection } from "./sections";
+import { columnsPerPage, moveInStrip, pageInStrip, type StripKey, type StripLayout } from "./strip-layout";
+
+export type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };
+
+const STRIP: Partial<Record<EmojiGridMove, StripKey>> = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" };
 
 export class EmojiGridNavigation implements KeyboardDelegate {
-  constructor(private layout: EmojiGridLayout) {}
+  constructor(private source: () => NavigationSource) {}
 
-  private get collection(): Collection<Node<unknown>> | undefined {
-    return this.layout.virtualizer?.collection;
+  /** Where a move from `key` lands (a page is what fits in `viewport` px), or null at an edge. */
+  move(key: Key, move: EmojiGridMove, viewport = 0): Key | null {
+    const { grid, strip, metrics } = this.source();
+    const index = grid.indexOf(String(key));
+    const page = move === "page-up" || move === "page-down";
+    const next =
+      strip && STRIP[move] ? moveInStrip(strip, index, STRIP[move]) : strip && page ? pageInStrip(strip, index, move === "page-down" ? 1 : -1, columnsPerPage(strip, viewport)) : moveInGrid(grid, index, move, rowsPerPage(viewport, metrics.cellHeight, metrics.headerHeight));
+    return index < 0 || next == null ? null : (grid.at(next)?.id ?? null);
   }
 
-  private at(key: Key) {
-    const p = this.layout.position(key);
-    return p ? { group: this.layout.groups[p[0]]!, g: p[0], i: p[1] } : null;
-  }
+  getKeyBelow = (key: Key) => this.move(key, "down");
+  getKeyAbove = (key: Key) => this.move(key, "up");
+  getKeyRightOf = (key: Key) => this.move(key, "right");
+  getKeyLeftOf = (key: Key) => this.move(key, "left");
+  getFirstKey = () => this.source().grid.at(0)?.id ?? null;
+  getLastKey = () => this.source().grid.at(this.source().grid.count - 1)?.id ?? null;
 
-  private get horizontal() {
-    return this.layout.orientation === "horizontal";
-  }
-
-  /** Global index in a horizontal strip ↔ key. */
-  private flat(key: Key) {
-    const p = this.at(key);
-    if (!p) return -1;
-    let index = p.i;
-    for (let g = 0; g < p.g; g++) index += this.layout.groups[g]!.keys.length;
-    return index;
-  }
-
-  private keyAt(index: number | null): Key | null {
-    if (index == null) return null;
-    for (const g of this.layout.groups) {
-      if (index < g.keys.length) return g.keys[index]!;
-      index -= g.keys.length;
-    }
-    return null;
-  }
-
-  private stripMove(key: Key, move: StripKey) {
-    const strip = this.layout.strip;
-    return strip ? this.keyAt(moveInStrip(strip, this.flat(key), move)) : null;
-  }
-
-  /** The next cell in reading order, across sections. */
-  private step(key: Key, by: 1 | -1): Key | null {
-    const p = this.at(key);
-    if (!p) return null;
-    const next = p.group.keys[p.i + by];
-    if (next != null) return next;
-    for (let g = p.g + by; g >= 0 && g < this.layout.groups.length; g += by) {
-      const keys = this.layout.groups[g]!.keys;
-      if (keys.length) return by === 1 ? keys[0]! : keys[keys.length - 1]!;
-    }
-    return null;
-  }
-
-  /** The cell one row down (or up), clamped to a short row, crossing into the next section. */
-  private line(key: Key, by: 1 | -1): Key | null {
-    const p = this.at(key);
-    if (!p) return null;
-    const lanes = this.layout.lanes;
-    const lane = p.i % lanes;
-    const row = Math.floor(p.i / lanes) + by;
-    if (row >= 0 && row <= Math.floor((p.group.keys.length - 1) / lanes)) return p.group.keys[Math.min(row * lanes + lane, p.group.keys.length - 1)]!;
-    for (let g = p.g + by; g >= 0 && g < this.layout.groups.length; g += by) {
-      const keys = this.layout.groups[g]!.keys;
-      if (!keys.length) continue;
-      const start = by === 1 ? 0 : Math.floor((keys.length - 1) / lanes) * lanes;
-      return keys[Math.min(start + lane, keys.length - 1)]!;
-    }
-    return null;
-  }
-
-  getKeyBelow = (key: Key) => (this.horizontal ? this.stripMove(key, "ArrowDown") : this.line(key, 1));
-  getKeyAbove = (key: Key) => (this.horizontal ? this.stripMove(key, "ArrowUp") : this.line(key, -1));
-  getKeyRightOf = (key: Key) => (this.horizontal ? this.stripMove(key, "ArrowRight") : this.step(key, 1));
-  getKeyLeftOf = (key: Key) => (this.horizontal ? this.stripMove(key, "ArrowLeft") : this.step(key, -1));
-  getFirstKey = () => this.layout.groups.find((g) => g.keys.length)?.keys[0] ?? null;
-  getLastKey = () => {
-    const groups = this.layout.groups.filter((g) => g.keys.length);
-    const last = groups[groups.length - 1];
-    return last ? last.keys[last.keys.length - 1]! : null;
-  };
-
-  /** A page: as many whole rows (columns, horizontally) as fit in `viewport` px under a stuck header. */
-  page(key: Key, by: 1 | -1, viewport: number): Key | null {
-    const { cellWidth, cellHeight, headerHeight, padding } = this.layout.metrics;
-    if (this.horizontal) {
-      const strip = this.layout.strip;
-      const columns = Math.max(1, Math.floor((viewport - 2 * padding) / cellWidth));
-      return strip ? this.keyAt(pageInStrip(strip, this.flat(key), by, columns)) : null;
-    }
-    const rows = Math.max(1, Math.floor((viewport - headerHeight) / cellHeight));
-    let current = key;
-    for (let n = 0; n < rows; n++) {
-      const next = this.line(current, by);
-      if (next == null) break;
-      current = next;
-    }
-    return current === key ? null : current;
-  }
-  getKeyPageBelow = (key: Key) => this.page(key, 1, this.layout.getVisibleRect().height);
-  getKeyPageAbove = (key: Key) => this.page(key, -1, this.layout.getVisibleRect().height);
-
-  /** Type-to-select (no search field): the first cell after `fromKey` whose name starts with the text. */
+  /** Type-to-select (no search field): the first emoji from `fromKey` on whose name starts with the text. */
   getKeyForSearch = (search: string, fromKey?: Key | null) => {
-    const collection = this.collection;
-    if (!collection) return null;
+    const { grid } = this.source();
     const text = search.toLocaleLowerCase();
-    const start = fromKey ?? this.getFirstKey();
-    let key = start;
-    while (key != null) {
-      if (collection.getItem(key)?.textValue.toLocaleLowerCase().startsWith(text)) return key;
-      key = this.step(key, 1) ?? this.getFirstKey();
-      if (key === start) break;
+    const start = Math.max(0, fromKey == null ? 0 : grid.indexOf(String(fromKey)));
+    for (let n = 0; n < grid.count; n++) {
+      const item = grid.at((start + n) % grid.count)!;
+      if (item.label.toLocaleLowerCase().startsWith(text)) return item.id;
     }
     return null;
   };

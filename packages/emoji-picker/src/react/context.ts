@@ -1,13 +1,12 @@
 // Internal: what Root shares with its parts.
 import * as React from "react";
-import type { Key } from "@react-types/shared";
 import type { EmojiRecord } from "../core/dataset";
 import type { EmojiLabels } from "../core/labels";
 import type { EmojiSelection, EmojiStore } from "../core/store";
 import type { CollapsedCategories } from "./collapse";
 import type { PickerComponents } from "./components";
 import type { KeyboardAction } from "./keymap";
-import type { Category, EmojiItem, EmojiSection } from "./sections";
+import type { Category, EmojiSection } from "./sections";
 
 /**
  * Where keyboard focus lives while navigating. "input": it stays in the search field
@@ -39,13 +38,10 @@ export type ListHandle = {
   focus(): boolean;
   /** Scrolls a section to the top (start); `instant` skips the smooth scroll. */
   jump(section: string, options?: { instant?: boolean }): void;
-  /** The highlighted or focused item. */
-  focusedItem(): EmojiItem | null;
   /** The highlight is on the first emoji. */
   atStart(): boolean;
   /** Opens the skin-tone variations of the emoji at `target` (its cell, or the field's highlight). */
   variations(target: Element): boolean;
-  orientation: "vertical" | "horizontal";
 };
 
 /** A tiny observable value: re-renders only its readers. */
@@ -104,8 +100,6 @@ export type PickerContextValue = {
   registerSearch(): () => void;
   /** Ids for aria-controls. */
   listId: string;
-  /** An item id → its DOM id. */
-  cellKey(key: Key): string;
 };
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);

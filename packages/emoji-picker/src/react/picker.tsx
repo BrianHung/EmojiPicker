@@ -213,7 +213,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       hasSearch: searchCount > 0 || !mounted,
       registerSearch,
       listId,
-      cellKey: (key) => `${listId}-${String(key)}`,
     }),
     [store, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, categories, sections, collapse, query, setQuery, searching, searchResults, searchLimit, results, searchState.pending, pick, close, activeSection, activeEmoji, searchCount, mounted, registerSearch, listId],
   );
