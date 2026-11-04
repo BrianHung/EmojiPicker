@@ -138,6 +138,18 @@ test("examples/virtualizer", async ({ page }) => {
   await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);
 });
 
+test("a popover's picker fits a short viewport", async ({ page }, info) => {
+  test.skip(viewportOf(info) === "mobile", "the desktop popover");
+  await page.setViewportSize({ width: 390, height: 500 });
+  await visit(page, "/examples/lexical/");
+  await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
+  const root = page.locator('[data-slot="popover-content"] [data-slot="emoji-picker"]');
+  await root.locator('[data-slot="emoji"]').first().waitFor();
+  await quiet(page);
+  const box = (await root.boundingBox())!;
+  expect([box.y, box.y + box.height].every((y) => y >= 0 && y <= 500), JSON.stringify(box)).toBe(true);
+});
+
 /** The highlighted item (the active descendant, the focused item, else [data-highlighted]), marked with `data-e2e`. */
 const mark = (root: Locator, name: string) =>
   root.evaluate((el, name) => {

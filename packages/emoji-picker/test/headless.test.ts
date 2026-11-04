@@ -68,4 +68,25 @@ describe("picker state without React", () => {
     expect(picker.getSnapshot().categorySections.find((s) => s.id === "flags")).toMatchObject({ collapsed: true, items: [] });
     off();
   });
+
+  it("leaves a controlled highlight to its owner", async () => {
+    const store = await ready();
+    const asked: (string | null)[] = [];
+    const options = { frequent: false as const, onHighlightChange: (id: string | null) => asked.push(id) };
+    const picker = createPickerState(store, { ...options, highlighted: null });
+    let renders = 0;
+    const off = picker.subscribe(() => renders++);
+    const [first, second] = picker.getSnapshot().sections[0]!.items;
+
+    picker.highlight(first!.id);
+    expect(asked).toEqual([first!.id]);
+    expect(picker.getSnapshot().highlighted).toBeNull();
+    expect(renders).toBe(0);
+
+    picker.setOptions({ ...options, highlighted: second!.id }, { notify: true });
+    expect(renders).toBe(1);
+    expect(picker.getSnapshot()).toMatchObject({ highlighted: second!.id, active: second });
+    expect(picker.choose()).toMatchObject({ emoji: second!.record.emoji });
+    off();
+  });
 });

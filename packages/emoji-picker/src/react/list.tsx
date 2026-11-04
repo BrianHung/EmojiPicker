@@ -213,7 +213,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, components, cellClassName, headerClassName, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ owner: "react-aria", sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, components, cellClassName, headerClassName, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 

@@ -32,6 +32,9 @@ export type PickerStateOptions<Icon = unknown> = {
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
   onCollapsedCategoriesChange?: (ids: string[]) => void;
+  /** Controlled highlight (an item id, or null): the state then keeps none of its own. */
+  highlighted?: string | null;
+  onHighlightChange?: (id: string | null) => void;
   focusModel?: FocusModel;
   disableVariations?: boolean;
   /** A tapback's reactions (unified codes), held like frequents while the user is in the picker. */
@@ -118,6 +121,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   };
 
   const labels = () => opts.labels ?? store.labels();
+  const highlighted = () => (opts.highlighted === undefined ? ui.highlighted : opts.highlighted);
   const query = () => opts.search ?? ownQuery;
   const collapsed = () => opts.collapsedCategories ?? ownCollapsed;
   // Frequents change with every pick; held while the user is in the picker so nothing moves under them.
@@ -158,7 +162,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     const suggested = suggestedOf(opts.suggested ?? (opts.frequent === false ? NO_IDS : frequents()), tone);
     const categorySections = sectionsOf(status, categories, suggested, collapsed(), opts.emojiVersion, tone, item);
     const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, l, tone, item) : categorySections;
-    const { highlighted, hovered, searchFields, mounted, domFocus } = ui;
+    const { hovered, searchFields, mounted, domFocus } = ui;
     const virtual = (opts.focusModel ?? "input") === "input" && (searchFields > 0 || !mounted) && !domFocus;
     return (cached = last = same(last, {
       query: q,
@@ -171,9 +175,9 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       collapsed: collapsed(),
       skinTone: tone,
       focus: virtual ? "virtual" : "roving",
-      highlighted,
+      highlighted: highlighted(),
       hovered,
-      active: activeOf(sections, hovered ?? highlighted),
+      active: activeOf(sections, hovered ?? highlighted()),
       activeSection: ui.activeSection,
       variations: ui.variations,
       reactions: ui.held ? reactions : (reactions = opts.reactions),
@@ -195,11 +199,12 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const state = {
     getSnapshot,
     subscribe: events.subscribe,
-    /** Takes new options without notifying: for a framework syncing them from a render. */
-    setOptions(next: PickerStateOptions<Icon>) {
+    /** Takes new options; without `notify`, silently: for a framework syncing them from a render. */
+    setOptions(next: PickerStateOptions<Icon>, { notify = false } = {}) {
       opts = next;
       nextCollapsed = null;
-      cached = null;
+      if (notify) changed();
+      else cached = null;
     },
     setQuery(value: string) {
       if (opts.search === undefined) ownQuery = value;
@@ -209,12 +214,16 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     toggleCollapsed: (id: string) => setCollapsed(id),
     setCollapsed: (id: string, value: boolean) => setCollapsed(id, value),
     /** The keyboard position (an item id), or null for none. */
-    highlight: (id: string | null) => put("highlighted", id),
+    highlight(id: string | null) {
+      if (id === highlighted()) return;
+      if (opts.highlighted === undefined) put("highlighted", id);
+      opts.onHighlightChange?.(id);
+    },
     hover: (id: string | null) => put("hovered", id),
     setActiveSection: (id: string | null) => put("activeSection", id),
     setSkinTone: (tone: number) => store.setSkinTone(tone),
     /** Picks an item (the highlighted one by default) or a unified code: the selection, counted as used. */
-    choose: (id = ui.highlighted): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
+    choose: (id = highlighted()): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
     /** Opens an emoji's skin-tone variations; false when it has none. */
     openVariations(id: string | null) {
       const record = findItem(getSnapshot().sections, id)?.record;

@@ -245,6 +245,8 @@ moveHighlight(picker, "right", { columns: 9 });
 picker.choose(); // EmojiSelection of the highlighted emoji
 ```
 
+The picker state owns its highlight unless you control it: pass `highlighted` and `onHighlightChange` (as with `search` and `onSearchChange`), and `setOptions(next, { notify: true })` when your value changes.
+
 ## Rendering emoji
 
 `<Emoji emoji={…} />` draws one emoji the way the pickers do. It accepts a native emoji, a shortcode with or without colons, a unified code, a custom emoji id, an `EmojiSelection`, an `EmojiRecord`, or a `CustomEmoji`. Unknown input renders as text with `data-emoji-missing`. `useEmoji(input)` returns the resolved emoji, and `resolveEmoji(store, input)` does the same without React. The `unified` prop is a deprecated alias of `emoji`.
