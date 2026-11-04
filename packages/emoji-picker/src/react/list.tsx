@@ -799,7 +799,7 @@ function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLa
         return (
           <div key={s.id} style={{ position: "absolute", top: info.rect.y, insetInlineStart: 0, width: "100%", height: info.rect.height }}>
             <div data-slot={SLOTS.headerActions} data-section={s.id} style={{ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none" }}>
-              <Actions section={{ id: s.category, name: s.name }} collapsed={s.collapsed} toggle={() => cells.toggle(s.id)} toggleProps={{ "aria-expanded": !s.collapsed, "aria-controls": cells.sectionDomId(s.id) }} />
+              <Actions section={{ id: s.category, name: s.name }} collapsed={s.collapsed} toggle={() => cells.toggle(s.id)} toggleProps={{ "aria-expanded": !s.collapsed }} />
             </div>
           </div>
         );

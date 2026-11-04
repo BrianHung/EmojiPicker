@@ -18,7 +18,7 @@ The React layer runs on React Aria Components and Floating UI instead of emoji-p
 
 ### Added
 
-- `components.HeaderActions` (`HeaderActionsProps`: `section`, `collapsed`, `toggle`, `toggleProps` with `aria-expanded` and `aria-controls`): controls for a section title, rendered outside the listbox and pinned with the sticky title.
+- `components.HeaderActions` (`HeaderActionsProps`: `section`, `collapsed`, `toggle`, `toggleProps` with `aria-expanded`): controls for a section title, rendered outside the listbox and pinned with the sticky title.
 - `pickerInitialFocus(root)`: where focus belongs when a picker opens in any popover (Base UI, Radix, shadcn/ui).
 - `ReactionBar`: a toolbar with a roving tab stop, Home/End and hover continuity, for rows of your own reaction buttons.
 - `Tapback reactions`: fixed reactions instead of the user's most-used emoji.

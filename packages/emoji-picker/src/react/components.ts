@@ -44,8 +44,11 @@ export type HeaderActionsProps = {
   section: { id: string; name: string };
   collapsed: boolean;
   toggle: () => void;
-  /** For the control that toggles: `aria-expanded`, and `aria-controls` naming the section. */
-  toggleProps: { "aria-expanded": boolean; "aria-controls": string };
+  /**
+   * For the control that toggles: `aria-expanded`. No `aria-controls`: the list is virtualized, so
+   * a section out of view has no element to name.
+   */
+  toggleProps: { "aria-expanded": boolean; "aria-controls"?: string };
 };
 
 export type CategoryButtonProps = React.HTMLAttributes<HTMLElement> & {

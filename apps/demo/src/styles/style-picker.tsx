@@ -116,27 +116,28 @@ function categoriesFor(layout: PickerLayout): CategoryOption[] | undefined {
 function headerComponent(layout: PickerLayout): PickerComponents | undefined {
   if (!layout.hideHeaders && !layout.headerIcon) return undefined;
   function Header({ category, children, className, ...props }: CategoryHeaderProps) {
-    if (layout.hideHeaders) return <div {...props} className={cn("pointer-events-none h-0 overflow-hidden", className)} aria-label={category.name} />;
+    // macOS: no visible titles; the clipped text still names the section's group.
+    if (layout.hideHeaders) return <header {...props} className={cn("pointer-events-none h-0 overflow-hidden", className)}>{children}</header>;
     const hi = layout.headerIcon!;
     const Icon = layout.nav?.icons[category.id];
     const icon = Icon ? <Icon size={hi.size} strokeWidth={2} className={hi.className} /> : null;
     if (!hi.chevron) {
       return (
-        <div {...props} className={className}>
+        <header {...props} className={className}>
           {icon}
           {children}
-        </div>
+        </header>
       );
     }
     // Discord: the chevron turns -90° when collapsed. The title is text; the row's toggle is HeaderActions.
     return (
-      <div {...props} className={className}>
+      <header {...props} className={className}>
         <div className="flex h-full min-w-0 flex-1 items-center gap-1">
           {icon}
           <span className="truncate">{children}</span>
           <I.ChevronDown size={hi.size} strokeWidth={2} aria-hidden className={cn("shrink-0 transition-transform duration-150", category.collapsed && "-rotate-90", hi.className)} />
         </div>
-      </div>
+      </header>
     );
   }
   // The whole row toggles its section: a control over the title, outside the listbox.

@@ -81,7 +81,7 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 <EmojiPicker.List components={{ HeaderActions: Toggle }} />
 ```
 
-`toggleProps` carries `aria-expanded` and `aria-controls` (the section's group). Search results ignore collapse.
+`toggleProps` carries `aria-expanded` (no `aria-controls`: the list is virtualized, so a section out of view has no element to point at). Search results ignore collapse.
 
 ### Horizontal list
 

@@ -3,24 +3,16 @@
 // new violation (or a known rule on a new element) is caught. Delete an entry once its fix lands.
 type Known = { rule: string; node: RegExp };
 
-const engineList = /^<(ul|li)\b[^>]*\brole="(grid|rowgroup)"/; // the picker's ul[role=grid] > li[role=rowgroup]
 const codeToken = /^<span style="color:/; // syntax-highlighted code on the docs pages
 
 export const KNOWN: Known[] = [
-  /* ---------------------------------------------------------- packages/emoji-picker (engine) */
-  // ul/li can't take grid/rowgroup roles. Goes away with the listbox/option markup (react-aria migration).
-  { rule: "aria-allowed-role", node: engineList },
-  // Discord style: the grid's sections hold their rows behind a collapsible header, so axe sees a
-  // grid > rowgroup with no row children.
-  { rule: "aria-required-children", node: engineList },
-  // Search results: a row of the results grid with no gridcells in it.
-  { rule: "aria-required-children", node: /^<div role="row" data-results-row/ },
+  /* ---------------------------------------------------------- packages/emoji-picker */
   // Every picker root is an unnamed <aside>; pages with several pickers repeat the landmark.
   { rule: "landmark-unique", node: /^<aside data-slot="emoji-picker"/ },
 
   /* ---------------------------------------------------------- apps/demo (styles and scenes) */
   // Muted greys copied from the real apps for pixel parity, below 4.5:1.
-  { rule: "color-contrast", node: /data-epr-part="category-label"/ }, // Notion section labels
+  { rule: "color-contrast", node: /^<header [^>]*text-picker-muted[^>]*data-slot="category-header"/ }, // Notion section labels
   { rule: "color-contrast", node: /^<div data-section="\w+"[^>]*text-picker-muted/ }, // Notion ":" menu section labels
   { rule: "color-contrast", node: /text-picker-subtle">Remove</ }, // Notion picker "Remove"
   { rule: "color-contrast", node: /style="color: rgb\(125, 122, 117\);">(Team space|Edited just now)</ }, // Notion scene chrome
@@ -38,7 +30,7 @@ export const KNOWN: Known[] = [
   // Slack and Linear composers: <textarea role="combobox">.
   { rule: "aria-allowed-role", node: /^<textarea role="combobox"/ },
   // Apple category tabs: the visible glyph isn't in the accessible name.
-  { rule: "label-content-name-mismatch", node: /role="tab" data-epr-part="category-tab"/ },
+  { rule: "label-content-name-mismatch", node: /^<div data-slot="category-tab"/ },
   // Home "Popover" example: the trigger shows an emoji and text that its aria-label doesn't contain.
   { rule: "label-content-name-mismatch", node: /^<button[^>]*aria-label="Open emoji picker"[^>]*data-slot="popover-trigger"/ },
   // Headings that skip a level: home install steps (h4), Discord message author (h3), Notion page body (h3).
