@@ -3,7 +3,7 @@ import * as React from "react";
 import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type ShortcodeAutocomplete } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { EmojiAutocomplete } from "@/components/emoji-autocomplete";
-import { EmojiPickerPopover } from "@/registry/emoji-picker";
+import { PickerPopover } from "@/components/picker-popover";
 import { SmilePlus } from "./icons";
 import { FitViewport, type Reaction } from "./scene-kit";
 import { StylePicker, useStyleTokens, type PickerLayout, type Style } from "./style-picker";
@@ -33,7 +33,7 @@ export function StyleDropdown({
 }) {
   // The popover measures its content, and picking closes it.
   return (
-    <EmojiPickerPopover
+    <PickerPopover
       onSelect={onSelect}
       side={side}
       align={align}
@@ -47,7 +47,7 @@ export function StyleDropdown({
       }
     >
       {children}
-    </EmojiPickerPopover>
+    </PickerPopover>
   );
 }
 

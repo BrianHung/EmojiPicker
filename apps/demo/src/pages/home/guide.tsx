@@ -5,6 +5,7 @@ import { Code } from "@/components/site/code";
 import { C, CodeTabs, H2, H3, P, Step, Steps, Tabs } from "@/components/site/docs";
 
 const REGISTRY_URL = "https://emoji.brianhung.me/r/emoji-picker.json";
+const POPOVER_URL = "https://emoji.brianhung.me/r/emoji-picker-popover.json";
 
 const pm = (cmd: { npm: string; pnpm: string; yarn: string; bun: string }) => [
   { label: "pnpm", code: cmd.pnpm, lang: "bash" as const },
@@ -20,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return <EmojiProvider data={en}>{children}</EmojiProvider>;
 }`;
 
-const USAGE = `import { EmojiPickerPopover } from "@/components/ui/emoji-picker";
+const USAGE = `import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <EmojiPickerPopover onSelect={(e) => react(message.id, e.unified)}>
   🙂 Add reaction
@@ -87,6 +88,20 @@ export function Installation() {
             />
             <P>
               Adds <C>components/ui/emoji-picker.tsx</C> and installs <C>@brianhung/emoji-picker</C>.
+            </P>
+          </Step>
+          <Step title="Add the popover.">
+            <CodeTabs
+              tabs={pm({
+                pnpm: `pnpm dlx shadcn@latest add ${POPOVER_URL}`,
+                npm: `npx shadcn@latest add ${POPOVER_URL}`,
+                yarn: `yarn dlx shadcn@latest add ${POPOVER_URL}`,
+                bun: `bunx --bun shadcn@latest add ${POPOVER_URL}`,
+              })}
+              defaultTab="npm"
+            />
+            <P>
+              Uses your own shadcn/ui popover (Base UI or Radix; with React Aria, add <C>emoji-picker-popover-aria.json</C> instead).
             </P>
           </Step>
           <Step title="Add the provider.">

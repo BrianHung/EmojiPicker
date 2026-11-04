@@ -7,6 +7,7 @@ import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "./context";
 import { mergeRefs, useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
+import { useEmojiPopover } from "./popover-context";
 import { SLOTS } from "./slots";
 
 type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "autoFocus" | "placeholder" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "onKeyDown">;
@@ -27,7 +28,6 @@ function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProp
   const { labels, focusModel, components } = picker;
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
   const { onKeyDown: onInputKeyDown, className, ...input } = inputProps ?? {};
-  const fieldRef = React.useRef<HTMLDivElement | null>(null);
   const ownInput = React.useRef<HTMLInputElement | null>(null);
 
   const region = useKeyRegion((action, event) => {
@@ -50,14 +50,15 @@ function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProp
   // The input's handler, then the Search row's, as bubbling would call them.
   const userKeys = useUserKeyDown(onInputKeyDown as PickerKeyboardEventHandler | undefined);
 
+  const inEmojiPopover = useEmojiPopover() !== null;
   React.useEffect(() => {
-    if (picker.autoFocusSearch && !fieldRef.current?.closest('[data-slot="popover-content"]')) ownInput.current?.focus({ preventScroll: true });
+    if (picker.autoFocusSearch && !inEmojiPopover) ownInput.current?.focus({ preventScroll: true });
   }, []);
 
   const Clear = components.ClearButton;
   const field = (
     <SearchField
-      ref={mergeRefs(fieldRef, region)}
+      ref={region}
       data-slot={SLOTS.searchField}
       aria-label={labels.searchLabel}
       className=""

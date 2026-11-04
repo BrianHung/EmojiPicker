@@ -6,7 +6,7 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
 import { EmojiSuggestion, EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
-import { EmojiPickerPopover } from "@/registry/emoji-picker";
+import { PickerPopover } from "@/components/picker-popover";
 
 function TiptapEditor() {
   const store = useEmojiStore();
@@ -19,7 +19,7 @@ function TiptapEditor() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
-        <EmojiPickerPopover
+        <PickerPopover
           label="Insert emoji"
           triggerClassName="rounded-md px-2 py-1"
           onSelect={(s) => {
@@ -30,7 +30,7 @@ function TiptapEditor() {
         >
           <span aria-hidden>🙂</span>
           <span className="text-muted-foreground">Emoji</span>
-        </EmojiPickerPopover>
+        </PickerPopover>
       </div>
       <EditorContent editor={editor} />
       <EmojiSuggestionMenu editor={editor} />
