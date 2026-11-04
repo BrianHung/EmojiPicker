@@ -11,6 +11,7 @@
 // A key the picker handles, or keeps from React Aria, stops at Root, as React Aria's
 // own handled keys do, so an Escape it used doesn't also close a dialog around it.
 import * as React from "react";
+import { mergeRefs } from "react-aria/mergeRefs";
 import { actionFor, isTextEditingKey, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
 
 /** A picker part's keydown event. Its handler runs before the picker's own. */
@@ -79,16 +80,6 @@ export function useSkinToneToggle(toggle: () => void) {
   }, [ctx]);
 }
 
-/** Merges refs into one callback. */
-export function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]): React.RefCallback<T> {
-  return (value) => {
-    for (const ref of refs) {
-      if (typeof ref === "function") ref(value);
-      else if (ref) (ref as React.MutableRefObject<T | null>).current = value;
-    }
-  };
-}
-
 export function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
   return el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "checkbox", "radio", "submit", "reset"].includes(el.type));
 }
@@ -139,7 +130,7 @@ export type KeyboardProviderProps = {
   variations: (target: Element) => boolean;
   /** Elements whose native keys stay with React Aria when no action claims them (tabs, toolbars). */
   ownsKeys: (target: Element) => boolean;
-  children: (props: { ref: React.RefCallback<HTMLElement>; onKeyDownCapture: React.KeyboardEventHandler<HTMLElement> }) => React.ReactNode;
+  children: (props: { ref: React.Ref<HTMLElement>; onKeyDownCapture: React.KeyboardEventHandler<HTMLElement> }) => React.ReactNode;
 };
 
 /** Provides registration to the parts and returns the Root element's props. */
@@ -209,7 +200,7 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, focusSea
 
   return (
     <KeyboardContext.Provider value={value}>
-      {children({ ref: mergeRefs(root, rootHandlerRef as React.RefCallback<HTMLElement>), onKeyDownCapture })}
+      {children({ ref: mergeRefs<HTMLElement>(root, rootHandlerRef), onKeyDownCapture })}
     </KeyboardContext.Provider>
   );
 }
@@ -225,5 +216,5 @@ export function useEdgeKeys(selector: string): React.RefCallback<Element> {
     item.focus();
     return "handled";
   });
-  return React.useMemo(() => mergeRefs(element, region), [region]);
+  return React.useMemo(() => mergeRefs(element, region) as React.RefCallback<Element>, [region]);
 }

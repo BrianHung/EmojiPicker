@@ -6,13 +6,17 @@ import { Button } from "react-aria-components/Button";
 import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "./context";
-import { mergeRefs, useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import { useEmojiPopover } from "./popover-context";
+import { renderElement, toRenderFunction, type PartElementProps, type RenderProp } from "./render";
 import { SLOTS } from "./slots";
 
 type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "autoFocus" | "placeholder" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "onKeyDown">;
 
-export type SearchProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
+export type SearchState = { empty: boolean };
+
+export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
   /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
   /** Attributes for the input; the picker owns its value. */
@@ -23,7 +27,7 @@ export type SearchProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "o
 const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
 
 /** The search field and its input: the picker's query, its keys, and the clear button. */
-function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProps["inputProps"]; inputRef?: React.Ref<HTMLInputElement>; as?: React.ElementType; children?: React.ReactNode }) {
+function Field({ inputProps, inputRef, render, children }: { inputProps?: SearchProps["inputProps"]; inputRef?: React.Ref<HTMLInputElement>; render?: RenderProp<object>; children?: React.ReactNode }) {
   const picker = usePicker("EmojiPicker.Search");
   const { labels, focusModel, components } = picker;
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
@@ -68,8 +72,8 @@ function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProp
         <>
           <Input
             {...input}
-            {...(as ? { render: (props: object) => React.createElement(as, props) } : {})}
-            ref={mergeRefs(ownInput, inputRef, userKeys)}
+            render={toRenderFunction(render) as never}
+            ref={mergeRefs<HTMLInputElement>(ownInput, inputRef, userKeys)}
             type="text"
             role="searchbox"
             className={className ?? ""}
@@ -94,23 +98,20 @@ function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProp
 }
 
 export const Search = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ inputProps, inputRef, onKeyDown, children, ...props }, ref) {
+  const { query } = usePicker("EmojiPicker.Search");
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
   const merged = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
-  return (
-    <div data-slot={SLOTS.search} {...props} ref={merged}>
-      <Field inputProps={inputProps} inputRef={inputRef} />
-      {children}
-    </div>
-  );
+  const state = { empty: query === "" };
+  const content = typeof children === "function" ? children(state) : children;
+  return renderElement("div", { "data-slot": SLOTS.search, ...props, ref: merged, children: <><Field inputProps={inputProps} inputRef={inputRef} />{content}</> }, state);
 });
 
 export type SearchInputProps = SearchProps["inputProps"] & {
-  /** Render this element instead of <input> (a design system's input that forwards its ref and props). */
-  as?: React.ElementType;
+  /** Replaces the <input>: an element (a design system's input) or `(props) => element`. */
+  render?: RenderProp<object>;
 };
 
 /** The search field on its own, for a custom search row. */
-export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ as, ...props }, ref) {
-  return <Field inputProps={props} inputRef={ref} as={as} />;
+export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ render, ...props }, ref) {
+  return <Field inputProps={props} inputRef={ref} render={render} />;
 });
-

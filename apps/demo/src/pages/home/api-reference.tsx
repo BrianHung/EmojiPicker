@@ -67,7 +67,7 @@ const SEARCH: PropRow[] = [
   { name: "children", type: "ReactNode", description: "Rendered after the input." },
 ];
 
-const SEARCH_INPUT: PropRow[] = [{ name: "as", type: "ElementType", default: '"input"', description: "The input component to render." }];
+const SEARCH_INPUT: PropRow[] = [{ name: "render", type: "ReactElement", default: '<input />', description: "The input element to render." }];
 
 const NAV: PropRow[] = [
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
@@ -112,7 +112,7 @@ const POPOVER_ROOT: PropRow[] = [
   { name: "onOpenChange", type: "(open: boolean) => void" },
   { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },
 ];
-const POPOVER_TRIGGER: PropRow[] = [{ name: "asChild", type: "boolean", description: "Merges props onto the child element." }];
+const POPOVER_TRIGGER: PropRow[] = [{ name: "render", type: "ReactElement", description: "Merges props onto this element." }];
 const POPOVER_CONTENT: PropRow[] = [
   { name: "side", type: '"top" | "bottom"', default: '"bottom"', description: "Flips when there isn't room." },
   { name: "align", type: '"start" | "center" | "end"', default: '"start"' },

@@ -17,11 +17,14 @@ import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "
 import { EmojiGridNavigation } from "./navigation";
 import { useArtworkMap } from "./overrides";
 import type { EmojiItem, EmojiSection } from "../core/sections";
+import { renderElement, type PartProps } from "./render";
 import { SLOTS, joinClasses } from "./slots";
 import { useEmptyState } from "./viewport";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
-export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
+export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
+
+export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> & PartProps<ListState> & {
   /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
   components?: ListComponents;
@@ -85,7 +88,7 @@ function readProbe(probe: HTMLElement): GridMetrics {
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
 export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
-  { components: listComponents, cellClassName, headerClassName, orientation = "vertical", rows = 5, searchRows, onKeyDown, value, onLoadMore, isLoadingMore, loadingMore, className, style, ...rest },
+  { components: listComponents, cellClassName, headerClassName, orientation = "vertical", rows = 5, searchRows, onKeyDown, value, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest },
   ref,
 ) {
   const picker = usePicker("EmojiPicker.List");
@@ -257,15 +260,28 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   return (
     <CellsContext.Provider value={grid.cells}>
       <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
-        <div {...rest} {...(grid.gridProps as React.HTMLAttributes<HTMLDivElement>)} className={className} style={style}>
-          <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
-          <div ref={probeRef} aria-hidden style={PROBE} />
-          {collection.size === 0 ? (
-            <div role="option" style={{ display: "contents" }}>
-              {empty}
-            </div>
-          ) : null}
-        </div>
+        {renderElement(
+          "div",
+          {
+            ...rest,
+            ...grid.gridProps,
+            className,
+            style,
+            render,
+            children: (
+              <>
+                <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
+                <div ref={probeRef} aria-hidden style={PROBE} />
+                {collection.size === 0 ? (
+                  <div role="option" style={{ display: "contents" }}>
+                    {empty}
+                  </div>
+                ) : null}
+              </>
+            ),
+          },
+          { orientation, searching, empty: collection.size === 0 },
+        )}
       </LoadMoreContext.Provider>
       {grid.variations}
       {components.HeaderActions && !horizontal && !searching ? <ActionsLayer layout={layout} list={listRef} Actions={components.HeaderActions} sections={sections} /> : null}

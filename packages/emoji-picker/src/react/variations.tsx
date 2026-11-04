@@ -6,7 +6,8 @@ import type { EmojiRecord } from "../core/dataset";
 import { nameWithTone } from "../core/shortcodes";
 import { usePicker } from "./context";
 import { Glyph } from "./glyph";
-import { mergeRefs, useKeyRegion } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { useKeyRegion } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { SLOTS } from "./slots";
 
@@ -49,7 +50,7 @@ export function Variations({ record, style, onPick, onClose }: VariationsProps) 
 
   return (
     <div
-      ref={mergeRefs(row, region)}
+      ref={mergeRefs<HTMLDivElement>(row, region)}
       role="listbox"
       aria-label={labels.skinTone}
       aria-orientation="horizontal"

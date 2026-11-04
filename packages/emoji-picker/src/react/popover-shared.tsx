@@ -2,6 +2,7 @@ import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverState } from "./popover-context";
+import { renderElement, type PartElementProps } from "./render";
 
 export { useEmojiPopover } from "./popover-context";
 
@@ -25,10 +26,9 @@ export type PopoverRootProps = {
   children: React.ReactNode;
 };
 
-export type PopoverTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  /** Render your own element (a shadcn Button…) as the trigger; it receives the props. */
-  asChild?: boolean;
-};
+export type PopoverTriggerState = { open: boolean };
+
+export type PopoverTriggerProps = PartElementProps<PopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
 
 /** Where focus goes when the content opens. */
 export type PopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | false;
@@ -154,19 +154,10 @@ export function PopoverProvider({ value, children }: { value: PopoverInternals; 
   );
 }
 
-export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ asChild, children, ...props }, ref) {
+export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ render, className, style, children, ...props }, ref) {
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
-  const childRef = asChild && React.isValidElement(children) ? (children.props as { ref?: React.Ref<HTMLElement> }).ref : undefined;
-  const refs = React.useMemo(() => mergeRefs(setTrigger, ref as React.Ref<HTMLElement>, childRef) as React.Ref<HTMLButtonElement>, [setTrigger, ref, childRef]);
-  const merged = triggerProps(mergeProps(props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
-  if (asChild && React.isValidElement(children)) {
-    const child = children as React.ReactElement<Record<string, unknown>>;
-    return React.cloneElement(child, { ...mergeProps(child.props, merged), ref: refs });
-  }
-  return (
-    <button type="button" {...merged} ref={refs}>
-      {children}
-    </button>
-  );
+  const refs = React.useMemo(() => mergeRefs<HTMLElement>(setTrigger, ref as React.Ref<HTMLElement>), [setTrigger, ref]);
+  const merged = triggerProps(mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
+  return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
 });

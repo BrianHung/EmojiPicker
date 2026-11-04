@@ -38,6 +38,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 
 ### Changed
 
+- Every part takes `render` (an element whose props and ref merge with the part's, or `(props, state) => element`, as Base UI's; built on React Aria's `composeRenderProps` and `mergeProps`), and `className` and `style` as values or functions of the part's state. State is also on data attributes, as before. `EmojiPopover.Trigger asChild` and `SearchInput as` are removed: use `render`.
 - Skin-tone variations per emoji (Shift+Space on the highlighted or focused emoji, or a long press) open a row of its six tones over it: a `listbox` (`data-slot="variations"`, options `data-slot="emoji"`) named by `labels.skinTone`, focused on the current tone; Left/Right, Home and End move along it, Enter or Space picks, Escape closes back to the emoji. `Root disableVariations` turns them off.
 - The package ships one module per source file: a bundler loads only what you import (`Emoji` alone is ~8 KB gzipped over React; the popover and tapback load only when used).
 

@@ -2,7 +2,9 @@ import * as React from "react";
 import { SKIN_TONES, withTone } from "../core/dataset";
 import { Emoji } from "./emoji";
 import { useSkinTone } from "./hooks";
-import { mergeRefs, useKeyRegion, useSkinToneToggle } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { useKeyRegion, useSkinToneToggle } from "./keyboard";
+import { renderElement, type PartProps } from "./render";
 import type { KeyboardAction } from "./keymap";
 import type { SkinToneButtonProps, SkinToneId } from "./components";
 import { useEmojiContext } from "./provider";
@@ -50,7 +52,9 @@ function withButtonProps(Base: React.ComponentType<SkinToneButtonProps & { emoji
   };
 }
 
-export type SkinToneProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> & {
+export type SkinToneState = { open: boolean; tone: number };
+
+export type SkinToneProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "className" | "style"> & PartProps<SkinToneState> & {
   /**
    * Draw each option as this emoji in that tone ("270b" ✋, like Slack and Discord)
    * instead of a color swatch.
@@ -124,13 +128,7 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
   });
 
   const merged = React.useMemo(() => mergeRefs(ref, rootRef, region), [ref, region]);
-  return (
-    <div
-      {...props}
-      ref={merged}
-      data-slot={SLOTS.skinTone}
-      data-state={open ? "open" : "closed"}
-    >
+  return renderElement("div", { ...props, ref: merged, "data-slot": SLOTS.skinTone, "data-state": open ? "open" : "closed", children: <>
       <Button
         type="button"
         tone={{ skinTone: TONE_IDS[tone] as SkinToneId, isActive: true, isOpen: open }}
@@ -156,6 +154,5 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
           ))}
         </div>
       ) : null}
-    </div>
-  );
+    </> }, { open, tone });
 });

@@ -110,9 +110,7 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 
 ```tsx
 <EmojiPopover.Root>
-  <EmojiPopover.Trigger asChild>
-    <Button variant="outline">🙂</Button>
-  </EmojiPopover.Trigger>
+  <EmojiPopover.Trigger render={<Button variant="outline" />}>🙂</EmojiPopover.Trigger>
   <EmojiPopover.Content side="top" align="end">
     <EmojiPicker.Root onSelect={insert}>…</EmojiPicker.Root>
   </EmojiPopover.Content>

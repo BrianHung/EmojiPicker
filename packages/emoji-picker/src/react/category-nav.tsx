@@ -9,11 +9,15 @@ import { useFocusVisible } from "react-aria/useFocusVisible";
 import { DefaultCategoryIcon } from "./category-icons";
 import type { CategoryButtonProps } from "./components";
 import { usePicker } from "./context";
-import { mergeRefs, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import { useCategoryNavigation } from "./picker";
+import { renderElement, resolve, type PartProps } from "./render";
 import { SLOTS, joinClasses } from "./slots";
 
-export type CategoryNavProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
+export type CategoryNavState = { orientation: "horizontal" | "vertical"; disabled: boolean };
+
+export type CategoryNavProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> & PartProps<CategoryNavState> & {
   /** Tab axis: "vertical" stacks the tabs (a side rail) and moves between them with Up/Down. Default "horizontal". */
   orientation?: "horizontal" | "vertical";
   /** Runs before the picker handles the key; see Root's `onKeyDown`. */
@@ -22,7 +26,7 @@ export type CategoryNavProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role"
   tabClassName?: string;
 };
 
-export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", tabClassName, onKeyDown, className, ...props }, ref) {
+export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", tabClassName, onKeyDown, className, style, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
@@ -65,37 +69,8 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
     e.stopPropagation();
   };
 
-  return (
-    <div
-      {...props}
-      ref={merged}
-      id={id}
-      role="tablist"
-      aria-label={picker.labels.categoryNavigation}
-      aria-orientation={orientation}
-      className={className ?? ""}
-      data-slot={SLOTS.categoryNav}
-      data-orientation={orientation}
-      style={{ pointerEvents: disabled ? "none" : undefined, ...props.style }}
-      onKeyDown={onKey}
-      onFocus={(e) => {
-        const key = keyOf(e);
-        if (key != null) setFocus({ key, within: true });
-      }}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus((f) => ({ ...f, within: false }));
-      }}
-      onPointerOver={(e) => e.pointerType !== "touch" && setPointer((p) => ({ ...p, hovered: keyOf(e) }))}
-      onPointerLeave={() => setPointer({ hovered: null, pressed: null })}
-      onPointerDown={(e) => setPointer((p) => ({ ...p, pressed: keyOf(e) }))}
-      onPointerUp={() => setPointer((p) => ({ ...p, pressed: null }))}
-      onPointerCancel={() => setPointer((p) => ({ ...p, pressed: null }))}
-      onClick={(e) => {
-        const key = keyOf(e);
-        if (key != null && !disabled) choose(key, e.detail === 0);
-      }}
-    >
-      {categories.map((c) => {
+  const state: CategoryNavState = { orientation, disabled };
+  const tabs = categories.map((c) => {
         const isSelected = c.id === selected;
         const active = isSelected && !disabled;
         const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
@@ -120,7 +95,39 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
           children: icon,
         };
         return User ? <User key={c.id} {...tabProps} category={{ id: c.id, name: c.name, isActive: active } satisfies CategoryButtonProps["category"]} /> : <div key={c.id} {...tabProps} />;
-      })}
-    </div>
+  });
+  return renderElement(
+    "div",
+    {
+      ...props,
+      ref: merged,
+      id,
+      role: "tablist",
+      "aria-label": picker.labels.categoryNavigation,
+      "aria-orientation": orientation,
+      className: className ?? "",
+      "data-slot": SLOTS.categoryNav,
+      "data-orientation": orientation,
+      style: (s: CategoryNavState) => ({ pointerEvents: s.disabled ? "none" : undefined, ...resolve(style, s) }),
+      onKeyDown: onKey,
+      onFocus: (e: React.FocusEvent) => {
+        const key = keyOf(e);
+        if (key != null) setFocus({ key, within: true });
+      },
+      onBlur: (e: React.FocusEvent) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus((f) => ({ ...f, within: false }));
+      },
+      onPointerOver: (e: React.PointerEvent) => e.pointerType !== "touch" && setPointer((p) => ({ ...p, hovered: keyOf(e) })),
+      onPointerLeave: () => setPointer({ hovered: null, pressed: null }),
+      onPointerDown: (e: React.PointerEvent) => setPointer((p) => ({ ...p, pressed: keyOf(e) })),
+      onPointerUp: () => setPointer((p) => ({ ...p, pressed: null })),
+      onPointerCancel: () => setPointer((p) => ({ ...p, pressed: null })),
+      onClick: (e: React.MouseEvent) => {
+        const key = keyOf(e);
+        if (key != null && !disabled) choose(key, e.detail === 0);
+      },
+      children: tabs,
+    },
+    state,
   );
 });

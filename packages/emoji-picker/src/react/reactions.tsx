@@ -10,10 +10,12 @@ import { nameWithTone } from "../core/shortcodes";
 import type { EmojiCellProps, ListEmoji } from "./components";
 import { usePicker } from "./context";
 import { Glyph } from "./glyph";
-import { mergeRefs, useEdgeKeys } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { useEdgeKeys } from "./keyboard";
 import { findArtwork, useArtworkMap } from "./overrides";
 import { useDrawable } from "./native-support";
 import { ReactionsContext, isPressed } from "./reactions-context";
+import { racClassName, renderElement, toRenderFunction, type PartElementProps, type PartProps } from "./render";
 import { SLOTS } from "./slots";
 
 
@@ -66,19 +68,22 @@ function useRovingRow(row: React.RefObject<HTMLElement | null>) {
   }, [row]);
 }
 
-export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role"> & {
-  /** Axis the arrows move along. Default "horizontal". */
-  orientation?: "horizontal" | "vertical";
-};
+export type ReactionBarState = { orientation: "horizontal" | "vertical" };
+
+export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
+  PartProps<ReactionBarState> & {
+    /** Axis the arrows move along. Default "horizontal". */
+    orientation?: "horizontal" | "vertical";
+  };
 
 /**
  * A row of reaction buttons (yours, or a Tapback's): one tab stop; arrows, Home and End
  * move along it; with focus in the row, focus follows the hovered button.
  */
-export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, ...props }, ref) {
+export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, render, ...props }, ref) {
   const row = React.useRef<HTMLDivElement | null>(null);
   useRovingRow(row);
-  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={className ?? ""} />;
+  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={racClassName(className)} render={toRenderFunction(render)} />;
 });
 
 /**
@@ -86,7 +91,9 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(fu
  * (the keymap's first/last) move along it. "+" expands into the full picker with
  * focus in its search field.
  */
-export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "role">>(function Reactions(props, ref) {
+export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation">;
+
+export const Reactions = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions(props, ref) {
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels, components } = picker;
@@ -130,7 +137,7 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
   const User = components.Emoji;
   const Expand = components.ExpandButton;
   return (
-    <ReactionBar {...props} ref={mergeRefs(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
+    <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
       {shown.map((unified) => {
         const record = store.get(unified);
         const name = nameWithTone(record?.name ?? unified, unified, labels.withSkinTone);
@@ -177,9 +184,12 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
   );
 });
 
+export type PanelState = { hidden: boolean };
+export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
+
 /** The full picker inside a Tapback: hidden while the reaction row shows. */
-export const Panel = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HTMLDivElement>, "hidden">>(function Panel(props, ref) {
+export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel(props, ref) {
   const state = React.useContext(ReactionsContext);
   const hidden = Boolean(state?.open);
-  return <div data-slot={SLOTS.panel} {...props} ref={ref} hidden={hidden} inert={hidden || undefined} />;
+  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref, hidden, inert: hidden || undefined }, { hidden });
 });

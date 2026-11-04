@@ -91,8 +91,8 @@ const POPOVER_TW = `import { EmojiPicker, EmojiPopover } from "@brianhung/emoji-
 import { Button } from "@/components/ui/button";
 
 <EmojiPopover.Root>
-  <EmojiPopover.Trigger asChild>
-    <Button variant="outline" className="rounded-full">🙂 Add reaction</Button>
+  <EmojiPopover.Trigger render={<Button variant="outline" className="rounded-full" />}>
+    🙂 Add reaction
   </EmojiPopover.Trigger>
   <EmojiPopover.Content side="bottom" align="start" className="z-50">
     <EmojiPicker.Root onSelect={(e) => react(e.unified)} className="h-[380px] w-[352px] rounded-xl border bg-popover shadow-md">
