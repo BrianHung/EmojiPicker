@@ -42,6 +42,7 @@ const EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Colo
 const STRUCTURE = (layer: string) => `@layer ${layer}{
 :where(${S("root")}){--ep-size:var(--emoji-size,30px);--ep-cell:var(--emoji-cell-size,calc(var(--ep-size) + 10px));--ep-pad:var(--emoji-list-padding,10px);--ep-header:var(--emoji-header-height,40px);--ep-glyph-pad:calc((var(--ep-cell) - var(--ep-size)) / 2)}
 ${S("root")}{position:relative;display:flex;flex-direction:column;overflow:clip}
+:where([data-slot="popover-content"]) ${S("root")}{max-height:var(--available-height)}
 :where(${S("root")} *){box-sizing:border-box}
 @media (prefers-reduced-motion:reduce){${S("root")},${S("root")} *{transition-duration:0s}}
 :where(${S("root")}[data-columns]){width:fit-content;max-width:100%}

@@ -136,6 +136,7 @@ const POPOVER_CSS = `.trigger {
 
 function PopoverExample() {
   const [picked, setPicked] = usePickedEmoji();
+  const [adapter, setAdapter] = React.useState<"floating-ui" | "react-aria">("floating-ui");
   return (
     <Example
       id="popover"
@@ -153,7 +154,10 @@ function PopoverExample() {
         },
       ]}
     >
-      <PickerPopover onSelect={setPicked} triggerClassName="h-10 rounded-full border border-border px-4 active:scale-[0.97] transition-transform">
+      <div className="absolute top-3 right-3">
+        <Chips label="Popover" value={adapter} onChange={setAdapter} options={[["floating-ui", "Floating UI"], ["react-aria", "React Aria"]]} />
+      </div>
+      <PickerPopover key={adapter} adapter={adapter} onSelect={setPicked} triggerClassName="h-10 rounded-full border border-border px-4 active:scale-[0.97] transition-transform">
         <span className="text-base">{picked?.emoji || "🙂"}</span> Add reaction
       </PickerPopover>
     </Example>

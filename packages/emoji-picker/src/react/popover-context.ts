@@ -7,6 +7,8 @@ export type PopoverState = {
   setOpen: (open: boolean) => void;
   close: () => void;
   closeOnSelect: boolean;
+  /** The content leaves initial focus to its picker: a grid that renders after opening focuses its current emoji. */
+  focusGrid?: boolean;
 };
 
 export const PopoverContext = React.createContext<PopoverState | null>(null);

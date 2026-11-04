@@ -3,7 +3,8 @@
 // popover (or, on mobile, a bottom sheet) that keeps the app's theme when it portals
 // out of the frame, and small helpers (fonts, avatars, press-and-hold).
 import * as React from "react";
-import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";

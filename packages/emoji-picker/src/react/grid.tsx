@@ -22,6 +22,7 @@ import type { KeyboardAction } from "./keymap";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "./native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "./overrides";
+import { useEmojiPopover } from "./popover-context";
 import { itemFactory, resultSections, type EmojiItem, type EmojiSection } from "./sections";
 import { SLOTS } from "./slots";
 import { Variations } from "./variations";
@@ -165,6 +166,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const virtual = focusModel === "input" && picker.hasSearch && !domFocus;
   const [marks] = React.useState(cellMarks);
   const pendingFocus = React.useRef<Key | null>(null);
+  // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
+  const focusGrid = React.useRef(Boolean(useEmojiPopover()?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
   const latest = React.useRef({ collection, virtual, geometry });
   latest.current = { collection, virtual, geometry };
@@ -342,10 +345,15 @@ export function useGridController({ sections, geometry, orientation, listRef, re
    */
   const syncStop = () => {
     const list = listRef.current;
-    if (list?.contains(document.activeElement) && document.activeElement !== list) return;
+    if (list?.contains(document.activeElement) && document.activeElement !== list) return void (focusGrid.current = false);
     const { collection, geometry } = latest.current;
     const stop = marks.stop.get();
     if (stop == null || !geometry.isVisible(stop) || !collection.emoji(stop)) marks.stop.set(collection.emoji(lastFocused.current) && geometry.isVisible(lastFocused.current!) ? lastFocused.current : geometry.firstVisible());
+    const cell = focusGrid.current ? cellElement(marks.stop.get()) : null;
+    if (!cell) return;
+    focusGrid.current = false;
+    const root = cell.closest(`[data-slot="${SLOTS.root}"]`);
+    if (root && !root.contains(document.activeElement) && !root.querySelector("[data-autofocus]")) cell.focus({ preventScroll: true });
   };
 
   // DOM focus landing on a cell (Tab from the search field, a script, a screen reader) while the

@@ -15,6 +15,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - Keyboard moves scroll only the picker's own viewport, never the page.
 - With `HeaderActions`, Tab from an emoji goes to the next section's actions (Shift+Tab: its own), as if they were in reading order.
 - `EmojiPopover`: Tab out of the content (also from a toolbar inside, which moves focus itself) returns to the page after the trigger and closes.
+- `EmojiPopover` (both adapters): a picker with no search field to focus focuses its current emoji once its grid renders; the trigger has `aria-haspopup="dialog"` and `aria-expanded`; the picker fits the space left (`--available-height`) and scrolls inside.
 
 ### Added
 

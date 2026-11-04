@@ -21,7 +21,8 @@
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
+import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { linear } from "./picker";
 import { StyleAutocomplete } from "@/styles/variants";

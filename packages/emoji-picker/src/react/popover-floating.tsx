@@ -1,7 +1,7 @@
 import * as React from "react";
 import { autoUpdate, flip, FloatingFocusManager, FloatingNode, FloatingPortal, FloatingTree, offset, shift, size, useDismiss, useFloating, useFloatingNodeId, useFloatingParentNodeId, useFloatingRootContext, useInteractions, useMergeRefs, useRole, useTransitionStatus, type FloatingRootContext, type Middleware, type UseFloatingOptions } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
-import { anchorRect, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "./popover-shared";
+import { anchorRect, ContentFocus, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "./popover-shared";
 
 export type PopoverContentProps = SharedContentProps & {
   /** How long the content stays mounted with `data-ending-style` after closing, ms (Floating UI's `useTransitionStatus`). Default 0. */
@@ -101,7 +101,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         ref={mergedRef}
         style={{ ...position, zIndex: 50, "--transform-origin": middlewareData.transformOrigin?.origin, ...style } as React.CSSProperties}
       >
-        {children}
+        <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
       </div>
     </FloatingFocusManager>,
     container,

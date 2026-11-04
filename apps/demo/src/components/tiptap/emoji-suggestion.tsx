@@ -110,6 +110,20 @@ export function useEmojiSuggestionQuery(editor: Editor, keys: React.RefObject<((
   };
 }
 
+/** While the menu is open, the editor names the highlighted option (`aria-activedescendant`), as a combobox's field does. */
+export function useEditorActiveDescendant(editor: Editor, list: string, option: string | undefined) {
+  React.useEffect(() => {
+    const dom = editor.view.dom;
+    if (!option) return;
+    dom.setAttribute("aria-controls", list);
+    dom.setAttribute("aria-activedescendant", option);
+    return () => {
+      dom.removeAttribute("aria-controls");
+      dom.removeAttribute("aria-activedescendant");
+    };
+  }, [editor, list, option]);
+}
+
 export type EmojiSuggestionMenuProps = {
   editor: Editor;
   /** Classes for the list (its look); rows are `li`, the highlighted one `[data-highlighted]`. */
@@ -127,6 +141,7 @@ export function EmojiSuggestionMenu({ editor, className, limit = 8, side = "bott
   const store = useEmojiStore();
   const menu = useEmojiSuggestions({ query: suggestion.query, limit, onChoose: (s) => suggestion.insert(s, menu.textFor(s)), onDismiss: suggestion.close });
   keys.current = (event) => menu.onKeyDown(event);
+  useEditorActiveDescendant(editor, menu.getListProps().id, suggestion.open ? menu.activeDescendant : undefined);
 
   return (
     <EmojiSuggestions.Popover open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} anchor={suggestion.rect} side={side} sideOffset={6}>
