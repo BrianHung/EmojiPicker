@@ -55,40 +55,55 @@ const ROOT: PropRow[] = [
   { name: "artwork", type: "ArtworkMap", description: "Draws these emoji with your own art." },
   { name: "emojiVersion", type: "number", description: "Hides emoji added after this Unicode emoji version." },
   { name: "disableVariations", type: "boolean", description: "Disables skin-tone variations in the grid." },
-  { name: "components", type: "PickerComponents", description: "{ CategoryButton, SkinToneButton, ClearButton, ExpandButton }" },
   { name: "colorScheme", type: '"light" | "dark" | "auto"', description: "Applies the built-in color tokens." },
   { name: "cssLayer", type: "string", default: '"base"', description: "Cascade layer for the built-in CSS." },
   { name: "nonce", type: "string" },
 ];
 
-const SEARCH: PropRow[] = [
-  { name: "inputProps", type: "InputHTMLAttributes", description: "Props for the input element." },
-  { name: "inputRef", type: "Ref<HTMLInputElement>" },
-  { name: "children", type: "ReactNode", description: "Rendered after the input." },
+const PART: PropRow[] = [
+  { name: "render", type: "ReactElement | (props, state) => ReactElement", description: "Replaces the element: its props and ref merge with the part's." },
+  { name: "className", type: "string | (state) => string", description: "A function receives the part's state." },
+  { name: "style", type: "CSSProperties | (state) => CSSProperties" },
 ];
 
-const SEARCH_INPUT: PropRow[] = [{ name: "render", type: "ReactElement", default: '<input />', description: "The input element to render." }];
+const SEARCH: PropRow[] = [{ name: "children", type: "ReactNode", default: "<Search.Input />", description: "The row's contents." }];
+
+const SEARCH_INPUT: PropRow[] = [
+  { name: "placeholder", type: "string", default: "Root's searchPlaceholder" },
+  { name: "autoFocus", type: "boolean", default: "Root's autoFocusSearch" },
+  { name: "children", type: "ReactNode", default: "<Search.Clear />", description: "In the field, after the input." },
+];
 
 const NAV: PropRow[] = [
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
-  { name: "tabClassName", type: "string", description: "Classes for each tab." },
+  { name: "children", type: "(category) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab: { id, name, icon }." },
 ];
 
+const NAV_TAB: PropRow[] = [{ name: "className", type: "string | ({ selected, active, focusVisible, hovered, pressed, disabled }) => string" }];
+
 const LIST: PropRow[] = [
+  { name: "children", type: "(section) => ReactNode", default: "title and cells", description: "Called only for the sections in view." },
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
-  { name: "components", type: "{ Emoji?, CategoryHeader? }", description: "Custom cell and section title components." },
-  { name: "cellClassName", type: "string", description: "Classes for each emoji cell." },
-  { name: "headerClassName", type: "string", description: "Classes for each section title." },
+  { name: "value", type: "string | null", description: "A value picker: the emoji shown as chosen (aria-selected)." },
+];
+
+const LIST_PARTS: PropRow[] = [
+  { name: "List.Section", type: "{ section, collapsed }", description: "A section (group): List.SectionTitle, List.Items, List.SectionActions." },
+  { name: "List.SectionTitle", type: "{ section, collapsed }", default: "section.name", description: "Text in the listbox, sticky where the layout puts it." },
+  { name: "List.Items › children", type: "(emoji: EmojiItem) => ReactNode", default: "<List.Cell />", description: "Called only for the emoji in view." },
+  { name: "List.Cell", type: "{ emoji, highlighted, active, hovered, focused, focusVisible, pressed, selected }", default: "the glyph", description: "An option; re-renders only when its own state changes." },
+  { name: "List.SectionActions", type: "{ section, collapsed, toggle, toggleProps }", description: "Controls over the title, outside the listbox." },
 ];
 
 const SKIN_TONE: PropRow[] = [
-  { name: "emoji", type: "string", description: "Shows options as this emoji in each tone instead of swatches." },
-  { name: "buttonClassName", type: "string", description: "Classes for the trigger and each option." },
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
-  { name: "optionsClassName", type: "string" },
-  { name: "button", type: "ComponentType<SkinToneButtonProps>" },
+  { name: "children", type: "ReactNode", default: "Trigger, Options", description: "State: { open, tone }." },
+  { name: "Trigger › children", type: "ReactNode | (state) => ReactNode", default: "a swatch" },
+  { name: "Options › children", type: "(tone: number) => ReactNode", default: "<SkinTone.Option />" },
+  { name: "Option › tone", type: "0–5", description: "State: { tone, selected }." },
+  { name: "Glyph › emoji", type: "string", default: '"✋"', description: "In the tone of its Option, else the current one." },
 ];
 
 const STATES: PropRow[] = [
@@ -102,8 +117,14 @@ const TAPBACK: PropRow[] = [
   { name: "count", type: "number", default: "5", description: "Number of emoji in the row." },
   { name: "collapseOnSelect", type: "boolean", default: "true" },
   { name: "expandable", type: "boolean", default: "true", description: "Shows the expand button." },
-  { name: "reactionsClassName", type: "string" },
-  { name: "children", type: "ReactNode", description: "Parts of the expanded picker. Accepts Root props." },
+  { name: "selected", type: "string[]", description: "The user's reactions: toggle buttons, pressed." },
+  { name: "children", type: "ReactNode", default: "<Reactions />", description: "Reactions, and a Panel with the expanded picker. Accepts Root props." },
+];
+
+const REACTIONS: PropRow[] = [
+  { name: "children", type: "(emoji) => ReactNode | ReactNode", default: "Items, then Expand", description: "Each reaction, or Reactions.Items and Reactions.Expand." },
+  { name: "Item › emoji", type: "string", description: "Unified code. State: React Aria's button state, with isSelected." },
+  { name: "Expand › children", type: "ReactNode", default: "a plus" },
 ];
 
 const POPOVER_ROOT: PropRow[] = [
@@ -147,7 +168,7 @@ const SLOTS: [string, string][] = [
   ['data-slot="category-nav" · "category-tab"', "Category bar and each tab"],
   ['data-slot="viewport" · "list"', "Scroll container and the virtualized list"],
   ['data-slot="category-header" · "emoji"', "Section titles and cells"],
-  ['data-slot="skin-tone" · "skin-tone-option" · "skin-tone-options"', "Skin tone trigger, options and their list"],
+  ['data-slot="skin-tone" · "skin-tone-trigger" · "skin-tone-options" · "skin-tone-option"', "Skin tone, its trigger, the options and each option"],
   ['data-slot="reactions" · "reactions-expand" · "panel"', "Tapback row, its “+”, and the expanded picker"],
   ['data-slot="preview" · "empty" · "loading"', "Preview, no results, loading"],
 ];
@@ -200,21 +221,33 @@ export function ApiReference() {
 
       <Part id="api-provider" title="EmojiProvider" description="Provides the dataset, search, frequently used emoji and skin tone to the parts and hooks inside it." props={PROVIDER} />
 
+      <Part id="api-parts" title="Every part" description="Each part renders its default element and children; these props replace or style them. State is also on data attributes." props={PART} />
+
       <Part id="api-root" title="Root" description="Contains the parts of a picker." props={ROOT} />
 
-      <Part id="api-search" title="Search and SearchInput" description="The search field. SearchInput renders only the input." props={SEARCH}>
+      <Part id="api-search" title="Search" description="The search row. Search.Input is the field; Search.Clear clears it, shown only with a query." props={SEARCH}>
+        <Sub>Search.Input</Sub>
         <PropsTable rows={SEARCH_INPUT} />
       </Part>
 
-      <Part id="api-category-nav" title="CategoryNav" description="A tab for each section that scrolls the list to it." props={NAV} />
+      <Part id="api-category-nav" title="CategoryNav" description="A tab for each section that scrolls the list to it." props={NAV}>
+        <Sub>CategoryNav.Tab</Sub>
+        <PropsTable rows={NAV_TAB} />
+      </Part>
 
-      <Part id="api-list" title="Viewport and List" description="The scroll container and the virtualized emoji grid." props={LIST} />
+      <Part id="api-list" title="Viewport and List" description="The scroll container and the virtualized emoji grid." props={LIST}>
+        <Sub>Parts and their state</Sub>
+        <PropsTable rows={LIST_PARTS} />
+      </Part>
 
-      <Part id="api-skin-tone" title="SkinTone" description="A button that shows the current skin tone and opens the options." props={SKIN_TONE} />
+      <Part id="api-skin-tone" title="SkinTone" description="The shared skin tone: a trigger, and the six tones it opens as a radio group." props={SKIN_TONE} />
 
       <Part id="api-states" title="Empty, Loading, LoadError" description="Content for the empty, loading and error states." props={STATES} />
 
-      <Part id="api-tapback" title="Tapback" description="A row of the most-used emoji that expands into a picker." props={TAPBACK} />
+      <Part id="api-tapback" title="Tapback" description="A row of the most-used emoji that expands into a picker." props={TAPBACK}>
+        <Sub>Reactions</Sub>
+        <PropsTable rows={REACTIONS} />
+      </Part>
 
       <Part id="api-popover" title="EmojiPopover" description="A popover that positions a picker next to its trigger." props={POPOVER_ROOT}>
         <Sub>Trigger</Sub>

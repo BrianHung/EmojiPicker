@@ -12,18 +12,17 @@ import {
   useFrequentEmoji,
   useTextFieldEmojiTypeahead,
   type CategoryOption,
-  type EmojiCellProps,
+  type EmojiItem,
   type EmojiSearch,
   type EmojiSelection,
   type Renderer,
   type SearchResultsMode,
 } from "@brianhung/emoji-picker";
 import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker/search";
-import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmojiPickerCard, EmojiTapback } from "@/registry/emoji-picker";
+import { EmojiPickerCard, EmojiPickerCell, EmojiTapback } from "@/registry/emoji-picker";
 import { PickerPopover } from "@/components/picker-popover";
 import { Example, H2, P } from "@/components/site/docs";
 import { InlinePicker as InlineTailwind } from "@/components/demos/inline-picker/tailwind";
@@ -409,17 +408,8 @@ function QuickRow({ onPick }: { onPick: (s: EmojiSelection) => void }) {
   );
 }
 
-function RoundCell({ emoji, children, className, ...props }: EmojiCellProps) {
-  return (
-    <button
-      {...props}
-      title={`:${emoji.names[0]}:`}
-      className={cn("flex items-center justify-center rounded-full leading-none outline-none transition-transform hover:scale-125 hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring data-[highlighted]:bg-accent", className)}
-    >
-      {children}
-    </button>
-  );
-}
+/** The registry's cell as a button with the shortcode as its tooltip, growing on hover. */
+const roundCell = (emoji: EmojiItem) => <EmojiPickerCell render={<button title={`:${emoji.record.shortcodes[0] ?? emoji.record.name}:`} />} className="leading-none hover:scale-125 focus-visible:ring-2 focus-visible:ring-ring" />;
 
 const ROWS_TW = `function QuickRow() {
   const store = useEmojiStore();
@@ -435,15 +425,25 @@ const ROWS_TW = `function QuickRow() {
   );
 }
 
-function RoundCell({ emoji, children, className, ...props }: EmojiCellProps) {
-  return <button {...props} className={cn("rounded-full hover:scale-125", className)}>{children}</button>;
-}
-
 <EmojiPicker.Root columns={7} frequent={false}>
   <EmojiPicker.Search />
   <QuickRow />
   <EmojiPicker.Viewport>
-    <EmojiPicker.List components={{ Emoji: RoundCell, CategoryHeader: MyHeader }} />
+    <EmojiPicker.List>
+      {(section) => (
+        <EmojiPicker.List.Section>
+          <EmojiPicker.List.SectionTitle className="px-2 text-xs font-medium" />
+          <EmojiPicker.List.Items>
+            {(emoji) => (
+              <EmojiPicker.List.Cell
+                render={<button title={\`:\${emoji.record.shortcodes[0]}:\`} />}
+                className="rounded-full hover:scale-125 data-[highlighted]:bg-accent"
+              />
+            )}
+          </EmojiPicker.List.Items>
+        </EmojiPicker.List.Section>
+      )}
+    </EmojiPicker.List>
   </EmojiPicker.Viewport>
 </EmojiPicker.Root>`;
 
@@ -453,7 +453,14 @@ const ROWS_TSX = `import styles from "./index.module.css";
   <EmojiPicker.Search />
   <QuickRow />
   <EmojiPicker.Viewport>
-    <EmojiPicker.List cellClassName={styles.cell} />
+    <EmojiPicker.List>
+      {() => (
+        <EmojiPicker.List.Section>
+          <EmojiPicker.List.SectionTitle />
+          <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
+        </EmojiPicker.List.Section>
+      )}
+    </EmojiPicker.List>
   </EmojiPicker.Viewport>
 </EmojiPicker.Root>`;
 
@@ -504,7 +511,7 @@ function RowsExample() {
     >
       {/* The old Rows and cells example's anchor. */}
       <span id="rows-and-cells" className="sr-only" aria-hidden />
-      <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} rows={<QuickRow onPick={setPicked} />} components={{ Emoji: RoundCell }} columns={7} frequent={false} className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]" />
+      <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} rows={<QuickRow onPick={setPicked} />} cell={roundCell} columns={7} frequent={false} className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]" />
     </Example>
   );
 }

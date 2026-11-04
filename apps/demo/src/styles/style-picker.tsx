@@ -1,15 +1,5 @@
 import * as React from "react";
-import {
-  Emoji,
-  EmojiPicker,
-  useEmojiStore,
-  useFrequentEmoji,
-  type CategoryHeaderProps,
-  type HeaderActionsProps,
-  type CategoryOption,
-  type EmojiSelection,
-  type PickerComponents,
-} from "@brianhung/emoji-picker";
+import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiSection, type EmojiSelection } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import * as I from "./icons";
 
@@ -109,39 +99,42 @@ function categoriesFor(layout: PickerLayout): CategoryOption[] | undefined {
   });
 }
 
-/** Only headers that aren't plain text need a component: hidden (macOS) or icon + chevron (Discord). */
-function headerComponent(layout: PickerLayout): PickerComponents | undefined {
-  if (!layout.hideHeaders && !layout.headerIcon) return undefined;
-  function Header({ category, children, className, ...props }: CategoryHeaderProps) {
-    // macOS: no visible titles; the clipped text still names the section's group.
-    if (layout.hideHeaders) return <header {...props} className={cn("pointer-events-none h-0 overflow-hidden", className)}>{children}</header>;
-    const hi = layout.headerIcon!;
-    const Icon = layout.nav?.icons[category.id];
-    const icon = Icon ? <Icon size={hi.size} strokeWidth={2} className={hi.className} /> : null;
-    if (!hi.chevron) {
-      return (
-        <header {...props} className={className}>
-          {icon}
-          {children}
-        </header>
-      );
-    }
-    // Discord: the chevron turns -90° when collapsed. The title is text; the row's toggle is HeaderActions.
+/** A section title: text (macOS: hidden, still naming the group), or Discord's icon, name and chevron (-90° when collapsed). */
+function title(layout: PickerLayout, section: EmojiSection) {
+  const hi = layout.headerIcon;
+  if (layout.hideHeaders || !hi) return section.name;
+  const Icon = layout.nav?.icons[section.category];
+  const icon = Icon ? <Icon size={hi.size} strokeWidth={2} className={hi.className} /> : null;
+  if (!hi.chevron)
     return (
-      <header {...props} className={className}>
-        <div className="flex h-full min-w-0 flex-1 items-center gap-1">
-          {icon}
-          <span className="truncate">{children}</span>
-          <I.ChevronDown size={hi.size} strokeWidth={2} aria-hidden className={cn("shrink-0 transition-transform duration-150", category.collapsed && "-rotate-90", hi.className)} />
-        </div>
-      </header>
+      <>
+        {icon}
+        {section.name}
+      </>
     );
-  }
-  // The whole row toggles its section: a control over the title, outside the listbox.
-  function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
-    return <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0 cursor-pointer outline-none" />;
-  }
-  return layout.headerIcon?.chevron ? { CategoryHeader: Header, HeaderActions: Toggle } : { CategoryHeader: Header };
+  return (
+    <div className="flex h-full min-w-0 flex-1 items-center gap-1">
+      {icon}
+      <span className="truncate">{section.name}</span>
+      <I.ChevronDown size={hi.size} strokeWidth={2} aria-hidden className={cn("shrink-0 transition-transform duration-150", section.collapsed && "-rotate-90", hi.className)} />
+    </div>
+  );
+}
+
+/** The layout's sections: its title, cells, and (Discord) the whole title row toggling the section, a control outside the listbox. */
+function sectionsFor(layout: PickerLayout) {
+  const cell = cn("flex items-center justify-center leading-none outline-none", layout.cell);
+  return function Section(section: EmojiSection) {
+    return (
+      <EmojiPicker.List.Section>
+        <EmojiPicker.List.SectionTitle className={layout.hideHeaders ? cn("pointer-events-none h-0 overflow-hidden", layout.header) : layout.header}>{title(layout, section)}</EmojiPicker.List.SectionTitle>
+        <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cell} />}</EmojiPicker.List.Items>
+        {layout.headerIcon?.chevron ? (
+          <EmojiPicker.List.SectionActions>{({ section, toggle, toggleProps }) => <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0 cursor-pointer outline-none" />}</EmojiPicker.List.SectionActions>
+        ) : null}
+      </EmojiPicker.List.Section>
+    );
+  };
 }
 
 const DOT_COLORS = ["#ffc93a", "#fadcbc", "#e0bb95", "#bf8f68", "#9b643d", "#594539"];
@@ -264,7 +257,8 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
   useStyleTokens(layout.id, layout.tokens);
   const navRef = useActiveTabInView(layout.nav?.placement === "left");
   const categories = React.useMemo(() => categoriesFor(layout), [layout]);
-  const headers = React.useMemo(() => headerComponent(layout), [layout]);
+  const sections = React.useMemo(() => sectionsFor(layout), [layout]);
+  const tab = cn("shrink-0", layout.nav?.button, layout.nav?.active);
   const pick = (s: EmojiSelection) => onSelect?.(s);
   const nav = layout.nav ? (
     <div className={cn("flex shrink-0", layout.nav.placement === "left" ? "flex-col" : "items-center", layout.nav.className)}>
@@ -272,22 +266,23 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
       <EmojiPicker.CategoryNav
         ref={navRef}
         orientation={layout.nav.placement === "left" ? "vertical" : "horizontal"}
-        // `nav.active` is written with data-active: variants, so it applies only to the current tab.
-        tabClassName={cn("shrink-0", layout.nav.button, layout.nav.active)}
         className={cn(
           "flex",
           // Tabs that don't fit scroll (the bar's scrollbar hidden, as the apps hide theirs).
           layout.nav.placement === "left" ? "min-h-0 w-full flex-1 flex-col items-center overflow-y-auto [scrollbar-width:none]" : "min-w-0 flex-1 items-center justify-between overflow-x-auto [scrollbar-width:none]",
           layout.nav.listClassName ?? (layout.nav.placement === "left" ? "gap-1" : "gap-0"),
         )}
-      />
+      >
+        {/* `nav.active` is written with data-active: variants, so it applies only to the current tab. */}
+        {() => <EmojiPicker.CategoryNav.Tab className={tab} />}
+      </EmojiPicker.CategoryNav>
       {layout.nav.trailing}
     </div>
   ) : null;
   const footer = layout.footer ? <Footer kind={layout.footer} layout={layout} className={layout.footerClass} /> : null;
   const viewport = (
     <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1", layout.scrollbar ?? "[scrollbar-width:thin]", !search && "pt-[var(--emoji-list-padding,8px)]", layout.viewport)}>
-      <EmojiPicker.List components={headers} cellClassName={cn("flex items-center justify-center leading-none outline-none", layout.cell)} headerClassName={layout.header} />
+      <EmojiPicker.List>{sections}</EmojiPicker.List>
       <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
     </EmojiPicker.Viewport>
   );

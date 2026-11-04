@@ -14,7 +14,7 @@ import { createEmojiGrid, type EmojiGrid, type EmojiGridMove, type EmojiGridRow 
 import type { PickerState } from "../core/picker";
 import type { EmojiItem, EmojiSection } from "../core/sections";
 import { EmojiCollection } from "./collection";
-import type { ListComponents } from "./components";
+
 import { signal, usePicker, useSelector, type ListHandle } from "./context";
 import { Glyph } from "./glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
@@ -78,9 +78,6 @@ export type Cells = {
   focusVisible: boolean;
   /** Position in its section, the section's size, and the index in the whole grid. */
   position: (id: Key) => readonly [number, number, number] | undefined;
-  components: ListComponents;
-  cellClassName?: string;
-  headerClassName?: string;
   virtual: boolean;
   marks: ReturnType<typeof cellMarks>;
   /** Scrolls the scroller (never the page) so the cell is in view. */
@@ -108,7 +105,6 @@ export type GridGeometry = {
 
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
 const LONG_PRESS_MS = 500;
-const NO_COMPONENTS: ListComponents = {};
 const NO_KEYS: Key[] = [];
 const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
@@ -134,7 +130,7 @@ export function useGridSections(horizontal: boolean) {
   return { sections: picker.searching ? picker.sections : categories, request, probeRoot };
 }
 
-type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | "aria-labelledby" | "components" | "cellClassName" | "headerClassName"> & {
+type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | "aria-labelledby"> & {
   /** Who owns the highlight: React Aria's focused key (the core state is controlled by it), or the core state. */
   owner: "react-aria" | "core";
   sections: readonly EmojiSection[];
@@ -147,7 +143,7 @@ type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | 
 };
 
 /** The grid's state, its listbox props and its cells' context. */
-export function useGridController({ owner, sections, geometry, orientation, listRef, ref, probeRoot, loader = false, value, onKeyDown, components = NO_COMPONENTS, cellClassName, headerClassName, ...aria }: ControllerOptions) {
+export function useGridController({ owner, sections, geometry, orientation, listRef, ref, probeRoot, loader = false, value, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
   const { labels, searching, focusModel } = picker;
   const { navigation } = geometry;
@@ -506,16 +502,13 @@ export function useGridController({ owner, sections, geometry, orientation, list
         const at = grid.locate(index);
         return at ? [at.index + 1, at.section.items.length, index] : undefined;
       },
-      components,
-      cellClassName,
-      headerClassName,
       virtual,
       marks,
       reveal: (id) => latest.current.geometry.reveal(id),
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
       toggle: (id) => picker.collapse.toggle(id),
     }),
-    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, components, cellClassName, headerClassName, virtual, marks, picker.listId, picker.collapse],
+    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, marks, picker.listId, picker.collapse],
   );
   // React Aria's per-item focus, for every cell at once: the focused key's cell gets DOM focus
   // (grid) or virtual focus (the field's aria-activedescendant), when it changes or mounts.
@@ -574,7 +567,10 @@ export function useGridController({ owner, sections, geometry, orientation, list
   };
 }
 
-/** A cell's props (its glyph as children) for its marks, and whether it's active (hovered or highlighted). */
+/** A cell's state, as its data attributes name it. */
+export type CellState = { emoji: EmojiItem; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
+
+/** A cell's props (its glyph as children) and state for its marks. */
 export function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
   const { selection: m } = cells;
   const { record, unified } = item;
@@ -591,7 +587,6 @@ export function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork:
     "aria-posinset": position?.[0],
     "aria-setsize": position?.[1],
     tabIndex: flags & STOP ? 0 : -1,
-    className: cells.cellClassName ?? "",
     "data-slot": SLOTS.emoji,
     "data-key": item.id,
     "data-collection": cells.collectionId,
@@ -609,7 +604,8 @@ export function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork:
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
     children: <Glyph unified={unified} record={record} animate={isActive} />,
   };
-  return { props, isActive };
+  const state: CellState = { emoji: item, highlighted, active: isActive, hovered: Boolean(flags & HOVERED), focused: isFocused, focusVisible: isFocused && cells.focusVisible, pressed: Boolean(flags & PRESSED), selected: isSelected };
+  return { props, state };
 }
 
 export type UseEmojiGridOptions = {

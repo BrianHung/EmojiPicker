@@ -3,16 +3,54 @@
 // shadcn/ui emoji picker. Installed by `npx shadcn add <registry>/emoji-picker.json`:
 // you own this file; restyle anything. Built on @brianhung/emoji-picker's unstyled parts.
 import * as React from "react";
-import { EmojiPicker, Tapback, type EmojiSelection, type ListProps, type RootProps } from "@brianhung/emoji-picker";
+import { EmojiPicker, Tapback, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 
 const tone = "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent";
+const cell = "flex items-center justify-center rounded-md outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";
+// Hover grows a reaction only with a real pointer (a tap would leave it stuck); a press shrinks it slightly, so the tap registers.
+const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
+
+function EmojiPickerSearch() {
+  return (
+    <EmojiPicker.Search className="relative flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3">
+      <EmojiPicker.Search.Input className="h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground">
+        <EmojiPicker.Search.Clear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 transform-none items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
+          <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </EmojiPicker.Search.Clear>
+      </EmojiPicker.Search.Input>
+      <svg viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" />
+      </svg>
+      <EmojiPicker.SkinTone>
+        <EmojiPicker.SkinTone.Trigger className={tone}>
+          <EmojiPicker.SkinTone.Glyph />
+        </EmojiPicker.SkinTone.Trigger>
+        <EmojiPicker.SkinTone.Options className="flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
+          {(t) => (
+            <EmojiPicker.SkinTone.Option tone={t} className={tone}>
+              <EmojiPicker.SkinTone.Glyph />
+            </EmojiPicker.SkinTone.Option>
+          )}
+        </EmojiPicker.SkinTone.Options>
+      </EmojiPicker.SkinTone>
+    </EmojiPicker.Search>
+  );
+}
+
+/** An emoji cell; `className` adds to its classes. */
+export function EmojiPickerCell({ className, ...props }: Omit<React.ComponentProps<typeof EmojiPicker.List.Cell>, "className"> & { className?: string }) {
+  return <EmojiPicker.List.Cell className={cn(cell, className)} {...props} />;
+}
 
 export type EmojiPickerBodyProps = {
   /** Rows between search and the grid (custom rows). */
   rows?: React.ReactNode;
-  /** Replace cells or section titles. */
-  components?: ListProps["components"];
+  /** Each emoji in view. Default `<EmojiPickerCell />`. */
+  cell?: (emoji: EmojiItem) => React.ReactNode;
   /** The hovered or highlighted emoji, with its name and shortcode. Default true. */
   footer?: boolean;
   /** Shown when a search has no results. Default "No emoji found." */
@@ -20,41 +58,20 @@ export type EmojiPickerBodyProps = {
 };
 
 /** Search, grid and footer: the inside of a picker, for any Root. Styled like shadcn's Command. */
-export function EmojiPickerBody({ rows, components, footer = true, empty = "No emoji found." }: EmojiPickerBodyProps) {
+export function EmojiPickerBody({ rows, cell: renderCell, footer = true, empty = "No emoji found." }: EmojiPickerBodyProps) {
   return (
     <>
-      <EmojiPicker.Search className="relative flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3">
-        <EmojiPicker.Search.Input className="h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground">
-          <EmojiPicker.Search.Clear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 transform-none items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
-            <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
-          </EmojiPicker.Search.Clear>
-        </EmojiPicker.Search.Input>
-        <svg viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-3.5-3.5" />
-        </svg>
-        <EmojiPicker.SkinTone>
-          <EmojiPicker.SkinTone.Trigger className={tone}>
-            <EmojiPicker.SkinTone.Glyph />
-          </EmojiPicker.SkinTone.Trigger>
-          <EmojiPicker.SkinTone.Options className="flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
-            {(t) => (
-              <EmojiPicker.SkinTone.Option tone={t} className={tone}>
-                <EmojiPicker.SkinTone.Glyph />
-              </EmojiPicker.SkinTone.Option>
-            )}
-          </EmojiPicker.SkinTone.Options>
-        </EmojiPicker.SkinTone>
-      </EmojiPicker.Search>
+      <EmojiPickerSearch />
       {rows}
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
-        <EmojiPicker.List
-          components={components}
-          cellClassName="flex items-center justify-center rounded-md outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-          headerClassName="bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground"
-        />
+        <EmojiPicker.List>
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
+              <EmojiPicker.List.Items>{renderCell ?? (() => <EmojiPickerCell />)}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
         <EmojiPicker.Empty className="py-6 text-center text-sm text-muted-foreground">{empty}</EmojiPicker.Empty>
         <EmojiPicker.Loading className="py-6 text-center text-sm text-muted-foreground">Loading…</EmojiPicker.Loading>
       </EmojiPicker.Viewport>
@@ -65,26 +82,27 @@ export function EmojiPickerBody({ rows, components, footer = true, empty = "No e
 
 /** The hovered (or, while searching, highlighted) emoji. */
 export function EmojiPickerFooter({ className }: { className?: string }) {
-  const active = EmojiPicker.useActiveEmoji();
   return (
-    <div className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)}>
-      {active ? (
-        <>
-          <span className="text-lg leading-none">{active.imageUrl ? <img src={active.imageUrl} alt="" className="size-[18px]" /> : active.emoji}</span>
-          <span className="truncate font-medium">{active.name}</span>
-          {active.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{active.shortcodes[0]}:</code> : null}
-        </>
-      ) : (
-        <span className="text-muted-foreground">Pick an emoji</span>
-      )}
-    </div>
+    <EmojiPicker.Preview className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)}>
+      {({ emoji }) =>
+        emoji ? (
+          <>
+            <span className="text-lg leading-none">{emoji.imageUrl ? <img src={emoji.imageUrl} alt="" className="size-[18px]" /> : emoji.emoji}</span>
+            <span className="truncate font-medium">{emoji.name}</span>
+            {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
+          </>
+        ) : (
+          <span className="text-muted-foreground">Pick an emoji</span>
+        )
+      }
+    </EmojiPicker.Preview>
   );
 }
 
-export type EmojiPickerCardProps = Omit<RootProps, "children"> & EmojiPickerBodyProps;
+export type EmojiPickerCardProps = Omit<RootProps, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
 
 /** The picker: search, skin tone, the grid and a footer, on shadcn's popover surface. */
-export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(function EmojiPickerCard({ className, rows, components, footer, empty, ...props }, ref) {
+export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(function EmojiPickerCard({ className, rows, cell: renderCell, footer, empty, ...props }, ref) {
   return (
     <EmojiPicker.Root
       ref={ref}
@@ -95,13 +113,10 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
       )}
       {...props}
     >
-      <EmojiPickerBody rows={rows} components={components} footer={footer} empty={empty} />
+      <EmojiPickerBody rows={rows} cell={renderCell} footer={footer} empty={empty} />
     </EmojiPicker.Root>
   );
 });
-
-// Hover grows a reaction only with a real pointer (a tap would leave it stuck); a press shrinks it slightly, so the tap registers.
-const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
 
 /** iMessage-style tapback: your top 5, and "+" that expands into the full picker. */
 export function EmojiTapback({ onSelect, className }: { onSelect: (selection: EmojiSelection) => void; className?: string }) {

@@ -20,10 +20,17 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
         </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className={styles.viewport}>
-        <EmojiPicker.List cellClassName={styles.cell} headerClassName={styles.header} />
+        <EmojiPicker.List>
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className={styles.header} />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
         <EmojiPicker.Empty className={styles.empty}>No emoji found.</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
-      <EmojiPicker.CategoryNav className={styles.nav} tabClassName={styles.tab} />
+      <EmojiPicker.CategoryNav className={styles.nav}>{() => <EmojiPicker.CategoryNav.Tab className={styles.tab} />}</EmojiPicker.CategoryNav>
     </EmojiPicker.Root>
   );
 }

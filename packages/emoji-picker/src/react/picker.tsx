@@ -5,7 +5,6 @@ import type { CategoryOption as CoreCategoryOption } from "../core/sections";
 import type { EmojiSelection } from "../core/store";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
-import type { PickerComponents } from "./components";
 import { PickerContext, usePicker, useSelector, type FocusModel, type HighlightControl, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "./hold";
 import { mergeRefs } from "react-aria/mergeRefs";
@@ -84,7 +83,6 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   emojiVersion?: number;
   /** Turn off an emoji's skin-tone variations (Shift+Space and long press on it). */
   disableVariations?: boolean;
-  components?: PickerComponents;
   /**
    * @deprecated The picker draws no colors of its own; use the tokens (`tokens.css`) or your
    * own CSS. Still sets `color-scheme` on Root.
@@ -106,11 +104,9 @@ type InternalRootProps = RootProps & {
   pressed?: ReadonlySet<string> | null;
 };
 
-const NO_COMPONENTS: PickerComponents = {};
-
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
   // The core state takes the props it knows by name (search, categories, frequent, collapse…).
-  const { onSelect, frequent, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, components = NO_COMPONENTS, cssLayer = "base", nonce, colorScheme, className, style, render, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest } = props;
+  const { onSelect, frequent, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, cssLayer = "base", nonce, colorScheme, className, style, render, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest } = props;
   const { store, labels: providerLabels, maxVersion } = useEmojiContext();
   const labels = React.useMemo(() => (searchPlaceholder ? { ...providerLabels, searchPlaceholder } : providerLabels), [providerLabels, searchPlaceholder]);
   // Inside an EmojiPopover: picking closes it (unless closeOnSelect={false}).
@@ -176,7 +172,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       pointer,
       autoFocusSearch: autoFocusSearch ?? Boolean(popover),
       disableVariations,
-      components,
       columns,
       fitColumns,
       emojiVersion,
@@ -199,7 +194,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       controlHighlight,
       listId,
     }),
-    [store, state, controlHighlight, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
+    [store, state, controlHighlight, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),

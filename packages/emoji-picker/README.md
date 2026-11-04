@@ -71,7 +71,38 @@ It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With
 
 ## Pickers
 
-`EmojiPicker` is a set of parts: `Root`, `Search`, `SearchInput`, `CategoryNav`, `Viewport`, `List`, `Preview`, `SkinTone`, `Empty`, `Loading`, `LoadError`, `Reactions`, and `Panel`. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
+`EmojiPicker` is a set of parts, each with a default rendering when you leave out its children:
+
+```
+Root
+├ Search                  Search.Input (field), Search.Clear (only with a query)
+├ SkinTone                SkinTone.Trigger, SkinTone.Options {(tone) => SkinTone.Option}, SkinTone.Glyph
+├ CategoryNav             {(category) => CategoryNav.Tab}
+├ Viewport
+│ ├ List                  {(section) => List.Section}
+│ │ └ List.Section        List.SectionTitle, List.Items {(emoji) => List.Cell}, List.SectionActions
+│ └ Empty · Loading · LoadError
+├ Preview                 {({ emoji }) => …}
+├ Reactions               {(emoji) => Reactions.Item}, or Reactions.Items and Reactions.Expand
+└ Panel
+```
+
+Every part takes `render` (an element, whose props and ref merge with the part's, or `(props, state) => element`), and `className` and `style` as values or functions of its state; state is also on data attributes. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
+
+```tsx
+<EmojiPicker.List>
+  {(section) => (
+    <EmojiPicker.List.Section>
+      <EmojiPicker.List.SectionTitle className="px-2 text-xs font-medium" />
+      <EmojiPicker.List.Items>
+        {(emoji) => <EmojiPicker.List.Cell render={<button title={emoji.label} />} className={({ highlighted }) => (highlighted ? "bg-accent" : "")} />}
+      </EmojiPicker.List.Items>
+    </EmojiPicker.List.Section>
+  )}
+</EmojiPicker.List>
+```
+
+The List's functions run only for the sections and emoji in view, and a cell re-renders only when its own state changes.
 
 `Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns` (with `fitColumns={false}` to keep them when the width is a little short), `emojiVersion`, `searchResults`, `keymap`, `focusModel`, `pointer`, and `artwork`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
 
@@ -81,14 +112,20 @@ Search results replace the category list while a query is active. `searchResults
 
 A collapsed section keeps its header and hides its rows. Control collapse with `collapsedCategories` and `onCollapsedCategoriesChange`, or set `defaultCollapsedCategories`.
 
-A section title is text inside the listbox (`CategoryHeader` customizes it and receives `category.collapsed`). Controls for a title, such as a collapse chevron or a "Customize" link, go in `components.HeaderActions`: they render in a layer over the list, outside the listbox, pinned with the title as it sticks.
+A section title (`List.SectionTitle`) is text inside the listbox; its state has `collapsed`. Controls for a title, such as a collapse chevron or a "Customize" link, go in `List.SectionActions`: they render in a layer over the list, outside the listbox, pinned with the title as it sticks.
 
 ```tsx
-function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
-  return <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0" />;
-}
-
-<EmojiPicker.List components={{ HeaderActions: Toggle }} />
+<EmojiPicker.List>
+  {() => (
+    <EmojiPicker.List.Section>
+      <EmojiPicker.List.SectionTitle />
+      <EmojiPicker.List.Items />
+      <EmojiPicker.List.SectionActions>
+        {({ section, toggle, toggleProps }) => <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0" />}
+      </EmojiPicker.List.SectionActions>
+    </EmojiPicker.List.Section>
+  )}
+</EmojiPicker.List>
 ```
 
 `toggleProps` carries `aria-expanded` (no `aria-controls`: the list is virtualized, so a section out of view has no element to point at). Search results ignore collapse.
@@ -103,7 +140,7 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 
 ## Tapbacks
 
-`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history), or fixed `reactions`. Its children become the expanded picker. `selected` makes the user's current reactions toggles with `aria-pressed`, in any skin tone. For a row of your own buttons, `ReactionBar` gives the same keyboard: one tab stop, arrows, Home and End, and focus that follows the pointer within the row.
+`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history), or fixed `reactions`. Its children are `EmojiPicker.Reactions` and an `EmojiPicker.Panel` holding the expanded picker (default: the reactions alone). `selected` makes the user's current reactions toggles with `aria-pressed`, in any skin tone. For a row of your own buttons, `ReactionBar` gives the same keyboard: one tab stop, arrows, Home and End, and focus that follows the pointer within the row.
 
 ## Popovers
 
@@ -348,7 +385,7 @@ The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
+Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
 
 ```css
 [data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }

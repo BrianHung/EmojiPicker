@@ -25,16 +25,19 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
         </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1">
-        <EmojiPicker.List
-          cellClassName="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected"
-          headerClassName="bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur"
-        />
+        <EmojiPicker.List>
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected" />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
         <EmojiPicker.Empty className="py-10 text-center text-sm text-picker-muted">No emoji found.</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
-      <EmojiPicker.CategoryNav
-        className="flex justify-between border-t border-picker-border px-2 py-1.5"
-        tabClassName="flex size-8 items-center justify-center rounded-md text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected data-active:text-picker-foreground"
-      />
+      <EmojiPicker.CategoryNav className="flex justify-between border-t border-picker-border px-2 py-1.5">
+        {() => <EmojiPicker.CategoryNav.Tab className="flex size-8 items-center justify-center rounded-md text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected data-active:text-picker-foreground" />}
+      </EmojiPicker.CategoryNav>
     </EmojiPicker.Root>
   );
 }

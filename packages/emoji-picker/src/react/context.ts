@@ -7,7 +7,6 @@ import { same } from "../core/reactive";
 import type { Category, EmojiSection } from "../core/sections";
 import type { EmojiSelection, EmojiStore } from "../core/store";
 import type { CollapsedCategories } from "./collapse";
-import type { PickerComponents } from "./components";
 import type { KeyboardAction } from "./keymap";
 
 /**
@@ -93,7 +92,6 @@ export type PickerContextValue = {
   pointer: PointerModel;
   autoFocusSearch: boolean;
   disableVariations: boolean;
-  components: PickerComponents;
   columns?: number;
   fitColumns: boolean;
   emojiVersion?: number;

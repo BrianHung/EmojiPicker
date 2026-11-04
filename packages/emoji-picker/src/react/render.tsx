@@ -36,8 +36,9 @@ export function toRenderFunction<S>(render: RenderProp<S> | undefined): ((props:
 export const resolve = <T, S>(value: T | ((state: S) => T), state: S): T => composeRenderProps<T, S, T>(value as never, (v) => v)(state);
 
 /** A part's element for its state: `className`, `style` and `children` resolved, through `render` when given. */
-export function renderElement<S>(tag: keyof React.JSX.IntrinsicElements, { render, className, style, children, ...props }: Input<S>, state: S) {
-  const resolved: ElementProps = { ...props, className: resolve(className, state), style: resolve(style, state), children: resolve(children, state) };
+export function renderElement<S>(tag: keyof React.JSX.IntrinsicElements, { render, ...props }: Input<S>, state: S) {
+  // Resolved in place: the element keeps its attributes in the order given.
+  const resolved = { ...props, className: resolve(props.className, state), style: resolve(props.style, state), children: resolve(props.children, state) } as ElementProps;
   const custom = toRenderFunction(render);
   return custom ? custom(resolved, state) : React.createElement(tag, resolved);
 }

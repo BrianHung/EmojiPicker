@@ -21,10 +21,14 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
           <EmojiPicker.Search.Input className="h-8 w-full rounded-md border border-picker-input-border bg-picker-input px-3 text-sm outline-none placeholder:text-picker-subtle" />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="relative min-h-0 flex-1">
-          <EmojiPicker.List
-            cellClassName="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected"
-            headerClassName="bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur"
-          />
+          <EmojiPicker.List>
+            {() => (
+              <EmojiPicker.List.Section>
+                <EmojiPicker.List.SectionTitle className="bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
+                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected" />}</EmojiPicker.List.Items>
+              </EmojiPicker.List.Section>
+            )}
+          </EmojiPicker.List>
         </EmojiPicker.Viewport>
       </EmojiPicker.Panel>
     </Tapback>

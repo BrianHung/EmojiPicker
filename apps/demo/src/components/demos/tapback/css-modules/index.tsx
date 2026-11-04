@@ -13,7 +13,14 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
           <EmojiPicker.Search.Input className={styles.input} />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className={styles.viewport}>
-          <EmojiPicker.List cellClassName={styles.cell} headerClassName={styles.header} />
+          <EmojiPicker.List>
+            {() => (
+              <EmojiPicker.List.Section>
+                <EmojiPicker.List.SectionTitle className={styles.header} />
+                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
+              </EmojiPicker.List.Section>
+            )}
+          </EmojiPicker.List>
         </EmojiPicker.Viewport>
       </EmojiPicker.Panel>
     </Tapback>
