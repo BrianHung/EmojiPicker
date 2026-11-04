@@ -19,6 +19,7 @@ const pages = {
   "semantic-search": "examples/semantic-search/index.html",
   "custom-emoji": "examples/custom-emoji/index.html",
   virtualizer: "examples/virtualizer/index.html",
+  editors: "examples/editors/index.html",
 };
 
 export default defineConfig({

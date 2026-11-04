@@ -1,0 +1,12 @@
+// Linear's ":" list opens 4px above its comment box, over the text's left edge; rows inherit the scene's 13px/18.57px.
+import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
+import { cn } from "@/lib/utils";
+import { linear } from "@/styles/linear/picker";
+import { SuggestionList, type EmojiMenuProps } from "./suggestion-list";
+
+export const linearEmojiOptions: EmojiTypeaheadOptions = { limit: 12 };
+
+/** Render inside the composer's `relative` box, next to the editor. */
+export function LinearEmojiMenu({ className, ...typeahead }: EmojiMenuProps) {
+  return <SuggestionList appStyle={linear} {...typeahead} className={cn("absolute bottom-full left-4 z-10 mb-1 max-w-[calc(100%-32px)] [line-height:calc(1.25/0.875)]", className)} />;
+}

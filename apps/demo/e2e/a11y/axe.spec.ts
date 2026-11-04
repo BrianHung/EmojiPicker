@@ -8,7 +8,7 @@ import { isKnown } from "./known";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
-const PAGES = ["/", ...STYLES.map((s) => `/gallery/#${s}`), "/examples/", "/examples/tiptap/", "/examples/lexical/", "/examples/semantic-search/", "/examples/custom-emoji/", "/examples/virtualizer/"];
+const PAGES = ["/", ...STYLES.map((s) => `/gallery/#${s}`), "/examples/", "/examples/tiptap/", "/examples/lexical/", "/examples/semantic-search/", "/examples/custom-emoji/", "/examples/virtualizer/", "/examples/editors/"];
 
 /** Waits out open/close transitions so contrast is measured on the final colours. */
 async function still(page: Page) {
