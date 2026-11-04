@@ -75,6 +75,7 @@ ${S("panel")}{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;min-
 ${S("panel")}[hidden]{display:none}
 ${S("empty")},${S("loading")}{display:flex;align-items:center;justify-content:center;padding:var(--ep-pad);min-height:var(--ep-cell)}
 ${S("headerActions")}{position:absolute;inset:0;pointer-events:none;z-index:3}
+:where(${S("variations")}){z-index:4;display:flex;background:var(--emoji-picker-background,Canvas);border-radius:var(--emoji-picker-radius,8px);box-shadow:var(--emoji-picker-shadow,0 4px 12px rgb(0 0 0 / 0.15))}
 ${S("headerActions")} > *{pointer-events:auto}
 }`;
 

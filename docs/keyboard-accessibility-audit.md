@@ -40,7 +40,7 @@ Defaults follow Discord; the rest is configurable. Each row is checked in Chrome
 
 | | With a search field | Without a search field |
 |---|---|---|
-| Structure | search field is a `searchbox` (React Aria `Autocomplete`) with `aria-controls` and `aria-activedescendant`; the list is a `listbox` › `group` (one per section, named by its title) › `option`; names include the skin tone (“thumbs up: medium skin tone”); results have a polite live region (“24 results”) | the same listbox |
+| Structure | search field is a `searchbox` (React Aria's `useAutocomplete`) with `aria-controls` and `aria-activedescendant`; the list is a `listbox` › `group` (one per section, named by its title) › `option`; names include the skin tone (“thumbs up: medium skin tone”); results have a polite live region (“24 results”) | the same listbox |
 | On open | focus in the search field (inline: once clicked; popover: on open), and it stays there | focus on the first emoji (or the one that was focused last) |
 | Arrows, Page Up / Down | move a highlight through the grid or results (`aria-activedescendant`); Left / Right edit the query unless the caret is at its end | move focus cell to cell (roving tabindex) |
 | Home / End | first / last emoji while the field is empty; with a query they move the caret, and Ctrl+Home / Ctrl+End move the highlight | first / last emoji |
@@ -55,4 +55,4 @@ Defaults follow Discord; the rest is configurable. Each row is checked in Chrome
 | Focus model | `focusModel="input"` (default) keeps focus in search; `"grid"` moves it into the cells | same |
 | Customisation | `keymap` remaps actions; a part’s `onKeyDown` runs first and can call `event.preventEmojiPickerHandler()` | same |
 
-The picker was a `combobox` driving a `grid` › `row` › `gridcell` until it moved to React Aria Components. It now follows React Aria's Autocomplete pattern: a `searchbox` whose `aria-activedescendant` names an `option` in a `listbox` of `group`s. Keys, focus and hover behave as above in both.
+The picker was a `combobox` driving a `grid` › `row` › `gridcell` until it moved to React Aria Components. It now follows React Aria's autocomplete pattern: a `searchbox` whose `aria-activedescendant` names an `option` in a `listbox` of `group`s. Keys, focus and hover behave as above in both.

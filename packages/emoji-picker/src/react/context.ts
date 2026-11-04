@@ -43,6 +43,8 @@ export type ListHandle = {
   focusedItem(): EmojiItem | null;
   /** The highlight is on the first emoji. */
   atStart(): boolean;
+  /** Opens the skin-tone variations of the emoji at `target` (its cell, or the field's highlight). */
+  variations(target: Element): boolean;
   orientation: "vertical" | "horizontal";
 };
 

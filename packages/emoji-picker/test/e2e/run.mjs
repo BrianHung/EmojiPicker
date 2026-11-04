@@ -617,6 +617,57 @@ const sugg = await page.evaluate(() => {
 });
 check("autocomplete (demo component): long shortcodes stay inside the menu", sugg && sugg.width <= 321 && sugg.scroll <= sugg.client + 1, JSON.stringify(sugg), { warn: true });
 
+// --- Skin-tone variations (Shift+Space, long press) ------------------------------
+const variations = () =>
+  page.evaluate((scope) => {
+    const row = document.querySelector(`${scope} [data-slot="variations"]`);
+    return row && { role: row.getAttribute("role"), label: row.getAttribute("aria-label"), options: [...row.querySelectorAll('[role="option"]')].map((o) => o.getAttribute("aria-label")), focus: document.activeElement?.getAttribute("aria-label") };
+  }, SCOPE);
+await mount(page, { kind: "vertical" });
+await search().fill("thumbs up");
+await page.waitForTimeout(250);
+await press("Shift+Space");
+const tones = await variations();
+check("variations: Shift+Space on the highlighted emoji opens its six tones, named, the current one focused", tones?.role === "listbox" && tones.options.length === 6 && tones.options[0] === "thumbs up" && tones.options[3] === "thumbs up: medium skin tone" && tones.focus === "thumbs up" && (await search().inputValue()) === "thumbs up", JSON.stringify(tones));
+await press("ArrowRight");
+check("variations: Right moves to the next tone", (await variations())?.focus === "thumbs up: light skin tone");
+await press("End");
+check("variations: End goes to the last tone", (await variations())?.focus === "thumbs up: dark skin tone");
+await press("Home");
+check("variations: Home goes to the first", (await variations())?.focus === "thumbs up");
+await press("Escape");
+check("variations: Escape closes, back to the field with the emoji highlighted", (await variations()) === null && (await focused(page)).slot === "search-input" && (await highlighted(page)) === "thumbs up" && (await search().inputValue()) === "thumbs up");
+await press("Shift+Space");
+await press("ArrowRight");
+await press("ArrowRight");
+await press("Enter", 300);
+check("variations: Enter picks the tone and closes", (await page.evaluate(() => window.__picks.at(-1))) === "1f44d-1f3fc" && (await variations()) === null && (await focused(page)).slot === "search-input");
+await mount(page, { kind: "vertical", root: GRID });
+await search().fill("waving hand");
+await page.waitForTimeout(250);
+const waving = await $('[data-slot="list"] [data-slot="emoji"]').first().boundingBox();
+await page.mouse.move(waving.x + waving.width / 2, waving.y + waving.height / 2);
+await page.mouse.down();
+await page.waitForTimeout(700);
+const held = await variations();
+await page.mouse.up();
+await page.waitForTimeout(200);
+check("variations: a long press opens them; the release doesn't pick", held?.options.length === 6 && held.options[0] === "waving hand" && (await page.evaluate(() => window.__picks.length)) === 0 && (await variations()) !== null, JSON.stringify(held));
+await press("ArrowRight");
+await press(" ", 300);
+check("variations: Space picks; focus goes back to the emoji's cell (grid)", (await page.evaluate(() => window.__picks.at(-1))) === "1f44b-1f3fb" && (await focused(page)).label === "waving hand" && (await focused(page)).slot === "emoji");
+await press("Shift+Space");
+check("variations: Shift+Space on a focused cell opens them", (await variations())?.options.length === 6);
+await page.mouse.click(5, 5);
+await page.waitForTimeout(150);
+check("variations: a click outside closes them", (await variations()) === null);
+await mount(page, { kind: "vertical", root: { disableVariations: true } });
+await search().fill("thumbs up");
+await page.waitForTimeout(250);
+await press("Shift+Space");
+check("variations: disableVariations turns them off (Shift+Space types a space)", (await variations()) === null && (await search().inputValue()) === "thumbs up ");
+await search().fill("");
+
 check("no page errors", errors.length === 0, errors.join(" | "));
 await browser.close();
 const n = failed();

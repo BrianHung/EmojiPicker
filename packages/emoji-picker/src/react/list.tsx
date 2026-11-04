@@ -26,6 +26,7 @@ import { itemFactory, resultSections, type EmojiItem, type EmojiSection } from "
 import { SLOTS, joinClasses } from "./slots";
 import { useDrawable } from "./native-support";
 import { useEmptyState } from "./viewport";
+import { Variations } from "./variations";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
 export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
@@ -333,6 +334,27 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     return m && m.isFocused && latest.current.collection.emoji(m.focusedKey) ? m.focusedKey : null;
   };
 
+  const focusInput = () => listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? null;
+
+  // --- Skin-tone variations of one emoji ---------------------------------------------
+  const [variations, setVariations] = React.useState<{ key: Key; back: HTMLElement | null } | null>(null);
+  const openVariations = (key: Key | null) => {
+    const record = latest.current.collection.emoji(key)?.record;
+    if (key == null || !record?.tones.length || record.imageUrl || picker.disableVariations) return false;
+    setVariations({ key, back: document.activeElement instanceof HTMLElement ? document.activeElement : null });
+    return true;
+  };
+  const closeVariations = (restore: boolean) => {
+    if (!variations) return;
+    setVariations(null);
+    if (!restore) return;
+    // Back to the emoji: its cell (grid), or the field with the emoji highlighted.
+    const m = stateRef.current.selectionManager;
+    (variations.back ?? cellElement(variations.key))?.focus({ preventScroll: true });
+    m.setFocused(true);
+    m.setFocusedKey(variations.key);
+  };
+
   const focusSearch = () => {
     const input = listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`);
     if (!input) return false;
@@ -419,6 +441,11 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       const key = highlight();
       return key != null && key === navigation.getFirstKey();
     },
+    variations(target) {
+      const cell = target.closest(`[data-slot="${SLOTS.emoji}"]`);
+      const key = cell && listRef.current?.contains(cell) ? cell.getAttribute("data-key") : target === focusInput() ? highlight() : null;
+      return openVariations(key);
+    },
   };
   const applyHighlightRef = React.useRef<() => void>(() => {});
   const handleRef = React.useRef(handle);
@@ -434,6 +461,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       jump: (id, o) => handleRef.current.jump(id, o),
       focusedItem: () => handleRef.current.focusedItem(),
       atStart: () => handleRef.current.atStart(),
+      variations: (t) => handleRef.current.variations(t),
     };
     picker.list.current = proxy;
     return () => {
@@ -588,11 +616,19 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   };
   // Cells have no handlers of their own: the list handles presses, hover and focus for all of them.
   const keyOf = (e: React.SyntheticEvent) => (e.target as Element).closest?.(`[data-slot="${SLOTS.emoji}"]`)?.getAttribute("data-key") ?? null;
+  // A long press on an emoji with tones opens its variations; the release then doesn't pick.
+  const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
+  const endPress = () => {
+    marks.pressed.set(null);
+    if (longPress.current) clearTimeout(longPress.current.timer);
+  };
   const cellHandlers: React.HTMLAttributes<HTMLElement> = {
     onPointerDown(e) {
       const key = keyOf(e);
       if (key == null || e.button !== 0) return;
+      endPress();
       marks.pressed.set(key);
+      longPress.current = { x: e.clientX, y: e.clientY, fired: false, timer: window.setTimeout(() => longPress.current && (longPress.current.fired = openVariations(key)), LONG_PRESS_MS) };
       // Focus stays in the field (virtual focus) or moves to the cell without scrolling.
       e.preventDefault();
       if (e.pointerType === "touch") return;
@@ -605,11 +641,16 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     onMouseDown(e) {
       if (keyOf(e) != null) e.preventDefault();
     },
-    onPointerUp: () => marks.pressed.set(null),
-    onPointerCancel: () => marks.pressed.set(null),
+    onPointerUp: endPress,
+    onPointerCancel: endPress,
+    onContextMenu(e) {
+      if (longPress.current?.fired) e.preventDefault();
+    },
     onClick(e) {
       const key = keyOf(e);
-      if (key == null) return;
+      const held = longPress.current?.fired;
+      longPress.current = null;
+      if (key == null || held) return;
       if (virtual && (e.nativeEvent as PointerEvent).pointerType === "touch") {
         state.selectionManager.setFocused(true);
         state.selectionManager.setFocusedKey(key);
@@ -625,6 +666,8 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       if (cell && !cell.contains(e.relatedTarget as Node | null) && marks.hovered.get() === cell.getAttribute("data-key")) hover(null);
     },
     onPointerMove(e) {
+      const press = longPress.current;
+      if (press && !press.fired && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 8) endPress();
       const key = keyOf(e);
       if (key != null) follow(key);
     },
@@ -632,6 +675,18 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   const { isFocusVisible: focusVisible } = useFocusVisible();
   React.useEffect(trackPointer, []);
 
+  /** Over the emoji (under it in the first row in view), centered on it and inside the list. */
+  const variationsStyle = (key: Key): React.CSSProperties => {
+    const cell = layout.getLayoutInfo(key)?.rect;
+    const list = listRef.current;
+    if (!cell || !list) return { position: "absolute", visibility: "hidden" };
+    const { cellWidth, cellHeight } = layout.metrics;
+    const width = 6 * cellWidth;
+    const left = Math.max(0, Math.min(cell.x + cell.width / 2 - width / 2, layout.getContentSize().width - width));
+    const above = cell.y - cellHeight;
+    const top = above >= (visibleRect()?.y ?? 0) ? above : cell.maxY;
+    return { position: "absolute", top: list.offsetTop + top, insetInlineStart: list.offsetLeft + left };
+  };
   const empty = useEmptyState();
   // Under Autocomplete (virtual focus), the field drives the list: its ids, keys and focus handling.
   const field = virtual ? autocomplete : null;
@@ -724,6 +779,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     return <EmojiCell item={node as unknown as EmojiItem} />;
   }, []);
   const isEmpty = collection.size === 0;
+  const varied = variations && collection.emoji(variations.key);
 
   return (
     <CellsContext.Provider value={cells}>
@@ -755,10 +811,23 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
           </div>
         ) : null}
       </LoadMoreContext.Provider>
+      {varied ? (
+        <Variations
+          record={varied.record}
+          style={variationsStyle(variations.key)}
+          onPick={(unified) => {
+            closeVariations(true);
+            picker.pick(unified);
+          }}
+          onClose={closeVariations}
+        />
+      ) : null}
       {components.HeaderActions && !horizontal && !searching ? <ActionsLayer layout={layout} list={listRef} Actions={components.HeaderActions} sections={sections} /> : null}
     </CellsContext.Provider>
   );
 });
+
+const LONG_PRESS_MS = 500;
 
 const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 

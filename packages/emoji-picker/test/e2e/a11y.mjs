@@ -57,6 +57,19 @@ for (const focusModel of ["input", "grid"]) {
 }
 
 await mount(page, { kind: "vertical" });
+await search().fill("thumbs up");
+await page.waitForTimeout(250);
+await page.keyboard.press("Shift+Space");
+await page.waitForTimeout(150);
+await axe("skin-tone variations open");
+const variation = await page.evaluate((scope) => {
+  const row = document.querySelector(`${scope} [data-slot="variations"]`);
+  const option = row?.querySelector('[role="option"][tabindex="0"]');
+  return { role: row?.getAttribute("role"), name: row?.getAttribute("aria-label"), option: option?.getAttribute("aria-label"), selected: option?.getAttribute("aria-selected"), focused: document.activeElement === option };
+}, SCOPE);
+check("variations: a named listbox of tone options, the current one selected and focused", variation.role === "listbox" && Boolean(variation.name) && variation.option === "thumbs up" && variation.selected === "true" && variation.focused, JSON.stringify(variation));
+await page.keyboard.press("Escape");
+await search().fill("");
 const landmark = await page.evaluate((scope) => (({ tagName, ariaLabel }) => ({ tagName, ariaLabel }))(document.querySelector(`${scope} [data-slot="emoji-picker"]`)), SCOPE);
 check("root: a named landmark (aside, default \"Emoji picker\")", landmark.tagName === "ASIDE" && landmark.ariaLabel === "Emoji picker", JSON.stringify(landmark));
 await page.locator(`${SCOPE} [data-slot="skin-tone"] > button`).click();

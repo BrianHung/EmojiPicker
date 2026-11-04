@@ -77,7 +77,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   artwork?: ArtworkMap;
   /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
   emojiVersion?: number;
-  /** @deprecated No effect: per-emoji skin-tone variations aren't available; the shared SkinTone applies. */
+  /** Turn off an emoji's skin-tone variations (Shift+Space and long press on it). */
   disableVariations?: boolean;
   components?: PickerComponents;
   /**
@@ -250,7 +250,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   );
 
   return (
-    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={escape} focusSearch={focusSearch} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
+    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={escape} focusSearch={focusSearch} variations={(target) => Boolean(list.current?.variations(target))} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
       {(keyboard) => (
         <aside
           ref={mergeRefs(ref, rootRef, keyboard.ref)}

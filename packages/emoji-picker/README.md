@@ -4,7 +4,7 @@ Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplet
 
 ## Overview
 
-The library builds on [React Aria Components](https://react-spectrum.adobe.com/react-aria/) (a virtualized `ListBox` grid, `Autocomplete`, `SearchField`, `Tabs`, `Toolbar`) and [Floating UI](https://floating-ui.com), and adds:
+The library builds on [React Aria](https://react-spectrum.adobe.com/react-aria/)'s hooks (`useListBox` over a virtualized grid, `useAutocomplete`, `useToolbar`) and adds:
 
 - Tapbacks: the user's most-used emoji, with a button that expands into the full picker.
 - Slack shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete.
@@ -85,7 +85,7 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 
 ### Horizontal list
 
-`<EmojiPicker.List orientation="horizontal" rows={5} />` lays sections side by side, as the iOS emoji keyboard does. Each section fills `rows` rows column by column, and the Viewport scrolls sideways. `searchRows` sets the rows for search results. Only columns near the viewport render. Long-press skin-tone variations aren't available in this layout.
+`<EmojiPicker.List orientation="horizontal" rows={5} />` lays sections side by side, as the iOS emoji keyboard does. Each section fills `rows` rows column by column, and the Viewport scrolls sideways. `searchRows` sets the rows for search results. Only columns near the viewport render.
 
 ## Tapbacks
 
@@ -93,7 +93,7 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 
 ## Popovers
 
-`EmojiPopover` positions its content next to the trigger with Floating UI (flip, shift, size; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
+`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
 
 ```tsx
 <EmojiPopover.Root>
@@ -237,11 +237,12 @@ Each part follows its WAI-ARIA Authoring Practices pattern. `npm run test:a11y` 
 
 | Part | Roles and states |
 |---|---|
-| Search field | `searchbox` (React Aria `Autocomplete`) with `aria-controls` and `aria-activedescendant` |
+| Search field | `searchbox` (React Aria's `useAutocomplete`) with `aria-controls` and `aria-activedescendant` |
 | Search status | A polite `status` live region: “24 results”, “No results” |
 | Lists and results | `listbox` › `group` (each section, named by its title) › `option`, named by the emoji and its skin tone, with `aria-posinset`/`aria-setsize` within its section; `aria-busy` during an async search; `aria-selected` only in a value picker (`List value`) |
 | CategoryNav | `tablist` of `tab`s with `aria-selected` |
 | SkinTone | A button with `aria-haspopup` and `aria-expanded` that opens a `radiogroup` |
+| Skin-tone variations | Shift+Space or a long press on an emoji opens a `listbox` of its six tones (named by `labels.skinTone`, options by `labels.withSkinTone`), focused on the current tone |
 | Tapback, ReactionBar | A `toolbar` with one tab stop (roving tabindex); `aria-pressed` on the user's reactions |
 | EmojiPopover | Trigger with `aria-haspopup="dialog"`, `aria-expanded`, and `aria-controls`; content is a labelled, non-modal `dialog` |
 | Autocomplete hooks | `combobox` and `listbox` props from `getInputProps`, `getListProps`, and `getOptionProps` |
@@ -251,7 +252,7 @@ The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus React Aria's `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected`. Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
+Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
 
 ```css
 [data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
