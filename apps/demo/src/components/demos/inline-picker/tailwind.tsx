@@ -1,5 +1,7 @@
 import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker";
 
+const tone = "flex size-8 shrink-0 items-center justify-center rounded-md text-lg leading-none outline-none hover:bg-picker-hover focus-visible:bg-picker-hover";
+
 export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPicker.Root
@@ -7,18 +9,20 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
       autoFocusSearch={false}
       className="flex h-[380px] w-[352px] max-w-full flex-col overflow-hidden rounded-picker border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:36px] [--emoji-header-height:32px] [--emoji-list-padding:8px] [--emoji-size:24px]"
     >
-      <EmojiPicker.Search
-        className="flex items-center gap-2 p-3"
-        inputProps={{
-          className:
-            "h-8 w-full rounded-md border border-picker-input-border bg-picker-input px-3 text-sm text-picker-foreground outline-none placeholder:text-picker-subtle focus-visible:border-picker-ring",
-        }}
-      >
-        <EmojiPicker.SkinTone
-          emoji="270b"
-          buttonClassName="flex size-8 shrink-0 items-center justify-center rounded-md text-lg leading-none outline-none hover:bg-picker-hover focus-visible:bg-picker-hover"
-          optionsClassName="flex rounded-lg border border-picker-border bg-picker-background p-0.5 shadow-picker"
-        />
+      <EmojiPicker.Search className="flex items-center gap-2 p-3">
+        <EmojiPicker.Search.Input className="h-8 w-full rounded-md border border-picker-input-border bg-picker-input px-3 text-sm text-picker-foreground outline-none placeholder:text-picker-subtle focus-visible:border-picker-ring" />
+        <EmojiPicker.SkinTone>
+          <EmojiPicker.SkinTone.Trigger className={tone}>
+            <EmojiPicker.SkinTone.Glyph />
+          </EmojiPicker.SkinTone.Trigger>
+          <EmojiPicker.SkinTone.Options className="flex rounded-lg border border-picker-border bg-picker-background p-0.5 shadow-picker">
+            {(t) => (
+              <EmojiPicker.SkinTone.Option tone={t} className={tone}>
+                <EmojiPicker.SkinTone.Glyph />
+              </EmojiPicker.SkinTone.Option>
+            )}
+          </EmojiPicker.SkinTone.Options>
+        </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1">
         <EmojiPicker.List

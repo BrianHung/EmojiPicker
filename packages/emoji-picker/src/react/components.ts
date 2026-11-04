@@ -3,9 +3,6 @@
 // data attributes (data-highlighted, data-focused, data-hovered, data-pressed, ...).
 import type * as React from "react";
 
-/** Skin tones as cell and button props name them. */
-export type SkinToneId = "neutral" | "1f3fb" | "1f3fc" | "1f3fd" | "1f3fe" | "1f3ff";
-
 /** The emoji a cell shows. */
 export type ListEmoji = {
   /** Hovered or highlighted (an animated custom emoji plays). */
@@ -55,10 +52,6 @@ export type CategoryButtonProps = React.HTMLAttributes<HTMLElement> & {
   category: { id: string; name: string; isActive: boolean };
 };
 
-export type SkinToneButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  tone: { skinTone: SkinToneId; isActive: boolean; isOpen: boolean };
-};
-
 export type ListComponents = {
   Emoji?: React.ComponentType<EmojiCellProps>;
   CategoryHeader?: React.ComponentType<CategoryHeaderProps>;
@@ -68,7 +61,4 @@ export type ListComponents = {
 /** Custom markup for parts. Spread the given props onto your element and keep its ref. */
 export type PickerComponents = ListComponents & {
   CategoryButton?: React.ComponentType<CategoryButtonProps>;
-  SkinToneButton?: React.ComponentType<SkinToneButtonProps>;
-  ExpandButton?: React.ComponentType<React.ButtonHTMLAttributes<HTMLButtonElement>>;
-  ClearButton?: React.ComponentType<React.ButtonHTMLAttributes<HTMLButtonElement>>;
 };

@@ -17,7 +17,6 @@ import { useEmojiContext } from "./provider";
 import { ReactionsContext, type ReactionsState } from "./reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "./render";
 import { useClippedScrollGuard } from "./scroll-guard";
-import { SkinToneButtonProvider } from "./skin-tone";
 import { SLOTS, VISUALLY_HIDDEN, useStructureStyles } from "./slots";
 import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
@@ -227,7 +226,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       <CollapseContext.Provider value={collapse}>
         <ReactionsContext.Provider value={reactionsState}>
           <EmptyStateContext.Provider value={emptyState}>
-            <SkinToneButtonProvider value={components.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
+            {artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}
           </EmptyStateContext.Provider>
         </ReactionsContext.Provider>
       </CollapseContext.Provider>

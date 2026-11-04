@@ -4,7 +4,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 
 /** The props a part hands to `render`: spread them (with the ref) onto your element. */
-export type ElementProps = React.HTMLAttributes<any> & { ref?: React.Ref<any> };
+export type ElementProps = React.AllHTMLAttributes<any> & { ref?: React.Ref<any> };
 
 /** Replaces a part's element: an element (the part's props and ref merge onto it) or `(props, state) => element`. */
 export type RenderProp<S> = React.ReactElement<Record<string, unknown>> | ((props: ElementProps, state: S) => React.ReactElement);

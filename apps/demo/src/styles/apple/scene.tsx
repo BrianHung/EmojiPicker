@@ -1091,11 +1091,10 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
         className="absolute inset-0"
         style={KEYBOARD_SIZES}
       >
-        <EmojiPicker.Search
-          className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px] [&_[data-slot=search-clear]]:absolute [&_[data-slot=search-clear]]:right-[10px] [&_[data-slot=search-clear]]:size-[20px] [&_[data-slot=search-clear]]:rounded-full [&_[data-slot=search-clear]]:bg-[#a5a7ac] [&_[data-slot=search-clear]]:text-white dark:[&_[data-slot=search-clear]]:bg-[#6c6c70] dark:[&_[data-slot=search-clear]]:text-[#2b2b2d]"
-          style={{ background: C.search }}
-          inputProps={{ "aria-label": "Search Emoji", className: "h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]" }}
-        >
+        <EmojiPicker.Search className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px]" style={{ background: C.search }}>
+          <EmojiPicker.Search.Input aria-label="Search Emoji" className="h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]">
+            <EmojiPicker.Search.Clear className="absolute right-[10px] size-[20px] rounded-full bg-[#a5a7ac] text-white dark:bg-[#6c6c70] dark:text-[#2b2b2d]" />
+          </EmojiPicker.Search.Input>
           <SFMagnifyingglass size={17} className="pointer-events-none absolute top-[11.7px] left-[19.7px] text-[#838589] dark:text-[#98989f]" />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="absolute inset-x-0 [scrollbar-width:none]" style={{ top: K.label, height: K.grid - K.label + K.rows * K.row }}>

@@ -27,6 +27,7 @@ import en from "@brianhung/emoji-picker/data/en.json?url"; // Vite; other bundle
 <EmojiProvider data={en}>
   <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)} className="h-[380px] w-[352px]">
     <EmojiPicker.Search>
+      <EmojiPicker.Search.Input />
       <EmojiPicker.SkinTone />
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>

@@ -13,7 +13,6 @@ import {
 import { cn } from "@/lib/utils";
 import * as I from "./icons";
 
-type SkinToneButtonProps = React.ComponentProps<NonNullable<PickerComponents["SkinToneButton"]>>;
 
 /** CSS variables for one style, values in light-dark() so one definition covers both themes. */
 export type Tokens = Record<`--${string}`, string>;
@@ -145,21 +144,43 @@ function headerComponent(layout: PickerLayout): PickerComponents | undefined {
   return layout.headerIcon?.chevron ? { CategoryHeader: Header, HeaderActions: Toggle } : { CategoryHeader: Header };
 }
 
-const DOT_COLORS: Record<string, string> = { neutral: "#ffc93a", "1f3fb": "#fadcbc", "1f3fc": "#e0bb95", "1f3fd": "#bf8f68", "1f3fe": "#9b643d", "1f3ff": "#594539" };
+const DOT_COLORS = ["#ffc93a", "#fadcbc", "#e0bb95", "#bf8f68", "#9b643d", "#594539"];
 
 /** emoji-mart / iOS style: a ringed color dot. */
-function DotTone({ tone, className, children: _children, ...props }: SkinToneButtonProps) {
-  return (
-    <button {...props} className={cn("flex size-7 items-center justify-center rounded-full", className)}>
-      <span className="size-[18px] rounded-full ring-1 ring-black/10 ring-offset-2 ring-offset-transparent" style={{ background: DOT_COLORS[tone.skinTone] }} />
-    </button>
-  );
-}
+const dot = ({ tone }: { tone: number }) => <span className="size-[18px] rounded-full ring-1 ring-black/10 ring-offset-2 ring-offset-transparent" style={{ background: DOT_COLORS[tone] }} />;
 
 /** The layout's skin-tone control: Slack/Discord's ✋ in each tone, or a dot. */
 function Tone({ layout }: { layout: PickerLayout }) {
-  if (layout.skinTone === "dot") return <EmojiPicker.SkinTone button={DotTone} />;
-  return <EmojiPicker.SkinTone emoji={layout.toneEmoji ?? "270b"} buttonClassName={cn("flex items-center justify-center", layout.toneButton, "leading-none")} />;
+  if (layout.skinTone === "dot") {
+    const button = "flex size-7 items-center justify-center rounded-full";
+    return (
+      <EmojiPicker.SkinTone>
+        <EmojiPicker.SkinTone.Trigger className={button}>{dot}</EmojiPicker.SkinTone.Trigger>
+        <EmojiPicker.SkinTone.Options>
+          {(tone) => (
+            <EmojiPicker.SkinTone.Option tone={tone} className={button}>
+              {dot}
+            </EmojiPicker.SkinTone.Option>
+          )}
+        </EmojiPicker.SkinTone.Options>
+      </EmojiPicker.SkinTone>
+    );
+  }
+  const button = cn("flex items-center justify-center", layout.toneButton, "leading-none");
+  return (
+    <EmojiPicker.SkinTone>
+      <EmojiPicker.SkinTone.Trigger className={button}>
+        <EmojiPicker.SkinTone.Glyph emoji={layout.toneEmoji} />
+      </EmojiPicker.SkinTone.Trigger>
+      <EmojiPicker.SkinTone.Options>
+        {(tone) => (
+          <EmojiPicker.SkinTone.Option tone={tone} className={button}>
+            <EmojiPicker.SkinTone.Glyph emoji={layout.toneEmoji} />
+          </EmojiPicker.SkinTone.Option>
+        )}
+      </EmojiPicker.SkinTone.Options>
+    </EmojiPicker.SkinTone>
+  );
 }
 
 /** Footer previews: Discord ":code: :alias:" and Slack's "Add Emoji" + skin tone. */
@@ -287,7 +308,8 @@ export function StylePicker({ layout, onSelect, search = true, autoFocus = false
       {layout.top}
       {layout.nav?.placement === "top" ? nav : null}
       {search ? (
-        <EmojiPicker.Search className={cn("relative flex shrink-0 items-center", layout.searchRow)} inputProps={{ className: layout.input }}>
+        <EmojiPicker.Search className={cn("relative flex shrink-0 items-center", layout.searchRow)}>
+          <EmojiPicker.Search.Input className={layout.input} />
           {layout.searchIcon ? (
             <I.Search
               size={16}
