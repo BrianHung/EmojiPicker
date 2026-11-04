@@ -1,6 +1,6 @@
 import * as React from "react";
 import { InputRange } from "dom-input-range";
-import { findShortcodeTrigger } from "./hooks";
+import { findShortcodeTrigger } from "../core/shortcodes";
 import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } from "./typeahead";
 
 type TextField = HTMLInputElement | HTMLTextAreaElement;
@@ -33,7 +33,7 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null
     const sync = () => {
       const to = el.selectionStart ?? 0;
       const found = el.selectionEnd === to ? findShortcodeTrigger(el.value.slice(0, to)) : null;
-      setMatch((prev) => (found ? (prev?.query === found.query && prev.from === found.offset ? prev : { query: found.query, from: found.offset, to }) : null));
+      setMatch((prev) => (found ? (prev && prev.query === found.query && prev.from === found.offset ? prev : { query: found.query, from: found.offset, to }) : null));
     };
     // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send).
     const keydown = (event: Event) => void (onKeyDown(event as KeyboardEvent) && event.stopPropagation());

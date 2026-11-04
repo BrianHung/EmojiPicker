@@ -10,7 +10,7 @@ import { createFrequencyStore, memoryStorage } from "../src/core/frequents";
 import { defaultLabels, plural } from "../src/core/labels";
 import { lexical, type SearchContext } from "../src/core/search";
 import { createSearchIndex } from "../src/core/search-index";
-import { nameWithTone } from "../src/core/shortcodes";
+import { findShortcodeTrigger, isComposingKey, nameWithTone } from "../src/core/shortcodes";
 import { createEmojiStore } from "../src/core/store";
 import { createTokenizer } from "../src/core/tokenize";
 
@@ -75,6 +75,23 @@ describe("search across scripts", () => {
     expect(lexical({ tokenize: bigrams })("笑う", context)).toEqual([{ unified: "1f604" }]);
     expect(lexical({ segmenter: false })("笑う", context)).toEqual([]);
     expect(lexical({ segmenter: { segment: (text) => text.split("").map((segment) => ({ segment, isWordLike: true })) } })("笑", context)).toEqual([{ unified: "1f604" }]);
+  });
+});
+
+describe("typing a :query", () => {
+  it("triggers after a space, a full-width colon, or a CJK character, and not inside times or emoticons", () => {
+    expect(findShortcodeTrigger("ok :smi")).toEqual({ query: "smi", offset: 3 });
+    expect(findShortcodeTrigger("今日は：わら")).toEqual({ query: "わら", offset: 3 });
+    expect(findShortcodeTrigger("哈哈:笑")).toEqual({ query: "笑", offset: 2 });
+    expect(findShortcodeTrigger("at 10:30")).toBeNull();
+    expect(findShortcodeTrigger("hi :)")).toBeNull();
+    expect(findShortcodeTrigger("hi :s")).toBeNull();
+  });
+
+  it("leaves keys to the IME while it composes", () => {
+    expect(isComposingKey({ isComposing: true })).toBe(true);
+    expect(isComposingKey({ keyCode: 229 })).toBe(true);
+    expect(isComposingKey({ keyCode: 13 })).toBe(false);
   });
 });
 

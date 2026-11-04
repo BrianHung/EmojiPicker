@@ -16,3 +16,4 @@ export type { EmojiInput, EmojiLookup, ResolvedEmoji } from "./resolve";
 export { splitWords } from "./custom";
 export { createEmojiGrid, moveInGrid, rowsPerPage } from "./grid";
 export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGridSection } from "./grid";
+export { findShortcodeTrigger, isComposingKey } from "./shortcodes";

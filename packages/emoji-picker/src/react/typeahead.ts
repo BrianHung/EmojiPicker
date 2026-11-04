@@ -1,4 +1,5 @@
 import * as React from "react";
+import { isComposingKey } from "../core/shortcodes";
 import { useEmojiSuggestions, type EmojiSuggestions, type EmojiSuggestionsOptions, type KeyLike, type ShortcodeSuggestion } from "./hooks";
 
 /** What an editor tells `useEmojiTypeahead` while a `:query` is being typed. */
@@ -37,13 +38,13 @@ const closed = () => null;
  * makes the editor a combobox while the menu is open (aria-expanded, -controls, -activedescendant).
  */
 export function useEmojiTypeahead(trigger: EmojiTrigger | null, { insert = "emoji", ...options }: EmojiTypeaheadOptions = {}, element?: () => HTMLElement | null | undefined): EmojiTypeahead {
-  const query = trigger && trigger.query.length > 1 ? trigger.query : "";
+  const query = trigger?.query ?? "";
   const suggestions = useEmojiSuggestions({ ...options, query, onChoose: (s) => trigger?.replace(suggestions.textFor(s, insert), s) });
   const keyHandler = React.useRef<((event: KeyLike) => boolean) | null>(null);
   const latest = React.useRef(suggestions);
   latest.current = suggestions;
   const onKeyDown = React.useCallback((event: KeyLike) => {
-    if ((event as { isComposing?: boolean }).isComposing || !latest.current.open) return false;
+    if (isComposingKey(event) || !latest.current.open) return false;
     return keyHandler.current?.(event) || latest.current.onKeyDown(event);
   }, []);
   useComboboxAttributes(element, suggestions);

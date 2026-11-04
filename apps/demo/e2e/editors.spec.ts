@@ -32,13 +32,13 @@ const caretGap = (field: Locator, box: { x: number; y: number; width: number; he
 const text = (field: Locator) => field.evaluate((el) => (el instanceof HTMLTextAreaElement ? el.value : el.textContent ?? "").replace(/️/g, ""));
 const focused = (field: Locator) => field.evaluate((el) => el.contains(document.activeElement));
 
-async function open(page: Page, editor: string, experience: string) {
+async function open(page: Page, editor: string, experience: string, trigger = ":smi") {
   await visit(page, "/examples/editors/");
   await page.getByRole("tablist", { name: "Editor" }).getByRole("tab", { name: editor, exact: true }).click();
   await page.getByRole("tablist", { name: "Experience" }).getByRole("tab", { name: experience, exact: true }).click();
   const field = page.locator('[aria-label="Message"]');
   await field.click();
-  await page.keyboard.type(":smi", { delay: 40 });
+  await page.keyboard.type(trigger, { delay: 40 });
   await expect(menu(page)).toBeVisible();
   return field;
 }
@@ -78,6 +78,21 @@ for (const editor of EDITORS)
       expect(await text(field)).toMatch(/:smi$/);
       expect(await focused(field)).toBe(true);
     });
+
+for (const editor of EDITORS)
+  test(`${editor}: a full-width colon triggers, and the Enter that commits an IME composition doesn't pick`, async ({ page }) => {
+    const field = await open(page, editor, "Slack", "：sm");
+    const ime = await page.context().newCDPSession(page);
+    await ime.send("Input.imeSetComposition", { text: "i", selectionStart: 1, selectionEnd: 1 });
+    await ime.send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 229 });
+    await ime.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 229 });
+    await ime.send("Input.insertText", { text: "i" });
+    await expect(menu(page)).toBeVisible();
+    expect(await text(field)).toMatch(/：smi$/);
+    await page.keyboard.press("Enter");
+    await expect(menu(page)).toBeHidden();
+    expect(await text(field)).not.toContain("：smi");
+  });
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 

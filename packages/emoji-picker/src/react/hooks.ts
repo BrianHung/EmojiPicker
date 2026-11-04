@@ -1,3 +1,4 @@
+import { findShortcodeTrigger, isComposingKey } from "../core/shortcodes";
 import * as React from "react";
 import { unifiedToNative, type EmojiRecord } from "../core/dataset";
 import type { ProgressiveHits } from "../core/search";
@@ -83,7 +84,7 @@ export type ShortcodeSuggestion = ShortcodeCompletion;
 export type AutocompleteResult = { value: string; caret: number };
 
 /** The parts of a keyboard event the hooks read: a React event, a DOM event, or a ProseMirror/Tiptap `event`. */
-export type KeyLike = { key: string; shiftKey?: boolean; preventDefault(): void };
+export type KeyLike = { key: string; shiftKey?: boolean; isComposing?: boolean; keyCode?: number; preventDefault(): void };
 
 export type EmojiSuggestionsOptions = {
   /** What the user typed after the trigger (`:`), without it. Empty closes the list. */
@@ -180,7 +181,7 @@ export function useEmojiSuggestions({ query, limit = 8, matchBy = "shortcode", o
     dismiss,
     textFor: ({ record, shortcode }, insert = "emoji") => (record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified))),
     onKeyDown(event) {
-      if (!open) return false;
+      if (!open || isComposingKey(event)) return false;
       const n = suggestions.length;
       // A list wraps with Up/Down; a grid (`columns`) moves by a cell with Left/Right and by a row with Up/Down.
       const step = columns ? { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns, ArrowDown: columns }[event.key] : { ArrowUp: -1, ArrowDown: 1 }[event.key];
@@ -228,15 +229,6 @@ export type ShortcodeAutocomplete = Omit<EmojiSuggestions, "activeDescendant"> &
   /** ARIA combobox wiring for the text input. */
   getInputProps(): Record<string, string | boolean | undefined>;
 };
-
-// ":" at the start or after whitespace/punctuation, then 2+ shortcode characters up to the caret.
-const TRIGGER = /(?:^|[\s(\[{>])(:([a-z0-9_+\-']{2,}))$/i;
-
-/** The `:query` that `text` (what's before the caret) ends with: the query, and the offset of its `:`. */
-export function findShortcodeTrigger(text: string): { query: string; offset: number } | null {
-  const match = TRIGGER.exec(text);
-  return match ? { query: match[2]!, offset: text.length - match[1]!.length } : null;
-}
 
 /**
  * Headless `:tada` → 🎉 autocomplete for a textarea, input or editor: you
