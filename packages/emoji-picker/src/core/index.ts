@@ -14,3 +14,5 @@ export type { EmojiLabels, PluralForms, SkinToneNames } from "./labels";
 export { nativeToUnified, resolveEmoji } from "./resolve";
 export type { EmojiInput, EmojiLookup, ResolvedEmoji } from "./resolve";
 export { splitWords } from "./custom";
+export { createEmojiGrid, moveInGrid, rowsPerPage } from "./grid";
+export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGridSection } from "./grid";

@@ -1,0 +1,68 @@
+---
+title: Bring your own virtualizer
+description: The picker's grid on TanStack Virtual, react-window, Virtuoso, or the virtual list you already ship.
+---
+
+import { TanStackPicker } from "./demo";
+
+<TanStackPicker />
+
+## How it works
+
+`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiGrid` inside `EmojiPicker.Root` instead. It returns the grid as `rows`, each a section title or a row of emoji with its `size`, and props for the grid, titles and cells: the same keyboard, highlight, hover, long press and skin-tone variations as `EmojiPicker.List`. Pass `scrollToIndex` so arrow keys scroll your virtualizer. Your app doesn't load React Aria's virtualizer.
+
+## TanStack Virtual
+
+```tsx title="tanstack-list.tsx"
+import * as React from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import { EmojiPicker, useEmojiGrid } from "@brianhung/emoji-picker";
+
+/** EmojiPicker.List's grid, virtualized by TanStack Virtual. */
+export function TanStackList() {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const grid = useEmojiGrid({
+    columns: 8,
+    rowHeight: 36,
+    headerHeight: 28,
+    scrollToIndex: (index, options) => virtualizer.scrollToIndex(index, options),
+  });
+  const virtualizer = useVirtualizer({
+    count: grid.rows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => grid.rows[i]!.size,
+    getItemKey: React.useCallback((i: number) => grid.rows[i]!.key, [grid.rows]),
+    overscan: 4,
+  });
+
+  return (
+    <EmojiPicker.Viewport ref={scrollRef} className="relative flex-1">
+      <div {...grid.getGridProps({ style: { position: "relative", height: virtualizer.getTotalSize() } })}>
+        {virtualizer.getVirtualItems().map((v) => {
+          const row = grid.rows[v.index]!;
+          return (
+            <div key={v.key} role="presentation" className="absolute inset-x-0 grid grid-cols-8 justify-items-center px-1.5" style={{ top: v.start, height: v.size }}>
+              {row.type === "header" ? (
+                <div {...grid.getHeaderProps(row.section)} className="col-span-full w-full bg-popover px-1 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
+              ) : (
+                row.items.map((item) => <div key={item.id} {...grid.getCellProps(item)} className="rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />)
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {grid.variations}
+    </EmojiPicker.Viewport>
+  );
+}
+```
+
+Put it inside `EmojiPicker.Root` where `EmojiPicker.List` would go. `grid.stickyIndexes` lists the title rows, for TanStack's sticky-item pattern.
+
+## react-window and Virtuoso
+
+The same `rows` feed react-window's `rowComponent` and Virtuoso's `itemContent`: render `grid.rows[index]` with the same props, and call their `scrollToRow` or `scrollToIndex` from `scrollToIndex`.
+
+## Without React
+
+`createEmojiGrid` and `moveInGrid` from `@brianhung/emoji-picker/core` are the rows and the keyboard on their own: offsets, sizes, lookups, and where Up, Down, Page Up and Page Down land, with short rows clamped.

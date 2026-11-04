@@ -3,18 +3,7 @@ import data from "../data/en.json";
 import { expandDataset, type Dataset } from "../src/core/dataset";
 import { defaultLabels } from "../src/core/labels";
 import { categorySections, itemFactory, resultSections } from "../src/react/sections";
-import {
-  activeSection,
-  layoutStrip,
-  moveInStrip,
-  placeCell,
-  revealCell,
-  sectionOf,
-  sectionScrollLeft,
-  visibleRange,
-  visibleSections,
-  type StripMetrics,
-} from "../src/react/strip-layout";
+import { layoutStrip, moveInStrip, placeCell, sectionOf, type StripMetrics } from "../src/react/strip-layout";
 
 // The iOS 27 keyboard: 46 × 38.4 cells, 5 rows, sections 13.8 apart.
 const IOS: StripMetrics = { rows: 5, cellWidth: 46, cellHeight: 38.4, headerHeight: 19.6, padding: 2.9, sectionGap: 13.8, sectionMinWidth: 150 };
@@ -46,7 +35,6 @@ describe("layoutStrip", () => {
     expect(empty.sections).toEqual([]);
     expect(empty.width).toBe(0);
     expect(moveInStrip(empty, 0, "ArrowRight")).toBeNull();
-    expect(activeSection(empty, 0, 400)).toBe(-1);
   });
 });
 
@@ -62,54 +50,6 @@ describe("placeCell", () => {
     expect(placeCell(strip, 44)).toBeNull();
     expect(sectionOf(strip, 41)).toBe(1);
     expect(sectionOf(strip, 42)).toBe(2);
-  });
-});
-
-describe("visibleRange", () => {
-  it("returns whole columns intersecting the window", () => {
-    // Columns 0 and 1 of the first section (x 2.9-94.9).
-    expect(visibleRange(strip, 0, 60)).toEqual([{ section: 0, first: 0, last: 9 }]);
-    // From inside column 5 of section 0 into column 0 of section 1.
-    const s1 = strip.sections[1]!;
-    expect(visibleRange(strip, 2.9 + 5 * 46 + 1, s1.x + 1)).toEqual([
-      { section: 0, first: 25, last: 29 },
-      { section: 1, first: 30, last: 34 },
-    ]);
-    // A partial last column ends at the section's last item.
-    expect(visibleRange(strip, s1.x + 2 * 46, s1.x + 3 * 46)).toEqual([{ section: 1, first: 40, last: 41 }]);
-    // The gap between sections renders nothing.
-    expect(visibleRange(strip, 279, 292)).toEqual([]);
-  });
-
-  it("includes titles of sections wider than their columns", () => {
-    const s2 = strip.sections[2]!;
-    expect(visibleRange(strip, s2.x + 60, s2.x + 100)).toEqual([]);
-    expect(visibleSections(strip, s2.x + 60, s2.x + 100)).toEqual([2]);
-  });
-});
-
-describe("current section", () => {
-  it("is the section under the start edge", () => {
-    expect(activeSection(strip, 0, 400)).toBe(0);
-    expect(activeSection(strip, 200, 100)).toBe(0);
-    expect(activeSection(strip, strip.sections[1]!.x - 2.9, 100)).toBe(1);
-  });
-
-  it("is the last section at the end of the scroll", () => {
-    expect(activeSection(strip, strip.width - 400, 400)).toBe(2);
-  });
-
-  it("scrolls a section to the start, clamped to the end", () => {
-    expect(sectionScrollLeft(strip, 0, 400)).toBe(0);
-    expect(sectionScrollLeft(strip, 1, 100)).toBeCloseTo(strip.sections[1]!.x - 2.9);
-    expect(sectionScrollLeft(strip, 2, 400)).toBeCloseTo(strip.width - 400);
-  });
-
-  it("reveals a cell only when it's out of view", () => {
-    expect(revealCell(strip, 0, 0, 100)).toBe(0);
-    // Column 3 (x 140.9-186.9) is right of a 100 wide viewport at 0.
-    expect(revealCell(strip, 15, 0, 100)).toBeCloseTo(186.9 + 2.9 - 100);
-    expect(revealCell(strip, 0, 50, 100)).toBe(0);
   });
 });
 

@@ -18,6 +18,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 
 ### Added
 
+- `useEmojiGrid`: the List's grid for a virtualizer you bring (TanStack Virtual, react-window, Virtuoso): `rows`, `stickyIndexes`, prop getters, and `scrollToIndex`. `createEmojiGrid`, `moveInGrid` and `rowsPerPage` (also in `/core`): the rows and the keyboard without React.
 - `components.HeaderActions` (`HeaderActionsProps`: `section`, `collapsed`, `toggle`, `toggleProps` with `aria-expanded`): controls for a section title, rendered outside the listbox and pinned with the sticky title.
 - `pickerInitialFocus(root)`: where focus belongs when a picker opens in any popover (Base UI, Radix, shadcn/ui).
 - `ReactionBar`: a toolbar with a roving tab stop, Home/End and hover continuity, for rows of your own reaction buttons.

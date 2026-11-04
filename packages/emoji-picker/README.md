@@ -54,7 +54,7 @@ It adds `components/ui/emoji-picker.tsx` with `EmojiPickerCard`, `EmojiPickerPop
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker` | Components and hooks |
-| `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, and `EmojiLabels`. No React. |
+| `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, and the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`). No React. |
 | `@brianhung/emoji-picker/search` | Building blocks for the provider's `search` |
 | `@brianhung/emoji-picker/data/en.json` | The English dataset |
 | `@brianhung/emoji-picker/tokens.css`, `theme.css`, `shadcn.css` | Color tokens, Tailwind utilities, and the shadcn/ui bridge |
@@ -86,6 +86,10 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 ### Horizontal list
 
 `<EmojiPicker.List orientation="horizontal" rows={5} />` lays sections side by side, as the iOS emoji keyboard does. Each section fills `rows` rows column by column, and the Viewport scrolls sideways. `searchRows` sets the rows for search results. Only columns near the viewport render.
+
+### Your own virtualizer
+
+`List` virtualizes with React Aria. For TanStack Virtual, react-window, Virtuoso or your own, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` instead: it returns the grid's `rows` (a section title, or a row of emoji, each with its `offset` and `size`), `stickyIndexes`, and `getGridProps`, `getHeaderProps` and `getCellProps`, with the List's keyboard, highlight, hover, long press and skin-tone `variations`. `scrollToIndex(index, { align })` scrolls your virtualizer as the highlight moves. The rows and the keyboard alone, without React, are `createEmojiGrid` and `moveInGrid` in `/core`. See the [TanStack Virtual example](https://emoji.brianhung.me/examples/virtualizer/).
 
 ## Tapbacks
 

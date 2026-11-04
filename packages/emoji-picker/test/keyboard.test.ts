@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { moveByRows, rowsPerPage, type Point } from "../src/react/grid-nav";
+import { createEmojiGrid, moveInGrid, rowsPerPage } from "../src/core/grid";
 import { DEFAULT_KEYMAP, actionFor, isTextEditingKey, matchesChord, parseChord, resolveKeymap } from "../src/react/keymap";
 import { columnsPerPage, layoutStrip, pageInStrip, type StripMetrics } from "../src/react/strip-layout";
 
@@ -110,27 +110,29 @@ describe("paging the strip", () => {
   });
 });
 
-describe("moving by rows (grouped results)", () => {
-  // Two sections: three cells, then a title gap, then two cells.
-  const points: Point[] = [
-    { x: 0, y: 0 },
-    { x: 40, y: 0 },
-    { x: 80, y: 0 },
-    { x: 0, y: 40 },
-    { x: 0, y: 120 },
-    { x: 40, y: 120 },
-  ];
+describe("the grid's rows", () => {
+  const section = (id: string, n: number, header = true) => ({ id, header, items: Array.from({ length: n }, (_, i) => ({ id: `${id}${i}` })) });
+  // a: [a0 a1 a2] [a3]   b: [b0 b1 b2] [b3 b4]
+  const grid = createEmojiGrid([section("a", 4), section("b", 5)], { columns: 3, rowHeight: 40, headerHeight: 30 });
 
-  it("goes to the next row in that direction, keeping the column", () => {
-    expect(moveByRows(points, 1, 1)).toBe(3); // nearest column in a shorter row
-    expect(moveByRows(points, 3, 1)).toBe(4); // across the section title
-    expect(moveByRows(points, 5, -1)).toBe(3);
-    expect(moveByRows(points, 5, -2)).toBe(1);
+  it("stacks titles and rows, with offsets and lookups", () => {
+    expect(grid.rows.map((r) => [r.type, r.offset])).toEqual([["header", 0], ["emojis", 30], ["emojis", 70], ["header", 110], ["emojis", 140], ["emojis", 180]]);
+    expect(grid.size).toBe(220);
+    expect(grid.stickyIndexes).toEqual([0, 3]);
+    expect(grid.at(grid.indexOf("b4"))?.id).toBe("b4");
+    expect(grid.locate(grid.indexOf("b4"))).toMatchObject({ row: 5, column: 1, index: 4 });
   });
 
-  it("lands on the last row for a long page, and stays put at the edge", () => {
-    expect(moveByRows(points, 0, 10)).toBe(4);
-    expect(moveByRows(points, 4, 1)).toBeNull();
-    expect(moveByRows(points, 0, -1)).toBeNull();
+  it("clamps Down to a short row and crosses titles, keeping the column", () => {
+    const move = (id: string, m: Parameters<typeof moveInGrid>[2], page?: number) => grid.at(moveInGrid(grid, grid.indexOf(id), m, page) ?? -1)?.id ?? null;
+    expect(move("a2", "down")).toBe("a3");
+    expect(move("a3", "down")).toBe("b0");
+    expect(move("a2", "page-down", 2)).toBe("b0"); // clamped to a3, then on from its column
+    expect(move("b3", "up")).toBe("b0");
+    expect(move("b0", "up")).toBe("a3");
+    expect(move("a3", "right")).toBe("b0");
+    expect(move("b4", "page-down", 9)).toBeNull();
+    expect(move("a0", "up")).toBeNull();
+    expect(move("b2", "first")).toBe("a0");
   });
 });
