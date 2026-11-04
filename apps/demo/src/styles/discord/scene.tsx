@@ -272,7 +272,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
         "aria-label": "Message #general",
         "aria-multiline": "false",
         class: cn(
-          "max-h-[22px] overflow-hidden text-[16px] leading-[22px] outline-none [&_p]:m-0",
+          "max-h-[50vh] overflow-y-auto text-[16px] leading-[22px] outline-none [&_p]:m-0 [&_[data-emoji-node]]:align-bottom [&_[data-emoji-node]>*]:size-[1.375em]",
           "[&>p:only-child:has(>br:only-child)]:before:pointer-events-none [&>p:only-child:has(>br:only-child)]:before:float-left [&>p:only-child:has(>br:only-child)]:before:h-0 [&>p:only-child:has(>br:only-child)]:before:text-(--ph) [&>p:only-child:has(>br:only-child)]:before:content-['Message_#general']",
         ),
       },
