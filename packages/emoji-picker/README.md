@@ -64,6 +64,7 @@ It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With
 | `@brianhung/emoji-picker` | Components and hooks |
 | `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, and the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`). No React. |
 | `@brianhung/emoji-picker/search` | Building blocks for the provider's `search` |
+| `@brianhung/emoji-picker/tiptap`, `/lexical` | `:shortcode` typeahead for Tiptap and Lexical ([Your own editor](#your-own-editor)); their editor packages are optional peer dependencies |
 | `@brianhung/emoji-picker/data/en.json` | The English dataset |
 | `@brianhung/emoji-picker/tokens.css`, `theme.css`, `shadcn.css` | Color tokens, Tailwind utilities, and the shadcn/ui bridge |
 
@@ -161,6 +162,35 @@ const menu = useEmojiSuggestions({
 ```
 
 Both hooks take `matchBy` (`"shortcode"` or `"search"`), `order` (`"relevance"` or `"alphabetical"`), `columns`, and `limit`. The demo has complete [Tiptap](../../apps/demo/src/components/tiptap) and [Lexical](../../apps/demo/src/components/lexical) integrations.
+
+### Your own editor
+
+Each editor adapter returns the same `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`, `dismiss`), so one menu works in every editor. They forward the editor's keys and replace the typed `:query`; the caret stays in the editor, and while the menu is open the editor is a combobox (`aria-expanded`, `aria-controls`, `aria-activedescendant`).
+
+| Import | Hook | Editor |
+|---|---|---|
+| `@brianhung/emoji-picker` | `useTextFieldEmojiTypeahead(ref, options)` | `<input>`, `<textarea>` |
+| `@brianhung/emoji-picker/tiptap` | `useTiptapEmojiTypeahead(editor, options)` | Tiptap 3, on `@tiptap/suggestion` |
+| `@brianhung/emoji-picker/lexical` | `useLexicalEmojiTypeahead(options)` | Lexical, inside `LexicalComposer` |
+
+```tsx
+const editor = useEditor({ extensions: [StarterKit] });
+const emoji = useTiptapEmojiTypeahead(editor);
+
+<EmojiSuggestions.Popover open={emoji.open} anchor={emoji.anchor} onOpenChange={(open) => !open && emoji.dismiss()}>
+  <ul {...emoji.suggestions.getListProps()}>
+    {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
+  </ul>
+</EmojiSuggestions.Popover>
+```
+
+For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three fields while a `:query` is typed (`null` otherwise):
+
+- `query`: what follows the `:` (`findShortcodeTrigger(textBeforeCaret)` finds it),
+- `anchor()`: the typed `:query`'s rect,
+- `replace(text, suggestion)`: put `text` where the `:query` is.
+
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds ProseMirror and contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five.
 
 ## Rendering emoji
 

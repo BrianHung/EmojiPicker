@@ -232,15 +232,21 @@ export type ShortcodeAutocomplete = Omit<EmojiSuggestions, "activeDescendant"> &
 // ":" at the start or after whitespace/punctuation, then 2+ shortcode characters up to the caret.
 const TRIGGER = /(?:^|[\s(\[{>])(:([a-z0-9_+\-']{2,}))$/i;
 
+/** The `:query` that `text` (what's before the caret) ends with: the query, and the offset of its `:`. */
+export function findShortcodeTrigger(text: string): { query: string; offset: number } | null {
+  const match = TRIGGER.exec(text);
+  return match ? { query: match[2]!, offset: text.length - match[1]!.length } : null;
+}
+
 /**
  * Headless `:tada` → 🎉 autocomplete for a textarea, input or editor: you
  * render the popup however you like; this owns matching, highlight,
  * keyboard handling and ARIA.
  */
 export function useShortcodeAutocomplete({ value, caret, limit = 8, insert = "emoji", columns, matchBy = "shortcode", order, onChoose }: ShortcodeAutocompleteOptions): ShortcodeAutocomplete {
-  const match = TRIGGER.exec(value.slice(0, caret));
-  const typed = match?.[2] ?? "";
-  const start = match ? caret - match[1]!.length : caret;
+  const match = findShortcodeTrigger(value.slice(0, caret));
+  const typed = match?.query ?? "";
+  const start = match?.offset ?? caret;
   // Called only after `core` exists (on choose, or by the caller).
   const apply = (suggestion: ShortcodeSuggestion): AutocompleteResult => {
     const text = `${core.textFor(suggestion, insert)} `;

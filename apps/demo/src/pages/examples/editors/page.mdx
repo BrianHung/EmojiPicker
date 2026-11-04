@@ -1,0 +1,53 @@
+---
+title: Editors
+description: The Slack, Discord, Notion or Linear ":" menu on a textarea, Tiptap, Lexical, ProseMirror or contenteditable.
+---
+
+import { EditorsDemo } from "./demo";
+
+<EditorsDemo />
+
+Each editor's adapter returns the same `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`, `dismiss`), and any menu renders it, so the experience and the editor are chosen separately.
+
+## Wiring
+
+```tsx title="Textarea"
+import { useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
+
+const ref = React.useRef<HTMLTextAreaElement>(null);
+const emoji = useTextFieldEmojiTypeahead(ref);
+<SlackEmojiMenu {...emoji} />
+<textarea ref={ref} />
+```
+
+```tsx title="Tiptap"
+import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
+
+const editor = useEditor({ extensions: [StarterKit] });
+const emoji = useTiptapEmojiTypeahead(editor);
+<NotionEmojiMenu {...emoji} />
+<EditorContent editor={editor} />
+```
+
+```tsx title="Lexical (inside LexicalComposer)"
+import { useLexicalEmojiTypeahead } from "@brianhung/emoji-picker/lexical";
+
+function EmojiMenu() {
+  return <DiscordEmojiMenu {...useLexicalEmojiTypeahead()} />;
+}
+```
+
+```tsx title="ProseMirror"
+const { plugin, ...emoji } = useProseMirrorEmojiTypeahead(); // editors/prosemirror.ts
+new EditorView(el, { state: EditorState.create({ schema, plugins: [plugin, ...plugins] }) });
+<LinearEmojiMenu {...emoji} />
+```
+
+```tsx title="Contenteditable"
+const ref = React.useRef<HTMLDivElement>(null);
+const emoji = useContentEditableEmojiTypeahead(ref); // editors/contenteditable.ts
+<SlackEmojiMenu {...emoji} />
+<div ref={ref} contentEditable role="textbox" />
+```
+
+The ProseMirror and contenteditable adapters are short files built on `useEmojiTypeahead` and `findShortcodeTrigger`; copy [`prosemirror.ts`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/editors/prosemirror.ts) or [`contenteditable.ts`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/editors/contenteditable.ts), or write one for your own editor. The menus are in [`experiences/`](https://github.com/BrianHung/EmojiPicker/tree/main/apps/demo/src/experiences).

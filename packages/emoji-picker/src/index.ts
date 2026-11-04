@@ -33,6 +33,10 @@ export { resolveEmoji } from "./core/resolve";
 export type { EmojiInput, ResolvedEmoji } from "./core/resolve";
 export { useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiSuggestions, useFrequentEmoji, useShortcodeAutocomplete, useSkinTone } from "./react/hooks";
 export type { AutocompleteResult, EmojiSearchState, EmojiSuggestionsOptions, KeyLike, ShortcodeAutocomplete, ShortcodeAutocompleteOptions, ShortcodeSuggestion } from "./react/hooks";
+export { findShortcodeTrigger } from "./react/hooks";
+export { useEmojiTypeahead } from "./react/typeahead";
+export type { EmojiTrigger, EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";
+export { useTextFieldEmojiTypeahead } from "./react/typeahead-text-field";
 
 export { createFrequencyStore, memoryStorage, DEFAULT_FREQUENT } from "./core/frequents";
 export { defaultLabels, plural } from "./core/labels";

@@ -18,6 +18,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 
 ### Added
 
+- Editor typeahead: `useEmojiTypeahead(trigger, options, element)` turns any editor's `:query` (`query`, `anchor`, `replace`) into one `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`, `dismiss`, `onKeyDown`) that any menu renders, and makes the editor a combobox while it is open. Adapters: `useTextFieldEmojiTypeahead` (input and textarea, caret rect from `dom-input-range`, insertion keeps the browser's undo), `@brianhung/emoji-picker/tiptap` (`useTiptapEmojiTypeahead`, on `@tiptap/suggestion`) and `@brianhung/emoji-picker/lexical` (`useLexicalEmojiTypeahead`, on Lexical's typeahead trigger). Tiptap and Lexical are optional peer dependencies. `findShortcodeTrigger(text)`: the `:query` the text before the caret ends with.
 - `useEmojiGrid`: the List's grid for a virtualizer you bring (TanStack Virtual, react-window, Virtuoso): `rows`, `stickyIndexes`, prop getters, and `scrollToIndex`. `createEmojiGrid`, `moveInGrid` and `rowsPerPage` (also in `/core`): the rows and the keyboard without React.
 - `components.HeaderActions` (`HeaderActionsProps`: `section`, `collapsed`, `toggle`, `toggleProps` with `aria-expanded`): controls for a section title, rendered outside the listbox and pinned with the sticky title.
 - `pickerInitialFocus(root)`: where focus belongs when a picker opens in any popover (Base UI, Radix, shadcn/ui).

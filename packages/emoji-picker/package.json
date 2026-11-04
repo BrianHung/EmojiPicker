@@ -62,6 +62,16 @@
       "types": "./dist/react-aria.d.ts",
       "import": "./dist/react-aria.js"
     },
+    "./tiptap": {
+      "@brianhung/source": "./src/tiptap.ts",
+      "types": "./dist/tiptap.d.ts",
+      "import": "./dist/tiptap.js"
+    },
+    "./lexical": {
+      "@brianhung/source": "./src/lexical.ts",
+      "types": "./dist/lexical.d.ts",
+      "import": "./dist/lexical.js"
+    },
     "./data/en.json": "./data/en.json",
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",
@@ -77,27 +87,53 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@lexical/react": ">=0.53.0",
+    "@tiptap/core": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "@tiptap/suggestion": "^3.0.0",
     "emojibase-data": ">=16.0.0",
+    "lexical": ">=0.53.0",
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
+    "@lexical/react": {
+      "optional": true
+    },
+    "@tiptap/core": {
+      "optional": true
+    },
+    "@tiptap/pm": {
+      "optional": true
+    },
+    "@tiptap/suggestion": {
+      "optional": true
+    },
     "emojibase-data": {
+      "optional": true
+    },
+    "lexical": {
       "optional": true
     }
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.20",
     "@react-types/shared": "^3.37.0",
+    "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",
     "react-aria-components": "^1.22.1",
     "react-stately": "^3.51.0"
   },
   "devDependencies": {
+    "@lexical/react": "^0.53.0",
+    "@tiptap/core": "^3.32.2",
+    "@tiptap/pm": "^3.32.2",
+    "@tiptap/suggestion": "^3.32.2",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "emojibase-data": "^18.0.0",
+    "lexical": "^0.53.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",
