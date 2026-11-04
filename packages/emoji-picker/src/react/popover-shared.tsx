@@ -32,6 +32,8 @@ export type PopoverTriggerProps = PartElementProps<PopoverTriggerState, HTMLButt
 
 /** Where focus goes when the content opens. */
 export type PopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | false;
+/** Where focus goes when a pick closes the content, as Base UI's `finalFocus` (other closes return to the trigger). */
+export type PopoverFinalFocus = HTMLElement | React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined);
 
 export type PopoverPlacementProps = {
   /** Preferred side; flips when there's no room. Default "bottom". */
@@ -59,6 +61,8 @@ export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> &
      * `false` leaves focus where it is.
      */
     initialFocus?: PopoverInitialFocus;
+    /** Focused once a pick closes the content, instead of the trigger (the editor a toolbar button inserts into). */
+    finalFocus?: PopoverFinalFocus;
   };
 
 /** A `:shortcode` menu next to a text field's caret: never takes focus, so the field keeps its caret and IME. */
@@ -92,6 +96,8 @@ export function pickerInitialFocus(root: Element | null | undefined): HTMLElemen
 
 export const initialFocusTarget = (initialFocus: PopoverInitialFocus | undefined, content: Element | null) =>
   (initialFocus === false ? null : typeof initialFocus === "function" ? initialFocus() : initialFocus ? initialFocus.current : pickerInitialFocus(content)) ?? null;
+
+export const finalFocusTarget = (finalFocus: PopoverFinalFocus) => (typeof finalFocus === "function" ? finalFocus() : finalFocus instanceof HTMLElement ? finalFocus : finalFocus.current) ?? null;
 
 export type TransitionStatus = "starting" | "open" | "ending";
 
@@ -129,13 +135,21 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
   // Stable across renders, so an inline onOpenChange doesn't re-run effects that depend on it.
   const latest = React.useRef({ controlled, onOpenChange });
   latest.current = { controlled, onOpenChange };
+  const selected = React.useRef(false);
   const setOpen = React.useCallback((next: boolean) => {
+    if (next) selected.current = false;
     if (latest.current.controlled === undefined) setUncontrolled(next);
     latest.current.onOpenChange?.(next);
   }, []);
   // After the task's microtasks: an editor an app focuses in onSelect (Lexical updates in a microtask) keeps focus.
-  const close = React.useCallback(() => queueMicrotask(() => setOpen(false)), [setOpen]);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect }), [open, setOpen, close, closeOnSelect]);
+  const close = React.useCallback(
+    (reason?: "select") => {
+      selected.current = reason === "select";
+      queueMicrotask(() => setOpen(false));
+    },
+    [setOpen],
+  );
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected }), [open, setOpen, close, closeOnSelect]);
 }
 
 /** Wraps the content's children: a picker whose grid renders after opening focuses it, unless `initialFocus` is set. */

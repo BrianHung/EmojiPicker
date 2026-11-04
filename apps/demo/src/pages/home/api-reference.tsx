@@ -141,6 +141,7 @@ const POPOVER_CONTENT: PropRow[] = [
   { name: "collisionPadding", type: "number", default: "8" },
   { name: "container", type: "HTMLElement | false", default: "document.body", description: "Portal target. false renders in place." },
   { name: "anchor", type: "Element | VirtualElement | () => …", description: "Positions against this element instead of the Trigger." },
+  { name: "finalFocus", type: "HTMLElement | RefObject | () => HTMLElement", default: "the Trigger", description: "Focused once a pick closes the content." },
   { name: "duration", type: "number", default: "0", description: "Floating UI only: ms the content stays mounted with data-ending-style after closing." },
 ];
 

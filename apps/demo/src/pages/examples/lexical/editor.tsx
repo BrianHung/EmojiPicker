@@ -17,22 +17,13 @@ import { PickerPopover } from "@/components/picker-popover";
 function Toolbar() {
   const [editor] = useLexicalComposerContext();
   const store = useEmojiStore();
-  // Back to the editor once the popover has closed: a popover that restores focus on close would take it back to the trigger.
-  const [open, setOpen] = React.useState(false);
-  const inserted = React.useRef(false);
-  React.useEffect(() => {
-    if (open || !inserted.current) return;
-    inserted.current = false;
-    editor.focus();
-  }, [open, editor]);
   return (
     <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
       <PickerPopover
         label="Insert emoji"
         triggerClassName="rounded-md px-2 py-1"
-        onOpenChange={setOpen}
+        finalFocus={() => editor.getRootElement()}
         onSelect={(s) => {
-          inserted.current = true;
           editor.update(() => {
             const selection = $getSelection();
             const range = $isRangeSelection(selection) ? selection : $getRoot().selectEnd();

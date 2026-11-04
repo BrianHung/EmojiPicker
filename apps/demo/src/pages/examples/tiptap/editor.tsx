@@ -22,10 +22,11 @@ function TiptapEditor() {
         <PickerPopover
           label="Insert emoji"
           triggerClassName="rounded-md px-2 py-1"
+          finalFocus={() => editor.view.dom}
           onSelect={(s) => {
             const attrs = s.emoji ? null : emojiAttrs(store, s.unified);
-            if (attrs) editor.chain().focus().insertEmoji(attrs).run();
-            else editor.chain().focus().insertContent(s.emoji).run();
+            if (attrs) editor.commands.insertEmoji(attrs);
+            else editor.commands.insertContent(s.emoji);
           }}
         >
           <span aria-hidden>🙂</span>

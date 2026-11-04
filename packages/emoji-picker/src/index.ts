@@ -25,7 +25,7 @@ export type { PickerKeyboardEvent, PickerKeyboardEventHandler } from "./react/ke
 export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";
 export { Tapback } from "./react/tapback";
 export { EmojiPopover, pickerInitialFocus, useEmojiPopover } from "./floating-ui";
-export type { PopoverAnchor, PopoverContentProps, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./floating-ui";
+export type { PopoverAnchor, PopoverContentProps, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./floating-ui";
 export type { TapbackProps } from "./react/tapback";
 export { Emoji, useEmoji } from "./react/emoji";
 export { EmojiOverrides, findArtwork } from "./react/overrides";

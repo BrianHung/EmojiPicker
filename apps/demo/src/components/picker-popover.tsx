@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker";
+import type { EmojiSelection, PopoverFinalFocus } from "@brianhung/emoji-picker";
 import { EmojiPopover as FloatingPopover } from "@brianhung/emoji-picker/floating-ui";
 import { EmojiPopover as AriaPopover } from "@brianhung/emoji-picker/react-aria";
 import { cn } from "@/lib/utils";
@@ -20,10 +20,12 @@ export type PickerPopoverProps = {
   /** Which EmojiPopover: Floating UI (the root export) or React Aria. */
   adapter?: "floating-ui" | "react-aria";
   onOpenChange?: (open: boolean) => void;
+  /** Focused once a pick closes the popover, instead of the trigger (the editor a toolbar button inserts into). */
+  finalFocus?: PopoverFinalFocus;
 };
 
 /** A trigger that opens the picker in a popover; picking closes it. */
-export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, adapter = "floating-ui", onOpenChange }: PickerPopoverProps) {
+export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, adapter = "floating-ui", onOpenChange, finalFocus }: PickerPopoverProps) {
   const EmojiPopover = adapter === "react-aria" ? AriaPopover : FloatingPopover;
   return (
     <EmojiPopover.Root onOpenChange={onOpenChange}>
@@ -41,6 +43,7 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
         side={side}
         align={align}
         aria-label="Emoji picker"
+        finalFocus={finalFocus}
         {...(adapter === "floating-ui" ? { duration: 100 } : {})}
         className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
       >

@@ -140,7 +140,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       if (!selection) return undefined;
       const { onSelect, popover } = latest.current;
       onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
-      if (popover?.closeOnSelect) popover.close();
+      if (popover?.closeOnSelect) popover.close("select");
       return selection;
     },
     [state, reactions, collapseToReactions],

@@ -144,7 +144,7 @@ A section title (`List.SectionTitle`) is text inside the listbox; its state has 
 
 ## Popovers
 
-`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
+`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger, or, when a pick closes it, to `finalFocus` on the content (an element, a ref or a function: the editor a toolbar button inserts into). `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
 
 ```tsx
 <EmojiPopover.Root>

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { autoUpdate, flip, FloatingFocusManager, FloatingNode, FloatingPortal, FloatingTree, offset, shift, size, useDismiss, useFloating, useFloatingNodeId, useFloatingParentNodeId, useFloatingRootContext, useInteractions, useMergeRefs, useRole, useTransitionStatus, type FloatingRootContext, type Middleware, type UseFloatingOptions } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
-import { anchorRect, ContentFocus, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "./popover-shared";
+import { anchorRect, ContentFocus, contentAttributes, finalFocusTarget, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "./popover-shared";
 
 export type PopoverContentProps = SharedContentProps & {
   /** How long the content stays mounted with `data-ending-style` after closing, ms (Floating UI's `useTransitionStatus`). Default 0. */
@@ -80,7 +80,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, duration = 0, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, duration = 0, style, children, ...props },
   ref,
 ) {
   const p = usePopoverInternals<Internals>("Content");
@@ -88,13 +88,14 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const { isMounted, status } = useTransitionStatus(context, { duration });
   const node = React.useRef<HTMLDivElement | null>(null);
   const mergedRef = useMergeRefs([node, p.setFloating, ref]);
-  const latest = React.useRef(initialFocus);
-  latest.current = initialFocus;
-  const [focusTarget] = React.useState(() => ({ get current() { return initialFocusTarget(latest.current, node.current); } }) as React.MutableRefObject<HTMLElement | null>);
+  const latest = React.useRef({ initialFocus, finalFocus, p });
+  latest.current = { initialFocus, finalFocus, p };
+  const [focusTarget] = React.useState(() => ({ get current() { return initialFocusTarget(latest.current.initialFocus, node.current); } }) as React.MutableRefObject<HTMLElement | null>);
+  const [returnTarget] = React.useState(() => ({ get current() { const { finalFocus, p } = latest.current; return finalFocus && p.state.selected.current ? finalFocusTarget(finalFocus) : p.trigger; } }) as React.MutableRefObject<HTMLElement | null>);
 
   if (!isMounted) return null;
   return portal(
-    <FloatingFocusManager context={context} modal={false} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget}>
+    <FloatingFocusManager context={context} modal={false} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus ? returnTarget : true}>
       <div
         {...p.floatingProps(props)}
         {...contentAttributes({ open: p.state.open, side: placed, align, status: status === "close" ? "ending" : status === "open" ? "open" : "starting", props })}
