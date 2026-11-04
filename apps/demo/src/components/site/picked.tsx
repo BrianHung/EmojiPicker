@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { toast } from "@/components/ui/toast";
 
 /** Copies a picked emoji (or a custom emoji's :shortcode:) and confirms with a toast: the emoji, its shortcode and name. */
@@ -8,7 +8,7 @@ function copyEmoji(selection: EmojiSelection) {
   navigator.clipboard?.writeText(selection.emoji || shortcode).catch(() => {});
   const icon = (
     <span data-slot="toast-icon" aria-hidden className="flex size-9 shrink-0 items-center justify-center text-[32px] leading-none">
-      {selection.imageUrl ? <img src={selection.imageUrl} alt="" width={32} height={32} className="size-8 object-contain" /> : selection.emoji}
+      <Emoji emoji={selection} size={32} />
     </span>
   );
   toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, data: { icon } });
