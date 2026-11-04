@@ -104,10 +104,20 @@ const PROBE: React.CSSProperties = {
   marginRight: "var(--emoji-list-padding-end, var(--ep-pad))",
 };
 
+/**
+ * A row height in layout units (1/64 px) at the element's CSS zoom, as the browser lays out a flow
+ * of rows: absolutely placed rows then land on the same device pixels, also under zoom.
+ */
+function layoutUnits(el: HTMLElement) {
+  const zoom = (el as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom || 1;
+  return (n: number) => (zoom === 1 ? Math.trunc(n * 64) / 64 : Math.trunc(n * zoom * 64) / 64 / zoom + 1e-6);
+}
+
 function readProbe(probe: HTMLElement): GridMetrics {
   const cs = getComputedStyle(probe);
   const px = (v: string) => parseFloat(v) || 0;
-  return { cellWidth: px(cs.width) || 40, cellHeight: px(cs.height) || 40, headerHeight: px(cs.paddingTop), padding: px(cs.paddingLeft), paddingEnd: px(cs.marginRight), sectionGap: px(cs.paddingRight), sectionMinWidth: px(cs.paddingBottom) };
+  const unit = layoutUnits(probe);
+  return { cellWidth: px(cs.width) || 40, cellHeight: unit(px(cs.height)) || 40, headerHeight: unit(px(cs.paddingTop)), padding: px(cs.paddingLeft), paddingEnd: px(cs.marginRight), sectionGap: px(cs.paddingRight), sectionMinWidth: px(cs.paddingBottom) };
 }
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
@@ -175,8 +185,12 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     if (!horizontal && !results) {
       const cell = list.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"]`);
       const header = list.querySelector<HTMLElement>(`[data-slot="${SLOTS.categoryHeader}"]`);
-      if (cell?.offsetHeight) next.cellWidth = next.cellHeight = cell.offsetHeight;
-      if (header) next.headerHeight = header.offsetHeight;
+      const unit = layoutUnits(list);
+      if (cell?.offsetHeight) {
+        next.cellWidth = cell.offsetHeight;
+        next.cellHeight = unit(cell.offsetHeight);
+      }
+      if (header) next.headerHeight = unit(header.offsetHeight);
     }
     setMetrics((m) => (sameMetrics(m, next) ? m : next));
   }, [horizontal, results]);
