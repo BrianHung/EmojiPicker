@@ -2,7 +2,7 @@
 //
 // Tiptap finds the trigger and the query; the picker library does the rest:
 // `useEmojiSuggestions` ranks and owns highlight, keys and ARIA, and
-// `EmojiPopover` positions the menu at the caret through its `anchor` prop.
+// `EmojiSuggestions.Popover` positions the menu at the caret without taking focus.
 // The extension only bridges the two with a tiny external store, so the menu is
 // a plain React component rendered next to <EditorContent> (inside EmojiProvider).
 // `useEmojiSuggestionQuery` is that bridge, for a menu of your own (Notion's grid).
@@ -10,7 +10,7 @@ import * as React from "react";
 import { Extension, type Editor, type Range } from "@tiptap/react";
 import Suggestion, { type SuggestionKeyDownProps, type SuggestionProps } from "@tiptap/suggestion";
 import { PluginKey } from "@tiptap/pm/state";
-import { Emoji, EmojiPopover, useEmojiStore, useEmojiSuggestions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { Emoji, EmojiSuggestions, useEmojiStore, useEmojiSuggestions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 
 type MenuState = { query: string; range: Range; rect: () => DOMRect | null } | null;
@@ -129,8 +129,7 @@ export function EmojiSuggestionMenu({ editor, className, limit = 8, side = "bott
   keys.current = (event) => menu.onKeyDown(event);
 
   return (
-    <EmojiPopover.Root open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} closeOnSelect={false}>
-      <EmojiPopover.Content anchor={suggestion.rect} side={side} sideOffset={6} onMouseDown={(e) => e.preventDefault()}>
+    <EmojiSuggestions.Popover open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} anchor={suggestion.rect} side={side} sideOffset={6}>
         <ul
           {...menu.getListProps()}
           className={cn("w-64 overflow-hidden rounded-lg border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg", className)}
@@ -149,7 +148,6 @@ export function EmojiSuggestionMenu({ editor, className, limit = 8, side = "bott
             );
           })}
         </ul>
-      </EmojiPopover.Content>
-    </EmojiPopover.Root>
+    </EmojiSuggestions.Popover>
   );
 }
