@@ -17,3 +17,6 @@ export { splitWords } from "./custom";
 export { createEmojiGrid, moveInGrid, rowsPerPage } from "./grid";
 export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGridSection } from "./grid";
 export { findShortcodeTrigger, isComposingKey } from "./shortcodes";
+export { createEmojiSuggestions } from "./suggestions";
+export type { EmojiSuggestionsMachine, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
+export type { ShortcodeCompletion } from "./search-index";
