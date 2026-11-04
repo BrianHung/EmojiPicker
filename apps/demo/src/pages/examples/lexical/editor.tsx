@@ -1,6 +1,7 @@
 // The picker inside a Lexical editor: `:shortcode` suggestions at the caret,
 // and the full picker from a toolbar button.
-import { $getSelection, $insertNodes, $isRangeSelection } from "lexical";
+import * as React from "react";
+import { $getRoot, $getSelection, $insertNodes, $isRangeSelection } from "lexical";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -16,19 +17,28 @@ import { PickerPopover } from "@/components/picker-popover";
 function Toolbar() {
   const [editor] = useLexicalComposerContext();
   const store = useEmojiStore();
+  // Back to the editor once the popover has closed: a popover that restores focus on close would take it back to the trigger.
+  const [open, setOpen] = React.useState(false);
+  const inserted = React.useRef(false);
+  React.useEffect(() => {
+    if (open || !inserted.current) return;
+    inserted.current = false;
+    editor.focus();
+  }, [open, editor]);
   return (
     <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
       <PickerPopover
         label="Insert emoji"
         triggerClassName="rounded-md px-2 py-1"
+        onOpenChange={setOpen}
         onSelect={(s) => {
-          editor.focus();
+          inserted.current = true;
           editor.update(() => {
             const selection = $getSelection();
-            if (!$isRangeSelection(selection)) return;
+            const range = $isRangeSelection(selection) ? selection : $getRoot().selectEnd();
             const attrs = s.emoji ? null : emojiAttrs(store, s.unified);
             if (attrs) $insertNodes([$createEmojiNode(attrs)]);
-            else selection.insertText(s.emoji);
+            else range.insertText(s.emoji);
           });
         }}
       >

@@ -19,13 +19,14 @@ export type PickerPopoverProps = {
   picker?: React.ReactNode;
   /** Which EmojiPopover: Floating UI (the root export) or React Aria. */
   adapter?: "floating-ui" | "react-aria";
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** A trigger that opens the picker in a popover; picking closes it. */
-export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, adapter = "floating-ui" }: PickerPopoverProps) {
+export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, adapter = "floating-ui", onOpenChange }: PickerPopoverProps) {
   const EmojiPopover = adapter === "react-aria" ? AriaPopover : FloatingPopover;
   return (
-    <EmojiPopover.Root>
+    <EmojiPopover.Root onOpenChange={onOpenChange}>
       <EmojiPopover.Trigger
         aria-label={label}
         className={cn(
