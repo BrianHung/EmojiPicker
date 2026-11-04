@@ -153,7 +153,7 @@ function App({ f }: { f: Fixture }) {
     body = (
       <EmojiPopover.Root closeOnSelect={f.closeOnSelect ?? true}>
         <EmojiPopover.Trigger data-testid="trigger">Open</EmojiPopover.Trigger>
-        <EmojiPopover.Content className="hx-pop" data-testid="content">
+        <EmojiPopover.Content className="hx-pop" data-testid="content" duration={150}>
           <Picker f={f} />
         </EmojiPopover.Content>
       </EmojiPopover.Root>
@@ -163,13 +163,13 @@ function App({ f }: { f: Fixture }) {
     body = (
       <EmojiPopover.Root>
         <EmojiPopover.Trigger data-testid="trigger">React</EmojiPopover.Trigger>
-        <button type="button" data-testid="after">after</button>
         <EmojiPopover.Content className="hx-pop" data-testid="content">
           <div role="toolbar" aria-label="Reactions">
             <button type="button">👍</button>
             <button type="button">❤️</button>
           </div>
         </EmojiPopover.Content>
+        <button type="button" data-testid="after">after</button>
       </EmojiPopover.Root>
     );
   else if (f.kind === "tapback")

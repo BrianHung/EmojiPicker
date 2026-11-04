@@ -35,6 +35,7 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
         side={side}
         align={align}
         aria-label="Emoji picker"
+        duration={100}
         className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
       >
         {picker ?? <EmojiPickerCard onSelect={onSelect} />}

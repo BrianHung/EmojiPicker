@@ -1,5 +1,5 @@
 // The nearest EmojiPopover's state, apart from the popover itself: a picker reads it
-// (close on pick) without pulling Floating UI into apps that never open a popover.
+// (close on pick) without pulling a popover library into apps that never open one.
 import * as React from "react";
 
 export type PopoverState = {
@@ -7,8 +7,6 @@ export type PopoverState = {
   setOpen: (open: boolean) => void;
   close: () => void;
   closeOnSelect: boolean;
-  triggerRef: React.MutableRefObject<HTMLElement | null>;
-  contentId: string;
 };
 
 export const PopoverContext = React.createContext<PopoverState | null>(null);

@@ -1,3 +1,5 @@
+import { EmojiSuggestions as Suggestions } from "./floating-ui";
+import type { EmojiSuggestions as SuggestionsState } from "./react/hooks";
 export { EmojiProvider, useEmojiStore } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps } from "./react/provider";
 export * as EmojiPicker from "./react/parts";
@@ -20,9 +22,8 @@ export type { KeyboardAction, Keymap } from "./react/keymap";
 export type { PickerKeyboardEvent, PickerKeyboardEventHandler } from "./react/keyboard";
 export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";
 export { Tapback } from "./react/tapback";
-export { EmojiPopover, pickerInitialFocus, useEmojiPopover } from "./react/popover";
-export type { PopoverAnchor } from "./react/popover";
-export type { PopoverContentProps, PopoverInitialFocus, PopoverRootProps, PopoverTriggerProps } from "./react/popover";
+export { EmojiPopover, pickerInitialFocus, useEmojiPopover } from "./floating-ui";
+export type { PopoverAnchor, PopoverContentProps, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, SuggestionsPopoverProps } from "./floating-ui";
 export type { TapbackProps } from "./react/tapback";
 export { Emoji, useEmoji } from "./react/emoji";
 export { EmojiOverrides, findArtwork } from "./react/overrides";
@@ -31,7 +32,7 @@ export type { EmojiProps } from "./react/emoji";
 export { resolveEmoji } from "./core/resolve";
 export type { EmojiInput, ResolvedEmoji } from "./core/resolve";
 export { useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiSuggestions, useFrequentEmoji, useShortcodeAutocomplete, useSkinTone } from "./react/hooks";
-export type { AutocompleteResult, EmojiSearchState, EmojiSuggestions, EmojiSuggestionsOptions, KeyLike, ShortcodeAutocomplete, ShortcodeAutocompleteOptions, ShortcodeSuggestion } from "./react/hooks";
+export type { AutocompleteResult, EmojiSearchState, EmojiSuggestionsOptions, KeyLike, ShortcodeAutocomplete, ShortcodeAutocompleteOptions, ShortcodeSuggestion } from "./react/hooks";
 
 export { createFrequencyStore, memoryStorage, DEFAULT_FREQUENT } from "./core/frequents";
 export { defaultLabels, plural } from "./core/labels";
@@ -42,3 +43,7 @@ export type { Dataset, EmojiRecord } from "./core/dataset";
 export type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./core/search-index";
 export { TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./core/platform";
 export type { Renderer } from "./core/platform";
+
+/** `EmojiSuggestions.Popover`; as a type, what `useEmojiSuggestions` returns. */
+export const EmojiSuggestions = Suggestions;
+export type EmojiSuggestions = SuggestionsState;

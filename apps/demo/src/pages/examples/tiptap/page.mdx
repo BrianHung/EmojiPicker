@@ -28,7 +28,7 @@ function Editor() {
 
 ## How it works
 
-The extension passes the query from `@tiptap/suggestion` to `useEmojiSuggestions` and positions the menu at the caret with `EmojiPopover`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+The extension passes the query from `@tiptap/suggestion` to `useEmojiSuggestions` and positions the menu at the caret with `EmojiSuggestions.Popover`, which never takes focus, so the editor keeps its caret. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
 const menu = useEmojiSuggestions({
@@ -44,7 +44,7 @@ Suggestion({
   }),
 });
 
-<EmojiPopover.Root open={menu.open}>
-  <EmojiPopover.Content anchor={() => clientRect()}>…</EmojiPopover.Content>
-</EmojiPopover.Root>
+<EmojiSuggestions.Popover open={menu.open} anchor={() => clientRect()}>
+  <ul {...menu.getListProps()}>…</ul>
+</EmojiSuggestions.Popover>
 ```

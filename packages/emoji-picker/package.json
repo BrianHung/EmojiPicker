@@ -52,6 +52,16 @@
       "types": "./dist/search.d.ts",
       "import": "./dist/search.js"
     },
+    "./floating-ui": {
+      "@brianhung/source": "./src/floating-ui.ts",
+      "types": "./dist/floating-ui.d.ts",
+      "import": "./dist/floating-ui.js"
+    },
+    "./react-aria": {
+      "@brianhung/source": "./src/react-aria.ts",
+      "types": "./dist/react-aria.d.ts",
+      "import": "./dist/react-aria.js"
+    },
     "./data/en.json": "./data/en.json",
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",
@@ -77,7 +87,7 @@
     }
   },
   "dependencies": {
-    "@floating-ui/react-dom": "^2.1.9",
+    "@floating-ui/react": "^0.27.20",
     "@react-types/shared": "^3.37.0",
     "react-aria": "^3.53.1",
     "react-aria-components": "^1.22.1",

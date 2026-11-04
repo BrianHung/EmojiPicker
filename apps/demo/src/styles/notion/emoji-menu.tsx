@@ -7,7 +7,7 @@
 // a cell, Up/Down a row, Enter/Tab insert, Escape closes.
 import * as React from "react";
 import type { Editor } from "@tiptap/react";
-import { Emoji, EmojiPopover, useEmojiStore, useEmojiSuggestions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { Emoji, EmojiSuggestions, useEmojiStore, useEmojiSuggestions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 import { useEmojiSuggestionQuery } from "@/components/tiptap/emoji-suggestion";
 import * as I from "@/styles/icons";
 import { useStyleTokens } from "@/styles/style-picker";
@@ -88,8 +88,7 @@ export function NotionEmojiMenu({ editor }: { editor: Editor }) {
 
   let position = 0;
   return (
-    <EmojiPopover.Root open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} closeOnSelect={false}>
-      <EmojiPopover.Content anchor={suggestion.rect} sideOffset={4} onMouseDown={(e) => e.preventDefault()} aria-label="Emoji">
+    <EmojiSuggestions.Popover open={suggestion.open && menu.open} onOpenChange={(next) => !next && suggestion.close()} anchor={suggestion.rect} sideOffset={4}>
         <div
           data-style={notion.id}
           className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
@@ -149,7 +148,6 @@ export function NotionEmojiMenu({ editor }: { editor: Editor }) {
             </span>
           </div>
         </div>
-      </EmojiPopover.Content>
-    </EmojiPopover.Root>
+    </EmojiSuggestions.Popover>
   );
 }

@@ -120,7 +120,11 @@ const POPOVER_CONTENT: PropRow[] = [
   { name: "collisionPadding", type: "number", default: "8" },
   { name: "container", type: "HTMLElement | false", default: "document.body", description: "Portal target. false renders in place." },
   { name: "anchor", type: "Element | VirtualElement | () => …", description: "Positions against this element instead of the Trigger." },
+  { name: "duration", type: "number", default: "0", description: "Floating UI only: ms the content stays mounted with data-ending-style after closing." },
 ];
+
+const POPOVER_ADAPTERS = `import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker/floating-ui"; // the default
+import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker/react-aria";`;
 
 const OWN_POPOVER = `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker";
@@ -217,6 +221,11 @@ export function ApiReference() {
         <PropsTable rows={POPOVER_TRIGGER} />
         <Sub>Content</Sub>
         <PropsTable rows={POPOVER_CONTENT} />
+        <Sub>Floating UI or React Aria</Sub>
+        <P>
+          The root export is built on Floating UI. The same <C>EmojiPopover</C> and <C>EmojiSuggestions.Popover</C> (a <C>:shortcode</C> menu at a text field's caret that never takes focus) also come from either subpath; an app bundles only the one it imports.
+        </P>
+        <Code title="imports.tsx" lang="tsx">{POPOVER_ADAPTERS}</Code>
         <Sub>Your own popover</Sub>
         <P>
           A picker works in any popover. In Base UI or shadcn/ui, close it from <C>onSelect</C> and focus the picker with <C>pickerInitialFocus</C>.

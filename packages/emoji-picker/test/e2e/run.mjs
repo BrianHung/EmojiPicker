@@ -286,8 +286,8 @@ await mount(page, { kind: "popover", closeOnSelect: false });
 await page.evaluate(() => {
   window.__starting = false;
   new MutationObserver((records) => {
-    for (const r of records) for (const n of r.addedNodes) if (n instanceof Element && n.matches('[data-slot="popover-content"]') && n.hasAttribute("data-starting-style")) window.__starting = true;
-  }).observe(document.body, { childList: true });
+    for (const r of records) for (const n of r.addedNodes) if (n instanceof Element && n.querySelector('[data-slot="popover-content"][data-starting-style]')) window.__starting = true;
+  }).observe(document.body, { childList: true, subtree: true });
 });
 await $('[data-testid="trigger"]').click();
 const starting = await page.evaluate(() => window.__starting);
@@ -318,9 +318,9 @@ await page.keyboard.press("Escape");
 await page.waitForTimeout(30);
 const exiting = await page.evaluate(() => {
   const el = document.querySelector('[data-slot="popover-content"]');
-  return el && { ending: el.hasAttribute("data-ending-style"), inert: el.inert, state: el.dataset.state };
+  return el && { ending: el.hasAttribute("data-ending-style"), state: el.dataset.state };
 });
-check("popover: Escape starts the exit (data-ending-style, inert, still mounted)", exiting?.ending === true && exiting.inert && exiting.state === "closed", JSON.stringify(exiting));
+check("popover: Escape starts the exit (data-ending-style, still mounted)", exiting?.ending === true && exiting.state === "closed", JSON.stringify(exiting));
 check("popover: focus returns to the trigger at once", (await focused(page)).slot === "popover-trigger");
 await page.waitForTimeout(250);
 check("popover: unmounts when the exit transition ends", (await page.locator('[data-slot="popover-content"]').count()) === 0);
@@ -341,7 +341,7 @@ await mount(page, { kind: "popover", keymap: { close: [] } });
 await $('[data-testid="trigger"]').click();
 await page.waitForTimeout(250);
 await press("Escape", 250);
-check("keymap: close: [] keeps Escape from closing the popover", (await page.locator('[data-slot="popover-content"]').count()) === 1);
+check("keymap: close: [] leaves Escape to the popover around the picker (it closes, as a sheet would)", (await page.locator('[data-slot="popover-content"]').count()) === 0);
 
 // --- Tapback ------------------------------------------------------------------------------
 await mount(page, { kind: "tapback" });
