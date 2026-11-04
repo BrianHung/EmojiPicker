@@ -30,6 +30,8 @@ const tokens: Tokens = {
   "--discord-mine-foreground": "light-dark(#4654c0, oklab(0.840364 0.0038172 -0.0788282))",
   "--discord-thumb": "light-dark(#8b8c94, #5f606a)",
   "--discord-icon": "light-dark(#595a63, #abacb2)",
+  "--discord-role-gold": "light-dark(#8a5d00, #f0b232)",
+  "--discord-role-blue": "light-dark(#3b5bd9, #9ab6ff)",
   "--discord-autocomplete": "light-dark(#ffffff, oklab(0.2624 0.0025 -0.0089))",
   "--discord-autocomplete-text": "light-dark(#28282d, oklab(0.988 0 0))",
   "--discord-autocomplete-muted": "light-dark(#595a63, oklab(0.7454 0.0013 -0.0085))",

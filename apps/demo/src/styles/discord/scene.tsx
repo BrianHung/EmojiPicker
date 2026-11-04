@@ -25,6 +25,7 @@ const C = {
   placeholder: ld("#84858d", "#6c6d76"),
   icon: ld("#595a63", "oklab(0.7 0.0016 -0.0115)"),
   search: ld("#f3f3f4", "oklab(0.18 0.0015 -0.006)"),
+  searchText: ld("#6c6d76", "oklab(0.608 0.0013 -0.0123)"),
   rule: ld("color-mix(in oklab, #97979f 28%, transparent)", "color-mix(in oklab, #97979f 12%, transparent)"),
   hover: "color-mix(in oklab, #97979f 12%, transparent)",
   toolbar: ld("#ffffff", "#242429"),
@@ -34,7 +35,7 @@ const C = {
 type Message = { id: number; author: string; color: string; nameColor?: string; time: string; lines: string[]; reactions: Reaction[] };
 
 const INITIAL: Message[] = [
-  { id: 1, author: "Maya", color: "#f97316", nameColor: "#f0b232", time: "Today at 9:41 AM", lines: ["morning! the new build is up on staging 🎉", "give it a spin when you get a sec"], reactions: [] },
+  { id: 1, author: "Maya", color: "#f97316", nameColor: "var(--discord-role-gold)", time: "Today at 9:41 AM", lines: ["morning! the new build is up on staging 🎉", "give it a spin when you get a sec"], reactions: [] },
   {
     id: 2,
     author: "Jordan",
@@ -47,8 +48,8 @@ const INITIAL: Message[] = [
       { unified: "1f64c", count: 1, mine: false },
     ],
   },
-  { id: 4, author: "Maya", color: "#f97316", nameColor: "#f0b232", time: "Today at 9:46 AM", lines: ["ok the skin tone picker is my favorite part ✋🏽"], reactions: [{ unified: "1f499", count: 1, mine: false }] },
-  { id: 3, author: "Bufo", color: "#8b5cf6", nameColor: "#9ab6ff", time: "Today at 9:47 AM", lines: ["try typing :smi in the box below"], reactions: [] },
+  { id: 4, author: "Maya", color: "#f97316", nameColor: "var(--discord-role-gold)", time: "Today at 9:46 AM", lines: ["ok the skin tone picker is my favorite part ✋🏽"], reactions: [{ unified: "1f499", count: 1, mine: false }] },
+  { id: 3, author: "Bufo", color: "#8b5cf6", nameColor: "var(--discord-role-blue)", time: "Today at 9:47 AM", lines: ["try typing :smi in the box below"], reactions: [] },
 ];
 
 const FONT = "'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -120,7 +121,7 @@ function Header() {
         <Bell />
         <Pin />
         <Members />
-        <div className="flex h-8 w-[180px] items-center justify-between rounded-[8px] px-2 text-[14px]" style={{ background: C.search, color: C.muted }}>
+        <div className="flex h-8 w-[180px] items-center justify-between rounded-[8px] px-2 text-[14px]" style={{ background: C.search, color: C.searchText }}>
           Search
           <SearchIcon />
         </div>
