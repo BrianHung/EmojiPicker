@@ -58,7 +58,7 @@ export function EmojiPickerBody({ rows, components, footer = true, empty = "No e
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
         <EmojiPicker.List
           components={components}
-          cellClassName="flex items-center justify-center rounded-md outline-none transition-colors hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent"
+          cellClassName="flex items-center justify-center rounded-md outline-none transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-inset data-[highlighted]:bg-accent data-[highlighted]:ring-2 data-[highlighted]:ring-muted-foreground data-[highlighted]:ring-inset"
           headerClassName="bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground"
         />
         <EmojiPicker.Empty className="py-6 text-center text-sm text-muted-foreground">{empty}</EmojiPicker.Empty>

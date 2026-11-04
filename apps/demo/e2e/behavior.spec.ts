@@ -4,7 +4,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { PAGE_SCROLLS } from "./known-issues";
 import { SURFACES, type Kind, type Surface } from "./surfaces";
-import { expect, fileName, matchFixture, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
+import { expect, fileName, frames, matchFixture, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
 
 /**
  * The navigation keys, in order, per kind of surface. A `:` menu owns only ArrowUp/Down: the other keys
@@ -137,3 +137,112 @@ test("examples/virtualizer", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);
 });
+
+/** The highlighted item (the active descendant, the focused item, else [data-highlighted]), marked with `data-e2e`. */
+const mark = (root: Locator, name: string) =>
+  root.evaluate((el, name) => {
+    const active = document.activeElement;
+    const id = active?.getAttribute("aria-activedescendant");
+    const item = (id && document.getElementById(id)) || (active !== el && el.contains(active) && active?.matches('[data-slot="emoji"], [role="option"]') ? active : el.querySelector("[data-highlighted]"));
+    item?.setAttribute("data-e2e", name);
+    return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
+  }, name);
+
+/**
+ * How the highlighted item differs from the one it left: the first background, outline or ring that changed (on
+ * the item, its pseudo-elements or children), as a contrast ratio over what's behind it (composited sRGB).
+ */
+const highlightLook = (page: Page) =>
+  page.evaluate(() => {
+    const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!;
+    const rgba = (color: string) => {
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = "#0000";
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, 1, 1);
+      const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+      return [r!, g!, b!, a! / 255];
+    };
+    const over = ([r, g, b, a]: number[], [R, G, B]: number[]) => [r! * a! + R! * (1 - a!), g! * a! + G! * (1 - a!), b! * a! + B! * (1 - a!), 1];
+    const backdrop = (el: Element | null) => {
+      const chain: number[][] = [];
+      for (let e = el; e; e = e.parentElement) {
+        chain.push(rgba(getComputedStyle(e).backgroundColor));
+        if (chain.at(-1)![3] === 1) break;
+      }
+      return chain.reduceRight((under, c) => over(c, under), [255, 255, 255, 1]);
+    };
+    const lum = (c: number[]) => c.slice(0, 3).reduce((sum, v, i) => sum + [0.2126, 0.7152, 0.0722][i]! * ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4), 0);
+    const contrast = (a: number[], b: number[]) => {
+      const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
+      return Math.round(((x! + 0.05) / (y! + 0.05)) * 100) / 100;
+    };
+    const parts = (el: Element) => [el, ...el.children].flatMap((e) => [null, "::before", "::after"].map((p) => ({ e, s: getComputedStyle(e, p) })));
+    const ring = (s: CSSStyleDeclaration) =>
+      s.outlineStyle !== "none" && parseFloat(s.outlineWidth) > 0 ? s.outlineColor : ([...s.boxShadow.matchAll(/(?:rgba?|oklab|oklch|lab|lch|color)\([^)]*\)/g)].map((m) => m[0]).find((c) => rgba(c)[3]! > 0) ?? null);
+    const [now, before] = [document.querySelector("[data-e2e=after]")!, document.querySelector("[data-e2e=before]")];
+    if (!before) return { kind: "none", contrast: 0, detail: "the previous item is gone" };
+    const [a, b] = [parts(now), parts(before)];
+    for (let i = 0; i < Math.min(a.length, b.length); i++) {
+      const [x, y] = [a[i]!, b[i]!];
+      const [rx, ry] = [ring(x.s), ring(y.s)];
+      if (rx && (rx !== ry || x.s.outlineStyle !== y.s.outlineStyle || x.s.boxShadow !== y.s.boxShadow)) {
+        const behind = backdrop(x.e);
+        return { kind: "ring", contrast: contrast(over(rgba(rx), behind), behind), detail: `ring ${rx} (was ${ry ?? "none"})` };
+      }
+      if (x.s.backgroundColor !== y.s.backgroundColor) {
+        const [ca, cb] = [rgba(x.s.backgroundColor), rgba(y.s.backgroundColor)];
+        const behind = backdrop(x.e.parentElement);
+        return { kind: ca[3] === 1 && cb[3] === 1 ? "solid" : "wash", contrast: contrast(over(ca, behind), over(cb, behind)), detail: `background ${x.s.backgroundColor} (was ${y.s.backgroundColor})` };
+      }
+    }
+    return { kind: "none", contrast: 1, detail: "no background, outline or ring changed" };
+  });
+
+/** iOS's emoji keyboard stays up while you type. */
+const KEEPS_OPEN = ["gallery/apple/scene-composer"];
+/** The trigger goes with the pick: focus moves to the message (iMessage), the bar's opener (Instagram) or the picked reaction (tapback). */
+const FOCUS_MOVES = ["gallery/apple/scene-tapback-more", "home/hero-apple-tapback-more", "gallery/instagram/scene-reaction-more", "home/tapback-more"];
+
+// From the keyboard: Enter on the trigger opens it with focus inside, an arrow visibly moves the highlight,
+// and Enter picks and closes it, with focus back on the trigger (or the field a composer inserted into).
+for (const s of SURFACES.filter((s) => s.trigger || s.kind === "menu"))
+  test(`keyboard: ${s.id}`, async ({ page }, info) => {
+    test.skip(!!s.only && s.only !== viewportOf(info), `${s.only} only`);
+    test.skip(viewportOf(info) === "mobile" && s.id === "gallery/instagram/scene-reaction-more", "on a phone its bar opens by long-press, with nothing to give focus back to");
+    await visit(page, s.path);
+    await s.prepare?.(page);
+    const root = s.root(page);
+    let back: Locator;
+    if (s.trigger) {
+      back = s.trigger(page);
+      await back.focus();
+      await page.keyboard.press("Enter");
+      await root.locator('[data-slot="emoji"], [role="option"]').first().waitFor();
+    } else back = await s.open(page);
+    await quiet(page);
+    await page.mouse.move(0, 0);
+    const inside = (el: Element) => {
+      const active = document.activeElement!;
+      const id = active.getAttribute("aria-activedescendant");
+      return (el !== active && el.contains(active)) || (!!id && el.contains(document.getElementById(id)));
+    };
+    expect(await root.evaluate(inside), "focus is inside").toBe(true);
+
+    const key = s.kind === "menu" ? "ArrowDown" : "ArrowRight";
+    if (!(await mark(root, "before"))) await page.keyboard.press("ArrowDown");
+    const from = await mark(root, "before");
+    await page.keyboard.press(key);
+    await quiet(page);
+    expect(await mark(root, "after"), `${key} moves the highlight`).not.toBe(from);
+    const look = await highlightLook(page);
+    info.annotations.push({ type: "highlight", description: `${look.kind} ${look.contrast}:1, ${look.detail}` });
+    expect(look.kind, look.detail).not.toBe("none");
+    expect(look.contrast, look.detail).toBeGreaterThanOrEqual(look.kind === "ring" ? 3 : look.kind === "solid" ? 1.5 : 1.05);
+
+    await page.keyboard.press("Enter");
+    if (!KEEPS_OPEN.includes(s.id)) await expect(page.locator("[data-e2e=after]")).toBeHidden();
+    await quiet(page);
+    const landed = await page.evaluate(() => (document.activeElement?.matches('[contenteditable="true"], input, textarea') ? "field" : document.activeElement === document.body ? "body" : "other"));
+    expect((await holdsFocus(back)) || landed === "field" || (FOCUS_MOVES.includes(s.id) && landed !== "body"), `focus after picking: ${(await probe(page, root)).focus}`).toBe(true);
+  });

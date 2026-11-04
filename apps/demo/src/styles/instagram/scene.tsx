@@ -9,7 +9,8 @@
 // or Enter) a bubble for the reaction bar, double-tap for ❤️, and "+" and the composer's
 // smiley open the picker as a bottom sheet. The phone header is not measured.
 import * as React from "react";
-import { Emoji, EmojiPopover, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, useCompact, useLongPress } from "@/styles/scene-kit";

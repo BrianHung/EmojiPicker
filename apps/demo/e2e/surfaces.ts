@@ -14,6 +14,8 @@ export type Surface = {
   only?: Viewport;
   /** Gets the page to the surface's starting point (a tab, dismissing an auto-opened tapback). */
   prepare?: (page: Page) => Promise<void>;
+  /** The popover's trigger: focus it and press Enter to open from the keyboard. */
+  trigger?: (page: Page) => Locator;
   /** Opens it and returns where focus belongs afterwards (the trigger or the text field). Inline: focuses it. */
   open: (page: Page) => Promise<Locator>;
   /** The open surface. */
@@ -52,6 +54,7 @@ function popover(id: string, path: string, trigger: (p: Page) => Locator, extra:
     path,
     kind: "picker",
     root: layer,
+    trigger,
     open: async (p) => {
       await trigger(p).click();
       if (extra.root) await extra.root(p).waitFor();
@@ -218,6 +221,7 @@ const home: Surface[] = [
     path: "/",
     kind: "picker",
     root: (p) => preview(p, "tapback"),
+    trigger: (p) => button(preview(p, "tapback"), "More emoji"),
     open: async (p) => {
       await button(preview(p, "tapback"), "More emoji").click();
       await preview(p, "tapback").locator('[data-slot="search-input"]').waitFor();

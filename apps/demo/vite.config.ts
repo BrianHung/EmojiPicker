@@ -47,6 +47,8 @@ export default defineConfig({
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
     // `@/…` is src/ (shadcn's aliases in components.json); `@/registry/…` is the registry item the site renders.
     alias: [
+      // E2E_POPOVER=react-aria: the site's EmojiPopover on React Aria, for the e2e suites.
+      ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker\/floating-ui$/, replacement: "@brianhung/emoji-picker/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],

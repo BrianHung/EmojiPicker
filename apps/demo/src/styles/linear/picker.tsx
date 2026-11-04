@@ -42,7 +42,7 @@ export const linear: Style = {
     columns: 9,
     frequent: 18,
     placeholder: "Search emoji…",
-    cell: "rounded-[8px] hover:bg-picker-hover data-[highlighted]:bg-picker-selected",
+    cell: "rounded-[8px] hover:bg-picker-hover data-[highlighted]:bg-picker-selected data-focus-visible:bg-picker-selected",
     header: "h-7 bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted",
     searchRow: "border-b border-(--linear-divider) px-[5px] pt-1 pb-1",
     input: "h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",

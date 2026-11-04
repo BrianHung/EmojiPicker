@@ -73,7 +73,7 @@ export const discord: Style = {
       { id: "symbols", name: "Symbols" },
       { id: "flags", name: "Flags" },
     ],
-    cell: "rounded hover:bg-picker-hover data-[highlighted]:bg-picker-hover",
+    cell: "rounded hover:bg-picker-hover data-[highlighted]:bg-picker-hover data-focus-visible:bg-picker-hover",
     header: "flex h-8 items-center gap-1 bg-picker-background pr-1 pl-1 text-[14px] leading-[18px] font-semibold text-picker-muted",
     headerIcon: { size: 16, chevron: true },
     top: (

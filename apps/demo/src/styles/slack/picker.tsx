@@ -92,7 +92,7 @@ export const slack: Style = {
     ],
     suggested: GETTING_WORK_DONE,
     // Slack's 35×32 hover box (radius 6) sits 1px left of the 33px cell and stops 1px above the next row.
-    cell: "relative isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-[highlighted]:before:bg-picker-selected",
+    cell: "relative isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-[highlighted]:before:bg-picker-selected data-focus-visible:before:bg-picker-selected",
     header: "block h-7 bg-picker-background/95 pt-px pr-3.5 pl-3.5 text-[13px] leading-6 font-bold text-picker-foreground",
     searchRow: "px-[17.5px] pt-3.5 pb-[7px]",
     input:

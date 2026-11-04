@@ -8,7 +8,7 @@
 import * as React from "react";
 import type { Editor } from "@tiptap/react";
 import { Emoji, EmojiSuggestions, useEmojiStore, useEmojiSuggestions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
-import { useEmojiSuggestionQuery } from "@/components/tiptap/emoji-suggestion";
+import { useEditorActiveDescendant, useEmojiSuggestionQuery } from "@/components/tiptap/emoji-suggestion";
 import * as I from "@/styles/icons";
 import { useStyleTokens } from "@/styles/style-picker";
 import { notion, NOTION_SECTIONS } from "./picker";
@@ -55,6 +55,7 @@ export function NotionEmojiMenu({ editor }: { editor: Editor }) {
   const activeSection = sections.find((s) => s.items.includes(order[highlighted]!))?.id;
   const scroller = React.useRef<HTMLDivElement>(null);
   const id = React.useId();
+  useEditorActiveDescendant(editor, menu.getListProps().id, suggestion.open && menu.open && order.length ? `${id}-${highlighted}` : undefined);
 
   keys.current = (event) => {
     if (!menu.open) return false;
@@ -93,7 +94,7 @@ export function NotionEmojiMenu({ editor }: { editor: Editor }) {
           data-style={notion.id}
           className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
         >
-          <div ref={scroller} {...menu.getListProps()} aria-activedescendant={`${id}-${highlighted}`} className="relative min-h-0 flex-1 overflow-y-auto pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent]">
+          <div ref={scroller} {...menu.getListProps()} className="relative min-h-0 flex-1 overflow-y-auto pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent]">
             {sections.map((section) => (
               <div key={section.id} role="group" aria-label={section.name}>
                 <div data-section={section.id} className="sticky top-0 z-10 h-[34px] bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted">

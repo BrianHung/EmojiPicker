@@ -31,7 +31,7 @@ export const apple: Style = {
     root: "h-[448px] w-[330px] rounded-picker border border-(--apple-edge) bg-picker-background/70 text-picker-foreground shadow-picker backdrop-blur-2xl backdrop-saturate-150 [--emoji-size:36px] [--emoji-cell-size:48px] [--emoji-image-size:34px] [--emoji-header-height:0px] [--emoji-list-padding:12px]",
     columns: 6,
     placeholder: "Search Emoji",
-    cell: "rounded-xl hover:bg-picker-hover data-[highlighted]:bg-picker-hover",
+    cell: "rounded-xl hover:bg-picker-hover data-[highlighted]:bg-picker-hover data-focus-visible:bg-picker-hover",
     header: "",
     hideHeaders: true,
     searchRow: "gap-2 px-2.5 pt-2.5 pb-2 [--search-icon-x:22px]",

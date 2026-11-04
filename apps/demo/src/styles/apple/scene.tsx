@@ -220,6 +220,17 @@ export function IMessageScreen({
   const close = React.useCallback(() => setMode("idle"), []);
   // Compose mode: the "+" opens the same sheet as a keyboard; picks go into the composer.
   const [compose, setCompose] = React.useState(false);
+  // Opened from the keyboard (a click with no pointer): the emoji keyboard takes focus, and gives it back.
+  const fromKeyboard = React.useRef(false);
+  const opener = (open: () => void) => (e?: React.MouseEvent) => {
+    fromKeyboard.current = e?.detail === 0;
+    open();
+  };
+  React.useEffect(() => {
+    if (covering || !fromKeyboard.current || !selected) return;
+    fromKeyboard.current = false;
+    bubbles.current.get(selected.id)?.focus();
+  }, [covering]);
   const insert = React.useRef<(text: string) => void>(() => {});
   const erase = React.useRef<() => void>(() => {});
   const modeRef = React.useRef(mode);
@@ -319,7 +330,7 @@ export function IMessageScreen({
       <StatusBar time={time} />
       {/* Tapping the conversation dismisses the compose keyboard. */}
       {compose ? <div className="absolute inset-0 z-[3]" onPointerDown={() => setCompose(false)} /> : null}
-      <Composer onSend={send} placeholder={placeholder} emojiOpen={compose} onEmoji={() => setCompose((c) => !c)} insert={insert} erase={erase} />
+      <Composer onSend={send} placeholder={placeholder} emojiOpen={compose} onEmoji={opener(() => setCompose((c) => !c))} insert={insert} erase={erase} />
 
       <AnimatePresence onExitComplete={() => modeRef.current === "idle" && setCovering(false)}>
         {active ? (
@@ -337,9 +348,9 @@ export function IMessageScreen({
           />
         ) : null}
         {active && mode === "tapback" ? (
-          <TapbackLayer key="tapback" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={() => setMode("emoji")} onClose={close} />
+          <TapbackLayer key="tapback" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={opener(() => setMode("emoji"))} onClose={close} />
         ) : null}
-        {active && mode === "menu" ? <MenuLayer key="menu" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={() => (setCovering(true), setMode("emoji"))} onClose={close} /> : null}
+        {active && mode === "menu" ? <MenuLayer key="menu" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={opener(() => (setCovering(true), setMode("emoji")))} onClose={close} /> : null}
         {active && mode === "emoji" ? <EmojiLayer key="emoji" rect={selected.rect} message={message} onClose={close} /> : null}
       </AnimatePresence>
 
@@ -358,7 +369,7 @@ export function IMessageScreen({
       >
         <DrawerContent
           container={screen}
-          initialFocus={false}
+          initialFocus={() => fromKeyboard.current}
           finalFocus={false}
           // iOS sheet: 0.3 pt in from the screen edges, its top at 485.3 pt, to the bottom.
           className="top-auto! right-[0.3px]! bottom-0! left-[0.3px]! h-[388.7px]! max-h-none! border-0! bg-transparent! text-base text-black duration-[380ms] ease-[cubic-bezier(0.2,1.1,0.32,1)] after:hidden data-ending-style:duration-[140ms]"

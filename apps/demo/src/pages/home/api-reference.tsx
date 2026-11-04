@@ -224,6 +224,7 @@ export function ApiReference() {
         <Sub>Floating UI or React Aria</Sub>
         <P>
           The root export is built on Floating UI. The same <C>EmojiPopover</C> and <C>EmojiSuggestions.Popover</C> (a <C>:shortcode</C> menu at a text field's caret that never takes focus) also come from either subpath; an app bundles only the one it imports.
+          React Aria's popover is modal: focus stays inside and the page doesn't scroll until it closes. Its non-modal popover closes when the page scrolls and stays open on a press outside, so editor menus should use the Floating UI <C>EmojiSuggestions.Popover</C>.
         </P>
         <Code title="imports.tsx" lang="tsx">{POPOVER_ADAPTERS}</Code>
         <Sub>Your own popover</Sub>
