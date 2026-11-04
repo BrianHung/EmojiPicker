@@ -1,28 +1,32 @@
-// EmojiPicker.List: a React Aria ListBox (layout "grid") of sections, virtualized
-// inside the Viewport by EmojiGridLayout. Categories, or the search results as their
-// own small collection; items are stable objects (see sections.ts).
+// EmojiPicker.List: a listbox (React Aria's useListBox, a "grid" of options) of sections,
+// virtualized inside the Viewport by EmojiGridLayout. Categories, or the search results
+// as their own small collection; items are shared objects (see sections.ts), and the
+// collection is built from them directly (collection.ts), never by rendering them.
 import * as React from "react";
-import type { Key } from "@react-types/shared";
-import { AutocompleteStateContext, Collection, Header, ListBox, ListBoxItem, ListBoxLoadMoreItem, ListBoxSection, SelectableCollectionContext, type ListBoxItemRenderProps } from "react-aria-components";
-import { Rect } from "react-aria-components/Virtualizer";
-import type { ListState } from "react-stately/useListState";
-import type { VirtualizerState } from "react-stately/useVirtualizerState";
-import type { Node as CollectionNode } from "@react-types/shared";
-import { GROUPS, isUnified, unifiedToNative } from "../core/dataset";
+import type { Key, Node as CollectionNode } from "@react-types/shared";
+import { useFocusRing } from "react-aria/useFocusRing";
+import { useFocusVisible } from "react-aria/useFocusVisible";
+import { useListBox, useListBoxSection } from "react-aria/useListBox";
+import { mergeProps } from "react-aria/mergeProps";
+import { useListState, type ListState } from "react-stately/useListState";
+import { moveVirtualFocus } from "./virtual-focus";
+import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
+import { AutocompleteContext } from "./autocomplete";
+import { EmojiCollection } from "./collection";
+import { GROUPS, unifiedToNative } from "../core/dataset";
 import type { CategoryHeaderProps, EmojiCellProps, HeaderActionsProps, ListComponents, ListEmoji } from "./components";
-import { signal, usePicker, useSignal, type ListHandle, type Signal } from "./context";
-import { EmojiImage } from "./image";
+import { signal, usePicker, type ListHandle } from "./context";
+import { Glyph } from "./glyph";
 import { mergeRefs, useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
-import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
-import { useEmojiContext } from "./provider";
+import { findArtwork, useArtworkMap } from "./overrides";
 import { itemFactory, resultSections, type EmojiItem, type EmojiSection } from "./sections";
 import { SLOTS, joinClasses } from "./slots";
 import { useDrawable } from "./native-support";
 import { useEmptyState } from "./viewport";
-import { ViewportVirtualizer } from "./virtualizer";
+import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
 export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
   /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
@@ -56,8 +60,10 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
  * slides cells under a resting pointer, and the browser reports hovers (and moves at
  * the same spot) for them.
  */
-const pointer = { x: NaN, y: NaN, moved: false };
-if (typeof window !== "undefined")
+const pointer = { x: NaN, y: NaN, moved: false, tracking: false };
+function trackPointer() {
+  if (pointer.tracking) return;
+  pointer.tracking = true;
   addEventListener(
     "pointermove",
     (e) => {
@@ -67,22 +73,42 @@ if (typeof window !== "undefined")
     },
     { capture: true, passive: true },
   );
+}
+
+/** Per-cell state the list sets and each cell reads as one number (one subscription per cell). */
+const STOP = 1;
+const ACTIVE = 2;
+const HOVERED = 4;
+const PRESSED = 8;
+function cellMarks() {
+  const marks = { stop: signal<Key | null>(null), active: signal<Key | null>(null), hovered: signal<Key | null>(null), pressed: signal<Key | null>(null) };
+  const all = Object.values(marks);
+  return {
+    ...marks,
+    subscribe(listener: () => void) {
+      const off = all.map((s) => s.subscribe(listener));
+      return () => off.forEach((f) => f());
+    },
+    of: (key: Key) => (marks.stop.get() === key ? STOP : 0) | (marks.active.get() === key ? ACTIVE : 0) | (marks.hovered.get() === key ? HOVERED : 0) | (marks.pressed.get() === key ? PRESSED : 0),
+  };
+}
+type CellMarks = ReturnType<typeof cellMarks>;
 
 type Cells = {
+  state: ListState<unknown>;
+  /** The listbox's id (options are `${id}-option-${key}`) and collection id. */
+  listId: string;
+  collectionId?: string;
+  focusVisible: boolean;
   /** Position in its section, the section's size, and the index in the whole list. */
   position: (id: Key) => readonly [number, number, number] | undefined;
   components: ListComponents;
   cellClassName?: string;
   headerClassName?: string;
   virtual: boolean;
-  tabStop: Signal<Key | null>;
-  active: Signal<Key | null>;
-  pendingFocus: React.MutableRefObject<Key | null>;
+  marks: CellMarks;
   /** Scrolls the Viewport (never the page) so the cell is in view. */
   reveal(id: Key): void;
-  hover(item: EmojiItem | null): void;
-  /** A real pointer move over a cell: the keyboard position follows (pointer "follows"). */
-  follow(item: EmojiItem): void;
   sectionDomId(id: string): string;
   toggle(id: string): void;
 };
@@ -153,16 +179,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
           }),
     [horizontal, picker.categorySections, drawable],
   );
-  const sections = React.useMemo(
-    () => (searching ? resultSections(picker.results, picker.searchResults, categoryName, (u) => store.withSkinTone(u), item, labels.searchResults) : categories),
-    [searching, picker.results, picker.searchResults, categoryName, store, item, labels.searchResults, categories],
+  const resultList = React.useMemo(
+    () => (searching ? resultSections(picker.results, picker.searchResults, categoryName, (u) => store.withSkinTone(u), item, labels.searchResults) : null),
+    [searching, picker.results, picker.searchResults, categoryName, store, item, labels.searchResults],
   );
-  const items = React.useMemo(() => new Map(sections.flatMap((s) => s.items.map((i) => [i.id, i] as const))), [sections]);
-  // Position in its section (aria-posinset/setsize: React Aria counts across sections, and the title).
-  const positions = React.useMemo(() => {
-    let index = 0;
-    return new Map(sections.flatMap((s) => s.items.map((i, n) => [i.id, [n + 1, s.items.length, index++]] as const)));
-  }, [sections]);
+  const sections = resultList ?? categories;
+  const loader = Boolean(onLoadMore && !searching);
+  const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
 
   // --- Geometry ---------------------------------------------------------------
   const [layout] = React.useState(() => new EmojiGridLayout());
@@ -197,18 +220,20 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   React.useLayoutEffect(measure);
 
   // --- Focus state --------------------------------------------------------------
-  const stateRef = React.useRef<ListState<EmojiSection> | null>(null);
+  const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => baseOf(i.unified) === baseOf(value)).map((i) => i.id))), [value, sections]);
+  const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? [], disallowEmptySelection: value !== undefined, layoutDelegate: layout });
+  const stateRef = React.useRef(state);
+  stateRef.current = state;
   const virtualizer = React.useRef<VirtualizerState<CollectionNode<unknown>, React.ReactNode> | null>(null);
-  const autocomplete = React.useContext(SelectableCollectionContext);
-  const autocompleteState = React.useContext(AutocompleteStateContext);
+  const autocomplete = React.useContext(AutocompleteContext);
   // DOM focus in a cell (Tab from the field): the list leaves virtual focus while it's there.
   const [domFocus, setDomFocus] = React.useState(false);
   const virtual = focusModel === "input" && picker.hasSearch && !domFocus;
-  const [cellsState] = React.useState(() => ({ tabStop: signal<Key | null>(null), active: signal<Key | null>(null), hovered: null as Key | null }));
+  const [marks] = React.useState(cellMarks);
   const pendingFocus = React.useRef<Key | null>(null);
   const lastFocused = React.useRef<Key | null>(null);
-  const latest = React.useRef({ items, positions, virtual, sections, horizontal });
-  latest.current = { items, positions, virtual, sections, horizontal };
+  const latest = React.useRef({ collection, virtual, horizontal });
+  latest.current = { collection, virtual, horizontal };
 
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
   const rtl = () => (listRef.current ? getComputedStyle(listRef.current).direction === "rtl" : false);
@@ -245,7 +270,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
         else if (info.rect.maxX > rect.maxX) el.scrollLeft += sign * (info.rect.maxX + pad - rect.maxX);
         return;
       }
-      const group = layout.groups[layout.positions.get(key)?.[0] ?? -1];
+      const group = layout.groups[layout.position(key)?.[0] ?? -1];
       const inset = group?.header ? layout.metrics.headerHeight : 0;
       if (info.rect.y < rect.y + inset) el.scrollTop -= rect.y + inset - info.rect.y;
       else if (info.rect.maxY > rect.maxY) el.scrollTop += info.rect.maxY - rect.maxY;
@@ -258,10 +283,10 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
 
   const setActive = React.useCallback(
     (key: Key | null) => {
-      cellsState.active.set(key);
-      picker.activeEmoji.set(key == null ? null : (latest.current.items.get(String(key))?.record ?? null));
+      marks.active.set(key);
+      picker.activeEmoji.set(latest.current.collection.emoji(key)?.record ?? null);
     },
-    [cellsState, picker.activeEmoji],
+    [marks, picker.activeEmoji],
   );
 
   const moveTo = React.useCallback(
@@ -289,15 +314,15 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       if (dom) pendingFocus.current = key;
       manager.setFocused(true);
       manager.setFocusedKey(key);
-      if (dom) cellsState.tabStop.set(key);
-      setActive(cellsState.hovered ?? key);
+      if (dom) marks.stop.set(key);
+      setActive(marks.hovered.get() ?? key);
     },
-    [reveal, cellsState, setActive, scroller, layout],
+    [reveal, marks, setActive, scroller, layout],
   );
 
   const pick = React.useCallback(
     (key: Key) => {
-      const it = latest.current.items.get(String(key));
+      const it = latest.current.collection.emoji(key);
       if (it) picker.pick(it.unified);
     },
     [picker],
@@ -305,7 +330,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
 
   const highlight = (): Key | null => {
     const m = stateRef.current?.selectionManager;
-    return m && m.isFocused && m.focusedKey != null && latest.current.items.has(String(m.focusedKey)) ? m.focusedKey : null;
+    return m && m.isFocused && latest.current.collection.emoji(m.focusedKey) ? m.focusedKey : null;
   };
 
   const focusSearch = () => {
@@ -357,13 +382,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       const m = stateRef.current?.selectionManager;
       if (!m || !latest.current.virtual || !m.isFocused || m.focusedKey == null) return false;
       m.setFocused(false);
-      autocompleteState?.setFocusedNodeId(null);
-      setActive(cellsState.hovered);
+      autocomplete?.clearFocusedNode();
+      setActive(marks.hovered.get());
       return true;
     },
     focus() {
       const m = stateRef.current?.selectionManager;
-      const key = m?.focusedKey != null && latest.current.items.has(String(m.focusedKey)) ? m.focusedKey : firstVisible();
+      const key = m && latest.current.collection.emoji(m.focusedKey) ? m.focusedKey : firstVisible();
       if (key == null) return false;
       setDomFocus(true);
       moveTo(key, true);
@@ -384,11 +409,11 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
         el.scrollBy({ left: (target - rect.x) * (rtl() ? -1 : 1), behavior });
       } else el.scrollBy({ top: info.rect.y - rect.y, behavior });
       const first = layout.groups.find((g) => g.key === id)?.keys[0];
-      if (first != null) cellsState.tabStop.set(first);
+      if (first != null) marks.stop.set(first);
     },
     focusedItem() {
       const key = highlight();
-      return key == null ? null : (latest.current.items.get(String(key)) ?? null);
+      return latest.current.collection.emoji(key) ?? null;
     },
     atStart() {
       const key = highlight();
@@ -431,7 +456,9 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       return;
     }
     const all = sections.flatMap((s) => s.items);
-    const previous = kept.current.query === picker.query ? all.find((i) => i.unified === kept.current.unified) : undefined;
+    const focused = stateRef.current.selectionManager.focusedKey;
+    const unified = all.find((i) => i.id === focused)?.unified ?? kept.current.unified;
+    const previous = kept.current.query === picker.query ? all.find((i) => i.unified === unified) : undefined;
     const target = previous ?? all[0];
     kept.current = { query: picker.query, unified: target?.unified };
     pendingHighlight.current = { key: target?.id ?? null };
@@ -450,13 +477,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     const input = listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector(`[data-slot="${SLOTS.searchInput}"]`);
     if (latest.current.virtual && document.activeElement === input) m.setFocused(true);
     m.setFocusedKey(pending.key);
-    setActive(cellsState.hovered ?? pending.key);
+    setActive(marks.hovered.get() ?? pending.key);
   };
   applyHighlightRef.current = applyHighlight;
   // Track the highlighted emoji for useActiveEmoji while the field keeps focus.
-  const focusedKey = stateRef.current?.selectionManager.focusedKey ?? null;
+  const focusedKey = state.selectionManager.focusedKey;
   React.useEffect(() => {
-    if (focusedKey != null && searching) kept.current.unified = latest.current.items.get(String(focusedKey))?.unified;
+    if (focusedKey != null && searching) kept.current.unified = latest.current.collection.emoji(focusedKey)?.unified;
   }, [focusedKey, searching]);
 
   // --- Scroll: the current section and the tab stop ---------------------------------
@@ -471,7 +498,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     measure();
     applyHighlightRef.current();
     const shown = virtualizer.current?.virtualizer.getVisibleLayoutInfos();
-    if (shown && !latest.current.horizontal) request([...shown.keys()].flatMap((key) => latest.current.items.get(String(key))?.unified ?? []));
+    if (shown && !latest.current.horizontal) request([...shown.keys()].flatMap((key) => latest.current.collection.emoji(key)?.unified ?? []));
     const rect = visibleRect();
     if (!rect) return;
     const horizontal = layout.orientation === "horizontal";
@@ -492,13 +519,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     // it's in view, else the first in view (Tab enters where the user looks).
     const list = listRef.current;
     const inside = list?.contains(document.activeElement) && document.activeElement !== list;
-    const stop = cellsState.tabStop.get();
+    const stop = marks.stop.get();
     if (!inside) {
       const r = stop != null ? layout.getLayoutInfo(stop)?.rect : null;
       const visible = r && (horizontal ? r.maxX > rect.x && r.x < rect.maxX : r.maxY > rect.y && r.y < rect.maxY);
-      if (!visible || !latest.current.items.has(String(stop))) cellsState.tabStop.set(lastFocused.current != null && latest.current.items.has(String(lastFocused.current)) && isVisible(lastFocused.current) ? lastFocused.current : firstVisible());
+      if (!visible || !latest.current.collection.emoji(stop)) marks.stop.set(latest.current.collection.emoji(lastFocused.current) && isVisible(lastFocused.current!) ? lastFocused.current : firstVisible());
     }
-  }, [measure, layout, picker.activeSection, searching, cellsState, firstVisible, request]);
+  }, [measure, layout, picker.activeSection, searching, marks, firstVisible, request]);
   // DOM focus landing on a cell (Tab from the search field, a script, a screen reader) while the
   // list is in virtual-focus mode: the cell becomes the focused key before React Aria's collection
   // sees the focus, or it would treat focus as entering with no key and move it to the first cell.
@@ -533,117 +560,201 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     return handle.key(action, "list", event) ? "handled" : "pass";
   });
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region), [ref, userKeys, region]);
 
+  /** The rendered cell for a key (in this list, not a nested one). */
+  const cellElement = (key: Key | null | undefined) => (key == null ? null : (listRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"][data-key="${CSS.escape(String(key))}"]`) ?? null));
+  const hover = (key: Key | null) => {
+    marks.hovered.set(key);
+    setActive(key ?? highlight());
+  };
+  /** A real pointer move over a cell: the keyboard position follows (pointer "follows"). */
+  const follow = (key: Key) => {
+    const m = state.selectionManager;
+    if (!pointer.moved || picker.pointer !== "follows" || m.focusedKey === key) return;
+    const active = document.activeElement;
+    const list = listRef.current;
+    const root = list?.closest(`[data-slot="${SLOTS.root}"]`);
+    // Hover moves the keyboard position: the highlight while the field has focus, focus
+    // itself once it's in the grid. Never from outside the picker.
+    if (list?.contains(active) && active !== list) {
+      pendingFocus.current = key;
+      m.setFocused(true);
+      m.setFocusedKey(key);
+      marks.stop.set(key);
+    } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) {
+      m.setFocused(true);
+      m.setFocusedKey(key);
+    }
+  };
+  // Cells have no handlers of their own: the list handles presses, hover and focus for all of them.
+  const keyOf = (e: React.SyntheticEvent) => (e.target as Element).closest?.(`[data-slot="${SLOTS.emoji}"]`)?.getAttribute("data-key") ?? null;
+  const cellHandlers: React.HTMLAttributes<HTMLElement> = {
+    onPointerDown(e) {
+      const key = keyOf(e);
+      if (key == null || e.button !== 0) return;
+      marks.pressed.set(key);
+      // Focus stays in the field (virtual focus) or moves to the cell without scrolling.
+      e.preventDefault();
+      if (e.pointerType === "touch") return;
+      const m = state.selectionManager;
+      if (virtual) {
+        m.setFocused(true);
+        m.setFocusedKey(key);
+      } else cellElement(key)?.focus({ preventScroll: true });
+    },
+    onMouseDown(e) {
+      if (keyOf(e) != null) e.preventDefault();
+    },
+    onPointerUp: () => marks.pressed.set(null),
+    onPointerCancel: () => marks.pressed.set(null),
+    onClick(e) {
+      const key = keyOf(e);
+      if (key == null) return;
+      if (virtual && (e.nativeEvent as PointerEvent).pointerType === "touch") {
+        state.selectionManager.setFocused(true);
+        state.selectionManager.setFocusedKey(key);
+      }
+      pick(key);
+    },
+    onPointerOver(e) {
+      const key = keyOf(e);
+      if (e.pointerType !== "touch" && key !== marks.hovered.get()) hover(key);
+    },
+    onPointerOut(e) {
+      const cell = (e.target as Element).closest?.(`[data-slot="${SLOTS.emoji}"]`);
+      if (cell && !cell.contains(e.relatedTarget as Node | null) && marks.hovered.get() === cell.getAttribute("data-key")) hover(null);
+    },
+    onPointerMove(e) {
+      const key = keyOf(e);
+      if (key != null) follow(key);
+    },
+  };
+  const { isFocusVisible: focusVisible } = useFocusVisible();
+  React.useEffect(trackPointer, []);
+
+  const empty = useEmptyState();
+  // Under Autocomplete (virtual focus), the field drives the list: its ids, keys and focus handling.
+  const field = virtual ? autocomplete : null;
+  const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region, field?.collectionRef as React.Ref<HTMLDivElement>), [ref, userKeys, region, field?.collectionRef]);
+  const { listBoxProps } = useListBox(
+    {
+      ...mergeProps(field?.collectionProps, {
+        id: virtual ? undefined : picker.listId,
+        "aria-label": rest["aria-label"] ?? (searching ? labels.searchResults : labels.emojiList),
+        "aria-labelledby": rest["aria-labelledby"],
+      }),
+      keyboardDelegate: navigation,
+      layoutDelegate: layout,
+      isVirtualized: true,
+      orientation,
+      escapeKeyBehavior: "none",
+      shouldFocusWrap: false,
+      onAction: pick,
+      onFocus(e: React.FocusEvent) {
+        // Real DOM focus only: virtual focus (aria-activedescendant) dispatches focus events too.
+        const cell = (e.target as Element).closest?.(`[data-slot="${SLOTS.emoji}"]`);
+        if (!cell || e.target !== document.activeElement) return;
+        const id = cell.getAttribute("data-key");
+        lastFocused.current = id;
+        marks.stop.set(id);
+        setActive(marks.hovered.get() ?? id);
+        if (focusModel === "input" && !domFocus) setDomFocus(true);
+      },
+      onBlur(e: React.FocusEvent) {
+        if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        if (domFocus) setDomFocus(false);
+        setActive(marks.hovered.get());
+      },
+    },
+    state,
+    listRef,
+  );
+  const { focusProps, isFocused, isFocusVisible } = useFocusRing();
+  const listId = (listBoxProps.id as string | undefined) ?? picker.listId;
+  const collectionId = (listBoxProps as { "data-collection"?: string })["data-collection"];
   const cells = React.useMemo<Cells>(
     () => ({
-      position: (id) => latest.current.positions.get(String(id)),
+      state,
+      listId,
+      collectionId,
+      focusVisible,
+      position(id) {
+        const p = layout.position(id);
+        const group = p && layout.groups[p[0]];
+        if (!group) return undefined;
+        let index = p[1];
+        for (let g = 0; g < p[0]; g++) index += layout.groups[g]!.keys.length;
+        return [p[1] + 1, group.keys.length, index];
+      },
       components,
       cellClassName,
       headerClassName,
       virtual,
-      tabStop: cellsState.tabStop,
-      active: cellsState.active,
-      pendingFocus,
+      marks,
       reveal: (id) => revealRef.current(id),
-      hover(it) {
-        cellsState.hovered = it?.id ?? null;
-        setActive(it?.id ?? highlight());
-      },
-      follow(it) {
-        const m = stateRef.current?.selectionManager;
-        if (pointer.moved && picker.pointer === "follows" && m && m.focusedKey !== it.id) {
-          const active = document.activeElement;
-          const list = listRef.current;
-          const root = list?.closest(`[data-slot="${SLOTS.root}"]`);
-          const inGrid = Boolean(list?.contains(active) && active !== list);
-          // Hover moves the keyboard position: the highlight while the field has focus, focus
-          // itself once it's in the grid. Never from outside the picker.
-          if (inGrid) {
-            pendingFocus.current = it.id;
-            m.setFocused(true);
-            m.setFocusedKey(it.id);
-            cellsState.tabStop.set(it.id);
-          } else if (latest.current.virtual && active instanceof HTMLInputElement && root?.contains(active)) {
-            m.setFocused(true);
-            m.setFocusedKey(it.id);
-          }
-        }
-      },
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
       toggle: (id) => picker.collapse.toggle(id),
     }),
-    [components, cellClassName, headerClassName, virtual, cellsState, picker.pointer, picker.listId, picker.collapse, setActive],
+    [state, listId, collectionId, focusVisible, layout, components, cellClassName, headerClassName, virtual, marks, picker.listId, picker.collapse],
   );
-
-  const empty = useEmptyState();
-  const selected = React.useMemo(() => (value == null ? undefined : [...items.values()].filter((i) => baseOf(i.unified) === baseOf(value)).map((i) => i.id)), [value, items]);
-  const collectionContext = virtual ? autocomplete : null;
+  // React Aria's per-item focus, for every cell at once: the focused key's cell gets DOM focus
+  // (grid) or virtual focus (the field's aria-activedescendant), when it changes or mounts.
+  const applied = React.useRef<{ el: Element | null; virtual: boolean }>({ el: null, virtual });
+  React.useEffect(() => {
+    const m = state.selectionManager;
+    const el = m.isFocused ? cellElement(m.focusedKey) : null;
+    const last = applied.current;
+    applied.current = { el, virtual };
+    if (!el || (el === last.el && virtual === last.virtual)) return;
+    if (virtual) moveVirtualFocus(el);
+    else if (document.activeElement !== el) el.focus({ preventScroll: true });
+  });
+  // A move from the keyboard (or hover) with focus in the grid lands focus on the cell once rendered.
+  React.useLayoutEffect(() => {
+    const el = cellElement(pendingFocus.current);
+    if (!el) return;
+    pendingFocus.current = null;
+    el.focus({ preventScroll: true });
+  });
+  const persistedKeys = React.useMemo(() => new Set(focusedKey == null ? [] : [focusedKey]), [focusedKey]);
+  const renderNode = React.useCallback((node: CollectionNode<unknown>) => {
+    if (node.type === "section") return <SectionView section={node.value as EmojiSection} />;
+    if (node.type === "header") return <SectionHeader section={node.value as EmojiSection} />;
+    if (node.type === "loader") return <LoadMore />;
+    return <EmojiCell item={node as unknown as EmojiItem} />;
+  }, []);
+  const isEmpty = collection.size === 0;
 
   return (
     <CellsContext.Provider value={cells}>
-      <ViewportVirtualizer layout={layout} layoutOptions={layoutOptions} scroller={scroller} onState={onState} onRendered={onRendered}>
-        <SelectableCollectionContext.Provider value={collectionContext}>
-          <ListBox<EmojiSection>
-            {...rest}
-            {...({ keyboardDelegate: navigation } as object)}
-            ref={merged}
-            id={virtual ? undefined : picker.listId}
-            aria-label={rest["aria-label"] ?? (searching ? labels.searchResults : labels.emojiList)}
-            layout="grid"
-            orientation={orientation}
-            dependencies={[cells]}
-            escapeKeyBehavior="none"
-            shouldFocusWrap={false}
-            selectionMode={value === undefined ? "none" : "single"}
-            selectedKeys={selected ?? []}
-            disallowEmptySelection={value !== undefined}
-            onAction={pick}
-            renderEmptyState={() => empty}
-            className={({ state }) => {
-              stateRef.current = state as ListState<EmojiSection>;
-              return className ?? "";
-            }}
-            style={style}
-            data-slot={SLOTS.list}
-            data-orientation={orientation}
-            data-results={searching ? picker.searchResults : undefined}
-            aria-busy={(searching && picker.pending) || undefined}
-            onFocus={(e) => {
-              // Real DOM focus only: virtual focus (aria-activedescendant) dispatches focus events too.
-              const cell = (e.target as Element).closest?.(`[data-slot="${SLOTS.emoji}"]`);
-              if (!cell || e.target !== document.activeElement) return;
-              const id = cell.getAttribute("data-key");
-              lastFocused.current = id;
-              cellsState.tabStop.set(id);
-              setActive(cellsState.hovered ?? id);
-              if (focusModel === "input" && !domFocus) setDomFocus(true);
-            }}
-            onBlur={(e) => {
-              if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
-              if (domFocus) setDomFocus(false);
-              setActive(cellsState.hovered);
-            }}
-            // One tab stop, a cell, never the list itself. (Under Autocomplete the list has no
-            // tabindex: Autocomplete turns virtual focus off for a collection that has one.)
-            render={(props) => (
-              <div {...props} tabIndex={collectionContext ? undefined : -1}>
-                {props.children}
-                <div ref={probeRef} aria-hidden style={PROBE} />
-              </div>
-            )}
-          >
-            <Collection items={sections} dependencies={[cells]}>
-              {(section) => <SectionView section={section} />}
-            </Collection>
-            {onLoadMore && !searching ? (
-              <ListBoxLoadMoreItem onLoadMore={onLoadMore} isLoading={isLoadingMore}>
-                {loadingMore}
-              </ListBoxLoadMoreItem>
-            ) : null}
-          </ListBox>
-        </SelectableCollectionContext.Provider>
-      </ViewportVirtualizer>
+      <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
+        <div
+          {...rest}
+          {...mergeProps(listBoxProps, focusProps, cellHandlers)}
+          ref={merged}
+          // One tab stop, a cell, never the list itself. (Under Autocomplete the list has no
+          // tabindex: Autocomplete turns virtual focus off for a collection that has one.)
+          tabIndex={field ? undefined : -1}
+          className={className}
+          style={style}
+          data-slot={SLOTS.list}
+          data-orientation={orientation}
+          data-layout="grid"
+          data-empty={isEmpty || undefined}
+          data-focused={isFocused || undefined}
+          data-focus-visible={isFocusVisible || undefined}
+          data-results={searching ? picker.searchResults : undefined}
+          aria-busy={(searching && picker.pending) || undefined}
+        >
+          <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
+          <div ref={probeRef} aria-hidden style={PROBE} />
+        </div>
+        {isEmpty ? (
+          <div role="option" style={{ display: "contents" }}>
+            {empty}
+          </div>
+        ) : null}
+      </LoadMoreContext.Provider>
       {components.HeaderActions && !horizontal && !searching ? <ActionsLayer layout={layout} list={listRef} Actions={components.HeaderActions} sections={sections} /> : null}
     </CellsContext.Provider>
   );
@@ -651,123 +762,117 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
 
 const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 
+const HeadingContext = React.createContext<React.HTMLAttributes<HTMLElement>>({});
+
 function SectionView({ section }: { section: EmojiSection }) {
   const cells = React.useContext(CellsContext)!;
+  const { headingProps, groupProps } = useListBoxSection({ heading: section.header ? section.name : undefined, "aria-label": section.header ? undefined : section.name });
   return (
-    <ListBoxSection
-      id={section.id}
-      data-slot={SLOTS.category}
-      data-category={section.category}
-      data-collapsed={section.collapsed || undefined}
-      aria-label={section.header ? undefined : section.name}
-      render={(props) => <section {...props} id={cells.sectionDomId(section.id)} />}
-    >
-      {section.header ? <SectionHeader section={section} /> : null}
-      <Collection items={section.items}>{(it) => <EmojiCell item={it} />}</Collection>
-    </ListBoxSection>
+    <section {...groupProps} id={cells.sectionDomId(section.id)} data-slot={SLOTS.category} data-category={section.category} data-collapsed={section.collapsed || undefined}>
+      <HeadingContext.Provider value={headingProps}>
+        <VirtualBranch parent={section.id} />
+      </HeadingContext.Provider>
+    </section>
   );
 }
 
 function SectionHeader({ section }: { section: EmojiSection }) {
   const cells = React.useContext(CellsContext)!;
+  const heading = React.useContext(HeadingContext);
   const User = cells.components.CategoryHeader;
+  const props = { ...heading, className: cells.headerClassName, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, children: section.name };
+  if (!User) return <header {...props} />;
+  const category: CategoryHeaderProps["category"] = { id: section.category, name: section.name, collapsed: section.collapsed, toggleCollapsed: () => cells.toggle(section.id) };
+  return <User {...(props as Omit<CategoryHeaderProps, "category">)} category={category} />;
+}
+
+type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
+const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
+
+/** The end of the list: loads the next page as it nears the viewport, and shows `loadingMore` while one loads. */
+function LoadMore() {
+  const more = React.useContext(LoadMoreContext);
+  const sentinel = React.useRef<HTMLDivElement | null>(null);
+  const latest = React.useRef(more?.onLoadMore);
+  latest.current = more?.onLoadMore;
+  React.useLayoutEffect(() => {
+    const el = sentinel.current;
+    const root = el?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`);
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    // Observed again for every collection: a page that still leaves room loads the next.
+    const observer = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && latest.current?.(), { root, rootMargin: "0px 100% 100% 100%" });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [more?.collection]);
+  if (!more) return null;
   return (
-    <Header
-      className={cells.headerClassName}
-      data-slot={SLOTS.categoryHeader}
-      data-collapsed={section.collapsed || undefined}
-      render={(props) => {
-        if (!User) return <header {...props} />;
-        const category: CategoryHeaderProps["category"] = { id: section.category, name: section.name, collapsed: section.collapsed, toggleCollapsed: () => cells.toggle(section.id) };
-        return <User {...(props as Omit<CategoryHeaderProps, "category">)} category={category} />;
-      }}
-    >
-      {section.name}
-    </Header>
+    <>
+      <div style={{ position: "relative", width: 0, height: 0 }} inert>
+        <div ref={sentinel} style={{ position: "absolute", height: 1, width: 1 }} />
+      </div>
+      {more.isLoading && more.children ? (
+        <div role="option" tabIndex={-1}>
+          {more.children}
+        </div>
+      ) : null}
+    </>
   );
 }
 
 function EmojiCell({ item }: { item: EmojiItem }) {
   const cells = React.useContext(CellsContext)!;
-  return (
-    <ListBoxItem
-      id={item.id}
-      value={item}
-      textValue={item.label}
-      aria-label={item.label}
-      className={cells.cellClassName ?? ""}
-      data-slot={SLOTS.emoji}
-      data-key={item.id}
-      data-unified={item.unified}
-      onHoverStart={() => cells.hover(item)}
-      onHoverEnd={() => cells.hover(null)}
-      render={(props, state) => <CellElement dom={props} state={state} item={item} />}
-    >
-      <Glyph item={item} />
-    </ListBoxItem>
-  );
-}
-
-function CellElement({ dom, state, item }: { dom: React.HTMLAttributes<HTMLElement> & { ref?: React.Ref<HTMLElement> }; state: ListBoxItemRenderProps; item: EmojiItem }) {
-  const cells = React.useContext(CellsContext)!;
   const artwork = useArtworkMap();
-  const isStop = React.useSyncExternalStore(cells.tabStop.subscribe, () => cells.tabStop.get() === item.id);
-  const isActive = React.useSyncExternalStore(cells.active.subscribe, () => cells.active.get() === item.id);
-  const ref = React.useRef<HTMLElement | null>(null);
-  // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
-  // a cell scrolls only its Viewport, which the keyboard moves already did.
+  const flags = React.useSyncExternalStore(cells.marks.subscribe, () => cells.marks.of(item.id));
   const own = React.useCallback(
     (el: HTMLElement | null) => {
+      // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
+      // a cell scrolls only its Viewport, which the keyboard moves already did.
       if (el) el.scrollIntoView = () => cells.reveal(item.id);
     },
     [cells, item.id],
   );
-  // A move from the keyboard (or hover) with focus in the grid lands focus here once rendered.
-  React.useLayoutEffect(() => {
-    if (cells.pendingFocus.current === item.id && ref.current) {
-      cells.pendingFocus.current = null;
-      ref.current.focus({ preventScroll: true });
-    }
-  });
+  const { selectionManager: m } = cells.state;
+  const { record, unified } = item;
   const position = cells.position(item.id);
-  const record = item.record;
-  const highlighted = cells.virtual && state.isFocused;
+  const isFocused = m.isFocused && m.focusedKey === item.id;
+  const isSelected = m.selectionMode !== "none" && m.isSelected(item.id);
+  const highlighted = cells.virtual && isFocused;
+  const isActive = Boolean(flags & ACTIVE) || highlighted;
   const attrs = {
-    ...dom,
-    ref: mergeRefs(dom.ref, ref, own),
-    onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
-      dom.onPointerMove?.(e as React.PointerEvent<HTMLElement>);
-      cells.follow(item);
-    },
-    tabIndex: isStop ? 0 : -1,
-    "aria-labelledby": undefined,
-    "aria-describedby": undefined,
+    ref: own,
+    id: `${cells.listId}-option-${item.id}`,
+    role: "option",
+    "aria-label": item.label,
+    "aria-selected": m.selectionMode === "none" ? undefined : isSelected,
     "aria-posinset": position?.[0],
     "aria-setsize": position?.[1],
+    tabIndex: flags & STOP ? 0 : -1,
+    className: cells.cellClassName ?? "",
+    "data-slot": SLOTS.emoji,
+    "data-key": item.id,
+    "data-collection": cells.collectionId,
+    "data-unified": unified,
     "data-index": position?.[2],
+    "data-selected": isSelected || undefined,
+    "data-hovered": flags & HOVERED ? true : undefined,
+    "data-focused": isFocused || undefined,
+    "data-focus-visible": (isFocused && cells.focusVisible) || undefined,
+    "data-pressed": flags & PRESSED ? true : undefined,
+    "data-selection-mode": m.selectionMode === "none" ? undefined : m.selectionMode,
     "data-highlighted": highlighted ? "" : undefined,
-    "data-active": isActive || highlighted ? "" : undefined,
-    "data-overridden": artwork && findArtwork(artwork, item.unified) !== undefined ? "" : undefined,
+    "data-active": isActive ? "" : undefined,
+    "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
   };
+  const glyph = <Glyph unified={unified} record={record} animate={isActive} />;
   const User = cells.components.Emoji;
-  if (!User) return <div {...(attrs as React.HTMLAttributes<HTMLDivElement>)} />;
-  const emoji: ListEmoji = { isActive: isActive || highlighted, unified: item.unified, names: [...record.shortcodes, record.name], emoji: record.imageUrl ? item.unified : unifiedToNative(item.unified), isCustom: Boolean(record.imageUrl), imageUrl: record.imageUrl, hasVariations: record.tones.length > 0 };
-  return <User {...(attrs as Omit<EmojiCellProps, "emoji">)} emoji={emoji} className={joinClasses(dom.className)} />;
-}
-
-function Glyph({ item }: { item: EmojiItem }) {
-  const { renderer, imageUrl } = useEmojiContext();
-  const cells = React.useContext(CellsContext)!;
-  const artwork = useArtworkMap();
-  const isActive = React.useSyncExternalStore(cells.active.subscribe, () => cells.active.get() === item.id);
-  const { record, unified } = item;
-  const art = artwork ? findArtwork(artwork, unified) : undefined;
-  const size = "var(--emoji-image-size, var(--ep-size))";
-  if (art !== undefined) return <ArtworkGlyph art={art} alt={record.name} size={size} />;
-  const src = record.imageUrl ?? (renderer === "twemoji" && isUnified(unified) ? imageUrl(unified) : undefined);
-  if (src) return <EmojiImage src={src} alt={record.name} record={record} size={size} animate={isActive} fallback={record.imageUrl ? undefined : unifiedToNative(unified)} />;
-  return <span data-glyph="">{unifiedToNative(unified)}</span>;
+  if (!User) return <div {...(attrs as React.HTMLAttributes<HTMLDivElement>)}>{glyph}</div>;
+  const emoji: ListEmoji = { isActive, unified, names: [...record.shortcodes, record.name], emoji: record.imageUrl ? unified : unifiedToNative(unified), isCustom: Boolean(record.imageUrl), imageUrl: record.imageUrl, hasVariations: record.tones.length > 0 };
+  return (
+    <User {...(attrs as Omit<EmojiCellProps, "emoji" | "children">)} emoji={emoji} className={joinClasses(attrs.className)}>
+      {glyph}
+    </User>
+  );
 }
 
 function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; Actions: React.ComponentType<HeaderActionsProps>; sections: readonly EmojiSection[] }) {

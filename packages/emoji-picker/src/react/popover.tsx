@@ -1,11 +1,10 @@
 // An unstyled popover for pickers: a trigger and portaled content positioned next to
-// it by Floating UI (flips, shifts into the viewport, follows scroll and resize),
+// it (flips, shifts into the viewport, follows scroll and resize),
 // Escape and outside-click to close, focus in on open and back to the trigger on
 // close, close-on-pick for any EmojiPicker.Root inside, and enter/exit hooks for CSS
 // transitions (data-starting-style / data-ending-style, --transform-origin).
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { autoUpdate, flip, offset, shift, size, useFloating, type Placement, type VirtualElement } from "@floating-ui/react-dom";
 import { PopoverContext, type PopoverState } from "./popover-context";
 
 export { useEmojiPopover } from "./popover-context";
@@ -178,7 +177,26 @@ function motionFinished(el: HTMLElement, done: () => void): () => void {
   return () => void (cancelled = true);
 }
 
-const placementOf = (side: Side, align: Align): Placement => (align === "center" ? side : `${side}-${align}`);
+type Position = { top: number; left: number; side: Side; origin: string };
+
+/**
+ * Where the content goes: on `side` of the anchor, or the other side when only that one has
+ * room (flip); moved into the viewport, `padding` from its edges (shift).
+ */
+function place(anchor: AnchorRect, width: number, height: number, { side, align, offset, padding }: { side: Side; align: Align; offset: number; padding: number }): Position {
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  const fitsBelow = anchor.bottom + offset + height <= vh - padding;
+  const fitsAbove = anchor.top - offset - height >= padding;
+  const below = side === "bottom" ? fitsBelow || !fitsAbove : !fitsAbove && fitsBelow;
+  const x = align === "start" ? anchor.left : align === "end" ? anchor.right - width : anchor.left + anchor.width / 2 - width / 2;
+  const left = Math.min(Math.max(x, padding), Math.max(padding, vw - width - padding));
+  const top = Math.max(padding, Math.min(below ? anchor.bottom + offset : anchor.top - offset - height, vh - height - padding));
+  // Scale from the anchor: its center along the edge facing it.
+  const originX = Math.min(Math.max(anchor.left + anchor.width / 2 - left, 0), width);
+  const originY = below ? anchor.bottom - top : anchor.top - top;
+  return { top, left, side: below ? "bottom" : "top", origin: `${Math.round(originX)}px ${Math.round(originY)}px` };
+}
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, style, children, ...props },
@@ -194,63 +212,42 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const initialFocusRef = React.useRef(initialFocus);
   initialFocusRef.current = initialFocus;
 
-  // The anchor as Floating UI's reference: the Trigger, or a virtual element over `anchor`.
-  const [reference] = React.useState<VirtualElement>(() => ({
-    getBoundingClientRect: () => {
+  // Placed once on open, then again on scroll, resize and when the content changes size: not
+  // for the anchor's own transitions (a trigger's hover or press scale).
+  const [position, setPosition] = React.useState<Position | null>(null);
+  React.useLayoutEffect(() => {
+    const el = node.current;
+    if (!mounted || !el) return setPosition(null);
+    const update = () => {
       const a = anchorRef.current;
       const rect = (typeof a === "function" ? a() : a?.getBoundingClientRect()) ?? state.triggerRef.current?.getBoundingClientRect();
-      const { top = 0, left = 0, right = 0, bottom = 0, width = 0, height = 0 } = rect ?? {};
-      return { x: left, y: top, top, left, right, bottom, width, height } as DOMRect;
-    },
-    get contextElement() {
-      const a = anchorRef.current;
-      return a instanceof Element ? a : typeof a === "function" ? undefined : (state.triggerRef.current ?? undefined);
-    },
-  }));
-  const floating = useFloating({
-    open: mounted,
-    strategy: "fixed",
-    placement: placementOf(side, align),
-    transform: false,
-    elements: { reference: mounted ? reference : null },
-    // Placed once on open, then again on scroll, resize and when the content changes size: not
-    // for the anchor's own transitions (a trigger's hover or press scale).
-    whileElementsMounted: (reference, floating, update) => {
-      const stop = autoUpdate(reference, floating, update, { layoutShift: false, elementResize: false });
-      let size = `${floating.offsetWidth}x${floating.offsetHeight}`;
-      const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
-        const next = `${floating.offsetWidth}x${floating.offsetHeight}`;
-        if (next !== size) (size = next), update();
-      });
-      observer?.observe(floating);
-      return () => {
-        stop();
-        observer?.disconnect();
-      };
-    },
-    middleware: [
-      offset(sideOffset),
-      flip({ padding: collisionPadding, fallbackStrategy: "initialPlacement", crossAxis: false }),
-      shift({ padding: collisionPadding, crossAxis: true }),
-      size({
-        padding: collisionPadding,
-        apply({ availableWidth, availableHeight, elements }) {
-          elements.floating.style.setProperty("--available-width", `${Math.round(availableWidth)}px`);
-          elements.floating.style.setProperty("--available-height", `${Math.round(availableHeight)}px`);
-        },
-      }),
-    ],
-  });
-  const positioned = mounted && floating.isPositioned;
-  const placedSide: Side = floating.placement.startsWith("top") ? "top" : "bottom";
-  // Scale from the trigger: its center along the edge facing it.
-  const origin = (() => {
-    if (!positioned) return undefined;
-    const r = reference.getBoundingClientRect();
-    const x = Math.min(Math.max(r.left + r.width / 2 - floating.x, 0), node.current?.offsetWidth ?? 0);
-    const y = placedSide === "bottom" ? r.bottom - floating.y : r.top - floating.y;
-    return `${Math.round(x)}px ${Math.round(y)}px`;
-  })();
+      if (!rect) return;
+      // offsetWidth/Height: the layout size, unaffected by a scale transition in progress.
+      const next = place(rect, el.offsetWidth, el.offsetHeight, { side, align, offset: sideOffset, padding: collisionPadding });
+      el.style.setProperty("--available-width", `${Math.round(document.documentElement.clientWidth - 2 * collisionPadding)}px`);
+      el.style.setProperty("--available-height", `${Math.round(document.documentElement.clientHeight - 2 * collisionPadding)}px`);
+      setPosition((p) => (p && p.top === next.top && p.left === next.left && p.side === next.side && p.origin === next.origin ? p : next));
+    };
+    update();
+    const onScroll = (e: Event) => !(e.target instanceof Node && el.contains(e.target)) && update();
+    let size = `${el.offsetWidth}x${el.offsetHeight}`;
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            const next = `${el.offsetWidth}x${el.offsetHeight}`;
+            if (next !== size) (size = next), update();
+          });
+    observer?.observe(el);
+    addEventListener("scroll", onScroll, { capture: true, passive: true });
+    addEventListener("resize", update);
+    return () => {
+      observer?.disconnect();
+      removeEventListener("scroll", onScroll, { capture: true });
+      removeEventListener("resize", update);
+    };
+  }, [mounted, state.triggerRef, side, align, sideOffset, collisionPadding]);
+  const positioned = position != null;
 
   // Children popovers register their content so clicks inside them stay "inside".
   const register = React.useCallback((el: HTMLElement | null) => {
@@ -388,7 +385,6 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       ref={(el) => {
         node.current = el;
         setRef(ref, el);
-        floating.refs.setFloating(el);
       }}
       id={state.contentId}
       role="dialog"
@@ -396,17 +392,17 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       aria-label={props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Emoji picker")}
       data-slot="popover-content"
       data-state={state.open ? "open" : "closed"}
-      data-side={positioned ? placedSide : side}
+      data-side={position?.side ?? side}
       data-align={align}
       {...transitionAttrs}
       style={
         {
           position: "fixed",
           zIndex: 50,
-          top: positioned ? floating.y : 0,
-          left: positioned ? floating.x : 0,
+          top: position?.top ?? 0,
+          left: position?.left ?? 0,
           visibility: positioned ? undefined : "hidden",
-          "--transform-origin": origin,
+          "--transform-origin": position?.origin,
           ...style,
         } as React.CSSProperties
       }

@@ -1,19 +1,22 @@
-// A React Aria collection renderer (CollectionRendererContext) that virtualizes the
-// ListBox inside the picker's Viewport. React Aria's own <Virtualizer> scrolls the
-// collection element itself; here the Viewport scrolls (it owns the scrollbar, its
-// padding and styling) and the ListBox is the tall list inside it, as before.
-// Headers stick with `position: sticky` on their wrapper, inside their section's box.
+// Virtualizes the List's collection inside the picker's Viewport with React Stately's
+// virtualizer. React Aria's own <Virtualizer> scrolls the collection element itself;
+// here the Viewport scrolls (it owns the scrollbar, its padding and styling) and the
+// listbox is the tall list inside it. Headers stick with `position: sticky` on their
+// wrapper, inside their section's box.
 import * as React from "react";
 import { flushSync } from "react-dom";
-import type { Key, Node } from "@react-types/shared";
-import { CollectionRendererContext, type CollectionRenderer } from "react-aria-components";
-import { Rect, Size, type LayoutInfo } from "react-aria-components/Virtualizer";
-import { useVirtualizerState, type ReusableView, type VirtualizerState } from "react-stately/useVirtualizerState";
+import type { Collection, Key, Node } from "@react-types/shared";
+import { Rect, Size, useVirtualizerState, type LayoutInfo, type ReusableView, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiGridLayout, EmojiGridLayoutOptions } from "./layout";
 
 type View = ReusableView<Node<unknown>, React.ReactNode>;
 type Options = {
+  collection: Collection<Node<unknown>>;
   layout: EmojiGridLayout;
+  /** The element for a section, title, cell or loader (a section renders its children with VirtualBranch). */
+  renderNode: (node: Node<unknown>) => React.ReactNode;
+  /** Kept rendered while out of view (the focused cell). */
+  persistedKeys?: Set<Key> | null;
   layoutOptions: EmojiGridLayoutOptions;
   /** The element that scrolls (the Viewport), given the collection element. */
   scroller: (list: HTMLElement) => HTMLElement | null;
@@ -23,9 +26,7 @@ type Options = {
   onRendered?: () => void;
 };
 
-const OptionsContext = React.createContext<Options | null>(null);
-const StateContext = React.createContext<VirtualizerState<Node<unknown>, React.ReactNode> | null>(null);
-const DirectionContext = React.createContext<"ltr" | "rtl">("ltr");
+const BranchContext = React.createContext<{ state: VirtualizerState<Node<unknown>, React.ReactNode>; dir: "ltr" | "rtl"; horizontal: boolean } | null>(null);
 
 /** How far `list`'s start edge sits before `scroller`'s start edge, in layout px (a CSS transform on an ancestor is undone). */
 function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boolean, rtl: boolean) {
@@ -36,9 +37,9 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
   return rtl ? (l.right - (s.right - scroller.clientLeft * scale)) / scale : (s.left + scroller.clientLeft * scale - l.left) / scale;
 }
 
-function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<Node<unknown>> & object; persistedKeys?: Set<Key> | null }) {
-  const options = React.useContext(OptionsContext)!;
-  const { layout, layoutOptions, scroller } = options;
+/** The virtualized content of the collection element (its child: the listbox scrolls with the Viewport). */
+export function VirtualCollection(options: Options) {
+  const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
   const horizontal = layoutOptions.orientation === "horizontal";
   // The collection element is this content's parent (its ref isn't attached yet when our effects first run).
   const content = React.useRef<HTMLDivElement | null>(null);
@@ -49,8 +50,8 @@ function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<No
   const state = useVirtualizerState<Node<unknown>, React.ReactNode, EmojiGridLayoutOptions>({
     allowsWindowScrolling: true,
     layout,
-    collection: collection as never,
-    renderView: (_type, item) => (item as { render?: (item: Node<unknown>) => React.ReactNode } | null)?.render?.(item!),
+    collection,
+    renderView: (_type, item) => (item ? renderNode(item) : null),
     onVisibleRectChange(rect) {
       const list = scrollRef.current;
       const el = list && scroller(list);
@@ -116,18 +117,15 @@ function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<No
   const size = state.contentSize;
   return (
     <div ref={content} role="presentation" style={{ position: "relative", width: horizontal ? size.width : undefined, height: size.height }}>
-      <DirectionContext.Provider value={dir}>
-        <StateContext.Provider value={state}>{renderChildren(null, state.visibleViews, dir, horizontal)}</StateContext.Provider>
-      </DirectionContext.Provider>
+      <BranchContext.Provider value={{ state, dir, horizontal }}>{renderChildren(null, state.visibleViews, dir, horizontal)}</BranchContext.Provider>
     </div>
   );
 }
 
-function CollectionBranch({ parent }: { parent: Node<unknown> }) {
-  const state = React.useContext(StateContext)!;
-  const dir = React.useContext(DirectionContext);
-  const horizontal = React.useContext(OptionsContext)!.layoutOptions.orientation === "horizontal";
-  const view = state.virtualizer.getVisibleView(parent.key);
+/** A section's visible children. */
+export function VirtualBranch({ parent }: { parent: Key }) {
+  const { state, dir, horizontal } = React.useContext(BranchContext)!;
+  const view = state.virtualizer.getVisibleView(parent);
   return view ? renderChildren(view, [...view.children], dir, horizontal) : null;
 }
 
@@ -155,16 +153,4 @@ function wrapperStyle(info: LayoutInfo, parent: LayoutInfo | null, dir: "ltr" | 
     overflow: info.allowOverflow ? "visible" : "hidden",
     zIndex: info.zIndex || undefined,
   };
-}
-
-const renderer: CollectionRenderer = { isVirtualized: true, CollectionRoot: CollectionRoot as CollectionRenderer["CollectionRoot"], CollectionBranch: CollectionBranch as CollectionRenderer["CollectionBranch"] };
-
-/** Virtualizes the ListBox inside it with `layout`, scrolled by `scroller`. */
-export function ViewportVirtualizer({ children, ...options }: Options & { children: React.ReactNode }) {
-  const value = React.useMemo(() => ({ ...renderer, layoutDelegate: options.layout }), [options.layout]);
-  return (
-    <CollectionRendererContext.Provider value={value}>
-      <OptionsContext.Provider value={options}>{children}</OptionsContext.Provider>
-    </CollectionRendererContext.Provider>
-  );
 }

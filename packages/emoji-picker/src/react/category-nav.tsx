@@ -1,8 +1,8 @@
-// EmojiPicker.CategoryNav: React Aria Tabs (manual activation) over the sections.
-// The current tab follows the list's scroll; choosing one scrolls the list there
-// (at once from the keyboard). While search results show, the tabs are disabled.
+// EmojiPicker.CategoryNav: a tablist (manual activation) over the sections. The current
+// tab follows the list's scroll; choosing one scrolls the list there (at once from the
+// keyboard). One tab stop: the current tab, else the last focused, else the first.
+// While search results show, the tabs are disabled.
 import * as React from "react";
-import { Tab, TabList, Tabs } from "react-aria-components";
 import { DefaultCategoryIcon } from "./category-icons";
 import type { CategoryButtonProps } from "./components";
 import { usePicker } from "./context";
@@ -23,67 +23,90 @@ export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(fu
   const picker = usePicker("EmojiPicker.CategoryNav");
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const fromPointer = React.useRef(false);
   const list = React.useRef<HTMLDivElement | null>(null);
   const merged = React.useMemo(() => mergeRefs(ref, userKeys, list), [ref, userKeys]);
-  // A tab clicked with a pointer scrolls; chosen any other way (keys, a script) it jumps at once.
-  React.useEffect(() => {
-    const el = list.current;
-    if (!el) return;
-    const key = () => void (fromPointer.current = false);
-    const pointer = () => void (fromPointer.current = true);
-    el.addEventListener("keydown", key, true);
-    el.addEventListener("pointerdown", pointer, true);
-    return () => {
-      el.removeEventListener("keydown", key, true);
-      el.removeEventListener("pointerdown", pointer, true);
-    };
-  });
+  const id = React.useId();
+  // The focused tab, and whether focus is still in the list (then it stays the tab stop).
+  const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
   const User = picker.components.CategoryButton;
   if (categories.length <= 1) return null;
-  const selected = activeCategory ?? categories[0]!.id;
-  const choose = (key: React.Key) => {
-    const id = String(key);
-    const instant = !fromPointer.current;
-    fromPointer.current = false;
-    if (picker.collapse.isCollapsed(id)) {
+
+  const ids = categories.map((c) => c.id);
+  const selected = activeCategory ?? ids[0]!;
+  const disabled = picker.searching;
+  const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
+  const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
+  const tab = (key: string) => list.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(key)}"]`);
+  // A tab clicked with a pointer scrolls; chosen any other way (keys, a script) it jumps at once.
+  const choose = (key: string, instant: boolean) => {
+    if (picker.collapse.isCollapsed(key)) {
       // Expand first, then jump once the rows are laid out.
-      picker.collapse.setCollapsed(id, false);
-      requestAnimationFrame(() => requestAnimationFrame(() => jumpToCategory(id, { instant })));
-    } else jumpToCategory(id, { instant });
+      picker.collapse.setCollapsed(key, false);
+      requestAnimationFrame(() => requestAnimationFrame(() => jumpToCategory(key, { instant })));
+    } else jumpToCategory(key, { instant });
   };
+  const keyOf = (e: React.SyntheticEvent) => (e.target as Element).closest?.('[role="tab"]')?.getAttribute("data-key") ?? null;
+  const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const key = keyOf(e);
+    if (key == null || disabled || e.altKey || e.ctrlKey || e.metaKey) return;
+    const i = ids.indexOf(key);
+    const rtl = orientation === "horizontal" && getComputedStyle(e.currentTarget).direction === "rtl";
+    const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
+    const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
+    if (to != null) tab(to)?.focus();
+    else if (e.key === "Enter" || e.key === " ") choose(key, true);
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <Tabs selectedKey={selected} onSelectionChange={choose} keyboardActivation="manual" orientation={orientation} isDisabled={picker.searching} style={{ display: "contents" }}>
-      <TabList
-        {...props}
-        ref={merged}
-        aria-label={picker.labels.categoryNavigation}
-        className={className ?? ""}
-        data-slot={SLOTS.categoryNav}
-        style={{ pointerEvents: picker.searching ? "none" : undefined, ...props.style }}
-      >
-        {categories.map((c) => {
-          const active = c.id === selected && !picker.searching;
-          const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
-          return (
-            <Tab
-              key={c.id}
-              id={c.id}
-              aria-label={c.name}
-              className={joinClasses(tabClassName) ?? ""}
-              data-slot={SLOTS.categoryTab}
-              data-active={active ? "" : undefined}
-              // The tabs scroll one list rather than switch panels: no aria-controls to a panel that doesn't exist.
-              render={(tabProps) => {
-                const props = { ...(tabProps as React.HTMLAttributes<HTMLElement>), "aria-controls": undefined };
-                return User ? <User {...props} category={{ id: c.id, name: c.name, isActive: active } satisfies CategoryButtonProps["category"]} /> : <div {...(props as React.HTMLAttributes<HTMLDivElement>)} />;
-              }}
-            >
-              {icon}
-            </Tab>
-          );
-        })}
-      </TabList>
-    </Tabs>
+    <div
+      {...props}
+      ref={merged}
+      id={id}
+      role="tablist"
+      aria-label={picker.labels.categoryNavigation}
+      aria-orientation={orientation}
+      className={className ?? ""}
+      data-slot={SLOTS.categoryNav}
+      data-orientation={orientation}
+      style={{ pointerEvents: disabled ? "none" : undefined, ...props.style }}
+      onKeyDown={onKey}
+      onFocus={(e) => {
+        const key = keyOf(e);
+        if (key != null) setFocus({ key, within: true });
+      }}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus((f) => ({ ...f, within: false }));
+      }}
+      onClick={(e) => {
+        const key = keyOf(e);
+        if (key != null && !disabled) choose(key, e.detail === 0);
+      }}
+    >
+      {categories.map((c) => {
+        const isSelected = c.id === selected;
+        const active = isSelected && !disabled;
+        const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
+        // The tabs scroll one list rather than switch panels: no aria-controls to a panel that doesn't exist.
+        const tabProps = {
+          id: `${id}-tab-${c.id}`,
+          role: "tab",
+          "aria-label": c.name,
+          "aria-selected": isSelected,
+          "aria-disabled": disabled || undefined,
+          tabIndex: disabled ? undefined : c.id === stop ? 0 : -1,
+          className: joinClasses(tabClassName) ?? "",
+          "data-slot": SLOTS.categoryTab,
+          "data-key": c.id,
+          "data-selected": isSelected || undefined,
+          "data-disabled": disabled || undefined,
+          "data-active": active ? "" : undefined,
+          children: icon,
+        };
+        return User ? <User key={c.id} {...tabProps} category={{ id: c.id, name: c.name, isActive: active } satisfies CategoryButtonProps["category"]} /> : <div key={c.id} {...tabProps} />;
+      })}
+    </div>
   );
 });

@@ -15,7 +15,7 @@ export class EmojiGridNavigation implements KeyboardDelegate {
   }
 
   private at(key: Key) {
-    const p = this.layout.positions.get(key);
+    const p = this.layout.position(key);
     return p ? { group: this.layout.groups[p[0]]!, g: p[0], i: p[1] } : null;
   }
 

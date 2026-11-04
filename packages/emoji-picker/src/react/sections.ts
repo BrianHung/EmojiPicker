@@ -1,7 +1,6 @@
-// The picker's collection: category sections (and search results) as plain objects
-// for React Aria. Items are cached so the same emoji in the same section and tone is
-// the same object across renders: React Aria rebuilds its collection when `items`
-// change, but reuses every node whose value is unchanged.
+// The picker's sections: category sections (and search results) of items cached per
+// labels, section and tone, so the same emoji is one object across renders and pickers.
+// An item is also its own React Aria collection node (see collection.ts).
 import { GROUPS, type EmojiRecord } from "../core/dataset";
 import type { EmojiLabels } from "../core/labels";
 import { nameWithTone } from "../core/shortcodes";
@@ -16,16 +15,51 @@ export type CategoryOption = {
   nav?: boolean;
 };
 
-export type EmojiItem = {
-  /** Unique across sections: the same emoji can be in "Frequently used" and its group. */
-  id: string;
-  section: string;
-  record: EmojiRecord;
-  /** What the cell shows and picks: skin tone applied where the emoji has one. */
-  unified: string;
-  /** Accessible name, with the skin tone ("thumbs up: medium skin tone"). */
-  label: string;
-};
+const NO_NODES: readonly never[] = [];
+
+export class EmojiItem {
+  constructor(
+    /** Unique across sections: the same emoji can be in "Frequently used" and its group. */
+    readonly id: string,
+    readonly section: string,
+    readonly record: EmojiRecord,
+    /** What the cell shows and picks: skin tone applied where the emoji has one. */
+    readonly unified: string,
+    /** Accessible name, with the skin tone ("thumbs up: medium skin tone"). */
+    readonly label: string,
+  ) {}
+  // Node fields, on the prototype: an item costs its five fields.
+  get type() {
+    return "item" as const;
+  }
+  get key() {
+    return this.id;
+  }
+  get value() {
+    return this;
+  }
+  get textValue() {
+    return this.label;
+  }
+  get parentKey() {
+    return this.section;
+  }
+  get level() {
+    return 1;
+  }
+  get index() {
+    return -1;
+  }
+  get hasChildNodes() {
+    return false;
+  }
+  get childNodes() {
+    return NO_NODES;
+  }
+  get rendered() {
+    return null;
+  }
+}
 
 export type EmojiSection = {
   id: string;
@@ -64,7 +98,7 @@ export function itemFactory(labels: EmojiLabels) {
     const id = `${section}:${unified}`;
     let item = cache.get(id);
     if (!item || item.record !== record) {
-      item = { id, section, record, unified, label: nameWithTone(record.name, unified, labels.withSkinTone) };
+      item = new EmojiItem(id, section, record, unified, nameWithTone(record.name, unified, labels.withSkinTone));
       cache.set(id, item);
     }
     return item;

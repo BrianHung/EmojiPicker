@@ -1,36 +1,20 @@
-// A reaction row: React Aria's Toolbar (arrows move along it) with one tab stop
+// A reaction row: React Aria's useToolbar (arrows move along it) with one tab stop
 // (roving tabindex), Home and End, and hover continuity: once focus is in the row it
 // follows the pointer, so the next arrow continues from the hovered reaction.
 import * as React from "react";
-import { Button, ToggleButton, Toolbar } from "react-aria-components";
-import { withoutTone } from "../core/dataset";
+import { useToolbar } from "react-aria/useToolbar";
+import { mergeProps } from "react-aria/mergeProps";
+import { unifiedToNative } from "../core/dataset";
+import { nameWithTone } from "../core/shortcodes";
 import type { EmojiCellProps, ListEmoji } from "./components";
 import { usePicker } from "./context";
+import { Glyph } from "./glyph";
 import { mergeRefs, useEdgeKeys } from "./keyboard";
-import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
-import { useEmojiContext } from "./provider";
-import { EmojiImage } from "./image";
+import { findArtwork, useArtworkMap } from "./overrides";
 import { useDrawable } from "./native-support";
+import { ReactionsContext, isPressed } from "./reactions-context";
 import { SLOTS } from "./slots";
-import { isUnified, unifiedToNative } from "../core/dataset";
-import { nameWithTone } from "../core/shortcodes";
 
-export type ReactionsState = {
-  reactions: readonly string[];
-  /** The compact row shows (false: the full picker). */
-  open: boolean;
-  /** Opens the full picker; undefined when the row can't expand. */
-  expand?: () => void;
-  /** The user's current reactions (base codes): their buttons are toggles, pressed. */
-  pressed: ReadonlySet<string> | null;
-};
-export const ReactionsContext = React.createContext<ReactionsState | null>(null);
-
-/** A code without skin-tone modifiers, lowercased: how reactions are compared. */
-export const reactionKey = (unified: string) => withoutTone(unified.toLowerCase());
-
-/** Whether a reaction button's emoji is one of the user's, in any skin tone. */
-export const isPressed = (selected: ReadonlySet<string>, unified: string) => selected.has(reactionKey(unified));
 
 const BUTTONS = "button:not([disabled])";
 
@@ -93,21 +77,9 @@ export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role"
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, ...props }, ref) {
   const row = React.useRef<HTMLDivElement | null>(null);
   useRovingRow(row);
-  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={className ?? ""} />;
+  const { toolbarProps } = useToolbar({ ...props, orientation }, row);
+  return <div {...mergeProps(props, toolbarProps)} ref={mergeRefs(ref, row)} className={className ?? ""} data-orientation={orientation} />;
 });
-
-/** The emoji a reaction button draws: artwork, an image (custom, Twemoji) or the native glyph. */
-function ReactionGlyph({ unified }: { unified: string }) {
-  const { store, renderer, imageUrl } = useEmojiContext();
-  const artwork = useArtworkMap();
-  const record = store.get(unified);
-  const art = artwork ? findArtwork(artwork, unified) : undefined;
-  const size = "var(--emoji-image-size, var(--ep-size))";
-  if (art !== undefined) return <ArtworkGlyph art={art} alt={record?.name ?? unified} size={size} />;
-  const src = record?.imageUrl ?? (renderer === "twemoji" && isUnified(unified) ? imageUrl(unified) : undefined);
-  if (src) return <EmojiImage src={src} alt={record?.name ?? unified} record={record} size={size} animate={false} fallback={record?.imageUrl ? undefined : unifiedToNative(unified)} />;
-  return <span data-glyph="">{unifiedToNative(unified)}</span>;
-}
 
 /**
  * A tapback's reaction row: one tab stop (roving tabindex); arrows, Home and End
@@ -160,51 +132,48 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
   return (
     <ReactionBar {...props} ref={mergeRefs(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
       {shown.map((unified) => {
-        const base = unified;
         const record = store.get(unified);
         const name = nameWithTone(record?.name ?? unified, unified, labels.withSkinTone);
         const on = state.pressed ? isPressed(state.pressed, unified) : undefined;
         const attrs = {
+          type: "button" as const,
           "aria-label": name,
+          "aria-pressed": on,
           "data-slot": SLOTS.emoji,
           "data-unified": unified,
           "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
-          "data-selected": on ? "" : undefined,
+          "data-selected": on || undefined,
           className: "",
+          onClick: () => picker.pick(unified),
+          children: <Glyph unified={unified} record={record} />,
         };
+        if (!User) return <button key={unified} {...attrs} />;
         const emoji: ListEmoji = { isActive: false, unified, names: [...(record?.shortcodes ?? []), record?.name ?? unified], emoji: record?.imageUrl ? unified : unifiedToNative(unified), isCustom: Boolean(record?.imageUrl), imageUrl: record?.imageUrl, hasVariations: Boolean(record?.tones.length) };
-        const render = User ? (p: React.HTMLAttributes<HTMLElement>) => <User {...(p as Omit<EmojiCellProps, "emoji">)} emoji={emoji} /> : undefined;
-        const glyph = <ReactionGlyph unified={unified} />;
-        return on === undefined ? (
-          <Button key={base} {...attrs} onPress={() => picker.pick(unified)} render={render as never}>
-            {glyph}
-          </Button>
-        ) : (
-          <ToggleButton key={base} {...attrs} isSelected={on} onChange={() => picker.pick(unified)} render={render as never}>
-            {glyph}
-          </ToggleButton>
-        );
+        return <User key={unified} {...(attrs as Omit<EmojiCellProps, "emoji">)} emoji={emoji} />;
       })}
       {state.expand ? (
-        <Button
-          aria-label={labels.expandReactions}
-          data-slot={SLOTS.reactionsExpand}
-          className=""
-          {...{ title: labels.expandReactions }}
-          onPress={() => {
+        <ExpandButton
+          as={Expand}
+          label={labels.expandReactions}
+          onClick={() => {
             expandFocus.current = row.current?.closest(`[data-slot="${SLOTS.root}"]`) ?? null;
             state.expand!();
           }}
-          render={Expand ? (p) => <Expand {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)} /> : undefined}
-        >
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-        </Button>
+        />
       ) : null}
     </ReactionBar>
   );
 });
+
+function ExpandButton({ as: As = "button", label, onClick }: { as?: React.ElementType; label: string; onClick: () => void }) {
+  return (
+    <As type="button" aria-label={label} title={label} data-slot={SLOTS.reactionsExpand} className="" onClick={onClick}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+    </As>
+  );
+}
 
 /** The full picker inside a Tapback: hidden while the reaction row shows. */
 export const Panel = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttributes<HTMLDivElement>, "hidden">>(function Panel(props, ref) {

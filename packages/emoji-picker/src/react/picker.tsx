@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Autocomplete } from "react-aria-components";
 import type { EmojiRecord } from "../core/dataset";
 import type { EmojiSelection } from "../core/store";
+import { Autocomplete } from "./autocomplete";
 import { CollapseContext, useCollapseState } from "./collapse";
 import type { PickerComponents } from "./components";
 import { PickerContext, signal, usePicker, useSignal, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
@@ -12,7 +12,7 @@ import type { KeyboardAction } from "./keymap";
 import { EmojiOverrides, type ArtworkMap } from "./overrides";
 import { useEmojiPopover } from "./popover-context";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
-import { ReactionsContext, type ReactionsState } from "./reactions";
+import { ReactionsContext, type ReactionsState } from "./reactions-context";
 import { useClippedScrollGuard } from "./scroll-guard";
 import { categoryList, categorySections, itemFactory, type CategoryOption } from "./sections";
 import { SkinToneButtonProvider } from "./skin-tone";
@@ -267,7 +267,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
           style={{ ...(columns ? { "--ep-columns": columns } : {}), ...(colorScheme ? { colorScheme: colorScheme === "auto" ? "light dark" : colorScheme } : {}), ...style } as React.CSSProperties}
         >
           {focusModel === "input" ? (
-            <Autocomplete inputValue={query} onInputChange={setQuery} disableAutoFocusFirst>
+            <Autocomplete inputValue={query} onInputChange={setQuery}>
               {body}
             </Autocomplete>
           ) : (

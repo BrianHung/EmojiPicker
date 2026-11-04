@@ -2,7 +2,8 @@ import * as React from "react";
 import type { EmojiSelection } from "../core/store";
 import { useFrequentEmoji } from "./hooks";
 import { PickerRoot, type RootProps } from "./picker";
-import { Panel, Reactions, reactionKey } from "./reactions";
+import { Panel, Reactions } from "./reactions";
+import { reactionKey } from "./reactions-context";
 
 export type TapbackProps = Omit<RootProps, "children" | "onSelect"> & {
   onSelect: (selection: EmojiSelection) => void;
