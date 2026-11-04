@@ -6,7 +6,7 @@ import type { EmojiSelection } from "../core/store";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
 import type { PickerComponents } from "./components";
-import { PickerContext, usePicker, useSelector, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
+import { PickerContext, usePicker, useSelector, type FocusModel, type HighlightControl, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "./hold";
 import { KeyboardProvider, mergeRefs, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
@@ -114,9 +114,20 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   // The renderer's limit (Twemoji's set) applies on top of the picker's own.
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = React.useRef<HTMLElement | null>(null);
-  const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
+  const base: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
+  const control = React.useRef<HighlightControl | null>(null);
+  const options = { ...base, ...control.current };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
+  const latestBase = React.useRef(base);
+  latestBase.current = base;
+  const controlHighlight = React.useCallback(
+    (next: HighlightControl | null) => {
+      control.current = next;
+      state.setOptions({ ...latestBase.current, ...next }, { notify: true });
+    },
+    [state],
+  );
   const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }));
   React.useEffect(() => void state.mount(), [state]);
   // Frequents change with every pick; held while the user is in the picker so
@@ -181,9 +192,10 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       close,
       list,
       registerSearch: state.registerSearch,
+      controlHighlight,
       listId,
     }),
-    [store, state, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
+    [store, state, controlHighlight, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),
