@@ -87,7 +87,7 @@ export function pickerInitialFocus(root: Element | null | undefined): HTMLElemen
   if (target) return target;
   // A picker whose grid hasn't rendered yet: nothing to focus yet.
   if (root.querySelector('[data-slot="emoji-picker"] [data-slot="list"]') || root.matches('[data-slot="emoji-picker"]')) return null;
-  return root.querySelector<HTMLElement>(TABBABLE);
+  return [...root.querySelectorAll<HTMLElement>(TABBABLE)].find((el) => el.tabIndex >= 0) ?? null;
 }
 
 export const initialFocusTarget = (initialFocus: PopoverInitialFocus | undefined, content: Element | null) =>

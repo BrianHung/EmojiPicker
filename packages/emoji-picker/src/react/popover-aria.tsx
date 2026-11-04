@@ -59,11 +59,11 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         containerPadding={collisionPadding}
         UNSTABLE_portalContainer={container || undefined}
         className={className}
-        style={{ "--transform-origin": "var(--trigger-anchor-point)", ...style } as React.CSSProperties}
+        style={style}
         render={(dom, values) => (
           <div
             {...mergeProps(props, contentAttributes({ open: p.state.open, side: values.placement ?? side, align, status: statusOf(values), props }), dom, { id: p.id })}
-            style={{ ...dom.style, "--available-height": maxHeightOf(dom.style) } as React.CSSProperties}
+            style={{ "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style } as React.CSSProperties}
           />
         )}
       >
