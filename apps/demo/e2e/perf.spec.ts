@@ -4,7 +4,10 @@ import type { CDPSession, Locator, Page } from "@playwright/test";
 import { card, preview } from "./surfaces";
 import { expect, frames, quiet, test, visit } from "./support";
 
-const BUDGET = { heapMB: 6, commits: 4, renders: 40 };
+// A step re-renders the cells it leaves and enters and what shows the active emoji. Moving the
+// highlight from the search field also re-renders React Aria's Autocomplete, SearchField and Input
+// (aria-activedescendant): their 7 renders are counted on top.
+const BUDGET = { heapMB: 6, commits: 3, renders: 6, autocomplete: 7 };
 const STEPS = 20;
 
 declare global {
@@ -78,7 +81,7 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
 }
 
 
-/** Per hover over STEPS cells in view, then per ArrowRight with the highlight in the grid. */
+/** Per hover over STEPS cells in view, per ArrowRight from the search field (virtual focus), and per ArrowRight with focus on a cell. */
 async function steps(page: Page, root: Locator) {
   await root.scrollIntoViewIfNeeded();
   const cells = await root.evaluate((el) => {
@@ -92,11 +95,14 @@ async function steps(page: Page, root: Locator) {
   await frames(page);
   const hover = await perStep(page, async (i) => page.mouse.move(cells[(i % (cells.length - 1)) + 1]!.x, cells[(i % (cells.length - 1)) + 1]!.y));
   await page.mouse.move(0, 0);
+  await root.locator('[data-slot="list"] [data-slot="emoji"][tabindex="0"]').focus();
+  await frames(page);
+  const focus = await perStep(page, () => page.keyboard.press("ArrowRight"));
   await root.locator('[data-slot="search-input"]').click();
   await page.keyboard.press("ArrowDown");
   await frames(page);
   const key = await perStep(page, () => page.keyboard.press("ArrowRight"));
-  return { hover, key };
+  return { hover, key, focus };
 }
 
 function record(name: string, value: unknown) {
@@ -104,11 +110,11 @@ function record(name: string, value: unknown) {
   console.log(name, JSON.stringify(value));
 }
 
-function withinBudget({ hover, key }: Awaited<ReturnType<typeof steps>>) {
-  for (const s of [hover, key]) {
-    expect(s.commits).toBeLessThanOrEqual(BUDGET.commits);
-    expect(s.renders).toBeLessThanOrEqual(BUDGET.renders);
-  }
+function withinBudget({ hover, key, focus }: Awaited<ReturnType<typeof steps>>) {
+  for (const s of [hover, key, focus]) expect(s.commits).toBeLessThanOrEqual(BUDGET.commits);
+  expect(hover.renders).toBeLessThanOrEqual(BUDGET.renders);
+  expect(focus.renders).toBeLessThanOrEqual(BUDGET.renders);
+  expect(key.renders).toBeLessThanOrEqual(BUDGET.renders + BUDGET.autocomplete);
 }
 
 test("home: inline picker renders per hover and per ArrowRight", async ({ page }) => {
@@ -149,5 +155,5 @@ test("bring your own virtualizer: renders per hover and per ArrowRight", async (
   await visit(page, "/examples/virtualizer/");
   const result = await steps(page, page.locator('[data-slot="emoji-picker"]').first());
   record("byo-tanstack", result);
-  expect(result.key.commits).toBeLessThanOrEqual(BUDGET.commits);
+  withinBudget(result);
 });

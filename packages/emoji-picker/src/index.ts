@@ -7,8 +7,8 @@ export type { CategoryOption, CollapsedCategories, FocusModel, PointerModel, Pre
 export type { ElementProps, PartElementProps, PartProps, RenderProp } from "./react/render";
 export type { CellProps, ItemsProps, ListProps, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps } from "./react/list";
 export type { CellState } from "./react/grid";
-export { useEmojiGrid } from "./react/grid";
-export type { UseEmojiGridOptions } from "./react/grid";
+export { useEmojiCell, useEmojiGrid } from "./react/grid";
+export type { EmojiGridState, UseEmojiGridOptions } from "./react/grid";
 export type { EmojiItem, EmojiSection } from "./core/sections";
 export { createEmojiGrid, moveInGrid, rowsPerPage } from "./core/grid";
 export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGridSection } from "./core/grid";

@@ -176,22 +176,24 @@ function Tone({ layout }: { layout: PickerLayout }) {
   );
 }
 
-/** Footer previews: Discord ":code: :alias:" and Slack's "Add Emoji" + skin tone. */
-function Footer({ kind, layout, className }: { kind: NonNullable<PickerLayout["footer"]>; layout: PickerLayout; className?: string }) {
+/** Discord's footer: the active emoji as ":code: :alias:", else the most used. */
+function DiscordFooter({ className }: { className?: string }) {
   const active = EmojiPicker.useActiveEmoji();
   const store = useEmojiStore();
   const first = useFrequentEmoji(1)[0];
   // A preview, not a pick: read the record (select() would count a use).
-  const fallback = first ? store.get(first) : undefined;
-  if (kind === "discord") {
-    const shown = active ?? fallback;
-    return (
-      <div className={className}>
-        <span className="flex size-7 items-center justify-center">{shown ? <Emoji emoji={shown.unified} size={28} /> : null}</span>
-        <span className="truncate text-base leading-5 font-semibold">{shown ? shown.shortcodes.map((c) => `:${c}:`).join(" ") || shown.name : ""}</span>
-      </div>
-    );
-  }
+  const shown = active ?? (first ? store.get(first) : undefined);
+  return (
+    <div className={className}>
+      <span className="flex size-7 items-center justify-center">{shown ? <Emoji emoji={shown.unified} size={28} /> : null}</span>
+      <span className="truncate text-base leading-5 font-semibold">{shown ? shown.shortcodes.map((c) => `:${c}:`).join(" ") || shown.name : ""}</span>
+    </div>
+  );
+}
+
+/** Footer previews: Discord ":code: :alias:" and Slack's "Add Emoji" + skin tone. */
+function Footer({ kind, layout, className }: { kind: NonNullable<PickerLayout["footer"]>; layout: PickerLayout; className?: string }) {
+  if (kind === "discord") return <DiscordFooter className={className} />;
   // Slack: "Add Emoji" on the left, the skin-tone control on the right.
   return (
     <div className={className}>

@@ -12,11 +12,10 @@ import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "../core/sections";
 import { usePicker } from "./context";
-import { cellProps, isRtl, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
+import { isRtl, useEmojiCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "./keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
-import { useArtworkMap } from "./overrides";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "./render";
 import { SLOTS } from "./slots";
 import { useEmptyState } from "./viewport";
@@ -219,7 +218,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ owner: "react-aria", sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 
@@ -251,8 +250,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
   }, [measure, layout, picker.state, searching, horizontal, request]);
 
   const empty = useEmptyState();
-  const { collection, focusedKey } = grid;
-  const persistedKeys = React.useMemo(() => new Set(focusedKey == null ? [] : [focusedKey]), [focusedKey]);
+  const { collection, persisted } = grid;
   const renderNode = React.useCallback((node: CollectionNode<unknown>) => {
     if (node.type === "section") return <SectionView section={node.value as EmojiSection} />;
     if (node.type === "header") return <SectionHeader />;
@@ -276,7 +274,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
               render,
               children: (
                 <>
-                  <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
+                  <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
                   <div ref={probeRef} aria-hidden style={PROBE} />
                   {collection.size === 0 ? (
                     <div role="option" style={{ display: "contents" }}>
@@ -403,14 +401,9 @@ const Cell = React.forwardRef<HTMLElement, CellProps>(function Cell({ className,
   const cells = React.useContext(CellsContext);
   const item = React.useContext(ItemContext);
   if (!cells || !item) throw new Error("EmojiPicker.List.Cell must be inside List.Items.");
-  const artwork = useArtworkMap();
-  const flags = React.useSyncExternalStore(cells.marks.subscribe, () => cells.marks.of(item.id));
-  // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
-  // a cell scrolls only its Viewport, which the keyboard moves already did.
-  const own = React.useCallback((el: HTMLElement | null) => void (el && (el.scrollIntoView = () => cells.reveal(item.id))), [cells, item.id]);
-  const refs = React.useMemo(() => mergeRefs(own, ref), [own, ref]);
-  const { props: cell, state } = cellProps(cells, item, flags, artwork);
-  return renderElement("div", { ...mergeProps(cell, props), ref: refs, className, style, render, children: children ?? cell.children }, state);
+  const { cellProps, state } = useEmojiCell(cells, item);
+  const refs = React.useMemo(() => mergeRefs(cellProps.ref, ref), [cellProps.ref, ref]);
+  return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style, render, children: children ?? cellProps.children }, state);
 });
 
 type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };

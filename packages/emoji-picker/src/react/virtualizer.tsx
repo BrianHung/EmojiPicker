@@ -38,7 +38,7 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
 }
 
 /** The virtualized content of the collection element (its child: the listbox scrolls with the Viewport). */
-export function VirtualCollection(options: Options) {
+export const VirtualCollection = React.memo(function VirtualCollection(options: Options) {
   const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
   const horizontal = layoutOptions.orientation === "horizontal";
   // The collection element is this content's parent (its ref isn't attached yet when our effects first run).
@@ -120,7 +120,7 @@ export function VirtualCollection(options: Options) {
       <BranchContext.Provider value={{ state, dir, horizontal }}>{renderChildren(null, state.visibleViews, dir, horizontal)}</BranchContext.Provider>
     </div>
   );
-}
+});
 
 /** A section's visible children. */
 export function VirtualBranch({ parent }: { parent: Key }) {

@@ -131,8 +131,6 @@ export function useGridSections(horizontal: boolean) {
 }
 
 type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | "aria-labelledby"> & {
-  /** Who owns the highlight: React Aria's focused key (the core state is controlled by it), or the core state. */
-  owner: "react-aria" | "core";
   sections: readonly EmojiSection[];
   geometry: GridGeometry;
   orientation: "vertical" | "horizontal";
@@ -143,7 +141,7 @@ type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | 
 };
 
 /** The grid's state, its listbox props and its cells' context. */
-export function useGridController({ owner, sections, geometry, orientation, listRef, ref, probeRoot, loader = false, value, onKeyDown, ...aria }: ControllerOptions) {
+export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, value, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
   const { labels, searching, focusModel } = picker;
   const { navigation } = geometry;
@@ -156,36 +154,30 @@ export function useGridController({ owner, sections, geometry, orientation, list
   const core = picker.state;
   const { virtual } = picker;
   const [marks] = React.useState(() => cellMarks(core));
-  const pendingFocus = React.useRef<Key | null>(null);
+  // Kept rendered while out of view: the highlighted cell (aria-activedescendant names it, or it has focus).
+  const [persisted] = React.useState(() => new Set<Key>());
   // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
   const focusGrid = React.useRef(Boolean(useEmojiPopover()?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
-  const latest = React.useRef({ collection, virtual, geometry });
-  latest.current = { collection, virtual, geometry };
+  const latest = React.useRef({ collection, virtual, geometry, searching });
+  latest.current = { collection, virtual, geometry, searching };
 
-  const ra = owner === "react-aria";
-  const highlight = (): string | null => {
-    if (!ra) return core.getSnapshot().highlighted;
-    const m = stateRef.current.selectionManager;
-    return m.isFocused && latest.current.collection.emoji(m.focusedKey) ? String(m.focusedKey) : null;
-  };
-  /** The last keyboard position: React Aria keeps its focused key while the grid isn't focused. */
-  const lastKey = () => (ra ? stateRef.current.selectionManager.focusedKey : highlight());
+  // The highlight lives in the core state; cells subscribe to it, the grid doesn't.
+  const highlight = (): string | null => core.getSnapshot().highlighted;
+  /** The last keyboard position, also while nothing is highlighted (the field or the grid lost focus). */
+  const position = React.useRef<Key | null>(null);
+  const lastKey = () => highlight() ?? position.current;
   const setHighlight = (key: Key | null) => {
-    if (!ra) return core.highlight(key == null ? null : String(key));
-    const m = stateRef.current.selectionManager;
-    m.setFocused(key != null);
-    if (key != null) m.setFocusedKey(key);
+    core.highlight(key == null ? null : String(key));
+    persisted.clear();
+    if (key == null) return;
+    persisted.add(key);
+    position.current = key;
+    if (latest.current.searching) kept.current.unified = latest.current.collection.emoji(key)?.unified;
   };
-  const highlighted = highlight();
-  React.useLayoutEffect(() => {
-    if (ra) picker.controlHighlight({ highlighted, onHighlightChange: setHighlight });
-  }, [highlighted]);
-  React.useLayoutEffect(() => (ra ? () => picker.controlHighlight(null) : undefined), []);
 
   const moveTo = (key: Key, dom: boolean, from?: Key) => {
     geometry.reveal(key, from);
-    if (dom) pendingFocus.current = key;
     setHighlight(key);
     if (dom) marks.stop.set(key);
   };
@@ -300,6 +292,7 @@ export function useGridController({ owner, sections, geometry, orientation, list
       if (kept.current.query) {
         kept.current = { query: "" };
         pendingHighlight.current = { key: null };
+        applyHighlight();
       }
       return;
     }
@@ -310,27 +303,16 @@ export function useGridController({ owner, sections, geometry, orientation, list
     const target = previous ?? all[0];
     kept.current = { query: picker.query, unified: target?.unified };
     pendingHighlight.current = { key: target?.id ?? null };
+    applyHighlight();
   }, [sections]);
   const applyHighlight = () => {
     const pending = pendingHighlight.current;
-    const state = stateRef.current;
-    if (!pending || (pending.key != null && !state.collection.getItem(pending.key))) return;
+    if (!pending || (pending.key != null && !latest.current.collection.getItem(pending.key))) return;
     pendingHighlight.current = null;
-    if (!ra) return setHighlight(pending.key);
-    const m = state.selectionManager;
-    if (pending.key == null) {
-      m.setFocusedKey(null);
-      m.setFocused(false);
-      return;
-    }
-    if (latest.current.virtual && document.activeElement === focusInput()) m.setFocused(true);
-    m.setFocusedKey(pending.key);
+    // Shown only while the field has focus; otherwise where the keys start.
+    if (pending.key != null && !(latest.current.virtual && document.activeElement === focusInput())) position.current = pending.key;
+    else setHighlight(pending.key);
   };
-  // Track the highlighted emoji for useActiveEmoji while the field keeps focus.
-  const focusedKey = ra ? state.selectionManager.focusedKey : highlighted;
-  React.useEffect(() => {
-    if (focusedKey != null && searching) kept.current.unified = latest.current.collection.emoji(focusedKey)?.unified;
-  }, [focusedKey, searching]);
 
   /**
    * The tab stop: the focused cell while focus is in the grid; else the last one while it's
@@ -358,7 +340,7 @@ export function useGridController({ owner, sections, geometry, orientation, list
     const onFocusIn = (e: FocusEvent) => {
       const manager = stateRef.current.selectionManager;
       const id = cellOf(e.target)?.getAttribute("data-key");
-      if (id == null || e.target !== document.activeElement || manager.focusedKey === id) return;
+      if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
       manager.setFocusedKey(id);
     };
     el.addEventListener("focusin", onFocusIn);
@@ -388,7 +370,6 @@ export function useGridController({ owner, sections, geometry, orientation, list
     // Hover moves the keyboard position: the highlight while the field has focus, focus
     // itself once it's in the grid. Never from outside the picker.
     if (list?.contains(active) && active !== list) {
-      pendingFocus.current = key;
       setHighlight(key);
       marks.stop.set(key);
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
@@ -473,13 +454,13 @@ export function useGridController({ owner, sections, geometry, orientation, list
         const id = cell.getAttribute("data-key");
         lastFocused.current = id;
         marks.stop.set(id);
-        if (!ra) setHighlight(id);
+        setHighlight(id);
         if (focusModel === "input") core.setDomFocus(true);
       },
       onBlur(e: React.FocusEvent) {
         if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
         core.setDomFocus(false);
-        if (!ra) setHighlight(null);
+        setHighlight(null);
       },
     },
     state,
@@ -510,24 +491,6 @@ export function useGridController({ owner, sections, geometry, orientation, list
     }),
     [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, marks, picker.listId, picker.collapse],
   );
-  // React Aria's per-item focus, for every cell at once: the focused key's cell gets DOM focus
-  // (grid) or virtual focus (the field's aria-activedescendant), when it changes or mounts.
-  const applied = React.useRef<{ el: Element | null; virtual: boolean }>({ el: null, virtual });
-  React.useEffect(() => {
-    const el = cellElement(highlight());
-    const last = applied.current;
-    applied.current = { el, virtual };
-    if (!el || (el === last.el && virtual === last.virtual)) return;
-    if (virtual) moveVirtualFocus(el);
-    else if (document.activeElement !== el) el.focus({ preventScroll: true });
-  });
-  // A move from the keyboard (or hover) with focus in the grid lands focus on the cell once rendered.
-  React.useLayoutEffect(() => {
-    const el = cellElement(pendingFocus.current);
-    if (!el) return;
-    pendingFocus.current = null;
-    el.focus({ preventScroll: true });
-  });
 
   const varied = variations != null ? collection.emoji(variations) : undefined;
   const isEmpty = collection.size === 0;
@@ -535,7 +498,7 @@ export function useGridController({ owner, sections, geometry, orientation, list
     state,
     collection,
     cells,
-    focusedKey,
+    persisted,
     applyHighlight,
     syncStop,
     gridProps: {
@@ -602,10 +565,42 @@ export function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork:
     "data-active": isActive ? "" : undefined,
     "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
-    children: <Glyph unified={unified} record={record} animate={isActive} />,
+    children: <Glyph unified={unified} record={record} animate={isActive && Boolean(record.animated)} />,
   };
   const state: CellState = { emoji: item, highlighted, active: isActive, hovered: Boolean(flags & HOVERED), focused: isFocused, focusVisible: isFocused && cells.focusVisible, pressed: Boolean(flags & PRESSED), selected: isSelected };
   return { props, state };
+}
+
+/** The grid's state, for `useEmojiCell`. */
+export type EmojiGridState = Cells;
+
+/**
+ * One cell of a grid (`EmojiPicker.List`'s, or `useEmojiGrid`'s `state`): its props, with its glyph
+ * as children and a ref, and its state. Subscribes to its own marks, so a highlight or hover move
+ * re-renders only the cells it leaves and enters; the cell it lands on takes focus, or virtual focus.
+ */
+export function useEmojiCell(grid: EmojiGridState, item: EmojiItem) {
+  const artwork = useArtworkMap();
+  const flags = React.useSyncExternalStore(grid.marks.subscribe, () => grid.marks.of(item.id));
+  const element = React.useRef<HTMLElement | null>(null);
+  const ref = React.useCallback(
+    (el: HTMLElement | null) => {
+      element.current = el;
+      // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
+      // a cell scrolls only its scroller, which the keyboard moves already did.
+      if (el) el.scrollIntoView = () => grid.reveal(item.id);
+    },
+    [grid, item.id],
+  );
+  const focused = Boolean(flags & FOCUSED);
+  React.useLayoutEffect(() => {
+    const el = element.current;
+    if (!el || !focused) return;
+    if (grid.virtual) moveVirtualFocus(el);
+    else if (el.ownerDocument.activeElement !== el) el.focus({ preventScroll: true });
+  }, [focused, grid.virtual]);
+  const { props, state } = cellProps(grid, item, flags, artwork);
+  return { cellProps: { ...props, ref }, state };
 }
 
 export type UseEmojiGridOptions = {
@@ -691,10 +686,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
       },
     };
   });
-  const controller = useGridController({ owner: "core", sections, geometry, orientation: "vertical", listRef, probeRoot, value, "aria-label": label });
-  const { cells } = controller;
-  React.useSyncExternalStore(cells.marks.subscribe, () => { const { hovered, highlighted } = picker.state.getSnapshot(); return [cells.marks.stop.get(), highlighted, hovered, cells.marks.pressed.get()].join("\n"); });
-  const artwork = useArtworkMap();
+  const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, value, "aria-label": label });
 
   // After each render and scroll: the search highlight, the tab stop, the current section, and probes of what's shown.
   const sync = React.useRef(() => {});
@@ -718,10 +710,8 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     ...grid,
     getGridProps: (props: React.HTMLAttributes<HTMLElement> = {}) => mergeProps(props, controller.gridProps) as typeof controller.gridProps,
     getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.categoryHeader, children: section.name }),
-    getCellProps: (item: EmojiItem) => ({
-      ...cellProps(cells, item, cells.marks.of(item.id), artwork).props,
-      ref: (el: HTMLElement | null) => void (el && (el.scrollIntoView = () => cells.reveal(item.id))),
-    }),
+    /** For `useEmojiCell(state, item)` in each cell. */
+    state: controller.cells,
     variations: controller.variations,
   };
 }

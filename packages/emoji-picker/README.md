@@ -136,7 +136,7 @@ A section title (`List.SectionTitle`) is text inside the listbox; its state has 
 
 ### Your own virtualizer
 
-`List` virtualizes with React Aria. For TanStack Virtual, react-window, Virtuoso or your own, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` instead: it returns the grid's `rows` (a section title, or a row of emoji, each with its `offset` and `size`), `stickyIndexes`, and `getGridProps`, `getHeaderProps` and `getCellProps`, with the List's keyboard, highlight, hover, long press and skin-tone `variations`. `scrollToIndex(index, { align })` scrolls your virtualizer as the highlight moves. The rows and the keyboard alone, without React, are `createEmojiGrid` and `moveInGrid` in `/core`. See the [TanStack Virtual example](https://emoji.brianhung.me/examples/virtualizer/).
+`List` virtualizes with React Aria. For TanStack Virtual, react-window, Virtuoso or your own, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` instead: it returns the grid's `rows` (a section title, or a row of emoji, each with its `offset` and `size`), `stickyIndexes`, `getGridProps` and `getHeaderProps`, and `state` for `useEmojiCell(state, item)` in each cell (a cell re-renders only when its own highlight, hover or press changes), with the List's keyboard, highlight, hover, long press and skin-tone `variations`. `scrollToIndex(index, { align })` scrolls your virtualizer as the highlight moves. The rows and the keyboard alone, without React, are `createEmojiGrid` and `moveInGrid` in `/core`. See the [TanStack Virtual example](https://emoji.brianhung.me/examples/virtualizer/).
 
 ## Tapbacks
 

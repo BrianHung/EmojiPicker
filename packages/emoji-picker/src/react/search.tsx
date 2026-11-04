@@ -48,6 +48,8 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.autoFocusSearch;
+  // Stable, so the field re-rendering with each highlight move (aria-activedescendant) skips it.
+  const clear = React.useMemo(() => <SearchClear />, []);
 
   const region = useKeyRegion((action, event) => {
     const field = event.target;
@@ -90,7 +92,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
             // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
             {...(focusOnMount ? { "data-autofocus": "" } : {})}
           />
-          {children ?? <SearchClear />}
+          {children ?? clear}
         </EmptyContext.Provider>
       )}
     </SearchField>
