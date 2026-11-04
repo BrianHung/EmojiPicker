@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SlackEmojiMenu, slackEmojiOptions } from "@/experiences/slack";
 import { avatarFor } from "@/lib/people";
@@ -168,7 +168,7 @@ function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; co
             placeholder="Message #general"
             className="block h-[38px] w-full resize-none bg-transparent px-3 py-2 text-[15px] leading-[22px] text-[#1d1c1d] outline-none placeholder:text-[#868686] dark:text-[#d1d2d3]"
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !isComposingKey(e.nativeEvent)) {
                 e.preventDefault();
                 submit();
               }

@@ -227,7 +227,7 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `anchor()`: the typed `:query`'s rect,
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
-Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five editors.
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders Slack, Discord, Notion and Linear menus on a textarea, Tiptap and Lexical.
 
 `/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
 

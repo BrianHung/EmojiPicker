@@ -8,7 +8,7 @@ import type { Plugin } from "vite";
 
 const SITE = "https://emoji.brianhung.me";
 const GITHUB = "https://github.com/BrianHung/EmojiPicker/blob/main";
-const EXAMPLES = ["tiptap", "lexical", "custom-emoji", "semantic-search", "virtualizer", "editors"];
+const EXAMPLES = ["tiptap", "lexical", "custom-emoji", "semantic-search", "virtualizer"];
 
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
