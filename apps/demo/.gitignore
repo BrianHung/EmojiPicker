@@ -9,3 +9,6 @@ dist/
 e2e/.cache/
 e2e/.results/
 e2e/.report/
+
+# Visual baselines are local (pixel-parity checks); capture with `npm run test:baseline`.
+e2e/__snapshots__/visual.spec.ts/
