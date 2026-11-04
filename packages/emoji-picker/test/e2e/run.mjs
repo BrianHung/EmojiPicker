@@ -612,7 +612,7 @@ await page.locator('#harness [data-testid="composer"]').click();
 await page.keyboard.type(":an_extraord");
 await page.waitForTimeout(250);
 const sugg = await page.evaluate(() => {
-  const el = document.querySelector('#harness [data-testid="suggestions"]');
+  const el = document.querySelector('[data-slot="suggestions-popover"]');
   return el ? { width: el.getBoundingClientRect().width, scroll: el.querySelector("ul").scrollWidth, client: el.querySelector("ul").clientWidth } : null;
 });
 check("autocomplete (demo component): long shortcodes stay inside the menu", sugg && sugg.width <= 321 && sugg.scroll <= sugg.client + 1, JSON.stringify(sugg), { warn: true });
