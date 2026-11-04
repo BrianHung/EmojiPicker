@@ -49,22 +49,22 @@
   ],
   "enter": {
     "open": false,
-    "focus": "body",
+    "focus": "button \"Maya: ok who's in for the lake on saturday. Hold\"",
     "focusReturned": false,
     "toast": null
   },
   "escape": [
     {
       "open": false,
-      "focus": "body",
+      "focus": "button \"Maya: ok who's in for the lake on saturday. Hold\"",
       "focusReturned": false,
       "toast": null
     }
   ],
   "tab": {
-    "focus": "button \"red heart\"",
+    "focus": "button \"Maya: I can drive, there's room for 4 🚗. Hold t\"",
     "highlight": null,
-    "open": true,
-    "inside": true
+    "open": false,
+    "inside": false
   }
 }
