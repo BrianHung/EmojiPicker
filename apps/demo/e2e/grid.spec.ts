@@ -1,7 +1,8 @@
 // The grid in modes the other specs don't cover: right-to-left, sticky section titles while
 // moving up, and Windows high contrast (forced colors), where backgrounds are dropped.
 import type { Page } from "@playwright/test";
-import { expect, frames, test, visit } from "./support";
+import { SURFACES } from "./surfaces";
+import { expect, frames, quiet, test, visit } from "./support";
 
 const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
 const highlighted = (page: Page) => picker(page).locator('[data-slot="emoji"][data-highlighted]');
@@ -56,3 +57,19 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
   await page.keyboard.type(":smi", { delay: 40 });
   expect(await page.getByRole("listbox", { name: "Emoji suggestions" }).locator("[data-highlighted]").evaluate(outline)).toBe("solid 2px");
 });
+
+for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover"])
+  test(`${id}: a pinned section title sits flush with the top, padding or not`, async ({ page }) => {
+    const surface = SURFACES.find((s) => s.id === id)!;
+    await visit(page, surface.path);
+    await surface.open(page);
+    await quiet(page);
+    const gap = await surface.root(page).locator('[data-slot="viewport"]').first().evaluate(async (viewport) => {
+      viewport.scrollBy(0, 330);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const top = viewport.getBoundingClientRect().top;
+      const pinned = [...viewport.querySelectorAll('[data-slot="category-header"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
+      return pinned ? pinned.top - top : null;
+    });
+    expect(gap).toBe(0);
+  });

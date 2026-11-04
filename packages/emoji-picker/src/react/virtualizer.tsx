@@ -76,6 +76,9 @@ export function VirtualCollection(options: Options) {
       const el = list && scroller(list);
       if (!el || !list) return;
       const rtl = getComputedStyle(list).direction === "rtl";
+      // Sticky titles pin at the scroller's edge, not inside its padding.
+      const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
+      content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding})`);
       const offset = visibleOffset(el, list, horizontal, rtl);
       // Layout px, as the browser rounds them (unaffected by an ancestor's scale).
       const width = list.clientWidth;
@@ -142,8 +145,8 @@ function wrapperStyle(info: LayoutInfo, parent: LayoutInfo | null, dir: "ltr" | 
   const y = info.rect.y - (parent?.rect.y ?? 0);
   if (info.isSticky)
     return horizontal
-      ? { position: "sticky", insetInlineStart: 0, width: "max-content", maxWidth: info.rect.width, height: info.rect.height, zIndex: info.zIndex || undefined }
-      : { position: "sticky", top: 0, height: info.rect.height, zIndex: info.zIndex || undefined };
+      ? { position: "sticky", insetInlineStart: "var(--ep-sticky-offset, 0px)", width: "max-content", maxWidth: info.rect.width, height: info.rect.height, zIndex: info.zIndex || undefined }
+      : { position: "sticky", top: "var(--ep-sticky-offset, 0px)", height: info.rect.height, zIndex: info.zIndex || undefined };
   return {
     position: "absolute",
     top: y,
