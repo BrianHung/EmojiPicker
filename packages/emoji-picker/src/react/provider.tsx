@@ -1,6 +1,6 @@
 import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
-import { defaultLabels, plural, type EmojiLabels } from "../core/labels";
+import { localizeLabels, type EmojiLabels } from "../core/labels";
 import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../core/platform";
 import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../core/store";
 
@@ -39,7 +39,7 @@ const EmojiContext = React.createContext<ContextValue | null>(null);
  */
 export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   // Options are read once, like a store; remount the provider to change data.
-  const [store] = React.useState(() => createEmojiStore({ ...options, locale }));
+  const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
   const [detected, setDetected] = React.useState<Renderer>("native");
 
   React.useEffect(() => {
@@ -51,7 +51,7 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   // Custom emoji groups are known once their packs load.
   const status = React.useSyncExternalStore(store.subscribe, store.status, store.status);
   const groups = React.useMemo(() => store.customGroups(), [store, status]);
-  const merged = useLabels(labels, locale);
+  const merged = useLabels(labels, locale ?? (status === "ready" ? store.locale() : undefined));
   const value = React.useMemo<ContextValue>(
     () => ({
       store,
@@ -67,16 +67,13 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   return locale ? <I18nProvider locale={locale}>{tree}</I18nProvider> : tree;
 }
 
-/** `labels` over the English defaults, kept stable while their values are. A locale formats the default count. */
+/** `labels` over the English defaults, kept stable while their values are. The locale formats the default count. */
 function useLabels(labels: Partial<EmojiLabels> | undefined, locale: string | undefined): EmojiLabels {
   const key = labels ? JSON.stringify(labels) : "";
   const latest = React.useRef(labels);
   latest.current = labels;
-  return React.useMemo(() => {
-    const count = locale ? { resultCount: plural(locale, { "=0": "No results", one: "# result", other: "# results" }) } : {};
-    return { ...defaultLabels, ...count, ...latest.current };
-    // Functions in labels compare by identity; strings by value.
-  }, [key, locale, labels?.resultCount, labels?.withSkinTone]);
+  // Functions in labels compare by identity; strings by value.
+  return React.useMemo(() => localizeLabels(locale, latest.current), [key, locale, labels?.resultCount, labels?.withSkinTone]);
 }
 
 export function useEmojiContext(): ContextValue {

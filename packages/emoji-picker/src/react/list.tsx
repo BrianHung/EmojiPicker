@@ -16,7 +16,7 @@ import type { PickerKeyboardEventHandler } from "./keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
 import { useArtworkMap } from "./overrides";
-import type { EmojiItem, EmojiSection } from "./sections";
+import type { EmojiItem, EmojiSection } from "../core/sections";
 import { SLOTS, joinClasses } from "./slots";
 import { useEmptyState } from "./viewport";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
@@ -239,10 +239,10 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       // At the end, the last section is current even when it's short.
       const end = horizontal ? layout.getContentSize().width - rect.width : layout.getContentSize().height - rect.height;
       const key = end > 0 && offset >= end - 1 && horizontal ? (layout.sections[layout.sections.length - 1]?.key ?? null) : layout.sectionAt(horizontal ? offset + layout.metrics.padding + layout.metrics.cellWidth / 2 : offset);
-      picker.activeSection.set(key == null ? null : String(key));
+      picker.state.setActiveSection(key == null ? null : String(key));
     }
     latest.current.syncStop();
-  }, [measure, layout, picker.activeSection, searching, horizontal, request]);
+  }, [measure, layout, picker.state, searching, horizontal, request]);
 
   const empty = useEmptyState();
   const { collection, focusedKey } = grid;

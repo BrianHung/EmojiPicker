@@ -1,10 +1,12 @@
-import { findShortcodeTrigger, isComposingKey } from "../core/shortcodes";
-import { useForcedColorsHighlight } from "./style-sheet";
 import * as React from "react";
-import { unifiedToNative, type EmojiRecord } from "../core/dataset";
-import type { ProgressiveHits } from "../core/search";
-import type { CompletionOrder, ShortcodeCompletion } from "../core/search-index";
+import type { EmojiRecord } from "../core/dataset";
+import { createSearch, type SearchState } from "../core/query";
+import { emitter } from "../core/reactive";
+import type { ShortcodeCompletion } from "../core/search-index";
+import { findShortcodeTrigger } from "../core/shortcodes";
+import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type SuggestionsOptions, type SuggestionsSnapshot } from "../core/suggestions";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
+import { useForcedColorsHighlight } from "./style-sheet";
 
 /** Top `n` emoji (base unified codes) by decayed frequency, filled with defaults. */
 export function useFrequentEmoji(n = 5): readonly string[] {
@@ -32,8 +34,6 @@ export function useEmojiStatus() {
   return status;
 }
 
-const NO_RESULTS: readonly EmojiRecord[] = [];
-
 /**
  * Results of the provider's `search` for a query: the picker's results grid,
  * a command palette, a custom grid. Sync engines answer in the same render; an
@@ -44,72 +44,33 @@ export function useEmojiSearch(query: string, { limit = 50 }: { limit?: number }
   return useEmojiSearchState(query, { limit }).results;
 }
 
-export type EmojiSearchState = {
-  results: readonly EmojiRecord[];
-  /** An async search for the current query is in flight. */
-  pending: boolean;
-};
+export type EmojiSearchState = SearchState;
 
 /** `useEmojiSearch` plus whether an async engine is still working on the current query. */
 export function useEmojiSearchState(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
   const { store } = useEmojiContext();
-  const status = useEmojiStatus();
-  const run = React.useMemo(() => {
-    if (status !== "ready" || !query.trim()) return { results: NO_RESULTS };
-    const controller = new AbortController();
-    const out = store.query(query, { limit, signal: controller.signal });
-    return Array.isArray(out) ? { results: out as readonly EmojiRecord[] } : { promise: out, controller };
-  }, [status, store, query, limit]);
-  const [settled, setSettled] = React.useState<{ run: unknown; results: readonly EmojiRecord[] }>({ run: null, results: NO_RESULTS });
-  React.useEffect(() => {
-    if (!("promise" in run) || !run.promise) return;
-    let live = true;
-    run.promise.then(
-      (results) => live && setSettled({ run, results }),
-      () => live && setSettled({ run, results: NO_RESULTS }),
-    );
-    return () => {
-      live = false;
-      run.controller.abort();
-    };
-  }, [run]);
-  if ("results" in run && run.results) return { results: run.results, pending: false };
-  if (settled.run === run) return { results: settled.results, pending: false };
-  // Still working: interim results (a progressive search) if any, else the previous ones.
-  const interim = "promise" in run ? (run.promise as Partial<ProgressiveHits<EmojiRecord[]>>).interim : undefined;
-  return { results: interim ?? settled.results, pending: true };
+  useEmojiStatus();
+  const [search] = React.useState(() => {
+    const events = emitter(() => () => runner.abort());
+    const runner = createSearch(store, events.emit);
+    return { runner, subscribe: events.subscribe };
+  });
+  const read = () => search.runner.run(query, limit);
+  return React.useSyncExternalStore(search.subscribe, read, read);
 }
 
 export type ShortcodeSuggestion = ShortcodeCompletion;
 
 export type AutocompleteResult = { value: string; caret: number };
 
-/** The parts of a keyboard event the hooks read: a React event, a DOM event, or a ProseMirror/Tiptap `event`. */
-export type KeyLike = { key: string; shiftKey?: boolean; isComposing?: boolean; keyCode?: number; preventDefault(): void };
+export type { KeyLike };
 
-export type EmojiSuggestionsOptions = {
+export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> & {
   /** What the user typed after the trigger (`:`), without it. Empty closes the list. */
   query: string;
-  limit?: number;
-  /** "shortcode" (default) completes Slack shortcodes, highlighting the typed part; "search" uses the provider's `search` engine. */
-  matchBy?: "shortcode" | "search";
-  /** Shortcode matches only: "relevance" (default) or "alphabetical" (prefix matches A–Z, then the rest A–Z, as Discord lists them). */
-  order?: CompletionOrder;
-  /** Render the suggestions as a grid of this many columns: Left/Right move a cell, Up/Down a row (Grok, Discord-style grids). */
-  columns?: number;
-  /** Called when a suggestion is chosen (Enter, Tab, click). Already recorded as used. */
-  onChoose?: (suggestion: ShortcodeSuggestion) => void;
-  /** Called on Escape. */
-  onDismiss?: () => void;
-  /** Identity of the current query for resetting the highlight and re-opening after Escape. Default `query`. */
-  resetKey?: string;
 };
 
-export type EmojiSuggestions = {
-  open: boolean;
-  query: string;
-  suggestions: readonly ShortcodeSuggestion[];
-  highlightedIndex: number;
+export type EmojiSuggestions = SuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
   /** Choose a suggestion (the highlighted one by default): records it as used and calls onChoose. */
   choose(index?: number): void;
@@ -120,94 +81,42 @@ export type EmojiSuggestions = {
   /** Arrow keys, Enter/Tab and Escape. Returns true when it handled (and prevented) the key. */
   onKeyDown(event: KeyLike): boolean;
   getListProps(): { id: string; role: "listbox" };
-  getOptionProps(index: number): {
-    id: string;
-    role: "option";
-    "aria-selected": boolean;
-    "data-highlighted": "" | undefined;
+  getOptionProps(index: number): ReturnType<EmojiSuggestionsMachine["getOptionProps"]> & {
     onMouseDown: (event: React.MouseEvent) => void;
     onPointerMove: () => void;
   };
-  /** id of the highlighted option, for `aria-activedescendant`. */
-  activeDescendant: string | undefined;
 };
 
 /**
- * Headless emoji suggestions for a query you already extracted: the editor-agnostic
- * core of `useShortcodeAutocomplete`. Use it where something else finds the trigger,
- * e.g. Tiptap's `@tiptap/suggestion` or a ProseMirror plugin, and forward its key events.
+ * Headless emoji suggestions for a query you already extracted (core's `createEmojiSuggestions`).
+ * Use it where something else finds the trigger, e.g. Tiptap's `@tiptap/suggestion` or a
+ * ProseMirror plugin, and forward its key events.
  */
-export function useEmojiSuggestions({ query, limit = 8, matchBy = "shortcode", order, columns, onChoose, onDismiss, resetKey = query }: EmojiSuggestionsOptions): EmojiSuggestions {
+export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestions {
   const { store } = useEmojiContext();
-  const status = useEmojiStatus();
-  const id = React.useId();
+  useEmojiStatus();
   useForcedColorsHighlight();
-  // "search" ranks with the provider's `search` (any engine, sync or async) instead of the shortcode index.
-  const searched = useEmojiSearchState(matchBy === "search" ? query : "", { limit }).results;
-  const suggestions = React.useMemo(
-    () =>
-      status !== "ready" || !query
-        ? []
-        : matchBy === "search"
-          ? searched.map((record) => ({ record, shortcode: record.shortcodes[0] ?? record.name.replace(/\s+/g, "_"), match: null }))
-          : store.completeShortcode(query, limit, order),
-    [status, store, query, limit, matchBy, order, searched],
-  );
-
-  const [highlightedIndex, setHighlightedIndex] = React.useState(0);
-  const [dismissed, setDismissed] = React.useState<string | null>(null);
-  // A new query resets the highlight and re-opens a dismissed list.
-  React.useEffect(() => setHighlightedIndex(0), [resetKey]);
-  const open = suggestions.length > 0 && dismissed !== resetKey;
-  const highlighted = Math.min(highlightedIndex, Math.max(suggestions.length - 1, 0));
-
-  const choose = (index = highlighted) => {
-    const suggestion = suggestions[index];
-    if (!suggestion) return;
-    store.frequents.record(suggestion.record.unified);
-    onChoose?.(suggestion);
-  };
-  const dismiss = () => {
-    setDismissed(resetKey);
-    onDismiss?.();
-  };
-  const optionId = (index: number) => `${id}-option-${index}`;
-
+  const id = React.useId();
+  const [machine] = React.useState(() => createEmojiSuggestions(store, { ...options, id }));
+  machine.setOptions({ ...options, id });
+  const snapshot = React.useSyncExternalStore(machine.subscribe, machine.getSnapshot, machine.getSnapshot);
   return {
-    open,
-    query,
-    suggestions,
-    highlightedIndex: highlighted,
-    setHighlightedIndex,
-    choose,
-    dismiss,
-    textFor: ({ record, shortcode }, insert = "emoji") => (record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified))),
-    onKeyDown(event) {
-      if (!open || isComposingKey(event)) return false;
-      const n = suggestions.length;
-      // A list wraps with Up/Down; a grid (`columns`) moves by a cell with Left/Right and by a row with Up/Down.
-      const step = columns ? { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns, ArrowDown: columns }[event.key] : { ArrowUp: -1, ArrowDown: 1 }[event.key];
-      if (step) setHighlightedIndex(columns ? Math.max(0, Math.min(n - 1, highlighted + step)) : (highlighted + step + n) % n);
-      else if ((event.key === "Enter" && !event.shiftKey) || event.key === "Tab") choose();
-      else if (event.key === "Escape") dismiss();
-      else return false;
-      event.preventDefault();
-      return true;
-    },
-    getListProps: () => ({ id: `${id}-listbox`, role: "listbox" }),
+    ...snapshot,
+    setHighlightedIndex: machine.highlight,
+    choose: machine.choose,
+    dismiss: machine.dismiss,
+    textFor: machine.textFor,
+    onKeyDown: machine.keydown,
+    getListProps: machine.getListProps,
     getOptionProps: (index) => ({
-      id: optionId(index),
-      role: "option",
-      "aria-selected": index === highlighted,
-      "data-highlighted": index === highlighted ? "" : undefined,
+      ...machine.getOptionProps(index),
       // mousedown, not click: keep focus (and the caret) in the editor
       onMouseDown: (event) => {
         event.preventDefault();
-        choose(index);
+        machine.choose(index);
       },
-      onPointerMove: () => setHighlightedIndex(index),
+      onPointerMove: () => machine.highlight(index),
     }),
-    activeDescendant: open ? optionId(highlighted) : undefined,
   };
 }
 
@@ -237,7 +146,7 @@ export type ShortcodeAutocomplete = Omit<EmojiSuggestions, "activeDescendant"> &
  * render the popup however you like; this owns matching, highlight,
  * keyboard handling and ARIA.
  */
-export function useShortcodeAutocomplete({ value, caret, limit = 8, insert = "emoji", columns, matchBy = "shortcode", order, onChoose }: ShortcodeAutocompleteOptions): ShortcodeAutocomplete {
+export function useShortcodeAutocomplete({ value, caret, limit, insert = "emoji", columns, matchBy, order, onChoose }: ShortcodeAutocompleteOptions): ShortcodeAutocomplete {
   const match = findShortcodeTrigger(value.slice(0, caret));
   const typed = match?.query ?? "";
   const start = match?.offset ?? caret;

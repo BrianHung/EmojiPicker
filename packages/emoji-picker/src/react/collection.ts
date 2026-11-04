@@ -2,7 +2,7 @@
 // items are the shared EmojiItem objects, so a collection is its sections, their
 // titles, and an index of keys.
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiItem, EmojiSection } from "./sections";
+import type { EmojiItem, EmojiSection } from "../core/sections";
 
 const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): Node<unknown> => ({
   type,

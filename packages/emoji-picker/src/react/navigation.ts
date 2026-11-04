@@ -3,7 +3,7 @@
 // x, skipping a short last row; this one clamps to it. Directions are logical; callers mirror for RTL.
 import type { Key, KeyboardDelegate } from "@react-types/shared";
 import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../core/grid";
-import type { EmojiSection } from "./sections";
+import type { EmojiSection } from "../core/sections";
 import { columnsPerPage, moveInStrip, pageInStrip, type StripKey, type StripLayout } from "./strip-layout";
 
 export type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { setCategoryCollapsed, toggleCategoryCollapsed } from "../src/react/collapse";
+import { setCategoryCollapsed } from "../src/core/picker";
 
 describe("collapse state", () => {
   it("toggles ids in and out", () => {
-    const one = toggleCategoryCollapsed([], "flags");
+    const one = setCategoryCollapsed([], "flags");
     expect(one).toEqual(["flags"]);
-    expect(toggleCategoryCollapsed(one, "symbols")).toEqual(["flags", "symbols"]);
-    expect(toggleCategoryCollapsed(one, "flags")).toEqual([]);
+    expect(setCategoryCollapsed(one, "symbols")).toEqual(["flags", "symbols"]);
+    expect(setCategoryCollapsed(one, "flags")).toEqual([]);
   });
 
   it("returns the same array when nothing changes", () => {

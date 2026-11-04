@@ -12,6 +12,8 @@ export type SearchIndexOptions = {
   locale?: string;
   /** Replaces the default tokenizer, for indexing and queries alike. */
   tokenize?: Tokenizer;
+  /** A–Z order of alphabetical completion. Default `new Intl.Collator(locale)`. */
+  collator?: Pick<Intl.Collator, "compare">;
 };
 
 export type SearchIndex = {
@@ -43,9 +45,8 @@ export type ShortcodeCompletion = {
 };
 
 /** A sorted token array searched by binary search. Build it once per record list. */
-export function createSearchIndex(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
+export function createSearchIndex(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale), collator = new Intl.Collator(canonicalLocale(locale)) }: SearchIndexOptions = {}): SearchIndex {
   const normalize = normalizer(locale);
-  const collator = new Intl.Collator(canonicalLocale(locale));
   const entries: [token: string, id: number, kind: number][] = [];
   const shortcodes = new Map<string, number>();
   const shortcodeList: [code: string, id: number][] = [];

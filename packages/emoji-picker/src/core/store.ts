@@ -1,6 +1,7 @@
 import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord } from "./dataset";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type FrequencyStore } from "./frequents";
+import { localizeLabels, type EmojiLabels } from "./labels";
 import type { CompletionOrder, SearchIndex } from "./search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
@@ -28,8 +29,16 @@ export type EmojiStoreOptions = {
    * the helpers in `@brianhung/emoji-picker/search`.
    */
   search?: EmojiSearch;
-  /** BCP 47 tag for search (case folding, word segmentation, A–Z order). Default: the dataset's `locale`. */
+  /**
+   * BCP 47 tag for everything language-specific: case folding, word segmentation and A–Z order
+   * in search, and the labels' counts. Default: the dataset's `locale`. Each piece replaces only
+   * itself: `labels`, `collator`, a `search` engine (`lexical({ segmenter, tokenize })`), or `data`.
+   */
   locale?: string;
+  /** Interface strings over the English defaults (`localizeLabels(locale, labels)`). */
+  labels?: Partial<EmojiLabels>;
+  /** A–Z order of alphabetical shortcode completion. Default `new Intl.Collator(locale)`. */
+  collator?: Pick<Intl.Collator, "compare">;
 };
 
 export type EmojiStoreStatus = "idle" | "loading" | "ready" | "error";
@@ -53,7 +62,7 @@ export type EmojiStore = ReturnType<typeof createEmojiStore>;
 
 const defaultSearch = lexical();
 
-export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch, locale: localeOption }: EmojiStoreOptions) {
+export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch, locale: localeOption, labels: labelOverrides, collator }: EmojiStoreOptions) {
   const sources = customSources(customEmojis);
   const listeners = new Set<() => void>();
   const emit = () => listeners.forEach((l) => l());
@@ -71,6 +80,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
   let customGroups = new Map<string, string | undefined>();
   let packErrors: readonly Error[] = [];
   let skinTone = clampTone(Number(toneStorage.read() ?? defaultSkinTone));
+  let labels: EmojiLabels | null = null;
 
   function ingest(dataset: Dataset, loaded: readonly CustomEmoji[]) {
     const all = expandDataset(dataset);
@@ -82,6 +92,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     records = [...base, ...customRecords(loaded, base.length, (u) => byCode.get(u.toLowerCase()))];
     groupNames = dataset.groups;
     locale = localeOption ?? dataset.locale;
+    labels = null;
     byUnified = new Map();
     for (const r of records) {
       byUnified.set(r.unified, r);
@@ -134,6 +145,8 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     groupNames: () => groupNames,
     /** The `locale` option, else the dataset's once loaded. */
     locale: () => locale,
+    /** The `labels` option over the English defaults, with counts in `locale`. */
+    labels: (): EmojiLabels => (labels ??= localizeLabels(locale, labelOverrides)),
 
     /** Base record for a unified code, a skin-tone variation or a custom emoji id. */
     get: (unified: string) => byUnified.get(unified.toLowerCase()) ?? byUnified.get(unified),
@@ -141,7 +154,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     /** The search index, built on first use. */
     index(): SearchIndex {
       if (status !== "ready") throw new Error("emoji data is not loaded; await store.load() first");
-      return (index ??= indexFor(records, { locale }));
+      return (index ??= indexFor(records, { locale, collator }));
     },
 
     /** Record for a Slack shortcode ("tada" or ":tada:"), including custom emoji. */

@@ -5,7 +5,8 @@ import { createRoot, type Root as ReactRoot } from "react-dom/client";
 import enUrl from "../../data/en.json?url";
 import { Emoji, EmojiPicker, EmojiPopover, EmojiProvider, Tapback, type CustomEmoji, type CustomEmojiSource, type KeyboardAction } from "../../src/index";
 // The demo's shadcn registry item and autocomplete: the markup apps actually ship.
-import { EmojiAutocomplete, useAutocompleteInput } from "@/components/emoji-autocomplete";
+import { useEmojiTextField } from "@/components/emoji-text-field";
+import { SuggestionMenu } from "@/components/suggestion-menu";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
 
 export type Fixture = {
@@ -137,11 +138,11 @@ function Picker({ f, horizontal }: { f: Fixture; horizontal?: boolean }) {
 }
 
 function Autocomplete() {
-  const { autocomplete, inputProps } = useAutocompleteInput<HTMLInputElement>({ insert: "shortcode" });
+  const { emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ insert: "shortcode" });
   return (
     <div style={{ position: "relative", width: 320 }}>
-      <EmojiAutocomplete autocomplete={autocomplete} data-testid="suggestions" style={{ position: "absolute", bottom: "100%", width: 320 }} />
-      <input {...inputProps} aria-label="Message" data-testid="composer" onKeyDown={(e) => autocomplete.onKeyDown(e)} style={{ width: 320 }} />
+      <SuggestionMenu {...emoji} side="top" />
+      <input {...inputProps} aria-label="Message" data-testid="composer" style={{ width: 320 }} />
     </div>
   );
 }
