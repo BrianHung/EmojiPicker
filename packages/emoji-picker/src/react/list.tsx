@@ -499,6 +499,22 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       if (!visible || !latest.current.items.has(String(stop))) cellsState.tabStop.set(lastFocused.current != null && latest.current.items.has(String(lastFocused.current)) && isVisible(lastFocused.current) ? lastFocused.current : firstVisible());
     }
   }, [measure, layout, picker.activeSection, searching, cellsState, firstVisible, request]);
+  // DOM focus landing on a cell (Tab from the search field, a script, a screen reader) while the
+  // list is in virtual-focus mode: the cell becomes the focused key before React Aria's collection
+  // sees the focus, or it would treat focus as entering with no key and move it to the first cell.
+  React.useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const onFocusIn = (e: FocusEvent) => {
+      const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.emoji}"]`) : null;
+      const manager = stateRef.current?.selectionManager;
+      const id = cell?.getAttribute("data-key");
+      if (!manager || id == null || e.target !== document.activeElement || manager.focusedKey === id) return;
+      manager.setFocusedKey(id);
+    };
+    el.addEventListener("focusin", onFocusIn);
+    return () => el.removeEventListener("focusin", onFocusIn);
+  }, []);
   const isVisible = (key: Key) => {
     const r = layout.getLayoutInfo(key)?.rect;
     const rect = visibleRect();
