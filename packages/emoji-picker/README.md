@@ -62,7 +62,7 @@ It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker` | Components and hooks |
-| `@brianhung/emoji-picker/core` | `createEmojiStore`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, and the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`). No React. |
+| `@brianhung/emoji-picker/core` | `createEmojiStore`, the picker's and the typeahead's state (`createPickerState`, `createEmojiSuggestions`), `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, and the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`). No React ([Without React](#without-react)). |
 | `@brianhung/emoji-picker/search` | Building blocks for the provider's `search` |
 | `@brianhung/emoji-picker/tiptap`, `/lexical` | `:shortcode` typeahead for Tiptap and Lexical ([Your own editor](#your-own-editor)); their editor packages are optional peer dependencies |
 | `@brianhung/emoji-picker/data/en.json` | The English dataset |
@@ -191,6 +191,27 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
 Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds ProseMirror and contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five.
+
+### Without React
+
+The hooks are thin wrappers over stores in `/core` that any framework can drive: `subscribe`, read `getSnapshot()`, call actions, and spread the attribute getters.
+
+```ts
+import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker/core";
+
+const store = createEmojiStore({ data: "/emoji/en.json" });
+const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)) });
+typeahead.subscribe(render);
+typeahead.setQuery("tada"); // from the editor's :query
+input.addEventListener("keydown", (e) => typeahead.keydown(e)); // arrows, Enter/Tab, Escape; IME-safe
+// typeahead.getSnapshot(): { open, suggestions, highlightedIndex, activeDescendant }
+// typeahead.getInputProps(), getListProps(), getOptionProps(i): role, ids, aria-*, data-highlighted
+
+const picker = createPickerState(store, { searchResults: "ranked" });
+picker.setQuery("heart");
+moveHighlight(picker, "right", { columns: 9 });
+picker.choose(); // EmojiSelection of the highlighted emoji
+```
 
 ## Rendering emoji
 
@@ -322,6 +343,15 @@ Set sizes with CSS variables on `Root` or an ancestor:
 `data/en.json` is built from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
 
 ## Localization
+
+Japanese in three lines: build the data, pass it with the locale, and translate the strings you show.
+
+```tsx
+// npx @brianhung/emoji-picker build-data ja --out public/emoji/ja.json
+<EmojiProvider data="/emoji/ja.json" locale="ja" labels={{ searchPlaceholder: "検索", noResults: "見つかりません" }}>…</EmojiProvider>
+```
+
+`locale` is one setting for everything language-specific: case folding, word segmentation and A–Z order in search, the result count's digits and plural rules, and React Aria's text direction. Without it, the dataset's own `locale` is used. Each piece can be replaced on its own, and replacing one leaves the others on the locale: `labels` (any of `EmojiLabels`), `data` (a dataset per locale), `search` (`lexical({ segmenter, tokenize })`), `collator` (alphabetical shortcode order), and the shortcode sets (`build-data --shortcodes`). The same options work on `createEmojiStore` without React; `store.labels()` is the merged labels.
 
 The package ships English. To build a dataset for another language, run the `build-data` command with an [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales):
 
