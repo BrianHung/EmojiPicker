@@ -1,15 +1,5 @@
 import { type Style, type Tokens } from "@/styles/style-picker";
 
-// Measured from Linear's web app (issue reaction button, light theme), Nov 2026:
-// 273×321 popover, borderless 28px search (radius 8) at (5.5,4.5), a lch(97.3) divider
-// at 37, 28px section titles with 12px/500 text at x=14.5, 28px cells (radius 8, 19px
-// emoji) on a 28px pitch from x=10.5. Its thin scrollbar sits over the ninth column.
-// The comment composer's ":" autocomplete (light, Nov 2026) opens above the caret: a card
-// 190.6px wide for ":smi" (it fits Linear's short codes; ours truncate), radius 10, the popup border and shadow,
-// 4px list padding; twelve 34px rows, a 15px emoji at x=14 then 8px to the 13px/450
-// lch(10) `:code:`, the highlight inset 4px at radius 6 on lch(95). No header.
-
-// Light and dark values measured from Linear with DevTools (its own lch() palette).
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(lch(100 0 282), lch(12.72 0.85 272))",
   "--emoji-picker-foreground": "light-dark(lch(20 1 282), lch(91.178 1.425 272))",
@@ -46,7 +36,6 @@ export const linear: Style = {
     header: "h-7 bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted",
     searchRow: "border-b border-(--linear-divider) px-[5px] pt-1 pb-1",
     input: "h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",
-    // The rows keep nine columns and run under the scrollbar, as Linear's do.
     scrollbar: "overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]",
     fixedColumns: true,
     categories: [{ id: "suggested", name: "Frequently used" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "travel_places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],

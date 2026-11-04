@@ -1,23 +1,3 @@
-// Linear style, in situ, all dark. Two frames:
-// 1. An issue page: the description is a Tiptap editor with Linear's inline ":" menu
-//    (B), the smiley under it opens the Linear style reaction picker (C) and adds
-//    Linear pills, comments carry pills, and the comment composer has `:` autocomplete.
-// 2. A team overview header (A): the icon tile opens Linear's 412px Icons | Emojis
-//    popover to set the team's icon (Icons is shown, disabled).
-//
-// Measured with DevTools on Linear web (dark, issue page, 1400×813 window), Nov 2026.
-// The frame crops that window at x=293, so frame x = window x − 293 (y unchanged):
-// panel inset 8.5 on a darker sidebar; content column at x=62 (window 355), 596 wide;
-// title 24/32 600 at y=112.3; description 15/24 450 at y=168.3; reaction buttons
-// 28×28 at x=56/84, y=218.3; divider y=312; "Activity" 15/23 600 at y=335.3;
-// activity line 12/16.8 500 at y≈382; composer 612×83 at x=54 (window 347).
-//
-// On a phone it is Linear's narrow layout, measured the same way in a 390px-wide frame
-// of the issue page: no inset panel; a 44px bar (0.5px rule, padding 0 12 0 8, 28px
-// round buttons); a right-aligned row of 28px round copy buttons at y=51.5; content
-// 14px in; title at y=89.8; property chips (24px, 6px apart) at y=145.8; description
-// text at y=201.8; reaction buttons at x=8, y=251.8; "Activity" at y=368.8 beside a
-// 32px Unsubscribe; the composer card 6px in at y=449. Pickers open as bottom sheets.
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -29,42 +9,42 @@ import { useEmojiTextField } from "@/components/emoji-text-field";
 import { LinearEmojiMenu, linearEmojiOptions } from "@/experiences/linear";
 import { StylePicker, type PickerLayout } from "@/styles/style-picker";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
-import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
+import { Avatar, EmojiText, FitViewport, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
 
 const W = 1000;
 const H = 800;
-const THEME = "dark";
 
 const C = {
-  window: "lch(3.2 0.5 272)",
-  panel: "lch(5.52 0.4 272)",
-  panelBorder: "lch(11 1 272)",
-  title: "lch(100 0 272)",
-  text: "lch(90.451 1.2 272)",
-  muted: "lch(61.803 1.2 272)",
-  card: "lch(9.232 0.85 272)",
-  cardBorder: "lch(16.793 1.93 272)",
-  button: "lch(13.861 1.139 272)",
-  divider: "lch(13 1.5 272)",
-  hover: "lch(11 1 272)",
-  chip: "lch(10.149 0.689 272)",
+  window: ld("lch(94.44 0.5 282)", "lch(3.2 0.5 272)"),
+  panel: ld("lch(97.94 0.5 282)", "lch(5.52 0.4 272)"),
+  panelBorder: ld("lch(89.84 0 282)", "lch(11 1 272)"),
+  title: ld("lch(9.794 0 282)", "lch(100 0 272)"),
+  text: ld("lch(19.588 1.25 282)", "lch(90.451 1.2 272)"),
+  muted: ld("lch(39.176 1.25 282)", "lch(61.803 1.2 272)"),
+  card: ld("lch(100 0 282)", "lch(9.232 0.85 272)"),
+  cardBorder: ld("lch(91.9 0 282)", "lch(16.793 1.93 272)"),
+  button: ld("lch(94.854 0.5 282)", "lch(13.861 1.139 272)"),
+  divider: ld("lch(89.84 0 282)", "lch(13 1.5 272)"),
+  hover: ld("lch(94.854 0.5 282)", "lch(11 1 272)"),
+  chip: ld("lch(100 0 282)", "lch(10.149 0.689 272)"),
+  status: ld("lch(64.64 1.25 282)", "lch(61.8 1.2 272)"),
+  input: ld("lch(20 1 282)", "lch(90.826 1.425 272)"),
+  placeholder: ld("lch(66 1 282)", "lch(61.803 1.2 272)"),
+  tabRule: ld("lch(91.9 0 282)", "lch(21.36 1.93 272)"),
+  tabMuted: ld("lch(40 1 282)", "lch(64.714 1.425 272)"),
+  tabText: ld("lch(20 1 282)", "lch(91.178 1.425 272)"),
 };
 const FONT = "'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-// Linear's popups (measured): lch(12.72) fill, 0.5px lch(25.68) border, three soft shadows.
-const POPUP_SHADOW = "shadow-[0_3px_8px_lch(0_0_0/0.125),0_2px_5px_lch(0_0_0/0.125),0_1px_1px_lch(0_0_0/0.125)]";
+const POPUP_SHADOW = "shadow-[0_6px_18px_lch(0_0_0/0.02),0_3px_9px_lch(0_0_0/0.04),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_3px_8px_lch(0_0_0/0.125),0_2px_5px_lch(0_0_0/0.125),0_1px_1px_lch(0_0_0/0.125)]";
+const CARD_SHADOW = "shadow-[0_3px_6px_-2px_lch(0_0_0/0.02),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_0.5px_1px_1px_lch(0_0_0/0.3)]";
 
-// (B) The inline ":" menu in Linear's editors, the same as its composer autocomplete
-// (re-measured Nov 2026): above the caret, 190.6px wide, radius 10, 4px
-// list padding, twelve 34px rows with the highlight inset 4px (radius 6), a 15px emoji
-// at x=14 and 8px to the 13px/450 ":code:". (Overrides the shared Tiptap menu's default look.)
 const INLINE_MENU = [
-  `w-[190.6px] rounded-[10px] border-[0.5px] border-[lch(25.68_1.93_272)] bg-[lch(12.72_0.85_272)] p-1 text-[lch(100_0_272)] ${POPUP_SHADOW}`,
-  "[font-family:'Inter_Variable',Inter,-apple-system,sans-serif] [color-scheme:dark]",
+  `w-[190.6px] rounded-[10px] border-[0.5px] border-[lch(91.9_0_282)] bg-[lch(100_0_282)] p-1 text-[lch(10_0_282)] dark:border-[lch(25.68_1.93_272)] dark:bg-[lch(12.72_0.85_272)] dark:text-[lch(100_0_272)] ${POPUP_SHADOW}`,
+  "[font-family:'Inter_Variable',Inter,-apple-system,sans-serif]",
   "[&>li]:h-[34px] [&>li]:gap-2 [&>li]:rounded-[6px] [&>li]:px-[10px]",
-  "[&>li[data-highlighted]]:bg-[lch(18_1_272)] [&>li[data-highlighted]]:text-[lch(100_0_272)]",
+  "[&>li[data-highlighted]]:bg-[lch(95_0_282)] [&>li[data-highlighted]]:text-[lch(10_0_282)] dark:[&>li[data-highlighted]]:bg-[lch(18_1_272)] dark:[&>li[data-highlighted]]:text-[lch(100_0_272)]",
   "[&_[data-emoji]]:w-[15px] [&_[data-emoji]]:text-[15px] [&_span]:[font-family:inherit] [&_span]:text-[13px] [&_span]:[font-weight:450] [&_b]:[font-weight:inherit]",
 ].join(" ");
-// Linear's body text: 15px/24px at weight 450 with slight negative tracking.
 const BODY = "text-[15px] leading-6 font-[450] tracking-[-0.1px]";
 
 type Comment = { id: number; author: string; color: string; time: string; text: string; reactions: Reaction[] };
@@ -101,16 +81,14 @@ function useIssue() {
 function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   return (
-    <SceneFrame width={W} height={H} theme={THEME} label="Linear style issue" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+    <SceneFrame width={W} height={H} label="Linear style issue" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
       <div className="absolute inset-[8.5px] right-[8.5px] flex flex-col overflow-hidden rounded-[8px]" style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
         <Breadcrumb icon={icon} />
         <div className="flex min-h-0 flex-1">
-          {/* Main column: content starts 53.5px from the panel's left edge. */}
           <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pb-10 [scrollbar-width:none]">
             <div className="relative ml-[53.5px] w-[596px] pt-[59.8px]">
               <ScenePicker
                 appStyle={linear}
-                theme={THEME}
                 label="Set icon"
                 title="Set icon"
                 onSelect={(s) => setIcon(s.unified)}
@@ -123,7 +101,6 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
                 Emoji popover clips under the toolbar
               </h1>
               <Description />
-              {/* Reaction row: pills, then add reaction (opens the picker) and attach. */}
               <div className="mt-[26px] -ml-1.5 flex h-7 items-center gap-1">
                 <Pills reactions={reactions} onToggle={(u) => setReactions((r) => toggleReaction(r, u))} />
                 <AddReaction onSelect={(u) => setReactions((r) => toggleReaction(r, u))} />
@@ -170,7 +147,7 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   const round = "flex size-7 items-center justify-center rounded-full border-[0.5px]";
   return (
-    <MobileFrame theme={THEME} label="Linear style issue" appStyle={linear} height={680} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+    <MobileFrame label="Linear style issue" appStyle={linear} height={680} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
       <div className="flex h-11 shrink-0 items-center pr-3 pl-2 text-[13px] font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
         <span className={round} style={{ borderColor: "transparent" }}>
           <SidebarIcon />
@@ -188,7 +165,6 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
         </span>
       </div>
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pb-6 [scrollbar-width:none]">
-        {/* Copy link / ID / branch, then a split button, right-aligned under the bar. */}
         <div className="mt-[7.5px] flex h-7 justify-end gap-1.5 pr-px" style={{ color: C.text }} aria-hidden>
           <span className={round} style={{ background: C.chip, borderColor: C.cardBorder }}>
             <LinkIcon />
@@ -215,7 +191,6 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
             </h1>
             <ScenePicker
               appStyle={linear}
-              theme={THEME}
               label="Set icon"
               title="Set icon"
               sheet
@@ -225,11 +200,10 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
               <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
             </ScenePicker>
           </div>
-          {/* Status, priority, assignee, labels: 24px chips, 6px apart. */}
           <div className="mt-6 ml-1.5 flex h-6 items-center gap-1.5 text-[12px] leading-3 font-medium" aria-hidden>
             <span className="flex h-6 items-center gap-1.5 rounded-full border-[0.5px] pr-2 pl-1.5" style={{ background: C.chip, borderColor: C.cardBorder }}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <circle cx="7" cy="7" r="6" stroke="lch(61.8 1.2 272)" strokeWidth="1.5" />
+                <circle cx="7" cy="7" r="6" style={{ stroke: C.status }} strokeWidth="1.5" />
               </svg>
               <span className="font-[450]">Todo</span>
             </span>
@@ -311,7 +285,7 @@ function Properties() {
       </div>
       <div className={row}>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-          <circle cx="7" cy="7" r="6" stroke="lch(61.8 1.2 272)" strokeWidth="1.5" />
+          <circle cx="7" cy="7" r="6" style={{ stroke: C.status }} strokeWidth="1.5" />
         </svg>
         Todo
       </div>
@@ -382,12 +356,10 @@ function Pills({ reactions, onToggle }: { reactions: Reaction[]; onToggle: (unif
   );
 }
 
-/** Linear's 28px round add-reaction button: opens the Linear style picker (a sheet on a phone). */
 function AddReaction({ onSelect, sheet = false }: { onSelect: (unified: string) => void; sheet?: boolean }) {
   return (
     <ScenePicker
       appStyle={linear}
-      theme={THEME}
       label="Add reaction"
       title="Add reaction"
       sheet={sheet}
@@ -402,7 +374,7 @@ function AddReaction({ onSelect, sheet = false }: { onSelect: (unified: string) 
 
 function CommentCard({ comment, onToggle, compact = false }: { comment: Comment; onToggle: (unified: string) => void; compact?: boolean }) {
   return (
-    <article className={cn("rounded-[8px] px-4 py-3", !compact && "-ml-2 w-[612px]")} style={{ background: C.card, border: `0.5px solid ${C.cardBorder}`, boxShadow: "0 0.5px 1px 1px lch(0 0 0 / 0.3)" }}>
+    <article className={cn("rounded-[8px] px-4 py-3", CARD_SHADOW, !compact && "-ml-2 w-[612px]")} style={{ background: C.card, border: `0.5px solid ${C.cardBorder}` }}>
       <header className="flex h-5 items-center gap-2">
         <Avatar name={comment.author} size={20} color={comment.color} fontSize={9} />
         <span className="text-[13px] font-medium" style={{ color: C.text }}>
@@ -433,14 +405,14 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   return (
     <div className={cn("relative", !compact && "mt-4 -ml-2 w-[612px]")}>
       <LinearEmojiMenu {...emoji} />
-      <div className="relative h-[83px] rounded-[8px] px-4 py-3" style={{ background: C.card, border: `0.5px solid ${C.cardBorder}`, boxShadow: "0 0.5px 1px 1px lch(0 0 0 / 0.3)" }}>
+      <div className={cn("relative h-[83px] rounded-[8px] px-4 py-3", CARD_SHADOW)} style={{ background: C.card, border: `0.5px solid ${C.cardBorder}` }}>
         <textarea
           {...inputProps}
           rows={1}
           aria-label="Leave a comment"
           placeholder="Leave a comment..."
           className={cn("block h-6 w-full resize-none bg-transparent outline-none placeholder:text-(--ph)", BODY)}
-          style={{ color: "lch(90.826 1.425 272)", "--ph": C.muted } as React.CSSProperties}
+          style={{ color: C.input, "--ph": C.placeholder } as React.CSSProperties}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
               e.preventDefault();
@@ -448,7 +420,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
             }
           }}
         />
-        {/* Send: 24×24 round at window (916.6, 460) → 18.4px from the right, 14.5px from the bottom. */}
         <div className="absolute right-[18.4px] bottom-[14.5px] flex items-center gap-2">
           <span className="flex size-6 items-center justify-center" style={{ color: C.muted }} aria-hidden>
             <Paperclip />
@@ -462,7 +433,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   );
 }
 
-// Icons in Linear's 14–16px line style (currentColor).
 const line = (d: React.ReactNode, size = 14) => (
   <svg width={size} height={size} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     {d}
@@ -525,14 +495,12 @@ const Dots = () =>
   );
 
 
-/** (B) The description: a Tiptap editor with Linear's inline ":" emoji menu. */
 function Description({ compact = false }: { compact?: boolean }) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: "<p>The reaction picker opens below the fold when the editor scrolls. Try :s</p>",
     immediatelyRender: true,
-    // On a phone the editor reaches the edges, its text 14px in (10px above, 16 below).
-    editorProps: { attributes: { "aria-label": "Issue description", class: cn("outline-none [&_p]:m-0 caret-[lch(90.451_1.2_272)]", compact ? "mt-[22px] -mx-[14px] px-[14px] pt-2.5 pb-4" : "mt-6", BODY) } },
+    editorProps: { attributes: { "aria-label": "Issue description", class: cn("outline-none [&_p]:m-0 caret-[lch(19.588_1.25_282)] dark:caret-[lch(90.451_1.2_272)]", compact ? "mt-[22px] -mx-[14px] px-[14px] pt-2.5 pb-4" : "mt-6", BODY) } },
   });
   if (!editor) return null;
   return (
@@ -543,9 +511,6 @@ function Description({ compact = false }: { compact?: boolean }) {
   );
 }
 
-// (A) Linear's team/document icon popover: 412×411, radius 6, an "Icons | Emojis" tab row
-// (31.5px, 13px/500, 2px accent underline), a 401×28 search at (5.5, 36), 12px/22px
-// section titles at x=10.5 and 14 columns of 28px cells from x=10.5.
 const TEAM_PICKER: PickerLayout = {
   ...linear.layout,
   root: "h-[379.5px] w-[412px] bg-transparent font-picker text-picker-foreground [--emoji-size:20px] [--emoji-cell-size:28px] [--emoji-image-size:20px] [--emoji-header-height:28px] [--emoji-list-padding:10.5px]",
@@ -559,13 +524,12 @@ const TEAM_PICKER: PickerLayout = {
 
 const ACCENT = "lch(52.418 61.103 288.421)";
 
-/** Linear's tab row over the team icon picker; the Icons tab is shown but disabled. */
 const TEAM_TABS = (
-  <div role="tablist" className="flex h-[31.5px] shrink-0 items-stretch pr-2 pl-1.5" style={{ borderBottom: "1px solid lch(21.36 1.93 272)" }}>
-    <button type="button" role="tab" aria-selected={false} disabled className="flex h-full cursor-default items-center px-2 py-[7px] text-[13px] font-medium" style={{ color: "lch(64.714 1.425 272)" }}>
+  <div role="tablist" className="flex h-[31.5px] shrink-0 items-stretch pr-2 pl-1.5" style={{ borderBottom: `1px solid ${C.tabRule}` }}>
+    <button type="button" role="tab" aria-selected={false} disabled className="flex h-full cursor-default items-center px-2 py-[7px] text-[13px] font-medium" style={{ color: C.tabMuted }}>
       Icons
     </button>
-    <button type="button" role="tab" aria-selected className="flex h-full items-center px-2 py-[7px] text-[13px] font-medium outline-none" style={{ color: "lch(91.178 1.425 272)", boxShadow: `inset 0 -1px 0 ${ACCENT}, 0 1px 0 ${ACCENT}` }}>
+    <button type="button" role="tab" aria-selected className="flex h-full items-center px-2 py-[7px] text-[13px] font-medium outline-none" style={{ color: C.tabText, boxShadow: `inset 0 -1px 0 ${ACCENT}, 0 1px 0 ${ACCENT}` }}>
       Emojis
     </button>
   </div>
@@ -573,7 +537,6 @@ const TEAM_TABS = (
 
 function TeamIconPopover({ value, onChange, sheet = false }: { value: string; onChange: (unified: string) => void; sheet?: boolean }) {
   const [open, setOpen] = React.useState(false);
-  const t = themed(THEME);
   const tile = <Emoji emoji={value} size={18} className="text-[18px] leading-none" />;
   if (sheet)
     return (
@@ -581,12 +544,11 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
         appStyle={linear}
         layout={TEAM_PICKER}
         top={TEAM_TABS}
-        theme={THEME}
         label="Change team icon"
         title="Change icon"
         onSelect={(s) => onChange(s.unified)}
         font={FONT}
-        triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded-[6px] bg-[lch(13.861_1.139_272)] outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
+        triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded-[6px] bg-[lch(94.854_0.5_282)] outline-none dark:bg-[lch(13.861_1.139_272)] focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
       >
         {tile}
       </PickerSheet>
@@ -597,11 +559,11 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
         aria-label="Change team icon"
         title="Change icon"
         className="flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
-        style={{ background: "lch(13.861 1.139 272)" }}
+        style={{ background: C.button }}
       >
         {tile}
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content side="bottom" align="start" aria-label="Linear style icon picker" className={t.className} style={{ ...t.style, fontFamily: FONT }}>
+      <EmojiPopover.Content side="bottom" align="start" aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
         <FitViewport width={412}>
           <div data-style="linear" className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
             {TEAM_TABS}
@@ -620,12 +582,11 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
   );
 }
 
-/** (A) A team overview header: the icon tile and a 24px/600 title. */
 function TeamFrame({ compact }: { compact: boolean }) {
   const [icon, setIcon] = React.useState("1f680"); // 🚀
   if (compact)
     return (
-      <MobileFrame theme={THEME} label="Linear style team header" appStyle={linear} height={150} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+      <MobileFrame label="Linear style team header" appStyle={linear} height={150} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
         <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[14px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
           <span>Teams</span>
           <Chevron />
@@ -645,7 +606,7 @@ function TeamFrame({ compact }: { compact: boolean }) {
       </MobileFrame>
     );
   return (
-    <SceneFrame width={W} height={196} theme={THEME} label="Linear style team header" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+    <SceneFrame width={W} height={196} label="Linear style team header" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
       <div className="absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[8px]" style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
         <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[21px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
           <span>Teams</span>

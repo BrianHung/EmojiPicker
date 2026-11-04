@@ -1,8 +1,3 @@
-// Slack style, in situ: a channel with shortcodes rendered as emoji, reaction pills, the
-// hover toolbar and the composer's ":" autocomplete. The composer is Slack's, measured in
-// a DM (light, Nov 2026): radius 8, a 1px rgba(94,93,96,.45) border and 0 1px 3px shadow,
-// a 36px formatting bar over the 15px/22px editor (padding 8px 12px) and a 42px toolbar,
-// 118px in all; the autocomplete's bottom sits 3px into the editor, over the formatting bar.
 import * as React from "react";
 import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
@@ -40,7 +35,6 @@ const INITIAL: Message[] = [
   { id: 3, author: "You", color: "#4a154b", time: "10:06 AM", text: "yep :+1::skin-tone-3: and the skin tone sticks everywhere :ship:", reactions: [] },
 ];
 
-// Slack renders :shortcodes: (with :skin-tone-N:) as emoji; custom ones as images.
 const SHORTCODE = /:([a-z0-9_+\-']+):(?::skin-tone-([2-6]):)?/gi;
 
 function SlackText({ text }: { text: string }) {
@@ -63,7 +57,6 @@ function SlackText({ text }: { text: string }) {
   return <>{nodes}</>;
 }
 
-/** The Slack picker: a popover, or on a phone a bottom sheet as in Slack's mobile app. */
 function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, children }: { sheet: boolean; label: string; onSelect: (s: EmojiSelection) => void; triggerClassName: string; side?: "top"; align?: "end"; children: React.ReactNode }) {
   if (sheet)
     return (
@@ -78,7 +71,6 @@ function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, chil
   );
 }
 
-/** Slack mockup: shortcodes in messages, reaction pills, hover toolbar, add-reaction picker, :shortcode: composer. */
 export function SlackScene() {
   const { ref, compact } = useCompact();
   const [messages, setMessages] = React.useState(INITIAL);
@@ -124,7 +116,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-[15px] font-black">{message.author}</span>
+          <span className="text-[15px] font-black dark:text-[#f8f8f8]">{message.author}</span>
           <span className="text-[12px] text-[#616061] dark:text-[#ababad]">{message.time}</span>
         </div>
         <p className="text-[15px] leading-[22px] break-words">
@@ -136,7 +128,6 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
           </div>
         ) : null}
       </div>
-      {/* Slack's hover toolbar: three quick reactions + add reaction */}
       <div className="absolute -top-4 right-5 hidden items-center rounded-lg border border-[#dddddd] bg-white p-0.5 shadow-[0_1px_3px_rgba(0,0,0,0.08)] group-focus-within:flex group-hover:flex has-[[aria-expanded=true]]:flex dark:border-[#35373b] dark:bg-[#1a1d21]">
         {quick.map((u) => (
           <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(store.withSkinTone(u))} className="flex size-8 items-center justify-center rounded hover:bg-[#f4f4f4] dark:hover:bg-[#2c2d30]">
@@ -152,7 +143,6 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
 }
 
 function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
-  // Slack keeps :shortcodes: as text in the composer and renders them in the message.
   const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insert: "shortcode" });
   const submit = () => {
     const text = value.trim();
@@ -162,7 +152,7 @@ function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; co
   return (
     <div className="shrink-0 px-5 pb-5">
       <div className="rounded-[8px] border border-[rgba(94,93,96,0.45)] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] dark:border-[#565856] dark:bg-[#222529]">
-        <div className="flex h-9 items-center gap-0.5 px-1.5 text-[15px] text-[#616061] dark:text-[#ababad]" aria-hidden>
+        <div className="flex h-9 items-center gap-0.5 px-1.5 text-[15px] text-[#616061] dark:text-[#b9babd]" aria-hidden>
           <span className="flex size-7 items-center justify-center font-bold">B</span>
           <span className="flex size-7 items-center justify-center font-serif italic">I</span>
           <span className="flex size-7 items-center justify-center line-through">S</span>

@@ -1,4 +1,3 @@
-// Stroke icons for category bars and controls (Lucide-style, 24×24, currentColor).
 import * as React from "react";
 
 type IconProps = React.SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number };

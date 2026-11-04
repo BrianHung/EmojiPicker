@@ -1,8 +1,6 @@
 import * as I from "@/styles/icons";
 import { type Style, type Tokens } from "@/styles/style-picker";
 
-// From a macOS emoji picker screenshot at 2x; the tapback follows iOS Messages.
-// Apple's system grays (Tailwind neutral) and glass alphas.
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(#ffffff, oklch(26.9% 0 none))",
   "--emoji-picker-foreground": "light-dark(oklch(20.5% 0 none), #ffffff)",
