@@ -1,67 +1,67 @@
 {
   "opened": {
-    "focus": "combobox \"Type to search for an emoji\"",
+    "focus": "searchbox \"Type to search for an emoji\"",
     "highlight": null
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"red heart\" 2764-fe0f",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"thumbs down\" 1f44e",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"thumbs down\" 1f44e",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"grinning face with smiling eyes\" 1f604",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"grinning face with smiling eyes\" 1f604",
       "scrolled": 0
     },
     {
       "key": "ArrowLeft",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"grinning face with big eyes\" 1f603",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"thumbs up\" 1f44d",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
       "key": "End",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
       "scrolled": 0
     },
     {
       "key": "Home",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"red heart\" 2764-fe0f",
       "scrolled": 0
     },
     {
       "key": "PageDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"kissing face\" 1f617",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"kissing face\" 1f617",
       "scrolled": 0
     },
     {
       "key": "PageUp",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"red heart\" 2764-fe0f",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"red heart\" 2764-fe0f",
       "scrolled": 0
     }
   ],

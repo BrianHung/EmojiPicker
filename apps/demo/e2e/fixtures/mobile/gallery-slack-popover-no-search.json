@@ -1,66 +1,66 @@
 {
   "opened": {
-    "focus": "gridcell \"check mark button\" 2705",
+    "focus": "option \"check mark button\" 2705",
     "highlight": null
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "gridcell \"thumbs up\" 1f44d",
+      "focus": "option \"thumbs up\" 1f44d",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "gridcell \"party popper\" 1f389",
+      "focus": "option \"party popper\" 1f389",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "gridcell \"keycap: 1\" 31-fe0f-20e3",
+      "focus": "option \"keycap: 1\" 31-fe0f-20e3",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "gridcell \"grinning face with smiling eyes\" 1f604",
+      "focus": "option \"grinning face with smiling eyes\" 1f604",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowLeft",
-      "focus": "gridcell \"grinning face with big eyes\" 1f603",
+      "focus": "option \"grinning face with big eyes\" 1f603",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "gridcell \"party popper\" 1f389",
+      "focus": "option \"party popper\" 1f389",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "End",
-      "focus": "gridcell \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "focus": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "Home",
-      "focus": "gridcell \"check mark button\" 2705",
+      "focus": "option \"check mark button\" 2705",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "PageDown",
-      "focus": "gridcell \"sleepy face\" 1f62a",
+      "focus": "option \"sleepy face\" 1f62a",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "PageUp",
-      "focus": "gridcell \"check mark button\" 2705",
+      "focus": "option \"check mark button\" 2705",
       "highlight": null,
       "scrolled": 0
     }

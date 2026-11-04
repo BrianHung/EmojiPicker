@@ -3,7 +3,7 @@
     - tab "GIFs" [disabled]
     - tab "Stickers" [disabled]
     - tab "Emoji" [selected]
-  - combobox "Type to search for an emoji" [expanded]
+  - searchbox "Type to search for an emoji"
   - button "Default skin tone":
     - img "clapping hands"
   - tablist "Category navigation":
@@ -16,165 +16,158 @@
     - tab "Objects"
     - tab "Symbols"
     - tab "Flags"
-  - grid:
-    - rowgroup "Frequently Used":
-      - button "Frequently Used" [expanded]
-      - row "red heart thumbs up thumbs down face with tears of joy double exclamation mark red question mark":
-        - gridcell "red heart":
-          - img "red heart"
-        - gridcell "thumbs up":
-          - img "thumbs up"
-        - gridcell "thumbs down":
-          - img "thumbs down"
-        - gridcell "face with tears of joy":
-          - img "face with tears of joy"
-        - gridcell "double exclamation mark":
-          - img "double exclamation mark"
-        - gridcell "red question mark":
-          - img "red question mark"
-    - rowgroup "People":
-      - button "People" [expanded]
-      - row:
-        - gridcell "grinning face":
-          - img "grinning face"
-        - gridcell "grinning face with big eyes":
-          - img "grinning face with big eyes"
-        - gridcell "grinning face with smiling eyes":
-          - img "grinning face with smiling eyes"
-        - gridcell "beaming face with smiling eyes":
-          - img "beaming face with smiling eyes"
-        - gridcell "grinning squinting face":
-          - img "grinning squinting face"
-        - gridcell "grinning face with sweat":
-          - img "grinning face with sweat"
-        - gridcell "rolling on the floor laughing":
-          - img "rolling on the floor laughing"
-        - gridcell "face with tears of joy":
-          - img "face with tears of joy"
-        - gridcell "slightly smiling face":
-          - img "slightly smiling face"
-        - gridcell "upside-down face":
-          - img "upside-down face"
-        - gridcell "melting face":
-          - img "melting face"
-        - gridcell "winking face":
-          - img "winking face"
-        - gridcell "smiling face with smiling eyes":
-          - img "smiling face with smiling eyes"
-        - gridcell "smiling face with halo":
-          - img "smiling face with halo"
-        - gridcell "smiling face with hearts":
-          - img "smiling face with hearts"
-        - gridcell "smiling face with heart-eyes":
-          - img "smiling face with heart-eyes"
-        - gridcell "star-struck":
-          - img "star-struck"
-        - gridcell "face blowing a kiss":
-          - img "face blowing a kiss"
-        - gridcell "kissing face":
-          - img "kissing face"
-        - gridcell "smiling face":
-          - img "smiling face"
-        - gridcell "kissing face with closed eyes":
-          - img "kissing face with closed eyes"
-        - gridcell "kissing face with smiling eyes":
-          - img "kissing face with smiling eyes"
-        - gridcell "smiling face with tear":
-          - img "smiling face with tear"
-        - gridcell "face savoring food":
-          - img "face savoring food"
-        - gridcell "face with tongue":
-          - img "face with tongue"
-        - gridcell "winking face with tongue":
-          - img "winking face with tongue"
-        - gridcell "zany face":
-          - img "zany face"
-        - gridcell "squinting face with tongue":
-          - img "squinting face with tongue"
-        - gridcell "money-mouth face":
-          - img "money-mouth face"
-        - gridcell "smiling face with open hands":
-          - img "smiling face with open hands"
-        - gridcell "face with hand over mouth":
-          - img "face with hand over mouth"
-        - gridcell "face with open eyes and hand over mouth":
-          - img "face with open eyes and hand over mouth"
-        - gridcell "face with peeking eye":
-          - img "face with peeking eye"
-        - gridcell "shushing face":
-          - img "shushing face"
-        - gridcell "thinking face":
-          - img "thinking face"
-        - gridcell "saluting face":
-          - img "saluting face"
-        - gridcell "zipper-mouth face":
-          - img "zipper-mouth face"
-        - gridcell "face with raised eyebrow":
-          - img "face with raised eyebrow"
-        - gridcell "neutral face":
-          - img "neutral face"
-        - gridcell "expressionless face":
-          - img "expressionless face"
-        - gridcell "face without mouth":
-          - img "face without mouth"
-        - gridcell "dotted line face":
-          - img "dotted line face"
-        - gridcell "face in clouds":
-          - img "face in clouds"
-        - gridcell "smirking face":
-          - img "smirking face"
-        - gridcell "unamused face":
-          - img "unamused face"
-        - gridcell "face with rolling eyes":
-          - img "face with rolling eyes"
-        - gridcell "grimacing face":
-          - img "grimacing face"
-        - gridcell "face exhaling":
-          - img "face exhaling"
-        - gridcell "lying face":
-          - img "lying face"
-        - gridcell "shaking face":
-          - img "shaking face"
-        - gridcell "head shaking horizontally":
-          - img "head shaking horizontally"
-        - gridcell "head shaking vertically":
-          - img "head shaking vertically"
-        - gridcell "relieved face":
-          - img "relieved face"
-        - gridcell "pensive face":
-          - img "pensive face"
-        - gridcell "sleepy face":
-          - img "sleepy face"
-        - gridcell "drooling face":
-          - img "drooling face"
-        - gridcell "sleeping face":
-          - img "sleeping face"
-        - gridcell "face with bags under eyes":
-          - img "face with bags under eyes"
-        - gridcell "face with medical mask":
-          - img "face with medical mask"
-        - gridcell "face with thermometer":
-          - img "face with thermometer"
-        - gridcell "face with head-bandage":
-          - img "face with head-bandage"
-        - gridcell "nauseated face":
-          - img "nauseated face"
-        - gridcell "face vomiting":
-          - img "face vomiting"
-    - rowgroup "Nature":
-      - button "Nature" [expanded]
-    - rowgroup "Food":
-      - button "Food" [expanded]
-    - rowgroup "Activities":
-      - button "Activities" [expanded]
-    - rowgroup "Travel":
-      - button "Travel" [expanded]
-    - rowgroup "Objects":
-      - button "Objects" [expanded]
-    - rowgroup "Symbols":
-      - button "Symbols" [expanded]
-    - rowgroup "Flags":
-      - button "Flags" [expanded]
+  - listbox "Emoji":
+    - group "Frequently Used":
+      - text: ""
+      - option "red heart":
+        - img "red heart"
+      - option "thumbs up":
+        - img "thumbs up"
+      - option "thumbs down":
+        - img "thumbs down"
+      - option "face with tears of joy":
+        - img "face with tears of joy"
+      - option "double exclamation mark":
+        - img "double exclamation mark"
+      - option "red question mark":
+        - img "red question mark"
+    - group "People":
+      - text: ""
+      - option "grinning face":
+        - img "grinning face"
+      - option "grinning face with big eyes":
+        - img "grinning face with big eyes"
+      - option "grinning face with smiling eyes":
+        - img "grinning face with smiling eyes"
+      - option "beaming face with smiling eyes":
+        - img "beaming face with smiling eyes"
+      - option "grinning squinting face":
+        - img "grinning squinting face"
+      - option "grinning face with sweat":
+        - img "grinning face with sweat"
+      - option "rolling on the floor laughing":
+        - img "rolling on the floor laughing"
+      - option "face with tears of joy":
+        - img "face with tears of joy"
+      - option "slightly smiling face":
+        - img "slightly smiling face"
+      - option "upside-down face":
+        - img "upside-down face"
+      - option "melting face":
+        - img "melting face"
+      - option "winking face":
+        - img "winking face"
+      - option "smiling face with smiling eyes":
+        - img "smiling face with smiling eyes"
+      - option "smiling face with halo":
+        - img "smiling face with halo"
+      - option "smiling face with hearts":
+        - img "smiling face with hearts"
+      - option "smiling face with heart-eyes":
+        - img "smiling face with heart-eyes"
+      - option "star-struck":
+        - img "star-struck"
+      - option "face blowing a kiss":
+        - img "face blowing a kiss"
+      - option "kissing face":
+        - img "kissing face"
+      - option "smiling face":
+        - img "smiling face"
+      - option "kissing face with closed eyes":
+        - img "kissing face with closed eyes"
+      - option "kissing face with smiling eyes":
+        - img "kissing face with smiling eyes"
+      - option "smiling face with tear":
+        - img "smiling face with tear"
+      - option "face savoring food":
+        - img "face savoring food"
+      - option "face with tongue":
+        - img "face with tongue"
+      - option "winking face with tongue":
+        - img "winking face with tongue"
+      - option "zany face":
+        - img "zany face"
+      - option "squinting face with tongue":
+        - img "squinting face with tongue"
+      - option "money-mouth face":
+        - img "money-mouth face"
+      - option "smiling face with open hands":
+        - img "smiling face with open hands"
+      - option "face with hand over mouth":
+        - img "face with hand over mouth"
+      - option "face with open eyes and hand over mouth":
+        - img "face with open eyes and hand over mouth"
+      - option "face with peeking eye":
+        - img "face with peeking eye"
+      - option "shushing face":
+        - img "shushing face"
+      - option "thinking face":
+        - img "thinking face"
+      - option "saluting face":
+        - img "saluting face"
+      - option "zipper-mouth face":
+        - img "zipper-mouth face"
+      - option "face with raised eyebrow":
+        - img "face with raised eyebrow"
+      - option "neutral face":
+        - img "neutral face"
+      - option "expressionless face":
+        - img "expressionless face"
+      - option "face without mouth":
+        - img "face without mouth"
+      - option "dotted line face":
+        - img "dotted line face"
+      - option "face in clouds":
+        - img "face in clouds"
+      - option "smirking face":
+        - img "smirking face"
+      - option "unamused face":
+        - img "unamused face"
+      - option "face with rolling eyes":
+        - img "face with rolling eyes"
+      - option "grimacing face":
+        - img "grimacing face"
+      - option "face exhaling":
+        - img "face exhaling"
+      - option "lying face":
+        - img "lying face"
+      - option "shaking face":
+        - img "shaking face"
+      - option "head shaking horizontally":
+        - img "head shaking horizontally"
+      - option "head shaking vertically":
+        - img "head shaking vertically"
+      - option "relieved face":
+        - img "relieved face"
+      - option "pensive face":
+        - img "pensive face"
+      - option "sleepy face":
+        - img "sleepy face"
+      - option "drooling face":
+        - img "drooling face"
+      - option "sleeping face":
+        - img "sleeping face"
+      - option "face with bags under eyes":
+        - img "face with bags under eyes"
+      - option "face with medical mask":
+        - img "face with medical mask"
+      - option "face with thermometer":
+        - img "face with thermometer"
+      - option "face with head-bandage":
+        - img "face with head-bandage"
+      - option "nauseated face":
+        - img "nauseated face"
+      - option "face vomiting":
+        - img "face vomiting"
+  - button "Frequently Used" [expanded]
+  - button "People" [expanded]
+  - button "Nature" [expanded]
+  - button "Food" [expanded]
+  - button "Activities" [expanded]
+  - button "Travel" [expanded]
+  - button "Objects" [expanded]
+  - button "Symbols" [expanded]
+  - button "Flags" [expanded]
   - img "red heart"
   - text: ":heart:"
   - status

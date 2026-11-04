@@ -1,66 +1,66 @@
 {
   "opened": {
-    "focus": "gridcell \"red heart\" 2764-fe0f",
+    "focus": "option \"red heart\" 2764-fe0f",
     "highlight": null
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "gridcell \"grinning face\" 1f600",
+      "focus": "option \"grinning face\" 1f600",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "gridcell \"grinning face with big eyes\" 1f603",
+      "focus": "option \"grinning face with big eyes\" 1f603",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "gridcell \"grinning face with smiling eyes\" 1f604",
+      "focus": "option \"grinning face with smiling eyes\" 1f604",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "gridcell \"winking face\" 1f609",
+      "focus": "option \"winking face\" 1f609",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowLeft",
-      "focus": "gridcell \"melting face\" 1fae0",
+      "focus": "option \"melting face\" 1fae0",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "gridcell \"grinning face with big eyes\" 1f603",
+      "focus": "option \"grinning face with big eyes\" 1f603",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "End",
-      "focus": "gridcell \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "focus": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "Home",
-      "focus": "gridcell \"red heart\" 2764-fe0f",
+      "focus": "option \"red heart\" 2764-fe0f",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "PageDown",
-      "focus": "gridcell \"angry face with horns\" 1f47f",
+      "focus": "option \"angry face with horns\" 1f47f",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "PageUp",
-      "focus": "gridcell \"red heart\" 2764-fe0f",
+      "focus": "option \"red heart\" 2764-fe0f",
       "highlight": null,
       "scrolled": 0
     }

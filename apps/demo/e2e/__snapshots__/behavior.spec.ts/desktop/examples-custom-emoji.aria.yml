@@ -1,137 +1,145 @@
 - complementary "Emoji picker":
-  - combobox "Type to search for an emoji" [expanded]
+  - searchbox "Type to search for an emoji"
   - button "Default skin tone":
     - img "raised hand": ✋
-  - grid:
-    - rowgroup "Frequently used":
-      - row "red heart thumbs up thumbs down face with tears of joy double exclamation mark red question mark":
-        - gridcell "red heart": ❤️
-        - gridcell "thumbs up": 👍
-        - gridcell "thumbs down": 👎
-        - gridcell "face with tears of joy": 😂
-        - gridcell "double exclamation mark": ‼️
-        - gridcell "red question mark": ❓
-    - rowgroup "Bufo":
-      - row "bufo yes bufo no bufo party bufo lgtm bufo wave bufo heart bufo thumbsup bufo celebrate bufo laugh xd bufo hug bufo pray bufo eyes bufo facepalm bufo shrug bufo happy bufo sweat bufo hello bufo thanks bufo ack bufo check bufo congrats bufo upvote bufo downvote bufo excited bufo shy bufo worried bufo phew bufo sigh bufo wat bufo idk bufo please bufo welcome bufo mindblown bufo nervous bufo confused bufo uwu bufo blep bufo peek bufo chefkiss bufo innocent bufo pog bufo lfg bufo grin bufo concerned bufo snore bufo shaking head bufo tips hat bufo detective bufo pirate bufo cowboy bufo king bufo nerd bufo science bufo rocket bufo medal bufo confetti":
-        - gridcell "bufo yes":
-          - img "bufo yes"
-        - gridcell "bufo no":
-          - img "bufo no"
-        - gridcell "bufo party":
-          - img "bufo party"
-        - gridcell "bufo lgtm":
-          - img "bufo lgtm"
-        - gridcell "bufo wave":
-          - img "bufo wave"
-        - gridcell "bufo heart":
-          - img "bufo heart"
-        - gridcell "bufo thumbsup":
-          - img "bufo thumbsup"
-        - gridcell "bufo celebrate":
-          - img "bufo celebrate"
-        - gridcell "bufo laugh xd":
-          - img "bufo laugh xd"
-        - gridcell "bufo hug":
-          - img "bufo hug"
-        - gridcell "bufo pray":
-          - img "bufo pray"
-        - gridcell "bufo eyes":
-          - img "bufo eyes"
-        - gridcell "bufo facepalm":
-          - img "bufo facepalm"
-        - gridcell "bufo shrug":
-          - img "bufo shrug"
-        - gridcell "bufo happy":
-          - img "bufo happy"
-        - gridcell "bufo sweat":
-          - img "bufo sweat"
-        - gridcell "bufo hello":
-          - img "bufo hello"
-        - gridcell "bufo thanks":
-          - img "bufo thanks"
-        - gridcell "bufo ack":
-          - img "bufo ack"
-        - gridcell "bufo check":
-          - img "bufo check"
-        - gridcell "bufo congrats":
-          - img "bufo congrats"
-        - gridcell "bufo upvote":
-          - img "bufo upvote"
-        - gridcell "bufo downvote":
-          - img "bufo downvote"
-        - gridcell "bufo excited":
-          - img "bufo excited"
-        - gridcell "bufo shy":
-          - img "bufo shy"
-        - gridcell "bufo worried":
-          - img "bufo worried"
-        - gridcell "bufo phew":
-          - img "bufo phew"
-        - gridcell "bufo sigh":
-          - img "bufo sigh"
-        - gridcell "bufo wat":
-          - img "bufo wat"
-        - gridcell "bufo idk":
-          - img "bufo idk"
-        - gridcell "bufo please":
-          - img "bufo please"
-        - gridcell "bufo welcome":
-          - img "bufo welcome"
-        - gridcell "bufo mindblown":
-          - img "bufo mindblown"
-        - gridcell "bufo nervous":
-          - img "bufo nervous"
-        - gridcell "bufo confused":
-          - img "bufo confused"
-        - gridcell "bufo uwu":
-          - img "bufo uwu"
-        - gridcell "bufo blep":
-          - img "bufo blep"
-        - gridcell "bufo peek":
-          - img "bufo peek"
-        - gridcell "bufo chefkiss":
-          - img "bufo chefkiss"
-        - gridcell "bufo innocent":
-          - img "bufo innocent"
-        - gridcell "bufo pog":
-          - img "bufo pog"
-        - gridcell "bufo lfg":
-          - img "bufo lfg"
-        - gridcell "bufo grin":
-          - img "bufo grin"
-        - gridcell "bufo concerned":
-          - img "bufo concerned"
-        - gridcell "bufo snore":
-          - img "bufo snore"
-        - gridcell "bufo shaking head":
-          - img "bufo shaking head"
-        - gridcell "bufo tips hat":
-          - img "bufo tips hat"
-        - gridcell "bufo detective":
-          - img "bufo detective"
-        - gridcell "bufo pirate":
-          - img "bufo pirate"
-        - gridcell "bufo cowboy":
-          - img "bufo cowboy"
-        - gridcell "bufo king":
-          - img "bufo king"
-        - gridcell "bufo nerd":
-          - img "bufo nerd"
-        - gridcell "bufo science":
-          - img "bufo science"
-        - gridcell "bufo rocket":
-          - img "bufo rocket"
-        - gridcell "bufo medal":
-          - img "bufo medal"
-        - gridcell "bufo confetti":
-          - img "bufo confetti"
-    - rowgroup "Smileys & People"
-    - rowgroup "Animals & Nature"
-    - rowgroup "Food & Drink"
-    - rowgroup "Travel & Places"
-    - rowgroup "Activities"
-    - rowgroup "Objects"
-    - rowgroup "Symbols"
-    - rowgroup "Flags"
+  - listbox "Emoji":
+    - group "Frequently used":
+      - text: ""
+      - option "red heart": ❤️
+      - option "thumbs up": 👍
+      - option "thumbs down": 👎
+      - option "face with tears of joy": 😂
+      - option "double exclamation mark": ‼️
+      - option "red question mark": ❓
+    - group "Bufo":
+      - text: ""
+      - option "bufo yes":
+        - img "bufo yes"
+      - option "bufo no":
+        - img "bufo no"
+      - option "bufo party":
+        - img "bufo party"
+      - option "bufo lgtm":
+        - img "bufo lgtm"
+      - option "bufo wave":
+        - img "bufo wave"
+      - option "bufo heart":
+        - img "bufo heart"
+      - option "bufo thumbsup":
+        - img "bufo thumbsup"
+      - option "bufo celebrate":
+        - img "bufo celebrate"
+      - option "bufo laugh xd":
+        - img "bufo laugh xd"
+      - option "bufo hug":
+        - img "bufo hug"
+      - option "bufo pray":
+        - img "bufo pray"
+      - option "bufo eyes":
+        - img "bufo eyes"
+      - option "bufo facepalm":
+        - img "bufo facepalm"
+      - option "bufo shrug":
+        - img "bufo shrug"
+      - option "bufo happy":
+        - img "bufo happy"
+      - option "bufo sweat":
+        - img "bufo sweat"
+      - option "bufo hello":
+        - img "bufo hello"
+      - option "bufo thanks":
+        - img "bufo thanks"
+      - option "bufo ack":
+        - img "bufo ack"
+      - option "bufo check":
+        - img "bufo check"
+      - option "bufo congrats":
+        - img "bufo congrats"
+      - option "bufo upvote":
+        - img "bufo upvote"
+      - option "bufo downvote":
+        - img "bufo downvote"
+      - option "bufo excited":
+        - img "bufo excited"
+      - option "bufo shy":
+        - img "bufo shy"
+      - option "bufo worried":
+        - img "bufo worried"
+      - option "bufo phew":
+        - img "bufo phew"
+      - option "bufo sigh":
+        - img "bufo sigh"
+      - option "bufo wat":
+        - img "bufo wat"
+      - option "bufo idk":
+        - img "bufo idk"
+      - option "bufo please":
+        - img "bufo please"
+      - option "bufo welcome":
+        - img "bufo welcome"
+      - option "bufo mindblown":
+        - img "bufo mindblown"
+      - option "bufo nervous":
+        - img "bufo nervous"
+      - option "bufo confused":
+        - img "bufo confused"
+      - option "bufo uwu":
+        - img "bufo uwu"
+      - option "bufo blep":
+        - img "bufo blep"
+      - option "bufo peek":
+        - img "bufo peek"
+      - option "bufo chefkiss":
+        - img "bufo chefkiss"
+      - option "bufo innocent":
+        - img "bufo innocent"
+      - option "bufo pog":
+        - img "bufo pog"
+      - option "bufo lfg":
+        - img "bufo lfg"
+      - option "bufo grin":
+        - img "bufo grin"
+      - option "bufo concerned":
+        - img "bufo concerned"
+      - option "bufo snore":
+        - img "bufo snore"
+      - option "bufo shaking head":
+        - img "bufo shaking head"
+      - option "bufo tips hat":
+        - img "bufo tips hat"
+      - option "bufo detective":
+        - img "bufo detective"
+      - option "bufo pirate":
+        - img "bufo pirate"
+      - option "bufo cowboy":
+        - img "bufo cowboy"
+      - option "bufo king":
+        - img "bufo king"
+      - option "bufo nerd":
+        - img "bufo nerd"
+      - option "bufo science":
+        - img "bufo science"
+      - option "bufo rocket":
+        - img "bufo rocket"
+      - option "bufo medal":
+        - img "bufo medal"
+      - option "bufo confetti":
+        - img "bufo confetti"
+      - option "bufo yay":
+        - img "bufo yay"
+      - option "bufo starstruck":
+        - img "bufo starstruck"
+      - option "bufo cuppa":
+        - img "bufo cuppa"
+      - option "bufo boba":
+        - img "bufo boba"
+      - option "bufo ice cream":
+        - img "bufo ice cream"
+      - option "bufo popcorn":
+        - img "bufo popcorn"
+      - option "bufo ramen":
+        - img "bufo ramen"
+      - option "bufo taco":
+        - img "bufo taco"
   - text: Pick an emoji
   - status
