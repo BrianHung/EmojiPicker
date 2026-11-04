@@ -7,6 +7,7 @@ import {
   useEmojiStore,
   useFrequentEmoji,
   type CategoryHeaderProps,
+  type HeaderActionsProps,
   type CategoryOption,
   type EmojiSelection,
   type PickerComponents,
@@ -127,23 +128,22 @@ function headerComponent(layout: PickerLayout): PickerComponents | undefined {
         </div>
       );
     }
-    // Discord: the whole row toggles the section; the chevron turns -90° when collapsed.
+    // Discord: the chevron turns -90° when collapsed. The title is text; the row's toggle is HeaderActions.
     return (
-      <div {...props} aria-hidden={undefined} className={className}>
-        <button
-          type="button"
-          aria-expanded={!category.collapsed}
-          onClick={category.toggleCollapsed}
-          className="flex h-full min-w-0 flex-1 cursor-pointer items-center gap-1 text-left outline-none hover:text-(--discord-strong) focus-visible:text-(--discord-strong)"
-        >
+      <div {...props} className={className}>
+        <div className="flex h-full min-w-0 flex-1 items-center gap-1">
           {icon}
           <span className="truncate">{children}</span>
-          <I.ChevronDown size={hi.size} strokeWidth={2} className={cn("shrink-0 transition-transform duration-150", category.collapsed && "-rotate-90", hi.className)} />
-        </button>
+          <I.ChevronDown size={hi.size} strokeWidth={2} aria-hidden className={cn("shrink-0 transition-transform duration-150", category.collapsed && "-rotate-90", hi.className)} />
+        </div>
       </div>
     );
   }
-  return { CategoryHeader: Header };
+  // The whole row toggles its section: a control over the title, outside the listbox.
+  function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
+    return <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0 cursor-pointer outline-none" />;
+  }
+  return layout.headerIcon?.chevron ? { CategoryHeader: Header, HeaderActions: Toggle } : { CategoryHeader: Header };
 }
 
 const DOT_COLORS: Record<string, string> = { neutral: "#ffc93a", "1f3fb": "#fadcbc", "1f3fc": "#e0bb95", "1f3fd": "#bf8f68", "1f3fe": "#9b643d", "1f3ff": "#594539" };

@@ -76,10 +76,8 @@ function CollectionRoot({ collection, persistedKeys }: { collection: Iterable<No
       if (!el || !list) return;
       const rtl = getComputedStyle(list).direction === "rtl";
       const offset = visibleOffset(el, list, horizontal, rtl);
-      // The list's fractional width (clientWidth rounds), with an ancestor's scale undone.
-      const box = list.getBoundingClientRect().width;
-      const ratio = list.offsetWidth ? box / list.offsetWidth : 1;
-      const width = Math.abs(ratio - 1) > 0.02 ? box / ratio : box;
+      // Layout px, as the browser rounds them (unaffected by an ancestor's scale).
+      const width = list.clientWidth;
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);
       // What of the list is in the scroller's window.
       const start = Math.max(0, offset);

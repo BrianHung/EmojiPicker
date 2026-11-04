@@ -9,7 +9,7 @@
 // or Enter) a bubble for the reaction bar, double-tap for ❤️, and "+" and the composer's
 // smiley open the picker as a bottom sheet. The phone header is not measured.
 import * as React from "react";
-import { Emoji, EmojiPopover, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, EmojiPopover, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, useCompact, useLongPress } from "@/styles/scene-kit";
@@ -319,7 +319,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
         className={t.className}
         style={t.style}
       >
-        <div data-style="instagram" className={tb.className} role="toolbar" aria-label="Reactions">
+        <ReactionRow data-style="instagram" className={tb.className} aria-label="Reactions">
           <div className={tb.reactions}>
             {tb.pinned!.map((u, i) => (
               <button
@@ -353,7 +353,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
               </EmojiPopover.Root>
             )}
           </div>
-        </div>
+        </ReactionRow>
       </EmojiPopover.Content>
     </EmojiPopover.Root>
   );

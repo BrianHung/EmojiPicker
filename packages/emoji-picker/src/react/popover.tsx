@@ -223,8 +223,21 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     placement: placementOf(side, align),
     transform: false,
     elements: { reference: mounted ? reference : null },
-    // Follows scroll and resizes, not the anchor's own transitions (a trigger's press scale).
-    whileElementsMounted: (reference, floating, update) => autoUpdate(reference, floating, update, { layoutShift: false }),
+    // Placed once on open, then again on scroll, resize and when the content changes size: not
+    // for the anchor's own transitions (a trigger's hover or press scale).
+    whileElementsMounted: (reference, floating, update) => {
+      const stop = autoUpdate(reference, floating, update, { layoutShift: false, elementResize: false });
+      let size = `${floating.offsetWidth}x${floating.offsetHeight}`;
+      const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => {
+        const next = `${floating.offsetWidth}x${floating.offsetHeight}`;
+        if (next !== size) (size = next), update();
+      });
+      observer?.observe(floating);
+      return () => {
+        stop();
+        observer?.disconnect();
+      };
+    },
     middleware: [
       offset(sideOffset),
       flip({ padding: collisionPadding, fallbackStrategy: "initialPlacement", crossAxis: false }),

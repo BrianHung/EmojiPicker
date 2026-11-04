@@ -1,6 +1,6 @@
 // Every variant (popover, tapback, autocomplete, reaction pills) in any app style. Same hooks and parts underneath.
 import * as React from "react";
-import { Emoji, useEmojiStore, useFrequentEmoji, type EmojiSelection, type ShortcodeAutocomplete } from "@brianhung/emoji-picker";
+import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type ShortcodeAutocomplete } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { EmojiAutocomplete } from "@/components/emoji-autocomplete";
 import { EmojiPickerPopover } from "@/registry/emoji-picker";
@@ -51,14 +51,14 @@ export function StyleDropdown({
   );
 }
 
-/** Tapback row: top frequents + a "+" that opens the style's full picker. */
+/** Tapback row: top frequents + a "+" that opens the style's full picker. One tab stop; arrows, Home and End move along it. */
 export function StyleTapback({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
   const store = useEmojiStore();
   const frequent = useFrequentEmoji(count);
   const top = appStyle.tapback.pinned ?? frequent;
   useStyleTokens(appStyle.id, appStyle.layout.tokens);
   return (
-    <div data-style={appStyle.id} className={cn(appStyle.tapback.className, className)} role="toolbar" aria-label="Reactions">
+    <ReactionBar data-style={appStyle.id} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">
       <div className={appStyle.tapback.reactions}>
         {top.map((u) => {
           const unified = store.withSkinTone(u);
@@ -82,7 +82,7 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
           {appStyle.tapback.more?.icon ?? <SmilePlus size={20} />}
         </StyleDropdown>
       </div>
-    </div>
+    </ReactionBar>
   );
 }
 
