@@ -65,7 +65,8 @@ const cached = <K, V>(map: Map<K, V>, key: K, create: () => V): V => {
 
 const indexes = new WeakMap<readonly EmojiRecord[], Map<Tokenizer, Map<string, SearchIndex>>>();
 /** One index per record list, tokenizer and locale, shared by every search that uses it. */
-export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
+export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale), collator }: SearchIndexOptions = {}): SearchIndex {
+  if (collator) return createSearchIndex(records, { locale, tokenize, collator });
   let byTokenizer = indexes.get(records);
   if (!byTokenizer) indexes.set(records, (byTokenizer = new Map()));
   const byLocale = cached(byTokenizer, tokenize, () => new Map<string, SearchIndex>());

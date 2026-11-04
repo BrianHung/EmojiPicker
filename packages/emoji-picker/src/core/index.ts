@@ -9,7 +9,7 @@ export type { Dataset, EmojiRecord, Group } from "./dataset";
 export type { CompletionOrder, SearchIndex, SearchIndexOptions } from "./search-index";
 export { createTokenizer, normalizer } from "./tokenize";
 export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./tokenize";
-export { defaultLabels, plural } from "./labels";
+export { defaultLabels, localizeLabels, plural } from "./labels";
 export type { EmojiLabels, PluralForms, SkinToneNames } from "./labels";
 export { nativeToUnified, resolveEmoji } from "./resolve";
 export type { EmojiInput, EmojiLookup, ResolvedEmoji } from "./resolve";

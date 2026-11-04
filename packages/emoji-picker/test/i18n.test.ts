@@ -78,6 +78,24 @@ describe("search across scripts", () => {
   });
 });
 
+describe("one locale", () => {
+  it("sets collation and counts from the store's locale; each piece passed replaces only itself", async () => {
+    const data = dataset("sv", [["1f600", "a", ["sz"]], ["1f601", "b", ["så"]], ["1f602", "c", ["sa"]]]);
+    const frequents = createFrequencyStore({ storage: memoryStorage() });
+    const alphabetical = (store: ReturnType<typeof createEmojiStore>) => store.completeShortcode("s", 8, "alphabetical").map((c) => c.shortcode);
+    const swedish = createEmojiStore({ data, frequents });
+    await swedish.load();
+    expect(alphabetical(swedish)).toEqual(["sa", "sz", "så"]);
+    expect(swedish.labels().resultCount(1234)).toBe(`${new Intl.NumberFormat("sv").format(1234)} results`);
+
+    const mixed = createEmojiStore({ data, frequents, collator: new Intl.Collator("en"), labels: { noResults: "Inga träffar" } });
+    await mixed.load();
+    expect(alphabetical(mixed)).toEqual(["sa", "så", "sz"]);
+    expect(mixed.labels()).toMatchObject({ noResults: "Inga träffar", searchPlaceholder: defaultLabels.searchPlaceholder });
+    expect(mixed.labels().resultCount(1234)).toBe(swedish.labels().resultCount(1234));
+  });
+});
+
 describe("typing a :query", () => {
   it("triggers after a space, a full-width colon, or a CJK character, and not inside times or emoticons", () => {
     expect(findShortcodeTrigger("ok :smi")).toEqual({ query: "smi", offset: 3 });

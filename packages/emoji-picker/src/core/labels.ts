@@ -59,6 +59,13 @@ export type EmojiLabels = {
   withSkinTone: (name: string, tone: number) => string;
 };
 
+const COUNT: PluralForms = { "=0": "No results", one: "# result", other: "# results" };
+
+/** `defaultLabels` for `locale` (counts in its digits and plural rules), then `overrides`. */
+export function localizeLabels(locale?: string, overrides?: Partial<EmojiLabels>): EmojiLabels {
+  return { ...defaultLabels, ...(locale ? { resultCount: plural(locale, COUNT) } : {}), ...overrides };
+}
+
 const TONE_SUFFIXES = ["light skin tone", "medium-light skin tone", "medium skin tone", "medium-dark skin tone", "dark skin tone"];
 
 /** English. Spread a translation over it: `{ ...defaultLabels, ...ja }`. */
@@ -69,7 +76,7 @@ export const defaultLabels: EmojiLabels = {
   searchClear: "Clear",
   searchResults: "Search results",
   emojiList: "Emoji",
-  resultCount: plural("en", { "=0": "No results", one: "# result", other: "# results" }),
+  resultCount: plural("en", COUNT),
   noResults: "No results found",
   categoryNavigation: "Category navigation",
   suggested: "Frequently used",
