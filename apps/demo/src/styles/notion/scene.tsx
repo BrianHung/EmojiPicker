@@ -1,13 +1,3 @@
-// Notion style, in situ: a page (light). The page icon opens the Notion style picker
-// (Emoji / Icons / Upload) to change it, and the body is a real Tiptap editor where
-// ":" plus a few letters opens Notion's compact picker of matches at the caret (experiences/notion.tsx).
-// Notion's page metrics (measured signed in, Nov 2026): ink #2c2c2b, a 78px icon whose left edge
-// lines up with the title text, a 28px controls row 8px under it, then the 40/48 bold title 4px
-// lower and the 16/24 body 8px under that; 96px side padding on a wide page.
-// On a phone it is Notion's mobile page: a 44px top bar with the 18px icon at x=15
-// and the title 40/48 bold (both measured on a public page in a 390px frame, Nov 2026),
-// 24px side padding (not measured: Notion picks its mobile layout by device, not width),
-// and the icon opens the picker as a bottom sheet.
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -16,14 +6,14 @@ import { notion } from "./picker";
 import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
 import { NotionEmojiMenu, notionEmojiOptions } from "@/experiences/notion";
 import { cn } from "@/lib/utils";
-import { MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
+import { ld, MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
 
 const W = 760;
 const H = 600;
-const THEME = "light";
 
-const INK = "#2c2c2b";
+const INK = ld("#2c2c2b", "#f0efed");
 const MUTED = "#7d7a75";
+const SLASH = ld("rgba(55,53,47,0.35)", "rgb(255 255 255 / 0.2)");
 const FONT = "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif";
 
 const CONTENT = `
@@ -44,13 +34,12 @@ export function NotionScene() {
       attributes: {
         "aria-label": "Page content",
         class: [
-          "outline-none text-[16px] leading-[1.5] text-[#2c2c2b] caret-[#2c2c2b]",
+          "outline-none text-[16px] leading-[1.5] text-[#2c2c2b] caret-[#2c2c2b] dark:text-[#f0efed] dark:caret-[#f0efed]",
           "[&_p]:my-[2px] [&_p]:py-[3px] [&_p]:px-[2px]",
           "[&_h3]:mt-4 [&_h3]:mb-px [&_h3]:px-[2px] [&_h3]:py-[3px] [&_h3]:text-[1.25em] [&_h3]:leading-[1.3] [&_h3]:font-semibold",
           "[&_ul]:my-0 [&_ul]:list-disc [&_ul]:pl-[26px] [&_li]:pl-[2px] [&_li>p]:my-px [&_li>p]:py-[3px]",
           "[&_code]:rounded-[4px] [&_code]:bg-[rgba(135,131,120,0.15)] [&_code]:px-[0.3em] [&_code]:py-[0.2em] [&_code]:font-mono [&_code]:text-[85%] [&_code]:text-[#eb5757]",
-          // Notion's hint on the empty last line.
-          "[&>p:last-child:has(>br:only-child)]:before:pointer-events-none [&>p:last-child:has(>br:only-child)]:before:float-left [&>p:last-child:has(>br:only-child)]:before:h-0 [&>p:last-child:has(>br:only-child)]:before:text-[rgba(55,53,47,0.5)] [&>p:last-child:has(>br:only-child)]:before:content-['Type_“:”_for_emoji…']",
+          "[&>p:last-child:has(>br:only-child)]:before:pointer-events-none [&>p:last-child:has(>br:only-child)]:before:float-left [&>p:last-child:has(>br:only-child)]:before:h-0 [&>p:last-child:has(>br:only-child)]:before:text-[light-dark(rgba(55,53,47,0.5),rgb(255_255_255/0.28))] [&>p:last-child:has(>br:only-child)]:before:content-['Type_“:”_for_emoji…']",
         ].join(" "),
       },
     },
@@ -64,20 +53,19 @@ export function NotionScene() {
           <div className="ml-[2px] flex h-[78px] w-[78px] items-center">
             <ScenePicker
               appStyle={notion}
-              theme={THEME}
               label="Change icon"
               title="Change icon"
               onSelect={(s) => setIcon(s.unified)}
               font={FONT}
               sheet={compact}
-              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(33,27,23,0.051)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(33,27,23,0.051)]"
+              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(33,27,23,0.051)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(33,27,23,0.051)] dark:hover:bg-white/[0.054] dark:data-[state=open]:bg-white/[0.054]"
             >
               <Emoji emoji={icon} size={78} className="text-[78px] leading-[1.1]" />
             </ScenePicker>
           </div>
           <div className={cn("mt-2 flex h-7 items-center gap-1 text-[14px] opacity-0 transition-opacity group-hover/header:opacity-100 group-focus-within/header:opacity-100", compact && "hidden")} style={{ color: MUTED }} aria-hidden>
-            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)]">🖼 Add cover</span>
-            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)]">💬 Add comment</span>
+            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)] dark:hover:bg-white/[0.054]">🖼 Add cover</span>
+            <span className="rounded-[4px] px-1.5 py-1 hover:bg-[rgba(33,27,23,0.051)] dark:hover:bg-white/[0.054]">💬 Add comment</span>
           </div>
           <h1 className="mt-1 mb-2 px-[2px] text-[40px] leading-[1.2] font-bold" style={{ color: INK }}>
             {title}
@@ -95,17 +83,16 @@ export function NotionScene() {
   return (
     <div ref={ref} className="w-full">
       {compact ? (
-        <MobileFrame theme={THEME} label="Notion style page" appStyle={notion} className="bg-white" style={{ color: INK, fontFamily: FONT }}>
+        <MobileFrame label="Notion style page" appStyle={notion} className="bg-white dark:bg-[#191919]" style={{ color: INK, fontFamily: FONT }}>
           {page}
         </MobileFrame>
       ) : (
         <SceneFrame
           width={W}
           height={H}
-          theme={THEME}
           label="Notion style page"
           appStyle={notion}
-          className="flex flex-col rounded-[12px] bg-white shadow-2xl ring-1 ring-[rgba(55,53,47,0.16)]"
+          className="flex flex-col rounded-[12px] bg-white shadow-2xl ring-1 ring-[rgba(55,53,47,0.16)] dark:bg-[#191919] dark:ring-white/10"
           style={{ color: INK, fontFamily: FONT }}
         >
           {page}
@@ -115,7 +102,6 @@ export function NotionScene() {
   );
 }
 
-/** Notion's mobile top bar: the page's icon and title, then share and more. */
 function MobileTopBar({ icon, title }: { icon: string; title: string }) {
   return (
     <div className="flex h-11 shrink-0 items-center gap-1.5 pr-2 pl-[15px] text-[14px]" aria-hidden>
@@ -147,7 +133,7 @@ function TopBar({ icon, title }: { icon: string; title: string }) {
       <span className="flex h-6 items-center gap-1.5 rounded-[4px] px-1.5" style={{ color: MUTED }}>
         Team space
       </span>
-      <span style={{ color: "rgba(55,53,47,0.35)" }}>/</span>
+      <span style={{ color: SLASH }}>/</span>
       <span className="flex h-6 items-center gap-1.5 rounded-[4px] px-1.5" style={{ color: INK }}>
         <Emoji emoji={icon} size={16} className="text-[16px] leading-none" />
         {title}

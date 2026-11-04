@@ -1,5 +1,3 @@
-// The style picker: one generic composer over the public parts. Each
-// styles/<id>/picker.tsx is a layout for it.
 import * as React from "react";
 import {
   Emoji,

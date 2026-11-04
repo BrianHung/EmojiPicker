@@ -1,9 +1,3 @@
-// An iPhone 18 Pro (402×874 pt screen) as Xcode 27's Device Hub draws it: a metallic
-// rim (dark edge, a light highlight line, then mid grey), a black bezel and side
-// buttons. Measured from the simulator window at 1.4154 px/pt:
-//   frame 17.7 pt per side = rim 8.5 + bezel 9.2; outer radius 77, screen radius 62.7;
-//   buttons protrude 5 pt; left: action 141–177, volume 202–268 and 281–346; right: side 243–346
-//   (y relative to the screen's top).
 import * as React from "react";
 
 const SCREEN = { width: 402, height: 874, radius: 62.7 } as const;
@@ -14,7 +8,6 @@ const OUTER_RADIUS = 77;
 const BUTTON = 5;
 
 const OUTER = { width: SCREEN.width + FRAME * 2, height: SCREEN.height + FRAME * 2 };
-/** Size of the frame including the side buttons, in pt (before `scale`). */
 const FRAME_SIZE = { width: OUTER.width + BUTTON * 2, height: OUTER.height };
 
 const BUTTONS: { side: "left" | "right"; top: number; bottom: number }[] = [
@@ -24,11 +17,7 @@ const BUTTONS: { side: "left" | "right"; top: number; bottom: number }[] = [
   { side: "right", top: 243, bottom: 346 },
 ];
 
-/**
- * The device around a 402×874 screen. `children` render at screen size (pt = CSS px);
- * the whole device is scaled by `scale` for the page, and the screen is clipped to its
- * rounded corners and kept in light mode whatever the page theme.
- */
+/** An iPhone 18 Pro around a 402×874 screen; `children` render at screen size. */
 export function IPhoneFrame({ children, scale = 1, className, style }: { children: React.ReactNode; scale?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <div className={className} style={{ width: FRAME_SIZE.width * scale, height: FRAME_SIZE.height * scale, flexShrink: 0, ...style }}>
@@ -49,7 +38,6 @@ export function IPhoneFrame({ children, scale = 1, className, style }: { childre
             }}
           />
         ))}
-        {/* Rim: a dark outer edge, a light highlight line, then mid grey. */}
         <div
           aria-hidden
           style={{
@@ -63,9 +51,7 @@ export function IPhoneFrame({ children, scale = 1, className, style }: { childre
             boxShadow: "inset 0 0 0 1.1px #121212, inset 0 0 0 2.1px rgb(125 125 125), inset 0 0 0 3.4px rgb(58 58 58), 0 18px 50px rgb(0 0 0 / 0.28), 0 4px 14px rgb(0 0 0 / 0.18)",
           }}
         />
-        {/* Bezel. */}
         <div aria-hidden style={{ position: "absolute", left: BUTTON + RIM, top: RIM, width: OUTER.width - RIM * 2, height: OUTER.height - RIM * 2, borderRadius: OUTER_RADIUS - RIM, background: "#000", boxShadow: "0 0 0 0.6px rgb(0 0 0 / 0.9)" }} />
-        {/* Screen. */}
         <div
           data-iphone-screen=""
           style={{
@@ -76,8 +62,7 @@ export function IPhoneFrame({ children, scale = 1, className, style }: { childre
             height: SCREEN.height,
             borderRadius: SCREEN.radius,
             overflow: "hidden",
-            colorScheme: "light",
-            // Safari: keep the rounded clip on transformed children.
+            // Safari: keeps the rounded clip on transformed children.
             isolation: "isolate",
           }}
         >

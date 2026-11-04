@@ -1,36 +1,25 @@
-// Instagram style, in situ: a group DM thread (dark). Hover a message for the react
-// button: it opens Instagram's reaction bar (❤️😂😮😢😡👍 and "+" for the full picker),
-// and the reaction shows as a chip under the bubble. The composer's smiley opens the
-// picker too. Measured from Instagram web DMs (dark), Nov 2026: page #0c1014; 12px
-// sender labels at x=59; 28px avatars at x=16; bubbles 15/18 with 8×12 padding,
-// radius 18 and a 4px corner on the avatar side inside a group; a 44px pill composer
-// (radius 22, 11px in, a 32px emoji button).
-// On a phone it is the mobile web thread at real size: press and hold (or right-click,
-// or Enter) a bubble for the reaction bar, double-tap for ❤️, and "+" and the composer's
-// smiley open the picker as a bottom sheet. The phone header is not measured.
 import * as React from "react";
 import { Emoji, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
-import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, useCompact, useLongPress } from "@/styles/scene-kit";
+import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, ld, useCompact, useLongPress } from "@/styles/scene-kit";
 import { StylePicker } from "@/styles/style-picker";
 
 const W = 720;
 const H = 640;
-const THEME = "dark";
 
 const C = {
-  page: "#0c1014",
-  text: "#f5f5f5",
-  muted: "#a8a8a8",
-  received: "rgb(37 41 46)",
-  rule: "#262626",
-  border: "#363636",
-  icon: "#f5f5f5",
-  chip: "#262626",
+  page: ld("#ffffff", "#0c1014"),
+  text: ld("#0c1014", "#f5f5f5"),
+  muted: ld("#6a717a", "#a8a8a8"),
+  received: ld("rgb(243 245 247)", "rgb(37 41 46)"),
+  rule: ld("rgb(219 223 228)", "#262626"),
+  border: ld("rgb(219 223 228)", "#363636"),
+  icon: ld("#0c1014", "#f5f5f5"),
+  chip: ld("rgb(243 245 247)", "#262626"),
 };
-// Sent bubbles take their color from one gradient over the visible thread (purple at the top, blue at the bottom).
+// One gradient over the visible thread: each sent bubble shows its slice.
 const SENT_GRADIENT = "linear-gradient(180deg, #a238ff 0%, #7a3cff 35%, #3c57ff 70%, #1d72ff 100%)";
 
 type Person = { name: string; color: string };
@@ -63,7 +52,7 @@ export function InstagramScene() {
   return (
     <div ref={ref} className="w-full">
       {compact ? (
-        <MobileFrame theme={THEME} label="Instagram style direct messages" appStyle={instagram} style={{ background: C.page, color: C.text, fontFamily: FONT }}>
+        <MobileFrame label="Instagram style direct messages" appStyle={instagram} style={{ background: C.page, color: C.text, fontFamily: FONT }}>
           <MobileHeader />
           <Thread messages={messages} listRef={list} onReact={react} compact />
           <Composer onSend={send} compact />
@@ -72,10 +61,9 @@ export function InstagramScene() {
         <SceneFrame
           width={W}
           height={H}
-          theme={THEME}
           label="Instagram style direct messages"
           appStyle={instagram}
-          className="flex flex-col rounded-[12px] shadow-2xl ring-1 ring-white/10"
+          className="flex flex-col rounded-[12px] shadow-2xl ring-1 ring-black/10 dark:ring-white/10"
           style={{ background: C.page, color: C.text, fontFamily: FONT }}
         >
           <Header />
@@ -96,7 +84,7 @@ function MobileHeader() {
       </span>
       <div className="relative size-9 shrink-0">
         <Avatar name={MAYA.name} size={26} color={MAYA.color} className="absolute top-0 left-0" />
-        <Avatar name={JORDAN.name} size={26} color={JORDAN.color} className="absolute right-0 bottom-0 ring-2 ring-[#0c1014]" />
+        <Avatar name={JORDAN.name} size={26} color={JORDAN.color} className="absolute right-0 bottom-0 ring-2 ring-white dark:ring-[#0c1014]" />
       </div>
       <div className="min-w-0">
         <div className="truncate text-[16px] leading-5 font-semibold">Lake weekend</div>
@@ -117,7 +105,7 @@ function Header() {
     <div className="flex h-[75px] shrink-0 items-center gap-3 px-4" style={{ borderBottom: `1px solid ${C.rule}` }}>
       <div className="relative size-11 shrink-0">
         <Avatar name={MAYA.name} size={32} color={MAYA.color} className="absolute top-0 left-0" />
-        <Avatar name={JORDAN.name} size={32} color={JORDAN.color} className="absolute right-0 bottom-0 ring-2 ring-[#0c1014]" />
+        <Avatar name={JORDAN.name} size={32} color={JORDAN.color} className="absolute right-0 bottom-0 ring-2 ring-white dark:ring-[#0c1014]" />
       </div>
       <div className="min-w-0">
         <div className="text-[16px] leading-5 font-semibold">Lake weekend</div>
@@ -223,7 +211,8 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
                 }
               : {})}
             className={cn(
-              "relative px-3 py-2 text-[15px] leading-[18px] break-words whitespace-pre-wrap text-white",
+              "relative px-3 py-2 text-[15px] leading-[18px] break-words whitespace-pre-wrap",
+              mine ? "text-white" : "text-[#0c1014] dark:text-white",
               compact && "touch-manipulation outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-2 focus-visible:ring-[#708dff]",
             )}
             style={{
@@ -249,7 +238,7 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
                   setSheetOpen(true);
                 }}
               />
-              <PickerSheet appStyle={instagram} theme={THEME} label="Choose a reaction" open={sheetOpen} onOpenChange={setSheetOpen} onSelect={(s) => onReact(s.unified)} />
+              <PickerSheet appStyle={instagram} label="Choose a reaction" open={sheetOpen} onOpenChange={setSheetOpen} onSelect={(s) => onReact(s.unified)} />
             </>
           ) : (
             // Hover actions beside the bubble: react, reply, more.
@@ -299,14 +288,13 @@ type ReactionBarProps = {
 /** The react button and its bar: six pinned reactions and "+" for the full Instagram picker. */
 function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: ReactionBarProps) {
   const store = useEmojiStore();
-  const t = themed(THEME);
   const tb = instagram.tapback;
   const first = React.useRef<HTMLButtonElement>(null);
   const moreClass = cn(tb.more!.className, "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]");
   return (
     <EmojiPopover.Root open={open} onOpenChange={onOpenChange}>
       {anchor ? null : (
-        <EmojiPopover.Trigger aria-label="React" title="React" className="flex size-8 cursor-pointer items-center justify-center rounded-full outline-none hover:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]">
+        <EmojiPopover.Trigger aria-label="React" title="React" className="flex size-8 cursor-pointer items-center justify-center rounded-full outline-none hover:text-[#0c1014] dark:hover:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]">
           <SmileIcon size={16} />
         </EmojiPopover.Trigger>
       )}
@@ -317,8 +305,6 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
         anchor={anchor ? () => anchor.current?.getBoundingClientRect() : undefined}
         initialFocus={anchor ? first : undefined}
         aria-label="Reactions"
-        className={t.className}
-        style={t.style}
       >
         <ReactionRow data-style="instagram" className={tb.className} aria-label="Reactions">
           <div className={tb.reactions}>
@@ -346,7 +332,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
                 <EmojiPopover.Trigger aria-label="More reactions" className={moreClass}>
                   {tb.more!.icon}
                 </EmojiPopover.Trigger>
-                <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker" className={t.className} style={t.style}>
+                <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker">
                   <FitViewport width={instagram.size.width}>
                     <StylePicker layout={instagram.layout} onSelect={onSelect} autoFocus />
                   </FitViewport>
@@ -384,12 +370,11 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     <div className="m-4 flex h-11 shrink-0 items-center gap-1 rounded-[22px] pr-4 pl-[11px]" style={{ border: `1px solid ${C.border}` }}>
       <ScenePicker
         appStyle={instagram}
-        theme={THEME}
         label="Choose an emoji"
         side="top"
         sheet={compact}
         onSelect={(s) => insert(s.emoji)}
-        triggerClassName="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#f5f5f5] outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]"
+        triggerClassName="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[#0c1014] outline-none dark:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]"
       >
         <SmileIcon size={24} />
       </ScenePicker>
@@ -409,10 +394,10 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
             submit();
           }
         }}
-        className="h-full min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none placeholder:text-[#a8a8a8]"
+        className="h-full min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none placeholder:text-[#6a717a] dark:placeholder:text-[#a8a8a8]"
       />
       {value.trim() ? (
-        <button type="button" onClick={submit} className="cursor-pointer text-[14px] font-semibold text-[#708dff] outline-none hover:text-white focus-visible:underline">
+        <button type="button" onClick={submit} className="cursor-pointer text-[14px] font-semibold text-[#4150f7] outline-none hover:text-[#0c1014] focus-visible:underline dark:text-[#708dff] dark:hover:text-white">
           Send
         </button>
       ) : (

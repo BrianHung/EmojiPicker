@@ -1,11 +1,6 @@
 import * as I from "@/styles/icons";
 import { type Style, type Tokens } from "@/styles/style-picker";
 
-// Measured from Instagram's web DMs (dark theme, then light theme), Nov 2026. Reaction bar:
-// 308×56, radius 26, six 40px cells with 32px emoji from x=12, then a 40px "+" circle.
-// Picker: 340×316, radius 6, a 40px pill search at (8,12) with a 1px border and a 14px icon
-// at x=20, 12px/600 section titles at x=14 (a 12px/600 "Customize" link on the first), eight
-// 40px columns from x=10, and a 42px category bar of 32px buttons (16px icons) on a 41px pitch.
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(#ffffff, #262626)",
   "--emoji-picker-foreground": "light-dark(#0c1014, #f5f5f5)",

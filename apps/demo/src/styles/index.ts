@@ -1,6 +1,3 @@
-// The app styles, in page order. Each has a picker (styles/<id>/picker.tsx: a layout for
-// StylePicker) and a scene (styles/<id>/scene.tsx: the app's emoji UI in situ). Scenes
-// expect an <EmojiProvider> above them; Discord brings its own, for Twemoji.
 import type * as React from "react";
 import { apple } from "./apple/picker";
 import { AppleScene } from "./apple/scene";

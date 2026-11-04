@@ -1,4 +1,3 @@
-// Every variant (popover, tapback, autocomplete, reaction pills) in any app style. Same hooks and parts underneath.
 import * as React from "react";
 import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";

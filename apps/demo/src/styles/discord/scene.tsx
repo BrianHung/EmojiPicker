@@ -1,13 +1,3 @@
-// Discord style, in situ: a text channel (dark) with reactions under a message, the
-// hover toolbar's "Add Reaction" opening the Discord style picker, and the composer's
-// `:smi` autocomplete. The composer is a Tiptap editor, so emoji show as Twemoji
-// while typing, as in Discord's own (Slate) composer. Measured from Discord web (dark), Nov 2026:
-// header 49px (0.8px rule, 16/20, padding 8 8 8 16); rows with a 40px avatar at x=16,
-// name + time + content from x=72 at 16/22; a 56px composer, radius 8, inset 8px, no border
-// (re-measured Nov 2026: oklab(0.2568 …) fill, 16px/22px text).
-// On a phone it is Discord's mobile chat (not measured): the same rows without the hover toolbar, press
-// and hold a message for the picker in a bottom sheet, and a round "+" beside a pill
-// composer whose smiley opens the sheet too.
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { Emoji, EmojiProvider, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
@@ -20,31 +10,32 @@ import Text from "@tiptap/extension-text";
 import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
 import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-node";
 import { DiscordEmojiMenu, discordEmojiOptions } from "@/experiences/discord";
-import { Avatar, EmojiText, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
+import { Avatar, EmojiText, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
 
 const W = 760;
 const H = 600;
-const THEME = "dark";
 
-// Discord's dark palette (measured, oklab as Chrome reports it).
 const C = {
-  chat: "oklab(0.2195 0.0021 -0.0074)",
-  composer: "oklab(0.2568 0.0006 -0.0076)",
-  header: "oklab(0.9527 0.0006 -0.0054)",
-  name: "oklab(0.9527 0.0006 -0.0054)",
-  text: "oklab(0.9527 0.0006 -0.0054)",
-  muted: "oklab(0.608 0.0013 -0.0123)",
-  icon: "oklab(0.7 0.0016 -0.0115)",
-  rule: "color-mix(in oklab, #97979f 12%, transparent)",
-  hover: "color-mix(in oklab, #000 6%, transparent)",
-  toolbar: "#242429",
-  toolbarBorder: "color-mix(in oklab, #97979f 4%, transparent)",
+  chat: ld("#fbfbfb", "oklab(0.2195 0.0021 -0.0074)"),
+  composer: ld("#ffffff", "oklab(0.2568 0.0006 -0.0076)"),
+  header: ld("#28282d", "oklab(0.9527 0.0006 -0.0054)"),
+  name: ld("#28282d", "oklab(0.9527 0.0006 -0.0054)"),
+  text: ld("#2e2e34", "oklab(0.9527 0.0006 -0.0054)"),
+  muted: ld("#70717a", "oklab(0.608 0.0013 -0.0123)"),
+  placeholder: ld("#84858d", "#6c6d76"),
+  icon: ld("#595a63", "oklab(0.7 0.0016 -0.0115)"),
+  search: ld("#f3f3f4", "oklab(0.18 0.0015 -0.006)"),
+  searchText: ld("#6c6d76", "oklab(0.608 0.0013 -0.0123)"),
+  rule: ld("color-mix(in oklab, #97979f 28%, transparent)", "color-mix(in oklab, #97979f 12%, transparent)"),
+  hover: "color-mix(in oklab, #97979f 12%, transparent)",
+  toolbar: ld("#ffffff", "#242429"),
+  toolbarBorder: ld("color-mix(in oklab, #97979f 20%, transparent)", "color-mix(in oklab, #97979f 4%, transparent)"),
 };
 
 type Message = { id: number; author: string; color: string; nameColor?: string; time: string; lines: string[]; reactions: Reaction[] };
 
 const INITIAL: Message[] = [
-  { id: 1, author: "Maya", color: "#f97316", nameColor: "#f0b232", time: "Today at 9:41 AM", lines: ["morning! the new build is up on staging 🎉", "give it a spin when you get a sec"], reactions: [] },
+  { id: 1, author: "Maya", color: "#f97316", nameColor: "var(--discord-role-gold)", time: "Today at 9:41 AM", lines: ["morning! the new build is up on staging 🎉", "give it a spin when you get a sec"], reactions: [] },
   {
     id: 2,
     author: "Jordan",
@@ -57,8 +48,8 @@ const INITIAL: Message[] = [
       { unified: "1f64c", count: 1, mine: false },
     ],
   },
-  { id: 4, author: "Maya", color: "#f97316", nameColor: "#f0b232", time: "Today at 9:46 AM", lines: ["ok the skin tone picker is my favorite part ✋🏽"], reactions: [{ unified: "1f499", count: 1, mine: false }] },
-  { id: 3, author: "Bufo", color: "#8b5cf6", nameColor: "#9ab6ff", time: "Today at 9:47 AM", lines: ["try typing :smi in the box below"], reactions: [] },
+  { id: 4, author: "Maya", color: "#f97316", nameColor: "var(--discord-role-gold)", time: "Today at 9:46 AM", lines: ["ok the skin tone picker is my favorite part ✋🏽"], reactions: [{ unified: "1f499", count: 1, mine: false }] },
+  { id: 3, author: "Bufo", color: "#8b5cf6", nameColor: "var(--discord-role-blue)", time: "Today at 9:47 AM", lines: ["try typing :smi in the box below"], reactions: [] },
 ];
 
 const FONT = "'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
@@ -67,21 +58,19 @@ export function DiscordScene() {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap");
   const { ref, compact } = useCompact();
   return (
-    // Discord draws Twemoji everywhere, so the scene has its own provider.
     <EmojiProvider data={enUrl} renderer="twemoji">
       <div ref={ref} className="w-full">
         {compact ? (
-          <MobileFrame theme={THEME} label="Discord style channel" appStyle={discord} style={{ background: C.chat, color: C.text, fontFamily: FONT }}>
+          <MobileFrame label="Discord style channel" appStyle={discord} style={{ background: C.chat, color: C.text, fontFamily: FONT }}>
             <Channel compact />
           </MobileFrame>
         ) : (
           <SceneFrame
             width={W}
             height={H}
-            theme={THEME}
             label="Discord style channel"
             appStyle={discord}
-            className="flex flex-col rounded-[8px] shadow-2xl ring-1 ring-black/40"
+            className="flex flex-col rounded-[8px] shadow-2xl ring-1 ring-black/10 dark:ring-black/40"
             style={{ background: C.chat, color: C.text, fontFamily: FONT }}
           >
             <Channel />
@@ -120,7 +109,7 @@ function Channel({ compact = false }: { compact?: boolean }) {
 
 function Header() {
   return (
-    <div className="flex h-[49px] shrink-0 items-center gap-2 pt-2 pr-2 pb-2 pl-4" style={{ borderBottom: `0.8px solid ${C.rule}` }}>
+    <div className="flex h-[49px] shrink-0 items-center gap-2 pt-2 pr-2 pb-2 pl-4" style={{ borderBottom: `1px solid ${C.rule}` }}>
       <span style={{ color: C.icon }}>
         <Hash />
       </span>
@@ -132,7 +121,7 @@ function Header() {
         <Bell />
         <Pin />
         <Members />
-        <div className="flex h-8 w-[180px] items-center justify-between rounded-[8px] px-2 text-[14px]" style={{ background: "oklab(0.18 0.0015 -0.006)", color: C.muted }}>
+        <div className="flex h-8 w-[180px] items-center justify-between rounded-[8px] px-2 text-[14px]" style={{ background: C.search, color: C.searchText }}>
           Search
           <SearchIcon />
         </div>
@@ -144,7 +133,7 @@ function Header() {
 /** The phone channel bar: menu, the channel, members and search. */
 function MobileHeader() {
   return (
-    <div className="flex h-12 shrink-0 items-center gap-2 pr-3 pl-3" style={{ borderBottom: `0.8px solid ${C.rule}` }} aria-hidden>
+    <div className="flex h-12 shrink-0 items-center gap-2 pr-3 pl-3" style={{ borderBottom: `1px solid ${C.rule}` }} aria-hidden>
       <span style={{ color: C.icon }}>
         <MenuIcon />
       </span>
@@ -225,7 +214,6 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
             })}
             <ScenePicker
               appStyle={discord}
-              theme={THEME}
               label="Add Reaction"
               title="Add Reaction"
               sheet={compact}
@@ -237,28 +225,25 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           </div>
         ) : null}
         {compact ? null : (
-          // Hover toolbar (measured): 33.6px tall, 28px buttons with radius 6, three quick reactions,
-          // Add Reaction (the picker), Reply, More.
           <div
-            className={cn("pointer-events-none absolute -top-4 right-3.5 z-10 flex items-center rounded-[8px] p-0.5 opacity-0 shadow-[0_1px_4px_rgb(0_0_0/0.14)] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100", pickerOpen && "pointer-events-auto opacity-100")}
-            style={{ background: C.toolbar, border: `0.8px solid ${C.toolbarBorder}`, color: C.icon }}
+            className={cn("pointer-events-none absolute -top-4 right-3.5 z-10 flex items-center rounded-[8px] p-0.5 opacity-0 shadow-[0_1px_4px_light-dark(rgb(0_0_0/0.08),rgb(0_0_0/0.14))] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100", pickerOpen && "pointer-events-auto opacity-100")}
+            style={{ background: C.toolbar, border: `1px solid ${C.toolbarBorder}`, color: C.icon }}
           >
             {quick.map((u) => (
-              <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-[#5865f2]">
+              <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-[color-mix(in_oklab,#97979f_16%,transparent)] focus-visible:ring-2 focus-visible:ring-[#5865f2] dark:hover:bg-white/[0.06]">
                 <Emoji emoji={u} size={20} className="size-5" />
               </button>
             ))}
             <span className="mx-1 h-5 w-px" style={{ background: C.rule }} />
             <ScenePicker
               appStyle={discord}
-              theme={THEME}
               label="Add Reaction"
               title="Add Reaction"
               align="end"
               open={pickerOpen}
               onOpenChange={setPickerOpen}
               onSelect={(s) => onToggle(s.unified)}
-              triggerClassName="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-white/[0.06] hover:text-white focus-visible:ring-2 focus-visible:ring-[#5865f2]"
+              triggerClassName="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-[color-mix(in_oklab,#97979f_16%,transparent)] hover:text-[#28282d] focus-visible:ring-2 focus-visible:ring-[#5865f2] dark:hover:bg-white/[0.06] dark:hover:text-white"
             >
               <SmilePlus />
             </ScenePicker>
@@ -271,8 +256,8 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           </div>
         )}
       </div>
-      {/* Outside the row, so the sheet's (portaled) pointer events don't reach its press-and-hold. */}
-      {compact ? <PickerSheet appStyle={discord} theme={THEME} label="Add Reaction" open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(s) => onToggle(s.unified)} font={FONT} /> : null}
+      {/* Outside the row: the sheet's portaled pointer events would reach its press-and-hold. */}
+      {compact ? <PickerSheet appStyle={discord} label="Add Reaction" open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(s) => onToggle(s.unified)} font={FONT} /> : null}
     </>
   );
 }
@@ -304,7 +289,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
   const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
-  // ProseMirror keeps the handlers it was created with; these refs reach the current render.
+  // ProseMirror keeps the handlers it was created with.
   const menuOpen = React.useRef(false);
   menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});
@@ -317,7 +302,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   const emoji = (
     <ScenePicker
       appStyle={discord}
-      theme={THEME}
       label="Select emoji"
       side="top"
       align="end"
@@ -337,7 +321,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
           <Plus />
         </span>
         <div className="flex h-10 min-w-0 flex-1 items-center rounded-full pr-1 pl-4" style={{ background: C.composer }}>
-          <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.muted } as React.CSSProperties} />
+          <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
           {emoji}
         </div>
       </div>
@@ -349,7 +333,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
         <span className="flex h-full w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
           <PlusCircle />
         </span>
-        <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.muted } as React.CSSProperties} />
+        <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
         <div className="flex shrink-0 items-center gap-1 pr-3 pl-2" style={{ color: C.icon }}>
           <span className="flex size-8 items-center justify-center" aria-hidden>
             <Gift />
@@ -367,7 +351,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   );
 }
 
-// Icons: simple 24px glyphs in Discord's shapes (currentColor).
 const svg = (d: React.ReactNode, size = 24) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     {d}
