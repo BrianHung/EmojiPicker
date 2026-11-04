@@ -44,8 +44,8 @@
     },
     "./core": {
       "@brianhung/source": "./src/core/index.ts",
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js"
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
     },
     "./search": {
       "@brianhung/source": "./src/search.ts",
