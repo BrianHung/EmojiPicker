@@ -5,7 +5,6 @@ import { mergeProps } from "react-aria/mergeProps";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { anchorRect, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type Align, type PopoverAnchor, type PopoverContentProps, type PopoverInitialFocus, type PopoverInternals, type PopoverRootProps, type Side, type SuggestionsPopoverProps } from "./popover-shared";
-import type { EmojiSuggestions as SuggestionsState } from "./hooks";
 
 type Internals = PopoverInternals & { id?: string };
 
@@ -108,5 +107,3 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
 export const EmojiPopover = { Root, Trigger, Content };
 /** `<EmojiSuggestions.Popover open anchor={caretRect}>` around a `useEmojiSuggestions` listbox: the text field keeps focus. */
 export const EmojiSuggestions = { Popover: SuggestionsPopover };
-/** What `useEmojiSuggestions` returns. */
-export type EmojiSuggestions = SuggestionsState;

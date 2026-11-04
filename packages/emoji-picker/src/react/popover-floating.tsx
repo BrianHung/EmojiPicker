@@ -2,7 +2,6 @@ import * as React from "react";
 import { autoUpdate, flip, FloatingFocusManager, FloatingNode, FloatingPortal, FloatingTree, offset, shift, size, useDismiss, useFloating, useFloatingNodeId, useFloatingParentNodeId, useFloatingRootContext, useInteractions, useMergeRefs, useRole, useTransitionStatus, type FloatingRootContext, type Middleware, type UseFloatingOptions } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
 import { anchorRect, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "./popover-shared";
-import type { EmojiSuggestions as SuggestionsState } from "./hooks";
 
 export type PopoverContentProps = SharedContentProps & {
   /** How long the content stays mounted with `data-ending-style` after closing, ms (Floating UI's `useTransitionStatus`). Default 0. */
@@ -133,5 +132,3 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
 export const EmojiPopover = { Root, Trigger, Content };
 /** `<EmojiSuggestions.Popover open anchor={caretRect}>` around a `useEmojiSuggestions` listbox: the text field keeps focus. */
 export const EmojiSuggestions = { Popover: SuggestionsPopover };
-/** What `useEmojiSuggestions` returns. */
-export type EmojiSuggestions = SuggestionsState;
