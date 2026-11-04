@@ -4,6 +4,7 @@
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import { AutocompleteStateContext, Collection, Header, ListBox, ListBoxItem, ListBoxLoadMoreItem, ListBoxSection, SelectableCollectionContext, type ListBoxItemRenderProps } from "react-aria-components";
+import { Rect } from "react-aria-components/Virtualizer";
 import type { ListState } from "react-stately/useListState";
 import type { VirtualizerState } from "react-stately/useVirtualizerState";
 import type { Node as CollectionNode } from "@react-types/shared";
@@ -77,6 +78,8 @@ type Cells = {
   tabStop: Signal<Key | null>;
   active: Signal<Key | null>;
   pendingFocus: React.MutableRefObject<Key | null>;
+  /** Scrolls the Viewport (never the page) so the cell is in view. */
+  reveal(id: Key): void;
   hover(item: EmojiItem | null): void;
   /** A real pointer move over a cell: the keyboard position follows (pointer "follows"). */
   follow(item: EmojiItem): void;
@@ -214,11 +217,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
 
   /** Scrolls only the Viewport so `key` is in view (never the page), clear of a stuck title. */
   const reveal = React.useCallback(
-    (key: Key) => {
+    (key: Key, moved = 0) => {
       const el = scroller();
-      const rect = visibleRect();
+      const seen = visibleRect();
       const info = layout.getLayoutInfo(key);
-      if (!el || !rect || !info) return;
+      if (!el || !seen || !info) return;
+      // The visible rect follows scroll events: a scroll made just now (`moved`) isn't in it yet.
+      const rect = layout.orientation === "horizontal" ? new Rect(seen.x + moved, seen.y, seen.width, seen.height) : new Rect(seen.x, seen.y + moved, seen.width, seen.height);
       if (layout.orientation === "horizontal") {
         const pad = layout.metrics.padding;
         const sign = rtl() ? -1 : 1;
@@ -233,6 +238,9 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     },
     [layout, scroller],
   );
+
+  const revealRef = React.useRef(reveal);
+  revealRef.current = reveal;
 
   const setActive = React.useCallback(
     (key: Key | null) => {
@@ -250,11 +258,20 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       const el = scroller();
       const a = from != null ? layout.getLayoutInfo(from)?.rect : null;
       const b = layout.getLayoutInfo(key)?.rect;
+      let moved = 0;
       if (el && a && b) {
-        if (layout.orientation === "horizontal") el.scrollLeft += (b.x - a.x) * (rtl() ? -1 : 1);
-        else el.scrollTop += b.y - a.y;
+        if (layout.orientation === "horizontal") {
+          const sign = rtl() ? -1 : 1;
+          const before = el.scrollLeft;
+          el.scrollLeft += (b.x - a.x) * sign;
+          moved = (el.scrollLeft - before) * sign;
+        } else {
+          const before = el.scrollTop;
+          el.scrollTop += b.y - a.y;
+          moved = el.scrollTop - before;
+        }
       }
-      reveal(key);
+      reveal(key, moved);
       if (dom) pendingFocus.current = key;
       manager.setFocused(true);
       manager.setFocusedKey(key);
@@ -498,6 +515,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       tabStop: cellsState.tabStop,
       active: cellsState.active,
       pendingFocus,
+      reveal: (id) => revealRef.current(id),
       hover(it) {
         cellsState.hovered = it?.id ?? null;
         setActive(it?.id ?? highlight());
@@ -666,6 +684,14 @@ function CellElement({ dom, state, item }: { dom: React.HTMLAttributes<HTMLEleme
   const isStop = React.useSyncExternalStore(cells.tabStop.subscribe, () => cells.tabStop.get() === item.id);
   const isActive = React.useSyncExternalStore(cells.active.subscribe, () => cells.active.get() === item.id);
   const ref = React.useRef<HTMLElement | null>(null);
+  // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
+  // a cell scrolls only its Viewport, which the keyboard moves already did.
+  const own = React.useCallback(
+    (el: HTMLElement | null) => {
+      if (el) el.scrollIntoView = () => cells.reveal(item.id);
+    },
+    [cells, item.id],
+  );
   // A move from the keyboard (or hover) with focus in the grid lands focus here once rendered.
   React.useLayoutEffect(() => {
     if (cells.pendingFocus.current === item.id && ref.current) {
@@ -678,7 +704,7 @@ function CellElement({ dom, state, item }: { dom: React.HTMLAttributes<HTMLEleme
   const highlighted = cells.virtual && state.isFocused;
   const attrs = {
     ...dom,
-    ref: mergeRefs(dom.ref, ref),
+    ref: mergeRefs(dom.ref, ref, own),
     onPointerMove: (e: React.PointerEvent<HTMLElement>) => {
       dom.onPointerMove?.(e as React.PointerEvent<HTMLElement>);
       cells.follow(item);
@@ -717,18 +743,48 @@ function Glyph({ item }: { item: EmojiItem }) {
 function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; Actions: React.ComponentType<HeaderActionsProps>; sections: readonly EmojiSection[] }) {
   const cells = React.useContext(CellsContext)!;
   const [top, setTop] = React.useState(0);
+  const layer = React.useRef<HTMLDivElement | null>(null);
   React.useLayoutEffect(() => {
     const el = list.current;
     if (el && el.offsetTop !== top) setTop(el.offsetTop);
   });
+  // The actions sit after the list in the DOM (a listbox holds only options), but Tab keeps reading
+  // order: from a cell, forward to the next section's actions, back to its own section's.
+  const order = React.useRef(sections);
+  order.current = sections;
+  React.useEffect(() => {
+    const el = list.current;
+    if (!el) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.emoji}"]`) : null;
+      const at = order.current.findIndex((s) => s.items.some((i) => i.id === cell?.getAttribute("data-key")));
+      if (!cell || at < 0) return;
+      const actions = (i: number) => layer.current?.querySelector<HTMLElement>(`[data-section="${CSS.escape(order.current[i]!.id)}"]`)?.querySelector<HTMLElement>(TABBABLE) ?? null;
+      let target: HTMLElement | null = null;
+      if (e.shiftKey) for (let i = at; i >= 0 && !target; i--) target = actions(i);
+      else {
+        for (let i = at + 1; i < order.current.length && !target; i++) target = actions(i);
+        // None after: past the actions too, to what follows the list.
+        if (!target && layer.current) target = nextTabbable(layer.current);
+      }
+      if (!target) return;
+      // Not on to React Aria, which would put focus back on the collection's last tabbable cell.
+      e.preventDefault();
+      e.stopPropagation();
+      target.focus();
+    };
+    el.addEventListener("keydown", onKeyDown);
+    return () => el.removeEventListener("keydown", onKeyDown);
+  }, [list]);
   return (
-    <div role="presentation" style={{ position: "absolute", top, insetInlineStart: 0, width: "100%", height: layout.getContentSize().height, pointerEvents: "none" }}>
+    <div ref={layer} role="presentation" style={{ position: "absolute", top, insetInlineStart: 0, width: "100%", height: layout.getContentSize().height, pointerEvents: "none" }}>
       {sections.map((s) => {
         const info = layout.getLayoutInfo(s.id);
         if (!info || !s.header) return null;
         return (
           <div key={s.id} style={{ position: "absolute", top: info.rect.y, insetInlineStart: 0, width: "100%", height: info.rect.height }}>
-            <div data-slot={SLOTS.headerActions} style={{ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none" }}>
+            <div data-slot={SLOTS.headerActions} data-section={s.id} style={{ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none" }}>
               <Actions section={{ id: s.category, name: s.name }} collapsed={s.collapsed} toggle={() => cells.toggle(s.id)} toggleProps={{ "aria-expanded": !s.collapsed, "aria-controls": cells.sectionDomId(s.id) }} />
             </div>
           </div>
@@ -738,3 +794,13 @@ function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLa
   );
 }
 
+const TABBABLE = 'button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/** The first tabbable element after `after` (and outside it) in document order. */
+function nextTabbable(after: Element): HTMLElement | null {
+  for (const el of after.ownerDocument.querySelectorAll<HTMLElement>(TABBABLE)) {
+    if (after.contains(el) || el.tabIndex < 0 || !(after.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
+    if (el.getClientRects().length && getComputedStyle(el).visibility !== "hidden") return el;
+  }
+  return null;
+}

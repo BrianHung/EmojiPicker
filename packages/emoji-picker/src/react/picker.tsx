@@ -10,7 +10,7 @@ import { useHeldWhileActive } from "./hold";
 import { KeyboardProvider, mergeRefs, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { EmojiOverrides, type ArtworkMap } from "./overrides";
-import { useEmojiPopover } from "./popover";
+import { useEmojiPopover } from "./popover-context";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 import { ReactionsContext, type ReactionsState } from "./reactions";
 import { useClippedScrollGuard } from "./scroll-guard";
@@ -77,7 +77,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   artwork?: ArtworkMap;
   /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
   emojiVersion?: number;
-  /** Turn off skin-tone variations in the grid (Shift+Space and long press). */
+  /** @deprecated No effect: per-emoji skin-tone variations aren't available; the shared SkinTone applies. */
   disableVariations?: boolean;
   components?: PickerComponents;
   /**

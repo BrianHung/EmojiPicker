@@ -61,23 +61,30 @@ function Field({ inputProps, inputRef, as, children }: { inputProps?: SearchProp
       className=""
       {...(focusModel === "grid" ? { value: picker.query, onChange: picker.setQuery } : {})}
     >
-      <Input
-        {...input}
-        {...(as ? { render: (props: object) => React.createElement(as, props) } : {})}
-        ref={mergeRefs(ownInput, inputRef, userKeys)}
-        type="text"
-        role="searchbox"
-        className={className ?? ""}
-        placeholder={labels.searchPlaceholder}
-        aria-label={labels.searchLabel}
-        data-slot={SLOTS.searchInput}
-        // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
-        {...(picker.autoFocusSearch ? { "data-autofocus": "" } : {})}
-      />
-      <Button aria-label={labels.searchClear} data-slot={SLOTS.searchClear} className="" {...{ title: labels.searchClear }} render={Clear ? (props) => <Clear {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)} /> : undefined}>
-        ×
-      </Button>
-      {children}
+      {({ isEmpty }) => (
+        <>
+          <Input
+            {...input}
+            {...(as ? { render: (props: object) => React.createElement(as, props) } : {})}
+            ref={mergeRefs(ownInput, inputRef, userKeys)}
+            type="text"
+            role="searchbox"
+            className={className ?? ""}
+            placeholder={labels.searchPlaceholder}
+            aria-label={input["aria-label"] ?? labels.searchLabel}
+            data-slot={SLOTS.searchInput}
+            // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
+            {...(picker.autoFocusSearch ? { "data-autofocus": "" } : {})}
+          />
+          {/* Only with a query to clear: whatever a theme's styles, an empty field has no button. */}
+          {!isEmpty && (
+            <Button aria-label={labels.searchClear} data-slot={SLOTS.searchClear} className="" {...{ title: labels.searchClear }} render={Clear ? (props) => <Clear {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)} /> : undefined}>
+              ×
+            </Button>
+          )}
+          {children}
+        </>
+      )}
     </SearchField>
   );
   return field;

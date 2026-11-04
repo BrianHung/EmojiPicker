@@ -57,9 +57,13 @@ function useRovingRow(row: React.RefObject<HTMLElement | null>) {
       const active = document.activeElement;
       if (button && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
     };
-    // Home and End go to the ends (a picker's dispatcher takes them first, by its keymap).
+    // Home and End go to the ends (a picker's dispatcher takes them first, by its keymap); the
+    // arrows across the row do nothing (rather than scroll the page).
     const onKey = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || (event.key !== "Home" && event.key !== "End") || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+      const across = el.getAttribute("aria-orientation") === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
+      if (across.includes(event.key)) return event.preventDefault();
+      if (event.key !== "Home" && event.key !== "End") return;
       const buttons = [...el.querySelectorAll<HTMLElement>(BUTTONS)];
       const target = event.key === "Home" ? buttons[0] : buttons[buttons.length - 1];
       if (!target) return;
@@ -123,19 +127,32 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
     return record != null && drawable(record, unified);
   });
   React.useEffect(() => request(shown));
-  const expandFocus = React.useRef(false);
+  // Set on expand: this picker's root (the row is gone by the time the full picker shows).
+  const expandFocus = React.useRef<Element | null>(null);
   React.useEffect(() => {
-    if (!expandFocus.current || state?.open) return;
-    expandFocus.current = false;
+    const root = expandFocus.current;
+    if (!root || state?.open) return;
+    expandFocus.current = null;
     // The full picker: focus its search field (else its first emoji) once it shows.
     let tries = 20;
-    const root = row.current?.closest(`[data-slot="${SLOTS.root}"]`) ?? document;
     const land = () => {
       const target = root.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? root.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"]`);
       if (target?.getClientRects().length) target.focus({ preventScroll: true });
       else if (--tries > 0) requestAnimationFrame(land);
     };
     requestAnimationFrame(land);
+  }, [state?.open]);
+  // Collapsing back (a pick from the full picker) hides what had focus: the row takes it.
+  const wasOpen = React.useRef(state?.open);
+  React.useEffect(() => {
+    const reopened = state?.open && wasOpen.current === false;
+    wasOpen.current = state?.open;
+    const el = row.current;
+    if (!reopened || !el) return;
+    const active = document.activeElement;
+    const root = el.closest(`[data-slot="${SLOTS.root}"]`);
+    if (active && active !== document.body && !(root?.contains(active) && active.closest("[inert],[hidden]"))) return;
+    el.querySelector<HTMLElement>(`${BUTTONS}:not([tabindex="-1"])`)?.focus({ preventScroll: true });
   }, [state?.open]);
   if (!state || !state.open) return null;
   const User = components.Emoji;
@@ -175,7 +192,7 @@ export const Reactions = React.forwardRef<HTMLDivElement, Omit<React.HTMLAttribu
           className=""
           {...{ title: labels.expandReactions }}
           onPress={() => {
-            expandFocus.current = true;
+            expandFocus.current = row.current?.closest(`[data-slot="${SLOTS.root}"]`) ?? null;
             state.expand!();
           }}
           render={Expand ? (p) => <Expand {...(p as React.ButtonHTMLAttributes<HTMLButtonElement>)} /> : undefined}

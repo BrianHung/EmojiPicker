@@ -121,8 +121,11 @@ function ancestors(from: Element, root: Element): Element[] {
   return out;
 }
 
-/** Keys React Aria's collections, tabs and fields act on by themselves. */
-const NATIVE_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " ", "Escape"]);
+/**
+ * Keys React Aria's collections, tabs and fields act on by themselves. Not Escape: with nothing
+ * to clear or close it goes on to the page (a sheet or dialog around the picker closes).
+ */
+const NATIVE_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " "]);
 
 export type KeyboardProviderProps = {
   keymap?: Partial<Record<KeyboardAction, readonly string[]>>;

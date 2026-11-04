@@ -4,7 +4,7 @@ Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplet
 
 ## Overview
 
-The library builds on the [emoji-picker-react](https://github.com/ealush/emoji-picker-react) v5 primitives and adds:
+The library builds on [React Aria Components](https://react-spectrum.adobe.com/react-aria/) (a virtualized `ListBox` grid, `Autocomplete`, `SearchField`, `Tabs`, `Toolbar`) and [Floating UI](https://floating-ui.com), and adds:
 
 - Tapbacks: the user's most-used emoji, with a button that expands into the full picker.
 - Slack shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete.
@@ -63,29 +63,25 @@ It adds `components/ui/emoji-picker.tsx` with `EmojiPickerCard`, `EmojiPickerPop
 
 `EmojiPicker` is a set of parts: `Root`, `Search`, `SearchInput`, `CategoryNav`, `Viewport`, `List`, `Preview`, `SkinTone`, `Empty`, `Loading`, `LoadError`, `Reactions`, and `Panel`. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
 
-`Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns`, `emojiVersion`, `searchResults`, `keymap`, `focusModel`, `pointer`, and `artwork`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
+`Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns` (with `fitColumns={false}` to keep them when the width is a little short), `emojiVersion`, `searchResults`, `keymap`, `focusModel`, `pointer`, and `artwork`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
 
 Search results replace the category list while a query is active. `searchResults="ranked"` shows one list, best match first; `"grouped"` shows category sections in rank order.
 
 ### Collapsible sections
 
-A collapsed section keeps its header and hides its rows. Control collapse with `collapsedCategories` and `onCollapsedCategoriesChange`, or set `defaultCollapsedCategories`. A custom `CategoryHeader` receives `category.collapsed` and `category.toggleCollapsed()`; drop the engine's `aria-hidden` when the header contains a button.
+A collapsed section keeps its header and hides its rows. Control collapse with `collapsedCategories` and `onCollapsedCategoriesChange`, or set `defaultCollapsedCategories`.
+
+A section title is text inside the listbox (`CategoryHeader` customizes it and receives `category.collapsed`). Controls for a title, such as a collapse chevron or a "Customize" link, go in `components.HeaderActions`: they render in a layer over the list, outside the listbox, pinned with the title as it sticks.
 
 ```tsx
-function Header({ category, children, ...props }: CategoryHeaderProps) {
-  return (
-    <div {...props} aria-hidden={undefined}>
-      <button type="button" aria-expanded={!category.collapsed} onClick={category.toggleCollapsed}>
-        {children}
-      </button>
-    </div>
-  );
+function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
+  return <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0" />;
 }
 
-<EmojiPicker.List components={{ CategoryHeader: Header }} />
+<EmojiPicker.List components={{ HeaderActions: Toggle }} />
 ```
 
-Search results ignore collapse. The engine's virtualization doesn't count collapsed headers, so with more than two rows' worth of collapsed headers above a section, its top rows can render blank.
+`toggleProps` carries `aria-expanded` and `aria-controls` (the section's group). Search results ignore collapse.
 
 ### Horizontal list
 
@@ -93,11 +89,11 @@ Search results ignore collapse. The engine's virtualization doesn't count collap
 
 ## Tapbacks
 
-`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history). Its children become the expanded picker. `selected` marks the user's current reactions with `aria-pressed`, in any skin tone.
+`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history), or fixed `reactions`. Its children become the expanded picker. `selected` makes the user's current reactions toggles with `aria-pressed`, in any skin tone. For a row of your own buttons, `ReactionBar` gives the same keyboard: one tab stop, arrows, Home and End, and focus that follows the pointer within the row.
 
 ## Popovers
 
-`EmojiPopover` positions its content next to the trigger, flips and clamps it to the viewport, closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
+`EmojiPopover` positions its content next to the trigger with Floating UI (flip, shift, size; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
 
 ```tsx
 <EmojiPopover.Root>
@@ -110,7 +106,35 @@ Search results ignore collapse. The engine's virtualization doesn't count collap
 </EmojiPopover.Root>
 ```
 
-Nothing animates by default. Content carries `data-starting-style` on its first frame, `data-ending-style` while closing (it unmounts when its transitions finish), `data-state`, `data-side`, `data-align`, and `--transform-origin`. Use CSS transitions so that reopening mid-exit reverses in place.
+Nothing animates by default. Content carries `data-starting-style` on its first frame, `data-ending-style` while closing (it unmounts when its transitions finish, and is `inert` meanwhile), `data-state`, `data-side`, `data-align`, and `--transform-origin`. Use CSS transitions so that reopening mid-exit reverses in place.
+
+### With your own popover
+
+A picker drops into any popover. Give it `autoFocusSearch`, and let the popover focus `pickerInitialFocus(content)` on open: the search field, else the grid's current emoji. Close it from `onSelect`.
+
+```tsx
+import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker";
+import { Popover } from "@base-ui-components/react/popover"; // or shadcn/ui's Popover (Radix)
+
+// Base UI
+<Popover.Root open={open} onOpenChange={setOpen}>
+  <Popover.Trigger>🙂</Popover.Trigger>
+  <Popover.Portal>
+    <Popover.Positioner sideOffset={8}>
+      <Popover.Popup ref={popup} initialFocus={() => pickerInitialFocus(popup.current)}>
+        <EmojiPicker.Root autoFocusSearch onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
+      </Popover.Popup>
+    </Popover.Positioner>
+  </Popover.Portal>
+</Popover.Root>
+
+// Radix / shadcn/ui
+<PopoverContent onOpenAutoFocus={(e) => { e.preventDefault(); pickerInitialFocus(e.currentTarget as HTMLElement)?.focus(); }}>
+  <EmojiPicker.Root autoFocusSearch onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
+</PopoverContent>
+```
+
+Escape clears the query first, and the picker keeps that key; with no query it reaches the popover, which closes.
 
 ## Autocomplete
 
@@ -192,8 +216,8 @@ Keys trigger actions, and `Root`'s `keymap` binds them. Every layout gives an ac
 | `move-left`, `move-right` | ArrowLeft, ArrowRight | A cell, in screen direction. In the search field, only with the caret at the end. |
 | `page-up`, `page-down` | PageUp, PageDown | The rows (or columns) that fit in the Viewport |
 | `first`, `last` | Home, Ctrl+Home, End, Ctrl+End | The first and last emoji. In a search field with a query, Home and End move the caret. |
-| `select` | Enter, Space | Picks the focused or highlighted emoji (Space types in the search field; Shift+Space opens an emoji's skin-tone variations) |
-| `close` | Escape | Closes the skin-tone menu or the surrounding popover |
+| `select` | Enter, Space | Picks the focused or highlighted emoji (Space types in the search field) |
+| `close` | Escape | Closes the skin-tone menu, clears the query, ends the highlight, then closes the surrounding popover |
 | `focus-search` | / | Focuses the search field |
 | `toggle-skin-tone` | None | Opens or closes `SkinTone` |
 
@@ -205,7 +229,7 @@ A binding replaces the action's defaults, and `[]` unbinds it. `Mod` is ⌘ on A
 
 `focusModel="input"` (the default) keeps focus in the search field and moves a highlight (`aria-activedescendant`); `"grid"` moves focus into the cells. `pointer="follows"` (the default) makes the hovered emoji the keyboard position: the next arrow continues from it, and hover never takes focus from outside the picker; `"independent"` leaves hover as a style. Without a search field, focus is on the cells either way. The grid, the category tabs and a tapback's reactions are one tab stop each (roving tabindex). After a pick, focus and the highlight stay where they were.
 
-A part's `onKeyDown` runs before the picker handles a key, innermost first. Call `event.preventEmojiPickerHandler()` to keep the picker from handling it.
+A part's `onKeyDown` runs before the picker handles a key, innermost first. Call `event.preventEmojiPickerHandler()` to keep the picker (and React Aria) from handling it. A key the picker handles stops at `Root`, as React Aria's handled keys do.
 
 ## Accessibility
 
@@ -213,21 +237,21 @@ Each part follows its WAI-ARIA Authoring Practices pattern. `npm run test:a11y` 
 
 | Part | Roles and states |
 |---|---|
-| Search field | `combobox` with `aria-expanded`, `aria-controls`, and `aria-activedescendant` |
+| Search field | `searchbox` (React Aria `Autocomplete`) with `aria-controls` and `aria-activedescendant` |
 | Search status | A polite `status` live region: “24 results”, “No results” |
-| Lists and results | `grid` › `row` › `gridcell`, named by the emoji and its skin tone; `aria-selected` on the highlight; `aria-busy` during an async search |
+| Lists and results | `listbox` › `group` (each section, named by its title) › `option`, named by the emoji and its skin tone, with `aria-posinset`/`aria-setsize` within its section; `aria-busy` during an async search; `aria-selected` only in a value picker (`List value`) |
 | CategoryNav | `tablist` of `tab`s with `aria-selected` |
 | SkinTone | A button with `aria-haspopup` and `aria-expanded` that opens a `radiogroup` |
-| Tapback | One tab stop (roving tabindex); `aria-pressed` on the user's reactions |
+| Tapback, ReactionBar | A `toolbar` with one tab stop (roving tabindex); `aria-pressed` on the user's reactions |
 | EmojiPopover | Trigger with `aria-haspopup="dialog"`, `aria-expanded`, and `aria-controls`; content is a labelled, non-modal `dialog` |
 | Autocomplete hooks | `combobox` and `listbox` props from `getInputProps`, `getListProps`, and `getOptionProps` |
 | `Emoji` | `role="img"` named by the emoji; `decorative` hides it |
 
-The library animates nothing itself and honors `prefers-reduced-motion`. The engine renders its list as `ul[role=grid] > li[role=rowgroup]`, which axe reports as a minor `aria-allowed-role` issue.
+The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted`, `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`. Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
+Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus React Aria's `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected`. Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
 
 ```css
 [data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
@@ -241,13 +265,14 @@ Set sizes with CSS variables on `Root` or an ancestor:
 | `--emoji-cell-size` | size + 10px | Grid pitch |
 | `--emoji-image-size` | `--emoji-size` | Image emoji inside a cell |
 | `--emoji-list-padding` | `10px` | Inline padding of the grid |
+| `--emoji-list-padding-end` | `--emoji-list-padding` | The grid's end padding without `columns` (may be negative) |
 | `--emoji-header-height` | `40px` | Section title height |
 | `--emoji-cell-width`, `--emoji-cell-height` | `--emoji-cell-size` | Horizontal list pitch |
 | `--emoji-section-gap`, `--emoji-section-min-width` | `--emoji-list-padding`, `0px` | Horizontal list sections |
-| `--emoji-font-family` | The engine's emoji fonts | Font for native emoji |
+| `--emoji-font-family` | System emoji fonts | Font for native emoji |
 | `--emoji-skin-tone-size` | `15px` | Default skin-tone swatch |
 
-`tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The engine's structural CSS is in the `base` cascade layer, so classes and unlayered CSS override it; `cssLayer` on `Root` changes the layer.
+`tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The structural CSS is in the `base` cascade layer, so classes and unlayered CSS override it; `cssLayer` on `Root` changes the layer.
 
 ## Data
 
@@ -282,7 +307,7 @@ const bigrams = (text: string) => Array.from({ length: Math.max(1, text.length -
 <EmojiProvider data="/emoji/zh.json" search={lexical({ tokenize: bigrams })}>…</EmojiProvider>
 ```
 
-Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker/core` with English defaults in `defaultLabels`. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:
+Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker/core` with English defaults in `defaultLabels`. Pass any of them as the provider's `labels`; its `locale` also sets React Aria's locale (text direction) and formats the default result count. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:
 
 ```ts
 import { defaultLabels, plural, type EmojiLabels } from "@brianhung/emoji-picker/core";
@@ -295,7 +320,6 @@ const ja: EmojiLabels = {
 };
 ```
 
-> Note: The components read `labels.suggested` and `labels.custom` today. The rest of `EmojiLabels` takes effect when the React layer adopts it.
 
 ## Development
 

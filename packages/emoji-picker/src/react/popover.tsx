@@ -6,25 +6,15 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { autoUpdate, flip, offset, shift, size, useFloating, type Placement, type VirtualElement } from "@floating-ui/react-dom";
+import { PopoverContext, type PopoverState } from "./popover-context";
+
+export { useEmojiPopover } from "./popover-context";
 
 type Side = "top" | "bottom";
 type Align = "start" | "center" | "end";
 type AnchorRect = { top: number; left: number; right: number; bottom: number; width: number; height: number; x?: number; y?: number };
 /** Anything with a rect: an element, a virtual element, or a function returning the rect (an editor caret). */
 export type PopoverAnchor = { getBoundingClientRect(): AnchorRect } | (() => AnchorRect | null | undefined);
-
-type PopoverState = {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  close: () => void;
-  closeOnSelect: boolean;
-  triggerRef: React.MutableRefObject<HTMLElement | null>;
-  contentId: string;
-};
-
-const PopoverContext = React.createContext<PopoverState | null>(null);
-/** Open state of the nearest EmojiPopover, for custom triggers and contents. */
-export const useEmojiPopover = () => React.useContext(PopoverContext);
 
 /** Content elements of open popovers below this one: clicks there are not "outside". */
 const NestedContext = React.createContext<((node: HTMLElement | null) => () => void) | null>(null);
@@ -346,15 +336,42 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       const stops = tabbables(el);
       if (e.shiftKey ? e.target !== stops[0] : e.target !== stops[stops.length - 1]) return;
       e.preventDefault();
-      const next = e.shiftKey ? trigger : (tabbables(document.body).find((t) => !el.contains(t) && trigger.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING && !trigger.contains(t)) ?? trigger);
+      leave(e.shiftKey);
+    };
+    const leave = (back: boolean) => {
+      const el = node.current;
+      const trigger = triggerRef.current;
+      if (!el) return;
+      // Opened from an anchor (no trigger): there's no place in the page to go back to, so Tab stays.
+      if (!trigger) return void tabbables(el)[back ? tabbables(el).length - 1 : 0]?.focus();
+      const next = back ? trigger : (tabbables(document.body).find((t) => !el.contains(t) && trigger.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING && !trigger.contains(t)) ?? trigger);
       next.focus();
       close();
     };
+    // A composite inside may move focus itself on Tab (a toolbar steps to its last item and lets
+    // the browser go on from there, stopping the event): catch focus leaving on a Tab instead.
+    let tabbing: boolean | null = null;
+    const tabStart = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || nested.current.size || !(e.target instanceof Node) || !node.current?.contains(e.target)) return;
+      tabbing = e.shiftKey;
+      setTimeout(() => (tabbing = null));
+    };
+    const focusOut = (e: FocusEvent) => {
+      if (tabbing === null || inside(e.relatedTarget)) return;
+      const back = tabbing;
+      tabbing = null;
+      leave(back);
+    };
+    const el = node.current;
     document.addEventListener("pointerdown", down);
     document.addEventListener("keydown", key);
+    document.addEventListener("keydown", tabStart, true);
+    el?.addEventListener("focusout", focusOut);
     return () => {
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("keydown", key);
+      document.removeEventListener("keydown", tabStart, true);
+      el?.removeEventListener("focusout", focusOut);
     };
   }, [state.open, close, triggerRef]);
 
