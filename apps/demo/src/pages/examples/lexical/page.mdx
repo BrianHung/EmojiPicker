@@ -31,22 +31,16 @@ export function Editor() {
 
 ## How it works
 
-Lexical's typeahead menu handles the trigger, caret position and keyboard. `useEmojiSuggestions` supplies the ranked options and the text to insert. Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
+`useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches and handles the keys through Lexical's command system, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
 
 ```tsx title="emoji-typeahead-plugin.tsx (excerpt)"
-const menu = useEmojiSuggestions({ query });
-const options = menu.suggestions.map((s, i) => new EmojiOption(s, i));
+const emoji = useLexicalEmojiTypeahead({
+  node: (text, s) => (s.record.imageUrl ? $createEmojiNode(attrs) : $createTextNode(`${text} `)),
+});
 
-<LexicalTypeaheadMenuPlugin
-  onQueryChange={setQuery}
-  options={options}
-  triggerFn={useBasicTypeaheadTriggerMatch(":", { minLength: 1 })}
-  onSelectOption={(option, node, close) => {
-    editor.update(() => {
-      node?.replace($createTextNode(menu.textFor(option.suggestion) + " "));
-      close();
-    });
-  }}
-  menuRenderFn={…}
-/>
+<EmojiSuggestions.Popover open={emoji.open} anchor={emoji.anchor} onOpenChange={(open) => !open && emoji.dismiss()}>
+  <ul {...emoji.suggestions.getListProps()}>
+    {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
+  </ul>
+</EmojiSuggestions.Popover>
 ```

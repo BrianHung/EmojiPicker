@@ -12,14 +12,14 @@ import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { Emoji, EmojiProvider, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
-import { discord, discordAutocompleteOptions } from "./picker";
-import { StyleAutocomplete } from "@/styles/variants";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import { discord } from "./picker";
+import { EditorContent, useEditor } from "@tiptap/react";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
-import { useShortcodeAutocomplete } from "@brianhung/emoji-picker";
-import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
+import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
+import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-node";
+import { DiscordEmojiMenu, discordEmojiOptions } from "@/experiences/discord";
 import { Avatar, EmojiText, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
 
 const W = 760;
@@ -277,23 +277,11 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
   );
 }
 
-/** The `:query` being completed, at the end of the text before the caret. */
-const TYPED = /:[a-z0-9_+\-']+$/i;
-
-/** Text from the start of the caret's paragraph to the caret; emoji nodes read as one character. */
-const textBeforeCaret = (editor: Editor) => {
-  const { $from } = editor.state.selection;
-  return $from.parent.textBetween(0, $from.parentOffset, undefined, "\ufffc");
-};
-
 function Composer({ onSend, compact = false }: { onSend: (text: string) => void; compact?: boolean }) {
   const store = useEmojiStore();
-  const [before, setBefore] = React.useState("");
   const editor = useEditor({
     extensions: [Document, Paragraph, Text, EmojiNode.configure({ store })],
     immediatelyRender: true,
-    onTransaction: ({ editor }) => setBefore(textBeforeCaret(editor)),
-    onBlur: () => dismiss.current(),
     editorProps: {
       attributes: {
         "aria-label": "Message #general",
@@ -304,44 +292,27 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
         ),
       },
       handleKeyDown: (_, event) => {
-        if (keyDown.current(event)) return true;
-        if (event.key !== "Enter" || event.shiftKey) return false;
+        if (event.key !== "Enter" || event.shiftKey || menuOpen.current) return false;
         event.preventDefault();
         submit.current();
         return true;
       },
     },
   });
-  const insert = (idOrShortcode: string, replace = 0) => {
-    const attrs = emojiAttrs(store, idOrShortcode);
-    if (!attrs) return;
-    const { from } = editor.state.selection;
-    editor.chain().focus().deleteRange({ from: from - replace, to: from }).insertEmoji(attrs).run();
+  const insert = (unified: string) => {
+    const attrs = emojiAttrs(store, unified);
+    if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
-  const autocomplete = useShortcodeAutocomplete({
-    ...discordAutocompleteOptions,
-    value: before,
-    caret: before.length,
-    onChoose: (_, s) => insert(s.record.unified, TYPED.exec(before)?.[0].length ?? 0),
-  });
+  const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
   // ProseMirror keeps the handlers it was created with; these refs reach the current render.
-  const keyDown = React.useRef((e: KeyboardEvent) => autocomplete.onKeyDown(e));
-  keyDown.current = (e) => autocomplete.onKeyDown(e);
-  const dismiss = React.useRef(autocomplete.dismiss);
-  dismiss.current = autocomplete.dismiss;
+  const menuOpen = React.useRef(false);
+  menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});
   submit.current = () => {
     const text = editor.getText().trim();
     if (text) onSend(text);
     editor.commands.clearContent();
   };
-  React.useEffect(() => {
-    const dom = editor.view.dom;
-    for (const [name, value] of Object.entries(autocomplete.getInputProps())) {
-      if (value === undefined) dom.removeAttribute(name);
-      else dom.setAttribute(name, String(value));
-    }
-  });
 
   const emoji = (
     <ScenePicker
@@ -361,7 +332,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   if (compact)
     return (
       <div className="relative mx-3 mb-3 flex shrink-0 items-center gap-2">
-        <StyleAutocomplete appStyle={discord} autocomplete={autocomplete} className="absolute inset-x-0 bottom-full mb-2" />
+        <DiscordEmojiMenu {...typeahead} />
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full" style={{ background: C.composer, color: C.icon }} aria-hidden>
           <Plus />
         </span>
@@ -373,7 +344,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     );
   return (
     <div className="relative mx-2 mb-4 shrink-0">
-      <StyleAutocomplete appStyle={discord} autocomplete={autocomplete} className="absolute inset-x-0 bottom-full mb-2" />
+      <DiscordEmojiMenu {...typeahead} />
       <div className="flex h-14 items-center rounded-[8px]" style={{ background: C.composer }}>
         <span className="flex h-full w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
           <PlusCircle />

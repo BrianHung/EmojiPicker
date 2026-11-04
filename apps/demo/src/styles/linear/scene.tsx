@@ -25,10 +25,10 @@ import { Emoji, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { linear } from "./picker";
-import { StyleAutocomplete } from "@/styles/variants";
-import { useAutocompleteInput } from "@/components/emoji-autocomplete";
+import { useEmojiTextField } from "@/components/emoji-text-field";
+import { LinearEmojiMenu, linearEmojiOptions } from "@/experiences/linear";
 import { StylePicker, type PickerLayout } from "@/styles/style-picker";
-import { EmojiSuggestion, EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
+import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, themed, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
 
 const W = 1000;
@@ -424,7 +424,7 @@ function CommentCard({ comment, onToggle, compact = false }: { comment: Comment;
 }
 
 function Composer({ onSend, compact = false }: { onSend: (text: string) => void; compact?: boolean }) {
-  const { value, setText, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ limit: 12 });
+  const { value, setText, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>(linearEmojiOptions);
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);
@@ -432,7 +432,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   };
   return (
     <div className={cn("relative", !compact && "mt-4 -ml-2 w-[612px]")}>
-      <StyleAutocomplete appStyle={linear} autocomplete={autocomplete} className="absolute bottom-full left-4 mb-1 max-w-[calc(100%-32px)]" />
+      <LinearEmojiMenu {...emoji} />
       <div className="relative h-[83px] rounded-[8px] px-4 py-3" style={{ background: C.card, border: `0.5px solid ${C.cardBorder}`, boxShadow: "0 0.5px 1px 1px lch(0 0 0 / 0.3)" }}>
         <textarea
           {...inputProps}
@@ -442,7 +442,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
           className={cn("block h-6 w-full resize-none bg-transparent outline-none placeholder:text-(--ph)", BODY)}
           style={{ color: "lch(90.826 1.425 272)", "--ph": C.muted } as React.CSSProperties}
           onKeyDown={(e) => {
-            if (autocomplete.onKeyDown(e)) return;
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
               e.preventDefault();
               submit();
@@ -529,7 +528,7 @@ const Dots = () =>
 /** (B) The description: a Tiptap editor with Linear's inline ":" emoji menu. */
 function Description({ compact = false }: { compact?: boolean }) {
   const editor = useEditor({
-    extensions: [StarterKit, EmojiSuggestion],
+    extensions: [StarterKit],
     content: "<p>The reaction picker opens below the fold when the editor scrolls. Try :s</p>",
     immediatelyRender: true,
     // On a phone the editor reaches the edges, its text 14px in (10px above, 16 below).

@@ -10,6 +10,7 @@ import {
   useEmojiSearch,
   useEmojiStore,
   useFrequentEmoji,
+  useTextFieldEmojiTypeahead,
   type CategoryOption,
   type EmojiCellProps,
   type EmojiSearch,
@@ -22,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EmojiAutocomplete, useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { EmojiPickerCard, EmojiTapback } from "@/registry/emoji-picker";
 import { PickerPopover } from "@/components/picker-popover";
 import { Example, H2, P } from "@/components/site/docs";
@@ -551,16 +551,26 @@ function CommandPalette() {
 }
 
 function Composer() {
-  const { autocomplete, inputProps } = useAutocompleteInput<HTMLInputElement>({ insert: "emoji", limit: 6 });
+  const ref = React.useRef<HTMLInputElement>(null);
+  const { open, suggestions: menu } = useTextFieldEmojiTypeahead(ref, { limit: 6 });
   return (
     <div className="relative w-full max-w-[352px]">
-      <EmojiAutocomplete autocomplete={autocomplete} className="absolute inset-x-0 bottom-full mb-1.5" />
+      {open ? (
+        <ul {...menu.getListProps()} aria-label="Emoji suggestions" className="absolute inset-x-0 bottom-full mb-1.5 max-h-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-sm text-foreground shadow-lg">
+          {menu.suggestions.map((s, i) => (
+            <li key={`${s.record.unified}:${s.shortcode}`} {...menu.getOptionProps(i)} className="flex cursor-default items-center gap-2.5 rounded-md px-2 py-1.5 data-[highlighted]:bg-accent">
+              <Emoji emoji={s.record.unified} size={20} className="text-xl leading-none" />
+              <span className="font-medium">:{s.shortcode}:</span>
+              <span className="ml-auto truncate pl-3 text-xs text-muted-foreground">{s.record.name}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
       <input
-        {...inputProps}
+        ref={ref}
         aria-label="Message"
         placeholder="Type :tada or :thu"
         className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40"
-        onKeyDown={(e) => autocomplete.onKeyDown(e)}
       />
     </div>
   );
@@ -577,17 +587,14 @@ function HeadlessExample() {
         {
           label: "Autocomplete",
           file: "composer.tsx",
-          code: `const ac = useShortcodeAutocomplete({
-  value, caret,
-  insert: "emoji",
-  onChoose: ({ value, caret }) => setText(value, caret),
-});
+          code: `const ref = useRef<HTMLTextAreaElement>(null);
+const { open, suggestions: menu } = useTextFieldEmojiTypeahead(ref);
 
-<textarea {...ac.getInputProps()} onKeyDown={(e) => ac.onKeyDown(e) || onKey(e)} />
-{ac.open && (
-  <ul {...ac.getListProps()} className="rounded-lg border bg-popover p-1">
-    {ac.suggestions.map((s, i) => (
-      <li key={s.shortcode} {...ac.getOptionProps(i)} className="data-[highlighted]:bg-accent">
+<textarea ref={ref} onKeyDown={onKey} />
+{open && (
+  <ul {...menu.getListProps()} className="rounded-lg border bg-popover p-1">
+    {menu.suggestions.map((s, i) => (
+      <li key={s.shortcode} {...menu.getOptionProps(i)} className="data-[highlighted]:bg-accent">
         <Emoji emoji={s.record.unified} /> :{s.shortcode}:
       </li>
     ))}

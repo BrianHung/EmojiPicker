@@ -43,7 +43,7 @@
   ],
   "enter": {
     "open": false,
-    "focus": "combobox \"Message\"",
+    "focus": "input \"Message\"",
     "focusReturned": true,
     "toast": null,
     "field": "😄"
@@ -63,14 +63,14 @@
   "escape": [
     {
       "open": false,
-      "focus": "combobox \"Message\"",
+      "focus": "input \"Message\"",
       "focusReturned": true,
       "toast": null,
       "field": ":smi"
     }
   ],
   "tab": {
-    "focus": "combobox \"Message\"",
+    "focus": "input \"Message\"",
     "highlight": null,
     "open": false,
     "inside": false

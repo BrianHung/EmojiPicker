@@ -12,10 +12,10 @@ import { useSmoothCorners } from "@lisse/react";
 import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
-import { useAutocompleteInput } from "@/components/emoji-autocomplete";
+import { useEmojiTextField } from "@/components/emoji-text-field";
+import { StyleAutocomplete } from "@/styles/variants";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import * as I from "@/styles/icons";
-import { StyleAutocomplete } from "@/styles/variants";
 import { EmojiText } from "@/styles/scene-kit";
 import { IPhoneFrame } from "./iphone-frame";
 import { apple } from "./picker";
@@ -510,7 +510,7 @@ function Composer({
 }) {
   const store = useEmojiStore();
   // iMessage inserts the emoji itself; :shortcodes: typed in full are converted on send.
-  const { value, setText, insertAtCaret, autocomplete, inputProps } = useAutocompleteInput<HTMLInputElement>({ limit: 6 });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6 });
   insert.current = insertAtCaret;
   // The keyboard's delete key: drop the last grapheme (an emoji is one).
   erase.current = () => setText(segment(value).slice(0, -1).join(""));
@@ -528,7 +528,7 @@ function Composer({
     >
       <div className="absolute inset-x-[16px] bottom-[77px] drop-shadow-[0_8px_24px_rgb(0_0_0/0.16)]">
         <Squircle radius={22}>
-          <StyleAutocomplete appStyle={apple} autocomplete={autocomplete} className="rounded-none! border-0! shadow-none!" />
+          <StyleAutocomplete appStyle={apple} {...emoji} className="rounded-none! border-0! shadow-none!" />
         </Squircle>
       </div>
       <button
@@ -552,7 +552,6 @@ function Composer({
           placeholder={placeholder}
           className="min-w-0 flex-1 bg-transparent text-[17px] tracking-[-0.01em] caret-[#0086fd] outline-none placeholder:text-[#bdbdc0]"
           onKeyDown={(e) => {
-            if (autocomplete.onKeyDown(e)) return;
             if (e.key === "Enter") {
               e.preventDefault();
               submit();
