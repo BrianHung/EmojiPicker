@@ -28,7 +28,8 @@ export type Surface = {
 
 /** The topmost open popover or sheet. */
 export const layer = (page: Page) => page.locator('[data-slot="popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
-const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).last();
+/** A `:` menu (the pickers are listboxes too: `data-slot="list"`). */
+const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=list])")).last();
 /** The picker root: the scope itself (a page whose frame is the picker) or the first one inside it. */
 const pickerIn = (scope: Locator) => scope.locator('xpath=descendant-or-self::*[@data-slot="emoji-picker" or @data-epr-part="root"]').first();
 const button = (scope: Page | Locator, name: string) => scope.getByRole("button", { name, exact: true });

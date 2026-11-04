@@ -1,67 +1,67 @@
 {
   "opened": {
-    "focus": "combobox \"Type to search for an emoji\"",
+    "focus": "searchbox \"Type to search for an emoji\"",
     "highlight": null
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"check mark button\" 2705",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"eyes\" 1f440",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"eyes\" 1f440",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"raising hands\" 1f64c",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"raising hands\" 1f64c",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"keycap: 3\" 33-fe0f-20e3",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"keycap: 3\" 33-fe0f-20e3",
       "scrolled": 0
     },
     {
       "key": "ArrowLeft",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"keycap: 2\" 32-fe0f-20e3",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"keycap: 2\" 32-fe0f-20e3",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"eyes\" 1f440",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"eyes\" 1f440",
       "scrolled": 0
     },
     {
       "key": "End",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
       "scrolled": 0
     },
     {
       "key": "Home",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"check mark button\" 2705",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
       "scrolled": 0
     },
     {
       "key": "PageDown",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"drooling face\" 1f924",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"drooling face\" 1f924",
       "scrolled": 0
     },
     {
       "key": "PageUp",
-      "focus": "combobox \"Type to search for an emoji\"",
-      "highlight": "gridcell \"check mark button\" 2705",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
       "scrolled": 0
     }
   ],
@@ -80,7 +80,7 @@
     }
   ],
   "tab": {
-    "focus": "gridcell \"check mark button\" 2705",
+    "focus": "option \"check mark button\" 2705",
     "highlight": null,
     "open": true,
     "inside": true

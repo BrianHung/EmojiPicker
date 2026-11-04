@@ -119,7 +119,8 @@ export const discord: Style = {
     // Discord's 8px scrollbar: a 4px #5f606a thumb in a transparent track. The cells
     // right margin goes so nine 48px columns still fit beside it.
     scrollbar:
-      "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:min-h-10 [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-(--discord-thumb) [&::-webkit-scrollbar-thumb]:bg-clip-padding [&_[data-epr-part=category-content]]:mr-0 [&_[data-epr-part=category-content]]:max-w-none",
+      "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:min-h-10 [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-(--discord-thumb) [&::-webkit-scrollbar-thumb]:bg-clip-padding [--emoji-list-padding-end:0px]",
+    fixedColumns: true,
     viewport: "pl-1",
     footer: "discord",
     footerInColumn: true,

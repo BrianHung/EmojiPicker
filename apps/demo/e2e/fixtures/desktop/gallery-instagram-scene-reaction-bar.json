@@ -6,45 +6,45 @@
   "keys": [
     {
       "key": "ArrowRight",
-      "focus": "button \"red heart\"",
+      "focus": "button \"face with tears of joy\"",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
-      "focus": "button \"red heart\"",
+      "focus": "button \"face with open mouth\"",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "ArrowLeft",
-      "focus": "button \"red heart\"",
+      "focus": "button \"face with tears of joy\"",
       "highlight": null,
       "scrolled": 0
     },
     {
       "key": "End",
-      "focus": "button \"red heart\"",
+      "focus": "button \"More reactions\"",
       "highlight": null,
-      "scrolled": 1631
+      "scrolled": 0
     },
     {
       "key": "Home",
       "focus": "button \"red heart\"",
       "highlight": null,
-      "scrolled": -1631
+      "scrolled": 0
     },
     {
       "key": "ArrowDown",
       "focus": "button \"red heart\"",
       "highlight": null,
-      "scrolled": 40
+      "scrolled": 0
     },
     {
       "key": "ArrowUp",
       "focus": "button \"red heart\"",
       "highlight": null,
-      "scrolled": -40
+      "scrolled": 0
     }
   ],
   "enter": {
@@ -55,12 +55,12 @@
   },
   "hover": {
     "hovered": {
-      "focus": "button \"red heart\"",
+      "focus": "button \"face with tears of joy\"",
       "highlight": null
     },
     "then": {
       "key": "ArrowRight",
-      "focus": "button \"red heart\"",
+      "focus": "button \"face with open mouth\"",
       "highlight": null,
       "scrolled": 0
     }
@@ -74,9 +74,9 @@
     }
   ],
   "tab": {
-    "focus": "button \"face with tears of joy\"",
+    "focus": "button \"React\"",
     "highlight": null,
-    "open": true,
-    "inside": true
+    "open": false,
+    "inside": false
   }
 }

@@ -1,33 +1,28 @@
-// Internal: one keyboard dispatcher per picker, at Root. For every keydown inside
-// the picker, in this order:
+// Internal: one keyboard dispatcher per picker, at Root, in React's capture phase
+// (before React Aria's handlers on the parts). For every keydown inside the picker:
 //   1. user `onKeyDown` handlers on the parts (innermost first, as bubbling would);
-//      any of them can call `event.preventEmojiPickerHandler()` to stop here,
-//   2. the key's action (from the keymap) goes to the innermost region that takes it
-//      (horizontal list, search field, skin tone, reactions, tab bar, vertical list),
-//   3. picker-wide actions: close, focus-search, toggle-skin-tone,
-//   4. otherwise the engine (emoji-picker-react) gets the key.
-//
-// It runs in React's capture phase on Root, which is before the engine's own
-// listener (bubble, on the same root element). Keys handled here, and keys the
-// user unbound, are hidden from the engine; nothing stops propagation, so apps can
-// still see them (and check `defaultPrevented`), except an Escape the picker used,
-// which stops at Root so a dialog or sheet around it stays open.
+//      any can call `event.preventEmojiPickerHandler()` to stop here,
+//   2. Shift+Space opens the skin-tone variations of the emoji the key is on, if it has them,
+//   3. the key's action (from the keymap) goes to the innermost region that takes it
+//      (skin tone, search field, list, reactions),
+//   4. picker-wide actions: close (clear the query, end the highlight, close the
+//      popover), focus-search, toggle-skin-tone,
+//   5. a navigation key left over (unbound by the keymap) is kept from React Aria.
+// A key the picker handles, or keeps from React Aria, stops at Root, as React Aria's
+// own handled keys do, so an Escape it used doesn't also close a dialog around it.
 import * as React from "react";
-import { ENGINE_KEYS, actionFor, engineActionOf, isTextEditingKey, matchesChord, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
+import { actionFor, isTextEditingKey, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
 
 /** A picker part's keydown event. Its handler runs before the picker's own. */
 export type PickerKeyboardEvent<T extends Element = Element> = React.KeyboardEvent<T> & {
-  /** Skip the picker's handling of this key (and the engine's); the event still propagates. Like Base UI's `preventBaseUIHandler`. */
+  /** Skip the picker's handling of this key (and React Aria's). Like Base UI's `preventBaseUIHandler`. */
   preventEmojiPickerHandler: () => void;
   /** Whether a handler called `preventEmojiPickerHandler()`. */
   readonly emojiPickerHandlerPrevented: boolean;
 };
 export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerKeyboardEvent<T>) => void;
 
-/**
- * What a region did with a key. "pass" lets an outer region (or the engine) try;
- * "native" keeps it from the engine and leaves it to the browser (a caret move).
- */
+/** What a region did with a key. "pass" lets an outer region try; "native" leaves it to the browser alone (a caret move). */
 export type RegionResult = "handled" | "pass" | "native";
 /** A region's action handler. `action` is null for keys with no binding. */
 export type RegionHandler = (action: KeyboardAction | null, event: PickerKeyboardEvent) => RegionResult;
@@ -42,6 +37,7 @@ type KeyboardContextValue = {
 };
 
 const KeyboardContext = React.createContext<KeyboardContextValue | null>(null);
+export const useKeymap = () => React.useContext(KeyboardContext)?.keymap ?? resolveKeymap();
 
 /** Keeps the latest value in a ref, registered under the element the returned ref callback receives. */
 function useRegistered<T>(registry: Registry<T> | null, value: T | undefined): React.RefCallback<Element> {
@@ -93,54 +89,7 @@ export function mergeRefs<T>(...refs: (React.Ref<T> | undefined)[]): React.RefCa
   };
 }
 
-// --- Engine boundary ------------------------------------------------------------
-
-/** Events this module dispatched itself (a remapped key, re-sent as the engine's own). */
-const resent = new WeakSet<Event>();
-
-/**
- * Hides one keydown from the engine. Its listener skips events that are part of an
- * IME composition, so the event reports `isComposing` until it leaves the picker's
- * root, then reads normally again for everyone above.
- */
-function hideFromEngine(event: KeyboardEvent, root: Element) {
-  if (Object.prototype.hasOwnProperty.call(event, "isComposing")) return;
-  Object.defineProperty(event, "isComposing", { configurable: true, get: () => true });
-  const parent = root.parentNode;
-  // Only this event: a key re-sent while handling it passes the parent first.
-  const restore = (e: Event) => {
-    if (e !== event) return;
-    delete (event as { isComposing?: boolean }).isComposing;
-    parent?.removeEventListener("keydown", restore);
-  };
-  if (!parent) return restore(event);
-  parent.addEventListener("keydown", restore);
-  // If something stops it before the parent, clean up after this dispatch anyway.
-  setTimeout(() => restore(event), 0);
-}
-
-/**
- * Stops one keydown once it has bubbled to the picker's root: everything inside
- * still sees it, nothing around the picker does (as the engine does with Escape).
- */
-function stopAtRoot(event: KeyboardEvent, root: Element) {
-  const stop = (e: Event) => {
-    if (e !== event) return;
-    e.stopPropagation();
-    root.removeEventListener("keydown", stop);
-  };
-  root.addEventListener("keydown", stop);
-  setTimeout(() => root.removeEventListener("keydown", stop), 0);
-}
-
-/** Sends `key` to the engine as if pressed on `target` (a remapped binding). */
-export function resendKey(target: Element, key: string, init: KeyboardEventInit = {}) {
-  const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, composed: true, ...init });
-  resent.add(event);
-  target.dispatchEvent(event);
-}
-
-function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
+export function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
   return el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "checkbox", "radio", "submit", "reset"].includes(el.type));
 }
 
@@ -173,17 +122,28 @@ function ancestors(from: Element, root: Element): Element[] {
   return out;
 }
 
+/**
+ * Keys React Aria's collections, tabs and fields act on by themselves. Not Escape: with nothing
+ * to clear or close it goes on to the page (a sheet or dialog around the picker closes).
+ */
+const NATIVE_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " "]);
+
 export type KeyboardProviderProps = {
   keymap?: Partial<Record<KeyboardAction, readonly string[]>>;
   /** Root's own onKeyDown: runs after the parts' handlers, before the picker's. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-  /** Close the surrounding popover, if any. Returns false when there's none. */
+  /** Picker-wide Escape: clear the query or the highlight, else close the popover. True when it did something. */
   close: () => boolean;
+  focusSearch: () => boolean;
+  /** Shift+Space: the skin-tone variations of the emoji at `target` (a cell, or the field's highlight). True when they open. */
+  variations: (target: Element) => boolean;
+  /** Elements whose native keys stay with React Aria when no action claims them (tabs, toolbars). */
+  ownsKeys: (target: Element) => boolean;
   children: (props: { ref: React.RefCallback<HTMLElement>; onKeyDownCapture: React.KeyboardEventHandler<HTMLElement> }) => React.ReactNode;
 };
 
 /** Provides registration to the parts and returns the Root element's props. */
-export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children }: KeyboardProviderProps) {
+export function KeyboardProvider({ keymap: overrides, onKeyDown, close, focusSearch, variations, ownsKeys, children }: KeyboardProviderProps) {
   const keymap = React.useMemo(() => resolveKeymap(overrides), [overrides]);
   const handlers = React.useRef<Registry<PickerKeyboardEventHandler>>(new Map()).current;
   const regions = React.useRef<Registry<RegionHandler>>(new Map()).current;
@@ -191,16 +151,17 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children
   const value = React.useMemo<KeyboardContextValue>(() => ({ keymap, handlers, regions, skinTone }), [keymap, handlers, regions]);
   const rootHandlerRef = useRegistered(handlers, onKeyDown as PickerKeyboardEventHandler | undefined);
   const root = React.useRef<HTMLElement | null>(null);
-  const latest = React.useRef({ keymap, close });
-  latest.current = { keymap, close };
+  const latest = React.useRef({ keymap, close, focusSearch, variations, ownsKeys });
+  latest.current = { keymap, close, focusSearch, variations, ownsKeys };
 
   const onKeyDownCapture = React.useCallback(
     (reactEvent: React.KeyboardEvent<HTMLElement>) => {
       const native = reactEvent.nativeEvent;
       const rootEl = root.current;
       const target = reactEvent.target as Element;
-      if (!rootEl || resent.has(native) || native.isComposing || native.keyCode === 229 || !(target instanceof Element)) return;
-      const { keymap, close } = latest.current;
+      // Untrusted events are React Aria's own re-dispatches (Autocomplete forwards keys to the collection).
+      if (!rootEl || !native.isTrusted || native.isComposing || native.keyCode === 229 || !(target instanceof Element)) return;
+      const { keymap, close, focusSearch, variations, ownsKeys } = latest.current;
       const event = augment(reactEvent);
       const path = ancestors(target, rootEl);
 
@@ -210,63 +171,38 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children
         if (handler) withCurrentTarget(event, el, () => handler(event));
         if (event.isPropagationStopped()) break;
       }
-      const action = actionFor(event, keymap);
-      if (event.emojiPickerHandlerPrevented) {
-        // Selecting a focused cell is the button's own click: keep that from happening too.
-        if (action === "select" && target instanceof HTMLButtonElement) event.preventDefault();
-        return hideFromEngine(native, rootEl);
-      }
+      if (event.emojiPickerHandlerPrevented) return event.stopPropagation();
       if (event.defaultPrevented) return;
 
-      // Home and End edit the query, except in an empty field, where there's no caret to move: they go to the first and last emoji.
-      const typing = isTextField(target) && isTextEditingKey(event) && !((event.key === "Home" || event.key === "End") && target.value === "");
       const handled = () => {
         event.preventDefault();
-        hideFromEngine(native, rootEl);
-        // An Escape the picker used (closing the skin tones, ending a highlight) mustn't also close a dialog or sheet around it.
-        if (action === "close") stopAtRoot(native, rootEl);
+        event.stopPropagation();
       };
+      if (event.key === " " && event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && variations(target)) return handled();
+
+      const action = actionFor(event, keymap);
+      // Home and End edit the query, except in an empty field: there they go to the first and last emoji.
+      const typing = isTextField(target) && isTextEditingKey(event) && !((event.key === "Home" || event.key === "End") && target.value === "");
 
       // 2. Regions, innermost first.
       if (!typing) {
         for (const el of path) {
-          const region = regions.get(el)?.current;
-          const result = region?.(action, event);
+          const result = regions.get(el)?.current?.(action, event);
           if (result === "handled") return handled();
-          if (result === "native") return hideFromEngine(native, rootEl);
+          if (result === "native") return event.stopPropagation();
         }
       }
 
       // 3. Picker-wide actions.
       if (action === "close" && close()) return handled();
-      if (!typing && action === "focus-search" && !isTextField(target)) {
-        const input = rootEl.querySelector<HTMLElement>('[data-slot="search-input"], [data-epr-part="search-input"]');
-        if (input) {
-          input.focus();
-          return handled();
-        }
-      }
+      if (!typing && action === "focus-search" && !isTextField(target) && focusSearch()) return handled();
       if (!typing && action === "toggle-skin-tone" && skinTone.current) {
         skinTone.current();
         return handled();
       }
 
-      // 4. The engine. Its own key for this action goes through untouched; another
-      //    binding is re-sent as that key; an engine key the user unbound is hidden.
-      const engineAction = engineActionOf(event);
-      if (action && action === engineAction) return;
-      const engineKey = action ? ENGINE_KEYS[action] : undefined;
-      if (engineKey && !typing) {
-        handled();
-        if (action === "select" && target instanceof HTMLButtonElement) target.click();
-        else resendKey(target, engineKey);
-        return;
-      }
-      if (engineAction && !keymap[engineAction].some((chord) => matchesChord(event, chord))) {
-        hideFromEngine(native, rootEl);
-        // Enter on a button would still click it.
-        if (engineAction === "select" && target instanceof HTMLButtonElement) event.preventDefault();
-      }
+      // 4. A navigation key no action claimed: React Aria's parts would act on it.
+      if (NATIVE_KEYS.has(event.key) && !(event.key === " " && typing) && !ownsKeys(target)) event.stopPropagation();
     },
     [handlers, regions],
   );
@@ -278,7 +214,7 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, children
   );
 }
 
-/** First/last for a row of buttons (reactions, category tabs): Home and End focus its ends. */
+/** First/last for a row of buttons (reactions): Home and End focus its ends. */
 export function useEdgeKeys(selector: string): React.RefCallback<Element> {
   const element = React.useRef<Element | null>(null);
   const region = useKeyRegion((action) => {

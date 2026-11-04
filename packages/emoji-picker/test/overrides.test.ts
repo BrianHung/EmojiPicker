@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findArtwork } from "../src/react/overrides";
-import { isPressed, reactionKey } from "../src/react/reactions";
+import { isPressed, reactionKey } from "../src/react/reactions-context";
 
 describe("artwork overrides", () => {
   const map = { "2764-fe0f": "/heart.svg", "1f44d": "/thumbs.svg", "1f44d-1f3ff": "/thumbs-dark.svg", "203c": "/bang.svg" };

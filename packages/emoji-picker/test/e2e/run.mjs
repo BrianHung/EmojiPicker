@@ -370,7 +370,7 @@ const tabStops = async () => {
     await press("Tab", 60);
     const f = await page.evaluate(() => {
       const a = document.activeElement;
-      return { inside: !!a?.closest('#harness, [data-slot="popover-content"]'), slot: a?.matches("button.epr-emoji, [data-slot=emoji]") ? "cell" : a?.getAttribute("role") === "tab" ? "tab" : (a?.getAttribute("data-slot") ?? a?.tagName) };
+      return { inside: !!a?.closest('#harness, [data-slot="popover-content"]'), slot: a?.matches("[data-slot=emoji]") ? "cell" : a?.getAttribute("role") === "tab" ? "tab" : (a?.getAttribute("data-slot") ?? a?.tagName) };
     });
     if (!f.inside) return { left: true, stops };
     stops.push(f.slot);
@@ -387,7 +387,7 @@ await press("Home", 500);
 const homeHl = await highlighted(page);
 check("empty search field: Home highlights the first emoji", homeHl != null && homeHl !== "flag: wales" && (await focused(page)).slot === "search-input", homeHl);
 check("empty search field: Home/End don't scroll the page", (await page.evaluate(() => scrollY)) === pageScroll);
-const tabbable = await page.evaluate(() => [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.tabIndex >= 0).length);
+const tabbable = await page.evaluate(() => [...document.querySelectorAll("#harness [data-slot=emoji]")].filter((c) => c.tabIndex >= 0).length);
 check("vertical list: one cell is tabbable (roving tabindex)", tabbable === 1, String(tabbable));
 await search().focus();
 const fromSearch = await tabStops();
@@ -398,7 +398,7 @@ await search().click();
 await press("ArrowDown", 200);
 await press("ArrowRight", 150);
 const gridHover = await page.evaluate(() => {
-  const cells = [...document.querySelectorAll("#harness button.epr-emoji")].filter((c) => c.getBoundingClientRect().width > 0);
+  const cells = [...document.querySelectorAll("#harness [data-slot=emoji]")].filter((c) => c.getBoundingClientRect().width > 0);
   const c = cells[18];
   const r = c.getBoundingClientRect();
   return { label: c.getAttribute("aria-label"), x: r.x + r.width / 2, y: r.y + r.height / 2, left: r.x, top: r.y };
@@ -508,7 +508,7 @@ await $('[data-slot="emoji"][data-unified="1f44d"]').first().click();
 check("artwork: picking an overridden emoji selects the standard one", (await page.evaluate(() => window.__picks.at(-1))) === "1f44d");
 await search().fill("thumbs up");
 await page.waitForTimeout(200);
-check("artwork: search results draw it too", (await overridden('#harness [data-slot="emoji"][data-result="0"]'))?.flag === true);
+check("artwork: search results draw it too", (await overridden('#harness [data-results] [data-slot="emoji"][data-index="0"]'))?.flag === true);
 await mount(page, { kind: "horizontal", root: { artwork } });
 check("artwork: the horizontal list draws it", (await overridden('#harness [data-slot="emoji"][data-overridden]')) != null);
 await mount(page, { kind: "tapback", root: { artwork } });
@@ -616,6 +616,57 @@ const sugg = await page.evaluate(() => {
   return el ? { width: el.getBoundingClientRect().width, scroll: el.querySelector("ul").scrollWidth, client: el.querySelector("ul").clientWidth } : null;
 });
 check("autocomplete (demo component): long shortcodes stay inside the menu", sugg && sugg.width <= 321 && sugg.scroll <= sugg.client + 1, JSON.stringify(sugg), { warn: true });
+
+// --- Skin-tone variations (Shift+Space, long press) ------------------------------
+const variations = () =>
+  page.evaluate((scope) => {
+    const row = document.querySelector(`${scope} [data-slot="variations"]`);
+    return row && { role: row.getAttribute("role"), label: row.getAttribute("aria-label"), options: [...row.querySelectorAll('[role="option"]')].map((o) => o.getAttribute("aria-label")), focus: document.activeElement?.getAttribute("aria-label") };
+  }, SCOPE);
+await mount(page, { kind: "vertical" });
+await search().fill("thumbs up");
+await page.waitForTimeout(250);
+await press("Shift+Space");
+const tones = await variations();
+check("variations: Shift+Space on the highlighted emoji opens its six tones, named, the current one focused", tones?.role === "listbox" && tones.options.length === 6 && tones.options[0] === "thumbs up" && tones.options[3] === "thumbs up: medium skin tone" && tones.focus === "thumbs up" && (await search().inputValue()) === "thumbs up", JSON.stringify(tones));
+await press("ArrowRight");
+check("variations: Right moves to the next tone", (await variations())?.focus === "thumbs up: light skin tone");
+await press("End");
+check("variations: End goes to the last tone", (await variations())?.focus === "thumbs up: dark skin tone");
+await press("Home");
+check("variations: Home goes to the first", (await variations())?.focus === "thumbs up");
+await press("Escape");
+check("variations: Escape closes, back to the field with the emoji highlighted", (await variations()) === null && (await focused(page)).slot === "search-input" && (await highlighted(page)) === "thumbs up" && (await search().inputValue()) === "thumbs up");
+await press("Shift+Space");
+await press("ArrowRight");
+await press("ArrowRight");
+await press("Enter", 300);
+check("variations: Enter picks the tone and closes", (await page.evaluate(() => window.__picks.at(-1))) === "1f44d-1f3fc" && (await variations()) === null && (await focused(page)).slot === "search-input");
+await mount(page, { kind: "vertical", root: GRID });
+await search().fill("waving hand");
+await page.waitForTimeout(250);
+const waving = await $('[data-slot="list"] [data-slot="emoji"]').first().boundingBox();
+await page.mouse.move(waving.x + waving.width / 2, waving.y + waving.height / 2);
+await page.mouse.down();
+await page.waitForTimeout(700);
+const held = await variations();
+await page.mouse.up();
+await page.waitForTimeout(200);
+check("variations: a long press opens them; the release doesn't pick", held?.options.length === 6 && held.options[0] === "waving hand" && (await page.evaluate(() => window.__picks.length)) === 0 && (await variations()) !== null, JSON.stringify(held));
+await press("ArrowRight");
+await press(" ", 300);
+check("variations: Space picks; focus goes back to the emoji's cell (grid)", (await page.evaluate(() => window.__picks.at(-1))) === "1f44b-1f3fb" && (await focused(page)).label === "waving hand" && (await focused(page)).slot === "emoji");
+await press("Shift+Space");
+check("variations: Shift+Space on a focused cell opens them", (await variations())?.options.length === 6);
+await page.mouse.click(5, 5);
+await page.waitForTimeout(150);
+check("variations: a click outside closes them", (await variations()) === null);
+await mount(page, { kind: "vertical", root: { disableVariations: true } });
+await search().fill("thumbs up");
+await page.waitForTimeout(250);
+await press("Shift+Space");
+check("variations: disableVariations turns them off (Shift+Space types a space)", (await variations()) === null && (await search().inputValue()) === "thumbs up ");
+await search().fill("");
 
 check("no page errors", errors.length === 0, errors.join(" | "));
 await browser.close();

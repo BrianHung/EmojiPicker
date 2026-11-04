@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { moveByRows, rowsPerPage, type Point } from "../src/react/grid-nav";
-import { DEFAULT_KEYMAP, actionFor, engineActionOf, isTextEditingKey, matchesChord, parseChord, resolveKeymap } from "../src/react/keymap";
+import { DEFAULT_KEYMAP, actionFor, isTextEditingKey, matchesChord, parseChord, resolveKeymap } from "../src/react/keymap";
 import { columnsPerPage, layoutStrip, pageInStrip, type StripMetrics } from "../src/react/strip-layout";
 
 const key = (k: string, mods: { ctrl?: boolean; meta?: boolean; alt?: boolean; shift?: boolean } = {}) => ({
@@ -19,7 +19,7 @@ describe("keymap", () => {
     expect(actionFor(key("End", { ctrl: true }), DEFAULT_KEYMAP)).toBe("last");
     expect(actionFor(key("Enter"), DEFAULT_KEYMAP)).toBe("select");
     expect(actionFor(key(" "), DEFAULT_KEYMAP)).toBe("select");
-    // Shift+Space is the engine's: it opens an emoji's skin-tone variations.
+    // Shift+Space isn't an action: it opens an emoji's skin-tone variations.
     expect(actionFor(key(" ", { shift: true }), DEFAULT_KEYMAP)).toBeNull();
     expect(actionFor(key("Escape"), DEFAULT_KEYMAP)).toBe("close");
     expect(actionFor(key("/"), DEFAULT_KEYMAP)).toBe("focus-search");
@@ -59,11 +59,7 @@ describe("keymap", () => {
     expect(() => parseChord("Hyper+K")).toThrow(/unknown modifier/);
   });
 
-  it("knows which keys the engine acts on and which a text field keeps", () => {
-    expect(engineActionOf(key("ArrowLeft"))).toBe("move-left");
-    expect(engineActionOf(key("Enter"))).toBe("select");
-    expect(engineActionOf(key("ArrowLeft", { shift: true }))).toBeNull();
-    expect(engineActionOf(key("PageDown"))).toBeNull();
+  it("knows which keys a text field keeps", () => {
     expect(isTextEditingKey(key("j"))).toBe(true);
     expect(isTextEditingKey(key("Home"))).toBe(true);
     expect(isTextEditingKey(key("Home", { ctrl: true }))).toBe(false);

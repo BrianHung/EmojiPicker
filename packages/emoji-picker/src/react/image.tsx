@@ -1,9 +1,7 @@
 // Internal: every image emoji the library draws (custom emoji, Twemoji), in the
 // grids, search results, the horizontal list and <Emoji>.
 import * as React from "react";
-import * as Epr from "emoji-picker-react/primitives";
-import { unifiedToNative, type EmojiRecord } from "../core/dataset";
-import { useEmojiContext } from "./provider";
+import type { EmojiRecord } from "../core/dataset";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -77,23 +75,4 @@ export function EmojiImage({ src, alt, record, size, animate, fallback, style, .
       style={{ width: size, height: size, objectFit: "contain", ...style }}
     />
   );
-}
-
-/**
- * An image emoji in one of the engine's cells (custom, or Twemoji), drawn like our
- * own grids draw it: lazy, sized up front, an animated one still until active.
- */
-export function EngineCellImage({ unified, src, active }: { unified: string; src: string; active: boolean }) {
-  const { store } = useEmojiContext();
-  const record = store.get(unified);
-  const props = { src: record?.imageUrl ?? src, alt: record?.name ?? unified, record, size: "var(--emoji-image-size, var(--emoji-size, 30px))", fallback: record?.imageUrl ? undefined : unifiedToNative(unified) };
-  // Only animated cells follow the hovered emoji, so hovering re-renders a few cells, not every image.
-  if (record?.animated && record.stillUrl) return <AnimatedCellImage {...props} unified={unified} highlighted={active} />;
-  return <EmojiImage {...props} animate={active} />;
-}
-
-function AnimatedCellImage({ unified, highlighted, ...props }: Omit<EmojiImageProps, "animate"> & { unified: string; highlighted: boolean }) {
-  // The engine's hovered (or focused) emoji; its cells' own isActive doesn't follow hover.
-  const hovered = Epr.useActiveEmoji()?.unified === unified;
-  return <EmojiImage {...props} animate={hovered || highlighted} />;
 }

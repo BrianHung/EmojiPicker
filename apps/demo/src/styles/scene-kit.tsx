@@ -238,7 +238,7 @@ export function PickerSheet({ appStyle: style, theme, onSelect, label, children,
               setOpen(false);
             }}
             // A phone may be narrower than the category bar: it scrolls sideways.
-            className="h-[min(420px,55dvh)] w-full rounded-none border-0 bg-transparent shadow-none backdrop-blur-none [&_[data-epr-part=category-nav]]:min-w-0 [&_[data-epr-part=category-nav]]:overflow-x-auto [&_[data-epr-part=category-nav]]:[scrollbar-width:none]"
+            className="h-[min(420px,55dvh)] w-full rounded-none border-0 bg-transparent shadow-none backdrop-blur-none [&_[data-slot=category-nav]]:min-w-0 [&_[data-slot=category-nav]]:overflow-x-auto [&_[data-slot=category-nav]]:[scrollbar-width:none]"
           />
         </div>
       </DrawerContent>

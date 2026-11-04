@@ -47,7 +47,8 @@ export const linear: Style = {
     searchRow: "border-b border-(--linear-divider) px-[5px] pt-1 pb-1",
     input: "h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",
     // The rows keep nine columns and run under the scrollbar, as Linear's do.
-    scrollbar: "overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin] [&_[data-epr-part=category-content]]:max-w-none",
+    scrollbar: "overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]",
+    fixedColumns: true,
     categories: [{ id: "suggested", name: "Frequently used" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "travel_places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
   },
   tapback: {

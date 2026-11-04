@@ -1,6 +1,10 @@
 import * as React from "react";
+import { I18nProvider } from "react-aria-components/I18nProvider";
+import { defaultLabels, plural, type EmojiLabels } from "../core/labels";
 import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../core/platform";
 import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../core/store";
+
+export type { EmojiLabels };
 
 export type EmojiProviderProps = EmojiStoreOptions & {
   /** "auto": native emoji, or Twemoji where the system can't draw flags (Windows). Default "auto". */
@@ -11,11 +15,10 @@ export type EmojiProviderProps = EmojiStoreOptions & {
   twemojiVersion?: number;
   /** Start loading data and building the index in idle time on mount. Default true. */
   prepare?: boolean;
+  /** Every string the pickers show or announce; English by default (`defaultLabels`). */
   labels?: Partial<EmojiLabels>;
   children: React.ReactNode;
 };
-
-export type EmojiLabels = { suggested: string; custom: string };
 
 type ContextValue = {
   store: EmojiStore;
@@ -30,12 +33,13 @@ type ContextValue = {
 const EmojiContext = React.createContext<ContextValue | null>(null);
 
 /**
- * One store per app: dataset, search index, frequents and skin tone are
- * shared by every picker, tapback and autocomplete below it.
+ * One store per app: dataset, search index, frequents and skin tone are shared by
+ * every picker, tapback and autocomplete below it. `locale` also sets React Aria's
+ * locale (text direction, number formatting) for everything inside.
  */
-export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, children, ...options }: EmojiProviderProps) {
+export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   // Options are read once, like a store; remount the provider to change data.
-  const [store] = React.useState(() => createEmojiStore(options));
+  const [store] = React.useState(() => createEmojiStore({ ...options, locale }));
   const [detected, setDetected] = React.useState<Renderer>("native");
 
   React.useEffect(() => {
@@ -47,18 +51,32 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   // Custom emoji groups are known once their packs load.
   const status = React.useSyncExternalStore(store.subscribe, store.status, store.status);
   const groups = React.useMemo(() => store.customGroups(), [store, status]);
+  const merged = useLabels(labels, locale);
   const value = React.useMemo<ContextValue>(
     () => ({
       store,
       renderer: resolved,
       imageUrl: (unified) => twemojiUrl(unified, twemojiBaseUrl),
-      labels: { suggested: "Frequently used", custom: "Custom", ...labels },
+      labels: merged,
       groups,
       maxVersion: resolved === "twemoji" ? twemojiVersion : undefined,
     }),
-    [store, resolved, twemojiBaseUrl, twemojiVersion, labels?.suggested, labels?.custom, groups],
+    [store, resolved, twemojiBaseUrl, twemojiVersion, merged, groups],
   );
-  return <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
+  const tree = <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
+  return locale ? <I18nProvider locale={locale}>{tree}</I18nProvider> : tree;
+}
+
+/** `labels` over the English defaults, kept stable while their values are. A locale formats the default count. */
+function useLabels(labels: Partial<EmojiLabels> | undefined, locale: string | undefined): EmojiLabels {
+  const key = labels ? JSON.stringify(labels) : "";
+  const latest = React.useRef(labels);
+  latest.current = labels;
+  return React.useMemo(() => {
+    const count = locale ? { resultCount: plural(locale, { "=0": "No results", one: "# result", other: "# results" }) } : {};
+    return { ...defaultLabels, ...count, ...latest.current };
+    // Functions in labels compare by identity; strings by value.
+  }, [key, locale, labels?.resultCount, labels?.withSkinTone]);
 }
 
 export function useEmojiContext(): ContextValue {

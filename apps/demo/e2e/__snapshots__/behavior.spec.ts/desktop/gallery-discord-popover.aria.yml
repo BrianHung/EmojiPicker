@@ -4,7 +4,7 @@
       - tab "GIFs" [disabled]
       - tab "Stickers" [disabled]
       - tab "Emoji" [selected]
-    - combobox "Type to search for an emoji" [expanded]
+    - searchbox "Type to search for an emoji"
     - button "Default skin tone":
       - img "clapping hands": 👏
     - tablist "Category navigation":
@@ -17,96 +17,89 @@
       - tab "Objects"
       - tab "Symbols"
       - tab "Flags"
-    - grid:
-      - rowgroup "Frequently Used":
-        - button "Frequently Used" [expanded]
-        - row "red heart thumbs up thumbs down face with tears of joy double exclamation mark red question mark":
-          - gridcell "red heart": ❤️
-          - gridcell "thumbs up": 👍
-          - gridcell "thumbs down": 👎
-          - gridcell "face with tears of joy": 😂
-          - gridcell "double exclamation mark": ‼️
-          - gridcell "red question mark": ❓
-      - rowgroup "People":
-        - button "People" [expanded]
-        - row:
-          - gridcell "grinning face": 😀
-          - gridcell "grinning face with big eyes": 😃
-          - gridcell "grinning face with smiling eyes": 😄
-          - gridcell "beaming face with smiling eyes": 😁
-          - gridcell "grinning squinting face": 😆
-          - gridcell "grinning face with sweat": 😅
-          - gridcell "rolling on the floor laughing": 🤣
-          - gridcell "face with tears of joy": 😂
-          - gridcell "slightly smiling face": 🙂
-          - gridcell "upside-down face": 🙃
-          - gridcell "melting face": 🫠
-          - gridcell "winking face": 😉
-          - gridcell "smiling face with smiling eyes": 😊
-          - gridcell "smiling face with halo": 😇
-          - gridcell "smiling face with hearts": 🥰
-          - gridcell "smiling face with heart-eyes": 😍
-          - gridcell "star-struck": 🤩
-          - gridcell "face blowing a kiss": 😘
-          - gridcell "kissing face": 😗
-          - gridcell "smiling face": ☺️
-          - gridcell "kissing face with closed eyes": 😚
-          - gridcell "kissing face with smiling eyes": 😙
-          - gridcell "smiling face with tear": 🥲
-          - gridcell "face savoring food": 😋
-          - gridcell "face with tongue": 😛
-          - gridcell "winking face with tongue": 😜
-          - gridcell "zany face": 🤪
-          - gridcell "squinting face with tongue": 😝
-          - gridcell "money-mouth face": 🤑
-          - gridcell "smiling face with open hands": 🤗
-          - gridcell "face with hand over mouth": 🤭
-          - gridcell "face with open eyes and hand over mouth": 🫢
-          - gridcell "face with peeking eye": 🫣
-          - gridcell "shushing face": 🤫
-          - gridcell "thinking face": 🤔
-          - gridcell "saluting face": 🫡
-          - gridcell "zipper-mouth face": 🤐
-          - gridcell "face with raised eyebrow": 🤨
-          - gridcell "neutral face": 😐
-          - gridcell "expressionless face": 😑
-          - gridcell "face without mouth": 😶
-          - gridcell "dotted line face": 🫥
-          - gridcell "face in clouds": 😶‍🌫️
-          - gridcell "smirking face": 😏
-          - gridcell "unamused face": 😒
-          - gridcell "face with rolling eyes": 🙄
-          - gridcell "grimacing face": 😬
-          - gridcell "face exhaling": 😮‍💨
-          - gridcell "lying face": 🤥
-          - gridcell "shaking face": 🫨
-          - gridcell "head shaking horizontally": 🙂‍↔️
-          - gridcell "head shaking vertically": 🙂‍↕️
-          - gridcell "relieved face": 😌
-          - gridcell "pensive face": 😔
-          - gridcell "sleepy face": 😪
-          - gridcell "drooling face": 🤤
-          - gridcell "sleeping face": 😴
-          - gridcell "face with bags under eyes": 🫩
-          - gridcell "face with medical mask": 😷
-          - gridcell "face with thermometer": 🤒
-          - gridcell "face with head-bandage": 🤕
-          - gridcell "nauseated face": 🤢
-          - gridcell "face vomiting": 🤮
-      - rowgroup "Nature":
-        - button "Nature" [expanded]
-      - rowgroup "Food":
-        - button "Food" [expanded]
-      - rowgroup "Activities":
-        - button "Activities" [expanded]
-      - rowgroup "Travel":
-        - button "Travel" [expanded]
-      - rowgroup "Objects":
-        - button "Objects" [expanded]
-      - rowgroup "Symbols":
-        - button "Symbols" [expanded]
-      - rowgroup "Flags":
-        - button "Flags" [expanded]
+    - listbox "Emoji":
+      - group "Frequently Used":
+        - text: ""
+        - option "red heart": ❤️
+        - option "thumbs up": 👍
+        - option "thumbs down": 👎
+        - option "face with tears of joy": 😂
+        - option "double exclamation mark": ‼️
+        - option "red question mark": ❓
+      - group "People":
+        - text: ""
+        - option "grinning face": 😀
+        - option "grinning face with big eyes": 😃
+        - option "grinning face with smiling eyes": 😄
+        - option "beaming face with smiling eyes": 😁
+        - option "grinning squinting face": 😆
+        - option "grinning face with sweat": 😅
+        - option "rolling on the floor laughing": 🤣
+        - option "face with tears of joy": 😂
+        - option "slightly smiling face": 🙂
+        - option "upside-down face": 🙃
+        - option "melting face": 🫠
+        - option "winking face": 😉
+        - option "smiling face with smiling eyes": 😊
+        - option "smiling face with halo": 😇
+        - option "smiling face with hearts": 🥰
+        - option "smiling face with heart-eyes": 😍
+        - option "star-struck": 🤩
+        - option "face blowing a kiss": 😘
+        - option "kissing face": 😗
+        - option "smiling face": ☺️
+        - option "kissing face with closed eyes": 😚
+        - option "kissing face with smiling eyes": 😙
+        - option "smiling face with tear": 🥲
+        - option "face savoring food": 😋
+        - option "face with tongue": 😛
+        - option "winking face with tongue": 😜
+        - option "zany face": 🤪
+        - option "squinting face with tongue": 😝
+        - option "money-mouth face": 🤑
+        - option "smiling face with open hands": 🤗
+        - option "face with hand over mouth": 🤭
+        - option "face with open eyes and hand over mouth": 🫢
+        - option "face with peeking eye": 🫣
+        - option "shushing face": 🤫
+        - option "thinking face": 🤔
+        - option "saluting face": 🫡
+        - option "zipper-mouth face": 🤐
+        - option "face with raised eyebrow": 🤨
+        - option "neutral face": 😐
+        - option "expressionless face": 😑
+        - option "face without mouth": 😶
+        - option "dotted line face": 🫥
+        - option "face in clouds": 😶‍🌫️
+        - option "smirking face": 😏
+        - option "unamused face": 😒
+        - option "face with rolling eyes": 🙄
+        - option "grimacing face": 😬
+        - option "face exhaling": 😮‍💨
+        - option "lying face": 🤥
+        - option "shaking face": 🫨
+        - option "head shaking horizontally": 🙂‍↔️
+        - option "head shaking vertically": 🙂‍↕️
+        - option "relieved face": 😌
+        - option "pensive face": 😔
+        - option "sleepy face": 😪
+        - option "drooling face": 🤤
+        - option "sleeping face": 😴
+        - option "face with bags under eyes": 🫩
+        - option "face with medical mask": 😷
+        - option "face with thermometer": 🤒
+        - option "face with head-bandage": 🤕
+        - option "nauseated face": 🤢
+        - option "face vomiting": 🤮
+    - button "Frequently Used" [expanded]
+    - button "People" [expanded]
+    - button "Nature" [expanded]
+    - button "Food" [expanded]
+    - button "Activities" [expanded]
+    - button "Travel" [expanded]
+    - button "Objects" [expanded]
+    - button "Symbols" [expanded]
+    - button "Flags" [expanded]
     - img "red heart": ❤️
     - text: ":heart:"
     - status

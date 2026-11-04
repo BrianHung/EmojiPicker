@@ -1,28 +1,20 @@
-// An unstyled popover for pickers: trigger, portaled content positioned next to it
-// (flips, clamps to the viewport, follows scroll), Escape and outside-click to close,
-// focus in on open and back to the trigger on close, close-on-pick for any
-// EmojiPicker.Root inside, and enter/exit hooks for CSS transitions.
+// An unstyled popover for pickers: a trigger and portaled content positioned next to
+// it (flips, shifts into the viewport, follows scroll and resize),
+// Escape and outside-click to close, focus in on open and back to the trigger on
+// close, close-on-pick for any EmojiPicker.Root inside, and enter/exit hooks for CSS
+// transitions (data-starting-style / data-ending-style, --transform-origin).
+// Not React Aria's Popover/Dialog: +10 KB gzip (overlay positioning, FocusScope, aria-hide).
 import * as React from "react";
 import { createPortal } from "react-dom";
+import { PopoverContext, type PopoverState } from "./popover-context";
+
+export { useEmojiPopover } from "./popover-context";
 
 type Side = "top" | "bottom";
-type AnchorRect = { top: number; left: number; right: number; bottom: number; width: number; height: number };
+type Align = "start" | "center" | "end";
+type AnchorRect = { top: number; left: number; right: number; bottom: number; width: number; height: number; x?: number; y?: number };
 /** Anything with a rect: an element, a virtual element, or a function returning the rect (an editor caret). */
 export type PopoverAnchor = { getBoundingClientRect(): AnchorRect } | (() => AnchorRect | null | undefined);
-type Align = "start" | "center" | "end";
-
-type PopoverState = {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  close: () => void;
-  closeOnSelect: boolean;
-  triggerRef: React.MutableRefObject<HTMLElement | null>;
-  contentId: string;
-};
-
-const PopoverContext = React.createContext<PopoverState | null>(null);
-/** Open state of the nearest EmojiPopover, for custom triggers and contents. */
-export const useEmojiPopover = () => React.useContext(PopoverContext);
 
 /** Content elements of open popovers below this one: clicks there are not "outside". */
 const NestedContext = React.createContext<((node: HTMLElement | null) => () => void) | null>(null);
@@ -133,14 +125,29 @@ export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> & {
    */
   anchor?: PopoverAnchor;
   /**
-   * Focused once the content is positioned and visible. Default: the first
-   * `[data-autofocus]` element inside (a picker's search field when the picker
-   * autofocuses), else the picker's first emoji, else the first thing Tab stops on. `false` leaves focus where it is (an editor's caret).
+   * Focused once the content is positioned and visible. Default: `pickerInitialFocus`
+   * (a picker's search field when it autofocuses, else its current emoji), else the
+   * first thing Tab stops on. `false` leaves focus where it is (an editor's caret).
    */
   initialFocus?: PopoverInitialFocus;
 };
 
-type Position = { top: number; left: number; side: Side; origin: string };
+/**
+ * Where focus belongs when a picker opens in any popover (EmojiPopover, Base UI, Radix):
+ * its search field when it autofocuses, else the grid's tab stop (its current emoji),
+ * else the first thing Tab stops on.
+ *
+ *   <Popover.Popup initialFocus={() => pickerInitialFocus(popupRef.current)}>   // Base UI
+ *   <Popover.Content onOpenAutoFocus={(e) => { e.preventDefault(); pickerInitialFocus(e.currentTarget)?.focus(); }}>   // Radix
+ */
+export function pickerInitialFocus(root: Element | null | undefined): HTMLElement | null {
+  if (!root) return null;
+  const target = root.querySelector<HTMLElement>('[data-autofocus]') ?? root.querySelector<HTMLElement>('[data-slot="emoji-picker"] [data-slot="list"] [data-slot="emoji"][tabindex="0"]');
+  if (target) return target;
+  // A picker whose grid hasn't rendered yet: nothing to focus yet (call again once it has).
+  if (root.querySelector('[data-slot="emoji-picker"] [data-slot="list"]') || root.matches('[data-slot="emoji-picker"]')) return null;
+  return tabbables(root)[0] ?? null;
+}
 
 /**
  * Mount and enter/exit state. Content mounts with "starting" (one frame, so CSS
@@ -161,34 +168,35 @@ function useTransition(open: boolean) {
   return { mounted, status, setStatus, unmount: React.useCallback(() => setMounted(false), []) };
 }
 
-/** Longest transition or animation on an element, in ms (for browsers without getAnimations). */
-function longestMotion(el: HTMLElement): number {
-  const cs = getComputedStyle(el);
-  const ms = (list: string) => list.split(",").map((v) => parseFloat(v) * (v.trim().endsWith("ms") ? 1 : 1000) || 0);
-  const total = (durations: string, delays: string) => {
-    const d = ms(durations);
-    const l = ms(delays);
-    return Math.max(0, ...d.map((x, i) => x + (l[i % l.length] ?? 0)));
-  };
-  return Math.max(total(cs.transitionDuration, cs.transitionDelay), total(cs.animationDuration, cs.animationDelay));
-}
-
 /** Resolves when the element's running transitions and animations end (at once when there are none). */
 function motionFinished(el: HTMLElement, done: () => void): () => void {
   let cancelled = false;
   const finish = () => !cancelled && done();
-  if (typeof el.getAnimations === "function") {
-    // Reading animations flushes style, so the ending-style transitions exist by now.
-    const animations = el.getAnimations();
-    if (!animations.length) finish();
-    else void Promise.allSettled(animations.map((a) => a.finished)).then(finish);
-    return () => void (cancelled = true);
-  }
-  const timer = setTimeout(finish, longestMotion(el));
-  return () => {
-    cancelled = true;
-    clearTimeout(timer);
-  };
+  const animations = typeof el.getAnimations === "function" ? el.getAnimations() : [];
+  if (!animations.length) finish();
+  else void Promise.allSettled(animations.map((a) => a.finished)).then(finish);
+  return () => void (cancelled = true);
+}
+
+type Position = { top: number; left: number; side: Side; origin: string };
+
+/**
+ * Where the content goes: on `side` of the anchor, or the other side when only that one has
+ * room (flip); moved into the viewport, `padding` from its edges (shift).
+ */
+function place(anchor: AnchorRect, width: number, height: number, { side, align, offset, padding }: { side: Side; align: Align; offset: number; padding: number }): Position {
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  const fitsBelow = anchor.bottom + offset + height <= vh - padding;
+  const fitsAbove = anchor.top - offset - height >= padding;
+  const below = side === "bottom" ? fitsBelow || !fitsAbove : !fitsAbove && fitsBelow;
+  const x = align === "start" ? anchor.left : align === "end" ? anchor.right - width : anchor.left + anchor.width / 2 - width / 2;
+  const left = Math.min(Math.max(x, padding), Math.max(padding, vw - width - padding));
+  const top = Math.max(padding, Math.min(below ? anchor.bottom + offset : anchor.top - offset - height, vh - height - padding));
+  // Scale from the anchor: its center along the edge facing it.
+  const originX = Math.min(Math.max(anchor.left + anchor.width / 2 - left, 0), width);
+  const originY = below ? anchor.bottom - top : anchor.top - top;
+  return { top, left, side: below ? "bottom" : "top", origin: `${Math.round(originX)}px ${Math.round(originY)}px` };
 }
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
@@ -200,12 +208,47 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const node = React.useRef<HTMLDivElement | null>(null);
   const nested = React.useRef(new Set<HTMLElement>());
   const registerInParent = React.useContext(NestedContext);
-  const [position, setPosition] = React.useState<Position | null>(null);
-  // Read through refs so new anchor/initialFocus values each render don't re-run effects.
   const anchorRef = React.useRef(anchor);
   anchorRef.current = anchor;
   const initialFocusRef = React.useRef(initialFocus);
   initialFocusRef.current = initialFocus;
+
+  // Placed once on open, then again on scroll, resize and when the content changes size: not
+  // for the anchor's own transitions (a trigger's hover or press scale).
+  const [position, setPosition] = React.useState<Position | null>(null);
+  React.useLayoutEffect(() => {
+    const el = node.current;
+    if (!mounted || !el) return setPosition(null);
+    const update = () => {
+      const a = anchorRef.current;
+      const rect = (typeof a === "function" ? a() : a?.getBoundingClientRect()) ?? state.triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      // offsetWidth/Height: the layout size, unaffected by a scale transition in progress.
+      const next = place(rect, el.offsetWidth, el.offsetHeight, { side, align, offset: sideOffset, padding: collisionPadding });
+      el.style.setProperty("--available-width", `${Math.round(document.documentElement.clientWidth - 2 * collisionPadding)}px`);
+      el.style.setProperty("--available-height", `${Math.round(document.documentElement.clientHeight - 2 * collisionPadding)}px`);
+      setPosition((p) => (p && p.top === next.top && p.left === next.left && p.side === next.side && p.origin === next.origin ? p : next));
+    };
+    update();
+    const onScroll = (e: Event) => !(e.target instanceof Node && el.contains(e.target)) && update();
+    let size = `${el.offsetWidth}x${el.offsetHeight}`;
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            const next = `${el.offsetWidth}x${el.offsetHeight}`;
+            if (next !== size) (size = next), update();
+          });
+    observer?.observe(el);
+    addEventListener("scroll", onScroll, { capture: true, passive: true });
+    addEventListener("resize", update);
+    return () => {
+      observer?.disconnect();
+      removeEventListener("scroll", onScroll, { capture: true });
+      removeEventListener("resize", update);
+    };
+  }, [mounted, state.triggerRef, side, align, sideOffset, collisionPadding]);
+  const positioned = position != null;
 
   // Children popovers register their content so clicks inside them stay "inside".
   const register = React.useCallback((el: HTMLElement | null) => {
@@ -215,53 +258,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   }, []);
   React.useLayoutEffect(() => (state.open && registerInParent ? registerInParent(node.current) : undefined), [state.open, registerInParent]);
 
-  React.useLayoutEffect(() => {
-    if (!mounted) return setPosition(null);
-    let frame = 0;
-    const update = () => {
-      const a = anchorRef.current;
-      const trigger = (typeof a === "function" ? a() : a?.getBoundingClientRect()) ?? state.triggerRef.current?.getBoundingClientRect();
-      const el = node.current;
-      if (!trigger || !el) return;
-      // offsetWidth/Height: the layout size, unaffected by a scale transition in progress.
-      const width = el.offsetWidth;
-      const height = el.offsetHeight;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const pad = collisionPadding;
-      const fitsBelow = trigger.bottom + sideOffset + height <= vh - pad;
-      const fitsAbove = trigger.top - sideOffset - height >= pad;
-      const below = side === "bottom" ? fitsBelow || !fitsAbove : !fitsAbove && fitsBelow;
-      const x = align === "start" ? trigger.left : align === "end" ? trigger.right - width : trigger.left + trigger.width / 2 - width / 2;
-      const left = Math.min(Math.max(x, pad), Math.max(pad, vw - width - pad));
-      const top = Math.max(pad, Math.min(below ? trigger.bottom + sideOffset : trigger.top - sideOffset - height, vh - height - pad));
-      // Scale from the trigger: its center along the edge facing it.
-      const originX = Math.min(Math.max(trigger.left + trigger.width / 2 - left, 0), width);
-      const originY = below ? trigger.bottom - top : trigger.top - top;
-      const origin = `${Math.round(originX)}px ${Math.round(originY)}px`;
-      setPosition((p) => (p && p.top === top && p.left === left && p.origin === origin && p.side === (below ? "bottom" : "top") ? p : { top, left, side: below ? "bottom" : "top", origin }));
-    };
-    const schedule = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(update);
-    };
-    update();
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
-    if (node.current) observer?.observe(node.current);
-    window.addEventListener("scroll", schedule, true);
-    window.addEventListener("resize", schedule);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer?.disconnect();
-      window.removeEventListener("scroll", schedule, true);
-      window.removeEventListener("resize", schedule);
-    };
-  }, [mounted, state.triggerRef, side, align, sideOffset, collisionPadding]);
-
-  const positioned = position != null;
-
-  // Enter: one frame with data-starting-style (the position read above flushed
-  // style with it applied, so the transition has a start), then idle.
+  // Enter: one frame with data-starting-style (positioning flushed style with it applied, so the transition has a start), then idle.
   React.useLayoutEffect(() => {
     if (status !== "starting" || !positioned) return;
     const frame = requestAnimationFrame(() => setStatus("idle"));
@@ -274,8 +271,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     return motionFinished(node.current, unmount);
   }, [status, unmount]);
 
-  // Focus in once visible: a hidden element can't take focus, so autofocus during
-  // the measuring render is lost.
+  // Focus in once visible: a hidden element can't take focus, so autofocus during the measuring render is lost.
   React.useLayoutEffect(() => {
     const el = node.current;
     if (!state.open || !positioned || !el || el.contains(document.activeElement)) return;
@@ -285,13 +281,10 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       (typeof option === "function" ? option() : option.current)?.focus({ preventScroll: true });
       return;
     }
-    // Default: the search field, or the first emoji when the picker has no search, so arrows work
-    // at once. The grid renders (and re-renders) its cells after the popover is positioned, which
-    // can drop focus to the body: while open, put it back.
-    // Content that isn't a picker (a row of reactions): its first stop.
-    const focusDefault = () => (el.querySelector<HTMLElement>('[data-autofocus], [data-slot="emoji-picker"] button[data-unified]') ?? tabbables(el)[0])?.focus({ preventScroll: true });
+    const focusDefault = () => pickerInitialFocus(el)?.focus({ preventScroll: true });
     focusDefault();
-    // Only until the user does something: Tab past the content's end also leaves focus on the body.
+    // The grid renders its rows after the popover is positioned, which can drop focus
+    // to the body: until the user does something, put it back.
     const observer = new MutationObserver(() => {
       const active = document.activeElement;
       if (!el.contains(active) && (active === null || active === document.body || active === state.triggerRef.current)) focusDefault();
@@ -317,20 +310,18 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     wasOpen.current = state.open;
   }, [state.open, state.triggerRef]);
 
-  // Escape and outside clicks close. A picker inside handles its own keys (its
-  // keymap's "close"), so Escape from inside one is left to it.
+  // Escape and outside clicks close. A picker inside handles its own Escape (its keymap's "close").
   const { close, triggerRef } = state;
   React.useEffect(() => {
     if (!state.open) return;
-    const inside = (target: EventTarget | null) =>
-      target instanceof Node && (node.current?.contains(target) || triggerRef.current?.contains(target) || [...nested.current].some((n) => n.contains(target)));
+    const inside = (target: EventTarget | null) => target instanceof Node && (node.current?.contains(target) || triggerRef.current?.contains(target) || [...nested.current].some((n) => n.contains(target)));
     const down = (e: PointerEvent) => !inside(e.target) && close();
     const key = (e: KeyboardEvent) => {
       if (e.key === "Tab" && !e.defaultPrevented && !nested.current.size) return tabOut(e);
       if (e.key !== "Escape" || e.defaultPrevented) return;
       // Only the innermost open popover handles Escape.
       if (nested.current.size) return;
-      if (e.target instanceof Element && node.current?.contains(e.target) && e.target.closest('[data-epr-part="root"]')) return;
+      if (e.target instanceof Element && node.current?.contains(e.target) && e.target.closest('[data-slot="emoji-picker"]')) return;
       e.preventDefault();
       close();
     };
@@ -343,15 +334,42 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       const stops = tabbables(el);
       if (e.shiftKey ? e.target !== stops[0] : e.target !== stops[stops.length - 1]) return;
       e.preventDefault();
-      const next = e.shiftKey ? trigger : (tabbables(document.body).find((t) => !el.contains(t) && trigger.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING && !trigger.contains(t)) ?? trigger);
+      leave(e.shiftKey);
+    };
+    const leave = (back: boolean) => {
+      const el = node.current;
+      const trigger = triggerRef.current;
+      if (!el) return;
+      // Opened from an anchor (no trigger): there's no place in the page to go back to, so Tab stays.
+      if (!trigger) return void tabbables(el)[back ? tabbables(el).length - 1 : 0]?.focus();
+      const next = back ? trigger : (tabbables(document.body).find((t) => !el.contains(t) && trigger.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING && !trigger.contains(t)) ?? trigger);
       next.focus();
       close();
     };
+    // A composite inside may move focus itself on Tab (a toolbar steps to its last item and lets
+    // the browser go on from there, stopping the event): catch focus leaving on a Tab instead.
+    let tabbing: boolean | null = null;
+    const tabStart = (e: KeyboardEvent) => {
+      if (e.key !== "Tab" || nested.current.size || !(e.target instanceof Node) || !node.current?.contains(e.target)) return;
+      tabbing = e.shiftKey;
+      setTimeout(() => (tabbing = null));
+    };
+    const focusOut = (e: FocusEvent) => {
+      if (tabbing === null || inside(e.relatedTarget)) return;
+      const back = tabbing;
+      tabbing = null;
+      leave(back);
+    };
+    const el = node.current;
     document.addEventListener("pointerdown", down);
     document.addEventListener("keydown", key);
+    document.addEventListener("keydown", tabStart, true);
+    el?.addEventListener("focusout", focusOut);
     return () => {
       document.removeEventListener("pointerdown", down);
       document.removeEventListener("keydown", key);
+      document.removeEventListener("keydown", tabStart, true);
+      el?.removeEventListener("focusout", focusOut);
     };
   }, [state.open, close, triggerRef]);
 

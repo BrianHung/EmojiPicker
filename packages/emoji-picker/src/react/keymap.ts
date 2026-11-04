@@ -130,19 +130,3 @@ export function isTextEditingKey(event: KeyChordEvent): boolean {
   if (event.ctrlKey || event.metaKey) return false;
   return [...event.key].length === 1 || event.key === "Home" || event.key === "End";
 }
-
-/** The plain key the engine (emoji-picker-react) acts on for an action, in the regions it owns. */
-export const ENGINE_KEYS: Partial<Record<KeyboardAction, string>> = {
-  "move-up": "ArrowUp",
-  "move-down": "ArrowDown",
-  "move-left": "ArrowLeft",
-  "move-right": "ArrowRight",
-  select: "Enter",
-};
-
-/** The action an unmodified engine key performs there, if any ("ArrowDown" → "move-down"). */
-export function engineActionOf(event: KeyChordEvent): KeyboardAction | null {
-  if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return null;
-  for (const [action, key] of Object.entries(ENGINE_KEYS) as [KeyboardAction, string][]) if (event.key === key) return action;
-  return null;
-}

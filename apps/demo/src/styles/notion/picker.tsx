@@ -54,7 +54,8 @@ const layout: PickerLayout = {
   placeholder: "Filter…",
   categories: NOTION_SECTIONS,
   // Notion's 12th column runs 3px under its 15px scrollbar; the content box is widened to fit it.
-  scrollbar: "overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [&_[data-epr-part=category-content]]:mr-[-3px] [&_[data-epr-part=category-content]]:max-w-none",
+  scrollbar: "overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]",
+  fixedColumns: true,
   cell: "rounded-[4px] hover:bg-picker-hover data-[highlighted]:bg-picker-selected",
   header: "items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted",
   top: (

@@ -11,8 +11,4 @@ export const PAGE_SCROLLS: Record<string, string[]> = {
   ...both("gallery/apple/scene-tapback-more", SHEET_KEYS),
   ...both("gallery/apple/scene-composer", SHEET_KEYS),
   ...both("home/hero-apple-tapback-more", SHEET_KEYS),
-  // Instagram's reaction bar handles ArrowLeft/Right only; the other keys fall through to the page.
-  ...both("gallery/instagram/scene-reaction-bar", ["End", "Home", "ArrowDown", "ArrowUp"]),
-  // The CSS Modules inline example scrolls the highlighted cell into view with the page, not just its grid.
-  ...both("home/inline-css-modules", ["ArrowDown", "ArrowDown", "PageDown"]),
 };

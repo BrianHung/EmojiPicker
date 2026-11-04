@@ -1,18 +1,19 @@
 import * as React from "react";
-import type { SkinToneButtonRenderProps } from "emoji-picker-react/primitives";
 import { SKIN_TONES, withTone } from "../core/dataset";
 import { Emoji } from "./emoji";
 import { useSkinTone } from "./hooks";
 import { mergeRefs, useKeyRegion, useSkinToneToggle } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
+import type { SkinToneButtonProps, SkinToneId } from "./components";
+import { useEmojiContext } from "./provider";
 import { SLOTS, joinClasses } from "./slots";
 
+// Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks.
 const TONE_IDS = ["neutral", ...SKIN_TONES] as const;
-const TONE_LABELS = ["Default skin tone", "Light skin tone", "Medium-light skin tone", "Medium skin tone", "Medium-dark skin tone", "Dark skin tone"];
 // Swatches for the unstyled default button (Fitzpatrick palette, as emoji-picker-react).
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];
 
-export type SkinToneButtonProps = SkinToneButtonRenderProps;
+export type { SkinToneButtonProps };
 
 /** Pass `components={{ SkinToneButton }}` to Root, or `button` here. */
 const SkinToneButtonContext = React.createContext<React.ComponentType<SkinToneButtonProps> | undefined>(undefined);
@@ -64,10 +65,7 @@ export type SkinToneProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children
   button?: React.ComponentType<SkinToneButtonProps>;
 };
 
-/**
- * The shared skin tone: one button showing the current tone, opening the six
- * options. Ours, not the engine's fan, so its size is whatever its button is.
- */
+/** The shared skin tone: one button showing the current tone, opening the six options as a radio group. */
 export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone(
   { orientation = "horizontal", optionsClassName, button, emoji, buttonClassName, ...props },
   ref,
@@ -91,7 +89,8 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
     return () => document.removeEventListener("pointerdown", onPointer);
   }, [open, tone]);
 
-  const label = (i: number) => TONE_LABELS[i]!;
+  const { labels } = useEmojiContext();
+  const label = (i: number) => labels.skinTones[i]!;
   // Closing from inside the options returns focus to the button, as a menu does.
   const close = React.useCallback(() => {
     const root = rootRef.current;
@@ -104,24 +103,6 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
     close();
   };
   useSkinToneToggle(() => (open ? close() : setOpen(true)));
-  // Escape from the options closes them, before the engine sees it: in its window
-  // capture listener it would end a search highlight instead and stop the key.
-  // A layout effect, so it's added before the engine's.
-  const latestClose = React.useRef(close);
-  latestClose.current = close;
-  React.useLayoutEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape" || event.defaultPrevented || event.isComposing) return;
-      const options = rootRef.current?.querySelector(`[data-slot="${SLOTS.skinToneOptions}"]`);
-      if (!options || !(event.target instanceof Node) || !rootRef.current?.contains(event.target)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      latestClose.current();
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, []);
-
   // Keys among the options: the keymap's moves along their axis (mirrored right to
   // left), first/last, and close.
   const region = useKeyRegion((action, event) => {
@@ -152,15 +133,14 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
     >
       <Button
         type="button"
-        tone={{ skinTone: TONE_IDS[tone] as SkinToneButtonProps["tone"]["skinTone"], isActive: true, isOpen: open }}
+        tone={{ skinTone: TONE_IDS[tone] as SkinToneId, isActive: true, isOpen: open }}
         aria-label={label(tone)}
         aria-haspopup="true"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       />
-      {/* No aria-orientation on the group: the engine gives [aria-orientation=horizontal] contain:inline-size. */}
       {open ? (
-        <div role="radiogroup" aria-label="Skin tone" data-slot={SLOTS.skinToneOptions} data-orientation={orientation} className={optionsClassName} style={orientation === "vertical" ? { flexDirection: "column" } : undefined}>
+        <div role="radiogroup" aria-label={labels.skinTone} data-slot={SLOTS.skinToneOptions} data-orientation={orientation} className={optionsClassName} style={orientation === "vertical" ? { flexDirection: "column" } : undefined}>
           {TONE_IDS.map((id, i) => (
             <Button
               key={id}
@@ -170,7 +150,7 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
               aria-label={label(i)}
               tabIndex={i === tone ? 0 : -1}
               data-slot={SLOTS.skinToneOption}
-              tone={{ skinTone: id as SkinToneButtonProps["tone"]["skinTone"], isActive: i === tone, isOpen: true }}
+              tone={{ skinTone: id as SkinToneId, isActive: i === tone, isOpen: true }}
               onClick={() => choose(i)}
             />
           ))}

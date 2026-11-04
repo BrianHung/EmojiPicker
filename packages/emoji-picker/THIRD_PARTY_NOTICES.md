@@ -6,7 +6,7 @@
 
 ## emoji-picker-react
 
-The picker is built on [emoji-picker-react](https://github.com/ealush/emoji-picker-react), a dependency, MIT License, Copyright (c) 2022 ealush.
+The default category icons and the native-emoji support probe are adapted from [emoji-picker-react](https://github.com/ealush/emoji-picker-react), MIT License, Copyright (c) 2022 ealush.
 
 ## Twemoji
 
