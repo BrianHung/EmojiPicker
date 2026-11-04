@@ -1,8 +1,8 @@
-- listbox "Typeahead menu":
-  - option "grinning face with smiling eyes :smile:":
+- listbox "Emoji suggestions":
+  - option "grinning face with smiling eyes :smile:" [selected]:
     - img "grinning face with smiling eyes": 😄
     - text: ""
-  - option "smirking face :smirk:" [selected]:
+  - option "smirking face :smirk:":
     - img "smirking face": 😏
     - text: ""
   - option "grinning face with big eyes :smiley:":

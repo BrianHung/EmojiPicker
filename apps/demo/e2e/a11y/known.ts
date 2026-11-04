@@ -23,12 +23,9 @@ export const KNOWN: Known[] = [
   // Code blocks, and the docs' tables at phone width, scroll horizontally but aren't focusable.
   { rule: "scrollable-region-focusable", node: /^<div class="overflow-x-auto font-mono/ },
   { rule: "scrollable-region-focusable", node: /^<div data-slot="table-container"/ },
-  // Notion ":" menu: a scrolling listbox driven by aria-activedescendant from the editor; it has no name.
+  // Notion ":" menu: a scrolling listbox driven by aria-activedescendant from the editor.
   { rule: "scrollable-region-focusable", node: /^<div id="[^"]*-listbox" role="listbox"/ },
-  { rule: "aria-input-field-name", node: /^<(div|ul) id="[^"]*-listbox" role="listbox"/ }, // Notion and Tiptap ":" menus
   { rule: "aria-input-field-name", node: /^<div contenteditable="true" role="textbox"[^>]*class="tiptap/ }, // Tiptap editor
-  // Slack and Linear composers: <textarea role="combobox">.
-  { rule: "aria-allowed-role", node: /^<textarea role="combobox"/ },
   // Apple category tabs: the visible glyph isn't in the accessible name.
   { rule: "label-content-name-mismatch", node: /^<div data-slot="category-tab"/ },
   // Home "Popover" example: the trigger shows an emoji and text that its aria-label doesn't contain.
@@ -37,8 +34,6 @@ export const KNOWN: Known[] = [
   { rule: "heading-order", node: /^<h4 class="pt-0\.5 font-medium">/ },
   { rule: "heading-order", node: /^<h3 class="text-\[16px\] leading-\[22px\]"><span class="font-medium"/ },
   { rule: "heading-order", node: /^<h3>Packing list<\/h3>/ },
-  // Lexical's typeahead mounts an empty listbox outside the landmarks.
-  { rule: "region", node: /^<div aria-label="Typeahead menu" role="listbox"/ },
   // Instagram scene at phone width: the message bubble (role=button) contains the reaction pill
   // button, and the pill is under 24×24.
   { rule: "nested-interactive", node: /^<div role="button"[^>]*aria-haspopup="dialog"/ },

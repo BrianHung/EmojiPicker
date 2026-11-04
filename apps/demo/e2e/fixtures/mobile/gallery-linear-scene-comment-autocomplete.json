@@ -43,7 +43,7 @@
   ],
   "enter": {
     "open": false,
-    "focus": "combobox \"Leave a comment\"",
+    "focus": "textarea \"Leave a comment\"",
     "focusReturned": true,
     "toast": null,
     "field": "😄"
@@ -51,14 +51,14 @@
   "escape": [
     {
       "open": false,
-      "focus": "combobox \"Leave a comment\"",
+      "focus": "textarea \"Leave a comment\"",
       "focusReturned": true,
       "toast": null,
       "field": ":smi"
     }
   ],
   "tab": {
-    "focus": "combobox \"Leave a comment\"",
+    "focus": "textarea \"Leave a comment\"",
     "highlight": null,
     "open": false,
     "inside": false

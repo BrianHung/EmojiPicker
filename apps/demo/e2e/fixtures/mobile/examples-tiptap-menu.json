@@ -1,42 +1,42 @@
 {
   "opened": {
-    "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+    "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
     "highlight": "option \"😄:smile:\""
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"😏:smirk:\"",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"😃:smiley:\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"😏:smirk:\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"😄:smile:\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"🥲:smiling_face_with_tear:\"",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Type : followed by a shortcode, such as :tada or\"",
+      "focus": "combobox \"Type : followed by a shortcode, such as :tada or\"",
       "highlight": "option \"😄:smile:\"",
       "scrolled": 0
     }

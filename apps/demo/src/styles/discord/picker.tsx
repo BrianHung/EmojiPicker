@@ -45,7 +45,7 @@ const tokens: Tokens = {
 
 /**
  * Discord lists `:smi` matches A–Z: codes starting with the query, then the rest.
- * Pass to `useShortcodeAutocomplete` (or `useAutocompleteInput`) with this style.
+ * Pass to an emoji typeahead (`useTextFieldEmojiTypeahead`, `useTiptapEmojiTypeahead`…) with this style.
  */
 export const discordAutocompleteOptions = { order: "alphabetical", limit: 14 } satisfies Partial<ShortcodeAutocompleteOptions>;
 

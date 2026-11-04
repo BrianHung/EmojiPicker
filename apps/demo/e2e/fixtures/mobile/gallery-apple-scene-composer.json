@@ -80,7 +80,7 @@
     }
   ],
   "tab": {
-    "focus": "combobox \"Message\"",
+    "focus": "input \"Message\"",
     "highlight": null,
     "open": true,
     "inside": false

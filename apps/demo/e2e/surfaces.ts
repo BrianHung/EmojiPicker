@@ -148,32 +148,32 @@ function scene(s: StyleId): Surface[] {
       return [
         popover(id("tapback-more"), path, (p) => sc(p).getByRole("toolbar", { name: "Tapbacks" }).getByRole("button", { name: "More emoji" })),
         popover(id("composer"), path, (p) => button(sc(p), "Emoji"), { prepare: dismissTapback }),
-        menu(id("autocomplete"), path, (p) => sc(p).getByRole("combobox", { name: "Message" }), ":smi", { prepare: dismissTapback, ...shotCard }),
+        menu(id("autocomplete"), path, (p) => sc(p).getByLabel("Message", { exact: true }), ":smi", { prepare: dismissTapback, ...shotCard }),
       ];
     case "slack":
       return [
         popover(id("reaction"), path, (p) => button(sc(p), "Add reaction").first()),
         popover(id("composer"), path, (p) => button(sc(p), "Emoji")),
-        menu(id("autocomplete"), path, (p) => sc(p).getByRole("combobox", { name: "Message #general" }), ":smi", shotCard),
+        menu(id("autocomplete"), path, (p) => sc(p).getByLabel("Message #general", { exact: true }), ":smi", shotCard),
       ];
     case "discord":
       return [
         // The "+" after a message's reaction pills (the hover toolbar's own "Add Reaction" is only shown on hover).
         popover(id("reaction"), path, (p) => button(sc(p), "eyes, 2 reactions").locator("xpath=..").getByRole("button", { name: "Add Reaction" })),
         popover(id("composer"), path, (p) => button(sc(p), "Select emoji")),
-        menu(id("autocomplete"), path, (p) => sc(p).getByRole("combobox", { name: "Message #general" }), ":smi", shotCard),
+        menu(id("autocomplete"), path, (p) => sc(p).getByLabel("Message #general", { exact: true }), ":smi", shotCard),
       ];
     case "notion":
       return [
         popover(id("page-icon"), path, (p) => button(sc(p), "Change icon")),
-        menu(id("colon-menu"), path, (p) => sc(p).getByRole("textbox", { name: "Page content" }), ":sm", shotCard),
+        menu(id("colon-menu"), path, (p) => sc(p).getByLabel("Page content", { exact: true }), ":sm", shotCard),
       ];
     case "linear":
       return [
         popover(id("issue-icon"), path, (p) => button(sc(p), "Set icon")),
         popover(id("reaction"), path, (p) => button(sc(p), "Add reaction").first()),
         popover(id("team-icon"), path, (p) => button(p, "Change team icon")),
-        menu(id("comment-autocomplete"), path, (p) => sc(p).getByRole("combobox", { name: "Leave a comment" }), ":smi", shotCard),
+        menu(id("comment-autocomplete"), path, (p) => sc(p).getByLabel("Leave a comment", { exact: true }), ":smi", shotCard),
       ];
     case "instagram": {
       const bar = (p: Page) => p.locator('[data-slot="popover-content"][aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])').filter({ visible: true }).last();
@@ -231,14 +231,14 @@ const home: Surface[] = [
   inline("home/search", "/", (p) => preview(p, "search")),
   inline("home/custom-emoji", "/", (p) => preview(p, "custom-emoji")),
   inline("home/custom-cells-and-rows", "/", (p) => preview(p, "custom-cells-and-rows")),
-  menu("home/autocomplete", "/", (p) => example(p, "headless").getByRole("combobox", { name: "Message" }), ":smi", { frame: (p) => preview(p, "headless") }),
+  menu("home/autocomplete", "/", (p) => example(p, "headless").getByLabel("Message", { exact: true }), ":smi", { frame: (p) => preview(p, "headless") }),
 ];
 
 const tiptapEditor = (p: Page) => p.locator("main [contenteditable=true]").first();
 const examples: Surface[] = [
   menu("examples/tiptap/menu", "/examples/tiptap/", tiptapEditor, ":smi"),
   popover("examples/tiptap/insert", "/examples/tiptap/", (p) => button(p, "Insert emoji")),
-  menu("examples/lexical/menu", "/examples/lexical/", (p) => p.getByRole("textbox", { name: "Editor" }), ":smi"),
+  menu("examples/lexical/menu", "/examples/lexical/", (p) => p.getByLabel("Editor", { exact: true }), ":smi"),
   popover("examples/lexical/insert", "/examples/lexical/", (p) => button(p, "Insert emoji")),
   inline("examples/custom-emoji", "/examples/custom-emoji/", (p) => p.locator("main").getByRole("complementary").first()),
   // Cleared: the page starts on a query ("jurassic park") that has no results before the model downloads.
