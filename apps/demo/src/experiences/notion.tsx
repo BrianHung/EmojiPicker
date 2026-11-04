@@ -1,12 +1,16 @@
-// Notion's ":" menu: a compact picker 4px under the caret line, its left edge on the ":"
-// (measurements in styles/notion/emoji-menu.tsx). The query's matches in Notion's sections,
-// 12 columns of 32px cells; Left/Right move a cell and Up/Down a row, from the editor.
+// Notion's ":" menu: not a list but a compact picker at the caret. Measured in Notion
+// (light, Chrome, Nov 2026): a 408×356 card (the picker's radius and shadow) 4px under
+// the caret line, its left edge on the ":"; no tabs or filter, the query's matches in
+// Notion's sections (12px/500 titles at x=8, the first at y≈13), 12 columns of 32px cells
+// from x=12 (first row y≈34.5), the first match on the hover wash, and the picker's
+// bottom bar of eleven 32px buttons at y=314. The editor keeps focus: Left/Right move
+// a cell, Up/Down a row, Enter/Tab insert, Escape closes.
 import * as React from "react";
 import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeaheadOptions, type KeyLike, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
 import { useStyleTokens } from "@/styles/style-picker";
-import type { EmojiMenuProps } from "./suggestion-list";
+import type { EmojiMenuProps } from ".";
 
 export const notionEmojiOptions: EmojiTypeaheadOptions = { matchBy: "search", limit: 200 };
 
@@ -36,7 +40,7 @@ function step(sections: Section[], at: number, key: string): number | null {
   return next ? next.start + Math.min(at - rows[row]!.start, next.length - 1) : null;
 }
 
-export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, keyHandler, className }: EmojiMenuProps) {
+export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, keyHandler, className, container = false }: EmojiMenuProps & { container?: HTMLElement | false }) {
   useStyleTokens(notion.id, notion.layout.tokens);
   const store = useEmojiStore();
   const sections = React.useMemo(() => sectionsOf(menu.suggestions), [menu.suggestions]);
@@ -85,7 +89,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
 
   let position = 0;
   return (
-    <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={false} className={className}>
+    <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={container} className={className}>
       <div
         data-style={notion.id}
         className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"

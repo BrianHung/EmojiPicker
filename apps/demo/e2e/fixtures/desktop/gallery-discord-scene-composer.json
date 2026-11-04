@@ -67,7 +67,7 @@
   ],
   "enter": {
     "open": false,
-    "focus": "combobox \"Message #general\"",
+    "focus": "textbox \"Message #general\"",
     "focusReturned": false,
     "toast": null
   },

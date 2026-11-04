@@ -5,12 +5,13 @@
 // 118px in all; the autocomplete's bottom sits 3px into the editor, over the formatting bar.
 import * as React from "react";
 import { Emoji, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
-import { useAutocompleteInput } from "@/components/emoji-autocomplete";
+import { useEmojiTextField } from "@/components/emoji-text-field";
+import { SlackEmojiMenu, slackEmojiOptions } from "@/experiences/slack";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Smile, SmilePlus } from "@/styles/icons";
 import { PickerSheet, toggleReaction, useCompact, type Reaction } from "@/styles/scene-kit";
-import { StyleAutocomplete, StyleDropdown, StylePills } from "@/styles/variants";
+import { StyleDropdown, StylePills } from "@/styles/variants";
 import { slack } from "./picker";
 
 type Message = { id: number; author: string; color: string; time: string; text: string; reactions: Reaction[] };
@@ -152,7 +153,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
 
 function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
   // Slack keeps :shortcodes: as text in the composer and renders them in the message.
-  const { value, setText, insertAtCaret, autocomplete, inputProps } = useAutocompleteInput<HTMLTextAreaElement>({ insert: "shortcode", limit: 25 });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insert: "shortcode" });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);
@@ -169,7 +170,7 @@ function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; co
           <span className="flex size-7 items-center justify-center font-mono text-[13px]">{"</>"}</span>
         </div>
         <div className="relative">
-          <StyleAutocomplete appStyle={slack} autocomplete={autocomplete} className="absolute bottom-[calc(100%-3px)] left-0 z-10" />
+          <SlackEmojiMenu {...emoji} />
           <textarea
             {...inputProps}
             rows={1}
@@ -177,7 +178,6 @@ function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; co
             placeholder="Message #general"
             className="block h-[38px] w-full resize-none bg-transparent px-3 py-2 text-[15px] leading-[22px] text-[#1d1c1d] outline-none placeholder:text-[#868686] dark:text-[#d1d2d3]"
             onKeyDown={(e) => {
-              if (autocomplete.onKeyDown(e)) return;
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 submit();

@@ -43,7 +43,7 @@
   ],
   "enter": {
     "open": false,
-    "focus": "combobox \"Message #general\"",
+    "focus": "textarea \"Message #general\"",
     "focusReturned": true,
     "toast": null,
     "field": ":smile:"
@@ -63,14 +63,14 @@
   "escape": [
     {
       "open": false,
-      "focus": "combobox \"Message #general\"",
+      "focus": "textarea \"Message #general\"",
       "focusReturned": true,
       "toast": null,
       "field": ":smi"
     }
   ],
   "tab": {
-    "focus": "combobox \"Message #general\"",
+    "focus": "textarea \"Message #general\"",
     "highlight": null,
     "open": false,
     "inside": false

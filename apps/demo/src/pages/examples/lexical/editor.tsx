@@ -1,4 +1,4 @@
-// The picker inside a Lexical editor: `:shortcode` suggestions from the typeahead menu,
+// The picker inside a Lexical editor: `:shortcode` suggestions at the caret,
 // and the full picker from a toolbar button.
 import { $getSelection, $insertNodes, $isRangeSelection } from "lexical";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";

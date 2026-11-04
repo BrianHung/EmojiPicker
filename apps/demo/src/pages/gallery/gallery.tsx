@@ -2,18 +2,17 @@
 // (the app in context, inline picker, popovers, tapback, reactions, autocomplete, sheet).
 import * as React from "react";
 import { usePickedEmoji } from "@/components/site/picked";
-import { Emoji, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, useTextFieldEmojiTypeahead, type EmojiSelection } from "@brianhung/emoji-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
 import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
-import { useAutocompleteInput } from "@/components/emoji-autocomplete";
 import { SCENES, STYLES, StylePicker, sourceOf, type Style } from "@/styles";
-import { discordAutocompleteOptions } from "@/styles/discord/picker";
 import { toggleReaction, type Reaction } from "@/styles/scene-kit";
 import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
+import { discordEmojiOptions } from "@/experiences/discord";
 
 /** One exported function from a source file, up to its closing brace. */
 function extract(source: string, name: string) {
@@ -55,16 +54,16 @@ function GalleryCard({ title, description, code, file, children, className, prev
 }
 
 function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
-  const { autocomplete, inputProps } = useAutocompleteInput<HTMLInputElement>({ insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) });
+  const ref = React.useRef<HTMLInputElement>(null);
+  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}) });
   return (
     <div className="relative w-full max-w-[380px]">
-      <StyleAutocomplete appStyle={appStyle} autocomplete={autocomplete} className="absolute inset-x-0 bottom-full mb-1.5" />
+      <StyleAutocomplete appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
       <input
-        {...inputProps}
+        ref={ref}
         aria-label="Message"
         placeholder="Type :smiling or :tad"
         className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        onKeyDown={(e) => autocomplete.onKeyDown(e)}
       />
     </div>
   );

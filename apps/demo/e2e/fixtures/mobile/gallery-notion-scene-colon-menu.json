@@ -1,42 +1,42 @@
 {
   "opened": {
-    "focus": "textbox \"Page content\"",
+    "focus": "combobox \"Page content\"",
     "highlight": "option \"grinning face with big eyes\""
   },
   "keys": [
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"slightly smiling face\"",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"upside-down face\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"slightly smiling face\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"grinning face with big eyes\"",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"grinning face with big eyes\"",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
-      "focus": "textbox \"Page content\"",
+      "focus": "combobox \"Page content\"",
       "highlight": "option \"slightly smiling face\"",
       "scrolled": 0
     }

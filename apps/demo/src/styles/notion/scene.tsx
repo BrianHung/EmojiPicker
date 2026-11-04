@@ -1,6 +1,6 @@
 // Notion style, in situ: a page (light). The page icon opens the Notion style picker
 // (Emoji / Icons / Upload) to change it, and the body is a real Tiptap editor where
-// ":" plus a few letters opens Notion's compact picker of matches at the caret (emoji-menu.tsx).
+// ":" plus a few letters opens Notion's compact picker of matches at the caret (experiences/notion.tsx).
 // Notion's page metrics (measured signed in, Nov 2026): ink #2c2c2b, a 78px icon whose left edge
 // lines up with the title text, a 28px controls row 8px under it, then the 40/48 bold title 4px
 // lower and the 16/24 body 8px under that; 96px side padding on a wide page.
@@ -13,8 +13,8 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Emoji } from "@brianhung/emoji-picker";
 import { notion } from "./picker";
-import { EmojiSuggestion } from "@/components/tiptap/emoji-suggestion";
-import { NotionEmojiMenu } from "./emoji-menu";
+import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
+import { NotionEmojiMenu, notionEmojiOptions } from "@/experiences/notion";
 import { cn } from "@/lib/utils";
 import { MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
 
@@ -37,7 +37,7 @@ export function NotionScene() {
   const [icon, setIcon] = React.useState("1f3d5-fe0f"); // 🏕️
   const title = "Team offsite";
   const editor = useEditor({
-    extensions: [StarterKit, EmojiSuggestion],
+    extensions: [StarterKit],
     content: CONTENT,
     immediatelyRender: true,
     editorProps: {
@@ -55,6 +55,7 @@ export function NotionScene() {
       },
     },
   });
+  const emoji = useTiptapEmojiTypeahead(editor, notionEmojiOptions);
   const page = (
     <>
       {compact ? <MobileTopBar icon={icon} title={title} /> : <TopBar icon={icon} title={title} />}
@@ -85,7 +86,7 @@ export function NotionScene() {
         {editor ? (
           <>
             <EditorContent editor={editor} />
-            <NotionEmojiMenu editor={editor} />
+            <NotionEmojiMenu {...emoji} container={document.body} />
           </>
         ) : null}
       </div>

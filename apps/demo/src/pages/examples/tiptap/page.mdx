@@ -13,14 +13,14 @@ import { Editor } from "./editor";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { EmojiProvider } from "@brianhung/emoji-picker";
-import { EmojiSuggestion, EmojiSuggestionMenu } from "./emoji-suggestion";
+import { EmojiSuggestionMenu } from "./emoji-suggestion";
 
 function Editor() {
-  const editor = useEditor({ extensions: [StarterKit, EmojiSuggestion] });
+  const editor = useEditor({ extensions: [StarterKit] });
   return (
     <EmojiProvider data="/emoji/en.json">
       <EditorContent editor={editor} />
-      {editor && <EmojiSuggestionMenu editor={editor} />}
+      <EmojiSuggestionMenu editor={editor} />
     </EmojiProvider>
   );
 }
@@ -28,23 +28,16 @@ function Editor() {
 
 ## How it works
 
-The extension passes the query from `@tiptap/suggestion` to `useEmojiSuggestions` and positions the menu at the caret with `EmojiSuggestions.Popover`, which never takes focus, so the editor keeps its caret. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+`useTiptapEmojiTypeahead` registers a `@tiptap/suggestion` plugin on the editor, ranks the matches and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
-const menu = useEmojiSuggestions({
-  query,
-  onChoose: (s) => editor.chain().focus().deleteRange(range).insertContent(menu.textFor(s) + " ").run(),
+const emoji = useTiptapEmojiTypeahead(editor, {
+  content: (text, s) => (s.record.imageUrl ? [{ type: "emoji", attrs }, { type: "text", text: " " }] : `${text} `),
 });
 
-Suggestion({
-  editor,
-  char: ":",
-  render: () => ({
-    onKeyDown: ({ event }) => menu.onKeyDown(event),
-  }),
-});
-
-<EmojiSuggestions.Popover open={menu.open} anchor={() => clientRect()}>
-  <ul {...menu.getListProps()}>…</ul>
+<EmojiSuggestions.Popover open={emoji.open} anchor={emoji.anchor} onOpenChange={(open) => !open && emoji.dismiss()}>
+  <ul {...emoji.suggestions.getListProps()}>
+    {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
+  </ul>
 </EmojiSuggestions.Popover>
 ```

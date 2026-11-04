@@ -35,6 +35,9 @@ export function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiNodeA
   return { unified, shortcode: record.shortcodes[0] ?? record.unified, text };
 }
 
+/** The node and a space after it, as `insertContent` takes them. */
+export const emojiContent = (attrs: EmojiNodeAttrs) => [{ type: "emoji", attrs }, { type: "text", text: " " }];
+
 function EmojiView({ node }: NodeViewProps) {
   const { unified } = node.attrs as EmojiNodeAttrs;
   return (
@@ -79,7 +82,7 @@ export const EmojiNode = Node.create<EmojiNodeOptions>({
       insertEmoji:
         (attrs) =>
         ({ commands }) =>
-          commands.insertContent([{ type: this.name, attrs }, { type: "text", text: " " }]),
+          commands.insertContent(emojiContent(attrs)),
     };
   },
 
