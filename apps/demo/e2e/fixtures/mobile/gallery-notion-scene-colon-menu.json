@@ -1,0 +1,66 @@
+{
+  "opened": {
+    "focus": "textbox \"Page content\"",
+    "highlight": "option \"grinning face with big eyes\""
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"slightly smiling face\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"upside-down face\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"slightly smiling face\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"grinning face with big eyes\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"grinning face with big eyes\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Page content\"",
+      "highlight": "option \"slightly smiling face\"",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "textbox \"Page content\"",
+    "focusReturned": true,
+    "toast": null,
+    "field": "e :tada or :tent.Packing listHiking boots 🥾Board games 🎲Snacks for the drive🙂"
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "textbox \"Page content\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": " :tada or :tent.Packing listHiking boots 🥾Board games 🎲Snacks for the drive:sm"
+    }
+  ],
+  "tab": {
+    "focus": "textbox \"Page content\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}

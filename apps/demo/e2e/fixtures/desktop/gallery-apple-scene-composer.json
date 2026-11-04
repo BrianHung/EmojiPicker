@@ -1,0 +1,100 @@
+{
+  "opened": {
+    "focus": "button \"Emoji\"",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 40
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 40
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": -40
+    },
+    {
+      "key": "End",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 1569
+    },
+    {
+      "key": "Home",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": -1609
+    },
+    {
+      "key": "PageDown",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 860
+    },
+    {
+      "key": "PageUp",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": -860
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "button \"Emoji\"",
+    "focusReturned": true,
+    "toast": null
+  },
+  "hover": {
+    "hovered": {
+      "focus": "button \"Emoji\"",
+      "highlight": null
+    },
+    "then": {
+      "key": "ArrowRight",
+      "focus": "button \"Emoji\"",
+      "highlight": null,
+      "scrolled": 0
+    }
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "button \"Emoji\"",
+      "focusReturned": true,
+      "toast": null
+    }
+  ],
+  "tab": {
+    "focus": "combobox \"Message\"",
+    "highlight": null,
+    "open": true,
+    "inside": false
+  }
+}

@@ -14,7 +14,8 @@ export default withGuidepup(
   defineConfig({
     ...base,
     testDir: ".",
-    // The dev server runs from apps/demo, not from this folder.
+    // Paths in the base config are relative to apps/demo, not to this folder.
+    globalSetup: base.globalSetup && fileURLToPath(new URL("../warmup.ts", import.meta.url)),
     webServer: { ...(base.webServer as object), cwd: fileURLToPath(new URL("../..", import.meta.url)) } as typeof base.webServer,
     outputDir: ".results",
     reporter: [["list"]],

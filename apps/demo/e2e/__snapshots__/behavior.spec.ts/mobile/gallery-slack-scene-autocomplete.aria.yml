@@ -1,0 +1,102 @@
+- listbox:
+  - 'option "grinning face with smiling eyes :smile: Enter" [selected]':
+    - img "grinning face with smiling eyes": 😄
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smirking face :smirk:":
+    - img "smirking face": 😏
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning face with big eyes :smiley:":
+    - img "grinning face with big eyes": 😃
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat with smiling eyes :smile_cat:":
+    - img "grinning cat with smiling eyes": 😸
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "cat with wry smile :smirk_cat:":
+    - img "cat with wry smile": 😼
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning cat :smiley_cat:":
+    - img "grinning cat": 😺
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with horns :smiling_imp:":
+    - img "smiling face with horns": 😈
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with tear :smiling_face_with_tear:":
+    - img "smiling face with tear": 🥲
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "smiling face with hearts :smiling_face_with_3_hearts:":
+    - img "smiling face with hearts": 🥰
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "face with hand over mouth :smiling_face_with_smiling_eyes_and_hand_covering_mouth:":
+    - img "face with hand over mouth": 🤭
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "grinning face with sweat :sweat_smile:":
+    - img "grinning face with sweat": 😅
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "kissing face with smiling eyes :kissing_smiling_eyes:":
+    - img "kissing face with smiling eyes": 😙
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "slightly smiling face :slightly_smiling_face:":
+    - img "slightly smiling face": 🙂
+    - text: ""
+    - mark: smi
+    - text: ""
+  - option "face savoring food :yum:":
+    - img "face savoring food": 😋
+    - text: ""
+  - option "beaming face with smiling eyes :grin:":
+    - img "beaming face with smiling eyes": 😁
+    - text: ""
+  - option "smiling face with smiling eyes :blush:":
+    - img "smiling face with smiling eyes": 😊
+    - text: ""
+  - option "smiling face :relaxed:":
+    - img "smiling face": ☺️
+    - text: ""
+  - option "grinning face :grinning:":
+    - img "grinning face": 😀
+    - text: ""
+  - option "grinning squinting face :laughing:":
+    - img "grinning squinting face": 😆
+    - text: ""
+  - option "smiling face with halo :innocent:":
+    - img "smiling face with halo": 😇
+    - text: ""
+  - option "grimacing face :grimacing:":
+    - img "grimacing face": 😬
+    - text: ""
+  - option "smiling face with heart-eyes :heart_eyes:":
+    - img "smiling face with heart-eyes": 😍
+    - text: ""
+  - option "smiling face with sunglasses :sunglasses:":
+    - img "smiling face with sunglasses": 😎
+    - text: ""
+  - option "star-struck :star-struck:":
+    - img "star-struck": 🤩
+    - text: ""
+  - option "smiling face with open hands :hugging_face:":
+    - img "smiling face with open hands": 🤗
+    - text: ""

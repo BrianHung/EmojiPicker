@@ -4,3 +4,8 @@ dist/
 .wrangler/
 .dev.vars*
 !.dev.vars.example
+
+# Playwright e2e: remote-file cache, results and the HTML report
+e2e/.cache/
+e2e/.results/
+e2e/.report/

@@ -1,0 +1,66 @@
+{
+  "opened": {
+    "focus": "combobox \"Message #general\"",
+    "highlight": "option \"😄:smile:Enter\""
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"😏:smirk:Enter\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"😃:smiley:Enter\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"😏:smirk:Enter\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"😄:smile:Enter\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"🤗:hugging_face:Enter\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Message #general\"",
+      "highlight": "option \"😄:smile:Enter\"",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "combobox \"Message #general\"",
+    "focusReturned": true,
+    "toast": null,
+    "field": ":smile:"
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "combobox \"Message #general\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ":smi"
+    }
+  ],
+  "tab": {
+    "focus": "combobox \"Message #general\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}

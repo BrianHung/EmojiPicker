@@ -1,0 +1,78 @@
+{
+  "opened": {
+    "focus": "textbox \"Editor\"",
+    "highlight": "option \"😄:smile:\""
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😏:smirk:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😃:smiley:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😏:smirk:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😄:smile:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"🥲:smiling_face_with_tear:\"",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😄:smile:\"",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "textbox \"Editor\"",
+    "focusReturned": true,
+    "toast": null,
+    "field": "😄"
+  },
+  "hover": {
+    "hovered": {
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😄:smile:\""
+    },
+    "then": {
+      "key": "ArrowDown",
+      "focus": "textbox \"Editor\"",
+      "highlight": "option \"😃:smiley:\"",
+      "scrolled": 0
+    }
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "textbox \"Editor\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": ":smi"
+    }
+  ],
+  "tab": {
+    "focus": "textbox \"Editor\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}

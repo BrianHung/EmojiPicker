@@ -1,0 +1,70 @@
+{
+  "opened": {
+    "focus": "button \"red heart\"",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowRight",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": 0
+    },
+    {
+      "key": "End",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": 3515
+    },
+    {
+      "key": "Home",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": -3515
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": 40
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "button \"red heart\"",
+      "highlight": null,
+      "scrolled": -40
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "body",
+    "focusReturned": false,
+    "toast": null
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "body",
+      "focusReturned": false,
+      "toast": null
+    }
+  ],
+  "tab": {
+    "focus": "button \"face with tears of joy\"",
+    "highlight": null,
+    "open": true,
+    "inside": true
+  }
+}
