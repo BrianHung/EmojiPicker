@@ -13,8 +13,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["vite/client", "node", "mdx"],
-    "paths": { "@/registry/*": ["./registry/*"], "@/*": ["./src/*"] }
+    "paths": { "@/registry/*": ["./registry/*"], "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"], "@/*": ["./src/*"] }
   },
   "include": ["src", "registry", "capture", "scripts", "plugins", "vite.config.ts"],
-  "exclude": ["capture/out"]
+  "exclude": ["capture/out", "registry/aria"]
 }

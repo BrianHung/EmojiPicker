@@ -23,7 +23,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmojiAutocomplete, useAutocompleteInput } from "@/components/emoji-autocomplete";
-import { EmojiPickerPopover, EmojiPickerCard, EmojiTapback } from "@/registry/emoji-picker";
+import { EmojiPickerCard, EmojiTapback } from "@/registry/emoji-picker";
+import { PickerPopover } from "@/components/picker-popover";
 import { Example, H2, P } from "@/components/site/docs";
 import { InlinePicker as InlineTailwind } from "@/components/demos/inline-picker/tailwind";
 import { InlinePicker as InlineModules } from "@/components/demos/inline-picker/css-modules";
@@ -152,9 +153,9 @@ function PopoverExample() {
         },
       ]}
     >
-      <EmojiPickerPopover onSelect={setPicked} triggerClassName="h-10 rounded-full border border-border px-4 active:scale-[0.97] transition-transform">
+      <PickerPopover onSelect={setPicked} triggerClassName="h-10 rounded-full border border-border px-4 active:scale-[0.97] transition-transform">
         <span className="text-base">{picked?.emoji || "🙂"}</span> Add reaction
-      </EmojiPickerPopover>
+      </PickerPopover>
     </Example>
   );
 }

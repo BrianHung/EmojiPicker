@@ -47,7 +47,15 @@ To copy a styled shadcn/ui version into your project:
 npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
 ```
 
-It adds `components/ui/emoji-picker.tsx` with `EmojiPickerCard`, `EmojiPickerPopover`, `EmojiTapback`, `EmojiPickerBody`, and `EmojiPickerFooter`.
+It adds `components/ui/emoji-picker.tsx` with `EmojiPickerCard`, `EmojiTapback`, `EmojiPickerBody`, and `EmojiPickerFooter`.
+
+To open it from a trigger in your own shadcn/ui popover (Base UI or Radix):
+
+```bash
+npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json
+```
+
+It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With React Aria, add `emoji-picker-popover-aria.json` instead. `EmojiPickerPopover` used to live in `emoji-picker.tsx` on `EmojiPopover`; it takes `onSelect`, `side`, `align`, `className`, and `aria-label` now.
 
 ## Entry points
 

@@ -11,14 +11,14 @@ import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { $createEmojiNode, EmojiNode, EmojiShortcodePlugin, emojiAttrs } from "@/components/lexical/emoji-node";
 import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
-import { EmojiPickerPopover } from "@/registry/emoji-picker";
+import { PickerPopover } from "@/components/picker-popover";
 
 function Toolbar() {
   const [editor] = useLexicalComposerContext();
   const store = useEmojiStore();
   return (
     <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
-      <EmojiPickerPopover
+      <PickerPopover
         label="Insert emoji"
         triggerClassName="rounded-md px-2 py-1"
         onSelect={(s) => {
@@ -34,7 +34,7 @@ function Toolbar() {
       >
         <span aria-hidden>🙂</span>
         <span className="text-muted-foreground">Emoji</span>
-      </EmojiPickerPopover>
+      </PickerPopover>
     </div>
   );
 }

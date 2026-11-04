@@ -21,7 +21,7 @@ Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/de
 | `src/pages/` | Each page's `main.tsx`. Example pages are a `page.mdx` and a live demo. |
 | `src/styles/<app>/` | An app style: a `picker.tsx` layout and a `scene.tsx` mockup. |
 | `src/components/` | shadcn components (`ui/`), site chrome (`site/`), and the Tiptap, Lexical and autocomplete integrations. |
-| `registry/` | The shadcn registry item. `npm run build:registry` writes it to `public/r/`. |
+| `registry/` | The shadcn registry items (`aria/` holds the React Aria popover; tsc skips it, as it needs that base). `npm run build:registry` writes them to `public/r/`. |
 | `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md` and `/llms.txt`. |
 | `worker/` | The Worker for `/api/*`. |
 | `capture/`, `shot.html` | Screenshot and parity tooling. |
