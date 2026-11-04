@@ -38,7 +38,10 @@ function EmojiMenu() {
 ```
 
 ```tsx title="ProseMirror"
-const { plugin, ...emoji } = useProseMirrorEmojiTypeahead(); // editors/prosemirror.ts
+import { useEmojiTypeaheadStore } from "@brianhung/emoji-picker";
+import { emojiTypeahead } from "@brianhung/emoji-picker/prosemirror";
+
+const { plugin, ...emoji } = useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), []);
 new EditorView(el, { state: EditorState.create({ schema, plugins: [plugin, ...plugins] }) });
 <LinearEmojiMenu {...emoji} />
 ```
@@ -50,4 +53,4 @@ const emoji = useContentEditableEmojiTypeahead(ref); // editors/contenteditable.
 <div ref={ref} contentEditable role="textbox" />
 ```
 
-The ProseMirror and contenteditable adapters are short files built on `useEmojiTypeahead` and `findShortcodeTrigger`; copy [`prosemirror.ts`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/editors/prosemirror.ts) or [`contenteditable.ts`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/editors/contenteditable.ts), or write one for your own editor. The menus are in [`experiences/`](https://github.com/BrianHung/EmojiPicker/tree/main/apps/demo/src/experiences).
+`@brianhung/emoji-picker/prosemirror` is plain TypeScript: a plugin and core's suggestions store, which `useEmojiTypeaheadStore` renders in React (Tiptap's adapter is the same plugin). The contenteditable adapter is a short file built on `useEmojiTypeahead` and `findShortcodeTrigger`; copy [`contenteditable.ts`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/editors/contenteditable.ts), or write one for your own editor. The menus are in [`experiences/`](https://github.com/BrianHung/EmojiPicker/tree/main/apps/demo/src/experiences).

@@ -8,9 +8,9 @@ const modules = (dir: string) => Object.fromEntries(readdirSync(`src/${dir}`).fl
 
 export default defineConfig([
   {
-    entry: { index: "src/index.ts", search: "src/search.ts", "floating-ui": "src/floating-ui.ts", "react-aria": "src/react-aria.ts", tiptap: "src/tiptap.ts", lexical: "src/lexical.ts", ...modules("core"), ...modules("react") },
+    entry: { index: "src/index.ts", search: "src/search.ts", "floating-ui": "src/floating-ui.ts", "react-aria": "src/react-aria.ts", tiptap: "src/tiptap.ts", lexical: "src/lexical.ts", prosemirror: "src/prosemirror.ts", ...modules("core"), ...modules("react") },
     format: ["esm"],
-    dts: { entry: { index: "src/index.ts", "core/index": "src/core/index.ts", search: "src/search.ts", "floating-ui": "src/floating-ui.ts", "react-aria": "src/react-aria.ts", tiptap: "src/tiptap.ts", lexical: "src/lexical.ts" } },
+    dts: { entry: { index: "src/index.ts", "core/index": "src/core/index.ts", search: "src/search.ts", "floating-ui": "src/floating-ui.ts", "react-aria": "src/react-aria.ts", tiptap: "src/tiptap.ts", lexical: "src/lexical.ts", prosemirror: "src/prosemirror.ts" } },
     sourcemap: true,
     clean: true,
     external: ["react", "react-dom"],

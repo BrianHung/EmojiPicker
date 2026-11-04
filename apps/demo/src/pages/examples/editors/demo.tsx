@@ -15,13 +15,13 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import "prosemirror-view/style/prosemirror.css";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
-import { EmojiProvider, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
+import { EmojiProvider, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
+import { emojiTypeahead } from "@brianhung/emoji-picker/prosemirror";
 import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
 import { useLexicalEmojiTypeahead } from "@brianhung/emoji-picker/lexical";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { useContentEditableEmojiTypeahead } from "@/editors/contenteditable";
-import { useProseMirrorEmojiTypeahead } from "@/editors/prosemirror";
 import { EXPERIENCES, type Experience } from "@/experiences";
 
 const FIELD = "block min-h-[66px] w-full resize-none bg-transparent px-4 py-3 text-[15px] leading-[22px] outline-none [&_p]:m-0";
@@ -73,7 +73,7 @@ function LexicalEditor({ experience }: EditorProps) {
 
 function ProseMirrorEditor({ experience: { Menu, options } }: EditorProps) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const { plugin, ...emoji } = useProseMirrorEmojiTypeahead(options);
+  const { plugin, ...emoji } = useEmojiTypeaheadStore((store, extra) => emojiTypeahead(store, { ...options, ...extra }), [options]);
   React.useEffect(() => {
     const plugins = [plugin, history(), keymap({ "Mod-z": undo, "Mod-Shift-z": redo }), keymap(baseKeymap)];
     const view = new EditorView(ref.current, { state: EditorState.create({ schema, plugins }), attributes: { role: "textbox", "aria-label": LABEL, class: FIELD } });
