@@ -6,7 +6,7 @@ import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } fr
 type TextField = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
-const EVENTS = ["input", "selectionchange", "click", "keyup"];
+const EVENTS = ["selectionchange", "click", "keyup"];
 
 /**
  * `useEmojiTypeahead` for an `<input>` or `<textarea>`, controlled or not: finds the `:query`
@@ -37,11 +37,15 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null
     };
     // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send).
     const keydown = (event: Event) => void (onKeyDown(event as KeyboardEvent) && event.stopPropagation());
+    // After them: a controlled field's onChange must commit the new value before this re-renders it.
+    const input = (event: Event) => event.target === el && sync();
     for (const type of EVENTS) el.addEventListener(type, sync);
     el.addEventListener("keydown", keydown);
+    el.ownerDocument.addEventListener("input", input);
     return () => {
       for (const type of EVENTS) el.removeEventListener(type, sync);
       el.removeEventListener("keydown", keydown);
+      el.ownerDocument.removeEventListener("input", input);
     };
   }, [ref, onKeyDown]);
   return typeahead;
