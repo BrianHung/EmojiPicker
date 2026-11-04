@@ -4,7 +4,7 @@ Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplet
 
 ## Overview
 
-The library builds on [React Aria](https://react-spectrum.adobe.com/react-aria/)'s hooks (`useListBox` over a virtualized grid, `useAutocomplete`, `useToolbar`) and adds:
+The library builds on [React Aria](https://react-spectrum.adobe.com/react-aria/) (`Autocomplete`, `SearchField`, `Toolbar`, and `useListBox` over a virtualized grid) and adds:
 
 - Tapbacks: the user's most-used emoji, with a button that expands into the full picker.
 - Slack shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete.
@@ -237,7 +237,7 @@ Each part follows its WAI-ARIA Authoring Practices pattern. `npm run test:a11y` 
 
 | Part | Roles and states |
 |---|---|
-| Search field | `searchbox` (React Aria's `useAutocomplete`) with `aria-controls` and `aria-activedescendant` |
+| Search field | `searchbox` (React Aria `Autocomplete`) with `aria-controls` and `aria-activedescendant` |
 | Search status | A polite `status` live region: “24 results”, “No results” |
 | Lists and results | `listbox` › `group` (each section, named by its title) › `option`, named by the emoji and its skin tone, with `aria-posinset`/`aria-setsize` within its section; `aria-busy` during an async search; `aria-selected` only in a value picker (`List value`) |
 | CategoryNav | `tablist` of `tab`s with `aria-selected` |

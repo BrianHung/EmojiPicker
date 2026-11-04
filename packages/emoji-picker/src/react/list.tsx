@@ -2,6 +2,8 @@
 // virtualized inside the Viewport by EmojiGridLayout. Categories, or the search results
 // as their own small collection; items are shared objects (see sections.ts), and the
 // collection is built from them directly (collection.ts), never by rendering them.
+// Not React Aria's ListBox: its collection is a hidden React tree with a fiber, props and
+// node per emoji per picker (+6.4 MB heap on open, 2.4x per extra picker), and +2.7 KB gzip.
 import * as React from "react";
 import type { Key, Node as CollectionNode } from "@react-types/shared";
 import { useFocusRing } from "react-aria/useFocusRing";
@@ -11,7 +13,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { moveVirtualFocus } from "./virtual-focus";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
-import { AutocompleteContext } from "./autocomplete";
+import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
 import { EmojiCollection } from "./collection";
 import { GROUPS, unifiedToNative } from "../core/dataset";
 import type { CategoryHeaderProps, EmojiCellProps, HeaderActionsProps, ListComponents, ListEmoji } from "./components";
@@ -226,7 +228,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   const stateRef = React.useRef(state);
   stateRef.current = state;
   const virtualizer = React.useRef<VirtualizerState<CollectionNode<unknown>, React.ReactNode> | null>(null);
-  const autocomplete = React.useContext(AutocompleteContext);
+  const autocomplete = React.useContext(AutocompleteStateContext);
   // DOM focus in a cell (Tab from the field): the list leaves virtual focus while it's there.
   const [domFocus, setDomFocus] = React.useState(false);
   const virtual = focusModel === "input" && picker.hasSearch && !domFocus;
@@ -404,7 +406,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
       const m = stateRef.current?.selectionManager;
       if (!m || !latest.current.virtual || !m.isFocused || m.focusedKey == null) return false;
       m.setFocused(false);
-      autocomplete?.clearFocusedNode();
+      autocomplete?.setFocusedNodeId(null);
       setActive(marks.hovered.get());
       return true;
     },
@@ -688,12 +690,13 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     return { position: "absolute", top: list.offsetTop + top, insetInlineStart: list.offsetLeft + left };
   };
   const empty = useEmptyState();
-  // Under Autocomplete (virtual focus), the field drives the list: its ids, keys and focus handling.
-  const field = virtual ? autocomplete : null;
-  const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region, field?.collectionRef as React.Ref<HTMLDivElement>), [ref, userKeys, region, field?.collectionRef]);
+  // Under Autocomplete the field drives the list: its id, virtual focus and the keys it forwards.
+  const selectable = React.useContext(SelectableCollectionContext) as { ref?: React.Ref<HTMLElement>; filter?: unknown } | null;
+  const { ref: fieldRef, filter: _filter, ...collectionProps } = (virtual && selectable) || {};
+  const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region, fieldRef as React.Ref<HTMLDivElement>), [ref, userKeys, region, fieldRef]);
   const { listBoxProps } = useListBox(
     {
-      ...mergeProps(field?.collectionProps, {
+      ...mergeProps(collectionProps, {
         id: virtual ? undefined : picker.listId,
         "aria-label": rest["aria-label"] ?? (searching ? labels.searchResults : labels.emojiList),
         "aria-labelledby": rest["aria-labelledby"],
@@ -790,7 +793,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
           ref={merged}
           // One tab stop, a cell, never the list itself. (Under Autocomplete the list has no
           // tabindex: Autocomplete turns virtual focus off for a collection that has one.)
-          tabIndex={field ? undefined : -1}
+          tabIndex={fieldRef ? undefined : -1}
           className={className}
           style={style}
           data-slot={SLOTS.list}

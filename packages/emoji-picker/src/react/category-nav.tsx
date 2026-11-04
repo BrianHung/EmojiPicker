@@ -2,6 +2,8 @@
 // tab follows the list's scroll; choosing one scrolls the list there (at once from the
 // keyboard). One tab stop: the current tab, else the last focused, else the first.
 // While search results show, the tabs are disabled.
+// Not React Aria's Tabs: they always select a tab, and "Frequently used" has none (no tab
+// selected, the first still the tab stop); they'd also cost 1.7 KB gzip more.
 import * as React from "react";
 import { useFocusVisible } from "react-aria/useFocusVisible";
 import { DefaultCategoryIcon } from "./category-icons";

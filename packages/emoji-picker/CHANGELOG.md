@@ -2,12 +2,12 @@
 
 ## Unreleased
 
-The React layer runs on React Aria's hooks (`react-aria`, `react-stately`) instead of emoji-picker-react; `emoji-picker-react` is no longer a dependency. The public API (parts, hooks, props, `data-slot` names) is unchanged except as listed here.
+The React layer runs on React Aria (`react-aria-components` and its hooks) instead of emoji-picker-react; `emoji-picker-react` is no longer a dependency. The public API (parts, hooks, props, `data-slot` names) is unchanged except as listed here.
 
 ### Semantics
 
 - The grid is a `listbox` of `option`s in `group`s (one per section, named by its title), not a `grid` of `gridcell`s. `aria-posinset` and `aria-setsize` count within a section.
-- The search field is a `searchbox` (React Aria's `useAutocomplete`, virtual focus) instead of a `combobox`; it has no `aria-expanded`.
+- The search field is a `searchbox` (React Aria `Autocomplete`, virtual focus) instead of a `combobox`; it has no `aria-expanded`.
 - A tapback's reactions are a `toolbar` of buttons (toggle buttons with `aria-pressed` when `selected` is given), not a `list`.
 - Category tabs have no `aria-controls` (they scroll one list rather than switch panels).
 - Keys the picker handles stop at `Root` (as React Aria's handled keys do); part and Root `onKeyDown` handlers still see every key first. Escape with nothing to clear or close goes on to the page (a sheet or dialog around the picker closes).

@@ -8,6 +8,7 @@ import type { SkinToneButtonProps, SkinToneId } from "./components";
 import { useEmojiContext } from "./provider";
 import { SLOTS, joinClasses } from "./slots";
 
+// Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks.
 const TONE_IDS = ["neutral", ...SKIN_TONES] as const;
 // Swatches for the unstyled default button (Fitzpatrick palette, as emoji-picker-react).
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];

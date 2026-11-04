@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { EmojiRecord } from "../core/dataset";
 import type { EmojiSelection } from "../core/store";
-import { Autocomplete } from "./autocomplete";
+import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapseState } from "./collapse";
 import type { PickerComponents } from "./components";
 import { PickerContext, signal, usePicker, useSignal, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
@@ -267,7 +267,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
           style={{ ...(columns ? { "--ep-columns": columns } : {}), ...(colorScheme ? { colorScheme: colorScheme === "auto" ? "light dark" : colorScheme } : {}), ...style } as React.CSSProperties}
         >
           {focusModel === "input" ? (
-            <Autocomplete inputValue={query} onInputChange={setQuery}>
+            <Autocomplete inputValue={query} onInputChange={setQuery} disableAutoFocusFirst>
               {body}
             </Autocomplete>
           ) : (

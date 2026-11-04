@@ -1,5 +1,5 @@
 import * as React from "react";
-import { I18nProvider } from "react-aria/I18nProvider";
+import { I18nProvider } from "react-aria-components/I18nProvider";
 import { defaultLabels, plural, type EmojiLabels } from "../core/labels";
 import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../core/platform";
 import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../core/store";

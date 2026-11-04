@@ -3,6 +3,7 @@
 // Escape and outside-click to close, focus in on open and back to the trigger on
 // close, close-on-pick for any EmojiPicker.Root inside, and enter/exit hooks for CSS
 // transitions (data-starting-style / data-ending-style, --transform-origin).
+// Not React Aria's Popover/Dialog: +10 KB gzip (overlay positioning, FocusScope, aria-hide).
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { PopoverContext, type PopoverState } from "./popover-context";
