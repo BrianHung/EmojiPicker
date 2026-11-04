@@ -138,6 +138,14 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
   return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect }), [open, setOpen, close, closeOnSelect]);
 }
 
+/** Wraps the content's children: a picker whose grid renders after opening focuses it, unless `initialFocus` is set. */
+export function ContentFocus({ initialFocus, children }: { initialFocus?: PopoverInitialFocus; children: React.ReactNode }) {
+  const { state } = usePopoverInternals("Content");
+  const focusGrid = initialFocus === undefined;
+  const value = React.useMemo(() => ({ ...state, focusGrid }), [state, focusGrid]);
+  return <PopoverContext.Provider value={value}>{children}</PopoverContext.Provider>;
+}
+
 export function PopoverProvider({ value, children }: { value: PopoverInternals; children: React.ReactNode }) {
   return (
     <PopoverContext.Provider value={value.state}>
@@ -151,7 +159,7 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
   const childRef = asChild && React.isValidElement(children) ? (children.props as { ref?: React.Ref<HTMLElement> }).ref : undefined;
   const refs = React.useMemo(() => mergeRefs(setTrigger, ref as React.Ref<HTMLElement>, childRef) as React.Ref<HTMLButtonElement>, [setTrigger, ref, childRef]);
-  const merged = triggerProps(mergeProps(props, { "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
+  const merged = triggerProps(mergeProps(props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
   if (asChild && React.isValidElement(children)) {
     const child = children as React.ReactElement<Record<string, unknown>>;
     return React.cloneElement(child, { ...mergeProps(child.props, merged), ref: refs });
