@@ -2,11 +2,13 @@
 import * as React from "react";
 import type { EmojiRecord } from "../core/dataset";
 import type { EmojiLabels } from "../core/labels";
+import type { PickerSnapshot, PickerState, SearchResultsMode } from "../core/picker";
+import { same } from "../core/reactive";
+import type { Category, EmojiSection } from "../core/sections";
 import type { EmojiSelection, EmojiStore } from "../core/store";
 import type { CollapsedCategories } from "./collapse";
 import type { PickerComponents } from "./components";
 import type { KeyboardAction } from "./keymap";
-import type { Category, EmojiSection } from "./sections";
 
 /**
  * Where keyboard focus lives while navigating. "input": it stays in the search field
@@ -21,7 +23,7 @@ export type FocusModel = "input" | "grid";
  * focus follows the pointer. "independent": hover is only a hover style (Linear, Slack).
  */
 export type PointerModel = "follows" | "independent";
-export type SearchResultsMode = "ranked" | "grouped";
+export type { SearchResultsMode };
 
 export type SelectDetails = {
   /** Return a tapback to its compact row. */
@@ -62,10 +64,28 @@ export function signal<T>(initial: T): Signal<T> {
     },
   };
 }
+
 export const useSignal = <T,>(s: Signal<T>) => React.useSyncExternalStore(s.subscribe, s.get, s.get);
+
+/** Part of a core store's snapshot; re-renders only when it changes (an object, shallowly). */
+export function useSelector<S, T>(store: { subscribe(listener: () => void): () => void; getSnapshot(): S }, select: (snapshot: S) => T): T {
+  const last = React.useRef<[S, T] | null>(null);
+  const read = () => {
+    const snapshot = store.getSnapshot();
+    const prev = last.current;
+    if (prev?.[0] !== snapshot) {
+      const value = select(snapshot);
+      last.current = [snapshot, prev && value && typeof value === "object" ? (same(prev[1] as object, value) as T) : value];
+    }
+    return last.current![1];
+  };
+  return React.useSyncExternalStore(store.subscribe, read, read);
+}
 
 export type PickerContextValue = {
   store: EmojiStore;
+  /** The picker's core state: query, sections, collapse, highlight, hover, current section. */
+  state: PickerState<React.ReactNode>;
   labels: EmojiLabels;
   focusModel: FocusModel;
   pointer: PointerModel;
@@ -76,9 +96,11 @@ export type PickerContextValue = {
   fitColumns: boolean;
   emojiVersion?: number;
   /** Sections in order with names and icons (all of them, empty or not). */
-  categories: readonly Category[];
+  categories: readonly Category<React.ReactNode>[];
   /** The category list as shown now (collapse applied). */
   categorySections: readonly EmojiSection[];
+  /** What the grid shows: search results while searching, else `categorySections`. */
+  sections: readonly EmojiSection[];
   collapse: CollapsedCategories;
   query: string;
   setQuery(value: string): void;
@@ -87,20 +109,19 @@ export type PickerContextValue = {
   searchLimit: number;
   results: readonly EmojiRecord[];
   pending: boolean;
+  /** The highlight is virtual (focus stays in the search field), else focus roves the cells. */
+  virtual: boolean;
   /** Pick an item or a unified code (skin tone already applied). */
   pick(unified: string, details?: SelectDetails): EmojiSelection | undefined;
   /** Close the surrounding popover; false when there's none. */
   close(): boolean;
   list: React.MutableRefObject<ListHandle | null>;
-  /** The current section (category tabs), and the hovered or highlighted emoji. */
-  activeSection: Signal<string | null>;
-  activeEmoji: Signal<EmojiRecord | null>;
-  /** A Search part is mounted (the List then uses virtual focus with focusModel "input"). */
-  hasSearch: boolean;
   registerSearch(): () => void;
   /** Ids for aria-controls. */
   listId: string;
 };
+
+export type { PickerSnapshot };
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);
 

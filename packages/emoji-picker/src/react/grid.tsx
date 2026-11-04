@@ -11,10 +11,11 @@ import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
 import { createEmojiGrid, type EmojiGrid, type EmojiGridMove, type EmojiGridRow } from "../core/grid";
-import { GROUPS } from "../core/dataset";
+import type { PickerState } from "../core/picker";
+import type { EmojiItem, EmojiSection } from "../core/sections";
 import { EmojiCollection } from "./collection";
 import type { ListComponents } from "./components";
-import { signal, usePicker, type ListHandle } from "./context";
+import { signal, usePicker, useSelector, type ListHandle } from "./context";
 import { Glyph } from "./glyph";
 import { mergeRefs, useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { ListProps } from "./list";
@@ -23,7 +24,6 @@ import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "./native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "./overrides";
 import { useEmojiPopover } from "./popover-context";
-import { itemFactory, resultSections, type EmojiItem, type EmojiSection } from "./sections";
 import { SLOTS } from "./slots";
 import { Variations } from "./variations";
 import { moveVirtualFocus } from "./virtual-focus";
@@ -48,21 +48,23 @@ function trackPointer() {
   );
 }
 
-/** Per-cell state the grid sets and each cell reads as one number (one subscription per cell). */
+/** Per-cell state each cell reads as one number (one subscription per cell): the tab stop and press here, hover and the active emoji from the picker's state. */
 export const STOP = 1;
 export const ACTIVE = 2;
 export const HOVERED = 4;
 export const PRESSED = 8;
-function cellMarks() {
-  const marks = { stop: signal<Key | null>(null), active: signal<Key | null>(null), hovered: signal<Key | null>(null), pressed: signal<Key | null>(null) };
-  const all = Object.values(marks);
+function cellMarks(state: PickerState<React.ReactNode>) {
+  const marks = { stop: signal<Key | null>(null), pressed: signal<Key | null>(null) };
   return {
     ...marks,
     subscribe(listener: () => void) {
-      const off = all.map((s) => s.subscribe(listener));
+      const off = [marks.stop.subscribe(listener), marks.pressed.subscribe(listener), state.subscribe(listener)];
       return () => off.forEach((f) => f());
     },
-    of: (key: Key) => (marks.stop.get() === key ? STOP : 0) | (marks.active.get() === key ? ACTIVE : 0) | (marks.hovered.get() === key ? HOVERED : 0) | (marks.pressed.get() === key ? PRESSED : 0),
+    of(key: Key) {
+      const { hovered, highlighted } = state.getSnapshot();
+      return (marks.stop.get() === key ? STOP : 0) | ((hovered ?? highlighted) === key ? ACTIVE : 0) | (hovered === key ? HOVERED : 0) | (marks.pressed.get() === key ? PRESSED : 0);
+    },
   };
 }
 
@@ -112,13 +114,6 @@ const cellOf = (target: EventTarget | null) => (target instanceof Element ? targ
 /** The sections the grid shows: the categories (without emoji the system can't draw), or the search results. */
 export function useGridSections(horizontal: boolean) {
   const picker = usePicker("EmojiPicker.List");
-  const { store, labels, searching } = picker;
-  const item = React.useMemo(() => itemFactory(labels), [labels]);
-  const groupNames = store.status() === "ready" ? store.groupNames() : [];
-  const categoryName = React.useCallback(
-    (group: string) => picker.categories.find((c) => c.id === group)?.name ?? (group === "custom" ? labels.custom : (groupNames[GROUPS.indexOf(group as (typeof GROUPS)[number])] ?? group)),
-    [picker.categories, labels, groupNames],
-  );
   const probeRoot = React.useRef<HTMLElement | null>(null);
   const { drawable, request } = useDrawable(probeRoot);
   const categories = React.useMemo(
@@ -133,11 +128,7 @@ export function useGridSections(horizontal: boolean) {
           }),
     [horizontal, picker.categorySections, drawable],
   );
-  const results = React.useMemo(
-    () => (searching ? resultSections(picker.results, picker.searchResults, categoryName, (u) => store.withSkinTone(u), item, labels.searchResults) : null),
-    [searching, picker.results, picker.searchResults, categoryName, store, item, labels.searchResults],
-  );
-  return { sections: results ?? categories, request, probeRoot };
+  return { sections: picker.searching ? picker.sections : categories, request, probeRoot };
 }
 
 type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | "aria-labelledby" | "components" | "cellClassName" | "headerClassName"> & {
@@ -161,10 +152,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const stateRef = React.useRef(state);
   stateRef.current = state;
   const autocomplete = React.useContext(AutocompleteStateContext);
-  // DOM focus in a cell (Tab from the field): the grid leaves virtual focus while it's there.
-  const [domFocus, setDomFocus] = React.useState(false);
-  const virtual = focusModel === "input" && picker.hasSearch && !domFocus;
-  const [marks] = React.useState(cellMarks);
+  const core = picker.state;
+  const { virtual } = picker;
+  const [marks] = React.useState(() => cellMarks(core));
   const pendingFocus = React.useRef<Key | null>(null);
   // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
   const focusGrid = React.useRef(Boolean(useEmojiPopover()?.focusGrid));
@@ -172,13 +162,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const latest = React.useRef({ collection, virtual, geometry });
   latest.current = { collection, virtual, geometry };
 
-  const setActive = React.useCallback(
-    (key: Key | null) => {
-      marks.active.set(key);
-      picker.activeEmoji.set(latest.current.collection.emoji(key)?.record ?? null);
-    },
-    [marks, picker.activeEmoji],
-  );
+  // React Aria's selection manager holds the focused key it renders; the picker's state follows it.
+  const setActive = (key: Key | null) => core.highlight(key == null ? null : String(key));
 
   const moveTo = (key: Key, dom: boolean, from?: Key) => {
     const manager = stateRef.current.selectionManager;
@@ -187,7 +172,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     manager.setFocused(true);
     manager.setFocusedKey(key);
     if (dom) marks.stop.set(key);
-    setActive(marks.hovered.get() ?? key);
+    setActive(key);
   };
 
   const pick = (key: Key) => {
@@ -205,22 +190,24 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const cellElement = (key: Key | null | undefined) => (key == null ? null : (listRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"][data-key="${CSS.escape(String(key))}"]`) ?? null));
 
   // --- Skin-tone variations of one emoji ---------------------------------------------
-  const [variations, setVariations] = React.useState<{ key: Key; back: HTMLElement | null } | null>(null);
+  const variations = useSelector(core, (s) => s.variations);
+  const back = React.useRef<HTMLElement | null>(null);
   const openVariations = (key: Key | null) => {
-    const record = latest.current.collection.emoji(key)?.record;
-    if (key == null || !record?.tones.length || record.imageUrl || picker.disableVariations) return false;
-    setVariations({ key, back: document.activeElement instanceof HTMLElement ? document.activeElement : null });
+    const active = document.activeElement;
+    if (!core.openVariations(key == null ? null : String(key))) return false;
+    back.current = active instanceof HTMLElement ? active : null;
     return true;
   };
   const closeVariations = (restore: boolean) => {
-    if (!variations) return;
-    setVariations(null);
+    const key = core.getSnapshot().variations;
+    if (key == null) return;
+    core.closeVariations();
     if (!restore) return;
     // Back to the emoji: its cell (grid), or the field with the emoji highlighted.
     const m = stateRef.current.selectionManager;
-    (variations.back ?? cellElement(variations.key))?.focus({ preventScroll: true });
+    (back.current ?? cellElement(key))?.focus({ preventScroll: true });
     m.setFocused(true);
-    m.setFocusedKey(variations.key);
+    m.setFocusedKey(key);
   };
 
   const handle: ListHandle = {
@@ -262,20 +249,20 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (!latest.current.virtual || !m.isFocused || m.focusedKey == null) return false;
       m.setFocused(false);
       autocomplete?.setFocusedNodeId(null);
-      setActive(marks.hovered.get());
+      setActive(null);
       return true;
     },
     focus() {
       const m = stateRef.current.selectionManager;
       const key = latest.current.collection.emoji(m.focusedKey) ? m.focusedKey : geometry.firstVisible();
       if (key == null) return false;
-      setDomFocus(true);
+      core.setDomFocus(true);
       moveTo(key, true);
       return true;
     },
     jump(id, { instant = false } = {}) {
       if (!geometry.jump(id, instant)) return;
-      picker.activeSection.set(id);
+      core.setActiveSection(id);
       const first = sections.find((s) => s.id === id)?.items[0]?.id;
       if (first != null) marks.stop.set(first);
     },
@@ -331,7 +318,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     }
     if (latest.current.virtual && document.activeElement === focusInput()) m.setFocused(true);
     m.setFocusedKey(pending.key);
-    setActive(marks.hovered.get() ?? pending.key);
+    setActive(pending.key);
   };
   // Track the highlighted emoji for useActiveEmoji while the field keeps focus.
   const focusedKey = state.selectionManager.focusedKey;
@@ -386,8 +373,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
 
   const hover = (key: Key | null) => {
-    marks.hovered.set(key);
-    setActive(key ?? highlight());
+    core.hover(key == null ? null : String(key));
+    if (key == null) setActive(highlight());
   };
   /** A real pointer move over a cell: the keyboard position follows (pointer "follows"). */
   const follow = (key: Key) => {
@@ -453,11 +440,11 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     },
     onPointerOver(e) {
       const key = keyOf(e);
-      if (e.pointerType !== "touch" && key !== marks.hovered.get()) hover(key);
+      if (e.pointerType !== "touch" && key !== core.getSnapshot().hovered) hover(key);
     },
     onPointerOut(e) {
       const cell = cellOf(e.target);
-      if (cell && !cell.contains(e.relatedTarget as Node | null) && marks.hovered.get() === cell.getAttribute("data-key")) hover(null);
+      if (cell && !cell.contains(e.relatedTarget as Node | null) && core.getSnapshot().hovered === cell.getAttribute("data-key")) hover(null);
     },
     onPointerMove(e) {
       const press = longPress.current;
@@ -494,13 +481,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         const id = cell.getAttribute("data-key");
         lastFocused.current = id;
         marks.stop.set(id);
-        setActive(marks.hovered.get() ?? id);
-        if (focusModel === "input" && !domFocus) setDomFocus(true);
+        setActive(id);
+        if (focusModel === "input") core.setDomFocus(true);
       },
       onBlur(e: React.FocusEvent) {
         if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
-        if (domFocus) setDomFocus(false);
-        setActive(marks.hovered.get());
+        core.setDomFocus(false);
+        setActive(null);
       },
     },
     state,
@@ -552,7 +539,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     el.focus({ preventScroll: true });
   });
 
-  const varied = variations && collection.emoji(variations.key);
+  const varied = variations != null ? collection.emoji(variations) : undefined;
   const isEmpty = collection.size === 0;
   return {
     state,
@@ -579,7 +566,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     variations: varied ? (
       <Variations
         record={varied.record}
-        style={geometry.overlay(variations.key)}
+        style={geometry.overlay(variations!)}
         onPick={(unified) => {
           closeVariations(true);
           picker.pick(unified);
@@ -713,7 +700,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
   });
   const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, value, "aria-label": label });
   const { cells } = controller;
-  React.useSyncExternalStore(cells.marks.subscribe, () => [cells.marks.stop.get(), cells.marks.active.get(), cells.marks.hovered.get(), cells.marks.pressed.get()].join("\n"));
+  React.useSyncExternalStore(cells.marks.subscribe, () => { const { hovered, highlighted } = picker.state.getSnapshot(); return [cells.marks.stop.get(), hovered ?? highlighted, hovered, cells.marks.pressed.get()].join("\n"); });
   const artwork = useArtworkMap();
 
   // After each render and scroll: the search highlight, the tab stop, the current section, and probes of what's shown.
@@ -724,7 +711,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     const v = windowOf(listRef.current);
     const shown = v ? grid.rows.filter((r) => r.offset + r.size > v.top && r.offset < v.top + v.height) : [];
     request(shown.flatMap((r) => (r.type === "emojis" ? r.items.map((i) => i.unified) : [])));
-    if (!picker.searching && shown[0]) picker.activeSection.set(shown[0].section.id);
+    if (!picker.searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
   };
   React.useLayoutEffect(() => sync.current());
   React.useEffect(() => {

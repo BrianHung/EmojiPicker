@@ -20,3 +20,6 @@ export { findShortcodeTrigger, isComposingKey } from "./shortcodes";
 export { createEmojiSuggestions } from "./suggestions";
 export type { EmojiSuggestionsMachine, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
 export type { ShortcodeCompletion } from "./search-index";
+export { createPickerState, moveHighlight } from "./picker";
+export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
+export type { Category, CategoryOption, EmojiItem, EmojiSection } from "./sections";

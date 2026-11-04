@@ -1,16 +1,16 @@
 // The picker's sections: category sections (and search results) of items cached per
 // labels, section and tone, so the same emoji is one object across renders and pickers.
-// An item is also its own React Aria collection node (see collection.ts).
+// An item also has the fields of a collection node, so a renderer can use it as one.
 import { GROUPS, type EmojiRecord } from "../core/dataset";
 import type { EmojiLabels } from "../core/labels";
 import { nameWithTone } from "../core/shortcodes";
 
-export type CategoryOption = {
+export type CategoryOption<Icon = unknown> = {
   /** A built-in group ("smileys_people", ...), "suggested", "custom", or "custom:<group>". */
   id: string;
   name?: string;
   /** Tab icon in CategoryNav. */
-  icon?: React.ReactNode;
+  icon?: Icon;
   /** false: keep the section in the list but give it no tab (Slack's pinned row). */
   nav?: boolean;
 };
@@ -72,18 +72,18 @@ export type EmojiSection = {
   collapsed: boolean;
 };
 
-export type Category = { id: string; name: string; icon?: React.ReactNode; nav: boolean };
+export type Category<Icon = unknown> = { id: string; name: string; icon?: Icon; nav: boolean };
 
 export const DEFAULT_ORDER = ["suggested", "custom", ...GROUPS] as const;
 const RESULT_ORDER = [...GROUPS, "custom"] as string[];
 
 /** Sections in order with names: `categories`, or every group, then custom groups no option lists. */
-export function categoryList(options: readonly CategoryOption[] | undefined, groupNames: readonly string[], labels: EmojiLabels, customGroups: Iterable<string>): Category[] {
+export function categoryList<Icon>(options: readonly CategoryOption<Icon>[] | undefined, groupNames: readonly string[], labels: EmojiLabels, customGroups: Iterable<string>): Category<Icon>[] {
   const name = (id: string) => (id === "suggested" ? labels.suggested : id === "custom" ? labels.custom : id.startsWith("custom:") ? id.slice(7) : (groupNames[GROUPS.indexOf(id as (typeof GROUPS)[number])] ?? id));
-  const listed: Category[] = (options?.length ? options : DEFAULT_ORDER.map((id) => ({ id }) as CategoryOption)).map((o) => ({ id: o.id, name: o.name ?? name(o.id), icon: o.icon, nav: o.nav !== false }));
+  const listed: Category<Icon>[] = (options?.length ? options : DEFAULT_ORDER.map((id) => ({ id }) as CategoryOption<Icon>)).map((o) => ({ id: o.id, name: o.name ?? name(o.id), icon: o.icon, nav: o.nav !== false }));
   const customInPlay = !options?.length || options.some((o) => o.id === "custom");
   const ids = new Set(listed.map((c) => c.id));
-  const appended = customInPlay ? [...new Set(customGroups)].filter((g) => !ids.has(`custom:${g}`)).map((g): Category => ({ id: `custom:${g}`, name: g, nav: true })) : [];
+  const appended = customInPlay ? [...new Set(customGroups)].filter((g) => !ids.has(`custom:${g}`)).map((g): Category<Icon> => ({ id: `custom:${g}`, name: g, nav: true })) : [];
   return [...listed, ...appended];
 }
 
@@ -106,7 +106,7 @@ export function itemFactory(labels: EmojiLabels) {
 }
 
 export type CategorySectionsInput = {
-  categories: readonly Category[];
+  categories: readonly Category<unknown>[];
   records: readonly EmojiRecord[];
   /** The suggested section's emoji (unified codes, skin tone applied). */
   suggested: readonly string[];

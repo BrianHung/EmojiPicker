@@ -8,7 +8,7 @@ export type { CategoryButtonProps, CategoryHeaderProps, EmojiCellProps, HeaderAc
 export type { ListProps } from "./react/list";
 export { useEmojiGrid } from "./react/grid";
 export type { UseEmojiGridOptions } from "./react/grid";
-export type { EmojiItem, EmojiSection } from "./react/sections";
+export type { EmojiItem, EmojiSection } from "./core/sections";
 export { createEmojiGrid, moveInGrid, rowsPerPage } from "./core/grid";
 export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGridSection } from "./core/grid";
 export type { SearchProps, SearchInputProps } from "./react/search";

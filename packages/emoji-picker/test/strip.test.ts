@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
 import { expandDataset, type Dataset } from "../src/core/dataset";
 import { defaultLabels } from "../src/core/labels";
-import { categorySections, itemFactory, resultSections } from "../src/react/sections";
+import { categorySections, itemFactory, resultSections } from "../src/core/sections";
 import { layoutStrip, moveInStrip, placeCell, sectionOf, type StripMetrics } from "../src/react/strip-layout";
 
 // The iOS 27 keyboard: 46 × 38.4 cells, 5 rows, sections 13.8 apart.
