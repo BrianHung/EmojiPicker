@@ -1,6 +1,7 @@
 // API reference, Base UI style: one block per part with props, data attributes
 // and CSS variables. Names and defaults follow packages/emoji-picker/src.
 import * as React from "react";
+import { Code } from "@/components/site/code";
 import { AttrTable, C, H2, H3, P, PropsTable, type PropRow } from "@/components/site/docs";
 
 function Part({ id, title, description, props, children }: { id: string; title: string; description: React.ReactNode; props?: PropRow[]; children?: React.ReactNode }) {
@@ -121,6 +122,16 @@ const POPOVER_CONTENT: PropRow[] = [
   { name: "anchor", type: "Element | VirtualElement | () => …", description: "Positions against this element instead of the Trigger." },
 ];
 
+const OWN_POPOVER = `import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker";
+
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger>😀</PopoverTrigger>
+  <PopoverContent initialFocus={() => pickerInitialFocus(document.querySelector("[data-slot=emoji-picker]"))}>
+    <EmojiPicker.Root onSelect={({ emoji }) => { insert(emoji); setOpen(false); }}>…</EmojiPicker.Root>
+  </PopoverContent>
+</Popover>`;
+
 const EMOJI: PropRow[] = [
   { name: "unified", type: "string", description: "Unified code or custom emoji id." },
   { name: "size", type: "number", description: "Image size in pixels." },
@@ -206,6 +217,11 @@ export function ApiReference() {
         <PropsTable rows={POPOVER_TRIGGER} />
         <Sub>Content</Sub>
         <PropsTable rows={POPOVER_CONTENT} />
+        <Sub>Your own popover</Sub>
+        <P>
+          A picker works in any popover. In Base UI or shadcn/ui, close it from <C>onSelect</C> and focus the picker with <C>pickerInitialFocus</C>.
+        </P>
+        <Code title="emoji-button.tsx" lang="tsx">{OWN_POPOVER}</Code>
       </Part>
 
       <Part id="api-emoji" title="Emoji" description="Renders a single emoji as the pickers do." props={EMOJI} />
