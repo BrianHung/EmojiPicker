@@ -1,6 +1,6 @@
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
-import { Emoji, EmojiProvider, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
+import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { discord } from "./picker";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -277,7 +277,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
         ),
       },
       handleKeyDown: (_, event) => {
-        if (event.key !== "Enter" || event.shiftKey || menuOpen.current) return false;
+        if (event.key !== "Enter" || event.shiftKey || menuOpen.current || isComposingKey(event)) return false;
         event.preventDefault();
         submit.current();
         return true;

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AnimatePresence, MotionGlobalConfig, motion, type Transition } from "motion/react";
 import { useSmoothCorners } from "@lisse/react";
-import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { useEmojiTextField } from "@/components/emoji-text-field";
@@ -497,7 +497,7 @@ function Composer({
           placeholder={placeholder}
           className="min-w-0 flex-1 bg-transparent text-[17px] tracking-[-0.01em] caret-[#0086fd] outline-none placeholder:text-[#bdbdc0] dark:caret-[#0a84ff] dark:placeholder:text-[#6c6c70]"
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !isComposingKey(e.nativeEvent)) {
               e.preventDefault();
               submit();
             }

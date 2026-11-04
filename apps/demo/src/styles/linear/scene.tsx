@@ -1,7 +1,7 @@
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Emoji, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
+import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { linear } from "./picker";
@@ -414,7 +414,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
           className={cn("block h-6 w-full resize-none bg-transparent outline-none placeholder:text-(--ph)", BODY)}
           style={{ color: C.input, "--ph": C.placeholder } as React.CSSProperties}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey || !e.shiftKey) && !isComposingKey(e.nativeEvent)) {
               e.preventDefault();
               submit();
             }
