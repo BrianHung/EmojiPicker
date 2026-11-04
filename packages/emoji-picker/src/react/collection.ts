@@ -4,9 +4,7 @@
 import type { Collection, Key, Node } from "@react-types/shared";
 import type { EmojiItem, EmojiSection } from "./sections";
 
-type BaseNode = Omit<Node<unknown>, "childNodes" | "value"> & { childNodes: Iterable<Node<unknown>>; value: unknown };
-
-const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): BaseNode => ({
+const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): Node<unknown> => ({
   type,
   key,
   value,
@@ -19,27 +17,19 @@ const node = (type: string, key: Key, value: unknown, textValue: string, childNo
   parentKey,
 });
 
-export const headerKey = (section: string) => `header:${section}`;
-export const LOADER_KEY = "loader";
-
 export class EmojiCollection implements Collection<Node<unknown>> {
   private readonly nodes: Node<unknown>[] = [];
   private readonly top: Node<unknown>[] = [];
   private readonly positions = new Map<Key, number>();
-  /** Options in the list (sections and titles aside). */
-  readonly itemCount: number;
 
   constructor(sections: readonly EmojiSection[], loader = false) {
-    let items = 0;
     for (const s of sections) {
-      const header = s.header ? [node("header", headerKey(s.id), s, s.name, [], s.id) as Node<unknown>] : [];
-      const children = [...header, ...(s.items as readonly Node<unknown>[] as Node<unknown>[])];
-      this.add(node("section", s.id, s, s.name, children) as Node<unknown>, true);
+      const header = s.header ? [node("header", `header:${s.id}`, s, s.name, [], s.id)] : [];
+      const children = [...header, ...(s.items as readonly Node<unknown>[])];
+      this.add(node("section", s.id, s, s.name, children), true);
       for (const child of children) this.add(child);
-      items += s.items.length;
     }
-    if (loader) this.add(node("loader", LOADER_KEY, null, "") as Node<unknown>, true);
-    this.itemCount = items;
+    if (loader) this.add(node("loader", "loader", null, ""), true);
   }
 
   private add(n: Node<unknown>, top = false) {

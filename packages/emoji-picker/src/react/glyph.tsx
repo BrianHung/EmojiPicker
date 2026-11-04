@@ -1,4 +1,3 @@
-import * as React from "react";
 import { isUnified, unifiedToNative, type EmojiRecord } from "../core/dataset";
 import { EmojiImage } from "./image";
 import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
