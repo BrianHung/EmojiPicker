@@ -28,7 +28,7 @@ function Editor() {
 
 ## How it works
 
-`useTiptapEmojiTypeahead` registers a `@tiptap/suggestion` plugin on the editor, ranks the matches and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+`useTiptapEmojiTypeahead` registers the library's ProseMirror plugin on the editor, ranks the matches and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
 const emoji = useTiptapEmojiTypeahead(editor, {

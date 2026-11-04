@@ -170,8 +170,9 @@ Each editor adapter returns the same `EmojiTypeahead` (`query`, `open`, `anchor`
 | Import | Hook | Editor |
 |---|---|---|
 | `@brianhung/emoji-picker` | `useTextFieldEmojiTypeahead(ref, options)` | `<input>`, `<textarea>` |
-| `@brianhung/emoji-picker/tiptap` | `useTiptapEmojiTypeahead(editor, options)` | Tiptap 3, on `@tiptap/suggestion` |
+| `@brianhung/emoji-picker/tiptap` | `useTiptapEmojiTypeahead(editor, options)` | Tiptap 3, on the ProseMirror plugin |
 | `@brianhung/emoji-picker/lexical` | `useLexicalEmojiTypeahead(options)` | Lexical, inside `LexicalComposer` |
+| `@brianhung/emoji-picker/prosemirror` | `emojiTypeahead(store, options)`, no React | ProseMirror |
 
 ```tsx
 const editor = useEditor({ extensions: [StarterKit] });
@@ -190,7 +191,38 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `anchor()`: the typed `:query`'s rect,
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
-Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds ProseMirror and contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five.
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five editors.
+
+`/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
+
+```ts
+import { createEmojiStore } from "@brianhung/emoji-picker/core";
+import { emojiTypeahead } from "@brianhung/emoji-picker/prosemirror";
+
+const { plugin, suggestions, anchor } = emojiTypeahead(createEmojiStore({ data: "/emoji/en.json" }));
+new EditorView(editor, { state: EditorState.create({ schema, plugins: [plugin, keymap(baseKeymap)] }) });
+
+const attrs = (el: HTMLElement, props: object) => {
+  for (const [name, value] of Object.entries(props)) value === undefined ? el.removeAttribute(name) : el.setAttribute(name, String(value));
+  return el;
+};
+const list = attrs(document.body.appendChild(document.createElement("ul")), suggestions.getListProps());
+list.onmousedown = (event) => event.preventDefault(); // keep the caret in the editor
+suggestions.subscribe(() => {
+  const { open, suggestions: items } = suggestions.getSnapshot();
+  const rect = anchor();
+  list.hidden = !open;
+  if (rect) list.style.cssText = `position: fixed; left: ${rect.left}px; top: ${rect.bottom}px`;
+  list.replaceChildren(
+    ...items.map((item, i) => {
+      const option = attrs(document.createElement("li"), suggestions.getOptionProps(i));
+      option.textContent = `${suggestions.textFor(item)} :${item.shortcode}:`;
+      option.onclick = () => suggestions.choose(i);
+      return option;
+    }),
+  );
+});
+```
 
 ### Without React
 

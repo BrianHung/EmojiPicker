@@ -89,16 +89,20 @@ export type EmojiSuggestions = SuggestionsSnapshot & {
 
 /**
  * Headless emoji suggestions for a query you already extracted (core's `createEmojiSuggestions`).
- * Use it where something else finds the trigger, e.g. Tiptap's `@tiptap/suggestion` or a
- * ProseMirror plugin, and forward its key events.
+ * Use it where something else finds the trigger and forwards its key events.
  */
 export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestions {
   const { store } = useEmojiContext();
-  useEmojiStatus();
-  useForcedColorsHighlight();
   const id = React.useId();
   const [machine] = React.useState(() => createEmojiSuggestions(store, { ...options, id }));
   machine.setOptions({ ...options, id });
+  return useSuggestionsStore(machine);
+}
+
+/** React state of a suggestions store made elsewhere: an editor plugin's (`emojiTypeahead`). */
+export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestions {
+  useEmojiStatus();
+  useForcedColorsHighlight();
   const snapshot = React.useSyncExternalStore(machine.subscribe, machine.getSnapshot, machine.getSnapshot);
   return {
     ...snapshot,
