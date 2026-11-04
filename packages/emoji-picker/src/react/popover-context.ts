@@ -5,7 +5,10 @@ import * as React from "react";
 export type PopoverState = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  close: () => void;
+  /** `select`: a pick closes it (focus then goes to the content's `finalFocus`). */
+  close: (reason?: "select") => void;
+  /** The last close was a pick. */
+  selected: React.RefObject<boolean>;
   closeOnSelect: boolean;
   /** The content leaves initial focus to its picker: a grid that renders after opening focuses its current emoji. */
   focusGrid?: boolean;

@@ -26,7 +26,7 @@
   gap: 2px;
   padding: 6px;
 }
-.reactions button {
+.reaction {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +36,7 @@
   font-size: 26px;
   transition: transform 150ms;
 }
-.reactions button:hover {
+.reaction:hover {
   transform: scale(1.1);
   background: var(--emoji-picker-hover);
 }

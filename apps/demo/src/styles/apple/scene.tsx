@@ -1091,27 +1091,26 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
         className="absolute inset-0"
         style={KEYBOARD_SIZES}
       >
-        <EmojiPicker.Search
-          className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px] [&_[data-slot=search-clear]]:absolute [&_[data-slot=search-clear]]:right-[10px] [&_[data-slot=search-clear]]:size-[20px] [&_[data-slot=search-clear]]:rounded-full [&_[data-slot=search-clear]]:bg-[#a5a7ac] [&_[data-slot=search-clear]]:text-white dark:[&_[data-slot=search-clear]]:bg-[#6c6c70] dark:[&_[data-slot=search-clear]]:text-[#2b2b2d]"
-          style={{ background: C.search }}
-          inputProps={{ "aria-label": "Search Emoji", className: "h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]" }}
-        >
+        <EmojiPicker.Search className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px]" style={{ background: C.search }}>
+          <EmojiPicker.Search.Input aria-label="Search Emoji" className="h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]">
+            <EmojiPicker.Search.Clear className="absolute right-[10px] size-[20px] rounded-full bg-[#a5a7ac] text-white dark:bg-[#6c6c70] dark:text-[#2b2b2d]" />
+          </EmojiPicker.Search.Input>
           <SFMagnifyingglass size={17} className="pointer-events-none absolute top-[11.7px] left-[19.7px] text-[#838589] dark:text-[#98989f]" />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="absolute inset-x-0 [scrollbar-width:none]" style={{ top: K.label, height: K.grid - K.label + K.rows * K.row }}>
-          <EmojiPicker.List
-            orientation="horizontal"
-            rows={K.rows}
-            headerClassName="pl-[9.8px] text-[12.25px] leading-[16px] font-semibold tracking-[-0.015em] whitespace-nowrap text-[#8b8d92] uppercase dark:text-[#8d8d93]"
-            cellClassName="rounded-[10px] outline-none active:bg-black/[0.06] focus-visible:bg-black/[0.06] data-highlighted:bg-black/[0.06] dark:active:bg-white/[0.1] dark:focus-visible:bg-white/[0.1] dark:data-highlighted:bg-white/[0.1]"
-          />
+          <EmojiPicker.List orientation="horizontal" rows={K.rows}>
+            {() => (
+              <EmojiPicker.List.Section>
+                <EmojiPicker.List.SectionTitle className="pl-[9.8px] text-[12.25px] leading-[16px] font-semibold tracking-[-0.015em] whitespace-nowrap text-[#8b8d92] uppercase dark:text-[#8d8d93]" />
+                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="rounded-[10px] outline-none active:bg-black/[0.06] focus-visible:bg-black/[0.06] data-highlighted:bg-black/[0.06] dark:active:bg-white/[0.1] dark:focus-visible:bg-white/[0.1] dark:data-highlighted:bg-white/[0.1]" />}</EmojiPicker.List.Items>
+              </EmojiPicker.List.Section>
+            )}
+          </EmojiPicker.List>
           <EmojiPicker.Empty className="absolute top-[60px] w-[396px] text-center text-[15px] text-[#8e8e93] dark:text-[#8d8d93]">No Emoji Found</EmojiPicker.Empty>
         </EmojiPicker.Viewport>
-        <EmojiPicker.CategoryNav
-          className="absolute top-[278.7px] flex h-[30px]"
-          style={{ left: TAB.first, gap: TAB.pitch - 30, color: C.icon }}
-          tabClassName="flex size-[30px] shrink-0 items-center justify-center rounded-full data-active:bg-[#bfc1c8] data-active:text-[#3c3c41] dark:data-active:bg-[#5a5a5e] dark:data-active:text-white"
-        />
+        <EmojiPicker.CategoryNav className="absolute top-[278.7px] flex h-[30px]" style={{ left: TAB.first, gap: TAB.pitch - 30, color: C.icon }}>
+          {() => <EmojiPicker.CategoryNav.Tab className="flex size-[30px] shrink-0 items-center justify-center rounded-full data-active:bg-[#bfc1c8] data-active:text-[#3c3c41] dark:data-active:bg-[#5a5a5e] dark:data-active:text-white" />}
+        </EmojiPicker.CategoryNav>
         <button type="button" aria-label="Delete" onClick={onDelete} className="absolute top-[278.7px] flex h-[30px] w-[30px] items-center justify-center text-[#1c1c1e] dark:text-white" style={{ left: 377.2 - 15 }}>
           <SFDeleteLeft size={22} />
         </button>

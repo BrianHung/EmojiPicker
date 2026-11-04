@@ -116,6 +116,7 @@ function Picker({ f, horizontal }: { f: Fixture; horizontal?: boolean }) {
     >
       {f.noSearch ? null : (
         <EmojiPicker.Search>
+          <EmojiPicker.Search.Input />
           <EmojiPicker.SkinTone />
         </EmojiPicker.Search>
       )}
@@ -176,10 +177,13 @@ function App({ f }: { f: Fixture }) {
   else if (f.kind === "tapback")
     body = (
       <Tapback {...f.root} selected={f.selected} className="hx-picker" onSelect={(s) => window.__picks.push(s.unified)} dir={f.dir} keymap={f.keymap}>
-        <EmojiPicker.Search />
-        <EmojiPicker.Viewport>
-          <EmojiPicker.List />
-        </EmojiPicker.Viewport>
+        <EmojiPicker.Reactions />
+        <EmojiPicker.Panel>
+          <EmojiPicker.Search />
+          <EmojiPicker.Viewport>
+            <EmojiPicker.List />
+          </EmojiPicker.Viewport>
+        </EmojiPicker.Panel>
       </Tapback>
     );
   else if (f.kind === "registry") body = <EmojiPickerCard onSelect={(s) => window.__picks.push(s.unified)} />;

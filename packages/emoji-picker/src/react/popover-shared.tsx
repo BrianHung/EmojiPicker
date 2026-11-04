@@ -2,6 +2,7 @@ import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverState } from "./popover-context";
+import { renderElement, type PartElementProps } from "./render";
 
 export { useEmojiPopover } from "./popover-context";
 
@@ -25,13 +26,14 @@ export type PopoverRootProps = {
   children: React.ReactNode;
 };
 
-export type PopoverTriggerProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  /** Render your own element (a shadcn Button…) as the trigger; it receives the props. */
-  asChild?: boolean;
-};
+export type PopoverTriggerState = { open: boolean };
+
+export type PopoverTriggerProps = PartElementProps<PopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
 
 /** Where focus goes when the content opens. */
 export type PopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | false;
+/** Where focus goes when a pick closes the content, as Base UI's `finalFocus` (other closes return to the trigger). */
+export type PopoverFinalFocus = HTMLElement | React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined);
 
 export type PopoverPlacementProps = {
   /** Preferred side; flips when there's no room. Default "bottom". */
@@ -59,6 +61,8 @@ export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> &
      * `false` leaves focus where it is.
      */
     initialFocus?: PopoverInitialFocus;
+    /** Focused once a pick closes the content, instead of the trigger (the editor a toolbar button inserts into). */
+    finalFocus?: PopoverFinalFocus;
   };
 
 /** A `:shortcode` menu next to a text field's caret: never takes focus, so the field keeps its caret and IME. */
@@ -92,6 +96,8 @@ export function pickerInitialFocus(root: Element | null | undefined): HTMLElemen
 
 export const initialFocusTarget = (initialFocus: PopoverInitialFocus | undefined, content: Element | null) =>
   (initialFocus === false ? null : typeof initialFocus === "function" ? initialFocus() : initialFocus ? initialFocus.current : pickerInitialFocus(content)) ?? null;
+
+export const finalFocusTarget = (finalFocus: PopoverFinalFocus) => (typeof finalFocus === "function" ? finalFocus() : finalFocus instanceof HTMLElement ? finalFocus : finalFocus.current) ?? null;
 
 export type TransitionStatus = "starting" | "open" | "ending";
 
@@ -129,13 +135,21 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
   // Stable across renders, so an inline onOpenChange doesn't re-run effects that depend on it.
   const latest = React.useRef({ controlled, onOpenChange });
   latest.current = { controlled, onOpenChange };
+  const selected = React.useRef(false);
   const setOpen = React.useCallback((next: boolean) => {
+    if (next) selected.current = false;
     if (latest.current.controlled === undefined) setUncontrolled(next);
     latest.current.onOpenChange?.(next);
   }, []);
   // After the task's microtasks: an editor an app focuses in onSelect (Lexical updates in a microtask) keeps focus.
-  const close = React.useCallback(() => queueMicrotask(() => setOpen(false)), [setOpen]);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect }), [open, setOpen, close, closeOnSelect]);
+  const close = React.useCallback(
+    (reason?: "select") => {
+      selected.current = reason === "select";
+      queueMicrotask(() => setOpen(false));
+    },
+    [setOpen],
+  );
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected }), [open, setOpen, close, closeOnSelect]);
 }
 
 /** Wraps the content's children: a picker whose grid renders after opening focuses it, unless `initialFocus` is set. */
@@ -154,19 +168,10 @@ export function PopoverProvider({ value, children }: { value: PopoverInternals; 
   );
 }
 
-export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ asChild, children, ...props }, ref) {
+export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ render, className, style, children, ...props }, ref) {
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
-  const childRef = asChild && React.isValidElement(children) ? (children.props as { ref?: React.Ref<HTMLElement> }).ref : undefined;
-  const refs = React.useMemo(() => mergeRefs(setTrigger, ref as React.Ref<HTMLElement>, childRef) as React.Ref<HTMLButtonElement>, [setTrigger, ref, childRef]);
-  const merged = triggerProps(mergeProps(props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
-  if (asChild && React.isValidElement(children)) {
-    const child = children as React.ReactElement<Record<string, unknown>>;
-    return React.cloneElement(child, { ...mergeProps(child.props, merged), ref: refs });
-  }
-  return (
-    <button type="button" {...merged} ref={refs}>
-      {children}
-    </button>
-  );
+  const refs = React.useMemo(() => mergeRefs<HTMLElement>(setTrigger, ref as React.Ref<HTMLElement>), [setTrigger, ref]);
+  const merged = triggerProps(mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
+  return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
 });

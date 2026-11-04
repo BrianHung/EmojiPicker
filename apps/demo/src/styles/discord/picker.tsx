@@ -85,7 +85,7 @@ export const discord: Style = {
     searchIcon: "left",
     searchIconClass: "top-3 translate-y-0 text-picker-muted",
     skinTone: "hand",
-    toneEmoji: "1f44f",
+    toneEmoji: "👏",
     toneButton: "size-[38px] text-[28px]",
     nav: {
       placement: "left",

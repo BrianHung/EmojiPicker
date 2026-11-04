@@ -5,24 +5,27 @@ import type { CategoryOption as CoreCategoryOption } from "../core/sections";
 import type { EmojiSelection } from "../core/store";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
-import type { PickerComponents } from "./components";
-import { PickerContext, usePicker, useSelector, type FocusModel, type HighlightControl, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
+import { PickerContext, usePicker, useSelector, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "./hold";
-import { KeyboardProvider, mergeRefs, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { KeyboardProvider, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { EmojiOverrides, type ArtworkMap } from "./overrides";
 import { useEmojiPopover } from "./popover-context";
 import { useEmojiContext } from "./provider";
 import { ReactionsContext, type ReactionsState } from "./reactions-context";
+import { renderElement, resolve, type PartElementProps, type PartProps } from "./render";
 import { useClippedScrollGuard } from "./scroll-guard";
-import { SkinToneButtonProvider } from "./skin-tone";
 import { SLOTS, VISUALLY_HIDDEN, useStructureStyles } from "./slots";
 import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 export type { FocusModel, PointerModel, SearchResultsMode, SelectDetails };
 
-export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "onKeyDown"> & {
+export type RootState = { searching: boolean };
+
+export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "onKeyDown" | "className" | "style"> &
+  PartProps<RootState> & {
   onSelect?: (selection: EmojiSelection, details: SelectDetails) => void;
   /**
    * Keys for the picker's actions, replacing the defaults per action (`DEFAULT_KEYMAP`).
@@ -80,7 +83,6 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
   emojiVersion?: number;
   /** Turn off an emoji's skin-tone variations (Shift+Space and long press on it). */
   disableVariations?: boolean;
-  components?: PickerComponents;
   /**
    * @deprecated The picker draws no colors of its own; use the tokens (`tokens.css`) or your
    * own CSS. Still sets `color-scheme` on Root.
@@ -102,11 +104,9 @@ type InternalRootProps = RootProps & {
   pressed?: ReadonlySet<string> | null;
 };
 
-const NO_COMPONENTS: PickerComponents = {};
-
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
   // The core state takes the props it knows by name (search, categories, frequent, collapse…).
-  const { onSelect, frequent, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, components = NO_COMPONENTS, cssLayer = "base", nonce, colorScheme, style, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest } = props;
+  const { onSelect, frequent, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, search, defaultSearch, onSearchChange, disableVariations = false, reactions, reactionsDefaultOpen, allowExpandReactions = true, pressed = null, searchPlaceholder, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, cssLayer = "base", nonce, colorScheme, className, style, render, autoFocusSearch, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", artwork, children, ...rest } = props;
   const { store, labels: providerLabels, maxVersion } = useEmojiContext();
   const labels = React.useMemo(() => (searchPlaceholder ? { ...providerLabels, searchPlaceholder } : providerLabels), [providerLabels, searchPlaceholder]);
   // Inside an EmojiPopover: picking closes it (unless closeOnSelect={false}).
@@ -114,20 +114,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   // The renderer's limit (Twemoji's set) applies on top of the picker's own.
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = React.useRef<HTMLElement | null>(null);
-  const base: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
-  const control = React.useRef<HighlightControl | null>(null);
-  const options = { ...base, ...control.current };
+  const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
-  const latestBase = React.useRef(base);
-  latestBase.current = base;
-  const controlHighlight = React.useCallback(
-    (next: HighlightControl | null) => {
-      control.current = next;
-      state.setOptions({ ...latestBase.current, ...next }, { notify: true });
-    },
-    [state],
-  );
   const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }));
   React.useEffect(() => void state.mount(), [state]);
   // Frequents change with every pick; held while the user is in the picker so
@@ -151,7 +140,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       if (!selection) return undefined;
       const { onSelect, popover } = latest.current;
       onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
-      if (popover?.closeOnSelect) popover.close();
+      if (popover?.closeOnSelect) popover.close("select");
       return selection;
     },
     [state, reactions, collapseToReactions],
@@ -172,7 +161,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       pointer,
       autoFocusSearch: autoFocusSearch ?? Boolean(popover),
       disableVariations,
-      components,
       columns,
       fitColumns,
       emojiVersion,
@@ -192,10 +180,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       close,
       list,
       registerSearch: state.registerSearch,
-      controlHighlight,
       listId,
     }),
-    [store, state, controlHighlight, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, components, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
+    [store, state, labels, focusModel, pointer, autoFocusSearch, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, pick, close, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),
@@ -222,7 +209,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       <CollapseContext.Provider value={collapse}>
         <ReactionsContext.Provider value={reactionsState}>
           <EmptyStateContext.Provider value={emptyState}>
-            <SkinToneButtonProvider value={components.SkinToneButton}>{artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}</SkinToneButtonProvider>
+            {artwork ? <EmojiOverrides artwork={artwork}>{children}</EmojiOverrides> : children}
           </EmptyStateContext.Provider>
         </ReactionsContext.Provider>
       </CollapseContext.Provider>
@@ -232,31 +219,40 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   return (
     <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={escape} focusSearch={focusSearch} variations={(target) => Boolean(list.current?.variations(target))} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
       {(keyboard) => (
-        <aside
-          ref={mergeRefs(ref, rootRef, keyboard.ref)}
-          data-slot={SLOTS.root}
-          // The root is an <aside> landmark, which needs a name; pass aria-label or aria-labelledby for another.
-          aria-label={rest["aria-labelledby"] ? undefined : labels.picker}
-          {...rest}
-          data-columns={columns ?? undefined}
-          data-search={searching ? "" : undefined}
-          onKeyDownCapture={(e: React.KeyboardEvent<HTMLElement>) => {
-            onKeyDownCapture?.(e);
-            if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
-          }}
-          style={{ ...(columns ? { "--ep-columns": columns } : {}), ...(colorScheme ? { colorScheme: colorScheme === "auto" ? "light dark" : colorScheme } : {}), ...style } as React.CSSProperties}
-        >
-          {focusModel === "input" ? (
-            <Autocomplete inputValue={query} onInputChange={state.setQuery} disableAutoFocusFirst>
-              {body}
-            </Autocomplete>
-          ) : (
-            body
-          )}
-          <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
-            {count}
-          </span>
-        </aside>
+        renderElement(
+          "aside",
+          {
+            ref: mergeRefs(ref, rootRef, keyboard.ref),
+            "data-slot": SLOTS.root,
+            // The root is an <aside> landmark, which needs a name; pass aria-label or aria-labelledby for another.
+            "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
+            ...rest,
+            "data-columns": columns ?? undefined,
+            "data-search": searching ? "" : undefined,
+            onKeyDownCapture: (e: React.KeyboardEvent<HTMLElement>) => {
+              onKeyDownCapture?.(e);
+              if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
+            },
+            className,
+            style: (s: RootState) => ({ ...(columns ? { "--ep-columns": columns } : {}), ...(colorScheme ? { colorScheme: colorScheme === "auto" ? "light dark" : colorScheme } : {}), ...resolve(style, s) }) as React.CSSProperties,
+            render,
+            children: (
+              <>
+                {focusModel === "input" ? (
+                  <Autocomplete inputValue={query} onInputChange={state.setQuery} disableAutoFocusFirst>
+                    {body}
+                  </Autocomplete>
+                ) : (
+                  body
+                )}
+                <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+                  {count}
+                </span>
+              </>
+            ),
+          },
+          { searching },
+        )
       )}
     </KeyboardProvider>
   );
@@ -301,27 +297,29 @@ export function useSearchActions() {
 
 export { useCollapsedCategories, type CollapsedCategories } from "./collapse";
 
-export type ViewportProps = Omit<React.HTMLAttributes<HTMLDivElement>, "onKeyDown"> & {
+export type ViewportState = { searching: boolean };
+
+export type ViewportProps = PartElementProps<ViewportState, HTMLDivElement, "onKeyDown"> & {
   /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
 };
 
 /** The scroll container: holds one List, and Empty, Loading and LoadError (which the List shows when it has nothing). */
 export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function Viewport({ onKeyDown, ...props }, ref) {
+  const { searching } = usePicker("EmojiPicker.Viewport");
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
   const merged = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
-  return <div data-slot={SLOTS.viewport} {...props} ref={merged} />;
+  return renderElement("div", { "data-slot": SLOTS.viewport, ...props, ref: merged }, { searching });
 });
 
-export type PreviewProps = React.HTMLAttributes<HTMLDivElement>;
+export type PreviewState = { emoji: EmojiRecord | null };
+
+export type PreviewProps = PartElementProps<PreviewState>;
 
 /** The hovered or highlighted emoji with its name, or the caption when there's none. */
 export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function Preview({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Preview");
   const active = useActiveEmoji();
-  return (
-    <div data-slot={SLOTS.preview} {...props} ref={ref}>
-      {children ?? (active ? `${active.imageUrl ? "" : active.emoji} ${active.name}`.trim() : labels.previewCaption)}
-    </div>
-  );
+  const caption = active ? `${active.imageUrl ? "" : active.emoji} ${active.name}`.trim() : labels.previewCaption;
+  return renderElement("div", { "data-slot": SLOTS.preview, ...props, ref, children: children ?? caption }, { emoji: active });
 });

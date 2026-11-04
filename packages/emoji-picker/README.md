@@ -27,6 +27,7 @@ import en from "@brianhung/emoji-picker/data/en.json?url"; // Vite; other bundle
 <EmojiProvider data={en}>
   <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)} className="h-[380px] w-[352px]">
     <EmojiPicker.Search>
+      <EmojiPicker.Search.Input />
       <EmojiPicker.SkinTone />
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
@@ -70,7 +71,38 @@ It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With
 
 ## Pickers
 
-`EmojiPicker` is a set of parts: `Root`, `Search`, `SearchInput`, `CategoryNav`, `Viewport`, `List`, `Preview`, `SkinTone`, `Empty`, `Loading`, `LoadError`, `Reactions`, and `Panel`. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
+`EmojiPicker` is a set of parts, each with a default rendering when you leave out its children:
+
+```
+Root
+├ Search                  Search.Input (field), Search.Clear (only with a query)
+├ SkinTone                SkinTone.Trigger, SkinTone.Options {(tone) => SkinTone.Option}, SkinTone.Glyph
+├ CategoryNav             {(category) => CategoryNav.Tab}
+├ Viewport
+│ ├ List                  {(section) => List.Section}
+│ │ └ List.Section        List.SectionTitle, List.Items {(emoji) => List.Cell}, List.SectionActions
+│ └ Empty · Loading · LoadError
+├ Preview                 {({ emoji }) => …}
+├ Reactions               {(emoji) => Reactions.Item}, or Reactions.Items and Reactions.Expand
+└ Panel
+```
+
+Every part takes `render` (an element, whose props and ref merge with the part's, or `(props, state) => element`), and `className` and `style` as values or functions of its state; state is also on data attributes. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
+
+```tsx
+<EmojiPicker.List>
+  {(section) => (
+    <EmojiPicker.List.Section>
+      <EmojiPicker.List.SectionTitle className="px-2 text-xs font-medium" />
+      <EmojiPicker.List.Items>
+        {(emoji) => <EmojiPicker.List.Cell render={<button title={emoji.label} />} className={({ highlighted }) => (highlighted ? "bg-accent" : "")} />}
+      </EmojiPicker.List.Items>
+    </EmojiPicker.List.Section>
+  )}
+</EmojiPicker.List>
+```
+
+The List's functions run only for the sections and emoji in view, and a cell re-renders only when its own state changes.
 
 `Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns` (with `fitColumns={false}` to keep them when the width is a little short), `emojiVersion`, `searchResults`, `keymap`, `focusModel`, `pointer`, and `artwork`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
 
@@ -80,14 +112,20 @@ Search results replace the category list while a query is active. `searchResults
 
 A collapsed section keeps its header and hides its rows. Control collapse with `collapsedCategories` and `onCollapsedCategoriesChange`, or set `defaultCollapsedCategories`.
 
-A section title is text inside the listbox (`CategoryHeader` customizes it and receives `category.collapsed`). Controls for a title, such as a collapse chevron or a "Customize" link, go in `components.HeaderActions`: they render in a layer over the list, outside the listbox, pinned with the title as it sticks.
+A section title (`List.SectionTitle`) is text inside the listbox; its state has `collapsed`. Controls for a title, such as a collapse chevron or a "Customize" link, go in `List.SectionActions`: they render in a layer over the list, outside the listbox, pinned with the title as it sticks.
 
 ```tsx
-function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
-  return <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0" />;
-}
-
-<EmojiPicker.List components={{ HeaderActions: Toggle }} />
+<EmojiPicker.List>
+  {() => (
+    <EmojiPicker.List.Section>
+      <EmojiPicker.List.SectionTitle />
+      <EmojiPicker.List.Items />
+      <EmojiPicker.List.SectionActions>
+        {({ section, toggle, toggleProps }) => <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0" />}
+      </EmojiPicker.List.SectionActions>
+    </EmojiPicker.List.Section>
+  )}
+</EmojiPicker.List>
 ```
 
 `toggleProps` carries `aria-expanded` (no `aria-controls`: the list is virtualized, so a section out of view has no element to point at). Search results ignore collapse.
@@ -98,21 +136,19 @@ function Toggle({ section, toggle, toggleProps }: HeaderActionsProps) {
 
 ### Your own virtualizer
 
-`List` virtualizes with React Aria. For TanStack Virtual, react-window, Virtuoso or your own, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` instead: it returns the grid's `rows` (a section title, or a row of emoji, each with its `offset` and `size`), `stickyIndexes`, and `getGridProps`, `getHeaderProps` and `getCellProps`, with the List's keyboard, highlight, hover, long press and skin-tone `variations`. `scrollToIndex(index, { align })` scrolls your virtualizer as the highlight moves. The rows and the keyboard alone, without React, are `createEmojiGrid` and `moveInGrid` in `/core`. See the [TanStack Virtual example](https://emoji.brianhung.me/examples/virtualizer/).
+`List` virtualizes with React Aria. For TanStack Virtual, react-window, Virtuoso or your own, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` instead: it returns the grid's `rows` (a section title, or a row of emoji, each with its `offset` and `size`), `stickyIndexes`, `getGridProps` and `getHeaderProps`, and `state` for `useEmojiCell(state, item)` in each cell (a cell re-renders only when its own highlight, hover or press changes), with the List's keyboard, highlight, hover, long press and skin-tone `variations`. `scrollToIndex(index, { align })` scrolls your virtualizer as the highlight moves. The rows and the keyboard alone, without React, are `createEmojiGrid` and `moveInGrid` in `/core`. See the [TanStack Virtual example](https://emoji.brianhung.me/examples/virtualizer/).
 
 ## Tapbacks
 
-`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history), or fixed `reactions`. Its children become the expanded picker. `selected` makes the user's current reactions toggles with `aria-pressed`, in any skin tone. For a row of your own buttons, `ReactionBar` gives the same keyboard: one tab stop, arrows, Home and End, and focus that follows the pointer within the row.
+`Tapback` shows the user's `count` most-used emoji (iOS defaults until there's history), or fixed `reactions`. Its children are `EmojiPicker.Reactions` and an `EmojiPicker.Panel` holding the expanded picker (default: the reactions alone). `selected` makes the user's current reactions toggles with `aria-pressed`, in any skin tone. For a row of your own buttons, `ReactionBar` gives the same keyboard: one tab stop, arrows, Home and End, and focus that follows the pointer within the row.
 
 ## Popovers
 
-`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger. `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
+`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger, or, when a pick closes it, to `finalFocus` on the content (an element, a ref or a function: the editor a toolbar button inserts into). `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
 
 ```tsx
 <EmojiPopover.Root>
-  <EmojiPopover.Trigger asChild>
-    <Button variant="outline">🙂</Button>
-  </EmojiPopover.Trigger>
+  <EmojiPopover.Trigger render={<Button variant="outline" />}>🙂</EmojiPopover.Trigger>
   <EmojiPopover.Content side="top" align="end">
     <EmojiPicker.Root onSelect={insert}>…</EmojiPicker.Root>
   </EmojiPopover.Content>
@@ -191,7 +227,7 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `anchor()`: the typed `:query`'s rect,
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
-Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [editors example](https://emoji.brianhung.me/examples/editors/) adds contenteditable this way, and renders Slack, Discord, Notion and Linear menus on all five editors.
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders Slack, Discord, Notion and Linear menus on a textarea, Tiptap and Lexical.
 
 `/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
 
@@ -349,7 +385,7 @@ The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements take class props: `cellClassName` and `headerClassName` on `List`, `tabClassName` on `CategoryNav`, and `buttonClassName` on `SkinTone`.
+Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
 
 ```css
 [data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }

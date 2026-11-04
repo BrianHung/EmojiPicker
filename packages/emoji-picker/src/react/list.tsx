@@ -6,25 +6,32 @@
 // node per emoji per picker (+6.4 MB heap on open, 2.4x per extra picker), and +2.7 KB gzip.
 import * as React from "react";
 import type { Node as CollectionNode } from "@react-types/shared";
+import { mergeProps } from "react-aria/mergeProps";
+import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
-import { unifiedToNative } from "../core/dataset";
-import type { CategoryHeaderProps, EmojiCellProps, HeaderActionsProps, ListComponents, ListEmoji } from "./components";
+import type { EmojiItem, EmojiSection } from "../core/sections";
 import { usePicker } from "./context";
-import { cellProps, isRtl, useGridController, useGridSections, type Cells, type GridGeometry } from "./grid";
+import { isRtl, useEmojiCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "./keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
-import { useArtworkMap } from "./overrides";
-import type { EmojiItem, EmojiSection } from "../core/sections";
-import { SLOTS, joinClasses } from "./slots";
+import { renderElement, resolve, type PartElementProps, type PartProps } from "./render";
+import { SLOTS } from "./slots";
 import { useEmptyState } from "./viewport";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
-export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
+export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
+
+export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> & PartProps<ListState> & {
   /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-  components?: ListComponents;
+  /**
+   * Each section, called only for the sections in view: a `List.Section` of `List.SectionTitle`,
+   * `List.Items` (each emoji, called only for the emoji in view) and `List.SectionActions`.
+   * Default: a title, and a `List.Cell` per emoji.
+   */
+  children?: (section: EmojiSection) => React.ReactNode;
   /**
    * "vertical" (default): sections stacked, scrolling down. "horizontal": sections side
    * by side, each a column-major grid of `rows` rows with its title above its first
@@ -35,10 +42,7 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
   rows?: number;
   /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
   searchRows?: number;
-  /** Classes for every emoji cell (`data-slot="emoji"`); state via data-highlighted, data-focused, data-hovered, data-active. */
-  cellClassName?: string;
-  /** Classes for every section title (`data-slot="category-header"`). */
-  headerClassName?: string;
+
   /** A value picker (a page icon): the emoji shown as chosen, with `aria-selected`. Compared without skin tone. */
   value?: string | null;
   /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
@@ -49,6 +53,7 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
 };
 
 const CellsContext = React.createContext<Cells | null>(null);
+const TemplateContext = React.createContext<(section: EmojiSection) => React.ReactNode>(() => null);
 
 const PROBE: React.CSSProperties = {
   position: "absolute",
@@ -84,14 +89,14 @@ function readProbe(probe: HTMLElement): GridMetrics {
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
-export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
-  { components: listComponents, cellClassName, headerClassName, orientation = "vertical", rows = 5, searchRows, onKeyDown, value, onLoadMore, isLoadingMore, loadingMore, className, style, ...rest },
+const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
+  { children, orientation = "vertical", rows = 5, searchRows, onKeyDown, value, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest },
   ref,
 ) {
   const picker = usePicker("EmojiPicker.List");
   const { searching } = picker;
   const horizontal = orientation === "horizontal";
-  const components = React.useMemo(() => ({ ...picker.components, ...listComponents }), [picker.components, listComponents]);
+
   const { sections, request, probeRoot } = useGridSections(horizontal);
   const loader = Boolean(onLoadMore && !searching);
 
@@ -213,7 +218,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ owner: "react-aria", sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, components, cellClassName, headerClassName, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 
@@ -245,57 +250,161 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(function List(
   }, [measure, layout, picker.state, searching, horizontal, request]);
 
   const empty = useEmptyState();
-  const { collection, focusedKey } = grid;
-  const persistedKeys = React.useMemo(() => new Set(focusedKey == null ? [] : [focusedKey]), [focusedKey]);
+  const { collection, persisted } = grid;
   const renderNode = React.useCallback((node: CollectionNode<unknown>) => {
     if (node.type === "section") return <SectionView section={node.value as EmojiSection} />;
-    if (node.type === "header") return <SectionHeader section={node.value as EmojiSection} />;
+    if (node.type === "header") return <SectionHeader />;
     if (node.type === "loader") return <LoadMore />;
-    return <EmojiCell item={node as unknown as EmojiItem} />;
+    return <ItemView item={node as unknown as EmojiItem} />;
   }, []);
+  const template = children ?? defaultSection;
+  const actions = React.useMemo(() => !horizontal && !searching && sections.some((s) => s.header && partsOf(template(s)).actions), [horizontal, searching, sections, template]);
 
   return (
     <CellsContext.Provider value={grid.cells}>
-      <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
-        <div {...rest} {...(grid.gridProps as React.HTMLAttributes<HTMLDivElement>)} className={className} style={style}>
-          <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persistedKeys} onState={onState} onRendered={onRendered} />
-          <div ref={probeRef} aria-hidden style={PROBE} />
-          {collection.size === 0 ? (
-            <div role="option" style={{ display: "contents" }}>
-              {empty}
-            </div>
-          ) : null}
-        </div>
-      </LoadMoreContext.Provider>
-      {grid.variations}
-      {components.HeaderActions && !horizontal && !searching ? <ActionsLayer layout={layout} list={listRef} Actions={components.HeaderActions} sections={sections} /> : null}
+      <TemplateContext.Provider value={template}>
+        <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
+          {renderElement(
+            "div",
+            {
+              ...rest,
+              ...grid.gridProps,
+              className,
+              style,
+              render,
+              children: (
+                <>
+                  <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
+                  <div ref={probeRef} aria-hidden style={PROBE} />
+                  {collection.size === 0 ? (
+                    <div role="option" style={{ display: "contents" }}>
+                      {empty}
+                    </div>
+                  ) : null}
+                </>
+              ),
+            },
+            { orientation, searching, empty: collection.size === 0 },
+          )}
+        </LoadMoreContext.Provider>
+        {grid.variations}
+        {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} /> : null}
+      </TemplateContext.Provider>
     </CellsContext.Provider>
   );
 });
 
-const HeadingContext = React.createContext<React.HTMLAttributes<HTMLElement>>({});
+export type SectionState = { section: EmojiSection; collapsed: boolean };
+
+type SectionData = { section: EmojiSection; groupProps: React.HTMLAttributes<HTMLElement>; headingProps: React.HTMLAttributes<HTMLElement> };
+const SectionContext = React.createContext<SectionData | null>(null);
+type Parts = { title?: React.ReactElement; items?: React.ReactElement<ItemsProps>; actions?: React.ReactElement<SectionActionsProps> };
+const PartsContext = React.createContext<Parts>({});
+const ItemContext = React.createContext<EmojiItem | null>(null);
+
+function useSection(part: string) {
+  const data = React.useContext(SectionContext);
+  if (!data) throw new Error(`EmojiPicker.List.${part} must be in a List.Section, inside EmojiPicker.List's children.`);
+  return data;
+}
+
+/** The parts a List.Section's children describe; they render where the layout places them, not in place. */
+function collectParts(children: React.ReactNode): Parts {
+  const parts: Parts = {};
+  React.Children.forEach(children, (child) => {
+    if (!React.isValidElement(child)) return;
+    if (child.type === SectionTitle) parts.title = child;
+    else if (child.type === Items) parts.items = child as React.ReactElement<ItemsProps>;
+    else if (child.type === SectionActions) parts.actions = child as React.ReactElement<SectionActionsProps>;
+  });
+  return parts;
+}
+
+/** The parts of the List.Section a section's template returns. */
+const partsOf = (node: React.ReactNode) => (React.isValidElement<SectionProps>(node) && node.type === Section ? collectParts(node.props.children) : {});
+
+const defaultSection = () => (
+  <Section>
+    <SectionTitle />
+    <Items />
+  </Section>
+);
 
 function SectionView({ section }: { section: EmojiSection }) {
-  const cells = React.useContext(CellsContext)!;
+  const template = React.useContext(TemplateContext);
   const { headingProps, groupProps } = useListBoxSection({ heading: section.header ? section.name : undefined, "aria-label": section.header ? undefined : section.name });
-  return (
-    <section {...groupProps} id={cells.sectionDomId(section.id)} data-slot={SLOTS.category} data-category={section.category} data-collapsed={section.collapsed || undefined}>
-      <HeadingContext.Provider value={headingProps}>
-        <VirtualBranch parent={section.id} />
-      </HeadingContext.Provider>
-    </section>
-  );
+  return <SectionContext.Provider value={{ section, groupProps, headingProps }}>{template(section)}</SectionContext.Provider>;
 }
 
-function SectionHeader({ section }: { section: EmojiSection }) {
+export type SectionProps = Omit<PartElementProps<SectionState, HTMLElement>, "children"> & {
+  /** `List.SectionTitle`, `List.Items` and `List.SectionActions`. */
+  children?: React.ReactNode;
+};
+
+/** A section of the list (a `group`): its title, items and title actions. */
+const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ children, ...props }, ref) {
   const cells = React.useContext(CellsContext)!;
-  const heading = React.useContext(HeadingContext);
-  const User = cells.components.CategoryHeader;
-  const props = { ...heading, className: cells.headerClassName, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, children: section.name };
-  if (!User) return <header {...props} />;
-  const category: CategoryHeaderProps["category"] = { id: section.category, name: section.name, collapsed: section.collapsed, toggleCollapsed: () => cells.toggle(section.id) };
-  return <User {...(props as Omit<CategoryHeaderProps, "category">)} category={category} />;
+  const { section, groupProps } = useSection("Section");
+  const parts = collectParts(children);
+  return (
+    <PartsContext.Provider value={parts}>
+      {renderElement(
+        "section",
+        {
+          ...groupProps,
+          id: cells.sectionDomId(section.id),
+          "data-slot": SLOTS.category,
+          "data-category": section.category,
+          "data-collapsed": section.collapsed || undefined,
+          ...props,
+          ref,
+          children: <VirtualBranch parent={section.id} />,
+        },
+        { section, collapsed: section.collapsed },
+      )}
+    </PartsContext.Provider>
+  );
+});
+
+export type SectionTitleProps = PartElementProps<SectionState, HTMLElement>;
+
+/** A section's title, text in the listbox, sticky where the layout puts it. Children default to the section's name. */
+const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function SectionTitle({ children, ...props }, ref) {
+  const { section, headingProps } = useSection("SectionTitle");
+  return renderElement("header", { ...headingProps, className: props.className, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, ...props, ref, children: children ?? section.name }, { section, collapsed: section.collapsed });
+});
+
+function SectionHeader() {
+  const { title } = React.useContext(PartsContext);
+  return title ?? <SectionTitle />;
 }
+
+export type ItemsProps = {
+  /** Each emoji in view. Default: `List.Cell`. */
+  children?: (emoji: EmojiItem) => React.ReactNode;
+};
+
+/** A section's emoji, each through `children`. */
+function Items(_: ItemsProps): null {
+  return null;
+}
+
+function ItemView({ item }: { item: EmojiItem }) {
+  const template = React.useContext(PartsContext).items?.props.children;
+  return <ItemContext.Provider value={item}>{template ? template(item) : <Cell />}</ItemContext.Provider>;
+}
+
+export type CellProps = PartElementProps<CellState>;
+
+/** An emoji: an `option`, with its state on data attributes. Children default to its glyph. */
+const Cell = React.forwardRef<HTMLElement, CellProps>(function Cell({ className, style, render, children, ...props }, ref) {
+  const cells = React.useContext(CellsContext);
+  const item = React.useContext(ItemContext);
+  if (!cells || !item) throw new Error("EmojiPicker.List.Cell must be inside List.Items.");
+  const { cellProps, state } = useEmojiCell(cells, item);
+  const refs = React.useMemo(() => mergeRefs(cellProps.ref, ref), [cellProps.ref, ref]);
+  return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style, render, children: children ?? cellProps.children }, state);
+});
 
 type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
 const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
@@ -330,28 +439,25 @@ function LoadMore() {
   );
 }
 
-function EmojiCell({ item }: { item: EmojiItem }) {
-  const cells = React.useContext(CellsContext)!;
-  const artwork = useArtworkMap();
-  const flags = React.useSyncExternalStore(cells.marks.subscribe, () => cells.marks.of(item.id));
-  const own = React.useCallback(
-    (el: HTMLElement | null) => {
-      // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
-      // a cell scrolls only its Viewport, which the keyboard moves already did.
-      if (el) el.scrollIntoView = () => cells.reveal(item.id);
-    },
-    [cells, item.id],
-  );
-  const { props, isActive } = cellProps(cells, item, flags, artwork);
-  const User = cells.components.Emoji;
-  if (!User) return <div {...(props as React.HTMLAttributes<HTMLDivElement>)} ref={own} />;
-  const { record, unified } = item;
-  const emoji: ListEmoji = { isActive, unified, names: [...record.shortcodes, record.name], emoji: record.imageUrl ? unified : unifiedToNative(unified), isCustom: Boolean(record.imageUrl), imageUrl: record.imageUrl, hasVariations: record.tones.length > 0 };
-  return <User {...({ ...props, ref: own } as Omit<EmojiCellProps, "emoji">)} emoji={emoji} className={joinClasses(props.className)} />;
+export type SectionActionsState = SectionState & {
+  toggle: () => void;
+  /** For the control that toggles: `aria-expanded`. No `aria-controls`: a section out of view has no element to name. */
+  toggleProps: { "aria-expanded": boolean };
+};
+
+export type SectionActionsProps = PartElementProps<SectionActionsState>;
+
+/**
+ * Controls for a section's title (a collapse chevron, a "Customize" link): a layer over the list,
+ * outside the listbox, pinned with the title as it sticks.
+ */
+function SectionActions(_: SectionActionsProps): null {
+  return null;
 }
 
-function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; Actions: React.ComponentType<HeaderActionsProps>; sections: readonly EmojiSection[] }) {
+function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; sections: readonly EmojiSection[] }) {
   const cells = React.useContext(CellsContext)!;
+  const template = React.useContext(TemplateContext);
   const [top, setTop] = React.useState(0);
   const layer = React.useRef<HTMLDivElement | null>(null);
   React.useLayoutEffect(() => {
@@ -391,12 +497,23 @@ function ActionsLayer({ layout, list, Actions, sections }: { layout: EmojiGridLa
     <div ref={layer} role="presentation" style={{ position: "absolute", top, insetInlineStart: 0, width: "100%", height: layout.getContentSize().height, pointerEvents: "none" }}>
       {sections.map((s) => {
         const info = layout.getLayoutInfo(s.id);
-        if (!info || !s.header) return null;
+        const actions = s.header ? partsOf(template(s)).actions : undefined;
+        if (!info || !actions) return null;
+        const { style, children, ...props } = actions.props;
+        const state: SectionActionsState = { section: s, collapsed: s.collapsed, toggle: () => cells.toggle(s.id), toggleProps: { "aria-expanded": !s.collapsed } };
         return (
           <div key={s.id} style={{ position: "absolute", top: info.rect.y, insetInlineStart: 0, width: "100%", height: info.rect.height }}>
-            <div data-slot={SLOTS.headerActions} data-section={s.id} style={{ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none" }}>
-              <Actions section={{ id: s.category, name: s.name }} collapsed={s.collapsed} toggle={() => cells.toggle(s.id)} toggleProps={{ "aria-expanded": !s.collapsed }} />
-            </div>
+            {renderElement(
+              "div",
+              {
+                ...props,
+                "data-slot": SLOTS.headerActions,
+                "data-section": s.id,
+                style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none", ...resolve(style, st) }),
+                children,
+              },
+              state,
+            )}
           </div>
         );
       })}
@@ -414,3 +531,5 @@ function nextTabbable(after: Element): HTMLElement | null {
   }
   return null;
 }
+
+export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell });

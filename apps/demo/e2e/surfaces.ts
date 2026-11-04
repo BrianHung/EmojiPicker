@@ -72,7 +72,7 @@ function popover(id: string, path: string, trigger: (p: Page) => Locator, extra:
 }
 
 /** Puts the caret at the end of a field (input, textarea or contenteditable). */
-const caretToEnd = (field: Locator) =>
+export const caretToEnd = (field: Locator) =>
   field.evaluate((el) => {
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return el.setSelectionRange(el.value.length, el.value.length);
     const range = document.createRange();

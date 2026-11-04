@@ -4,7 +4,7 @@ import { Popover, type PopoverRenderProps } from "react-aria-components/Popover"
 import { mergeProps } from "react-aria/mergeProps";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
-import { anchorRect, ContentFocus, contentAttributes, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type Align, type PopoverAnchor, type PopoverContentProps, type PopoverInitialFocus, type PopoverInternals, type PopoverRootProps, type Side, type SuggestionsPopoverProps } from "./popover-shared";
+import { anchorRect, ContentFocus, contentAttributes, finalFocusTarget, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type Align, type PopoverAnchor, type PopoverContentProps, type PopoverInitialFocus, type PopoverInternals, type PopoverRootProps, type Side, type SuggestionsPopoverProps } from "./popover-shared";
 
 type Internals = PopoverInternals & { id?: string };
 
@@ -39,10 +39,16 @@ function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitial
 }
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, className, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, children, ...props },
   ref,
 ) {
   const p = usePopoverInternals<Internals>("Content");
+  // On close, before the popover's focus scope restores focus to the trigger (it does only while focus is still inside).
+  const wasOpen = React.useRef(p.state.open);
+  React.useEffect(() => {
+    if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });
+    wasOpen.current = p.state.open;
+  }, [p.state.open]);
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);

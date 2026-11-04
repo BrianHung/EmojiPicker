@@ -1,87 +1,50 @@
-import * as React from "react";
-import { SKIN_TONES, withTone } from "../core/dataset";
-import { Emoji } from "./emoji";
-import { useSkinTone } from "./hooks";
-import { mergeRefs, useKeyRegion, useSkinToneToggle } from "./keyboard";
-import type { KeyboardAction } from "./keymap";
-import type { SkinToneButtonProps, SkinToneId } from "./components";
-import { useEmojiContext } from "./provider";
-import { SLOTS, joinClasses } from "./slots";
-
+// EmojiPicker.SkinTone: a trigger showing the shared tone, opening the six tones as a radio group.
 // Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks.
-const TONE_IDS = ["neutral", ...SKIN_TONES] as const;
-// Swatches for the unstyled default button (Fitzpatrick palette, as emoji-picker-react).
+import * as React from "react";
+import { mergeRefs } from "react-aria/mergeRefs";
+import { withTone } from "../core/dataset";
+import { nativeToUnified } from "../core/resolve";
+import { Emoji, type EmojiProps } from "./emoji";
+import { useSkinTone } from "./hooks";
+import { useKeyRegion, useSkinToneToggle } from "./keyboard";
+import type { KeyboardAction } from "./keymap";
+import { useEmojiContext } from "./provider";
+import { renderElement, resolve, type PartElementProps } from "./render";
+import { SLOTS } from "./slots";
+
+const TONES = [0, 1, 2, 3, 4, 5] as const;
+// Swatches for the unstyled default (Fitzpatrick palette, as emoji-picker-react).
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];
+const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[tone] });
 
-export type { SkinToneButtonProps };
+type Orientation = "horizontal" | "vertical";
+type SkinToneContextValue = { tone: number; open: boolean; orientation: Orientation; toggle(): void; choose(tone: number): void; label(tone: number): string; group: string };
+const SkinToneContext = React.createContext<SkinToneContextValue | null>(null);
+const OptionContext = React.createContext<number | null>(null);
 
-/** Pass `components={{ SkinToneButton }}` to Root, or `button` here. */
-const SkinToneButtonContext = React.createContext<React.ComponentType<SkinToneButtonProps> | undefined>(undefined);
-export const SkinToneButtonProvider = SkinToneButtonContext.Provider;
-
-function DefaultToneButton({ tone, style, ...props }: SkinToneButtonProps) {
-  const index = TONE_IDS.indexOf(tone.skinTone as (typeof TONE_IDS)[number]);
-  return (
-    <button
-      {...props}
-      style={{ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[index], ...style }}
-    />
-  );
+function useSkinToneContext(part: string) {
+  const value = React.useContext(SkinToneContext);
+  if (!value) throw new Error(`EmojiPicker.SkinTone.${part} must be inside <EmojiPicker.SkinTone>.`);
+  return value;
 }
 
-/** The tone-applied emoji as a button (Slack's and Discord's ✋). */
-function EmojiToneButton({ tone, emoji = "270b", ...props }: SkinToneButtonProps & { emoji?: string }) {
-  const index = TONE_IDS.indexOf(tone.skinTone as (typeof TONE_IDS)[number]);
-  const toned = index > 0 ? withTone(emoji, index) : emoji;
-  return (
-    <button {...props}>
-      <Emoji emoji={toned} style={{ width: "1em", height: "1em" }} />
-    </button>
-  );
-}
+export type SkinToneState = { open: boolean; tone: number };
 
-/** Adds `buttonClassName` (and the emoji for EmojiToneButton) to whichever button renders. */
-function withButtonProps(Base: React.ComponentType<SkinToneButtonProps & { emoji?: string }>, emoji: string | undefined, className: string | undefined) {
-  const own = Base === EmojiToneButton;
-  if (!own && !className) return Base as React.ComponentType<SkinToneButtonProps>;
-  return function ToneButton(props: SkinToneButtonProps) {
-    // Only the built-in emoji button takes `emoji`; custom buttons spread props onto the DOM.
-    return <Base {...props} {...(own ? { emoji } : {})} className={joinClasses(className, props.className)} />;
-  };
-}
-
-export type SkinToneProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children"> & {
-  /**
-   * Draw each option as this emoji in that tone ("270b" ✋, like Slack and Discord)
-   * instead of a color swatch.
-   */
-  emoji?: string;
-  /** Classes for the trigger and every option (`data-slot="skin-tone-option"`). */
-  buttonClassName?: string;
+export type SkinToneProps = PartElementProps<SkinToneState> & {
   /** Axis the options open along. Default "horizontal". */
-  orientation?: "horizontal" | "vertical";
-  /** Classes for the open options list (`data-slot="skin-tone-options"`). */
-  optionsClassName?: string;
-  button?: React.ComponentType<SkinToneButtonProps>;
+  orientation?: Orientation;
 };
 
-/** The shared skin tone: one button showing the current tone, opening the six options as a radio group. */
-export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone(
-  { orientation = "horizontal", optionsClassName, button, emoji, buttonClassName, ...props },
-  ref,
-) {
+/** The shared skin tone (0, none, to 5): `SkinTone.Trigger` and `SkinTone.Options` by default. */
+const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
   const [open, setOpen] = React.useState(false);
-  const fromRoot = React.useContext(SkinToneButtonContext);
-  const Base = button ?? fromRoot ?? (emoji ? EmojiToneButton : DefaultToneButton);
-  const Button = React.useMemo(() => withButtonProps(Base, emoji, buttonClassName), [Base, emoji, buttonClassName]);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
-  // Through the DOM, not refs: custom buttons may not forward refs (React 18).
-  const focusOption = (i: number) => rootRef.current?.querySelectorAll<HTMLElement>(`[data-slot="${SLOTS.skinToneOption}"]`)[i]?.focus();
+  const options = () => [...(rootRef.current?.querySelectorAll<HTMLElement>(`[data-slot="${SLOTS.skinToneOption}"]`) ?? [])];
 
   React.useEffect(() => {
     if (!open) return;
-    focusOption(tone);
+    options()[tone]?.focus();
     const onPointer = (e: PointerEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
@@ -90,72 +53,149 @@ export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function
   }, [open, tone]);
 
   const { labels } = useEmojiContext();
-  const label = (i: number) => labels.skinTones[i]!;
-  // Closing from inside the options returns focus to the button, as a menu does.
+  // Closing from inside the options returns focus to the trigger, as a menu does.
   const close = React.useCallback(() => {
     const root = rootRef.current;
     const inside = root?.querySelector(`[data-slot="${SLOTS.skinToneOptions}"]`)?.contains(document.activeElement);
     setOpen(false);
-    if (inside) root?.querySelector<HTMLElement>("button")?.focus();
+    if (inside) root?.querySelector<HTMLElement>(`[data-slot="${SLOTS.skinToneTrigger}"]`)?.focus();
   }, []);
-  const choose = (i: number) => {
-    setTone(i);
-    close();
-  };
-  useSkinToneToggle(() => (open ? close() : setOpen(true)));
-  // Keys among the options: the keymap's moves along their axis (mirrored right to
-  // left), first/last, and close.
+  const toggle = () => (open ? close() : setOpen(true));
+  useSkinToneToggle(toggle);
+  // Keys among the options: the keymap's moves along their axis (mirrored right to left), first/last, and close.
   const region = useKeyRegion((action, event) => {
     if (!open || !action) return "pass";
     if (action === "close") {
       close();
       return "handled";
     }
-    const options = [...(rootRef.current?.querySelectorAll<HTMLElement>(`[data-slot="${SLOTS.skinToneOption}"]`) ?? [])];
-    const i = options.indexOf(event.target as HTMLElement);
+    const all = options();
+    const i = all.indexOf(event.target as HTMLElement);
     if (i < 0) return "pass";
     const rtl = orientation === "horizontal" && rootRef.current != null && getComputedStyle(rootRef.current).direction === "rtl";
-    const steps: Partial<Record<KeyboardAction, number>> =
-      orientation === "vertical" ? { "move-down": 1, "move-up": -1 } : { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
-    if (action === "first" || action === "last") focusOption(action === "first" ? 0 : options.length - 1);
-    else if (steps[action]) focusOption((i + steps[action]! + options.length) % options.length);
+    const steps: Partial<Record<KeyboardAction, number>> = orientation === "vertical" ? { "move-down": 1, "move-up": -1 } : { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
+    if (action === "first" || action === "last") all[action === "first" ? 0 : all.length - 1]?.focus();
+    else if (steps[action]) all[(i + steps[action]! + all.length) % all.length]?.focus();
     else return "pass";
     return "handled";
   });
 
   const merged = React.useMemo(() => mergeRefs(ref, rootRef, region), [ref, region]);
+  const context: SkinToneContextValue = {
+    tone,
+    open,
+    orientation,
+    toggle,
+    choose(next) {
+      setTone(next);
+      close();
+    },
+    label: (i) => labels.skinTones[i]!,
+    group: labels.skinTone,
+  };
   return (
-    <div
-      {...props}
-      ref={merged}
-      data-slot={SLOTS.skinTone}
-      data-state={open ? "open" : "closed"}
-    >
-      <Button
-        type="button"
-        tone={{ skinTone: TONE_IDS[tone] as SkinToneId, isActive: true, isOpen: open }}
-        aria-label={label(tone)}
-        aria-haspopup="true"
-        aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
-      />
-      {open ? (
-        <div role="radiogroup" aria-label={labels.skinTone} data-slot={SLOTS.skinToneOptions} data-orientation={orientation} className={optionsClassName} style={orientation === "vertical" ? { flexDirection: "column" } : undefined}>
-          {TONE_IDS.map((id, i) => (
-            <Button
-              key={id}
-              type="button"
-              role="radio"
-              aria-checked={i === tone}
-              aria-label={label(i)}
-              tabIndex={i === tone ? 0 : -1}
-              data-slot={SLOTS.skinToneOption}
-              tone={{ skinTone: id as SkinToneId, isActive: i === tone, isOpen: true }}
-              onClick={() => choose(i)}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
+    <SkinToneContext.Provider value={context}>
+      {renderElement("div", { ...props, ref: merged, "data-slot": SLOTS.skinTone, "data-state": open ? "open" : "closed", children: children ?? <><SkinToneTrigger /><SkinToneOptions /></> }, { open, tone })}
+    </SkinToneContext.Provider>
   );
 });
+
+export type SkinToneTriggerProps = PartElementProps<SkinToneState, HTMLButtonElement, "onClick">;
+
+/** Shows the current tone and opens the options. Without children, a color swatch. */
+const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
+  const { tone, open, toggle, label } = useSkinToneContext("Trigger");
+  const state = { open, tone };
+  return renderElement(
+    "button",
+    {
+      type: "button",
+      ...props,
+      ref,
+      "data-slot": SLOTS.skinToneTrigger,
+      "aria-label": label(tone),
+      "aria-haspopup": "true",
+      "aria-expanded": open,
+      onClick: toggle,
+      style: (s: SkinToneState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
+      children,
+    },
+    state,
+  );
+});
+
+export type SkinToneOptionsState = { orientation: Orientation; tone: number };
+
+export type SkinToneOptionsProps = Omit<PartElementProps<SkinToneOptionsState>, "children" | "role"> & {
+  /** Each tone's option, 0 (none) to 5. Default: `SkinTone.Option`. */
+  children?: (tone: number) => React.ReactNode;
+};
+
+/** The six tones as a radio group, while open. */
+const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneOptions({ style, children, ...props }, ref) {
+  const { open, orientation, group, tone } = useSkinToneContext("Options");
+  if (!open) return null;
+  return renderElement(
+    "div",
+    {
+      ...props,
+      ref,
+      role: "radiogroup",
+      "aria-label": group,
+      "data-slot": SLOTS.skinToneOptions,
+      "data-orientation": orientation,
+      style: (s: SkinToneOptionsState) => (orientation === "vertical" ? { flexDirection: "column", ...resolve(style, s) } : resolve(style, s)),
+      children: TONES.map((t) => <OptionContext.Provider key={t} value={t}>{children ? children(t) : <SkinToneOption tone={t} />}</OptionContext.Provider>),
+    },
+    { orientation, tone },
+  );
+});
+
+export type SkinToneOptionState = { tone: number; selected: boolean };
+
+export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButtonElement, "onClick" | "role"> & {
+  /** 0 (none) to 5. */
+  tone: number;
+};
+
+/** One tone, as a radio. Without children, a color swatch. */
+const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone, style, children, ...props }, ref) {
+  const { tone: current, choose, label } = useSkinToneContext("Option");
+  const selected = tone === current;
+  return (
+    <OptionContext.Provider value={tone}>
+      {renderElement(
+        "button",
+        {
+          type: "button",
+          ...props,
+          ref,
+          role: "radio",
+          "aria-checked": selected,
+          "aria-label": label(tone),
+          tabIndex: selected ? 0 : -1,
+          "data-slot": SLOTS.skinToneOption,
+          onClick: () => choose(tone),
+          style: (s: SkinToneOptionState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
+          children,
+        },
+        { tone, selected },
+      )}
+    </OptionContext.Provider>
+  );
+});
+
+export type SkinToneGlyphProps = Omit<EmojiProps, "emoji"> & {
+  /** The emoji to show in the tone, as text. Default ✋. */
+  emoji?: string;
+};
+
+/** An emoji in the tone of the option it is in, else the current tone (Slack's and Discord's ✋). */
+function SkinToneGlyph({ emoji = "✋", style, ...props }: SkinToneGlyphProps) {
+  const { tone: current } = useSkinToneContext("Glyph");
+  const tone = React.useContext(OptionContext) ?? current;
+  const unified = nativeToUnified(emoji);
+  return <Emoji {...props} emoji={tone > 0 ? withTone(unified, tone) : unified} style={{ width: "1em", height: "1em", ...style }} />;
+}
+
+export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: SkinToneTrigger, Options: SkinToneOptions, Option: SkinToneOption, Glyph: SkinToneGlyph });

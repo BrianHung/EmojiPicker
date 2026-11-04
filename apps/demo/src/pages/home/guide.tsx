@@ -152,7 +152,11 @@ const ANATOMY = `import { EmojiProvider, EmojiPicker, EmojiPopover, Tapback, Emo
   <EmojiPicker.Root>
     <EmojiPicker.CategoryNav />
     <EmojiPicker.Search>
-      <EmojiPicker.SkinTone />
+      <EmojiPicker.Search.Input />
+      <EmojiPicker.SkinTone>
+        <EmojiPicker.SkinTone.Trigger />
+        <EmojiPicker.SkinTone.Options />
+      </EmojiPicker.SkinTone>
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
       <EmojiPicker.List />
@@ -165,16 +169,12 @@ const ANATOMY = `import { EmojiProvider, EmojiPicker, EmojiPopover, Tapback, Emo
 
   <EmojiPopover.Root>
     <EmojiPopover.Trigger />
-    <EmojiPopover.Content>
-      <EmojiPicker.Root>…</EmojiPicker.Root>
-    </EmojiPopover.Content>
+    <EmojiPopover.Content>…</EmojiPopover.Content>
   </EmojiPopover.Root>
 
   <Tapback>
-    <EmojiPicker.Search />
-    <EmojiPicker.Viewport>
-      <EmojiPicker.List />
-    </EmojiPicker.Viewport>
+    <EmojiPicker.Reactions />
+    <EmojiPicker.Panel>…</EmojiPicker.Panel>
   </Tapback>
 
   <Emoji emoji="1f44d-1f3fd" />

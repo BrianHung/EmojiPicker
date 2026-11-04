@@ -3,16 +3,17 @@
 import * as React from "react";
 import { usePicker } from "./context";
 import { useEmojiStore, useStoreSnapshot } from "./provider";
+import { renderElement, type PartElementProps } from "./render";
 import { SLOTS } from "./slots";
 import { signal, useSignal, type Signal } from "./context";
 
 type Kind = "empty" | "loading" | "error";
 type Slots = Partial<Record<Kind, React.ReactElement>>;
-type EmptyState = { slots: Signal<Slots>; lists: Signal<number> };
+type Registry = { slots: Signal<Slots>; lists: Signal<number> };
 
-export const EmptyStateContext = React.createContext<EmptyState | null>(null);
+export const EmptyStateContext = React.createContext<Registry | null>(null);
 
-export function useEmptyStateSlots(): EmptyState {
+export function useEmptyStateSlots(): Registry {
   const [state] = React.useState(() => ({ slots: signal<Slots>({}), lists: signal(0) }));
   return state;
 }
@@ -55,38 +56,28 @@ function useSlot(kind: Kind, element: React.ReactElement, visible: boolean): Rea
 }
 const NO_LISTS = signal(0);
 
-export type EmptyProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "role"> & {
-  children?: React.ReactNode | ((state: { search: string }) => React.ReactNode);
-};
+export type EmptyState = { search: string };
+export type EmptyProps = PartElementProps<EmptyState, HTMLDivElement, "role">;
 
 /** Shown when a search finds nothing. */
 export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(function Empty({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Empty");
-  const element = (
-    <div {...props} ref={ref} role="status" data-slot={SLOTS.empty}>
-      {typeof children === "function" ? children({ search: picker.query }) : (children ?? picker.labels.noResults)}
-    </div>
-  );
+  const element = renderElement("div", { ...props, ref, role: "status", "data-slot": SLOTS.empty, children: children ?? picker.labels.noResults }, { search: picker.query });
   return useSlot("empty", element, picker.searching && !picker.pending && !picker.results.length);
 });
 
-export type LoadingProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role">;
+export type LoadingProps = PartElementProps<object, HTMLDivElement, "role">;
 
 /** Shown while the dataset loads. */
 export const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(function Loading({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Loading");
   const status = useStoreSnapshot((s) => s.status());
-  const element = (
-    <div {...props} ref={ref} role="status" data-slot={SLOTS.loading}>
-      {children ?? picker.labels.loading}
-    </div>
-  );
+  const element = renderElement("div", { ...props, ref, role: "status", "data-slot": SLOTS.loading, children: children ?? picker.labels.loading }, {});
   return useSlot("loading", element, status === "idle" || status === "loading");
 });
 
-export type LoadErrorProps = Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "role"> & {
-  children?: React.ReactNode | ((state: { error: Error; retry: () => void }) => React.ReactNode);
-};
+export type LoadErrorState = { error: Error; retry: () => void };
+export type LoadErrorProps = PartElementProps<LoadErrorState, HTMLDivElement, "role">;
 
 /** Shown when the dataset fails to load, with a retry. */
 export const LoadError = React.forwardRef<HTMLDivElement, LoadErrorProps>(function LoadError({ children, ...props }, ref) {
@@ -95,21 +86,15 @@ export const LoadError = React.forwardRef<HTMLDivElement, LoadErrorProps>(functi
   const status = useStoreSnapshot((s) => s.status());
   const retry = () => void store.load().catch(() => {});
   const error = store.error() ?? new Error(picker.labels.loadingError);
-  const element = (
-    <div {...props} ref={ref} role="alert" data-slot={SLOTS.loadError}>
-      {typeof children === "function" ? (
-        children({ error, retry })
-      ) : (
-        (children ?? (
-          <>
-            <p>{picker.labels.loadingError}</p>
-            <button type="button" onClick={retry}>
-              {picker.labels.retryLoading}
-            </button>
-          </>
-        ))
-      )}
-    </div>
+  const fallback = (
+    <>
+      <p>{picker.labels.loadingError}</p>
+      <button type="button" onClick={retry}>
+        {picker.labels.retryLoading}
+      </button>
+    </>
   );
+  const element = renderElement("div", { ...props, ref, role: "alert", "data-slot": SLOTS.loadError, children: children ?? fallback }, { error, retry });
+
   return useSlot("error", element, status === "error");
 });

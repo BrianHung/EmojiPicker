@@ -1,6 +1,12 @@
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { EmojiPicker, useEmojiGrid } from "@brianhung/emoji-picker";
+import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "@brianhung/emoji-picker";
+
+/** One emoji: it re-renders only when its own highlight, hover or press changes. */
+const Cell = React.memo(function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
+  const { cellProps } = useEmojiCell(state, item);
+  return <div {...cellProps} className="rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />;
+});
 
 /** EmojiPicker.List's grid, virtualized by TanStack Virtual. */
 export function TanStackList() {
@@ -29,7 +35,7 @@ export function TanStackList() {
               {row.type === "header" ? (
                 <div {...grid.getHeaderProps(row.section)} className="col-span-full w-full bg-popover px-1 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
               ) : (
-                row.items.map((item) => <div key={item.id} {...grid.getCellProps(item)} className="rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />)
+                row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />)
               )}
             </div>
           );

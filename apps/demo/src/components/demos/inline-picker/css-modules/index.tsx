@@ -4,14 +4,33 @@ import styles from "./index.module.css";
 export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPicker.Root onSelect={onSelect} autoFocusSearch={false} className={styles.root}>
-      <EmojiPicker.Search className={styles.search} inputProps={{ className: styles.input }}>
-        <EmojiPicker.SkinTone emoji="270b" buttonClassName={styles.tone} optionsClassName={styles.tones} />
+      <EmojiPicker.Search className={styles.search}>
+        <EmojiPicker.Search.Input className={styles.input} />
+        <EmojiPicker.SkinTone>
+          <EmojiPicker.SkinTone.Trigger className={styles.tone}>
+            <EmojiPicker.SkinTone.Glyph />
+          </EmojiPicker.SkinTone.Trigger>
+          <EmojiPicker.SkinTone.Options className={styles.tones}>
+            {(tone) => (
+              <EmojiPicker.SkinTone.Option tone={tone} className={styles.tone}>
+                <EmojiPicker.SkinTone.Glyph />
+              </EmojiPicker.SkinTone.Option>
+            )}
+          </EmojiPicker.SkinTone.Options>
+        </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className={styles.viewport}>
-        <EmojiPicker.List cellClassName={styles.cell} headerClassName={styles.header} />
+        <EmojiPicker.List>
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className={styles.header} />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
         <EmojiPicker.Empty className={styles.empty}>No emoji found.</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
-      <EmojiPicker.CategoryNav className={styles.nav} tabClassName={styles.tab} />
+      <EmojiPicker.CategoryNav className={styles.nav}>{() => <EmojiPicker.CategoryNav.Tab className={styles.tab} />}</EmojiPicker.CategoryNav>
     </EmojiPicker.Root>
   );
 }

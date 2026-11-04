@@ -21,6 +21,7 @@ export const SLOTS = {
   skinTone: "skin-tone",
   skinToneOption: "skin-tone-option",
   skinToneOptions: "skin-tone-options",
+  skinToneTrigger: "skin-tone-trigger",
   reactions: "reactions",
   reactionsExpand: "reactions-expand",
   preview: "preview",

@@ -2,12 +2,11 @@
 import * as React from "react";
 import type { EmojiRecord } from "../core/dataset";
 import type { EmojiLabels } from "../core/labels";
-import type { PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "../core/picker";
+import type { PickerSnapshot, PickerState, SearchResultsMode } from "../core/picker";
 import { same } from "../core/reactive";
 import type { Category, EmojiSection } from "../core/sections";
 import type { EmojiSelection, EmojiStore } from "../core/store";
 import type { CollapsedCategories } from "./collapse";
-import type { PickerComponents } from "./components";
 import type { KeyboardAction } from "./keymap";
 
 /**
@@ -82,8 +81,6 @@ export function useSelector<S, T>(store: { subscribe(listener: () => void): () =
   return React.useSyncExternalStore(store.subscribe, read, read);
 }
 
-export type HighlightControl = Pick<PickerStateOptions, "highlighted" | "onHighlightChange">;
-
 export type PickerContextValue = {
   store: EmojiStore;
   /** The picker's core state: query, sections, collapse, highlight, hover, current section. */
@@ -93,7 +90,6 @@ export type PickerContextValue = {
   pointer: PointerModel;
   autoFocusSearch: boolean;
   disableVariations: boolean;
-  components: PickerComponents;
   columns?: number;
   fitColumns: boolean;
   emojiVersion?: number;
@@ -119,8 +115,6 @@ export type PickerContextValue = {
   close(): boolean;
   list: React.MutableRefObject<ListHandle | null>;
   registerSearch(): () => void;
-  /** A list that owns the highlight (React Aria's focused key) controls the core state's; null hands it back. */
-  controlHighlight(control: HighlightControl | null): void;
   /** Ids for aria-controls. */
   listId: string;
 };

@@ -52,8 +52,8 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
   await focusSearch(page);
   expect(await highlighted(page).evaluate(outline)).toBe("solid 2px");
 
-  await visit(page, "/examples/editors/");
-  await page.locator('[aria-label="Message"]').click();
+  await visit(page, "/gallery/#slack");
+  await page.locator('[data-slot="card"]').first().getByLabel("Message #general", { exact: true }).click();
   await page.keyboard.type(":smi", { delay: 40 });
   expect(await page.getByRole("listbox", { name: "Emoji suggestions" }).locator("[data-highlighted]").evaluate(outline)).toBe("solid 2px");
 });
