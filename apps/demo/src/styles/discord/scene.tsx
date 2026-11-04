@@ -22,11 +22,11 @@ const C = {
   name: ld("#28282d", "oklab(0.9527 0.0006 -0.0054)"),
   text: ld("#2e2e34", "oklab(0.9527 0.0006 -0.0054)"),
   muted: ld("#70717a", "oklab(0.608 0.0013 -0.0123)"),
-  placeholder: ld("#84858d", "oklab(0.608 0.0013 -0.0123)"),
+  placeholder: ld("#84858d", "#6c6d76"),
   icon: ld("#595a63", "oklab(0.7 0.0016 -0.0115)"),
   search: ld("#f3f3f4", "oklab(0.18 0.0015 -0.006)"),
   rule: ld("color-mix(in oklab, #97979f 28%, transparent)", "color-mix(in oklab, #97979f 12%, transparent)"),
-  hover: ld("color-mix(in oklab, #97979f 12%, transparent)", "color-mix(in oklab, #000 6%, transparent)"),
+  hover: "color-mix(in oklab, #97979f 12%, transparent)",
   toolbar: ld("#ffffff", "#242429"),
   toolbarBorder: ld("color-mix(in oklab, #97979f 20%, transparent)", "color-mix(in oklab, #97979f 4%, transparent)"),
 };
@@ -108,7 +108,7 @@ function Channel({ compact = false }: { compact?: boolean }) {
 
 function Header() {
   return (
-    <div className="flex h-[49px] shrink-0 items-center gap-2 pt-2 pr-2 pb-2 pl-4" style={{ borderBottom: `0.8px solid ${C.rule}` }}>
+    <div className="flex h-[49px] shrink-0 items-center gap-2 pt-2 pr-2 pb-2 pl-4" style={{ borderBottom: `1px solid ${C.rule}` }}>
       <span style={{ color: C.icon }}>
         <Hash />
       </span>
@@ -132,7 +132,7 @@ function Header() {
 /** The phone channel bar: menu, the channel, members and search. */
 function MobileHeader() {
   return (
-    <div className="flex h-12 shrink-0 items-center gap-2 pr-3 pl-3" style={{ borderBottom: `0.8px solid ${C.rule}` }} aria-hidden>
+    <div className="flex h-12 shrink-0 items-center gap-2 pr-3 pl-3" style={{ borderBottom: `1px solid ${C.rule}` }} aria-hidden>
       <span style={{ color: C.icon }}>
         <MenuIcon />
       </span>
@@ -226,7 +226,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
         {compact ? null : (
           <div
             className={cn("pointer-events-none absolute -top-4 right-3.5 z-10 flex items-center rounded-[8px] p-0.5 opacity-0 shadow-[0_1px_4px_light-dark(rgb(0_0_0/0.08),rgb(0_0_0/0.14))] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100", pickerOpen && "pointer-events-auto opacity-100")}
-            style={{ background: C.toolbar, border: `0.8px solid ${C.toolbarBorder}`, color: C.icon }}
+            style={{ background: C.toolbar, border: `1px solid ${C.toolbarBorder}`, color: C.icon }}
           >
             {quick.map((u) => (
               <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(u)} className="flex size-7 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-[color-mix(in_oklab,#97979f_16%,transparent)] focus-visible:ring-2 focus-visible:ring-[#5865f2] dark:hover:bg-white/[0.06]">

@@ -48,7 +48,7 @@ export const discord: Style = {
   layout: {
     id: "discord",
     tokens,
-    root: "h-[486px] w-[498px] rounded-picker border-[0.8px] border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-size:40px] [--emoji-cell-size:48px] [--emoji-image-size:40px] [--emoji-header-height:32px] [--emoji-list-padding:4px]",
+    root: "h-[486px] w-[498px] rounded-picker border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-size:40px] [--emoji-cell-size:48px] [--emoji-image-size:40px] [--emoji-header-height:32px] [--emoji-list-padding:4px]",
     columns: 9,
     frequent: 18,
     placeholder: "Find the perfect emoji",
@@ -77,9 +77,9 @@ export const discord: Style = {
         inactiveTab="text-picker-muted"
       />
     ),
-    searchRow: "h-[53px] gap-3 px-4 pb-[13px] [--search-icon-x:27.8px]",
+    searchRow: "h-[53px] gap-3 px-4 pb-[13px] [--search-icon-x:28px]",
     input:
-      "h-10 w-full rounded-[8px] border-[0.8px] border-picker-input-border bg-picker-input pr-3 pl-[38.8px] text-[16px] leading-5 text-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-picker-ring focus:outline-2 focus:outline-picker-ring",
+      "h-10 w-full rounded-[8px] border border-picker-input-border bg-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-picker-ring focus:outline-2 focus:outline-picker-ring",
     searchIcon: "left",
     searchIconClass: "top-3 translate-y-0 text-picker-muted",
     skinTone: "hand",
@@ -115,13 +115,13 @@ export const discord: Style = {
     footerClass: "flex h-12 shrink-0 items-center gap-2 bg-picker-panel px-4",
   },
   tapback: {
-    className: "flex w-fit flex-col overflow-hidden rounded-[8px] border-[0.8px] border-(--discord-chip-border) bg-picker-background shadow-[0_1px_4px_rgb(0_0_0/0.14)]",
+    className: "flex w-fit flex-col overflow-hidden rounded-[8px] border border-(--discord-chip-border) bg-picker-background shadow-[0_1px_4px_rgb(0_0_0/0.14)]",
     reactions: "flex items-center p-0.5 [--emoji-image-size:20px] [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[6px] [&_button]:text-[20px] [&_button:hover]:bg-picker-hover",
     more: { className: "text-(--discord-icon)", icon: <I.SmilePlus size={20} strokeWidth={2} /> },
   },
   autocomplete: {
     className: "mx-3 rounded-[5px] bg-(--discord-autocomplete) font-picker text-(--discord-autocomplete-text) shadow-(--discord-autocomplete-shadow)",
-    headerClassName: "px-2 pt-2 pb-4 text-[14px] leading-[18.67px] font-medium text-(--discord-autocomplete-muted)",
+    headerClassName: "px-2 pt-2 pb-4 text-[14px] leading-[1.33333] font-medium text-(--discord-autocomplete-muted)",
     list: "max-h-[437px] px-2 pb-2 [scrollbar-width:thin]",
     item: "h-[31.2px] gap-2 rounded-[3px] px-2 py-0 text-[16px] leading-5 font-normal data-[highlighted]:bg-(--discord-autocomplete-hover)",
     match: "",
@@ -129,9 +129,9 @@ export const discord: Style = {
     header: (q) => `Emoji matching :${q}`,
   },
   pill: {
-    base: "h-[29.6px] gap-1.5 rounded-[8px] border-[0.8px] border-transparent bg-(--discord-chip) px-1.5 text-[16px] leading-4 font-semibold text-(--discord-pill-foreground)",
+    base: "h-[30px] gap-1.5 rounded-[8px] border border-transparent bg-(--discord-chip) px-1.5 text-[16px] leading-4 font-semibold text-(--discord-pill-foreground)",
     mine: "aria-pressed:border-picker-accent aria-pressed:bg-(--discord-mine) aria-pressed:text-(--discord-mine-foreground)",
-    add: "h-[29.6px] rounded-[8px] bg-(--discord-chip) px-1.5 text-(--discord-pill-foreground)",
+    add: "h-[30px] rounded-[8px] bg-(--discord-chip) px-1.5 text-(--discord-pill-foreground)",
     emoji: 20,
   },
 };

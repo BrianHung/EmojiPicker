@@ -51,7 +51,7 @@ const layout: PickerLayout = {
     <Tabs
       items={["Emoji", "Icons", "Upload"]}
       active={0}
-      className="flex h-10 shrink-0 items-center px-2 text-[14px] leading-[16.8px] shadow-[inset_0_-1px_0_var(--emoji-picker-border)]"
+      className="flex h-10 shrink-0 items-center px-2 text-[14px] leading-[1.2] shadow-[inset_0_-1px_0_var(--emoji-picker-border)]"
       tab="relative flex h-7 items-center px-2"
       activeTab="text-picker-foreground after:absolute after:inset-x-2 after:-bottom-1.5 after:h-0.5 after:bg-picker-foreground"
       inactiveTab="text-picker-subtle"
