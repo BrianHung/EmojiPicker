@@ -428,7 +428,7 @@ The List sets `--emoji-picker-content-width` on Root to the grid's measured widt
 
 `data/en.json` is built from emojibase and its iamcal shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
 
-A dataset object (`import en from ".../en.json"`) is ready on the first render, so server-rendered markup has the grid. Changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the provider in place, keeping frequents and skin tone; functions and objects compare by reference, so define them outside render or memoize them.
+A dataset object (`import en from ".../en.json"`) without `customEmojis` is ready on the first render, so server-rendered markup has the grid. Changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the provider in place, keeping frequents and skin tone; functions and objects compare by reference, so define them outside render or memoize them.
 
 ## Localization
 

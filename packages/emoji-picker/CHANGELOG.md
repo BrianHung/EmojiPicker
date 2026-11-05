@@ -36,6 +36,12 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - `EmojiProvider locale` sets React Aria's locale (`I18nProvider`: direction, number formatting) and formats the default result count; every string in `EmojiLabels` is used (`labels` takes any of them).
 - Data attributes on cells and tabs, as React Aria names them: `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, `data-selected`, `data-index`.
 
+- The provider follows its props: changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the store in place (frequents and skin tone stay; the old data shows until new data loads), so a `key` remount is no longer needed. A dataset object is ready on the first render, so server-rendered markup has the grid.
+- Zero-config: `data` defaults to core's `data/en.json` on jsDelivr, pinned to core's version, and `EmojiPicker.Root` creates a provider when none is above it.
+- `data` takes a hand-written `EmojiDataInput` (`{ locale, groups: [{ id, label }], emojis: [{ emoji | unified, label, tags?, shortcodes?, group, version? }] }`), normalized to the compact format on load. Core's `localeData(locale, { shortcodes, baseUrl })` returns the URL of a prebuilt dataset in `@brianhung/emoji-picker-data`.
+- Each part is exported on its own (`EmojiPickerRoot`, `EmojiPickerSearch`, `EmojiPickerList`, …) beside `EmojiPicker.*`, for bundlers that keep whole namespace imports.
+- The List sets `--emoji-picker-content-width` on Root to its measured width.
+
 ### Changed
 
 - Every part takes `render` (an element whose props and ref merge with the part's, or `(props, state) => element`, as Base UI's; built on React Aria's `composeRenderProps` and `mergeProps`), and `className` and `style` as values or functions of the part's state. State is also on data attributes, as before. `EmojiPopover.Trigger asChild` and `SearchInput as` are removed: use `render`.
