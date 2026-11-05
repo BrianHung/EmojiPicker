@@ -10,12 +10,20 @@
     "dev": "npm run dev -w demo",
     "build": "npm run build -w @brianhung/emoji-picker && npm run build -w demo",
     "test": "npm test -w @brianhung/emoji-picker",
+    "test:e2e": "npm run test:e2e -w demo",
+    "test:a11y": "npm run test:a11y -w demo",
     "typecheck": "npm run typecheck --workspaces",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check ."
+    "check": "biome check .",
+    "size": "size-limit",
+    "changeset": "changeset",
+    "version": "changeset version && npm install --package-lock-only"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.5"
+    "@biomejs/biome": "^2.6.5",
+    "@changesets/cli": "^3.0.3",
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "size-limit": "^14.3.0"
   }
 }
