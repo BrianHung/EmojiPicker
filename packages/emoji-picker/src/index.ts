@@ -37,7 +37,7 @@ export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, Reacti
 export { Tapback } from "./react/tapback";
 export type { TapbackProps } from "./react/tapback";
 export { pickerInitialFocus, useEmojiPopover } from "./react/popover";
-export type { PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";
+export type { EmojiPopoverState, PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";
 export { EmojiPopover, EmojiSuggestions } from "./react/popover/floating-ui";
 export type { PopoverContentProps } from "./react/popover/floating-ui";
 export { Emoji, EmojiOverrides, findArtwork, useEmoji } from "./react/emoji";
@@ -47,6 +47,7 @@ export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTrigger, Emoj
 
 export { createEmojiGrid, createFrequencyStore, DEFAULT_FREQUENT, defaultLabels, findShortcodeTrigger, isComposingKey, memoryStorage, moveInGrid, plural, resolveEmoji, rowsPerPage, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./core";
 export type {
+  CategoryId,
   CompletionOrder,
   CustomEmoji,
   CustomEmojiLoader,
@@ -72,5 +73,6 @@ export type {
   SearchIndex,
   ShortcodeCompletion,
   SkinToneNames,
+  SkinToneValue,
 } from "./core";
 export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";

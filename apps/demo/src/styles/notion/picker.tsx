@@ -1,4 +1,4 @@
-import { EmojiPicker, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPicker, useEmojiStore, type CategoryOption, type EmojiSelection } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { HandTone, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
@@ -36,7 +36,7 @@ export const NOTION_SECTIONS = [
   { id: "symbols", name: "Symbols" },
   { id: "flags", name: "Flags" },
   { id: "custom", name: "Custom" },
-];
+] satisfies CategoryOption[];
 
 const CATEGORIES = withIcons(I.ICONS.notion, { categories: NOTION_SECTIONS, size: 22, strokeWidth: 1.5 });
 

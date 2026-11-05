@@ -1,7 +1,8 @@
-import type { PropRow } from "@/components/site/docs";
+import type { PartProps } from "@brianhung/emoji-picker";
+import { rowsOf } from "./rows";
 
-export const part: PropRow[] = [
+export const part = rowsOf<PartProps<unknown>>()([
   { name: "render", type: "ReactElement | (props, state) => ReactElement", description: "Replaces the element: its props and ref merge with the part's." },
-  { name: "className", type: "string | (state) => string", description: "A function receives the part's state." },
-  { name: "style", type: "CSSProperties | (state) => CSSProperties" },
-];
+  { name: "className", type: "string | (state) => string | undefined", description: "A function receives the part's state." },
+  { name: "style", type: "CSSProperties | (state) => CSSProperties | undefined" },
+]);

@@ -78,7 +78,7 @@ describe("picker state without React", () => {
   it("leaves a controlled highlight to its owner", async () => {
     const store = await ready();
     const asked: (string | null)[] = [];
-    const options = { frequent: false as const, onHighlightChange: (id: string | null) => asked.push(id) };
+    const options = { frequent: false as const, onHighlightedChange: (id: string | null) => asked.push(id) };
     const picker = createPickerState(store, { ...options, highlighted: null });
     let renders = 0;
     const off = picker.subscribe(() => renders++);

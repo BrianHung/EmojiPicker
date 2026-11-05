@@ -10,10 +10,15 @@ export const slots: [string, string][] = [
 ];
 
 export const stateAttributes: [string, string][] = [
+  ["data-searching", "Root, Viewport and List while search results show."],
   ["data-highlighted", "Present on the highlighted cell."],
   ["data-active", "Present on the category tab for the section in view."],
+  ["data-selected", "The category tab for the section in view; a value picker's cell; the current skin-tone option."],
+  ["data-collapsed", "A collapsed section, its title and its actions."],
+  ["data-disabled", "CategoryNav and its tabs while search results show."],
+  ["data-empty", "Search with no query; List with nothing to show."],
   ["data-has-variations", "Present on cells with skin-tone variations."],
   ["data-unified", "The cell's unified code."],
-  ['data-state="open" | "closed"', "Present on SkinTone. Whether the options are open."],
-  ["data-orientation", "SkinTone options: horizontal or vertical."],
+  ['data-state="open" | "closed"', "SkinTone and its Trigger: whether the options are open."],
+  ["data-orientation", "Viewport, List, CategoryNav and SkinTone options: horizontal or vertical."],
 ];

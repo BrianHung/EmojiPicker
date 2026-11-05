@@ -49,7 +49,7 @@ export function BufoPicker() {
   const customEmojis = React.useMemo(() => packs.flatMap((p) => p.emoji), [packs]);
   const categories = React.useMemo<CategoryOption[]>(() => {
     const groups = [...new Set(customEmojis.map((e) => e.group ?? "Custom"))];
-    return [{ id: "suggested", name: "Frequently used" }, ...groups.map((g) => ({ id: `custom:${g}`, name: g })), ...STANDARD];
+    return [{ id: "suggested", name: "Frequently used" }, ...groups.map((g) => ({ id: `custom:${g}` as const, name: g })), ...STANDARD];
   }, [customEmojis]);
 
   return (

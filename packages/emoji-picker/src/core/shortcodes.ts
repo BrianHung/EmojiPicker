@@ -1,4 +1,4 @@
-import { SKIN_TONES, unifiedToNative, type EmojiRecord } from "./dataset";
+import { SKIN_TONES, unifiedToNative, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { defaultLabels, type EmojiLabels } from "./labels";
 import type { SearchIndex } from "./search/search-index";
 
@@ -20,10 +20,10 @@ export function findShortcodeTrigger(text: string): { query: string; offset: num
 export const isComposingKey = (event: { isComposing?: boolean; keyCode?: number }) => !!event.isComposing || event.keyCode === 229;
 
 /** Skin tone 1-5 of a variation, or 0 for the base emoji. */
-export function toneOf(unified: string): number {
+export function toneOf(unified: string): SkinToneValue {
   for (const part of unified.split("-")) {
     const i = SKIN_TONES.indexOf(part as (typeof SKIN_TONES)[number]);
-    if (i >= 0) return i + 1;
+    if (i >= 0) return (i + 1) as SkinToneValue;
   }
   return 0;
 }

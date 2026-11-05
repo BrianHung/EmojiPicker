@@ -24,7 +24,7 @@ import type { KeyboardAction } from "../root/keymap";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
-import { useEmojiPopover } from "../popover/popover-context";
+import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { Variations } from "./variations";
 import { moveVirtualFocus } from "./virtual-focus";
@@ -157,7 +157,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   // Kept rendered while out of view: the highlighted cell (aria-activedescendant names it, or it has focus).
   const [persisted] = React.useState(() => new Set<Key>());
   // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
-  const focusGrid = React.useRef(Boolean(useEmojiPopover()?.focusGrid));
+  const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
   const latest = React.useRef({ collection, virtual, geometry, searching });
   latest.current = { collection, virtual, geometry, searching };
@@ -513,6 +513,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       "data-empty": isEmpty || undefined,
       "data-focused": isFocused || undefined,
       "data-focus-visible": isFocusVisible || undefined,
+      "data-searching": searching || undefined,
       "data-results": searching ? picker.searchResults : undefined,
       "aria-busy": (searching && picker.pending) || undefined,
     } as React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement> },
@@ -571,15 +572,16 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
   return { props, state };
 }
 
-/** The grid's state, for `useEmojiCell`. */
-export type EmojiGridState = Cells;
+declare const gridState: unique symbol;
+/** A grid's state, for `useEmojiCell` (`useEmojiGrid().state`). */
+export type EmojiGridState = { readonly [gridState]: true };
 
 /**
- * One cell of a grid (`EmojiPicker.List`'s, or `useEmojiGrid`'s `state`): its props, with its glyph
- * as children and a ref, and its state. Subscribes to its own marks, so a highlight or hover move
- * re-renders only the cells it leaves and enters; the cell it lands on takes focus, or virtual focus.
+ * One cell of a grid: its props, with its glyph as children and a ref, and its state. Subscribes to
+ * its own marks, so a highlight or hover move re-renders only the cells it leaves and enters; the
+ * cell it lands on takes focus, or virtual focus.
  */
-export function useEmojiCell(grid: EmojiGridState, item: EmojiItem) {
+export function useCell(grid: Cells, item: EmojiItem) {
   const artwork = useArtworkMap();
   const flags = React.useSyncExternalStore(grid.marks.subscribe, () => grid.marks.of(item.id));
   const element = React.useRef<HTMLElement | null>(null);
@@ -709,7 +711,10 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     getGridProps: (props: React.HTMLAttributes<HTMLElement> = {}) => mergeProps(props, controller.gridProps) as typeof controller.gridProps,
     getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.categoryHeader, children: section.name }),
     /** For `useEmojiCell(state, item)` in each cell. */
-    state: controller.cells,
+    state: controller.cells as unknown as EmojiGridState,
     variations: controller.variations,
   };
 }
+
+/** One cell of `useEmojiGrid`'s grid, from its `state`: the cell's props and state. */
+export const useEmojiCell = useCell as unknown as (state: EmojiGridState, item: EmojiItem) => ReturnType<typeof useCell>;

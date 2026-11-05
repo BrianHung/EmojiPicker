@@ -44,7 +44,7 @@ Defaults follow Discord; the rest is configurable. Each row is checked in Chrome
 | On open | focus in the search field (inline: once clicked; popover: on open), and it stays there | focus on the first emoji (or the one that was focused last) |
 | Arrows, Page Up / Down | move a highlight through the grid or results (`aria-activedescendant`); Left / Right edit the query unless the caret is at its end | move focus cell to cell (roving tabindex) |
 | Home / End | first / last emoji while the field is empty; with a query they move the caret, and Ctrl+Home / Ctrl+End move the highlight | first / last emoji |
-| Hover (`pointer="follows"`) | moves the highlight; the next arrow continues from the hovered emoji; focus never moves | the next arrow continues from the hovered emoji (focus follows the pointer once it is in the grid; hover never takes focus from outside the picker and never scrolls the page). `"independent"`: hover is only a style |
+| Hover (`pointerModel="follows"`) | moves the highlight; the next arrow continues from the hovered emoji; focus never moves | the next arrow continues from the hovered emoji (focus follows the pointer once it is in the grid; hover never takes focus from outside the picker and never scrolls the page). `"independent"`: hover is only a style |
 | Enter / Space | Enter picks the highlighted emoji (Space types a space) | Enter or Space picks |
 | After a pick | focus and highlight stay when the picker stays open; a popover closes and focus returns to the trigger | same |
 | Escape | clears the query, then ends the highlight, then closes the popover; focus returns to the trigger | closes the popover; focus returns to the trigger |

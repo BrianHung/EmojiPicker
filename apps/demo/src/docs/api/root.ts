@@ -1,11 +1,13 @@
-import type { PropRow } from "@/components/site/docs";
+import type { RootProps } from "@brianhung/emoji-picker";
+import { rowsOf } from "./rows";
 
-export const root: PropRow[] = [
+export const root = rowsOf<RootProps>()([
   { name: "onSelect", type: "(selection: EmojiSelection, details: SelectDetails) => void" },
   { name: "columns", type: "number", default: "fits width", description: "Emoji per row." },
-  { name: "categories", type: "CategoryOption[]", description: "The sections to show, in order." },
+  { name: "fitColumns", type: "boolean", default: "true", description: "With columns: fewer per row when they don't fit; false keeps them." },
+  { name: "categories", type: "readonly CategoryOption[]", description: "The sections to show, in order: { id: CategoryId, name?, icon?, nav? }." },
   { name: "frequent", type: "number | false", default: "16", description: "Number of frequently used emoji. false hides the section." },
-  { name: "suggested", type: "string[]", description: "Fixed emoji for the suggested section." },
+  { name: "suggested", type: "readonly string[]", description: "Fixed emoji for the suggested section." },
   { name: "searchResults", type: '"ranked" | "grouped"', default: '"ranked"' },
   { name: "searchLimit", type: "number", default: "200" },
   { name: "query", type: "string", description: "Controlled search text." },
@@ -14,20 +16,20 @@ export const root: PropRow[] = [
   { name: "value", type: "string | null", description: "A value picker (a page icon): the emoji shown as chosen, compared without skin tone." },
   { name: "defaultValue", type: "string | null" },
   { name: "onValueChange", type: "(unified: string) => void" },
-  { name: "highlightedEmoji", type: "string | null", description: 'The keyboard position, an item id ("smileys_people:1f600"), controlled.' },
-  { name: "defaultHighlightedEmoji", type: "string | null" },
-  { name: "onHighlightedEmojiChange", type: "(id: string | null) => void" },
+  { name: "highlighted", type: "string | null", description: 'The keyboard position, an item id ("smileys_people:1f600"), controlled.' },
+  { name: "defaultHighlighted", type: "string | null" },
+  { name: "onHighlightedChange", type: "(id: string | null) => void" },
   { name: "reactions", type: "readonly string[]", description: "The emoji of EmojiPicker.Reactions." },
   { name: "reactionsOpen", type: "boolean", description: "The reaction row shows, rather than the full picker in Panel. Controlled." },
   { name: "defaultReactionsOpen", type: "boolean", default: "true" },
   { name: "onReactionsOpenChange", type: "(open: boolean) => void" },
   { name: "focusModel", type: '"input" | "grid"', default: '"input"', description: "Where focus lives while navigating: the search field, or the cells." },
-  { name: "pointer", type: '"follows" | "independent"', default: '"follows"', description: "Whether hover moves the keyboard position." },
-  { name: "keymap", type: "Partial<Record<KeyboardAction, string[]>>", description: "Keys per action, replacing the defaults." },
+  { name: "pointerModel", type: '"follows" | "independent"', default: '"follows"', description: "Whether hover moves the keyboard position." },
+  { name: "keymap", type: "Partial<Record<KeyboardAction, readonly string[]>>", description: "Keys per action, replacing the defaults." },
   { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
-  { name: "collapsedCategories", type: "string[]", description: "Collapsed sections, controlled." },
-  { name: "defaultCollapsedCategories", type: "string[]" },
-  { name: "onCollapsedCategoriesChange", type: "(ids: string[]) => void" },
+  { name: "collapsedCategories", type: "readonly string[]", description: "Collapsed sections, controlled." },
+  { name: "defaultCollapsedCategories", type: "readonly string[]" },
+  { name: "onCollapsedCategoriesChange", type: "(ids: readonly string[]) => void" },
   { name: "emojiVersion", type: "number", description: "Hides emoji added after this Unicode emoji version." },
-  { name: "disableVariations", type: "boolean", description: "Disables skin-tone variations in the grid." },
-];
+  { name: "disableVariations", type: "boolean", default: "false", description: "Disables skin-tone variations in the grid." },
+]);

@@ -3,12 +3,12 @@
 // while focus stays here; with "grid", Down moves focus into the cells.
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { Button, type ButtonRenderProps } from "react-aria-components/Button";
-import { Input, type InputRenderProps } from "react-aria-components/Input";
+import { Button } from "react-aria-components/Button";
+import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "../root/context";
 import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
-import { racClassName, renderElement, toRenderFunction, type PartElementProps, type PartProps } from "../utils/render";
+import { racParts, racState, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 export type SearchState = { empty: boolean };
@@ -22,14 +22,14 @@ export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" |
 const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
   const { query } = usePicker("EmojiPicker.Search");
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
-  return renderElement("div", { "data-slot": SLOTS.search, ...props, ref: merged, children: children ?? <SearchInput /> }, { empty: query === "" });
+  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
+  return renderElement("div", { "data-slot": SLOTS.search, "data-empty": query === "" || undefined, ...props, ref: merged, children: children ?? <SearchInput /> }, { empty: query === "" });
 });
 
-export type SearchInputState = InputRenderProps;
+export type SearchInputState = Omit<InteractionState, "pressed">;
 
 export type SearchInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "onKeyDown" | "className" | "style"> &
-  PartProps<SearchInputState> & {
+  PartProps<SearchInputState, HTMLInputElement> & {
     /** Runs before the picker handles the key; see Root's `onKeyDown`. */
     onKeyDown?: PickerKeyboardEventHandler<HTMLInputElement>;
     /** Inside the field, after the input. Default: `Search.Clear`. */
@@ -43,7 +43,7 @@ const EmptyContext = React.createContext(true);
 const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
 
 /** The search field: the picker's query and its keys. `placeholder` defaults to the labels'; `autoFocus` to being in an EmojiPopover. */
-const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, render, placeholder, autoFocus, children, ...props }, ref) {
+const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels, focusModel } = picker;
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
@@ -84,8 +84,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
             ref={mergeRefs<HTMLInputElement>(own, ref, userKeys)}
             type="text"
             role="searchbox"
-            className={racClassName(className)}
-            render={toRenderFunction(render) as never}
+            {...racParts<InteractionState, HTMLInputElement>({ className, style, render })}
             placeholder={placeholder ?? labels.searchPlaceholder}
             aria-label={props["aria-label"] ?? labels.searchLabel}
             data-slot={SLOTS.searchInput}
@@ -99,16 +98,16 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
   );
 });
 
-export type SearchClearState = ButtonRenderProps;
+export type SearchClearState = InteractionState;
 export type SearchClearProps = PartElementProps<SearchClearState, HTMLButtonElement, "onClick">;
 
 /** Clears the query; rendered only while there is one. */
-const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ className, render, children, ...props }, ref) {
+const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Search.Clear");
   if (React.useContext(EmptyContext)) return null;
   return (
-    <Button {...(props as object)} ref={ref} aria-label={labels.searchClear} data-slot={SLOTS.searchClear} className={racClassName(className)} render={toRenderFunction(render) as never} {...{ title: labels.searchClear }}>
-      {children ?? "×"}
+    <Button {...(props as object)} ref={ref} aria-label={labels.searchClear} data-slot={SLOTS.searchClear} {...racParts({ className, style, render })} {...{ title: labels.searchClear }}>
+      {typeof children === "function" ? (r) => children(racState(r)) : (children ?? "×")}
     </Button>
   );
 });

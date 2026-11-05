@@ -1,4 +1,4 @@
-import { GROUPS, type EmojiRecord } from "./dataset";
+import { GROUPS, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
 import type { EmojiLabels } from "./labels";
 import { createSearch } from "./search/query";
@@ -31,11 +31,11 @@ export type PickerStateOptions<Icon = unknown> = {
   /** Controlled collapsed sections (category ids). */
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
-  onCollapsedCategoriesChange?: (ids: string[]) => void;
+  onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
   /** Controlled highlight (an item id, or null): the state then keeps none of its own. */
   highlighted?: string | null;
   defaultHighlighted?: string | null;
-  onHighlightChange?: (id: string | null) => void;
+  onHighlightedChange?: (id: string | null) => void;
   focusModel?: FocusModel;
   disableVariations?: boolean;
   /** A tapback's reactions (unified codes), held like frequents while the user is in the picker. */
@@ -54,7 +54,7 @@ export type PickerSnapshot<Icon = unknown> = {
   /** What the grid shows: the search results while searching, else the categories. */
   sections: readonly EmojiSection[];
   collapsed: readonly string[];
-  skinTone: number;
+  skinTone: SkinToneValue;
   /** "virtual": the highlight moves while focus stays in the search field (aria-activedescendant). "roving": focus moves through the cells. */
   focus: "virtual" | "roving";
   /** Item ids: the keyboard position, the hovered emoji, and whichever of them the preview shows. */
@@ -210,7 +210,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     if (opts.collapsedCategories === undefined) ownCollapsed = ids;
     else nextCollapsed = ids;
     changed();
-    opts.onCollapsedCategoriesChange?.([...ids]);
+    opts.onCollapsedCategoriesChange?.(ids);
   };
 
   const state = {
@@ -234,11 +234,11 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     highlight(id: string | null) {
       if (id === highlighted()) return;
       if (opts.highlighted === undefined) put("highlighted", id);
-      opts.onHighlightChange?.(id);
+      opts.onHighlightedChange?.(id);
     },
     hover: (id: string | null) => put("hovered", id),
     setActiveSection: (id: string | null) => put("activeSection", id),
-    setSkinTone: (tone: number) => store.setSkinTone(tone),
+    setSkinTone: (tone: SkinToneValue) => store.setSkinTone(tone),
     /** Picks an item (the highlighted one by default) or a unified code: the selection, counted as used. */
     choose: (id = highlighted()): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
     /** Opens an emoji's skin-tone variations; false when it has none. */

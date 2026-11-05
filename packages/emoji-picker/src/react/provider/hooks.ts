@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
+import type { EmojiRecord, SkinToneValue } from "../../core/dataset";
 import { createSearch, type SearchState } from "../../core/search/query";
 import { emitter } from "../../core/reactive";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
@@ -15,7 +15,7 @@ export function useFrequentEmoji(n = 5): readonly string[] {
 }
 
 /** Shared skin tone, 0 (none) to 5. Persisted, and applied by every picker. */
-export function useSkinTone(): [tone: number, setTone: (tone: number) => void] {
+export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {
   const { store } = useEmojiContext();
   return [useStoreSnapshot((s) => s.skinTone()), store.setSkinTone];
 }

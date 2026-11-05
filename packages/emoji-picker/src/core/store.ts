@@ -1,4 +1,4 @@
-import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord } from "./dataset";
+import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
@@ -22,10 +22,10 @@ export type EmojiStoreOptions = {
   filter?: (record: EmojiRecord) => boolean;
   frequents?: FrequencyStore;
   /** Controlled skin tone: 0 (none) or 1-5, the Fitzpatrick tones. */
-  skinTone?: number;
+  skinTone?: SkinToneValue;
   /** Skin tone until one is stored or chosen. Default 0. */
-  defaultSkinTone?: number;
-  onSkinToneChange?: (tone: number) => void;
+  defaultSkinTone?: SkinToneValue;
+  onSkinToneChange?: (tone: SkinToneValue) => void;
   /** Where the uncontrolled skin tone persists. Default: localStorage `emoji-picker:skin-tone`; `null` keeps it in memory. */
   skinToneStorage?: EmojiStorage | null;
   /**
@@ -58,7 +58,7 @@ export type EmojiSelection = {
   /** ":thumbsup:" or ":thumbsup::skin-tone-3:" when one exists. */
   shortcode?: string;
   shortcodes: readonly string[];
-  skinTone: number;
+  skinTone: SkinToneValue;
   isCustom: boolean;
   imageUrl?: string;
 };
@@ -210,7 +210,7 @@ export function createEmojiStore({
     replaceShortcodes: (text: string) => (status === "ready" ? replaceShortcodes(text, store.index()) : text),
 
     skinTone: () => (toneControl.value === undefined ? ownTone : clampTone(toneControl.value)),
-    setSkinTone(next: number) {
+    setSkinTone(next: SkinToneValue) {
       const value = clampTone(next);
       if (toneControl.value === undefined && value !== ownTone) {
         ownTone = value;
@@ -220,7 +220,7 @@ export function createEmojiStore({
       toneControl.onChange?.(value);
     },
     /** Takes the controlled skin tone and its handler (a framework syncing them from a render). */
-    controlSkinTone(value: number | undefined, onChange?: (tone: number) => void) {
+    controlSkinTone(value: SkinToneValue | undefined, onChange?: (tone: SkinToneValue) => void) {
       const changed = value !== toneControl.value;
       toneControl = { value, onChange };
       if (changed) emit();
@@ -261,7 +261,7 @@ export function createEmojiStore({
   return store;
 }
 
-const clampTone = (n: number) => (Number.isInteger(n) && n >= 0 && n <= SKIN_TONES.length ? n : 0);
+const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 && n <= SKIN_TONES.length ? (n as SkinToneValue) : 0);
 
 // Stores (one per provider) that load the same URL share one request and one parse.
 const byUrl = new Map<string, Promise<Dataset>>();

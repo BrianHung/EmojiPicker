@@ -2,7 +2,7 @@
 // Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks.
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { withTone } from "../../core/dataset";
+import { withTone, type SkinToneValue } from "../../core/dataset";
 import { nativeToUnified } from "../../core/resolve";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
@@ -11,6 +11,7 @@ import type { KeyboardAction } from "../root/keymap";
 import { useEmojiContext } from "../provider/provider";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { useControllable } from "../utils/controllable";
 
 const TONES = [0, 1, 2, 3, 4, 5] as const;
 // Swatches for the unstyled default (Fitzpatrick palette, as emoji-picker-react).
@@ -18,9 +19,9 @@ const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463
 const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[tone] });
 
 type Orientation = "horizontal" | "vertical";
-type SkinToneContextValue = { tone: number; open: boolean; orientation: Orientation; toggle(): void; choose(tone: number): void; label(tone: number): string; group: string };
+type SkinToneContextValue = { tone: SkinToneValue; open: boolean; orientation: Orientation; toggle(): void; choose(tone: SkinToneValue): void; label(tone: SkinToneValue): string; group: string };
 const SkinToneContext = React.createContext<SkinToneContextValue | null>(null);
-const OptionContext = React.createContext<number | null>(null);
+const OptionContext = React.createContext<SkinToneValue | null>(null);
 
 function useSkinToneContext(part: string) {
   const value = React.useContext(SkinToneContext);
@@ -28,17 +29,21 @@ function useSkinToneContext(part: string) {
   return value;
 }
 
-export type SkinToneState = { open: boolean; tone: number };
+export type SkinToneState = { open: boolean; tone: SkinToneValue };
 
 export type SkinToneProps = PartElementProps<SkinToneState> & {
   /** Axis the options open along. Default "horizontal". */
   orientation?: Orientation;
+  /** The options show. Controlled. */
+  open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 /** The shared skin tone (0, none, to 5): `SkinTone.Trigger` and `SkinTone.Options` by default. */
-const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", children, ...props }, ref) {
+const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useControllable(openProp, defaultOpen, onOpenChange);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const options = () => [...(rootRef.current?.querySelectorAll<HTMLElement>(`[data-slot="${SLOTS.skinToneOption}"]`) ?? [])];
 
@@ -50,7 +55,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     };
     document.addEventListener("pointerdown", onPointer);
     return () => document.removeEventListener("pointerdown", onPointer);
-  }, [open, tone]);
+  }, [open, tone, setOpen]);
 
   const { labels } = useEmojiContext();
   // Closing from inside the options returns focus to the trigger, as a menu does.
@@ -59,7 +64,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     const inside = root?.querySelector(`[data-slot="${SLOTS.skinToneOptions}"]`)?.contains(document.activeElement);
     setOpen(false);
     if (inside) root?.querySelector<HTMLElement>(`[data-slot="${SLOTS.skinToneTrigger}"]`)?.focus();
-  }, []);
+  }, [setOpen]);
   const toggle = () => (open ? close() : setOpen(true));
   useSkinToneToggle(toggle);
   // Keys among the options: the keymap's moves along their axis (mirrored right to left), first/last, and close.
@@ -80,7 +85,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     return "handled";
   });
 
-  const merged = React.useMemo(() => mergeRefs(ref, rootRef, region), [ref, region]);
+  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, rootRef, region), [ref, region]);
   const context: SkinToneContextValue = {
     tone,
     open,
@@ -131,6 +136,7 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
       "aria-label": label(tone),
       "aria-haspopup": "true",
       "aria-expanded": open,
+      "data-state": open ? "open" : "closed",
       onClick: toggle,
       style: (s: SkinToneState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
       children,
@@ -139,11 +145,11 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
   );
 });
 
-export type SkinToneOptionsState = { orientation: Orientation; tone: number };
+export type SkinToneOptionsState = { orientation: Orientation; tone: SkinToneValue };
 
 export type SkinToneOptionsProps = Omit<PartElementProps<SkinToneOptionsState>, "children" | "role"> & {
   /** Each tone's option, 0 (none) to 5. Default: `SkinTone.Option`. */
-  children?: (tone: number) => React.ReactNode;
+  children?: (tone: SkinToneValue) => React.ReactNode;
 };
 
 /** The six tones as a radio group, while open. */
@@ -170,11 +176,10 @@ const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(f
   );
 });
 
-export type SkinToneOptionState = { tone: number; selected: boolean };
+export type SkinToneOptionState = { tone: SkinToneValue; selected: boolean };
 
 export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButtonElement, "onClick" | "role"> & {
-  /** 0 (none) to 5. */
-  tone: number;
+  tone: SkinToneValue;
 };
 
 /** One tone, as a radio. Without children, a color swatch. */
@@ -194,6 +199,7 @@ const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(
           "aria-label": label(tone),
           tabIndex: selected ? 0 : -1,
           "data-slot": SLOTS.skinToneOption,
+          "data-selected": selected || undefined,
           onClick: () => choose(tone),
           style: (s: SkinToneOptionState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
           children,
