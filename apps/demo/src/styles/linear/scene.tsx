@@ -89,19 +89,12 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
         <div className="flex min-h-0 flex-1">
           <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pb-10 [scrollbar-width:none]">
             <div className="relative ml-[53.5px] w-[596px] pt-[59.8px]">
-              <ScenePicker
-                appStyle={linear}
-                label="Set icon"
-                title="Set icon"
-                onSelect={(s) => setIcon(s.unified)}
-                pickerClassName={POPUP_SHADOW}
-                triggerClassName="absolute top-[59.8px] -left-10 flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-popup-open:bg-(--hover)"
-              >
-                <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
-              </ScenePicker>
-              <h1 className="text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
-                Emoji popover clips under the toolbar
-              </h1>
+              <div className="flex items-center gap-3">
+                <IconPopover value={icon} onChange={setIcon} />
+                <h1 className="text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
+                  Emoji popover clips under the toolbar
+                </h1>
+              </div>
               <Description />
               <div className="mt-[26px] -ml-1.5 flex h-7 items-center gap-1">
                 <Pills reactions={reactions} onToggle={(u) => setReactions((r) => toggleReaction(r, u))} />
@@ -186,20 +179,11 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
           </span>
         </div>
         <div className="px-[14px]">
-          <div className="mt-[10.3px] flex items-start gap-2">
+          <div className="mt-[10.3px] flex items-center gap-3">
+            <IconPopover value={icon} onChange={setIcon} sheet />
             <h1 className="min-w-0 flex-1 text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
               Emoji popover clips under the toolbar
             </h1>
-            <ScenePicker
-              appStyle={linear}
-              label="Set icon"
-              title="Set icon"
-              sheet
-              onSelect={(s) => setIcon(s.unified)}
-              triggerClassName="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
-            >
-              <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
-            </ScenePicker>
           </div>
           <div className="mt-6 ml-1.5 flex h-6 items-center gap-1.5 text-[12px] leading-3 font-medium" aria-hidden>
             <span className="flex h-6 items-center gap-1.5 rounded-full border-[0.5px] pr-2 pl-1.5" style={{ background: C.chip, borderColor: C.cardBorder }}>
@@ -522,7 +506,7 @@ function Description({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+function IconPicker({ onSelect, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
   return (
     <EmojiPicker.Root
       columns={fluid ? "fit" : 13}
@@ -555,7 +539,7 @@ function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
 
 const ACCENT = "lch(52.418 61.103 288.421)";
 
-const TEAM_TABS = (
+const ICON_TABS = (
   <div role="tablist" className="flex h-[31.5px] shrink-0 items-stretch pr-2 pl-1.5" style={{ borderBottom: `1px solid ${C.tabRule}` }}>
     <button type="button" role="tab" aria-selected={false} disabled className="flex h-full cursor-default items-center px-2 py-[7px] text-[13px] font-medium" style={{ color: C.tabMuted }}>
       Icons
@@ -566,16 +550,16 @@ const TEAM_TABS = (
   </div>
 );
 
-function TeamIconPopover({ value, onChange, sheet = false }: { value: string; onChange: (unified: string) => void; sheet?: boolean }) {
+function IconPopover({ value, onChange, sheet = false }: { value: string; onChange: (unified: string) => void; sheet?: boolean }) {
   const [open, setOpen] = React.useState(false);
   const tile = <Emoji emoji={value} size={18} className="text-[18px] leading-none" />;
   if (sheet)
     return (
       <PickerSheet
         appStyle={linear}
-        Picker={TeamPicker}
-        top={TEAM_TABS}
-        label="Change team icon"
+        Picker={IconPicker}
+        top={ICON_TABS}
+        label="Change issue icon"
         title="Change icon"
         onSelect={(s) => onChange(s.unified)}
         font={FONT}
@@ -587,7 +571,7 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
   return (
     <EmojiPopover.Root open={open} onOpenChange={setOpen}>
       <EmojiPopover.Trigger
-        aria-label="Change team icon"
+        aria-label="Change issue icon"
         title="Change icon"
         className="flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#5e6ad2]"
         style={{ background: C.button }}
@@ -597,8 +581,8 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
       <EmojiPopover.Content side="bottom" align="start" aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
         <FitViewport width={412}>
           <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
-            {TEAM_TABS}
-            <TeamPicker
+            {ICON_TABS}
+            <IconPicker
               onSelect={(s) => {
                 onChange(s.unified);
                 copyEmoji(s);
@@ -613,61 +597,13 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
   );
 }
 
-function TeamFrame({ compact }: { compact: boolean }) {
-  const [icon, setIcon] = React.useState("1f680");
-  if (compact)
-    return (
-      <MobileFrame label="Linear style team header" appStyle={linear} height={150} style={{ ...FRAME, background: C.panel }}>
-        <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[14px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
-          <span>Teams</span>
-          <Chevron />
-          <span>Atlas</span>
-        </div>
-        <div className="px-[14px] pt-6">
-          <div className="flex items-center gap-3">
-            <TeamIconPopover value={icon} onChange={setIcon} sheet />
-            <h1 className="text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
-              Atlas
-            </h1>
-          </div>
-          <p className={cn("mt-3", BODY)} style={{ color: C.muted }}>
-            Platform team · tap the icon to change it
-          </p>
-        </div>
-      </MobileFrame>
-    );
-  return (
-    <SceneFrame width={W} height={196} label="Linear style team header" appStyle={linear} className="rounded-xl shadow-2xl" style={{ ...FRAME, background: C.window }}>
-      <div className={cn("absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[12px]", CARD_SHADOW)} style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
-        <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[21px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
-          <span>Teams</span>
-          <Chevron />
-          <span>Atlas</span>
-        </div>
-        <div className="ml-[53.5px] w-[596px] pt-8">
-          <div className="flex items-center gap-3">
-            <TeamIconPopover value={icon} onChange={setIcon} />
-            <h1 className="text-[24px] leading-8 font-semibold tracking-[-0.16px]" style={{ color: C.title }}>
-              Atlas
-            </h1>
-          </div>
-          <p className={cn("mt-3", BODY)} style={{ color: C.muted }}>
-            Platform team · click the icon to change it
-          </p>
-        </div>
-      </div>
-    </SceneFrame>
-  );
-}
-
 export function LinearScene() {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
   const { ref, compact } = useCompact();
   const issue = useIssue();
   return (
-    <div ref={ref} className={cn("flex w-full flex-col", compact ? "gap-4" : "gap-6")}>
+    <div ref={ref} className="w-full">
       {compact ? <MobileIssueFrame issue={issue} /> : <IssueFrame issue={issue} />}
-      <TeamFrame compact={compact} />
     </div>
   );
 }
