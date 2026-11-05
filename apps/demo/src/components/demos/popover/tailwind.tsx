@@ -1,0 +1,30 @@
+import * as React from "react";
+import type { EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
+import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+
+export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
+  const [picked, setPicked] = React.useState<EmojiSelection | null>(null);
+  return (
+    <EmojiPopover.Root>
+      <EmojiPopover.Trigger
+        aria-label="Open emoji picker"
+        className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm transition-transform outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] data-[state=open]:bg-accent"
+      >
+        <span className="text-base">{picked?.emoji || "🙂"}</span> Add reaction
+      </EmojiPopover.Trigger>
+      <EmojiPopover.Content
+        aria-label="Emoji picker"
+        duration={100}
+        className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
+      >
+        <EmojiPickerCard
+          onSelect={(selection) => {
+            setPicked(selection);
+            onSelect(selection);
+          }}
+        />
+      </EmojiPopover.Content>
+    </EmojiPopover.Root>
+  );
+}

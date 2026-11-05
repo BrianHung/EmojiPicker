@@ -4,6 +4,7 @@ import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
 import { CodeBlock, CopyButton } from "@/components/site/code";
+import { useRenderer } from "@/components/site/shell";
 import { Collapsible, FitBox, Tabs } from "@/components/site/docs";
 import { STYLES, StylePicker, sourceOf, styleById, type Style } from "@/styles";
 import { AppleScene } from "@/styles/apple/scene";
@@ -19,7 +20,8 @@ function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: Rende
   );
 }
 
-export function Hero({ renderer }: { renderer: Renderer | "auto" }) {
+export function Hero() {
+  const renderer = useRenderer();
   const [id, setId] = React.useState("apple");
   const appStyle = styleById(id);
   const source = React.useMemo(() => sourceOf(id, "picker"), [id]);

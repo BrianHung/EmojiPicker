@@ -27,6 +27,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
     markdownDocs(),
+    // A demo imported with `?react-aria` (components/site/demo.tsx) gets React Aria's EmojiPopover in place of Floating UI's.
+    {
+      name: "react-aria-demos",
+      enforce: "pre",
+      resolveId(source, importer) {
+        if (source === "@brianhung/emoji-picker/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("@brianhung/emoji-picker/react-aria", importer, { skipSelf: true });
+      },
+    },
     // Transformers.js loads the ONNX Runtime wasm from jsDelivr; the bundled copy (25.6 MiB) is
     // unused and over the Workers 25 MiB asset limit.
     {
@@ -45,11 +53,13 @@ export default defineConfig({
     // condition, scoped so other packages' `source` conditions stay off): no build step in dev.
     // Deployed on its own, apps/demo uses the published build.
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
-    // `@/…` is src/ (shadcn's aliases in components.json); `@/registry/…` is the registry item the site renders.
+    // `@/…` is src/ (shadcn's aliases in components.json); `@/registry/…` and `@/components/ui/emoji-picker`
+    // (as an app imports it once installed) are the registry item the site renders.
     alias: [
       // E2E_POPOVER=react-aria: the site's EmojiPopover on React Aria, for the e2e suites.
       ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker\/floating-ui$/, replacement: "@brianhung/emoji-picker/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
+      { find: /^@\/components\/ui\/emoji-picker$/, replacement: fileURLToPath(new URL("./registry/emoji-picker.tsx", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
   },
