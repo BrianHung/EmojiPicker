@@ -129,7 +129,7 @@ function MobileTopBar({ icon, title }: { icon: string; title: string }) {
 
 function TopBar({ icon, title }: { icon: string; title: string }) {
   return (
-    <div className="flex h-[45px] shrink-0 items-center gap-1 px-3 text-[14px]" aria-hidden>
+    <div className="flex h-11 shrink-0 items-center gap-1 px-3 text-[14px] leading-[1.2]" aria-hidden>
       <span className="flex h-6 items-center gap-1.5 rounded-[4px] px-1.5" style={{ color: MUTED }}>
         Team space
       </span>

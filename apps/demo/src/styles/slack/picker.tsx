@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { EmojiPicker } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
@@ -45,7 +46,7 @@ function CustomTabIcon() {
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(#ffffff, #1a1d21)",
   "--emoji-picker-foreground": "light-dark(#1d1c1d, #d1d2d3)",
-  "--emoji-picker-muted": "light-dark(#454447, #ababad)",
+  "--emoji-picker-muted": "light-dark(#454447, #b9babd)",
   "--emoji-picker-subtle": "light-dark(#868686, #818385)",
   "--slack-button-border": "light-dark(color-mix(in oklab, #5e5d60 45%, transparent), #565856)",
   "--slack-placeholder": "light-dark(#5e5d60, #9a9b9e)",
@@ -53,9 +54,8 @@ const tokens: Tokens = {
   "--emoji-picker-input-border": "light-dark(#7c7a7f, #797c81)",
   "--emoji-picker-panel": "light-dark(#f8f8f8, #222529)",
   "--emoji-picker-hover": "light-dark(#f8f8f8, #222529)",
-  "--emoji-picker-selected": "light-dark(#e8f5fa, color-mix(in oklab, #1d9bd1 20%, transparent))",
   "--emoji-picker-accent": "light-dark(#83388a, #e3ceeb)",
-  "--emoji-picker-ring": "#1264a3",
+  "--emoji-picker-ring": "light-dark(#1264a3, #2ba5ce)",
   "--emoji-picker-radius": "6px",
   "--emoji-picker-font": "Lato, 'Slack-Lato', system-ui, sans-serif",
   "--emoji-picker-shadow": "0 0 0 1px light-dark(rgb(29 28 29 / 0.13), rgb(232 232 232 / 0.13)), 0 4px 12px rgb(0 0 0 / 0.08)",
@@ -69,8 +69,14 @@ const tokens: Tokens = {
   "--slack-mine": "light-dark(#e3f8ff, #0a77a7)",
   "--slack-mine-foreground": "light-dark(#1264a3, #f8f8f8)",
   "--slack-mine-ring": "light-dark(#1264a3, transparent)",
-  "--slack-pill-hover-border": "#bdbdbd",
+  "--slack-strong": "light-dark(#1d1c1d, #f8f8f8)",
+  "--slack-match": "light-dark(currentColor, #dea700)",
+  "--slack-match-background": "light-dark(rgb(255 198 0 / 0.18), rgb(160 115 0 / 0.18))",
+  "--slack-kbd": "light-dark(#eaeaea, rgb(248 248 248 / 0.06))",
 };
+
+const HOVER = ["rgb(155 223 88 / 0.7)", "rgb(149 211 254 / 0.7)", "rgb(247 233 34 / 0.7)", "rgb(238 166 252 / 0.7)", "rgb(255 213 143 / 0.7)", "rgb(211 209 255 / 0.7)"];
+const cellHover = ({ row, column }: { row: number; column: number }) => ({ "--slack-cell-hover": HOVER[(row * 9 + column) % 6] }) as React.CSSProperties;
 
 const TAB = "flex h-[38px] w-[34.3px] shrink-0 items-start justify-center rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-picker-subtle hover:text-picker-foreground";
 
@@ -87,7 +93,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       style={tokens}
       className={cn(
         ROOT,
-        "group h-[454px] w-[361px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:33px] [--emoji-header-height:28px] [--emoji-image-size:22px] [--emoji-list-padding:9px] [--emoji-size:22px]",
+        "group h-[454px] w-[361px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:33px] [--emoji-header-height:26px] [--emoji-image-size:22px] [--emoji-list-padding:9px] [--emoji-size:22px]",
         className,
       )}
     >
@@ -111,7 +117,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
           <EmojiPicker.Search.Input
             placeholder="Search all emoji"
             autoFocus={autoFocus}
-            className="h-9 w-full rounded-[8px] border border-picker-input-border bg-picker-background px-3 py-1 text-[15px] outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
+            className="h-9 w-full rounded-[8px] border border-picker-input-border bg-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
           >
             <SearchClear />
           </EmojiPicker.Search.Input>
@@ -126,10 +132,13 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
         <EmojiPicker.List className="outline-none">
           {() => (
             <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="block h-7 bg-picker-background/95 pt-px pr-3.5 pl-3.5 text-[13px] leading-6 font-bold text-picker-foreground" />
+              <EmojiPicker.List.SectionTitle className="mr-[3px] -ml-px block h-[26px] bg-picker-background/95 px-3.5 text-[13px] leading-[26px] font-bold text-picker-foreground" />
               <EmojiPicker.List.Items>
                 {() => (
-                  <EmojiPicker.List.Cell className={cn(CELL, "isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-focus-visible:before:bg-picker-selected data-[highlighted]:before:bg-picker-selected")} />
+                  <EmojiPicker.List.Cell
+                    style={cellHover}
+                    className={cn(CELL, "isolate before:absolute before:inset-[0_0_1px_-2px] before:-z-10 before:rounded-[6px] before:transition-[background-color] before:duration-50 before:ease-[ease-out] hover:before:bg-(--slack-cell-hover) data-focus-visible:before:bg-(--slack-cell-hover) data-[highlighted]:before:bg-(--slack-cell-hover)")}
+                  />
                 )}
               </EmojiPicker.List.Items>
             </EmojiPicker.List.Section>
@@ -162,17 +171,17 @@ export const slack: Style = {
     more: { className: "text-(--slack-icon)", icon: <I.SmilePlus size={18} strokeWidth={1.75} /> },
   },
   autocomplete: {
-    className: "w-[473.5px] max-w-full rounded-picker bg-picker-panel font-picker shadow-picker",
-    list: "max-h-[220px] pt-2",
-    item: "h-8 gap-3 rounded-none px-4 py-0 text-[15px] leading-[22.4px] text-picker-foreground data-[highlighted]:bg-(--slack-wash)",
-    match: "",
-    hint: <span className="text-[13px] text-picker-foreground">Enter</span>,
+    className: "w-fit min-w-[min(420px,100%)] max-w-[min(540px,100%)] rounded-picker bg-picker-panel font-picker shadow-picker",
+    list: "max-h-[220px] py-2",
+    item: "h-8 gap-2 rounded-none px-4 py-0 text-[15px] leading-[22.4px] text-picker-foreground data-[highlighted]:bg-(--slack-wash)",
+    match: "bg-(--slack-match-background) text-(--slack-match)",
+    hint: <kbd className="mr-4 flex h-5 items-center rounded-[4px] border-b border-picker-border bg-(--slack-kbd) px-1 font-picker text-[13px] leading-[13px] text-picker-foreground">Enter</kbd>,
   },
   pill: {
-    base: "h-6 rounded-full bg-(--slack-wash) px-2 text-[12px] leading-3 text-picker-foreground not-aria-pressed:hover:shadow-[0_0_0_1px_var(--slack-pill-hover-border)]",
+    base: "h-6 rounded-full bg-(--slack-wash) px-2 text-[12px] leading-3 text-picker-foreground not-aria-pressed:hover:bg-transparent not-aria-pressed:hover:shadow-[0_0_0_1px_var(--emoji-picker-input-border)]",
     mine: "aria-pressed:bg-(--slack-mine) aria-pressed:text-(--slack-mine-foreground) aria-pressed:shadow-[0_0_0_1px_var(--slack-mine-ring)]",
     count: "font-bold",
-    add: "h-6 rounded-full bg-(--slack-wash) px-2 text-picker-foreground",
+    add: "h-6 rounded-full bg-(--slack-wash) px-2 text-(--slack-strong)",
     addIcon: <I.SmilePlus size={18} strokeWidth={1.75} />,
   },
 };

@@ -26,16 +26,17 @@ const C = {
   cardBorder: ld("lch(91.9 0 282)", "lch(16.793 1.93 272)"),
   button: ld("lch(94.854 0.5 282)", "lch(14.006 0.593 272)"),
   divider: ld("lch(89.84 0 282)", "lch(18.48 1.48 272)"),
-  hover: ld("lch(94.854 0.5 282)", "lch(11 1 272)"),
+  hover: ld("lch(94.854 0.5 282)", "lch(14.006 0.593 272)"),
   chip: ld("lch(100 0 282)", "lch(10.149 0.689 272)"),
   status: ld("lch(64.64 1.25 282)", "lch(61.8 1.2 272)"),
   input: ld("lch(20 1 282)", "lch(90.826 1.425 272)"),
-  placeholder: ld("lch(66 1 282)", "lch(61.803 1.2 272)"),
+  placeholder: ld("lch(66 1 282)", "lch(39.452 1.425 272)"),
   tabRule: ld("lch(91.9 0 282)", "lch(21.36 1.93 272)"),
   tabMuted: ld("lch(40 1 282)", "lch(64.714 1.425 272)"),
   tabText: ld("lch(20 1 282)", "lch(91.178 1.425 272)"),
 };
 const FONT = "'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const FRAME = { color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'", "--hover": C.hover, "--text": C.text } as React.CSSProperties;
 const POPUP_SHADOW = "shadow-[0_6px_18px_lch(0_0_0/0.02),0_3px_9px_lch(0_0_0/0.04),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_3px_8px_lch(0_0_0/0.125),0_2px_5px_lch(0_0_0/0.125),0_1px_1px_lch(0_0_0/0.125)]";
 const CARD_SHADOW = "shadow-[0_3px_6px_-2px_lch(0_0_0/0.02),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_0.5px_1px_1px_lch(0_0_0/0.3)]";
 
@@ -81,8 +82,8 @@ function useIssue() {
 function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   return (
-    <SceneFrame width={W} height={H} label="Linear style issue" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
-      <div className="absolute inset-[8.5px] right-[8.5px] flex flex-col overflow-hidden rounded-[8px]" style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
+    <SceneFrame width={W} height={H} label="Linear style issue" appStyle={linear} className="rounded-xl shadow-2xl" style={{ ...FRAME, background: C.window }}>
+      <div className={cn("absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[12px]", CARD_SHADOW)} style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
         <Breadcrumb icon={icon} />
         <div className="flex min-h-0 flex-1">
           <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pb-10 [scrollbar-width:none]">
@@ -108,7 +109,7 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
                   <Paperclip />
                 </span>
               </div>
-              <div className="mt-[27.7px] flex h-6 items-center gap-1.5 text-[13px] font-medium" style={{ color: C.muted }}>
+              <div className="mt-[27.7px] -ml-1.5 flex h-6 w-fit items-center gap-1.5 rounded-full pr-3 pl-1.5 text-[12px] font-medium" style={{ color: C.text }}>
                 <PlusIcon /> Add sub-issues
               </div>
               <div className="mt-[14.3px] h-px" style={{ background: C.divider }} />
@@ -116,8 +117,8 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
                 <h2 className="text-[15px] leading-[23px] font-semibold" style={{ color: C.title }}>
                   Activity
                 </h2>
-                <div className="ml-auto flex items-center gap-3 text-[13px] font-medium" style={{ color: C.muted }}>
-                  Unsubscribe
+                <div className="ml-auto flex items-center gap-1 text-[12px] font-medium" style={{ color: C.muted }}>
+                  <span className="flex h-8 items-center rounded-full px-3">Unsubscribe</span>
                   <Avatar name="You" size={20} color="#5e6ad2" fontSize={9} />
                 </div>
               </div>
@@ -146,7 +147,7 @@ function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   const round = "flex size-7 items-center justify-center rounded-full border-[0.5px]";
   return (
-    <MobileFrame label="Linear style issue" appStyle={linear} height={680} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+    <MobileFrame label="Linear style issue" appStyle={linear} height={680} style={{ ...FRAME, background: C.panel }}>
       <div className="flex h-11 shrink-0 items-center pr-3 pl-2 text-[13px] font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
         <span className={round} style={{ borderColor: "transparent" }}>
           <SidebarIcon />
@@ -275,6 +276,16 @@ function Breadcrumb({ icon }: { icon: string }) {
   );
 }
 
+function Prop({ children, muted = false }: { children: React.ReactNode; muted?: boolean }) {
+  return (
+    <div className="flex h-8 items-center">
+      <span className="-ml-1.5 flex h-7 items-center gap-1.5 rounded-full pr-2.5 pl-1.5 text-[13px] font-medium" style={muted ? { color: C.muted } : undefined}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
 function Properties() {
   const row = "flex h-8 items-center gap-2.5 rounded-[6px] px-2 -mx-2 text-[13px] font-medium";
   return (
@@ -282,28 +293,28 @@ function Properties() {
       <div className="mb-1 flex h-8 items-center text-[13px] font-medium" style={{ color: C.muted }}>
         Properties
       </div>
-      <div className={row}>
+      <Prop>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
           <circle cx="7" cy="7" r="6" style={{ stroke: C.status }} strokeWidth="1.5" />
         </svg>
         Todo
-      </div>
-      <div className={row} style={{ color: C.muted }}>
+      </Prop>
+      <Prop muted>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden>
           <rect x="1" y="8" width="3" height="4" rx="1" opacity=".5" />
           <rect x="5.5" y="5" width="3" height="7" rx="1" opacity=".5" />
           <rect x="10" y="2" width="3" height="10" rx="1" opacity=".5" />
         </svg>
         Set priority
-      </div>
-      <div className={row} style={{ color: C.muted }}>
+      </Prop>
+      <Prop muted>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
           <circle cx="7" cy="7" r="6" strokeDasharray="2 1.6" />
           <circle cx="7" cy="5.6" r="1.8" />
           <path d="M3.8 11c.7-1.4 1.8-2.1 3.2-2.1s2.5.7 3.2 2.1" />
         </svg>
         Assign
-      </div>
+      </Prop>
       <div className="mt-5 mb-1 flex h-8 items-center text-[13px] font-medium" style={{ color: C.muted }}>
         Labels
       </div>
@@ -319,12 +330,12 @@ function Properties() {
       <div className="mt-5 mb-1 flex h-8 items-center text-[13px] font-medium" style={{ color: C.muted }}>
         Project
       </div>
-      <div className={row} style={{ color: C.muted }}>
+      <Prop muted>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
           <path d="M2 4.5 7 2l5 2.5v5L7 12 2 9.5v-5Z" />
         </svg>
         Add to project
-      </div>
+      </Prop>
     </aside>
   );
 }
@@ -404,13 +415,13 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   return (
     <div className={cn("relative", !compact && "mt-4 -ml-2 w-[612px]")}>
       <LinearEmojiMenu {...emoji} />
-      <div className={cn("relative h-[83px] rounded-[8px] px-4 py-3", CARD_SHADOW)} style={{ background: C.card, border: `0.5px solid ${C.cardBorder}` }}>
+      <div className={cn("relative min-h-[83px] rounded-[8px] px-4 pt-3 pb-[45px]", CARD_SHADOW)} style={{ background: C.card, border: `0.5px solid ${C.cardBorder}` }}>
         <textarea
           {...inputProps}
           rows={1}
           aria-label="Leave a comment"
           placeholder="Leave a comment..."
-          className={cn("block h-6 w-full resize-none bg-transparent outline-none placeholder:text-(--ph)", BODY)}
+          className={cn("block min-h-6 w-full resize-none bg-transparent outline-none field-sizing-content placeholder:text-(--ph)", BODY)}
           style={{ color: C.input, "--ph": C.placeholder } as React.CSSProperties}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey || !e.shiftKey) && !isComposingKey(e.nativeEvent)) {
@@ -605,7 +616,7 @@ function TeamFrame({ compact }: { compact: boolean }) {
   const [icon, setIcon] = React.useState("1f680");
   if (compact)
     return (
-      <MobileFrame label="Linear style team header" appStyle={linear} height={150} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
+      <MobileFrame label="Linear style team header" appStyle={linear} height={150} style={{ ...FRAME, background: C.panel }}>
         <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[14px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
           <span>Teams</span>
           <Chevron />
@@ -625,8 +636,8 @@ function TeamFrame({ compact }: { compact: boolean }) {
       </MobileFrame>
     );
   return (
-    <SceneFrame width={W} height={196} label="Linear style team header" appStyle={linear} className="rounded-xl shadow-2xl" style={{ background: C.window, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>
-      <div className="absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[8px]" style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
+    <SceneFrame width={W} height={196} label="Linear style team header" appStyle={linear} className="rounded-xl shadow-2xl" style={{ ...FRAME, background: C.window }}>
+      <div className={cn("absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[12px]", CARD_SHADOW)} style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
         <div className="flex h-11 shrink-0 items-center gap-2 pr-3 pl-[21px] text-[13px] leading-4 font-medium" style={{ borderBottom: `0.5px solid ${C.divider}` }} aria-hidden>
           <span>Teams</span>
           <Chevron />

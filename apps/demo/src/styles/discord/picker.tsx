@@ -68,7 +68,7 @@ function Footer() {
   const first = useFrequentEmoji(1)[0];
   const shown = active ?? (first ? store.get(first) : undefined);
   return (
-    <div className="flex h-12 shrink-0 items-center gap-2 bg-picker-panel px-4">
+    <div className="flex h-12 shrink-0 items-center gap-2 border-t border-picker-input-border bg-picker-panel px-4">
       <span className="flex size-7 items-center justify-center">{shown ? <Emoji emoji={shown.unified} size={28} /> : null}</span>
       <span className="truncate text-base leading-5 font-semibold">{shown ? shown.shortcodes.map((c) => `:${c}:`).join(" ") || shown.name : ""}</span>
     </div>
@@ -102,7 +102,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
         inactiveTab="text-picker-muted"
       />
       {search ? (
-        <EmojiPicker.Search className="relative flex h-[53px] shrink-0 items-center gap-3 px-4 pb-[13px] [--search-icon-x:28px]">
+        <EmojiPicker.Search className="relative flex h-[53px] shrink-0 items-center gap-3 border-b border-picker-border px-4 pb-3 [--search-icon-x:28px]">
           <EmojiPicker.Search.Input
             placeholder="Find the perfect emoji"
             autoFocus={autoFocus}
@@ -112,6 +112,9 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
           </EmojiPicker.Search.Input>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-3 left-[var(--search-icon-x,12px)] translate-y-0 text-picker-muted" />
           <HandTone emoji="👏" className="flex size-[38px] items-center justify-center text-[28px] leading-none" />
+          <button type="button" className="h-10 min-w-[100px] shrink-0 rounded-[8px] border border-(--discord-chip-border) bg-(--discord-chip) px-[15px] py-[7px] text-[16px] text-(--discord-strong)">
+            Add Emoji
+          </button>
         </EmojiPicker.Search>
       ) : null}
       <div className="flex min-h-0 flex-1">
@@ -190,5 +193,6 @@ export const discord: Style = {
     mine: "aria-pressed:border-picker-accent aria-pressed:bg-(--discord-mine) aria-pressed:text-(--discord-mine-foreground)",
     add: "h-[30px] rounded-[8px] bg-(--discord-chip) px-1.5 text-(--discord-pill-foreground)",
     emoji: 20,
+    count: "min-w-3",
   },
 };
