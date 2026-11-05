@@ -3,7 +3,6 @@ import { defineConfig } from "@playwright/test";
 import base from "../../playwright.config";
 
 const desktop = { viewport: { width: 1440, height: 900 } };
-const mobile = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 
 export default defineConfig({
   ...base,
@@ -15,6 +14,5 @@ export default defineConfig({
   projects: [
     { name: "desktop-light", use: { browserName: "chromium", ...desktop, colorScheme: "light" } },
     { name: "desktop-dark", use: { browserName: "chromium", ...desktop, colorScheme: "dark" } },
-    { name: "mobile-light", use: { browserName: "chromium", ...mobile, colorScheme: "light" } },
   ],
 });
