@@ -270,6 +270,8 @@ Each part follows its WAI-ARIA Authoring Practices pattern. Nothing animates by 
 [data-slot="emoji-picker"] { --emoji-font-family: "Noto Color Emoji"; }
 ```
 
+Twemoji as a font: `import "@brianhung/emoji-picker-twemoji-font/twemoji.css"` and set `--emoji-font-family: Twemoji`.
+
 **Own artwork.** Images instead of a font: `imageUrl` replaces particular emoji (or all of them) under any renderer:
 
 ```tsx

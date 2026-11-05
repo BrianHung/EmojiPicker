@@ -28,6 +28,7 @@
     "@base-ui/react": "^1.9.0",
     "@brianhung/emoji-picker-react": "*",
     "@brianhung/emoji-picker-core": "*",
+    "@brianhung/emoji-picker-twemoji-font": "*",
     "@floating-ui/react": "^0.27.20",
     "@huggingface/transformers": "^4.3.2",
     "@lexical/react": "^0.53.0",
