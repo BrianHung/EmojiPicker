@@ -3,79 +3,134 @@ import { createStore } from "./reactive";
 export type EmojiStorage = {
   read(): string | null;
   write(value: string): void;
+  subscribe?(listener: () => void): () => void;
 };
+
+// count is the use count decayed by half every 14 days, as of lastUsed
+export type FrequentEntry = { count: number; lastUsed: number };
+export type Frequents = Readonly<Record<string, FrequentEntry>>;
+export type FrequentsChangeDetails = { reason: "pick" | "remove" | "clear"; emoji?: string };
 
 export type FrequencyStore = {
   record(unified: string): void;
+  remove(unified: string): void;
+  clear(): void;
   top(n: number): readonly string[];
   score(unified: string): number;
+  entries(): Frequents;
   subscribe(listener: () => void): () => void;
-  version(): number;
-  clear(): void;
 };
 
 export type FrequencyStoreOptions = {
-  storage?: EmojiStorage;
-  key?: string;
-  halfLifeDays?: number;
-  defaults?: readonly string[];
-  max?: number;
+  frequents?: Frequents;
+  defaultFrequents?: Frequents;
+  onFrequentsChange?: (frequents: Frequents, details: FrequentsChangeDetails) => void;
+  frequentsStorage?: EmojiStorage | null;
 };
 
-export const DEFAULT_FREQUENT = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
+const DEFAULTS = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
+const HALF_LIFE = 14 * 864e5;
+const MAX = 64;
+const NONE: Frequents = {};
 
-type Entry = readonly [score: number, updatedAt: number];
-type Entries = Readonly<Record<string, Entry>>;
-type FrequencyState = { entries: Entries; version: number };
-type FrequencyAction = { type: "record"; unified: string; now: number } | { type: "clear" };
+const decayed = ({ count, lastUsed }: FrequentEntry, now: number) => count * 0.5 ** ((now - lastUsed) / HALF_LIFE);
+const ranked = (entries: Frequents, now: number) => Object.entries(entries).sort((a, b) => decayed(b[1], now) - decayed(a[1], now));
+const capped = (entries: Frequents, now: number): Frequents => Object.fromEntries(ranked(entries, now).slice(0, MAX));
 
-export function createFrequencyStore({ storage = localStorageAdapter("emoji-picker:frequents"), halfLifeDays = 14, defaults = DEFAULT_FREQUENT, max = 64 }: FrequencyStoreOptions = {}): FrequencyStore {
-  const halfLife = halfLifeDays * 864e5;
-  const decayed = ([score, at]: Entry, now: number) => score * 0.5 ** ((now - at) / halfLife);
-  const ranked = (entries: Entries, now: number) => Object.entries(entries).sort((a, b) => decayed(b[1], now) - decayed(a[1], now));
+export function mergeFrequents(a: Frequents, b: Frequents): Frequents {
+  const merged: Record<string, FrequentEntry> = { ...a };
+  for (const [unified, entry] of Object.entries(b)) {
+    const other = merged[unified];
+    const lastUsed = Math.max(entry.lastUsed, other?.lastUsed ?? 0);
+    merged[unified] = other ? { count: decayed(entry, lastUsed) + decayed(other, lastUsed), lastUsed } : entry;
+  }
+  return capped(merged, Date.now());
+}
 
-  const reduce = (state: FrequencyState, action: FrequencyAction): FrequencyState => {
-    if (action.type === "clear") return { entries: {}, version: state.version + 1 };
-    const { unified, now } = action;
-    const prev = state.entries[unified];
-    const entries = { ...state.entries, [unified]: [(prev ? decayed(prev, now) : 0) + 1, now] as const };
-    return { entries: Object.fromEntries(ranked(entries, now).slice(0, max)), version: state.version + 1 };
-  };
-  const store = createStore<FrequencyState, FrequencyAction>({ entries: parse(storage.read()), version: 0 }, reduce);
-  const tops = new WeakMap<FrequencyState, Map<number, readonly string[]>>();
+type FrequencyState = { own: Frequents; controlled: Frequents | undefined };
+type FrequencyAction = { type: "own"; entries: Frequents } | { type: "control"; entries: Frequents | undefined };
 
-  const top = (n: number) => {
-    const state = store.getSnapshot();
-    const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
-    tops.set(state, byCount);
-    const list = byCount.get(n) ?? [...new Set([...ranked(state.entries, Date.now()).map(([u]) => u), ...defaults])].slice(0, n);
-    byCount.set(n, list);
-    return list;
-  };
-  const commit = (action: FrequencyAction) => {
-    store.dispatch(action);
-    storage.write(JSON.stringify(store.getSnapshot().entries));
+const reduce = (state: FrequencyState, action: FrequencyAction): FrequencyState =>
+  action.type === "own" ? (action.entries === state.own ? state : { ...state, own: action.entries }) : action.entries === state.controlled ? state : { ...state, controlled: action.entries };
+
+export function createFrequencyStore({
+  frequents,
+  defaultFrequents = NONE,
+  onFrequentsChange,
+  frequentsStorage = localStorageAdapter("emoji-picker:frequents"),
+}: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {
+  const read = () => parse(frequentsStorage?.read() ?? null) ?? defaultFrequents;
+  const store = createStore<FrequencyState, FrequencyAction>({ own: read(), controlled: frequents }, reduce);
+  const callbacks = { onFrequentsChange };
+  const entries = () => store.getSnapshot().controlled ?? store.getSnapshot().own;
+  const tops = new WeakMap<Frequents, Map<number, readonly string[]>>();
+
+  const change = (next: Frequents, details: FrequentsChangeDetails) => {
+    if (store.getSnapshot().controlled === undefined) {
+      frequentsStorage?.write(JSON.stringify(next));
+      store.dispatch({ type: "own", entries: next });
+    }
+    callbacks.onFrequentsChange?.(next, details);
   };
 
   return {
-    record: (unified) => commit({ type: "record", unified, now: Date.now() }),
-    top,
+    record(unified) {
+      const now = Date.now();
+      const prev = entries()[unified];
+      change(capped({ ...entries(), [unified]: { count: (prev ? decayed(prev, now) : 0) + 1, lastUsed: now } }, now), { reason: "pick", emoji: unified });
+    },
+    remove(unified) {
+      if (!(unified in entries())) return;
+      const { [unified]: _, ...rest } = entries();
+      change(rest, { reason: "remove", emoji: unified });
+    },
+    clear: () => change(NONE, { reason: "clear" }),
+    top(n) {
+      const state = entries();
+      const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
+      tops.set(state, byCount);
+      const list = byCount.get(n) ?? [...new Set([...ranked(state, Date.now()).map(([u]) => u), ...DEFAULTS])].slice(0, n);
+      byCount.set(n, list);
+      return list;
+    },
     score(unified) {
-      const entry = store.getSnapshot().entries[unified];
+      const entry = entries()[unified];
       return entry ? decayed(entry, Date.now()) : 0;
     },
-    subscribe: store.subscribe,
-    version: () => store.getSnapshot().version,
-    clear: () => commit({ type: "clear" }),
+    entries,
+    subscribe: syncWith(frequentsStorage, store.subscribe, () => store.dispatch({ type: "own", entries: read() })),
+    control(value, onChange) {
+      callbacks.onFrequentsChange = onChange;
+      store.dispatch({ type: "control", entries: value });
+    },
   };
 }
 
-function parse(raw: string | null): Entries {
+// Another tab's writes arrive while anything listens
+export function syncWith(storage: EmojiStorage | null, subscribe: (listener: () => void) => () => void, sync: () => void) {
+  let count = 0;
+  let stop: (() => void) | undefined;
+  return (listener: () => void) => {
+    const unsubscribe = subscribe(listener);
+    if (count++ === 0 && storage?.subscribe) {
+      sync();
+      stop = storage.subscribe(sync);
+    }
+    return () => {
+      unsubscribe();
+      if (--count === 0) stop?.();
+    };
+  };
+}
+
+const isEntry = (value: unknown): value is FrequentEntry => typeof (value as FrequentEntry)?.count === "number" && typeof (value as FrequentEntry).lastUsed === "number";
+
+function parse(raw: string | null): Frequents | undefined {
   try {
-    const value = raw ? JSON.parse(raw) : {};
-    return value && typeof value === "object" ? value : {};
+    const value: unknown = raw ? JSON.parse(raw) : undefined;
+    return value && typeof value === "object" ? Object.fromEntries(Object.entries(value).filter(([, entry]) => isEntry(entry))) : undefined;
   } catch {
-    return {};
+    return undefined;
   }
 }
 
@@ -84,7 +139,8 @@ export function localStorageAdapter(key: string): EmojiStorage {
   return {
     read() {
       try {
-        return globalThis.localStorage?.getItem(key) ?? memory.read();
+        const local = globalThis.localStorage;
+        return local ? local.getItem(key) : memory.read();
       } catch {
         return memory.read();
       }
@@ -94,6 +150,12 @@ export function localStorageAdapter(key: string): EmojiStorage {
       try {
         globalThis.localStorage?.setItem(key, value);
       } catch {}
+    },
+    subscribe(listener) {
+      if (typeof addEventListener !== "function") return () => {};
+      const onStorage = (event: StorageEvent) => event.key === key && listener();
+      addEventListener("storage", onStorage);
+      return () => removeEventListener("storage", onStorage);
     },
   };
 }

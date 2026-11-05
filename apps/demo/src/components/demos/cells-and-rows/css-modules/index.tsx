@@ -4,7 +4,7 @@ import styles from "./index.module.css";
 
 function QuickRow({ onPick }: { onPick: (selection: EmojiSelection) => void }) {
   const store = useEmojiStore();
-  const top = useFrequentEmoji(8);
+  const top = useFrequentEmoji({ limit: 8 }).items;
   return (
     <div className={styles.row}>
       <div className={styles.label}>Quick reactions</div>

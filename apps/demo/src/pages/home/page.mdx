@@ -168,7 +168,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
     <EmojiPopover.Content>…</EmojiPopover.Content>
   </EmojiPopover.Root>
 
-  <EmojiPicker.Root reactions={useFrequentEmoji(5)}>
+  <EmojiPicker.Root reactions={useFrequentEmoji({ limit: 5 }).items}>
     <EmojiPicker.Reactions />
     <EmojiPicker.Panel>…</EmojiPicker.Panel>
   </EmojiPicker.Root>

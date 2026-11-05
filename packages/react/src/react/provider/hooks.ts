@@ -3,7 +3,14 @@ import { createSearch, type SearchState, type SkinToneValue } from "@brianhung/e
 import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
-export function useFrequentEmoji(n = 5): readonly string[] {
+export type FrequentEmoji = {
+  items: readonly string[];
+  record(unified: string): void;
+  remove(unified: string): void;
+  clear(): void;
+};
+
+export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): FrequentEmoji {
   const { store } = useEmojiContext();
   const subscribe = React.useCallback(
     (listener: () => void) => {
@@ -12,7 +19,9 @@ export function useFrequentEmoji(n = 5): readonly string[] {
     },
     [store],
   );
-  return useStore({ subscribe, getSnapshot: () => store.frequent(n) });
+  const items = useStore({ subscribe, getSnapshot: () => store.frequent(limit) });
+  const { record, remove, clear } = store.frequents;
+  return React.useMemo(() => ({ items, record, remove, clear }), [items, record, remove, clear]);
 }
 
 export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {

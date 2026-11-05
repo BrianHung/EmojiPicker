@@ -123,7 +123,7 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
 export function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
     <EmojiPicker.Root
-      reactions={useFrequentEmoji(count)}
+      reactions={useFrequentEmoji({ limit: count }).items}
       onSelect={(selection, { collapse }) => {
         onSelect(selection);
         collapse?.();

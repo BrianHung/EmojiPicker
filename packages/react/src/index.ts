@@ -17,7 +17,7 @@ export {
 } from "./react/parts";
 
 export { EmojiProvider, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
-export type { EmojiLabels, EmojiProviderProps, EmojiSearchState, ImageUrl } from "./react/provider";
+export type { EmojiLabels, EmojiProviderProps, EmojiSearchState, FrequentEmoji, ImageUrl } from "./react/provider";
 export type {
   CategoryOption,
   CollapsedCategories,
@@ -49,7 +49,7 @@ export type { EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";
 export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
 
-export { createFrequencyStore, findShortcodeTrigger, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
+export { findShortcodeTrigger, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
 export type {
   CategoryId,
   CustomEmoji,
@@ -65,7 +65,9 @@ export type {
   EmojiStorage,
   EmojiStore,
   EmojiTrigger,
-  FrequencyStore,
+  FrequentEntry,
+  Frequents,
+  FrequentsChangeDetails,
   Renderer,
   SkinToneValue,
 } from "@brianhung/emoji-picker-core";

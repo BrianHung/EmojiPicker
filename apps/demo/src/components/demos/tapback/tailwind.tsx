@@ -5,7 +5,7 @@ const reaction = "flex size-10 items-center justify-center rounded-full text-[26
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPicker.Root
-      reactions={useFrequentEmoji(5)}
+      reactions={useFrequentEmoji({ limit: 5 }).items}
       onSelect={(selection, { collapse }) => {
         onSelect(selection);
         collapse?.();

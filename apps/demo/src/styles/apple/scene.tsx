@@ -634,7 +634,7 @@ const PILL = { w: 375, h: 64, inset: 16.3, gap: 68.4 };
 const tapbackTop = (rect: Rect) => Math.max(rect.top, 100 + PILL.gap);
 
 function useReactionItems(message: Message, recentCount: number) {
-  const recents = useFrequentEmoji(16).slice(0, recentCount);
+  const recents = useFrequentEmoji({ limit: 16 }).items.slice(0, recentCount);
   const mine = (message.reactedBy ?? "me") === "me" ? message.reactions.at(-1) : undefined;
   return [
     ...TAPBACKS.map((t) => ({ key: `t${t.unified}`, unified: t.unified, label: t.label, tapback: true })),

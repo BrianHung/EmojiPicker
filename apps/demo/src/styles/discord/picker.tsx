@@ -65,7 +65,7 @@ const CATEGORIES = withIcons(ICONS, {
 function Footer() {
   const active = EmojiPicker.useActiveEmoji();
   const store = useEmojiStore();
-  const first = useFrequentEmoji(1)[0];
+  const first = useFrequentEmoji({ limit: 1 }).items[0];
   const shown = active ?? (first ? store.get(first) : undefined);
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 border-t border-picker-input-border bg-picker-panel px-4">

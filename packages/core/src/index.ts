@@ -1,7 +1,7 @@
 export { createEmojiStore } from "./store";
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiData, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreState, EmojiStoreStatus } from "./store";
-export { createFrequencyStore, localStorageAdapter, memoryStorage, DEFAULT_FREQUENT } from "./frequents";
-export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./frequents";
+export { localStorageAdapter, memoryStorage, mergeFrequents } from "./frequents";
+export type { EmojiStorage, FrequencyStore, FrequentEntry, Frequents, FrequentsChangeDetails } from "./frequents";
 export { localeData, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer, ShortcodeSet } from "./platform";
 export { isUnified, nativeToUnified, unifiedToNative, withoutFe0f, withTone, withoutTone } from "./dataset";

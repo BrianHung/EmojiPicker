@@ -31,8 +31,9 @@ export const EmojiContext = React.createContext<ContextValue | null>(null);
 
 export function EmojiProvider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
-  const { skinTone, onSkinToneChange, data, customEmojis, filter, searchEngine } = options;
+  const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
   React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
+  React.useLayoutEffect(() => store.controlFrequents(frequents, onFrequentsChange), [store, frequents, onFrequentsChange]);
   React.useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale }), [store, data, customEmojis, filter, searchEngine, locale]);
   const [detected, setDetected] = React.useState<Renderer>("native");
 

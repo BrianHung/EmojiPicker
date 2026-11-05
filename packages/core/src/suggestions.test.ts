@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
 import type { Dataset } from "./dataset";
-import { createFrequencyStore, memoryStorage } from "./frequents";
 import { createEmojiStore } from "./store";
 import { createEmojiSuggestions } from "./suggestions";
 
@@ -15,7 +14,7 @@ const key = (key: string) => ({
 
 describe("suggestions", () => {
   it("matches a query, moves, and chooses with keys", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequents: createFrequencyStore({ storage: memoryStorage() }) });
+    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
     await store.load();
     const chosen: string[] = [];
     const typeahead = createEmojiSuggestions(store, { id: "ta", onChoose: (s) => chosen.push(typeahead.textFor(s)) });
@@ -43,7 +42,7 @@ describe("suggestions", () => {
   });
 
   it("resets the highlight whenever the reset key changes, even back to an earlier one", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequents: createFrequencyStore({ storage: memoryStorage() }) });
+    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
     await store.load();
     const typeahead = createEmojiSuggestions(store, { query: "heart" });
     typeahead.highlight(2);

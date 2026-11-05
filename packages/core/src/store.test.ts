@@ -2,15 +2,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import data from "../data/en.json";
 import type { CustomEmoji } from "./custom";
 import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
-import { createFrequencyStore, memoryStorage } from "./frequents";
+import { memoryStorage } from "./frequents";
 import { defaultLabels } from "./labels";
 import { interimOf, lexical, progressive, remote } from "./search/search";
 import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
 const dataset = data as unknown as Dataset;
-const frequents = () => createFrequencyStore({ storage: memoryStorage() });
 const frog = (id: string, extra: Partial<CustomEmoji> = {}): CustomEmoji => ({ id, name: id, imageUrl: `/frogs/${id}.png`, ...extra });
-const storeWith = (customEmojis: EmojiStoreOptions["customEmojis"]) => createEmojiStore({ data: dataset, customEmojis, frequents: frequents() });
+const storeWith = (customEmojis: EmojiStoreOptions["customEmojis"]) => createEmojiStore({ data: dataset, customEmojis, frequentsStorage: null });
 const tiny = (locale: string, emojis: [unified: string, name: string, shortcodes?: string[]][]): Dataset => ({
   format: 1,
   locale,
@@ -26,7 +25,7 @@ describe("store", () => {
   it("loads lazily and resolves selections with tone and shortcode", async () => {
     const store = createEmojiStore({
       data: async () => dataset,
-      frequents: frequents(),
+      frequentsStorage: null,
       customEmojis: [{ id: "parrot", name: "party parrot", imageUrl: "/parrot.gif", shortcodes: ["partyparrot"] }],
     });
     expect(store.query("thumbs")).toEqual([]);
@@ -39,9 +38,8 @@ describe("store", () => {
   });
 
   it("skips frequent custom emoji the current sources no longer have, keeping the count", () => {
-    const history = frequents();
-    ["parrot", "1f44d", "1f525"].forEach((u) => history.record(u));
-    const store = createEmojiStore({ data: dataset, frequents: history });
+    const defaultFrequents = Object.fromEntries(["parrot", "1f44d", "1f525"].map((u) => [u, { count: 1, lastUsed: Date.now() }]));
+    const store = createEmojiStore({ data: dataset, defaultFrequents, frequentsStorage: null });
     expect(store.frequent(3)).not.toContain("parrot");
     expect(store.frequent(3)).toHaveLength(3);
     expect(store.frequent(3)).toBe(store.frequent(3));
@@ -97,7 +95,7 @@ describe("custom emoji in the store", () => {
 
 describe("store locale", () => {
   it("takes the dataset's locale for search", async () => {
-    const store = createEmojiStore({ data: tiny("tr", [["1faa1", "iğne"]]), frequents: frequents() });
+    const store = createEmojiStore({ data: tiny("tr", [["1faa1", "iğne"]]), frequentsStorage: null });
     await store.load();
     expect(store.locale()).toBe("tr");
     expect((store.query("İĞNE") as readonly { emoji: string }[]).map((r) => r.emoji)).toEqual(["🪡"]);
@@ -110,12 +108,12 @@ describe("store locale", () => {
       ["1f602", "c", ["sa"]],
     ]);
     const alphabetical = (store: ReturnType<typeof createEmojiStore>) => store.completeShortcode("s", 8, "alphabetical").map((c) => c.shortcode);
-    const swedish = createEmojiStore({ data: sv, frequents: frequents() });
+    const swedish = createEmojiStore({ data: sv, frequentsStorage: null });
     await swedish.load();
     expect(alphabetical(swedish)).toEqual(["sa", "sz", "så"]);
     expect(swedish.labels().resultCount(1234)).toBe(`${new Intl.NumberFormat("sv").format(1234)} results`);
 
-    const mixed = createEmojiStore({ data: sv, frequents: frequents(), locale: "en", labels: { searchPlaceholder: "Sök" } });
+    const mixed = createEmojiStore({ data: sv, frequentsStorage: null, locale: "en", labels: { searchPlaceholder: "Sök" } });
     await mixed.load();
     expect(alphabetical(mixed)).toEqual(["sa", "så", "sz"]);
     expect(mixed.labels()).toMatchObject({ searchPlaceholder: "Sök", searchLabel: defaultLabels.searchLabel });
@@ -128,7 +126,7 @@ describe("store.query", () => {
     const store = createEmojiStore({
       data: dataset,
       customEmojis: [{ id: "shipit", name: "shipit", shortcodes: ["shipit"], tags: ["squirrel"], imageUrl: "/shipit.png" }],
-      frequents: frequents(),
+      frequentsStorage: null,
       searchEngine: remote(async (q, { records }) => records.filter((r) => r.name.includes(q)).map((r) => r.unified)),
     });
     await store.load();
@@ -139,7 +137,7 @@ describe("store.query", () => {
   it("returns interim records for a progressive search", async () => {
     const store = createEmojiStore({
       data: dataset,
-      frequents: frequents(),
+      frequentsStorage: null,
       searchEngine: progressive(
         lexical(),
         remote(async () => ["1f680"]),
@@ -152,7 +150,7 @@ describe("store.query", () => {
   });
 
   it("defaults to lexical, synchronously", async () => {
-    const store = createEmojiStore({ data: dataset, frequents: frequents() });
+    const store = createEmojiStore({ data: dataset, frequentsStorage: null });
     await store.load();
     const out = store.query("fire");
     expect(Array.isArray(out)).toBe(true);
@@ -162,13 +160,13 @@ describe("store.query", () => {
 
 describe("store options", () => {
   it("is ready at once for an in-memory dataset", () => {
-    const store = createEmojiStore({ data: dataset, frequents: frequents() });
+    const store = createEmojiStore({ data: dataset, frequentsStorage: null });
     expect(store.status()).toBe("ready");
     expect(store.get("1f44d")?.emoji).toBe("👍");
   });
 
   it("swaps data in place, keeping skin tone and frequents, and the old data while new data loads", async () => {
-    const store = createEmojiStore({ data: tiny("en", [["1f600", "grinning"]]), frequents: frequents(), skinToneStorage: memoryStorage() });
+    const store = createEmojiStore({ data: tiny("en", [["1f600", "grinning"]]), frequentsStorage: null, skinToneStorage: memoryStorage() });
     store.setSkinTone(2);
     store.select("1f600");
     store.setOptions({ data: tiny("fr", [["1f600", "souriant"]]) });
@@ -180,7 +178,7 @@ describe("store options", () => {
   });
 
   it("re-filters without reloading, and ignores an equivalent filter", () => {
-    const store = createEmojiStore({ data: dataset, frequents: frequents() });
+    const store = createEmojiStore({ data: dataset, frequentsStorage: null });
     const before = store.getSnapshot().data;
     store.setOptions({ data: dataset, filter: () => true });
     expect(store.getSnapshot().data).toBe(before);

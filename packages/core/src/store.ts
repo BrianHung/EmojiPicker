@@ -1,6 +1,6 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
-import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
+import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type FrequencyStoreOptions } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
 import { cached, createStore, memo } from "./reactive";
@@ -12,11 +12,10 @@ export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { s
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
-export type EmojiStoreOptions = {
+export type EmojiStoreOptions = FrequencyStoreOptions & {
   data?: EmojiDataSource;
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   filter?: (record: EmojiRecord) => boolean;
-  frequents?: FrequencyStore;
   skinTone?: SkinToneValue;
   defaultSkinTone?: SkinToneValue;
   onSkinToneChange?: (tone: SkinToneValue) => void;
@@ -92,7 +91,10 @@ const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length
 const sameSource = (a: EmojiSourceOptions, b: EmojiSourceOptions) => a.data === b.data && sameItems(customSources(a.customEmojis), customSources(b.customEmojis));
 
 export function createEmojiStore({
-  frequents = createFrequencyStore(),
+  frequents: controlledFrequents,
+  defaultFrequents,
+  onFrequentsChange,
+  frequentsStorage,
   skinTone: controlledTone,
   defaultSkinTone = 0,
   onSkinToneChange,
@@ -100,6 +102,7 @@ export function createEmojiStore({
   labels: labelOverrides,
   ...source
 }: EmojiStoreOptions = {}) {
+  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, frequentsStorage });
   let config: EmojiSourceOptions = source;
   let raw = inline(config);
   let base: readonly EmojiRecord[] = [];
@@ -121,11 +124,14 @@ export function createEmojiStore({
       error: null,
       loading: null,
       data: raw ? build(raw) : { ...NO_DATA, locale: config.locale },
-      ownTone: clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone)),
+      ownTone: storedTone(),
       controlledTone,
     },
     reduce,
   );
+  function storedTone() {
+    return clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
+  }
   const callbacks = { onSkinToneChange };
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
@@ -135,7 +141,8 @@ export function createEmojiStore({
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale }));
 
   const store = {
-    frequents,
+    frequents: frequents as FrequencyStore,
+    controlFrequents: frequents.control,
     getSnapshot: state.getSnapshot,
     customEmojis: (): readonly CustomEmoji[] => loaded().customs,
     customGroups: (): ReadonlyMap<string, string | undefined> => loaded().customGroups,
@@ -238,12 +245,12 @@ export function createEmojiStore({
       state.dispatch({ type: "control", tone: value });
     },
 
-    select(unified: string): EmojiSelection | undefined {
+    select(unified: string, { record: count = true } = {}): EmojiSelection | undefined {
       const record = store.get(unified);
       if (!record) return undefined;
       const tone = record.imageUrl ? 0 : toneOf(unified);
       const resolved = tone ? (record.tones[tone - 1] ?? record.unified) : record.unified;
-      frequents.record(record.unified);
+      if (count) frequents.record(record.unified);
       return {
         emoji: record.imageUrl ? "" : unifiedToNative(resolved),
         unified: resolved,
@@ -263,7 +270,7 @@ export function createEmojiStore({
       return record && current && record.tones[current - 1] ? record.tones[current - 1]! : unified;
     },
 
-    subscribe: state.subscribe,
+    subscribe: syncWith(skinToneStorage, state.subscribe, () => state.dispatch({ type: "tone", tone: storedTone() })),
   };
   return store;
 }
