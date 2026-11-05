@@ -3,6 +3,7 @@ import { BoldIcon, CodeIcon, ItalicIcon, LinkIcon, ListIcon, ListOrderedIcon, Pl
 import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SlackEmojiMenu, slackEmojiOptions } from "@/experiences/slack";
+import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Smile, SmilePlus } from "@/styles/icons";
@@ -66,7 +67,7 @@ function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, chil
       </PickerSheet>
     );
   return (
-    <StyleDropdown appStyle={slack} side={side} align={align} label={label} onSelect={onSelect} triggerClassName={triggerClassName}>
+    <StyleDropdown appStyle={slack} side={side} align={align} label={label} onSelect={(s) => (onSelect(s), copyEmoji(s))} triggerClassName={triggerClassName}>
       {children}
     </StyleDropdown>
   );
@@ -125,7 +126,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
         </p>
         {message.reactions.length ? (
           <div className="mt-1">
-            <StylePills appStyle={slack} reactions={message.reactions} onToggle={onToggle} />
+            <StylePills appStyle={slack} reactions={message.reactions} onToggle={onToggle} onSelect={copyEmoji} />
           </div>
         ) : null}
       </div>

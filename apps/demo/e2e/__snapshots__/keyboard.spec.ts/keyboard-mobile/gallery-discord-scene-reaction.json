@@ -69,7 +69,7 @@
     "open": false,
     "focus": "button \"Add Reaction\"",
     "focusReturned": true,
-    "toast": null
+    "toast": "❤️ :heart: red heart"
   },
   "escape": [
     {

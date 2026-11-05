@@ -1,5 +1,5 @@
 import * as React from "react";
-import { usePickedEmoji } from "@/components/site/picked";
+import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
 import { Emoji, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -90,7 +90,7 @@ function PillsDemo({ appStyle }: { appStyle: Style }) {
     { unified: "1f680", count: 2, mine: false },
     { unified: "2764-fe0f", count: 1, mine: false },
   ]);
-  return <StylePills appStyle={appStyle} reactions={reactions} onToggle={(u) => setReactions((r) => toggleReaction(r, u))} />;
+  return <StylePills appStyle={appStyle} reactions={reactions} onToggle={(u) => setReactions((r) => toggleReaction(r, u))} onSelect={copyEmoji} />;
 }
 
 function TapbackDemo({ appStyle }: { appStyle: Style }) {
@@ -183,7 +183,7 @@ export function GalleryPage() {
           <FitBox width={appStyle.size.width} height={361} className="items-end">
             <div className="overflow-hidden rounded-t-[20px] border border-b-0 border-border bg-background" style={{ width: appStyle.size.width }}>
               <div className="mx-auto my-2 h-1 w-9 rounded-full bg-muted-foreground/30" />
-              <appStyle.Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />
+              <appStyle.Picker onSelect={copyEmoji} className="h-[340px] w-full rounded-none border-0 shadow-none" />
             </div>
           </FitBox>
         </GalleryCard>
