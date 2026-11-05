@@ -20,6 +20,9 @@ export type Dataset = {
 
 export const SKIN_TONES = ["1f3fb", "1f3fc", "1f3fd", "1f3fe", "1f3ff"] as const;
 
+/** 0 (none) or 1-5, the Fitzpatrick tones. */
+export type SkinToneValue = 0 | 1 | 2 | 3 | 4 | 5;
+
 const TONE_CODES = new Set<string>(SKIN_TONES);
 
 /** A unified code with its skin-tone modifiers removed: 1f44d-1f3fd → 1f44d. */

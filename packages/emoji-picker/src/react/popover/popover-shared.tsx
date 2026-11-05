@@ -2,7 +2,7 @@ import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverState } from "./popover-context";
-import { renderElement, type PartElementProps } from "../utils/render";
+import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
 
 export type Side = "top" | "bottom";
 export type Align = "start" | "center" | "end";
@@ -45,7 +45,10 @@ export type PopoverPlacementProps = {
   container?: HTMLElement | false;
 };
 
-export type PopoverContentProps = React.HTMLAttributes<HTMLDivElement> &
+export type PopoverContentState = { open: boolean; side: Side; align: Align };
+
+export type PopoverContentProps = Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "style"> &
+  Omit<PartProps<PopoverContentState>, "render"> &
   PopoverPlacementProps & {
     /**
      * Position against this instead of the Trigger: an element, a virtual element
@@ -100,7 +103,7 @@ export const finalFocusTarget = (finalFocus: PopoverFinalFocus) => (typeof final
 type TransitionStatus = "starting" | "open" | "ending";
 
 /** The attributes every adapter puts on the content, so styles and tests don't depend on the adapter. */
-export const contentAttributes = ({ open, side, align, status, props }: { open: boolean; side: string; align: Align; status: TransitionStatus; props: React.AriaAttributes }) => ({
+export const contentAttributes = ({ open, side, align, status, props }: PopoverContentState & { status: TransitionStatus; props: React.AriaAttributes }) => ({
   role: "dialog",
   // A dialog needs a name; pass aria-label or aria-labelledby for another.
   "aria-label": props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Emoji picker"),
@@ -169,7 +172,7 @@ export function PopoverProvider({ value, children }: { value: PopoverInternals; 
 export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ render, className, style, children, ...props }, ref) {
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
-  const refs = React.useMemo(() => mergeRefs<HTMLElement>(setTrigger, ref as React.Ref<HTMLElement>), [setTrigger, ref]);
+  const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
   const merged = triggerProps(
     mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }),
   );

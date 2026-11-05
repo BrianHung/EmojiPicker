@@ -2,6 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Popover, type PopoverRenderProps } from "react-aria-components/Popover";
 import { mergeProps } from "react-aria/mergeProps";
+import { resolve } from "../../utils/render";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import {
@@ -84,11 +85,11 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         offset={sideOffset}
         containerPadding={collisionPadding}
         UNSTABLE_portalContainer={container || undefined}
-        className={className}
-        style={style}
+        className={(values) => resolve(className, stateOf(values, p.state.open, side, align)) ?? ""}
+        style={(values) => resolve(style, stateOf(values, p.state.open, side, align))}
         render={(dom, values) => (
           <div
-            {...mergeProps(props, contentAttributes({ open: p.state.open, side: values.placement ?? side, align, status: statusOf(values), props }), dom, { id: p.id })}
+            {...mergeProps(props, contentAttributes({ ...stateOf(values, p.state.open, side, align), status: statusOf(values), props }), dom, { id: p.id })}
             style={{ "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style } as React.CSSProperties}
           />
         )}
@@ -100,6 +101,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   );
 });
 
+const stateOf = ({ placement }: PopoverRenderProps, open: boolean, side: Side, align: Align) => ({ open, side: placement === "top" || placement === "bottom" ? placement : side, align });
 const statusOf = ({ isEntering, isExiting }: PopoverRenderProps) => (isEntering ? "starting" : isExiting ? "ending" : "open");
 const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
 

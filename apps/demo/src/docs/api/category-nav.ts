@@ -1,8 +1,14 @@
-import type { PropRow } from "@/components/site/docs";
+import type { CategoryNavProps, CategoryTabProps } from "@brianhung/emoji-picker";
+import { rowsOf } from "./rows";
 
-export const categoryNav: PropRow[] = [
+export const categoryNav = rowsOf<CategoryNavProps>()([
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
-  { name: "children", type: "(category) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab: { id, name, icon }." },
-];
+  { name: "children", type: "(category: NavCategory) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab: { id, name, icon }." },
+  { name: "className", type: "string | ({ orientation, disabled }) => string | undefined" },
+  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
+]);
 
-export const categoryNavTab: PropRow[] = [{ name: "className", type: "string | ({ selected, active, focusVisible, hovered, pressed, disabled }) => string" }];
+export const categoryNavTab = rowsOf<CategoryTabProps>()([
+  { name: "className", type: "string | ({ category, selected, active, focused, focusVisible, hovered, pressed, disabled }) => string | undefined" },
+  { name: "children", type: "ReactNode | (state) => ReactNode", default: "the category's icon" },
+]);

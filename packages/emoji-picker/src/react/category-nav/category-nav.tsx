@@ -39,7 +39,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
   const list = React.useRef<HTMLDivElement | null>(null);
-  const merged = React.useMemo(() => mergeRefs(ref, userKeys, list), [ref, userKeys]);
+  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys, list), [ref, userKeys]);
   const id = React.useId();
   // The focused tab, and whether focus is still in the list (then it stays the tab stop).
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
@@ -91,6 +91,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
           className: className ?? "",
           "data-slot": SLOTS.categoryNav,
           "data-orientation": orientation,
+          "data-disabled": disabled || undefined,
           style: (s: CategoryNavState) => ({ pointerEvents: s.disabled ? "none" : undefined, ...resolve(style, s) }),
           onKeyDown: onKey,
           onFocus: (e: React.FocusEvent) => {

@@ -23,6 +23,7 @@ import {
   type UseFloatingOptions,
 } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
+import { resolve } from "../../utils/render";
 import {
   anchorRect,
   ContentFocus,
@@ -37,6 +38,7 @@ import {
   type PopoverContentProps as SharedContentProps,
   type PopoverInternals,
   type PopoverPlacementProps,
+  type Side,
   type PopoverRootProps,
   type SuggestionsPopoverProps,
 } from "../popover-shared";
@@ -110,13 +112,13 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   React.useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference]);
-  return { ...floating, side: floating.placement.split("-")[0]!, style: { position: floating.strategy, top: floating.y, left: floating.x } as const };
+  return { ...floating, side: floating.placement.split("-")[0] as Side, style: { position: floating.strategy, top: floating.y, left: floating.x } as const };
 }
 
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, duration = 0, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, duration = 0, className, style, children, ...props },
   ref,
 ) {
   const p = usePopoverInternals<Internals>("Content");
@@ -145,13 +147,15 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   );
 
   if (!isMounted) return null;
+  const state = { open: p.state.open, side: placed, align };
   return portal(
     <FloatingFocusManager context={context} modal={false} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus ? returnTarget : true}>
       <div
         {...p.floatingProps(props)}
-        {...contentAttributes({ open: p.state.open, side: placed, align, status: status === "close" ? "ending" : status === "open" ? "open" : "starting", props })}
+        {...contentAttributes({ ...state, status: status === "close" ? "ending" : status === "open" ? "open" : "starting", props })}
         ref={mergedRef}
-        style={{ ...position, zIndex: 50, "--transform-origin": middlewareData.transformOrigin?.origin, ...style } as React.CSSProperties}
+        className={resolve(className, state)}
+        style={{ ...position, zIndex: 50, "--transform-origin": middlewareData.transformOrigin?.origin, ...resolve(style, state) } as React.CSSProperties}
       >
         <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
       </div>

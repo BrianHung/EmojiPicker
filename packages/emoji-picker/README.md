@@ -89,7 +89,7 @@ Root
 
 Every part takes `render` (an element, whose props and ref merge with the part's, or `(props, state) => element`), and `className` and `style` as values or functions of its state; state is also on data attributes. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories` and `useSearchState`.
 
-Root's state is controllable, Base UI style (`x`, `defaultX`, `onXChange`): `query`, `value` (a value picker's chosen emoji), `highlightedEmoji` (an item id), `reactionsOpen`, and `collapsedCategories`. The provider's `skinTone`, `defaultSkinTone` and `onSkinToneChange` do the same for the shared skin tone, which `skinToneStorage` persists (localStorage by default; `null` for memory only).
+Root's state is controllable, Base UI style (`x`, `defaultX`, `onXChange`): `query`, `value` (a value picker's chosen emoji), `highlighted` (an item id), `reactionsOpen`, and `collapsedCategories`; `SkinTone` takes `open` the same way. The provider's `skinTone`, `defaultSkinTone` and `onSkinToneChange` do the same for the shared skin tone, which `skinToneStorage` persists (localStorage by default; `null` for memory only).
 
 ```tsx
 <EmojiPicker.List>
@@ -106,7 +106,7 @@ Root's state is controllable, Base UI style (`x`, `defaultX`, `onXChange`): `que
 
 The List's functions run only for the sections and emoji in view, and a cell re-renders only when its own state changes.
 
-`Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns` (with `fitColumns={false}` to keep them when the width is a little short), `emojiVersion`, `searchResults`, `keymap`, `focusModel`, `pointer`, and `artwork`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
+`Root` takes `onSelect`, `categories` (order, names, icons, and `nav: false`), `frequent`, `suggested`, `columns` (with `fitColumns={false}` to keep them when the width is a little short), `emojiVersion`, `searchResults`, `keymap`, `focusModel` and `pointerModel`, among others. `onSelect` receives an `EmojiSelection`: `emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `skinTone`, `isCustom`, and `imageUrl`.
 
 Search results replace the category list while a query is active. `searchResults="ranked"` shows one list, best match first; `"grouped"` shows category sections in rank order.
 
@@ -283,7 +283,7 @@ moveHighlight(picker, "right", { columns: 9 });
 picker.choose(); // EmojiSelection of the highlighted emoji
 ```
 
-The picker state owns its highlight unless you control it: pass `highlighted` and `onHighlightChange` (as with `query` and `onQueryChange`), and `setOptions(next, { notify: true })` when your value changes.
+The picker state owns its highlight unless you control it: pass `highlighted` and `onHighlightedChange` (as with `query` and `onQueryChange`), and `setOptions(next, { notify: true })` when your value changes.
 
 ## Rendering emoji
 
@@ -291,7 +291,7 @@ The picker state owns its highlight unless you control it: pass `highlighted` an
 
 ### Artwork overrides
 
-`EmojiOverrides` draws particular emoji with your own art everywhere inside it: `<Emoji>`, picker cells, search results, and tapbacks. The emoji keep their identity for selection, search, and frequents. Keys are unified codes; a base code covers every skin tone. `Root` and `Tapback` take the same map as `artwork`.
+`EmojiOverrides` draws particular emoji with your own art everywhere inside it: `<Emoji>`, picker cells, search results, and tapbacks. The emoji keep their identity for selection, search, and frequents. Keys are unified codes; a base code covers every skin tone.
 
 ```tsx
 <EmojiOverrides artwork={{ "2764-fe0f": "/tapback/heart.svg", "2753": <QuestionMark /> }}>
@@ -362,7 +362,7 @@ Keys trigger actions, and `Root`'s `keymap` binds them. Every layout gives an ac
 
 A binding replaces the action's defaults, and `[]` unbinds it. `Mod` is ⌘ on Apple platforms and Ctrl elsewhere. Printable keys still type in the search field.
 
-`focusModel="input"` (the default) keeps focus in the search field and moves a highlight (`aria-activedescendant`); `"grid"` moves focus into the cells. `pointer="follows"` (the default) makes the hovered emoji the keyboard position: the next arrow continues from it, and hover never takes focus from outside the picker; `"independent"` leaves hover as a style. Without a search field, focus is on the cells either way. The grid, the category tabs and a tapback's reactions are one tab stop each (roving tabindex). After a pick, focus and the highlight stay where they were.
+`focusModel="input"` (the default) keeps focus in the search field and moves a highlight (`aria-activedescendant`); `"grid"` moves focus into the cells. `pointerModel="follows"` (the default) makes the hovered emoji the keyboard position: the next arrow continues from it, and hover never takes focus from outside the picker; `"independent"` leaves hover as a style. Without a search field, focus is on the cells either way. The grid, the category tabs and a tapback's reactions are one tab stop each (roving tabindex). After a pick, focus and the highlight stay where they were.
 
 A part's `onKeyDown` runs before the picker handles a key, innermost first. Call `event.preventEmojiPickerHandler()` to keep the picker (and React Aria) from handling it. A key the picker handles stops at `Root`, as React Aria's handled keys do.
 
@@ -387,7 +387,7 @@ The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
+Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-searching`, `data-empty`, `data-disabled`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). A part's state uses the same names (`{ hovered, focused, focusVisible, pressed, disabled }` on its buttons and field). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
 
 ```css
 [data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }

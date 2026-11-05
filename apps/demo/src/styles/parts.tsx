@@ -1,9 +1,9 @@
 import * as React from "react";
-import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker";
+import { EmojiPicker, type CategoryId, type CategoryOption } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import type * as I from "./icons";
 
-const DEFAULT_ORDER = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
+const DEFAULT_ORDER: CategoryId[] = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
 
 /** Sections with the app's tab icons; `hide` keeps sections in the list without a tab. */
 export function withIcons(

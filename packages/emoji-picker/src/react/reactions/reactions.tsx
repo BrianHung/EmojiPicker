@@ -3,7 +3,7 @@
 // follows the pointer, so the next arrow continues from the hovered reaction.
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { Button, type ButtonRenderProps } from "react-aria-components/Button";
+import { Button } from "react-aria-components/Button";
 import { ToggleButton } from "react-aria-components/ToggleButton";
 import { Toolbar } from "react-aria-components/Toolbar";
 import { nameWithTone } from "../../core/shortcodes";
@@ -13,7 +13,7 @@ import { useEdgeKeys } from "../root/keyboard";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap } from "../emoji/overrides";
 import { ReactionsContext, isPressed } from "./reactions-context";
-import { racClassName, renderElement, resolve, toRenderFunction, type PartElementProps, type PartProps } from "../utils/render";
+import { racClassName, racParts, racState, renderElement, resolve, toRenderFunction, type InteractionState, type PartElementProps, type PartProps, type RacState } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 const BUTTONS = "button:not([disabled])";
@@ -68,7 +68,7 @@ function useRovingRow(row: React.RefObject<HTMLElement | null>) {
 export type ReactionBarState = { orientation: "horizontal" | "vertical" };
 
 export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
-  PartProps<ReactionBarState> & {
+  PartProps<ReactionBarState, HTMLDivElement> & {
     /** Axis the arrows move along. Default "horizontal". */
     orientation?: "horizontal" | "vertical";
   };
@@ -168,7 +168,7 @@ function ReactionsItems({ children }: { children?: (emoji: string) => React.Reac
   return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <ReactionsItem emoji={unified} />}</React.Fragment>);
 }
 
-export type ReactionsItemState = Omit<ButtonRenderProps, "isPending"> & { isSelected?: boolean };
+export type ReactionsItemState = InteractionState & { selected: boolean };
 
 export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButtonElement, "onClick" | "onChange"> & {
   /** The reaction's unified code. */
@@ -190,19 +190,17 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
     "data-unified": unified,
     "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
     "data-selected": on ? "" : undefined,
-    className: racClassName(className),
     // An emoji cell: never larger than `--emoji-cell-size`.
-    style: (s: ReactionsItemState) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }),
-    render: toRenderFunction(render) as never,
-    children: children ?? <Glyph unified={unified} record={record} />,
+    ...racParts<ReactionsItemState, HTMLButtonElement>({ className, style: (s) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }), render }),
+    children: typeof children === "function" ? (r: RacState) => children(racState(r)) : (children ?? <Glyph unified={unified} record={record} />),
   };
   return on === undefined ? <Button {...attrs} onPress={() => picker.pick(unified)} /> : <ToggleButton {...attrs} isSelected={on} onChange={() => picker.pick(unified)} />;
 });
 
-export type ReactionsExpandProps = PartElementProps<ButtonRenderProps, HTMLButtonElement, "onClick">;
+export type ReactionsExpandProps = PartElementProps<InteractionState, HTMLButtonElement, "onClick">;
 
 /** Expands into the full picker; rendered only when the row can. Without children, a plus. */
-const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ className, render, children, ...props }, ref) {
+const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
   const { expandFocus, row } = useRow("Expand");
@@ -213,19 +211,20 @@ const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps
       ref={ref}
       aria-label={labels.expandReactions}
       data-slot={SLOTS.reactionsExpand}
-      className={racClassName(className)}
-      render={toRenderFunction(render) as never}
+      {...racParts({ className, style, render })}
       {...{ title: labels.expandReactions }}
       onPress={() => {
         expandFocus.current = row.current?.closest(`[data-slot="${SLOTS.root}"]`) ?? null;
         state.expand!();
       }}
     >
-      {children ?? (
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-          <path d="M12 5v14M5 12h14" />
-        </svg>
-      )}
+      {typeof children === "function"
+        ? (r) => children(racState(r))
+        : (children ?? (
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          ))}
     </Button>
   );
 });

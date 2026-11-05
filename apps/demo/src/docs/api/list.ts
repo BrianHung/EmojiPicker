@@ -1,11 +1,17 @@
 import type { PropRow } from "@/components/site/docs";
+import type { ListProps } from "@brianhung/emoji-picker";
+import { rowsOf } from "./rows";
 
-export const list: PropRow[] = [
-  { name: "children", type: "(section) => ReactNode", default: "title and cells", description: "Called only for the sections in view." },
+export const list = rowsOf<ListProps>()([
+  { name: "children", type: "(section: EmojiSection) => ReactNode", default: "title and cells", description: "Called only for the sections in view." },
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
-];
+  { name: "onLoadMore", type: "() => void", description: "Called as the end of the list scrolls into view (a paged custom pack)." },
+  { name: "loadingMore", type: "boolean", description: "A page is loading: the end of the list shows loadingIndicator." },
+  { name: "loadingIndicator", type: "ReactNode" },
+  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
+]);
 
 export const listParts: PropRow[] = [
   { name: "List.Section", type: "{ section, collapsed }", description: "A section (group): List.SectionTitle, List.Items, List.SectionActions." },

@@ -12,7 +12,7 @@ import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "../../core/sections";
 import { usePicker, ViewportContext } from "../root/context";
-import { isRtl, useEmojiCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
+import { isRtl, useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../root/keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
@@ -24,7 +24,7 @@ import { VirtualBranch, VirtualCollection } from "./virtualizer";
 export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
 
 export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> &
-  PartProps<ListState> & {
+  PartProps<ListState, HTMLDivElement> & {
     /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
     /**
@@ -45,9 +45,9 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
     searchRows?: number;
     /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
     onLoadMore?: () => void;
-    /** A page is loading: the end of the list shows `loadingMore`. */
-    isLoadingMore?: boolean;
-    loadingMore?: React.ReactNode;
+    /** A page is loading: the end of the list shows `loadingIndicator`. */
+    loadingMore?: boolean;
+    loadingIndicator?: React.ReactNode;
   };
 
 const CellsContext = React.createContext<Cells | null>(null);
@@ -101,7 +101,7 @@ function readProbe(probe: HTMLElement): GridMetrics {
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
-const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest }, ref) {
+const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, loadingMore, loadingIndicator, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
   const { searching } = picker;
   const horizontal = orientation === "horizontal";
@@ -275,7 +275,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     <CellsContext.Provider value={grid.cells}>
       <HorizontalContext.Provider value={horizontal}>
         <TemplateContext.Provider value={template}>
-          <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
+          <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: loadingMore, children: loadingIndicator, collection } : null}>
             {renderElement(
               "div",
               {
@@ -426,13 +426,13 @@ function ItemView({ item }: { item: EmojiItem }) {
 export type CellProps = PartElementProps<CellState>;
 
 /** An emoji: an `option`, with its state on data attributes. Children default to its glyph. */
-const Cell = React.forwardRef<HTMLElement, CellProps>(function Cell({ className, style, render, children, ...props }, ref) {
+const Cell = React.forwardRef<HTMLDivElement, CellProps>(function Cell({ className, style, render, children, ...props }, ref) {
   const cells = React.useContext(CellsContext);
   const item = React.useContext(ItemContext);
   if (!cells || !item) throw new Error("EmojiPicker.List.Cell must be inside List.Items.");
   const horizontal = React.useContext(HorizontalContext);
-  const { cellProps, state } = useEmojiCell(cells, item);
-  const refs = React.useMemo(() => mergeRefs(cellProps.ref, ref), [cellProps.ref, ref]);
+  const { cellProps, state } = useCell(cells, item);
+  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(cellProps.ref, ref), [cellProps.ref, ref]);
   return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style: (s: CellState) => ({ ...(horizontal ? FILL : CELL), ...resolve(style, s) }), render, children: children ?? cellProps.children }, state);
 });
 
@@ -442,7 +442,7 @@ const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
 const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
 
-/** The end of the list: loads the next page as it nears the viewport, and shows `loadingMore` while one loads. */
+/** The end of the list: loads the next page as it nears the viewport, and shows `loadingIndicator` while one loads. */
 function LoadMore() {
   const more = React.useContext(LoadMoreContext);
   const sentinel = React.useRef<HTMLDivElement | null>(null);
@@ -542,6 +542,7 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
                 ...props,
                 "data-slot": SLOTS.headerActions,
                 "data-section": s.id,
+                "data-collapsed": s.collapsed || undefined,
                 style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
                 children,
               },

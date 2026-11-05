@@ -1,13 +1,15 @@
 // The picker's sections: category sections (and search results) of items cached per
 // labels, section and tone, so the same emoji is one object across renders and pickers.
 // An item also has the fields of a collection node, so a renderer can use it as one.
-import { GROUPS, type EmojiRecord } from "./dataset";
+import { GROUPS, type EmojiRecord, type Group } from "./dataset";
 import type { EmojiLabels } from "./labels";
 import { nameWithTone } from "./shortcodes";
 
+/** A built-in group ("smileys_people", ...), "suggested", "custom" (every custom emoji), or "custom:<group>". */
+export type CategoryId = Group | "suggested" | "custom" | `custom:${string}`;
+
 export type CategoryOption<Icon = unknown> = {
-  /** A built-in group ("smileys_people", ...), "suggested", "custom", or "custom:<group>". */
-  id: string;
+  id: CategoryId;
   name?: string;
   /** Tab icon in CategoryNav. */
   icon?: Icon;

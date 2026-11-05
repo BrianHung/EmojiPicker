@@ -5,7 +5,7 @@ export { createFrequencyStore, localStorageAdapter, memoryStorage, DEFAULT_FREQU
 export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./frequents";
 export { needsTwemoji, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer } from "./platform";
-export type { Dataset, EmojiRecord, Group } from "./dataset";
+export type { Dataset, EmojiRecord, Group, SkinToneValue } from "./dataset";
 export type { CompletionOrder, SearchIndex, SearchIndexOptions, ShortcodeCompletion } from "./search";
 export { createTokenizer, normalizer } from "./search";
 export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./search";
@@ -21,4 +21,4 @@ export { createEmojiSuggestions } from "./suggestions";
 export type { EmojiSuggestionsMachine, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
 export { createPickerState, moveHighlight } from "./picker";
 export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
-export type { Category, CategoryOption, EmojiItem, EmojiSection } from "./sections";
+export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
