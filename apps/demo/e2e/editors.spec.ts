@@ -13,3 +13,12 @@ for (const e of EDITORS)
     const field = await openEditorMenu(page, e);
     expect(await caretGap(field, (await listbox(page).boundingBox())!)).toBeLessThan(e.gap ?? 24);
   });
+
+for (const e of EDITORS)
+  test(`${e.name}: a pick counts once in frequently used`, async ({ page }) => {
+    await openEditorMenu(page, e);
+    await page.keyboard.press("Enter");
+    await expect(listbox(page)).toBeHidden();
+    const scores = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem("emoji-picker:frequents") ?? "{}") as Record<string, [number, number]>).map(([score]) => Math.round(score)));
+    expect(scores).toEqual([1]);
+  });

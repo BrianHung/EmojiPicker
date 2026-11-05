@@ -29,7 +29,12 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
         fitColumns={false}
         keyboardTarget={editor}
         actionsRef={actions}
-        onSelect={(selection) => menu.choose(menu.suggestions.findIndex((s) => s.record.unified === selection.baseUnified))}
+        onSelect={(selection) =>
+          menu.choose(
+            menu.suggestions.findIndex((s) => s.record.unified === selection.baseUnified),
+            { record: false },
+          )
+        }
         data-style={notion.id}
         style={tokensOf(notion)}
         className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [--emoji-cell-size:32px] [--emoji-header-height:34px] [--emoji-list-padding:12px] [--emoji-size:24px] [--emoji-image-size:24px] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
