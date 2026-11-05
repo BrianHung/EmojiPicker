@@ -71,7 +71,7 @@ export function useEmojiContext(): ContextValue {
   return value;
 }
 
-export const useEmojiStore = () => useEmojiContext().store;
+export const useEmojiStore = (): EmojiStore => useEmojiContext().store;
 
 export function useStoreSnapshot<T>(read: (store: EmojiStore) => T): T {
   const { store } = useEmojiContext();
