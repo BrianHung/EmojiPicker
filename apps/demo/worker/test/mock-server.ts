@@ -1,10 +1,3 @@
-// The real Worker (worker/index.ts) on a local port, with the in-memory bindings from
-// mocks.ts: hashed-word embeddings and a word-overlap decision model. Rankings are not
-// meaningful; it exists for end-to-end tests and for offline work on the page.
-//
-//   npx tsx worker/test/mock-server.ts [--port 8799] [--assets .cloudflare/output/v0/workers/default/assets]
-//
-// With --assets it also serves the built site, like the deployed Worker does.
 import { createReadStream, existsSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize } from "node:path";
@@ -52,7 +45,6 @@ createServer(async (req, res) => {
   for await (const c of req) chunks.push(c as Buffer);
   const body = ["GET", "HEAD", "OPTIONS"].includes(req.method ?? "") ? undefined : Buffer.concat(chunks);
   const request = new Request(`http://localhost:${port}${req.url}`, { method: req.method, headers: req.headers as Record<string, string>, body });
-  // A network-ish delay, so latency reads like a round trip.
   await new Promise((r) => setTimeout(r, 40));
   const response = await handle(request, env);
   res.writeHead(response.status, Object.fromEntries(response.headers));

@@ -1,8 +1,6 @@
-// Internal: whether the user is working in the picker (focus or pointer inside), which holds
-// frequents and reactions steady: picking reorders them, and nothing should move under the user.
+// Holds frequents and reactions steady while the user works in the picker: nothing should move under them
 import * as React from "react";
 
-/** Calls `onChange` as focus or the pointer enters `root` (true) and once both have left (false). */
 export function useActiveWithin(root: React.RefObject<HTMLElement | null>, onChange: (active: boolean) => void) {
   const latest = React.useRef(onChange);
   latest.current = onChange;

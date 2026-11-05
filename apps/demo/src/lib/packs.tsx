@@ -3,7 +3,6 @@ import type { CustomEmoji } from "@brianhung/emoji-picker";
 
 const cache = new Map<string, Promise<CustomEmoji[]>>();
 
-/** Fetch a pack.json (CustomEmoji[]) once per URL; image URLs resolve against the pack's URL. */
 export function loadPack(url: string): Promise<CustomEmoji[]> {
   let pending = cache.get(url);
   if (!pending) {
@@ -28,14 +27,9 @@ export function loadPack(url: string): Promise<CustomEmoji[]> {
   return pending;
 }
 
-/**
- * Bufos from all-the-bufo (https://github.com/knobiknows/all-the-bufo), chosen by
- * scripts/pick-bufos.ts. That repository has no license, so this manifest only references
- * its images on their own host; none are copied into this repo.
- */
+// all-the-bufo has no license: the manifest only references images on their own host, none are copied here
 export const BUFO_PACK_URL = "/packs/bufo/pack.json";
 
-/** A pack's emoji once loaded, else null. */
 export function usePack(url: string) {
   const [pack, setPack] = React.useState<CustomEmoji[] | null>(null);
   React.useEffect(() => {

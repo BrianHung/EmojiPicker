@@ -6,39 +6,28 @@ import { emitter, memo, same } from "./reactive";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
 import type { EmojiSelection, EmojiStore } from "./store";
 
-/** "input": focus stays in the search field and a highlight moves (virtual focus). "grid": focus moves through the cells. */
 export type FocusModel = "input" | "grid";
 export type SearchResultsMode = "ranked" | "grouped";
 
 export type PickerStateOptions<Icon = unknown> = {
-  /** Default: the store's (`store.labels()`). */
   labels?: EmojiLabels;
-  /** Which categories show, in order, with optional names and icons. */
   categories?: readonly CategoryOption<Icon>[];
-  /** Size of the "Frequently used" section; false hides it. Default 16. */
   frequent?: number | false;
-  /** Fixed emoji (unified codes) for the suggested section instead of frequents. */
   suggested?: readonly string[];
-  /** Hide emoji newer than this Unicode emoji version. */
   emojiVersion?: number;
   searchResults?: SearchResultsMode;
-  /** Most results for a query. Default 200. */
   searchLimit?: number;
-  /** Controlled query. */
   query?: string;
   defaultQuery?: string;
   onQueryChange?: (query: string) => void;
-  /** Controlled collapsed sections (category ids). */
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
   onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
-  /** Controlled highlight (an item id, or null): the state then keeps none of its own. */
   highlighted?: string | null;
   defaultHighlighted?: string | null;
   onHighlightedChange?: (id: string | null) => void;
   focusModel?: FocusModel;
   disableVariations?: boolean;
-  /** A tapback's reactions (unified codes), held like frequents while the user is in the picker. */
   reactions?: readonly string[];
 };
 
@@ -47,22 +36,16 @@ export type PickerSnapshot<Icon = unknown> = {
   searching: boolean;
   results: readonly EmojiRecord[];
   pending: boolean;
-  /** Every category in order, with names and icons (empty ones too). */
   categories: readonly Category<Icon>[];
-  /** The categories as shown: empty ones left out, collapsed ones without emoji. */
   categorySections: readonly EmojiSection[];
-  /** What the grid shows: the search results while searching, else the categories. */
   sections: readonly EmojiSection[];
   collapsed: readonly string[];
   skinTone: SkinToneValue;
-  /** "virtual": the highlight moves while focus stays in the search field (aria-activedescendant). "roving": focus moves through the cells. */
   focus: "virtual" | "roving";
-  /** Item ids: the keyboard position, the hovered emoji, and whichever of them the preview shows. */
   highlighted: string | null;
   hovered: string | null;
   active: EmojiItem | null;
   activeSection: string | null;
-  /** The emoji whose skin-tone variations are open. */
   variations: string | null;
   reactions: readonly string[] | undefined;
 };
@@ -70,7 +53,6 @@ export type PickerSnapshot<Icon = unknown> = {
 const NO_IDS: readonly string[] = [];
 const NO_SECTIONS: readonly EmojiSection[] = [];
 
-/** `ids` with `id` added (collapsed) or removed; toggled without `collapsed`. `ids` itself when nothing changes. */
 export function setCategoryCollapsed(ids: readonly string[], id: string, collapsed = !ids.includes(id)): readonly string[] {
   if (ids.includes(id) === collapsed) return ids;
   return collapsed ? [...ids, id] : ids.filter((x) => x !== id);
@@ -83,11 +65,6 @@ const findItem = (sections: readonly EmojiSection[], id: string | null) => {
 
 type Ui = { highlighted: string | null; hovered: string | null; activeSection: string | null; variations: string | null; searchFields: number; mounted: boolean; domFocus: boolean; held: boolean };
 
-/**
- * An emoji picker's state, for any framework: the query and its results, the sections (categories,
- * frequents, collapse), the highlight and hover, the current section, skin tone and variations.
- * Feed it options (`setOptions` from a render, or actions), render its snapshot.
- */
 export function createPickerState<Icon = unknown>(store: EmojiStore, options: PickerStateOptions<Icon> = {}) {
   let opts = options;
   let ownQuery = options.defaultQuery ?? "";
@@ -125,7 +102,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const highlighted = () => (opts.highlighted === undefined ? ui.highlighted : opts.highlighted);
   const query = () => opts.query ?? ownQuery;
   const collapsed = () => opts.collapsedCategories ?? ownCollapsed;
-  // Frequents change with every pick; held while the user is in the picker so nothing moves under them.
+  // Frequents change with every pick; held while the user is in the picker so nothing moves under them
   const frequents = () => {
     const n = (opts.frequent ?? 16) || 1;
     if (!top || (!ui.held && top.n !== n)) top = { n, list: store.frequents.top(n) };
@@ -201,7 +178,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       }));
   }
 
-  // Controlled, later calls before the next render build on the last change.
   let nextCollapsed: readonly string[] | null = null;
   const setCollapsed = (id: string, value?: boolean) => {
     const current = nextCollapsed ?? collapsed();
@@ -216,7 +192,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const state = {
     getSnapshot,
     subscribe: events.subscribe,
-    /** Takes new options; without `notify`, silently: for a framework syncing them from a render. */
     setOptions(next: PickerStateOptions<Icon>, { notify = false } = {}) {
       opts = next;
       nextCollapsed = null;
@@ -230,7 +205,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     },
     toggleCollapsed: (id: string) => setCollapsed(id),
     setCollapsed: (id: string, value: boolean) => setCollapsed(id, value),
-    /** The keyboard position (an item id), or null for none. */
     highlight(id: string | null) {
       if (id === highlighted()) return;
       if (opts.highlighted === undefined) put("highlighted", id);
@@ -239,9 +213,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     hover: (id: string | null) => put("hovered", id),
     setActiveSection: (id: string | null) => put("activeSection", id),
     setSkinTone: (tone: SkinToneValue) => store.setSkinTone(tone),
-    /** Picks an item (the highlighted one by default) or a unified code: the selection, counted as used. */
     choose: (id = highlighted()): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
-    /** Opens an emoji's skin-tone variations; false when it has none. */
     openVariations(id: string | null) {
       const record = findItem(getSnapshot().sections, id)?.record;
       if (!record?.tones.length || record.imageUrl || opts.disableVariations) return false;
@@ -249,16 +221,12 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       return true;
     },
     closeVariations: () => put("variations", null),
-    /** A search field is shown (the highlight is then virtual with focusModel "input"). Returns its removal. */
     registerSearch() {
       put("searchFields", ui.searchFields + 1);
       return () => put("searchFields", ui.searchFields - 1);
     },
-    /** Rendered: until then a search field is assumed, so the first render starts in the right focus mode. */
     mount: () => put("mounted", true),
-    /** DOM focus is in a cell (Tab from the field): the highlight is roving while it's there. */
     setDomFocus: (value: boolean) => put("domFocus", value),
-    /** While held, frequents keep their order; releasing catches up. */
     hold: (value: boolean) => put("held", value),
   };
   return state;
@@ -266,10 +234,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
 
 export type PickerState<Icon = unknown> = ReturnType<typeof createPickerState<Icon>>;
 
-/**
- * Moves a picker's highlight through its shown sections, `columns` per row (`pageRows` for a page).
- * Directions are logical: mirror Left/Right for right to left. The new id, or null at an edge.
- */
 export function moveHighlight(state: PickerState, direction: EmojiGridMove, { columns = 9, pageRows = 1 }: { columns?: number; pageRows?: number } = {}): string | null {
   const { sections, highlighted } = state.getSnapshot();
   const grid = createEmojiGrid(sections, { columns, rowHeight: 1 });

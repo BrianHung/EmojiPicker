@@ -19,7 +19,6 @@ const C = {
   icon: ld("#0c1014", "#f5f5f5"),
   chip: ld("rgb(243 245 247)", "#262626"),
 };
-// One gradient over the visible thread: each sent bubble shows its slice.
 const SENT_GRADIENT = "linear-gradient(180deg, #a238ff 0%, #7a3cff 35%, #3c57ff 70%, #1d72ff 100%)";
 
 type Person = { name: string; color: string };
@@ -75,7 +74,6 @@ export function InstagramScene() {
   );
 }
 
-/** The phone thread's top bar: back, the group's avatars and name, call and video. */
 function MobileHeader() {
   return (
     <div className="flex h-[60px] shrink-0 items-center gap-3 pr-4 pl-3" style={{ borderBottom: `1px solid ${C.rule}` }} aria-hidden>
@@ -122,9 +120,7 @@ function Header() {
   );
 }
 
-/** Groups consecutive messages by sender: sender labels, corners and avatars follow from it. */
 function Thread({ messages, listRef, onReact, compact = false }: { messages: Message[]; listRef: React.RefObject<HTMLDivElement | null>; onReact: (id: number, unified: string) => void; compact?: boolean }) {
-  // Sent bubbles read their gradient slice from the thread's scroll position.
   const [scroll, setScroll] = React.useState(0);
   return (
     <div
@@ -169,13 +165,11 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
   const [top, setTop] = React.useState(0);
   React.useLayoutEffect(() => {
     if (!mine || !bubble.current) return;
-    // Offset inside the thread's content (layout px, unaffected by the frame's scale).
     let y = 0;
     for (let el: HTMLElement | null = bubble.current; el && el !== listRef.current; el = el.offsetParent as HTMLElement | null) y += el.offsetTop;
     if (y !== top) setTop(y);
   });
   const viewport = listRef.current?.clientHeight ?? 480;
-  // Corners: 18px, and 4px on the sender's side where the group continues.
   const r = (cont: boolean) => (cont ? 4 : 18);
   const radius = mine
     ? `18px ${r(!first)}px ${r(!last)}px 18px`
@@ -241,7 +235,6 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
               <PickerSheet appStyle={instagram} label="Choose a reaction" open={sheetOpen} onOpenChange={setSheetOpen} onSelect={(s) => onReact(s.unified)} />
             </>
           ) : (
-            // Hover actions beside the bubble: react, reply, more.
             <div className={cn("flex items-center gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100", barOpen && "opacity-100", mine && "flex-row-reverse")} style={{ color: C.muted }}>
               <ReactionBar open={barOpen} onOpenChange={setBarOpen} onSelect={pick} align={mine ? "end" : "start"} />
               <span className="flex size-8 items-center justify-center" aria-hidden>
@@ -258,7 +251,6 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
   );
 }
 
-/** Instagram's chip: the reaction under the bubble's bottom edge, ringed in the page color. */
 function ReactionChip({ unified, mine, onRemove }: { unified: string; mine: boolean; onRemove: () => void }) {
   const store = useEmojiStore();
   useEmojiStatus();
@@ -280,12 +272,10 @@ type ReactionBarProps = {
   onOpenChange: (open: boolean) => void;
   onSelect: (s: EmojiSelection) => void;
   align: "start" | "end";
-  /** On a phone: the bar opens over this bubble (no react button) and "+" calls `onMore` for the sheet. */
   anchor?: React.RefObject<HTMLElement | null>;
   onMore?: () => void;
 };
 
-/** The react button and its bar: six pinned reactions and "+" for the full Instagram picker. */
 function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: ReactionBarProps) {
   const store = useEmojiStore();
   const tb = instagram.tapback;
@@ -411,7 +401,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   );
 }
 
-// Icons in Instagram's outline style (24px, 2px stroke, currentColor).
 const stroke = (d: React.ReactNode, size = 24) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     {d}

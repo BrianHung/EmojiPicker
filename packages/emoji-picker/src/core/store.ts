@@ -6,56 +6,32 @@ import type { CompletionOrder, SearchIndex } from "./search/search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
-/** A dataset object, a URL to one, or a loader. Load it as a separate asset, not inlined into JS. */
 export type EmojiDataSource = Dataset | string | ((options: { signal: AbortSignal }) => Promise<Dataset>);
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
 export type EmojiStoreOptions = {
   data: EmojiDataSource;
-  /**
-   * Custom emoji: an array, a pack's JSON URL, a loader `({ signal }) => Promise<CustomEmoji[]>`,
-   * or an array mixing them (several packs). Packs load with the data, in parallel.
-   */
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
-  /** Drop emoji from the picker and search. */
   filter?: (record: EmojiRecord) => boolean;
   frequents?: FrequencyStore;
-  /** Controlled skin tone: 0 (none) or 1-5, the Fitzpatrick tones. */
   skinTone?: SkinToneValue;
-  /** Skin tone until one is stored or chosen. Default 0. */
   defaultSkinTone?: SkinToneValue;
   onSkinToneChange?: (tone: SkinToneValue) => void;
-  /** Where the uncontrolled skin tone persists. Default: localStorage `emoji-picker:skin-tone`; `null` keeps it in memory. */
   skinToneStorage?: EmojiStorage | null;
-  /**
-   * How queries become results, for the picker and useEmojiSearch. Any function
-   * `(query, context) => hits | Promise<hits>`; default `lexical()`. Compose with
-   * the helpers in `@brianhung/emoji-picker/search`.
-   */
   searchEngine?: EmojiSearch;
-  /**
-   * BCP 47 tag for everything language-specific: case folding, word segmentation and A–Z order
-   * in search, and the labels' counts. Default: the dataset's `locale`. Each piece replaces only
-   * itself: `labels`, `collator`, a `searchEngine` (`lexical({ segmenter, tokenize })`), or `data`.
-   */
   locale?: string;
-  /** Interface strings over the English defaults (`localizeLabels(locale, labels)`). */
   labels?: Partial<EmojiLabels>;
-  /** A–Z order of alphabetical shortcode completion. Default `new Intl.Collator(locale)`. */
   collator?: Pick<Intl.Collator, "compare">;
 };
 
 export type EmojiStoreStatus = "idle" | "loading" | "ready" | "error";
 
-/** The resolved form of a pick, from the picker, a tapback or autocomplete. */
 export type EmojiSelection = {
-  /** Text to insert. Empty for custom emoji. */
   emoji: string;
   unified: string;
   baseUnified: string;
   name: string;
-  /** ":thumbsup:" or ":thumbsup::skin-tone-3:" when one exists. */
   shortcode?: string;
   shortcodes: readonly string[];
   skinTone: SkinToneValue;
@@ -103,7 +79,6 @@ export function createEmojiStore({
   function ingest(dataset: Dataset, loaded: readonly CustomEmoji[]) {
     const all = expandDataset(dataset);
     const base = all.filter((r) => !filter || filter(r));
-    // A custom emoji's base may be filtered out of the picker and still lend its words.
     const byCode = new Map(all.map((r) => [r.unified, r]));
     customs = loaded;
     customGroups = new Map(loaded.map((c) => [c.id, c.group]));
@@ -121,14 +96,10 @@ export function createEmojiStore({
 
   const store = {
     frequents,
-    /** Custom emoji once loaded (inline ones and every pack). */
     customEmojis: (): readonly CustomEmoji[] => customs,
-    /** Custom emoji id → its group, once loaded. */
     customGroups: (): ReadonlyMap<string, string | undefined> => customGroups,
-    /** Packs that failed to load; they're left out, the rest of the picker works. */
     packErrors: (): readonly Error[] => packErrors,
 
-    /** Fetch and expand the dataset. Idempotent; safe to call from many pickers. */
     load(): Promise<void> {
       if (pending) return pending;
       status = "loading";
@@ -151,7 +122,6 @@ export function createEmojiStore({
       return pending;
     },
 
-    /** Load data and build the search index in idle time, before anyone opens a picker. */
     prepare() {
       idle(() =>
         store
@@ -164,31 +134,20 @@ export function createEmojiStore({
     status: () => status,
     error: () => error,
     records: (): readonly EmojiRecord[] => records,
-    /** Localized category names from the dataset, in GROUPS order. */
     groupNames: () => groupNames,
-    /** The `locale` option, else the dataset's once loaded. */
     locale: () => locale,
-    /** The `labels` option over the English defaults, with counts in `locale`. */
     labels: (): EmojiLabels => (labels ??= localizeLabels(locale, labelOverrides)),
 
-    /** Base record for a unified code, a skin-tone variation or a custom emoji id. */
     get: (unified: string) => byUnified.get(unified.toLowerCase()) ?? byUnified.get(unified),
 
-    /** The search index, built on first use. */
     index(): SearchIndex {
       if (status !== "ready") throw new Error("emoji data is not loaded; await store.load() first");
       return (index ??= indexFor(records, { locale, collator }));
     },
 
-    /** Record for a Slack shortcode ("tada" or ":tada:"), including custom emoji. */
     fromShortcode: (code: string) => (status === "ready" ? store.index().byShortcode(code) : undefined),
     search: (query: string, limit?: number) => (status === "ready" ? store.index().search(query, limit) : []),
 
-    /**
-     * Run the configured search. Sync engines return records directly; async ones
-     * a promise, which has `interim` records when the search shows some meanwhile
-     * (`progressive`). Unknown codes are dropped and duplicates removed.
-     */
     query(text: string, { limit = 200, signal = new AbortController().signal }: { limit?: number; signal?: AbortSignal } = {}): EmojiRecord[] | Promise<EmojiRecord[]> | ProgressiveHits<EmojiRecord[]> {
       if (status !== "ready" || !text.trim()) return [];
       const resolve = (hits: readonly SearchHit[]) => {
@@ -219,14 +178,12 @@ export function createEmojiStore({
       }
       toneControl.onChange?.(value);
     },
-    /** Takes the controlled skin tone and its handler (a framework syncing them from a render). */
     controlSkinTone(value: SkinToneValue | undefined, onChange?: (tone: SkinToneValue) => void) {
       const changed = value !== toneControl.value;
       toneControl = { value, onChange };
       if (changed) emit();
     },
 
-    /** Build the selection for an emoji (or variation) and count it as used. */
     select(unified: string): EmojiSelection | undefined {
       const record = store.get(unified);
       if (!record) return undefined;
@@ -246,7 +203,6 @@ export function createEmojiStore({
       };
     },
 
-    /** Applies the current skin tone to a base emoji when it has variations. */
     withSkinTone(unified: string): string {
       const record = store.get(unified);
       const current = store.skinTone();
@@ -263,7 +219,6 @@ export function createEmojiStore({
 
 const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 && n <= SKIN_TONES.length ? (n as SkinToneValue) : 0);
 
-// Stores (one per provider) that load the same URL share one request and one parse.
 const byUrl = new Map<string, Promise<Dataset>>();
 
 async function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset> {
@@ -275,7 +230,7 @@ async function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Da
       if (!response.ok) throw new Error(`emoji data: ${response.status} ${response.statusText}`);
       return response.json() as Promise<Dataset>;
     });
-    pending.catch(() => byUrl.delete(source)); // let a later load retry
+    pending.catch(() => byUrl.delete(source));
     byUrl.set(source, pending);
   }
   return pending;

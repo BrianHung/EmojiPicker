@@ -9,19 +9,14 @@ export type ShortcodeSuggestion = ShortcodeCompletion;
 export type { KeyLike };
 
 export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> & {
-  /** What the user typed after the trigger (`:`), without it. Empty closes the list. */
   query: string;
 };
 
 export type EmojiSuggestionsState = SuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
-  /** Choose a suggestion (the highlighted one by default): records it as used and calls onChoose. */
   choose(index?: number): void;
-  /** Close until the query changes. */
   dismiss(): void;
-  /** The text a suggestion inserts: the emoji in the user's skin tone, or `:shortcode:` (always for custom emoji). */
   textFor(suggestion: ShortcodeSuggestion, insert?: "emoji" | "shortcode"): string;
-  /** Arrow keys, Enter/Tab and Escape. Returns true when it handled (and prevented) the key. */
   onKeyDown(event: KeyLike): boolean;
   getListProps(): { id: string; role: "listbox" };
   getOptionProps(index: number): ReturnType<EmojiSuggestionsMachine["getOptionProps"]> & {
@@ -30,10 +25,6 @@ export type EmojiSuggestionsState = SuggestionsSnapshot & {
   };
 };
 
-/**
- * Headless emoji suggestions for a query you already extracted (core's `createEmojiSuggestions`).
- * Use it where something else finds the trigger and forwards its key events.
- */
 export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestionsState {
   const { store } = useEmojiContext();
   const id = React.useId();
@@ -42,7 +33,6 @@ export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSugg
   return useSuggestionsStore(machine);
 }
 
-/** React state of a suggestions store made elsewhere: an editor plugin's (`emojiTypeahead`). */
 export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestionsState {
   useEmojiStatus();
   const snapshot = React.useSyncExternalStore(machine.subscribe, machine.getSnapshot, machine.getSnapshot);
@@ -56,7 +46,7 @@ export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSugg
     getListProps: machine.getListProps,
     getOptionProps: (index) => ({
       ...machine.getOptionProps(index),
-      // mousedown, not click: keep focus (and the caret) in the editor
+      // mousedown, not click: keeps focus and the caret in the editor
       onMouseDown: (event) => {
         event.preventDefault();
         machine.choose(index);

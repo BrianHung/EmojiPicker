@@ -19,7 +19,6 @@ export const STYLES: Style[] = [apple, slack, discord, notion, linear, instagram
 
 export const styleById = (id: string) => STYLES.find((s) => s.id === id) ?? apple;
 
-/** Each style's scene, by style id. */
 export const SCENES: Record<string, React.ComponentType> = {
   apple: AppleScene,
   slack: SlackScene,
@@ -31,7 +30,6 @@ export const SCENES: Record<string, React.ComponentType> = {
 
 const sources = import.meta.glob<string>("./*/*.tsx", { query: "?raw", import: "default", eager: true });
 
-/** A style file as the site shows it ("apple", "picker" → styles/apple/picker.tsx), without maintainer comments. */
 export const sourceOf = (id: string, file: "picker" | "scene") => stripComments(sources[`./${id}/${file}.tsx`] ?? "");
 
 function stripComments(code: string) {

@@ -1,6 +1,3 @@
-// The site's og:video (1200×630, 6 s loop): a pointer taps 🫪 three times and each tap inflates
-// it like a balloon, then it lets the air out and settles back. Every frame is a pure function of
-// `t`, stepped by capture/render-og.mjs; frame 0 is og.png.
 import pointerUrl from "./assets/pointer.png";
 
 const TWEMOJI_BASE_URL = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/";
@@ -18,14 +15,11 @@ const clamp = (v: number) => Math.min(1, Math.max(0, v));
 const progress = (t: number, from: number, to: number) => clamp((t - from) / (to - from));
 const mix = (a: number, b: number, p: number) => a + (b - a) * p;
 const easeInOut = (p: number) => (p < 0.5 ? 4 * p ** 3 : 1 - (-2 * p + 2) ** 3 / 2);
-/** A damped spring from 0 to 1. */
 const spring = (p: number) => 1 - Math.exp(-6 * p) * Math.cos(p * Math.PI * 3);
 
-/** The balloon's scale, and how squashed it is by the press (0 = round). */
 function face(t: number) {
   if (t >= DEFLATE[0]) {
     const p = progress(t, ...DEFLATE);
-    // Air rushing out: a fast shrink with a wobble that dies down.
     return { scale: mix(SIZES[SIZES.length - 1]!, 1, easeInOut(p)), squash: 0, wobble: Math.sin(p * 40) * 7 * (1 - p) };
   }
   const i = TAPS.filter((tap) => t >= tap).length - 1;
@@ -36,20 +30,17 @@ function face(t: number) {
   return { scale: mix(SIZES[i]!, SIZES[i + 1]!, grow), squash, wobble: 0 };
 }
 
-/** Where the fingertip is: resting off the balloon's lower right, darting in for each tap. */
 function pointer(t: number, scale: number) {
   const r = (BASE * scale) / 2;
   const rest = { x: CENTER.x + r * 0.62 + 46, y: CENTER.y + r * 0.62 + 46 };
   const touch = { x: CENTER.x + r * 0.5, y: CENTER.y + r * 0.5 };
   const tap = TAPS.find((at) => t >= at - 0.18 && t < at + PRESS + 0.12);
-  // Off while the air goes out, back in place before the loop restarts.
   const away = progress(t, DEFLATE[0] - 0.2, DEFLATE[0] + 0.3) * (1 - easeInOut(progress(t, DEFLATE[1] + 0.1, DURATION - 0.15)));
   if (tap === undefined) return { ...rest, pressed: false, away };
   const p = t < tap ? easeInOut(progress(t, tap - 0.18, tap)) : 1 - easeInOut(progress(t, tap + PRESS, tap + PRESS + 0.12));
   return { x: mix(rest.x, touch.x, p), y: mix(rest.y, touch.y, p), pressed: t >= tap && t < tap + PRESS, away };
 }
 
-// The pointer, hand-drawn for this site (165×194); its fingertip is at (50, 4).
 const POINTER = { width: 165, height: 194, tip: { x: 50, y: 4 } };
 
 function Pointer({ x, y, pressed, away }: { x: number; y: number; pressed: boolean; away: number }) {

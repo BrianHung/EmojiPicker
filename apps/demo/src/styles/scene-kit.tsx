@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { tokensOf, type Style, type StylePickerProps } from "./style";
 
-/** A color for the site's light and dark themes. */
 export const ld = (light: string, dark: string) => `light-dark(${light}, ${dark})`;
 
 function useFitScale(width: number) {
@@ -27,16 +26,13 @@ function useFitScale(width: number) {
 export type SceneFrameProps = {
   width: number;
   height: number;
-  /** Accessible name of the region ("Discord style channel"). */
   label: string;
-  /** The app style whose tokens the scene's own markup uses. */
   appStyle?: Style;
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
 };
 
-/** An app window at its real pixel size, scaled down (not reflowed) to fit narrow containers. */
 export function SceneFrame({ width, height, label, appStyle, className, style, children }: SceneFrameProps) {
   const { ref, scale } = useFitScale(width);
   return (
@@ -56,7 +52,6 @@ export function SceneFrame({ width, height, label, appStyle, className, style, c
   );
 }
 
-/** Whether the scene's container is narrower than `breakpoint`, where scenes switch to the app's mobile layout. */
 export function useCompact(breakpoint = 640) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [compact, setCompact] = React.useState(false);
@@ -82,7 +77,6 @@ export function MobileFrame({ height = 640, label, appStyle, className, style, c
   );
 }
 
-/** Shrinks a portaled popup that is wider than the viewport. */
 export function FitViewport({ width, children }: { width: number; children: React.ReactNode }) {
   const [zoom, setZoom] = React.useState(1);
   React.useLayoutEffect(() => {
@@ -91,7 +85,7 @@ export function FitViewport({ width, children }: { width: number; children: Reac
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, [width]);
-  // The popover mounts hidden while it measures, so the picker's autofocus can miss.
+  // The popover mounts hidden while it measures, so the picker's autofocus can miss
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     let frames = 0;
@@ -125,12 +119,10 @@ export type ScenePickerProps = {
   onOpenChange?: (open: boolean) => void;
   title?: string;
   pickerClassName?: string;
-  /** Font for the portaled popover, which otherwise inherits the site's. */
   font?: string;
   sheet?: boolean;
 };
 
-/** A trigger that opens the app style's picker in a popover, or a bottom sheet with `sheet`. */
 export function ScenePicker({ appStyle: style, onSelect, children, label, triggerClassName, side = "bottom", align = "start", open, onOpenChange, title, pickerClassName, font, sheet }: ScenePickerProps) {
   if (sheet)
     return (
@@ -156,19 +148,16 @@ export type PickerSheetProps = {
   appStyle: Style;
   onSelect: (selection: EmojiSelection) => void;
   label: string;
-  /** Omit to drive the sheet with `open`. */
   children?: React.ReactNode;
   title?: string;
   triggerClassName?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   font?: string;
-  /** A picker other than the style's own. */
   Picker?: React.ComponentType<StylePickerProps>;
   top?: React.ReactNode;
 };
 
-/** The app style's picker in a full-width bottom sheet. Picking closes it. */
 export function PickerSheet({ appStyle: style, onSelect, label, children, title, triggerClassName, open, onOpenChange, font, Picker = style.Picker, top }: PickerSheetProps) {
   const [uncontrolled, setUncontrolled] = React.useState(false);
   const isOpen = open ?? uncontrolled;
@@ -188,7 +177,7 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
         data-style={style.id}
         className="border-picker-border bg-picker-background font-picker text-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-picker-muted/40"
         style={{ ...tokensOf(style), fontFamily: font }}
-        // Keyboard opens into search; a tap doesn't raise the phone's keyboard.
+        // Keyboard opens into search; a tap doesn't, so it won't raise the phone's keyboard
         initialFocus={(type) => (type === "touch" ? true : (body.current?.querySelector("input") ?? true))}
       >
         <DrawerTitle className="sr-only">{label}</DrawerTitle>
@@ -208,7 +197,6 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
   );
 }
 
-/** Press and hold, or right click: spread onto a message to open its reactions. */
 export function useLongPress(onLongPress: () => void, delay = 450) {
   const timer = React.useRef(0);
   const start = React.useRef<{ x: number; y: number } | null>(null);
@@ -219,7 +207,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
     start.current = null;
   };
   React.useEffect(() => cancel, []);
-  // React bubbles events from portals; those aren't presses on the message.
+  // React bubbles events from portals; those aren't presses on the message
   const outside = (e: React.SyntheticEvent) => !(e.currentTarget as Node).contains(e.target as Node);
   return {
     onPointerDown: (e: React.PointerEvent) => {
@@ -246,7 +234,6 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
   };
 }
 
-/** Loads a Google Fonts stylesheet once. */
 export function useFontStylesheet(href: string) {
   React.useInsertionEffect(() => {
     if (document.head.querySelector(`link[href="${href}"]`)) return;
@@ -257,7 +244,6 @@ export function useFontStylesheet(href: string) {
   }, [href]);
 }
 
-/** The person's Bufo, or initials on a flat color. */
 export function Avatar({ name, size, color, src = avatarFor(name), className, fontSize }: { name: string; size: number; color: string; src?: string; className?: string; fontSize?: number }) {
   const initials = name
     .split(/\s+/)
@@ -287,7 +273,6 @@ export function toggleReaction(list: Reaction[], unified: string): Reaction[] {
 const segmenter = typeof Intl !== "undefined" && "Segmenter" in Intl ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
 const toUnified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
-/** Message text with each emoji drawn by <Emoji>, so the provider's renderer applies. */
 export function EmojiText({ text, size, className }: { text: string; size: number; className?: string }) {
   const store = useEmojiStore();
   const status = useEmojiStatus();

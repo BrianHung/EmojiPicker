@@ -27,7 +27,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
     markdownDocs(),
-    // A demo imported with `?react-aria` (components/site/demo.tsx) gets React Aria's EmojiPopover in place of Floating UI's.
     {
       name: "react-aria-demos",
       enforce: "pre",
@@ -35,37 +34,28 @@ export default defineConfig({
         if (source === "@brianhung/emoji-picker/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("@brianhung/emoji-picker/react-aria", importer, { skipSelf: true });
       },
     },
-    // Transformers.js loads the ONNX Runtime wasm from jsDelivr; the bundled copy (25.6 MiB) is
-    // unused and over the Workers 25 MiB asset limit.
+    // ONNX Runtime wasm loads from jsDelivr; the bundled 25.6 MiB copy is over the Workers 25 MiB asset limit
     {
       name: "drop-ort-wasm",
       generateBundle(_, bundle) {
         for (const file of Object.keys(bundle)) if (/ort-wasm.*\.wasm$/.test(file)) delete bundle[file];
       },
     },
-    // The site's Worker (worker/index.ts, /api/*) runs in workerd next to the pages. Workers AI (Clef)
-    // has no local mode, so /api answers 503 in dev unless you're logged in and set
-    // CLOUDFLARE_REMOTE_BINDINGS=1 to use the real ones.
+    // Workers AI has no local mode: /api answers 503 in dev unless CLOUDFLARE_REMOTE_BINDINGS=1
     cloudflare({ remoteBindings: process.env.CLOUDFLARE_REMOTE_BINDINGS === "1" }),
   ],
   resolve: {
-    // In the monorepo, the library resolves to its TypeScript source (the `@brianhung/source` export
-    // condition, scoped so other packages' `source` conditions stay off): no build step in dev.
-    // Deployed on its own, apps/demo uses the published build.
+    // Scoped `@brianhung/source` condition, so other packages' `source` conditions stay off
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
-    // `@/…` is src/ (shadcn's aliases in components.json); `@/registry/…` and `@/components/ui/emoji-picker`
-    // (as an app imports it once installed) are the registry item the site renders.
     alias: [
-      // E2E_POPOVER=react-aria: the site's EmojiPopover on React Aria, for the e2e suites.
       ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker\/floating-ui$/, replacement: "@brianhung/emoji-picker/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\/components\/ui\/emoji-picker$/, replacement: fileURLToPath(new URL("./registry/emoji-picker.tsx", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
   },
-  // The pages, for the client build only (the Worker environment has its own entry).
   environments: { client: { build: { rollupOptions: { input: pages } } } },
-  // Scan only the pages for dependencies; capture/ holds Node scripts (Playwright) that never ship.
+  // Scan only the pages: capture/ holds Node scripts (Playwright) that never ship
   optimizeDeps: { entries: Object.values(pages) },
   server: { port: 5199, strictPort: true, watch: { ignored: ["**/capture/out/**", "**/capture/*.mjs", "**/capture/*.py"] } },
 });

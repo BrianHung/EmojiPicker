@@ -1,11 +1,7 @@
-// Which emoji the system font can draw: a sequence it can't comes out as tofu or as
-// its parts side by side. Each emoji version is sampled once; emoji on screen are then
-// probed one by one, on a canvas, in batches. Browser-only; on the server, everything
-// counts as supported. From emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md).
+// Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 
-/** Emoji with a text presentation that the system fonts draw as plain symbols (♀ ♂ ⚕). */
 export const KNOWN_FAILING = new Set(["2640", "2642", "2695"]);
 
 const CELL = 32;
@@ -17,13 +13,11 @@ const isCountryFlag = (unified: string) => /^(1f1[ef][\da-f]-1f1[ef][\da-f]$|1f3
 
 type NativeProbe = {
   prime(unifieds: Iterable<string>): void;
-  /** true / false once probed; null when the probe couldn't tell; undefined before. */
   result(unified: string): boolean | null | undefined;
 };
 
 export type NativeSupport = {
   probe: NativeProbe;
-  /** Emoji versions whose sample failed: their emoji are hidden until probed. */
   failedVersions: ReadonlySet<number>;
   countryFlags: boolean;
 };
@@ -40,8 +34,7 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
     ctx.fillText(text, 0, y);
     ctx.restore();
   };
-  // A sequence is drawn twice, with and without its tag characters (subdivision flags):
-  // a supported one has ink, and differs from its parts.
+  // Drawn with and without tag characters (subdivision flags): a supported sequence has ink and differs from its parts
   const run = (candidates: [string, string, string][]) => {
     try {
       const height = candidates.length * CELL;
@@ -80,9 +73,7 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
           const width = ctx.measureText(text).width;
           if (width <= 0 || width >= 1.5 * baseline) results.set(unified, false);
           else candidates.push([unified, text, text.replace(/[\u{e0020}-\u{e007f}]/gu, "")]);
-        } catch {
-          // An unparsable code: unknown.
-        }
+        } catch {}
       }
       for (let i = 0; i < candidates.length; i += PROBE_BATCH) run(candidates.slice(i, i + PROBE_BATCH));
     },
@@ -92,7 +83,6 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
 
 const probes = new Map<string, NativeProbe | null>();
 
-/** The probe for a font stack (shared per font), or null where canvas can't tell (jsdom, no canvas). */
 export function nativeProbe(fontFamily = DEFAULT_EMOJI_FONT): NativeProbe | null {
   if (typeof document === "undefined") return null;
   if (probes.has(fontFamily)) return probes.get(fontFamily)!;
@@ -114,7 +104,6 @@ export function nativeProbe(fontFamily = DEFAULT_EMOJI_FONT): NativeProbe | null
   return probe;
 }
 
-/** Samples one emoji per version (first in `samples`) and the country flags. */
 export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, string>): NativeSupport {
   probe.prime([FLAG_SAMPLE, ...samples.values()]);
   const failedVersions = new Set<number>();
@@ -122,7 +111,6 @@ export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, s
   return { probe, failedVersions, countryFlags: probe.result(FLAG_SAMPLE) !== false };
 }
 
-/** Whether an emoji draws natively: its own probe when it has one, else its version's sample. */
 export function isNativeSupported(support: NativeSupport | null, unified: string, version: number): boolean {
   const exact = support?.probe.result(unified);
   if (typeof exact === "boolean") return exact;

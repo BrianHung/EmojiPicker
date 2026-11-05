@@ -1,9 +1,5 @@
 import * as React from "react";
 
-/**
- * The heading last scrolled into the top fifth of the viewport (shadcn's `useActiveItem`),
- * or the last one once the page is scrolled to the bottom. Defaults to the first.
- */
 export function useActiveHeading(ids: string[]) {
   const [intersected, setIntersected] = React.useState<string | null>(null);
   const [atBottom, setAtBottom] = React.useState(false);

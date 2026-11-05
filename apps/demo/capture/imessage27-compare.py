@@ -1,18 +1,8 @@
-# iOS 27 Messages parity: per-part bounding boxes (pt) and % changed pixels, ref vs ours,
-# plus side-by-side images (real | ours | diff). Called by imessage27-parity.mjs.
-#   python3 imessage27-compare.py reacted pill keyboard menu
-# Every part is measured the same way in both images: the bounding box of the pixels in
-# a region (pt) that differ from the region's corner colour, or that match a colour.
 import json, sys
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
-S = 3  # px per pt
+S = 3
 
-# name: (region x0,y0,x1,y1 in pt, rule)
-#   rule ("bg", thr): differs from the region's top-left pixel by more than thr
-#   rule ("color", (r,g,b), tol): within tol of a colour
-#   rule ("ink", thr): darker than thr (text, glyphs)
-#   rule ("sat", thr): saturated (emoji, blue)
 COMMON = {
     "time": ((40, 15, 130, 50), ("ink", 120)),
     "island": ((130, 5, 270, 60), ("color", (0, 0, 0), 30)),
@@ -94,7 +84,7 @@ def bbox(img, region, rule):
         mask = maxchan(ImageChops.difference(crop, ref)).point(lambda v: 255 if v <= rule[2] else 0)
     elif kind == "ink":
         mask = crop.convert("L").point(lambda v: 255 if v < rule[1] else 0)
-    else:  # sat
+    else:
         r, g, b = crop.split()
         hi = ImageChops.lighter(ImageChops.lighter(r, g), b)
         lo = ImageChops.darker(ImageChops.darker(r, g), b)
@@ -129,7 +119,6 @@ def side_by_side(state, real, ours, rows):
         x = pad + i * (w + pad)
         d.text((x, 22), f"{state} · {label}", fill="black", font=font)
         c.paste(img, (x, top))
-    # Outline the parts on ours (red) and real (green).
     for name, (r_box, o_box, _) in rows.items():
         for box, x, col in ((r_box, pad, (0, 170, 0)), (o_box, pad * 2 + w, (230, 0, 0))):
             if box:
@@ -146,7 +135,7 @@ def main(states):
         if ours.size != real.size:
             ours = ours.resize(real.size)
         parts = {**COMMON, **STATES[state]}
-        if state == "keyboard":  # the sheet covers the composer
+        if state == "keyboard":
             for k in ("plus", "field", "placeholder"):
                 parts.pop(k)
         rows = {}
@@ -154,7 +143,6 @@ def main(states):
             r_box, o_box = bbox(real, region, rule), bbox(ours, region, rule)
             gap = None if not (r_box and o_box) else round(max(abs(a - b) for a, b in zip(r_box, o_box)), 1)
             rows[name] = (r_box, o_box, gap)
-        # Clocks differ by design: % changed is also given without the status bar.
         top_cut = 54 * S
         pct = changed(real, ours)
         pct_body = changed(real.crop((0, top_cut, real.width, real.height)), ours.crop((0, top_cut, ours.width, ours.height)))
@@ -162,7 +150,6 @@ def main(states):
         sbs = side_by_side(state, real, ours, rows)
         sbs.save(f"out/imessage27-{state}-compare.png")
         sheets.append(sbs)
-    # All states stacked, at half size.
     half = [s.resize((s.width // 2, s.height // 2), Image.LANCZOS) for s in sheets]
     out = Image.new("RGB", (max(s.width for s in half), sum(s.height for s in half)), "white")
     y = 0

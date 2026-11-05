@@ -1,5 +1,3 @@
-// The server-side searches, served by this site's Worker (worker/index.ts) on the same
-// origin. VITE_SEARCH_API_URL points them at an API hosted elsewhere.
 import { remote } from "@brianhung/emoji-picker/search";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
@@ -19,11 +17,7 @@ const setStatus = (backend: Backend, value: ApiStatus) => {
   listeners.forEach((l) => l());
 };
 
-/**
- * POST <path> { query, limit, custom, ...body } → { hits }. When the API can't answer
- * (local dev without Cloudflare bindings, a static host), it returns no hits, so a
- * `fallback` to lexical() still fills the picker.
- */
+// Without the API (local dev, a static host) this returns no hits, so a fallback to lexical() still fills the picker
 function api(backend: Backend, path: string, body: Record<string, unknown> = {}) {
   return remote(async (query, { limit, signal, records }) => {
     try {
@@ -45,8 +39,6 @@ function api(backend: Backend, path: string, body: Record<string, unknown> = {})
   });
 }
 
-/** Workers AI embeddings (bge-large-en-v1.5), nearest neighbors from Vectorize. */
 export const embeddingsSearch = api("embeddings", "/api/embed-search");
 
-/** Jev, a decision model on Workers AI, picks from every emoji name. */
 export const decisionSearch = api("decision", "/api/decide");

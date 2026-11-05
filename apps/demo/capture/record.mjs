@@ -1,5 +1,3 @@
-// Same steps as the real-app recording: open, type a query one letter at a time, hover a cell.
-// node record.mjs discord heart 10 --theme=dark  → frames/<style>/ours-N.png
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";

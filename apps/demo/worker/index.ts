@@ -1,9 +1,3 @@
-// The site's API. Static pages are served as assets; only /api/* reaches this Worker.
-//
-//   GET  /api/health        what's configured, and the index size
-//   POST /api/embed-search  Workers AI embeddings + Vectorize
-//   POST /api/decide        Jev, a decision model on Workers AI
-//   POST /api/admin/seed    embeds the emoji into Vectorize (Bearer ADMIN_TOKEN)
 import { allowedOrigin, corsHeaders } from "./cors";
 import { BUILT_IN, CUSTOM } from "./corpus";
 import { decisionSearch, MODEL } from "./decide";
@@ -33,7 +27,6 @@ const readJson = (request: Request) => request.json().catch(() => null);
 export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
-    // Same-origin calls need no CORS. ALLOWED_ORIGINS is for hosting the page elsewhere.
     const origin = allowedOrigin(request, env.ALLOWED_ORIGINS ?? "");
     const cors = corsHeaders(origin);
     const json = (data: unknown, status = 200, headers: Record<string, string> = {}) => Response.json(data, { status, headers: { ...cors, ...headers } });

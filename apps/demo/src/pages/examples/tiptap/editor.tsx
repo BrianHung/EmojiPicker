@@ -1,5 +1,3 @@
-// The picker inside a Tiptap (ProseMirror) editor: `:shortcode` suggestions at the caret,
-// and the full picker from a toolbar button.
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";

@@ -1,6 +1,3 @@
-// POST /api/embed-search { query, limit?, custom? }
-// Embeds the query with Workers AI (bge-large-en-v1.5, 1024 dimensions), then takes the
-// nearest emoji from Vectorize (cosine). The index is filled by POST /api/admin/seed.
 import { QUERY_PREFIX } from "./corpus";
 import type { Env } from "./env";
 import { binding, Unavailable } from "./errors";
@@ -10,7 +7,6 @@ export const EMBEDDING_MODEL = "@cf/baai/bge-large-en-v1.5";
 export type Hit = { unified: string; score: number; custom?: true; imageUrl?: string };
 export type EmbedSearchResponse = { hits: Hit[]; model: string; timings: { embedMs: number; queryMs: number } };
 
-/** One 1024-dimension vector per text. */
 export async function embed(env: Env, text: string[]): Promise<number[][]> {
   const out = (await binding(() => env.AI.run(EMBEDDING_MODEL, { text }))) as { data?: number[][] };
   if (out?.data?.length !== text.length) throw new Unavailable("Workers AI returned no embeddings");
@@ -21,8 +17,7 @@ export async function embedSearch(env: Env, { query, limit, custom }: { query: s
   const t0 = performance.now();
   const [vector] = await embed(env, [QUERY_PREFIX + query]);
   const t1 = performance.now();
-  // With metadata, Vectorize returns at most 50 matches. Without custom emoji, take
-  // all 50 and drop the custom ones.
+  // With metadata, Vectorize returns at most 50 matches
   const { matches } = await binding(() => env.EMOJI_INDEX.query(vector!, { topK: custom ? limit : 50, returnMetadata: "all" }));
   const t2 = performance.now();
   if (matches.length === 0) {
@@ -36,6 +31,6 @@ export async function embedSearch(env: Env, { query, limit, custom }: { query: s
     hits.push(isCustom ? { unified: match.id, score: match.score, custom: true, imageUrl: String(match.metadata?.imageUrl ?? "") || undefined } : { unified: match.id, score: match.score });
     if (hits.length === limit) break;
   }
-  // Workers' clock advances only across I/O, which is what these measure.
+  // Workers' clock advances only across I/O, which is what these measure
   return { hits, model: EMBEDDING_MODEL, timings: { embedMs: Math.round(t1 - t0), queryMs: Math.round(t2 - t1) } };
 }

@@ -1,25 +1,14 @@
-// The on-device index: one int8 vector per emoji plus its scale, and the ranking.
-// Written by scripts/embed-emoji.ts, read by on-device.worker.ts.
-//
-// Layout (little-endian):
-//   "EMB1"  u32 count  u32 dims  u32 idBytes
-//   ids     UTF-8, newline-separated unified codes, zero-padded to 4 bytes
-//   scales  f32[count]          vector i ≈ scales[i] * int8[i]
-//   vectors i8[count * dims]
-
 export type VectorIndex = {
   ids: string[];
   dims: number;
   scales: Float32Array;
   vectors: Int8Array;
-  /** Sign bits of each vector, dims / 32 words per vector: the binary shortlist. */
   bits: Uint32Array;
 };
 
-const MAGIC = 0x31424d45; // "EMB1"
+const MAGIC = 0x31424d45;
 const pad4 = (n: number) => (n + 3) & ~3;
 
-/** Quantize unit vectors to int8 with one scale per vector (max |x| → 127). */
 export function encodeIndex(ids: string[], vectors: Float32Array[], dims: number): Uint8Array {
   const idBytes = new TextEncoder().encode(ids.join("\n"));
   const header = 16;
@@ -67,11 +56,9 @@ const popcount = (x: number) => {
 
 type RankOptions = {
   limit: number;
-  /** Rerank only the `shortlist` nearest by Hamming distance on sign bits. 0 scores every vector. */
   shortlist?: number;
 };
 
-/** Cosine ranking of a unit query against the index: binary shortlist, then int8 dot products. */
 export function rank(index: VectorIndex, query: Float32Array, { limit, shortlist = 0 }: RankOptions): { unified: string; score: number }[] {
   const { ids, dims, scales, vectors, bits } = index;
   let candidates: number[];

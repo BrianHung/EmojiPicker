@@ -1,23 +1,15 @@
-// POST /api/decide { query, limit?, custom? }
-// Jev, TypeSafe's decision model on Workers AI, answers a "choice" question with a
-// probability per option (the System One protocol, which Cloudflare's Clef also speaks).
-// A question takes at most 255 options, so every emoji name can't be one question:
-//   round 1  the names split into questions of <= 250 options, packed into as few
-//            requests as fit, all in parallel; keep each question's top options
-//   round 2  one question over those finalists; its probabilities are the ranking
+// A question takes at most 255 options: round 1 shortlists per chunk of names, round 2 ranks the finalists
 import { BUILT_IN, CUSTOM, type Entry } from "./corpus";
 import type { Hit } from "./embed-search";
 import type { Env } from "./env";
 import { binding, UpstreamError } from "./errors";
 
 export const MODEL = "typesafe/jev";
-/** USD per input token; output tokens are free. */
 export const PRICE = 0.042 / 1_000_000;
 
 export const MAX_OPTIONS = 255;
 export const MAX_QUESTIONS = 64;
 const OPTIONS_PER_QUESTION = 250;
-/** Estimated input tokens per request, leaving room under Jev's 65,536-token context. */
 const TOKENS_PER_REQUEST = 40_000;
 const INSTRUCTIONS = "Which emoji best matches what the user is searching for? Consider meaning, slang and abbreviations, not only exact words.";
 
@@ -31,14 +23,12 @@ export type SystemOneResponse = { model: string; answers: Record<string, ChoiceA
 type DecisionUsage = { inputTokens: number; outputTokens: number; requests: number; costUsd: number };
 export type DecisionResponse = { hits: Hit[]; model: string; usage: DecisionUsage; timings: { round1Ms: number; round2Ms: number } };
 
-/** One System One request through the AI binding, logged by AI Gateway. */
 async function ask(env: Env, request: SystemOneRequest, signal?: AbortSignal): Promise<SystemOneResponse> {
   const out = (await binding(() => env.AI.run(MODEL, request, { gateway: { id: env.AI_GATEWAY_ID }, signal }))) as { result?: SystemOneResponse };
   if (!out?.result?.answers || Object.keys(out.result.answers).length === 0) throw new UpstreamError(`${MODEL} returned no answers`);
   return out.result;
 }
 
-/** Unique option labels: the name, disambiguated when two emoji share one. */
 export function labelOptions(entries: readonly Entry[]): Map<string, Entry> {
   const byLabel = new Map<string, Entry>();
   for (const e of entries) {
@@ -57,7 +47,6 @@ export function chunk<T>(list: readonly T[], size: number): T[][] {
   return out;
 }
 
-/** Packs questions into requests under the token budget and the per-request question limit. */
 export function pack(questions: string[][], budget: number): string[][][] {
   const requests: string[][][] = [];
   let current: string[][] = [];
@@ -95,7 +84,6 @@ export async function decisionSearch(env: Env, { query, limit, custom }: { query
 
   const t0 = performance.now();
   const questions = chunk([...byLabel.keys()], OPTIONS_PER_QUESTION);
-  // Enough finalists from each question that round 2 can fill `limit`, within 255 options.
   const perQuestion = Math.max(4, Math.min(Math.ceil((limit * 2) / questions.length), Math.floor(MAX_OPTIONS / questions.length)));
   const round1 = await Promise.all(pack(questions, TOKENS_PER_REQUEST).map(request));
   const finalists = round1.flatMap((r) => Object.values(r.answers).flatMap((a) => top(a.probabilities, perQuestion).map(([label]) => label)));

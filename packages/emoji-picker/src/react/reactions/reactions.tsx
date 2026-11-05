@@ -1,6 +1,3 @@
-// A reaction row: React Aria's Toolbar (arrows move along it) with one tab stop
-// (roving tabindex), Home and End, and hover continuity: once focus is in the row it
-// follows the pointer, so the next arrow continues from the hovered reaction.
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
@@ -18,7 +15,6 @@ import { SLOTS } from "../utils/slots";
 
 const BUTTONS = "button:not([disabled])";
 
-/** Roving tabindex over a row's buttons, Home/End, and focus following the pointer within the row. */
 function useRovingRow(row: React.RefObject<HTMLElement | null>) {
   const current = React.useRef(0);
   React.useLayoutEffect(() => {
@@ -41,8 +37,7 @@ function useRovingRow(row: React.RefObject<HTMLElement | null>) {
       const active = document.activeElement;
       if (button && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
     };
-    // Home and End go to the ends (a picker's dispatcher takes them first, by its keymap); the
-    // arrows across the row do nothing (rather than scroll the page).
+    // Cross-axis arrows are swallowed so they don't scroll the page
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
       const across = el.getAttribute("aria-orientation") === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
@@ -69,14 +64,9 @@ export type ReactionBarState = { orientation: "horizontal" | "vertical" };
 
 export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
   PartProps<ReactionBarState, HTMLDivElement> & {
-    /** Axis the arrows move along. Default "horizontal". */
     orientation?: "horizontal" | "vertical";
   };
 
-/**
- * A row of reaction buttons (yours, or a Tapback's): one tab stop; arrows, Home and End
- * move along it; with focus in the row, focus follows the hovered button.
- */
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, render, ...props }, ref) {
   const row = React.useRef<HTMLDivElement | null>(null);
   useRovingRow(row);
@@ -93,15 +83,9 @@ function useRow(part: string) {
 }
 
 export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation"> & {
-  /** Each reaction (its unified code) as `Reactions.Item`, followed by `Reactions.Expand`; or your own composition of `Reactions.Items` and `Reactions.Expand`. */
   children?: React.ReactNode | ((emoji: string) => React.ReactNode);
 };
 
-/**
- * A tapback's reaction row: one tab stop (roving tabindex); arrows, Home and End
- * (the keymap's first/last) move along it. "+" expands into the full picker with
- * focus in its search field.
- */
 const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
@@ -116,13 +100,12 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       return record != null && drawable(record, unified);
     });
   React.useEffect(() => request(shown));
-  // Set on expand: this picker's root (the row is gone by the time the full picker shows).
+  // Captured on expand: the row is gone by the time the full picker shows
   const expandFocus = React.useRef<Element | null>(null);
   React.useEffect(() => {
     const root = expandFocus.current;
     if (!root || state?.open) return;
     expandFocus.current = null;
-    // The full picker: focus its search field (else its first emoji) once it shows.
     let tries = 20;
     const land = () => {
       const target = root.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? root.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"]`);
@@ -131,7 +114,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     };
     requestAnimationFrame(land);
   }, [state?.open]);
-  // Collapsing back (a pick from the full picker) hides what had focus: the row takes it.
+  // Collapsing back after a pick hides what had focus, so the row takes it
   const wasOpen = React.useRef(state?.open);
   React.useEffect(() => {
     const reopened = state?.open && wasOpen.current === false;
@@ -162,7 +145,6 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   );
 });
 
-/** The reactions, each through `children` (default `Reactions.Item`). */
 function ReactionsItems({ children }: { children?: (emoji: string) => React.ReactNode }) {
   const { shown } = useRow("Items");
   return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <ReactionsItem emoji={unified} />}</React.Fragment>);
@@ -171,11 +153,9 @@ function ReactionsItems({ children }: { children?: (emoji: string) => React.Reac
 export type ReactionsItemState = InteractionState & { selected: boolean };
 
 export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButtonElement, "onClick" | "onChange"> & {
-  /** The reaction's unified code. */
   emoji: string;
 };
 
-/** A reaction: picks it; a toggle (`aria-pressed`) when the Tapback has `selected`. Without children, its glyph. */
 const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
   const state = React.useContext(ReactionsContext);
@@ -190,7 +170,6 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
     "data-unified": unified,
     "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
     "data-selected": on ? "" : undefined,
-    // An emoji cell: never larger than `--emoji-cell-size`.
     ...racParts<ReactionsItemState, HTMLButtonElement>({ className, style: (s) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }), render }),
     children: typeof children === "function" ? (r: RacState) => children(racState(r)) : (children ?? <Glyph unified={unified} record={record} />),
   };
@@ -199,7 +178,6 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
 
 export type ReactionsExpandProps = PartElementProps<InteractionState, HTMLButtonElement, "onClick">;
 
-/** Expands into the full picker; rendered only when the row can. Without children, a plus. */
 const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
@@ -234,7 +212,6 @@ export const Reactions = /* @__PURE__ */ Object.assign(ReactionsRoot, { Items: R
 export type PanelState = { hidden: boolean };
 export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 
-/** The full picker inside a Tapback: hidden while the reaction row shows. */
 export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);
   const hidden = Boolean(state?.open);

@@ -41,7 +41,6 @@ const tokens: Tokens = {
   "--discord-autocomplete-shadow": "0 0 0 1px light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08)), 0 12px 24px light-dark(transparent, rgb(0 0 0 / 0.24)), 0 12px 36px light-dark(rgb(0 0 0 / 0.12), transparent)",
 };
 
-/** Discord lists `:smi` matches A–Z: codes starting with the query, then the rest. */
 export const discordAutocompleteOptions = { order: "alphabetical", limit: 14 } satisfies EmojiTypeaheadOptions;
 
 const ICONS: I.IconSet = I.ICONS.apple;
@@ -63,12 +62,11 @@ const CATEGORIES = withIcons(ICONS, {
   strokeWidth: 2,
 });
 
-/** The active emoji as ":code: :alias:", else the most used. */
 function Footer() {
   const active = EmojiPicker.useActiveEmoji();
   const store = useEmojiStore();
   const first = useFrequentEmoji(1)[0];
-  // A preview, not a pick: read the record (select() would count a use).
+  // A preview, not a pick: read the record, since select() would count a use
   const shown = active ?? (first ? store.get(first) : undefined);
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 bg-picker-panel px-4">
@@ -134,7 +132,6 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
           </span>
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* Nine 48px columns fit beside the 8px scrollbar only without the end padding. */}
           <EmojiPicker.Viewport
             className={cn(
               "relative min-h-0 flex-1 pl-1 [--emoji-list-padding-end:0px] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:min-h-10 [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:border-2 [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-(--discord-thumb) [&::-webkit-scrollbar-thumb]:bg-clip-padding",

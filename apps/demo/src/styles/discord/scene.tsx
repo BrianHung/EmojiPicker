@@ -130,7 +130,6 @@ function Header() {
   );
 }
 
-/** The phone channel bar: menu, the channel, members and search. */
 function MobileHeader() {
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 pr-3 pl-3" style={{ borderBottom: `1px solid ${C.rule}` }} aria-hidden>
@@ -153,7 +152,7 @@ function MobileHeader() {
 
 function DiscordMessage({ message, onToggle, compact = false }: { message: Message; onToggle: (unified: string) => void; compact?: boolean }) {
   const store = useEmojiStore();
-  useEmojiStatus(); // names for labels once the data is in
+  useEmojiStatus();
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const hold = useLongPress(() => setPickerOpen(true));
   const quick = ["1f44d", "2764-fe0f", "1f602"];
@@ -256,7 +255,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           </div>
         )}
       </div>
-      {/* Outside the row: the sheet's portaled pointer events would reach its press-and-hold. */}
+      {/* Outside the row: the sheet's portaled pointer events would reach its press-and-hold */}
       {compact ? <PickerSheet appStyle={discord} label="Add Reaction" open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(s) => onToggle(s.unified)} font={FONT} /> : null}
     </>
   );
@@ -289,7 +288,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
   const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
-  // ProseMirror keeps the handlers it was created with.
+  // ProseMirror keeps the handlers it was created with
   const menuOpen = React.useRef(false);
   menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});

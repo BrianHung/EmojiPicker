@@ -1,5 +1,3 @@
-// The site header: nav, renderer select, GitHub and npm links, theme toggle; on phones, a
-// "Menu" button opening a full-screen sheet.
 import * as React from "react";
 import type { Renderer } from "@brianhung/emoji-picker";
 import { MenuIcon } from "lucide-react";
@@ -19,7 +17,6 @@ const NAV: [Page, string, string][] = [
   ["examples", "Examples", "/examples/"],
 ];
 
-/** A circle with its left half in horizontal stripes; in dark, the right half is solid. */
 function ThemeIcon({ theme }: { theme: Theme }) {
   const id = React.useId();
   return (
@@ -78,7 +75,6 @@ export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { pag
   const [menu, setMenu] = React.useState(false);
   const themeLabel = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
   return (
-    // Full width, no rule: shadcn's header (64px, 24px gutters, page background).
     <header className="sticky top-0 z-40 bg-background">
       <div className="flex h-16 items-center gap-1 px-4 sm:gap-2 sm:px-6">
         <MobileMenu page={page} open={menu} onOpenChange={setMenu} renderer={renderer} onRenderer={onRenderer} />
@@ -123,7 +119,6 @@ const MENU: { label: string; links: { id: string; label: string; href: string }[
   },
 ];
 
-/** shadcn's mobile menu: a "Menu" button on the left opening a full-screen sheet of grouped links. */
 function MobileMenu({ page, open, onOpenChange, renderer, onRenderer }: { page: Page; open: boolean; onOpenChange: (open: boolean) => void; renderer: Renderer | "auto"; onRenderer: (r: Renderer | "auto") => void }) {
   const current = typeof location === "undefined" ? "" : location.pathname;
   return (

@@ -1,10 +1,3 @@
-/*
- * Tailwind v4: the same tokens as utilities (bg-picker-background, text-picker-muted,
- * border-picker-border, bg-picker-hover/50, rounded-picker, shadow-picker, font-picker).
- *   @import "tailwindcss";
- *   @import "@brianhung/emoji-picker/tokens.css";
- *   @import "@brianhung/emoji-picker/theme.css";
- */
 @theme inline {
   --color-picker-background: var(--emoji-picker-background);
   --color-picker-foreground: var(--emoji-picker-foreground);

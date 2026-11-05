@@ -2,7 +2,6 @@ import * as React from "react";
 import { Emoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { toast } from "@/components/ui/toast";
 
-/** Copies a picked emoji (or a custom emoji's :shortcode:) and confirms with a toast: the emoji, its shortcode and name. */
 function copyEmoji(selection: EmojiSelection) {
   const shortcode = selection.shortcode || `:${selection.shortcodes[0] ?? selection.unified}:`;
   navigator.clipboard?.writeText(selection.emoji || shortcode).catch(() => {});
@@ -14,7 +13,6 @@ function copyEmoji(selection: EmojiSelection) {
   toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, data: { icon } });
 }
 
-/** The last picked emoji; picking also copies it and shows a toast. */
 export function usePickedEmoji() {
   const [picked, setPicked] = React.useState<EmojiSelection | null>(null);
   const pick = React.useCallback((selection: EmojiSelection) => {

@@ -4,17 +4,12 @@ import type { EmojiStore } from "../store";
 
 export type SearchState = {
   results: readonly EmojiRecord[];
-  /** An async search for the current query is in flight. */
   pending: boolean;
 };
 
 const NONE: readonly EmojiRecord[] = [];
 const IDLE: SearchState = { results: NONE, pending: false };
 
-/**
- * The store's search for one query at a time. Sync engines answer at once; an async one keeps
- * the last settled results (or its interim ones) until it settles, and a newer query aborts it.
- */
 export function createSearch(store: EmojiStore, onSettle: () => void) {
   let key: string | null = null;
   let state = IDLE;
@@ -44,7 +39,6 @@ export function createSearch(store: EmojiStore, onSettle: () => void) {
       out.then(done, () => done(NONE));
       return (state = { results: (out as Partial<ProgressiveHits<EmojiRecord[]>>).interim ?? settled, pending: true });
     },
-    /** Stops a search in flight; the next `run` starts it again. */
     abort() {
       if (controller) key = null;
       abort();

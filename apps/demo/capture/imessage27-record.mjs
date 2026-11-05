@@ -1,6 +1,3 @@
-// Records our iOS 27 flow (KB fixture, real animations) at 402×874 (1 px = 1 pt) to compare
-// timing with ref/imessage27-recording.mp4: double-click → pill, smiley → sheet, pick → reaction.
-//   node capture/imessage27-record.mjs   → out/imessage27-ours.webm
 import { chromium } from "playwright";
 import { renameSync } from "node:fs";
 import { dirname } from "node:path";

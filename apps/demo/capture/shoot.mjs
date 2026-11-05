@@ -1,4 +1,3 @@
-// Screenshots each example alone at 2x: node capture/shoot.mjs [style...] [--theme=dark]
 import { chromium } from "playwright";
 import { mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -12,7 +11,7 @@ await mkdir(out, { recursive: true });
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 for (const style of styles.length ? styles : ["apple", "slack", "discord", "notion", "linear", "instagram"]) {
-  // A fresh context per example: frequents live in localStorage and must not leak between shots.
+  // A fresh context per example: frequents live in localStorage and must not leak between shots
   const context = await browser.newContext({ deviceScaleFactor: 2, viewport: { width: 800, height: 900 } });
   const page = await context.newPage();
   page.on("pageerror", (e) => console.error("pageerror", e.message));

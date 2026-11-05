@@ -1,4 +1,3 @@
-// A shadcn/ui-styled `:shortcode` menu for any editor's typeahead, at the caret.
 import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeahead } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 

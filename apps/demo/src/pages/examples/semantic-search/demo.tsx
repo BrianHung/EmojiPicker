@@ -1,5 +1,3 @@
-// The semantic search demo: one picker, three approaches (on device, a vector DB, a
-// decision model).
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, type CustomEmoji, type EmojiSearch } from "@brianhung/emoji-picker";
@@ -14,7 +12,6 @@ import { EmojiPickerCard } from "@/registry/emoji-picker";
 
 const CUSTOM_EMOJI: CustomEmoji[] = customEmojiJson;
 const SAMPLES = ["jurassic park", "happy cat", "deploy to production"];
-/** Results per search: a semantic ranking's tail is noise. */
 const LIMIT = 48;
 const EMPTY_BEFORE_DOWNLOAD = "Download the model to search by meaning.";
 
@@ -25,7 +22,6 @@ const SEARCHES: Record<Tab, EmojiSearch> = {
   decision: fallback(decisionSearch, lexical()),
 };
 
-/** Reports how many results the provider's search returned and how long it took. */
 function timed(search: EmojiSearch, report: (t: { query: string; count: number; ms: number }) => void): EmojiSearch {
   return (query, context) => {
     const start = performance.now();
@@ -84,7 +80,7 @@ export function Demo() {
         ) : null}
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
-        {/* The provider reads `searchEngine` once: remount it per backend, and when the model arrives. */}
+        {/* The provider reads searchEngine once: remount per backend and when the model arrives */}
         <EmojiProvider key={`${tab}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} searchEngine={search}>
           <EmojiPickerCard query={query} onQueryChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
         </EmojiProvider>

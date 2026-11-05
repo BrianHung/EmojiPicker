@@ -106,7 +106,7 @@ export function SlackScene() {
 
 function SlackMessage({ message, onToggle, compact }: { message: Message; onToggle: (unified: string) => void; compact: boolean }) {
   const store = useEmojiStore();
-  useEmojiStatus(); // re-render once the dataset is ready
+  useEmojiStatus();
   const quick = useFrequentEmoji(3);
   const avatar = avatarFor(message.author);
   return (

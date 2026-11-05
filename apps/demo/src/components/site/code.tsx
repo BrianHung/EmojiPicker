@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 
 const decoder = new TextDecoder();
 const cache = new Map<string, string>();
-/** Highlighted once per source: both themes ride along as CSS light-dark(), so the site's color-scheme picks one. */
 function highlight(code: string, lang: Lang) {
   const key = `${lang}\0${code}`;
   let html = cache.get(key);
@@ -21,10 +20,8 @@ function highlight(code: string, lang: Lang) {
 
 export type { Lang };
 
-/** Highlighted source with no chrome: the building block of every code panel. */
 export function CodeBlock({ code, lang = "tsx", className }: { code: string; lang?: Lang; className?: string }) {
   const html = React.useMemo(() => highlight(code.trim(), lang), [code, lang]);
-  // The highlighter emits its own <pre>; reset its theme background so the panel shows through.
   return <div className={cn("overflow-x-auto font-mono text-[13px] leading-[1.7] [&_code]:font-mono [&_pre]:!bg-transparent [&_pre]:px-4 [&_pre]:py-3.5", className)} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
@@ -56,7 +53,6 @@ export function CopyButton({ text, className }: { text: string; className?: stri
   );
 }
 
-/** A titled code card (shadcn's figure with a caption bar). */
 export function Code({ children, title, lang = "tsx" }: { children: string; title?: string; lang?: Lang }) {
   return (
     <figure className="overflow-hidden rounded-xl border border-border bg-code">

@@ -1,19 +1,15 @@
 "use client";
 
-// shadcn/ui emoji picker. Installed by `npx shadcn add <registry>/emoji-picker.json`:
-// you own this file; restyle anything. Built on @brianhung/emoji-picker's unstyled parts.
 import * as React from "react";
 import { EmojiPicker, Tapback, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 
-// What the picker needs from its classes: a column that fits a popover (--available-height), the emoji font, no
-// transitions with reduced motion, and in forced colors (where backgrounds drop) an outline on the highlighted emoji.
 const root =
   "relative flex max-h-(--available-height) flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0 [--emoji-font-family:'Segoe_UI_Emoji','Segoe_UI_Symbol','Segoe_UI','Apple_Color_Emoji','Twemoji_Mozilla','Noto_Color_Emoji','EmojiOne_Color','Android_Emoji']";
 const tone = "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent";
 const cell =
   "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";
-// Hover grows a reaction only with a real pointer (a tap would leave it stuck); a press shrinks it slightly, so the tap registers.
+// Hover grows a reaction only with a real pointer: on touch the hover state would stick after a tap
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
 
 function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
@@ -46,25 +42,18 @@ function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
   );
 }
 
-/** An emoji cell; `className` adds to its classes. */
 export function EmojiPickerCell({ className, ...props }: Omit<React.ComponentProps<typeof EmojiPicker.List.Cell>, "className"> & { className?: string }) {
   return <EmojiPicker.List.Cell className={cn(cell, className)} {...props} />;
 }
 
 export type EmojiPickerBodyProps = {
-  /** Focus the search field on mount. Default: inside an EmojiPopover. */
   autoFocus?: boolean;
-  /** Rows between search and the grid (custom rows). */
   rows?: React.ReactNode;
-  /** Each emoji in view. Default `<EmojiPickerCell />`. */
   cell?: (emoji: EmojiItem) => React.ReactNode;
-  /** The hovered or highlighted emoji, with its name and shortcode. Default true. */
   footer?: boolean;
-  /** Shown when a search has no results. Default "No emoji found." */
   empty?: React.ReactNode;
 };
 
-/** Search, grid and footer: the inside of a picker, for any Root. Styled like shadcn's Command. */
 export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, empty = "No emoji found." }: EmojiPickerBodyProps) {
   return (
     <>
@@ -87,7 +76,6 @@ export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = tr
   );
 }
 
-/** The hovered (or, while searching, highlighted) emoji. */
 export function EmojiPickerFooter({ className }: { className?: string }) {
   return (
     <EmojiPicker.Preview className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)}>
@@ -108,13 +96,11 @@ export function EmojiPickerFooter({ className }: { className?: string }) {
 
 export type EmojiPickerCardProps = Omit<RootProps, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
 
-/** The picker: search, skin tone, the grid and a footer, on shadcn's popover surface. */
 export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(function EmojiPickerCard({ className, autoFocus, rows, cell: renderCell, footer, empty, ...props }, ref) {
   return (
     <EmojiPicker.Root
       ref={ref}
       className={cn(
-        // corner-shape: squircle where supported (Chromium); plain rounded corners elsewhere.
         root,
         "h-[360px] w-[328px] max-w-full rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
         className,
@@ -126,7 +112,6 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
   );
 });
 
-/** iMessage-style tapback: your top 5, and "+" that expands into the full picker. */
 export function EmojiTapback({ onSelect, className }: { onSelect: (selection: EmojiSelection) => void; className?: string }) {
   return (
     <Tapback

@@ -20,7 +20,7 @@ function Question() {
   );
 }
 
-/** As text: an <Emoji> of the same code would be overridden again. */
+// As text: an <Emoji> of the same code would be overridden again
 const native = (char: string) => (
   <span aria-hidden style={{ fontSize: "1em", lineHeight: 1 }}>
     {char}
@@ -45,7 +45,6 @@ export const TAPBACKS: { unified: string; label: string }[] = [
   { unified: "2753", label: "Question" },
 ];
 
-/** An emoji, drawn as its iOS tapback artwork when `tapback` is set. */
 export function TapbackGlyph({ unified, size, tapback = true }: { unified: string; size: number; tapback?: boolean }) {
   const art = tapback ? TAPBACK_ARTWORK[unified] : undefined;
   if (art === undefined) return <Emoji emoji={unified} size={size} style={{ fontSize: size, lineHeight: 1 }} />;

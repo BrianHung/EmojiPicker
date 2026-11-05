@@ -1,9 +1,3 @@
-// Fills the Vectorize index through the deployed Worker's POST /api/admin/seed, which
-// embeds with Workers AI and upserts with the Vectorize binding. Needs only the site's
-// URL and its ADMIN_TOKEN: no account id or API token.
-//
-//   npm run seed -- --url https://emoji-picker.<you>.workers.dev --token $ADMIN_TOKEN
-//   npm run seed -- --url … --token … --custom ./my-emoji.json   index your own emoji too
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
@@ -12,7 +6,6 @@ const { values } = parseArgs({
     url: { type: "string", default: process.env.SITE_URL },
     token: { type: "string", default: process.env.ADMIN_TOKEN },
     custom: { type: "string" },
-    // Emoji per request: a few Workers AI calls and one upsert each.
     batch: { type: "string", default: "500" },
   },
 });

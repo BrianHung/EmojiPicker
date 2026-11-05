@@ -1,4 +1,3 @@
-/** The example pages, in nav order. */
 export const EXAMPLES = [
   { id: "tiptap", title: "Tiptap", href: "/examples/tiptap/", description: "Shortcode suggestions and an emoji picker for the Tiptap editor." },
   { id: "lexical", title: "Lexical", href: "/examples/lexical/", description: "Shortcode suggestions and an emoji picker for the Lexical editor." },

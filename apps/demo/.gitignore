@@ -1,14 +1,11 @@
-# Build output (Vite and the Cloudflare plugin), generated types, local state and secrets
 dist/
 .cloudflare/
 .wrangler/
 .dev.vars*
 !.dev.vars.example
 
-# Playwright e2e: remote-file cache, results and the HTML report
 e2e/.cache/
 e2e/.results/
 e2e/.report/
 
-# Visual baselines are local (pixel-parity checks); capture with `npm run test:baseline`.
 e2e/__snapshots__/visual.spec.ts/

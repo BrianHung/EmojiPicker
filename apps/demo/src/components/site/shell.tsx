@@ -1,5 +1,3 @@
-// The shell every page shares: theme (stored, else system), the renderer choice,
-// the site header and an EmojiProvider for the page.
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
@@ -20,12 +18,9 @@ const read = (key: string, fallback: string) => {
 const write = (key: string, value: string) => {
   try {
     localStorage.setItem(key, value);
-  } catch {
-    // per-viewer convenience only
-  }
+  } catch {}
 };
 
-/** The stored theme, else the system's. One toggle flips the resolved theme and stores it. */
 function useTheme(): [Theme, () => void] {
   const media = React.useMemo(() => window.matchMedia("(prefers-color-scheme: dark)"), []);
   const [stored, setStored] = React.useState<Theme | null>(() => {
@@ -52,16 +47,14 @@ function useTheme(): [Theme, () => void] {
 
 export type Page = "docs" | "gallery" | "examples";
 
-/** Page column widths; the footer aligns with the page's column. */
 export const WIDTH = { column: "max-w-3xl", wide: "max-w-[1400px]" } as const;
 
-// SF on Apple platforms, Inter elsewhere: CSS can't tell platforms apart, so tag the root once.
+// CSS can't tell platforms apart, so the root is tagged once for SF on Apple and Inter elsewhere
 if (typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)) {
   document.documentElement.classList.add("apple");
 }
 
 const RendererContext = React.createContext<Renderer | "auto">("auto");
-/** The renderer picked in the header. */
 export const useRenderer = () => React.useContext(RendererContext);
 
 export function SiteShell({ page, width = "column", children }: { page: Page; width?: keyof typeof WIDTH; children: React.ReactNode }) {
@@ -71,7 +64,7 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
   return (
     <TooltipProvider>
       <RendererContext.Provider value={renderer}>
-        {/* Remount on renderer change: provider options are read once. */}
+        {/* Remount on renderer change: provider options are read once */}
         <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
           <div className="flex min-h-svh flex-col">
             <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />

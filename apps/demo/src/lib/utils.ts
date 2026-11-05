@@ -1,6 +1,4 @@
-// shadcn/ui's `cn`: conditional classes, with later Tailwind classes winning conflicts.
-// Extended with the picker's theme tokens (theme.css) so tailwind-merge groups them
-// correctly: `font-picker` is a font family, not a weight.
+// tailwind-merge learns the picker's theme tokens, else it reads `font-picker` as a weight and drops a real one
 import { clsx, type ClassValue } from "clsx";
 import { extendTailwindMerge } from "tailwind-merge";
 

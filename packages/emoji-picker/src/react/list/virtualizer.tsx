@@ -1,8 +1,4 @@
-// Virtualizes the List's collection inside the picker's Viewport with React Stately's
-// virtualizer. React Aria's own <Virtualizer> scrolls the collection element itself;
-// here the Viewport scrolls (it owns the scrollbar, its padding and styling) and the
-// listbox is the tall list inside it. Headers stick with `position: sticky` on their
-// wrapper, inside their section's box.
+// React Aria's Virtualizer scrolls the collection element itself; here the Viewport scrolls and owns the scrollbar
 import * as React from "react";
 import { flushSync } from "react-dom";
 import type { Collection, Key, Node } from "@react-types/shared";
@@ -13,22 +9,16 @@ type View = ReusableView<Node<unknown>, React.ReactNode>;
 type Options = {
   collection: Collection<Node<unknown>>;
   layout: EmojiGridLayout;
-  /** The element for a section, title, cell or loader (a section renders its children with VirtualBranch). */
   renderNode: (node: Node<unknown>) => React.ReactNode;
-  /** Kept rendered while out of view (the focused cell). */
   persistedKeys?: Set<Key> | null;
   layoutOptions: EmojiGridLayoutOptions;
-  /** The element that scrolls (the Viewport), given the collection element. */
   scroller: (list: HTMLElement) => HTMLElement | null;
-  /** Called with the virtualizer on each render (for navigation and jumps). */
   onState?: (state: VirtualizerState<Node<unknown>, React.ReactNode>) => void;
-  /** Called once the rendered rows are in the DOM (after every render, scrolls included). */
   onRendered?: () => void;
 };
 
 const BranchContext = React.createContext<{ state: VirtualizerState<Node<unknown>, React.ReactNode>; dir: "ltr" | "rtl"; horizontal: boolean } | null>(null);
 
-/** How far `list`'s start edge sits before `scroller`'s start edge, in layout px (a CSS transform on an ancestor is undone). */
 function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boolean, rtl: boolean) {
   const s = scroller.getBoundingClientRect();
   const l = list.getBoundingClientRect();
@@ -37,11 +27,10 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
   return rtl ? (l.right - (s.right - scroller.clientLeft * scale)) / scale : (s.left + scroller.clientLeft * scale - l.left) / scale;
 }
 
-/** The virtualized content of the collection element (its child: the listbox scrolls with the Viewport). */
 export const VirtualCollection = React.memo(function VirtualCollection(options: Options) {
   const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
   const horizontal = layoutOptions.orientation === "horizontal";
-  // The collection element is this content's parent (its ref isn't attached yet when our effects first run).
+  // The collection element is this content's parent: its ref isn't attached yet when our effects first run
   const content = React.useRef<HTMLDivElement | null>(null);
   const scrollRef = React.useMemo(
     () => ({
@@ -63,7 +52,6 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const list = scrollRef.current;
       const el = list && scroller(list);
       if (!el || !list) return;
-      // The list may start below the scroller's edge (its padding, a row above it): only its own offset moves.
       const current = Math.max(0, visibleOffset(el, list, horizontal, dir === "rtl"));
       const delta = (horizontal ? rect.x : rect.y) - current;
       if (!delta) return;
@@ -83,14 +71,12 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const el = list && scroller(list);
       if (!el || !list) return;
       const rtl = getComputedStyle(list).direction === "rtl";
-      // Sticky titles pin at the scroller's edge, not inside its padding.
+      // Sticky titles pin at the scroller's edge, not inside its padding
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
       content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding})`);
       const offset = visibleOffset(el, list, horizontal, rtl);
-      // Layout px, as the browser rounds them (unaffected by an ancestor's scale).
       const width = list.clientWidth;
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);
-      // What of the list is in the scroller's window.
       const start = Math.max(0, offset);
       const extent = Math.max(0, (horizontal ? el.clientWidth : el.clientHeight) + Math.min(0, offset));
       const rect = horizontal ? new Rect(start, 0, extent, list.clientHeight) : new Rect(0, start, width, extent);
@@ -132,7 +118,6 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
   );
 });
 
-/** A section's visible children. */
 export function VirtualBranch({ parent }: { parent: Key }) {
   const { state, dir, horizontal } = React.useContext(BranchContext)!;
   const view = state.virtualizer.getVisibleView(parent);

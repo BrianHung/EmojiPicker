@@ -1,4 +1,3 @@
-/** `fn`, recomputed only when an argument changes (by identity). */
 export function memo<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
   let last: { args: A; value: R } | null = null;
   return (...args) => {
@@ -7,12 +6,10 @@ export function memo<A extends unknown[], R>(fn: (...args: A) => R): (...args: A
   };
 }
 
-/** `next`, or `prev` when every field is the same: snapshots keep their identity while nothing changes. */
 export function same<T extends object>(prev: T | null, next: T): T {
   return prev && (Object.keys(next) as (keyof T)[]).every((k) => Object.is(prev[k], next[k])) ? prev : next;
 }
 
-/** Listeners that connect to their sources with the first and let go with the last. */
 export function emitter(connect: (emit: () => void) => () => void) {
   const listeners = new Set<() => void>();
   let disconnect: (() => void) | null = null;

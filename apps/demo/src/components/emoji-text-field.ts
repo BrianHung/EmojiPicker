@@ -1,4 +1,3 @@
-// A controlled <input> or <textarea> with `:shortcode` typeahead: its text, and inserting at the caret (from a picker).
 import * as React from "react";
 import { useTextFieldEmojiTypeahead, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
 

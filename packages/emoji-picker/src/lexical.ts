@@ -7,13 +7,11 @@ import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, typ
 export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";
 
 export type LexicalEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
-  /** The node that replaces the typed `:query`; default the text and a space. Return an image node for custom emoji. */
   node?: (text: string, suggestion: ShortcodeSuggestion) => LexicalNode;
 };
 
 type Match = { query: string; key: NodeKey; from: number; to: number };
 
-/** `:shortcode` typeahead for Lexical, inside `<LexicalComposer>`: keys through its command system, and what an emoji menu renders. */
 export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypeaheadOptions = {}): EmojiTypeahead {
   const [editor] = useLexicalComposerContext();
   const [match, setMatch] = React.useState<Match | null>(null);

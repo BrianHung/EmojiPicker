@@ -1,9 +1,4 @@
-// EmojiPicker.CategoryNav: a tablist (manual activation) over the sections. The current
-// tab follows the list's scroll; choosing one scrolls the list there (at once from the
-// keyboard). One tab stop: the current tab, else the last focused, else the first.
-// While search results show, the tabs are disabled.
-// Not React Aria's Tabs: they always select a tab, and "Frequently used" has none (no tab
-// selected, the first still the tab stop); they'd also cost 1.7 KB gzip more.
+// Not React Aria's Tabs: they always select a tab, and "Frequently used" has none to select
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useFocusVisible } from "react-aria/useFocusVisible";
@@ -16,17 +11,13 @@ import { SLOTS } from "../utils/slots";
 
 type Orientation = "horizontal" | "vertical";
 
-/** A tab's section: its id, name and icon. */
 export type NavCategory = ReturnType<typeof useCategoryNavigation>["categories"][number];
 
 export type CategoryNavState = { orientation: Orientation; disabled: boolean };
 
 export type CategoryNavProps = Omit<PartElementProps<CategoryNavState, HTMLDivElement, "role" | "onKeyDown" | "dangerouslySetInnerHTML">, "children"> & {
-  /** Tab axis: "vertical" stacks the tabs (a side rail) and moves between them with Up/Down. Default "horizontal". */
   orientation?: Orientation;
-  /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
-  /** Each section's tab. Default: `CategoryNav.Tab`. */
   children?: (category: NavCategory) => React.ReactNode;
 };
 
@@ -41,7 +32,6 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const list = React.useRef<HTMLDivElement | null>(null);
   const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys, list), [ref, userKeys]);
   const id = React.useId();
-  // The focused tab, and whether focus is still in the list (then it stays the tab stop).
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
   const [pointer, setPointer] = React.useState<{ hovered: string | null; pressed: string | null }>({ hovered: null, pressed: null });
   const { isFocusVisible } = useFocusVisible();
@@ -53,10 +43,8 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
   const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
   const tab = (key: string) => list.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(key)}"]`);
-  // A tab clicked with a pointer scrolls; chosen any other way (keys, a script) it jumps at once.
   const choose = (key: string, instant: boolean) => {
     if (picker.collapse.isCollapsed(key)) {
-      // Expand first, then jump once the rows are laid out.
       picker.collapse.setCollapsed(key, false);
       requestAnimationFrame(() => requestAnimationFrame(() => jumpToCategory(key, { instant })));
     } else jumpToCategory(key, { instant });
@@ -126,7 +114,6 @@ export type CategoryTabState = { category: NavCategory; selected: boolean; activ
 
 export type CategoryTabProps = PartElementProps<CategoryTabState, HTMLDivElement, "role" | "id">;
 
-/** A section's tab. Children default to its icon. */
 const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
   const nav = React.useContext(NavContext);
   const c = React.useContext(TabContext);
@@ -145,7 +132,7 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
     disabled,
   };
   const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
-  // The tabs scroll one list rather than switch panels: no aria-controls to a panel that doesn't exist.
+  // The tabs scroll one list rather than switch panels, so there is no panel for aria-controls
   return renderElement(
     "div",
     {

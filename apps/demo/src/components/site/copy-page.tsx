@@ -1,5 +1,3 @@
-// shadcn's "Copy Page" split button: copy the page's Markdown, or open it as Markdown,
-// in Claude or in ChatGPT. `md` is the page's Markdown URL (see plugins/markdown-docs.ts).
 import * as React from "react";
 import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
 import { ClaudeIcon, MarkdownIcon, OpenAIIcon } from "./brand-icons";
@@ -8,12 +6,11 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-/** shadcn's menu items: icon left, 14px label, ~36px tall, rounded highlight. */
 const ITEM = "h-9 gap-2.5 rounded-md px-2.5 text-sm [&_svg]:size-4";
 
 function CopyPage({ md, className }: { md: string; className?: string }) {
   const [copied, setCopied] = React.useState(false);
-  // Fetched ahead of the click: the clipboard write then happens inside the user gesture.
+  // Fetched before the click so the clipboard write happens inside the user gesture
   const markdown = React.useRef<Promise<string> | null>(null);
   const load = React.useCallback(() => (markdown.current ??= fetch(md).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status} ${md}`))))), [md]);
   React.useEffect(() => {
@@ -26,7 +23,7 @@ function CopyPage({ md, className }: { md: string; className?: string }) {
   const copy = async () => {
     try {
       const text = load();
-      // Safari wants the write started synchronously; ClipboardItem takes the pending text.
+      // Safari needs the write started synchronously; ClipboardItem accepts the pending text
       if (typeof ClipboardItem !== "undefined" && "supports" in ClipboardItem) {
         await navigator.clipboard.write([new ClipboardItem({ "text/plain": text.then((t) => new Blob([t], { type: "text/plain" })) })]);
       } else {
@@ -77,7 +74,6 @@ function CopyPage({ md, className }: { md: string; className?: string }) {
   );
 }
 
-/** The page title row: h1 and description; `md` adds Copy Page beside the title (below the description on mobile). */
 export function PageHeader({ title, description, md, className }: { title: React.ReactNode; description: React.ReactNode; md?: string; className?: string }) {
   return (
     <div className={cn("grid gap-2", md && "sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6", className)}>

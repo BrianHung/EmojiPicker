@@ -23,10 +23,8 @@ const tokens: Tokens = {
   "--instagram-link": "light-dark(#4150f7, rgb(112 141 255))",
 };
 
-/** Instagram's default reactions: ❤️ 😂 😮 😢 😡 👍. */
 const REACTIONS = ["2764-fe0f", "1f602", "1f62e", "1f622", "1f621", "1f44d"];
 
-// Instagram's 16px glyphs fill their box; ours have a 24px grid's padding.
 const CATEGORIES = withIcons(I.ICONS.instagram, {
   categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "activities" }, { id: "travel_places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
   size: 18,
@@ -52,7 +50,6 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
       )}
     >
       {search ? (
-        // The list starts at the field's bottom edge, so a scrolled sticky title never covers its border.
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
           <EmojiPicker.Search.Input
             placeholder="Search emoji"
@@ -61,7 +58,6 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
           >
             <SearchClear />
           </EmojiPicker.Search.Input>
-          {/* Centered on the field, not the row (which has 12px of top padding). */}
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-[calc(50%+6px)] left-[var(--search-icon-x,12px)] size-[14px] -translate-y-1/2 text-picker-subtle" />
         </EmojiPicker.Search>
       ) : null}

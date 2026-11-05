@@ -1,6 +1,3 @@
-// Internal: hides emoji the system font can't draw (native renderer only). Versions are
-// sampled when the picker mounts; emoji on screen are probed in idle time, and the list
-// re-renders without any that fail.
 import * as React from "react";
 import { withoutTone, type EmojiRecord } from "../../core/dataset";
 import { KNOWN_FAILING, PROBE_BATCH, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport } from "../../core/native";
@@ -10,7 +7,6 @@ type Drawable = (record: EmojiRecord, unified: string) => boolean;
 
 const always: Drawable = () => true;
 
-/** Whether each emoji can be drawn here, and `request` to probe the ones on screen. */
 export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawable: Drawable; request: (unifieds: Iterable<string>) => void } {
   const { store, renderer } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
@@ -40,7 +36,6 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
         const batch = [...pending.current].slice(0, PROBE_BATCH);
         batch.forEach((u) => pending.current.delete(u));
         support.probe.prime(batch);
-        // A failure the version sample didn't predict: show the list without it.
         if (batch.some((u) => support.probe.result(u) === false)) setVersion((v) => v + 1);
         if (pending.current.size) schedule();
       };
@@ -63,7 +58,6 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
   const drawable = React.useMemo<Drawable>(() => {
     if (!native) return always;
     return (record, unified) => record.imageUrl != null || (!KNOWN_FAILING.has(withoutTone(record.unified).replace(/-fe0f/g, "")) && isNativeSupported(support, unified, record.version));
-    // `version` bumps when a probe hides an emoji.
   }, [native, support, version]);
   return { drawable, request };
 }

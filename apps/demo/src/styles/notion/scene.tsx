@@ -24,7 +24,7 @@ const CONTENT = `
 
 export function NotionScene() {
   const { ref, compact } = useCompact();
-  const [icon, setIcon] = React.useState("1f3d5-fe0f"); // 🏕️
+  const [icon, setIcon] = React.useState("1f3d5-fe0f");
   const title = "Team offsite";
   const editor = useEditor({
     extensions: [StarterKit],

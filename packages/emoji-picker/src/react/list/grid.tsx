@@ -1,7 +1,3 @@
-// The emoji grid's behaviour, apart from how it is laid out and virtualized: a listbox (React
-// Aria's useListBox over the picker's sections, see collection.ts), the highlight and focus, keys,
-// hover and presses, and skin-tone variations. EmojiPicker.List renders it with React Aria's
-// virtualizer; useEmojiGrid hands it, with the rows of core/grid, to a virtualizer you bring.
 import * as React from "react";
 import type { Key, LayoutDelegate } from "@react-types/shared";
 import { useFocusRing } from "react-aria/useFocusRing";
@@ -29,11 +25,7 @@ import { SLOTS } from "../utils/slots";
 import { Variations } from "./variations";
 import { moveVirtualFocus } from "./virtual-focus";
 
-/**
- * Hover moves the keyboard position only on a real pointer move: a keyboard scroll
- * slides cells under a resting pointer, and the browser reports hovers (and moves at
- * the same spot) for them.
- */
+// Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
 const pointer = { x: NaN, y: NaN, moved: false, tracking: false, list: null as Element | null, within: false };
 function trackPointer() {
   if (pointer.tracking) return;
@@ -52,7 +44,6 @@ function trackPointer() {
   );
 }
 
-/** Per-cell state each cell reads as one number (one subscription per cell): the tab stop and press here, the highlight, hover and the active emoji from the picker's state. */
 const STOP = 1;
 const ACTIVE = 2;
 const HOVERED = 4;
@@ -75,34 +66,26 @@ function cellMarks(state: PickerState<React.ReactNode>) {
 
 export type Cells = {
   selection: ListState<unknown>["selectionManager"];
-  /** The listbox's id (options are `${id}-option-${key}`) and collection id. */
   listId: string;
   collectionId?: string;
   focusVisible: boolean;
-  /** Position in its section, the section's size, and the index in the whole grid. */
   position: (id: Key) => readonly [number, number, number] | undefined;
   virtual: boolean;
   marks: ReturnType<typeof cellMarks>;
-  /** Scrolls the scroller (never the page) so the cell is in view. */
   reveal(id: Key): void;
   sectionDomId(id: string): string;
   toggle(id: string): void;
 };
 
-/** How a grid is laid out and scrolled: the default list's virtualizer, or one you bring. */
 export type GridGeometry = {
   grid(): EmojiGrid<EmojiSection>;
   navigation: EmojiGridNavigation;
   layoutDelegate?: LayoutDelegate;
   firstVisible(): Key | null;
   isVisible(key: Key): boolean;
-  /** Scrolls only the scroller (never the page) so `key` is in view; a page `from` a key keeps it where it is on screen. */
   reveal(key: Key, from?: Key): void;
-  /** The scroller's length along the grid: a page. */
   viewport(): number;
-  /** Scrolls a section to the start; false when it can't. */
   jump(section: string, instant: boolean): boolean;
-  /** Where the skin-tone variations of `key` go. */
   overlay(key: Key): React.CSSProperties;
 };
 
@@ -113,7 +96,6 @@ const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g,
 export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
 
-/** The sections the grid shows: the categories (without emoji the system can't draw), or the search results. */
 export function useGridSections(horizontal: boolean) {
   const picker = usePicker("EmojiPicker.List");
   const probeRoot = React.useRef<HTMLElement | null>(null);
@@ -143,7 +125,6 @@ type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labe
   loader?: boolean;
 };
 
-/** The grid's state, its listbox props and its cells' context. */
 export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
   const { labels, searching, focusModel, value } = picker;
@@ -157,20 +138,15 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const core = picker.state;
   const { virtual } = picker;
   const [marks] = React.useState(() => cellMarks(core));
-  // Kept rendered while out of view: the highlighted cell (aria-activedescendant names it, or it has focus).
   const [persisted] = React.useState(() => new Set<Key>());
-  // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
   const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
-  // Focus moved by key: a hover takes it back only once the pointer moves within the list, as
-  // VoiceOver moves the pointer to what it reads, which lags behind focus.
+  // After a key move, hover takes over only once the pointer moves: VoiceOver moves the pointer to what it reads, lagging focus
   const keyed = React.useRef(false);
   const latest = React.useRef({ collection, virtual, geometry, searching });
   latest.current = { collection, virtual, geometry, searching };
 
-  // The highlight lives in the core state; cells subscribe to it, the grid doesn't.
   const highlight = (): string | null => core.getSnapshot().highlighted;
-  /** The last keyboard position, also while nothing is highlighted (the field or the grid lost focus). */
   const position = React.useRef<Key | null>(null);
   const lastKey = () => highlight() ?? position.current;
   const setHighlight = (key: Key | null) => {
@@ -194,10 +170,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   };
 
   const focusInput = () => listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? null;
-  /** The rendered cell for a key (in this grid, not a nested one). */
   const cellElement = (key: Key | null | undefined) => (key == null ? null : (listRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"][data-key="${CSS.escape(String(key))}"]`) ?? null));
 
-  // --- Skin-tone variations of one emoji ---------------------------------------------
   const variations = useSelector(core, (s) => s.variations);
   const back = React.useRef<HTMLElement | null>(null);
   const openVariations = (key: Key | null) => {
@@ -211,7 +185,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (key == null) return;
     core.closeVariations();
     if (!restore) return;
-    // Back to the emoji: its cell (grid), or the field with the emoji highlighted.
     (back.current ?? cellElement(key))?.focus({ preventScroll: true });
     setHighlight(key);
   };
@@ -228,10 +201,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       }
       let move = action;
       if (isRtl(listRef.current) && (move === "move-left" || move === "move-right")) move = move === "move-left" ? "move-right" : "move-left";
-      // With focus in the grid, the move starts from the focused cell.
       const current = (dom ? cellOf(event?.target ?? null)?.getAttribute("data-key") : null) ?? highlight();
       if (current == null) {
-        // Nothing highlighted: Down (and the keys that go forward) start at the first emoji in view.
         const start = move === "first" ? navigation.getFirstKey() : move === "last" ? navigation.getLastKey() : move === "move-down" || move === "move-right" || move === "page-down" ? geometry.firstVisible() : null;
         if (start == null) return false;
         moveTo(start, dom);
@@ -241,7 +212,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (!to) return false;
       const next = navigation.move(current, to, geometry.viewport());
       if (next == null || next === current) {
-        // Up from the top row: back to typing (the field keeps focus), or back to the field.
         if (move === "move-up") {
           if (dom) focusInput()?.focus();
           else handle.clear();
@@ -288,10 +258,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     };
   });
 
-  // Search results: the best match is highlighted as you type (Enter picks it). New
-  // results for the same query keep the highlighted emoji, so a pick doesn't move it.
-  // React Aria builds the new collection in a later render, so the highlight is applied
-  // once a render has it (applyHighlight).
+  // React Aria builds the new collection in a later render, so the highlight is applied once a render has it
   const kept = React.useRef<{ query: string; unified?: string }>({ query: "" });
   const pendingHighlight = React.useRef<{ key: Key | null } | null>(null);
   React.useLayoutEffect(() => {
@@ -316,15 +283,10 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const pending = pendingHighlight.current;
     if (!pending || (pending.key != null && !latest.current.collection.getItem(pending.key))) return;
     pendingHighlight.current = null;
-    // Shown only while the field has focus; otherwise where the keys start.
     if (pending.key != null && !(latest.current.virtual && document.activeElement === focusInput())) position.current = pending.key;
     else setHighlight(pending.key);
   };
 
-  /**
-   * The tab stop: the focused cell while focus is in the grid; else the last one while it's
-   * in view, else the first in view (Tab enters where the user looks).
-   */
   const syncStop = () => {
     const list = listRef.current;
     if (list?.contains(document.activeElement) && document.activeElement !== list) return void (focusGrid.current = false);
@@ -338,9 +300,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (root && !root.contains(document.activeElement) && !root.querySelector("[data-autofocus]")) cell.focus({ preventScroll: true });
   };
 
-  // DOM focus landing on a cell (Tab from the search field, a script, a screen reader) while the
-  // grid is in virtual-focus mode: the cell becomes the focused key before React Aria's collection
-  // sees the focus, or it would treat focus as entering with no key and move it to the first cell.
+  // Set the focused key before React Aria sees DOM focus, or it treats focus as entering with no key and jumps to the first cell
   React.useEffect(() => {
     const el = listRef.current;
     if (!el) return;
@@ -354,7 +314,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     return () => el.removeEventListener("focusin", onFocusIn);
   }, []);
 
-  // --- Keys on a focused cell, from Root's dispatcher -------------------------------
   const region = useKeyRegion((action, event) => {
     const cell = cellOf(event.target);
     if (!action || !cell || !listRef.current?.contains(cell)) return "pass";
@@ -368,14 +327,11 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
 
   const hover = (key: Key | null) => core.hover(key == null ? null : String(key));
-  /** A real pointer move over a cell: the keyboard position follows (pointer "follows"). */
   const follow = (key: Key) => {
     if (!pointer.moved || picker.pointer !== "follows" || lastKey() === key) return;
     const active = document.activeElement;
     const list = listRef.current;
     const root = list?.closest(`[data-slot="${SLOTS.root}"]`);
-    // Hover moves the keyboard position: the highlight while the field has focus, focus
-    // itself once it's in the grid. Never from outside the picker.
     if (list?.contains(active) && active !== list) {
       if (keyed.current && !pointer.within) return;
       keyed.current = false;
@@ -383,9 +339,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       marks.stop.set(key);
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
   };
-  // Cells have no handlers of their own: the grid handles presses, hover and focus for all of them.
   const keyOf = (e: React.SyntheticEvent) => cellOf(e.target)?.getAttribute("data-key") ?? null;
-  // A long press on an emoji with tones opens its variations; the release then doesn't pick.
   const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
   const endPress = () => {
     marks.pressed.set(null);
@@ -398,7 +352,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       endPress();
       marks.pressed.set(key);
       longPress.current = { x: e.clientX, y: e.clientY, fired: false, timer: window.setTimeout(() => longPress.current && (longPress.current.fired = openVariations(key)), LONG_PRESS_MS) };
-      // Focus stays in the field (virtual focus) or moves to the cell without scrolling.
       e.preventDefault();
       if (e.pointerType === "touch") return;
       if (virtual) setHighlight(key);
@@ -438,7 +391,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const { isFocusVisible: focusVisible } = useFocusVisible();
   React.useEffect(trackPointer, []);
 
-  // Under Autocomplete the field drives the grid: its id, virtual focus and the keys it forwards.
   const selectable = React.useContext(SelectableCollectionContext) as { ref?: React.Ref<HTMLElement>; filter?: unknown } | null;
   const { ref: fieldRef, filter: _filter, ...collectionProps } = (virtual && selectable) || {};
   const merged = React.useMemo(() => mergeRefs(listRef, probeRoot, ref, userKeys, region, fieldRef), [listRef, probeRoot, ref, userKeys, region, fieldRef]);
@@ -457,7 +409,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       shouldFocusWrap: false,
       onAction: pick,
       onFocus(e: React.FocusEvent) {
-        // Real DOM focus only: virtual focus (aria-activedescendant) dispatches focus events too.
+        // Real DOM focus only: virtual focus (aria-activedescendant) dispatches focus events too
         const cell = cellOf(e.target);
         if (!cell || e.target !== document.activeElement) return;
         const id = cell.getAttribute("data-key");
@@ -479,7 +431,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const { focusProps, isFocused, isFocusVisible } = useFocusRing();
   const listId = (listBoxProps.id as string | undefined) ?? picker.listId;
   const collectionId = (listBoxProps as { "data-collection"?: string })["data-collection"];
-  // Cells render from their marks, so a highlight move re-renders only the cells it leaves and lands on.
   const selection = state.selectionManager;
   const cells = React.useMemo<Cells>(
     () => ({
@@ -514,8 +465,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     gridProps: {
       ...mergeProps(listBoxProps, focusProps, cellHandlers),
       ref: merged,
-      // One tab stop, a cell, never the grid itself. (Under Autocomplete the grid has no
-      // tabindex: Autocomplete turns virtual focus off for a collection that has one.)
+      // No tabindex under Autocomplete: it turns virtual focus off for a collection that has one
       tabIndex: fieldRef ? undefined : -1,
       "data-slot": SLOTS.list,
       "data-orientation": orientation,
@@ -541,10 +491,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   };
 }
 
-/** A cell's state, as its data attributes name it. */
 export type CellState = { emoji: EmojiItem; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
-/** A cell's props (its glyph as children) and state for its marks. */
 function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
   const { selection: m } = cells;
   const { record, unified } = item;
@@ -583,14 +531,8 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
 }
 
 declare const gridState: unique symbol;
-/** A grid's state, for `useEmojiCell` (`useEmojiGrid().state`). */
 export type EmojiGridState = { readonly [gridState]: true };
 
-/**
- * One cell of a grid: its props, with its glyph as children and a ref, and its state. Subscribes to
- * its own marks, so a highlight or hover move re-renders only the cells it leaves and enters; the
- * cell it lands on takes focus, or virtual focus.
- */
 export function useCell(grid: Cells, item: EmojiItem) {
   const artwork = useArtworkMap();
   const flags = React.useSyncExternalStore(grid.marks.subscribe, () => grid.marks.of(item.id));
@@ -598,8 +540,7 @@ export function useCell(grid: Cells, item: EmojiItem) {
   const ref = React.useCallback(
     (el: HTMLElement | null) => {
       element.current = el;
-      // React Aria scrolls a newly focused item into view with the page too (scrollIntoViewport):
-      // a cell scrolls only its scroller, which the keyboard moves already did.
+      // React Aria's scrollIntoViewport would scroll the page too; the keyboard moves already scrolled the scroller
       if (el) el.scrollIntoView = () => grid.reveal(item.id);
     },
     [grid, item.id],
@@ -616,32 +557,19 @@ export function useCell(grid: Cells, item: EmojiItem) {
 }
 
 export type UseEmojiGridOptions = {
-  /** Emoji per row. Default: Root's `columns`, else 9. */
   columns?: number;
-  /** A row of emoji, in px (your virtualizer's size for it). */
   rowHeight: number;
-  /** A section title, in px. Default `rowHeight`. */
   headerHeight?: number;
-  /**
-   * Scrolls your virtualizer to a row: `(index, options) => virtualizer.scrollToIndex(index, options)`.
-   * Without it the grid's scroll container is scrolled directly.
-   */
   scrollToIndex?: (index: number, options: { align: "start" | "end" }) => void;
   "aria-label"?: string;
 };
 
-/** The grid's scroll container, and its window in grid px. */
 function windowOf(list: HTMLElement | null) {
   let el = list?.parentElement;
   while (el && !/auto|scroll/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
   return list && el ? { el, top: el.getBoundingClientRect().top + el.clientTop - list.getBoundingClientRect().top, height: el.clientHeight } : null;
 }
 
-/**
- * The picker's grid for a virtualizer you bring (TanStack Virtual, react-window, Virtuoso): its
- * rows (core/grid), and props for the grid, the section titles and the cells, with the keyboard,
- * highlight, hover, presses and skin-tone variations of EmojiPicker.List. Inside EmojiPicker.Root.
- */
 export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions) {
   const picker = usePicker("useEmojiGrid");
   const { sections, request, probeRoot } = useGridSections(false);
@@ -670,7 +598,6 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
         return row?.type === "emojis" ? row.items[0]!.id : (g().at(0)?.id ?? null);
       },
       isVisible: (key) => Boolean(g().rows[rowOf(key)] && visible(g().rows[rowOf(key)]!)),
-      /** Into view; scrolling up to a section's first row brings its title along. */
       reveal(key) {
         const index = rowOf(key);
         const v = windowOf(listRef.current);
@@ -698,7 +625,6 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
   });
   const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, "aria-label": label });
 
-  // After each render and scroll: the search highlight, the tab stop, the current section, and probes of what's shown.
   const sync = React.useRef(() => {});
   sync.current = () => {
     controller.applyHighlight();
@@ -720,11 +646,9 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     ...grid,
     getGridProps: (props: React.HTMLAttributes<HTMLElement> = {}) => mergeProps(props, controller.gridProps) as typeof controller.gridProps,
     getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.categoryHeader, children: section.name }),
-    /** For `useEmojiCell(state, item)` in each cell. */
     state: controller.cells as unknown as EmojiGridState,
     variations: controller.variations,
   };
 }
 
-/** One cell of `useEmojiGrid`'s grid, from its `state`: the cell's props and state. */
 export const useEmojiCell = useCell as unknown as (state: EmojiGridState, item: EmojiItem) => ReturnType<typeof useCell>;

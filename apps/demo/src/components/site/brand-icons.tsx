@@ -1,5 +1,4 @@
-// Brand marks from simple-icons (CC0): markdown and claude from the develop branch, openai
-// from v13.0.0 (later releases dropped it). 16px, currentColor.
+// simple-icons (CC0): markdown and claude from develop, openai from v13.0.0 (later releases dropped it)
 import type * as React from "react";
 
 type IconProps = React.SVGProps<SVGSVGElement>;

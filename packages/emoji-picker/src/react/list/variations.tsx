@@ -1,6 +1,3 @@
-// An emoji's skin-tone variations (Shift+Space on it, or a long press): a row of its
-// six tones over the cell. Left/Right, Home and End move along it, Enter or Space picks,
-// and Escape (or focus leaving) closes it, back to the emoji.
 import * as React from "react";
 import type { EmojiRecord } from "../../core/dataset";
 import { nameWithTone } from "../../core/shortcodes";
@@ -13,10 +10,8 @@ import { SLOTS } from "../utils/slots";
 
 type VariationsProps = {
   record: EmojiRecord;
-  /** Where it sits, in the Viewport's content box. */
   style: React.CSSProperties;
   onPick(unified: string): void;
-  /** `restore`: focus goes back to the emoji (Escape, a pick); else it went elsewhere. */
   onClose(restore: boolean): void;
 };
 
@@ -46,7 +41,6 @@ export function Variations({ record, style, onPick, onClose }: VariationsProps) 
     else if (action === "select") onPick(variants[i]!);
     else if (action === "first" || action === "last") all[action === "first" ? 0 : all.length - 1]!.focus();
     else if (action && steps[action]) all[(i + steps[action]! + all.length) % all.length]!.focus();
-    // Up and Down stay here rather than move the grid underneath.
     else if (action !== "move-up" && action !== "move-down") return "pass";
     return "handled";
   });

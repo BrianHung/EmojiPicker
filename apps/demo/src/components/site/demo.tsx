@@ -13,12 +13,11 @@ const CSS_MODULES = "css-modules/index.tsx";
 
 const modules: Record<Adapter, Record<string, Module>> = {
   "floating-ui": import.meta.glob("../demos/*/{tailwind.tsx,css-modules/index.tsx}", { eager: true }),
-  // vite.config.ts: under `?react-aria`, a demo's Floating UI EmojiPopover is React Aria's.
+  // vite.config.ts aliases a demo's Floating UI EmojiPopover to React Aria's under `?react-aria`
   "react-aria": import.meta.glob("../demos/popover/{tailwind.tsx,css-modules/index.tsx}", { eager: true, query: "?react-aria" }),
 };
 const sources = import.meta.glob<string>("../demos/*/{tailwind.tsx,css-modules/index.*}", { eager: true, query: "?raw", import: "default" });
 
-/** A demo's code tabs, Tailwind and CSS Modules (Base UI's), each with the file it renders. */
 function variants(name: string): [CodeTab, string][] {
   const source = (file: string) => sources[`${DEMOS}${name}/${file}`];
   const tailwind = source(TAILWIND)!;
@@ -39,11 +38,6 @@ function variants(name: string): [CodeTab, string][] {
   ];
 }
 
-/**
- * shadcn's ComponentPreview: `demos/<name>/` rendered live over its own source. The preview shows
- * the variant whose tab is selected; fenced code inside adds tabs. `adapters` switches the
- * demo's EmojiPopover between Floating UI and React Aria.
- */
 export function Demo({ name, className, adapters, children }: { name: string; className?: string; adapters?: boolean; children?: React.ReactNode }) {
   const [, onSelect] = usePickedEmoji();
   const [adapter, setAdapter] = React.useState<Adapter>("floating-ui");

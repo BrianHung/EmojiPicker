@@ -1,4 +1,3 @@
-// `:shortcode` suggestions for Lexical: the library's typeahead and a menu at the caret. Custom emoji insert an EmojiNode.
 import { $createTextNode } from "lexical";
 import { useLexicalEmojiTypeahead } from "@brianhung/emoji-picker/lexical";
 import { SuggestionMenu } from "@/components/suggestion-menu";

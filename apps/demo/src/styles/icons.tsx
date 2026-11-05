@@ -122,14 +122,12 @@ const Peace = icon(
     <path d="M12 2.5v19M12 12l-6.7 6.7M12 12l6.7 6.7" />
   </>,
 );
-/** Slack's tab: a sticker square with a smile. */
 export const Sticker = icon(
   <>
     <path d="M15.5 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h7l8-8V6a3 3 0 0 0-3-3Z" />
     <path d="M13 21v-3.5a4 4 0 0 1 4-4H21M8.5 14s1.2 1.5 3 1.5M9 9h.01M15 9h.01" />
   </>,
 );
-/** iOS keyboard: dog face (Animals & Nature). */
 export const DogFace = icon(
   <>
     <path d="M7.5 6.5 4 4.5c-1 1.5-1.5 4 0 6.5" />
@@ -169,7 +167,6 @@ export function PlusCircleFilled({ size = 20 }: { size?: number }) {
 
 export type IconSet = Partial<Record<string, React.ComponentType<IconProps>>>;
 
-/** Category id → icon, per product. Category ids: suggested, custom, smileys_people, animals_nature, food_drink, travel_places, activities, objects, symbols, flags. */
 export const ICONS = {
   apple: { suggested: Clock, smileys_people: Smile, animals_nature: Paw, food_drink: Apple, activities: Ball, travel_places: Car, objects: Bulb, symbols: Heart, flags: Flag, custom: Grid },
   notion: { suggested: Clock, smileys_people: Smile, animals_nature: Leaf, food_drink: Carrot, activities: Ball, travel_places: Plane, objects: Bulb, symbols: CheckCircle, flags: Flag, custom: Grid },

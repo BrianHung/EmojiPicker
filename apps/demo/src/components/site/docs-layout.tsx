@@ -1,7 +1,6 @@
 import * as React from "react";
 import { TableOfContents } from "./toc";
 
-/** A docs page: the content column centered in the viewport, and "On this page" in the right gutter when it fits (as on shadcn). */
 export function DocsLayout({ toc = false, children }: { toc?: boolean; children: React.ReactNode }) {
   const content = React.useRef<HTMLElement>(null);
   return (

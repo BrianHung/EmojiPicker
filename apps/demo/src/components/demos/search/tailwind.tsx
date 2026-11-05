@@ -6,7 +6,6 @@ import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianh
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Chips } from "@/components/site/chips";
 
-/** A stand-in endpoint: the lexical search behind 400 ms of latency, honoring the abort signal. */
 const slowEndpoint: EmojiSearch = remote(
   (query, context) =>
     new Promise((resolve, reject) => {
