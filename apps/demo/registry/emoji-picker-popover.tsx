@@ -13,11 +13,9 @@ function EmojiPickerPopover({
   align = "start",
   className,
   children,
-  finalFocus,
   "aria-label": ariaLabel,
 }: {
   onSelect: (selection: EmojiSelection) => void;
-  finalFocus?: React.ComponentProps<typeof PopoverContent>["finalFocus"];
   side?: "top" | "bottom";
   align?: "start" | "center" | "end";
   className?: string;
@@ -30,7 +28,7 @@ function EmojiPickerPopover({
       <PopoverTrigger aria-label={ariaLabel} className={cn(buttonVariants({ variant: "outline" }), className)}>
         {children}
       </PopoverTrigger>
-      <PopoverContent side={side} align={align} finalFocus={finalFocus} aria-label="Emoji picker" className="w-auto overflow-hidden p-0">
+      <PopoverContent side={side} align={align} aria-label="Emoji picker" className="w-auto overflow-hidden p-0">
         <EmojiPickerCard
           autoFocus
           onSelect={(selection) => {

@@ -16,7 +16,7 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover (Base UI or Radix): a trigger that opens it, picking closes it.",
+      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases: a trigger that opens it, picking closes it. With --base aria, add emoji-picker-popover-aria instead.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [{ "path": "registry/emoji-picker-popover.tsx", "type": "registry:ui" }]
     },
@@ -24,7 +24,7 @@
       "name": "emoji-picker-popover-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
-      "description": "The emoji picker in your shadcn/ui React Aria popover: a trigger that opens it, picking closes it.",
+      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria): a trigger that opens it, picking closes it.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [{ "path": "registry/aria/emoji-picker-popover.tsx", "type": "registry:ui" }]
     },
