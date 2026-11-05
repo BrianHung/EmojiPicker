@@ -16,7 +16,7 @@ export {
   useSearchState,
 } from "./react/parts";
 
-export { EmojiProvider, useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
+export { EmojiProvider, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps, EmojiSearchState, ImageUrl } from "./react/provider";
 export type {
   CategoryOption,
