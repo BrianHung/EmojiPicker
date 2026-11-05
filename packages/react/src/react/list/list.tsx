@@ -94,17 +94,16 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const [metrics, setMetrics] = React.useState<GridMetrics>(layout.metrics);
   const probeRef = React.useRef<HTMLDivElement | null>(null);
   const listRef = React.useRef<HTMLDivElement | null>(null);
-  const results = searching ? picker.searchResults : undefined;
-  const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(
-    () => ({ metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
-    [metrics, picker.columns, horizontal, results, searching, searchRows, rows],
-  );
+  const results = searching && !horizontal ? picker.searchResults : undefined;
+  // Results and the strip size cells from the probe with unpadded glyphs; the category grid measures its rendered cells
+  const unpadded = horizontal || results !== undefined;
+  const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(() => ({ metrics, columns: picker.columns, results, rows: searching ? (searchRows ?? rows) : rows }), [metrics, picker.columns, results, searching, searchRows, rows]);
   const measure = React.useCallback(() => {
     const probe = probeRef.current;
     const list = listRef.current;
     if (!probe || !list) return;
     const next = readProbe(probe);
-    if (!horizontal && !results) {
+    if (!unpadded) {
       const { elements, headers } = latest.current.cells;
       const cell = elements.values().next().value;
       const header = headers.values().next().value;
@@ -116,7 +115,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
       if (header) next.headerHeight = unit(header.offsetHeight);
     }
     setMetrics((m) => (sameMetrics(m, next) ? m : next));
-  }, [horizontal, results]);
+  }, [unpadded]);
   React.useLayoutEffect(measure);
 
   const rtlRef = React.useRef(false);
@@ -236,7 +235,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
               ...grid.gridProps,
               onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
               className,
-              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
+              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(unpadded ? UNPADDED : null), ...resolve(style, s) }),
               render,
               children: (
                 <>
