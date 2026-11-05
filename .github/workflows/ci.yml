@@ -33,6 +33,25 @@ jobs:
       - run: npx publint packages/emoji-picker-core && npx publint packages/emoji-picker && npx publint packages/emoji-picker-data
       - run: npx @arethetypeswrong/cli --pack packages/emoji-picker-core --profile esm-only && npx @arethetypeswrong/cli --pack packages/emoji-picker --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css
 
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker
+      - run: npm pack -w @brianhung/emoji-picker-core -w @brianhung/emoji-picker --pack-destination "$RUNNER_TEMP"
+      # A fresh Vite + React app on the packed tarballs; importing only the picker must leave Floating UI out
+      - working-directory: ${{ runner.temp }}
+        run: |
+          cp -R "$GITHUB_WORKSPACE/.github/smoke" app && cd app
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund ../brianhung-emoji-picker-core-*.tgz "$(ls ../brianhung-emoji-picker-[0-9]*.tgz)" react react-dom vite @floating-ui/react
+          npx vite build --sourcemap
+          node check.mjs
+
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 30
