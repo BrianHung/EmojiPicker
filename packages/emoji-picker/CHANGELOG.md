@@ -55,6 +55,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 
 ### Removed
 
+- `fuse()` from `@brianhung/emoji-picker-core/search`: core holds no adapters for libraries it doesn't depend on. The core README has a self-contained Fuse.js recipe, beside MiniSearch and FlexSearch.
 - Root `searchPlaceholder` and `autoFocusSearch` (`Search.Input` takes `placeholder` and `autoFocus`), `artwork` (wrap it in `EmojiOverrides`), `colorScheme`, `cssLayer` and `nonce`; `useSearchActions` (control `query`); `useShortcodeAutocomplete` and its types (`useTextFieldEmojiTypeahead`).
 
 - Output no longer contains emoji-picker-react markup (`epr-*` classes, `data-epr-*` attributes, `--epr-*` variables). Style `data-slot` and `data-*` attributes; CSS that targeted `[data-epr-part=category-content]` maps to `fitColumns` and `--emoji-list-padding-end`.

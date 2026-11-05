@@ -331,10 +331,9 @@ Only visible rows render, so only their images load.
 A search is a function, `(query, context) => hits | Promise<hits>`. Set it with the provider's `searchEngine`; the picker, `useEmojiSearch`, and `useEmojiSearchState` call it.
 
 ```tsx
-import Fuse from "fuse.js";
-import { fallback, fuse, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker-core/search";
+import { fallback, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker-core/search";
 
-const typoTolerant = fallback(lexical(), fuse(Fuse));
+const typoTolerant = fallback(lexical(), fuzzy); // fuzzy: any EmojiSearch, such as the Fuse.js recipe in the core README
 const personal = rerank(lexical(), preferFrequent());
 const semantic = progressive(lexical(), remote((query, { signal }) => fetchEmoji(query, signal)));
 
@@ -353,7 +352,6 @@ Recipes for MiniSearch, Fuse.js and FlexSearch are in the [core README](https://
 | `rerank(search, ...rerankers)`, `preferFrequent({ weight })` | Reorders results |
 | `progressive(fast, slow)`, `withInterim(promise, hits)` | Shows fast results until slow ones arrive |
 | `remote(fetcher)` | Any async source of unified codes or hits |
-| `fuse(Fuse, options)` | Adapts Fuse.js, passed in so it stays optional |
 
 ## Keyboard
 

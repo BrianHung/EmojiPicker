@@ -171,28 +171,3 @@ export function preferFrequent({ weight = 0.5 }: { weight?: number } = {}): Rera
 export function remote(fetcher: (query: string, context: SearchContext) => PromiseLike<readonly (string | SearchHit)[]>): EmojiSearch {
   return (query, context) => then(fetcher(query, context), (list) => list.map((x) => (typeof x === "string" ? { unified: x } : x)));
 }
-
-type FuseLike<T> = { search(query: string, options?: { limit?: number }): { item: T; score?: number }[] };
-type FuseConstructor<T> = new (docs: T[], options: object) => FuseLike<T>;
-type FuseDoc = { unified: string; name: string; shortcodes: string; tags: string };
-
-export function fuse(Fuse: FuseConstructor<FuseDoc>, options: object = {}): EmojiSearch {
-  const instances = new WeakMap<readonly EmojiRecord[], FuseLike<FuseDoc>>();
-  return (query, { records, limit }) => {
-    const instance = cached(instances, records, () => {
-      const docs = records.map((r) => ({ unified: r.unified, name: r.name, shortcodes: r.shortcodes.join(" ").replace(/_/g, " "), tags: r.tags.join(" ") }));
-      return new Fuse(docs, {
-        keys: [
-          { name: "shortcodes", weight: 1 },
-          { name: "name", weight: 3 },
-          { name: "tags", weight: 0.5 },
-        ],
-        threshold: 0.4,
-        ignoreLocation: true,
-        includeScore: true,
-        ...options,
-      });
-    });
-    return instance.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
-  };
-}
