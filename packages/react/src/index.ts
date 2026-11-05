@@ -44,7 +44,6 @@ export type { CategoryNavProps, CategoryNavState, CategoryTabProps, CategoryTabS
 export type { SkinToneGlyphProps, SkinToneOpenChangeDetails, SkinToneOptionProps, SkinToneOptionState, SkinToneOptionsProps, SkinToneOptionsState, SkinToneProps, SkinToneState, SkinToneTriggerProps } from "./react/skin-tone";
 export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
-export { pickerInitialFocus } from "./react/popover";
 export type {
   PopoverAnchor,
   PopoverFinalFocus,
