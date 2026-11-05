@@ -12,7 +12,7 @@
   transition: transform 150ms;
 }
 .trigger:hover,
-.trigger[data-state="open"] {
+.trigger[data-popup-open] {
   background: var(--emoji-picker-hover);
 }
 .trigger:active {

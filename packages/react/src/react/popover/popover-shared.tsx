@@ -79,7 +79,8 @@ export const contentAttributes = ({ open, side, align, status, props }: PopoverC
   role: "dialog",
   "aria-label": props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Emoji picker"),
   "data-slot": SLOTS.popoverContent,
-  "data-state": open ? "open" : "closed",
+  "data-open": open ? "" : undefined,
+  "data-closed": open ? undefined : "",
   "data-side": side,
   "data-align": align,
   "data-starting-style": status === "starting" ? "" : undefined,
@@ -142,7 +143,7 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open, "trigger-press", e.nativeEvent);
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
   const merged = triggerProps(
-    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-state": state.open ? "open" : "closed", onClick: toggle }),
+    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-popup-open": state.open ? "" : undefined, onClick: toggle }),
   );
   return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
 });

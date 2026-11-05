@@ -40,6 +40,6 @@ describe.each([
     unmount = () => React.act(() => root.unmount());
     outsidePress(outside);
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "outside-press" }));
-    expect(document.querySelector('[role="dialog"]')?.getAttribute("data-state")).toBe("open");
+    expect(document.querySelector('[role="dialog"]')?.hasAttribute("data-open")).toBe(true);
   });
 });

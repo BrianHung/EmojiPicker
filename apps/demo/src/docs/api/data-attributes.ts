@@ -11,15 +11,19 @@ export const slots: [string, string][] = [
 
 export const stateAttributes: [string, string][] = [
   ["data-searching", "Root, Viewport and List while search results show."],
-  ["data-highlighted", "Present on the highlighted cell."],
-  ["data-active", "Present on the category tab for the section in view."],
-  ["data-selected", "The category tab for the section in view; a value picker's cell; the current skin-tone option."],
+  ["data-highlighted", "Present on the highlighted cell while focus stays in a search field or keyboard target."],
+  ["data-active", "Present on the category tab for the section in view, as on Base UI's Tabs.Tab."],
+  ["data-selected", "A value picker's cell; the current skin-tone option; a selected reaction."],
   ["data-collapsed", "A collapsed section, its title and its actions."],
   ["data-disabled", "CategoryNav and its tabs while search results show."],
   ["data-empty", "Search with no query; List with nothing to show."],
   ["data-has-variations", "Present on cells with skin-tone variations."],
   ["data-unified", "The cell's unified code."],
   ["data-row · data-column", "The cell's row, counted across the whole list, and its column."],
-  ['data-state="open" | "closed"', "SkinTone and its Trigger: whether the options are open."],
+  ["data-open · data-closed", "SkinTone and EmojiPopover.Content: whether the options or the popover are open."],
+  ["data-popup-open", "SkinTone.Trigger and EmojiPopover.Trigger while their popup is open."],
+  ["data-starting-style · data-ending-style", "EmojiPopover.Content while it enters and exits."],
+  ["data-pressed · data-hovered · data-focus-visible", "Cells, tabs and buttons, from React Aria's usePress, useHover (no hover on touch) and useFocusRing."],
+  ["data-focused", "List, tabs and the search field while they hold DOM focus."],
   ["data-orientation", "Viewport, List, CategoryNav and SkinTone options: horizontal or vertical."],
 ];

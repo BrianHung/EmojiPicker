@@ -95,7 +95,7 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
                 title="Set icon"
                 onSelect={(s) => setIcon(s.unified)}
                 pickerClassName={POPUP_SHADOW}
-                triggerClassName="absolute top-[59.8px] -left-10 flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-[state=open]:bg-(--hover)"
+                triggerClassName="absolute top-[59.8px] -left-10 flex size-8 cursor-pointer items-center justify-center rounded-[6px] outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-popup-open:bg-(--hover)"
               >
                 <Emoji emoji={icon} size={20} className="text-[20px] leading-none" />
               </ScenePicker>
@@ -376,7 +376,7 @@ function AddReaction({ onSelect, sheet = false }: { onSelect: (unified: string) 
       sheet={sheet}
       onSelect={(s) => onSelect(s.unified)}
       pickerClassName={POPUP_SHADOW}
-      triggerClassName="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-[0.5px] border-transparent text-(--text) outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-[state=open]:bg-(--hover)"
+      triggerClassName="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-[0.5px] border-transparent text-(--text) outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-popup-open:bg-(--hover)"
     >
       <SmilePlus />
     </ScenePicker>

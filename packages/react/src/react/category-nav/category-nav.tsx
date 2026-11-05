@@ -152,7 +152,6 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
       ...mergeProps(props, hoverProps, pressProps, focusProps),
       ref: refs,
       "data-key": c.id,
-      "data-selected": selected || undefined,
       "data-disabled": disabled || undefined,
       "data-focused": state.focused || undefined,
       "data-focus-visible": state.focusVisible || undefined,

@@ -116,7 +116,8 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
           ...mergeProps(props, { onKeyDown: keys }),
           ref: merged,
           "data-slot": SLOTS.skinTone,
-          "data-state": open ? "open" : "closed",
+          "data-open": open ? "" : undefined,
+          "data-closed": open ? undefined : "",
           children: children ?? (
             <>
               <SkinToneTrigger />
@@ -146,7 +147,7 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
       "aria-label": label(tone),
       "aria-haspopup": "true",
       "aria-expanded": open,
-      "data-state": open ? "open" : "closed",
+      "data-popup-open": open ? "" : undefined,
       onClick: (e: React.MouseEvent) => toggle(e.nativeEvent),
       style: (s: SkinToneState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
       children,
