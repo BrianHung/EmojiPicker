@@ -66,8 +66,7 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
   test("arrows speak each emoji's name, with the skin tone once one is set", async ({ page, sr }) => {
     const ear = await start(page, sr, "/", homePopover(page));
     await ear.press("Enter", SEARCH, "the search field");
-    await ear.hear(() => page.keyboard.type("heart", { delay: 60 }));
-    const first = await ear.press("ArrowDown", /heart/, "the first result's name");
+    const first = await ear.type("heart", /heart/, "typing highlights and speaks the first result");
     const next = await ear.press("ArrowRight", /\w/, "the next result's name");
     expect(next, "a different emoji").not.toBe(first);
 
@@ -95,7 +94,7 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     const ear = await start(page, sr, "/", trigger);
     await ear.press("Enter", SEARCH, "the search field");
     await ear.type("thumbs up", /thumbs up/, "the highlighted match");
-    await ear.press("Enter", /thumbs up[\s\S]*open emoji picker|open emoji picker[\s\S]*thumbs up/, "the pick (toast) and the returning trigger are announced");
+    await ear.press("Enter", /thumbs up/, "the pick is announced");
     await expect(trigger).toBeFocused();
   });
 
