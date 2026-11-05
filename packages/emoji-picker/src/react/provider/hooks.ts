@@ -1,7 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord, SkinToneValue } from "../../core/dataset";
-import { createSearch, type SearchState } from "../../core/search/query";
-import { emitter } from "../../core/reactive";
+import { createSearch, emitter, type EmojiRecord, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
 export function useFrequentEmoji(n = 5): readonly string[] {

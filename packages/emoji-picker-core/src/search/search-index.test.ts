@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import data from "../../../data/en.json";
-import { buildDataset } from "../../../scripts/build-data";
+import data from "../../data/en.json";
+import { buildDataset } from "../../scripts/build-data";
 import { expandDataset, type Dataset, type DatasetEmoji } from "../dataset";
 import { createSearchIndex } from "./search-index";
 

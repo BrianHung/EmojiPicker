@@ -1,8 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
-import { createPickerState, type PickerStateOptions } from "../../core/picker";
-import type { CategoryOption as CoreCategoryOption } from "../../core/sections";
-import type { EmojiSelection } from "../../core/store";
+import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiRecord, type EmojiSelection, type PickerStateOptions } from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
 import { PickerContext, usePicker, useSelector, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";

@@ -1,10 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
-import type { EmojiLabels } from "../../core/labels";
-import type { PickerState, SearchResultsMode } from "../../core/picker";
-import { same } from "../../core/reactive";
-import type { Category, EmojiSection } from "../../core/sections";
-import type { EmojiSelection, EmojiStore } from "../../core/store";
+import { type Category, type EmojiLabels, type EmojiRecord, type EmojiSection, type EmojiSelection, type EmojiStore, type PickerState, same, type SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
 import type { KeyboardAction } from "./keymap";
 

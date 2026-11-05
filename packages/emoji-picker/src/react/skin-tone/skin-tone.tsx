@@ -1,8 +1,7 @@
 // Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { withTone, type SkinToneValue } from "../../core/dataset";
-import { nativeToUnified } from "../../core/resolve";
+import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
 import { useKeyRegion, useSkinToneToggle } from "../root/keyboard";

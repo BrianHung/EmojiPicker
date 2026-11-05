@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
+import data from "../data/en.json";
 import type { Dataset } from "./dataset";
 import { missingEmojiText, nativeToUnified, resolveEmoji } from "./resolve";
 import { createEmojiStore } from "./store";

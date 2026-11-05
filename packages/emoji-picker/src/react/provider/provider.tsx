@@ -1,8 +1,6 @@
 import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
-import { localizeLabels, type EmojiLabels } from "../../core/labels";
-import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../../core/platform";
-import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../../core/store";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, localizeLabels, needsTwemoji, type Renderer, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 

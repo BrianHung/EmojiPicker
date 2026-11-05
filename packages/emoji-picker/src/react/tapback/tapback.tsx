@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiSelection } from "../../core/store";
+import type { EmojiSelection } from "@brianhung/emoji-picker-core";
 import { useFrequentEmoji } from "../provider/hooks";
 import { PickerRoot, type RootProps } from "../root/picker";
 import { Reactions } from "../reactions/reactions";

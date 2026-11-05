@@ -29,6 +29,12 @@ export type SuggestionsSnapshot = {
 
 export type SuggestionsMove = "up" | "down" | "left" | "right";
 
+export type EmojiTrigger = {
+  query: string;
+  anchor: () => DOMRect | null;
+  replace: (text: string, suggestion: ShortcodeCompletion) => void;
+};
+
 const NONE: readonly ShortcodeCompletion[] = [];
 const KEYS: Record<string, SuggestionsMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
 

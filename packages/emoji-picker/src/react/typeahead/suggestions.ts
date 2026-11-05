@@ -1,6 +1,5 @@
 import * as React from "react";
-import type { ShortcodeCompletion } from "../../core/search/search-index";
-import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type SuggestionsOptions, type SuggestionsSnapshot } from "../../core/suggestions";
+import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions, type SuggestionsSnapshot } from "@brianhung/emoji-picker-core";
 import { useEmojiStatus } from "../provider/hooks";
 import { useEmojiContext } from "../provider/provider";
 

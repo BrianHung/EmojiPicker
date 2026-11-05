@@ -3,7 +3,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
 import { ToggleButton } from "react-aria-components/ToggleButton";
 import { Toolbar } from "react-aria-components/Toolbar";
-import { nameWithTone } from "../../core/shortcodes";
+import { nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { useEdgeKeys } from "../root/keyboard";

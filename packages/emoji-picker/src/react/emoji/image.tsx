@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
+import type { EmojiRecord } from "@brianhung/emoji-picker-core";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import data from "../../data/en.json";
+import data from "../data/en.json";
 import type { CustomEmoji } from "./custom";
 import type { Dataset, DatasetEmoji } from "./dataset";
 import { createFrequencyStore, memoryStorage } from "./frequents";

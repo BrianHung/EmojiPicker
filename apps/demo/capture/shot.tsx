@@ -2,7 +2,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
 import { MotionGlobalConfig } from "motion/react";
-import enUrl from "@brianhung/emoji-picker/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { SCENES, styleById } from "@/styles";
 import { StyleTapback } from "@/styles/variants";

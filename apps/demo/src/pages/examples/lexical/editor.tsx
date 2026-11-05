@@ -5,7 +5,7 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import enUrl from "@brianhung/emoji-picker/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { $createEmojiNode, EmojiNode, EmojiShortcodePlugin, emojiAttrs } from "@/components/lexical/emoji-node";
 import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";

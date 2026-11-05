@@ -4,9 +4,9 @@ import { schema } from "prosemirror-schema-basic";
 import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import data from "../data/en.json";
-import type { Dataset } from "./core/dataset";
-import { createFrequencyStore, memoryStorage } from "./core/frequents";
-import { createEmojiStore } from "./core/store";
+import type { Dataset } from "./dataset";
+import { createFrequencyStore, memoryStorage } from "./frequents";
+import { createEmojiStore } from "./store";
 import { emojiTypeahead } from "./prosemirror";
 
 it("opens on :smi, and ArrowDown + Enter replaces it with the emoji; a composing Enter doesn't", async () => {

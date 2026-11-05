@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withoutTone } from "../../core/dataset";
+import { withoutTone } from "@brianhung/emoji-picker-core";
 
 export type ReactionsState = {
   reactions: readonly string[];

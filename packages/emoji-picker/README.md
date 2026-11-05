@@ -17,12 +17,14 @@ One `EmojiProvider` holds the data, search index, frequently used emoji, and ski
 ## Getting started
 
 ```bash
-npm install @brianhung/emoji-picker
+npm install @brianhung/emoji-picker @brianhung/emoji-picker-core
 ```
+
+`@brianhung/emoji-picker` is the React layer. `@brianhung/emoji-picker-core` has no dependencies and owns the data, search, stores and every extension contract (`EmojiSearch`, `EmojiStorage`, `CustomEmojiSource`, the dataset format); import its types from there.
 
 ```tsx
 import { EmojiPicker, EmojiProvider, Tapback } from "@brianhung/emoji-picker";
-import en from "@brianhung/emoji-picker/data/en.json?url"; // Vite; other bundlers have their own asset imports
+import en from "@brianhung/emoji-picker-core/data/en.json?url"; // Vite; other bundlers have their own asset imports
 
 <EmojiProvider data={en}>
   <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)} className="h-[380px] w-[352px]">
@@ -62,12 +64,14 @@ It adds `components/ui/emoji-picker-popover.tsx` with `EmojiPickerPopover`. With
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker` | Components and hooks |
-| `@brianhung/emoji-picker/core` | `createEmojiStore`, the picker's and the typeahead's state (`createPickerState`, `createEmojiSuggestions`), `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, and the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`). No React ([Without React](#without-react)). |
-| `@brianhung/emoji-picker/search` | Building blocks for the provider's `search` |
+| `@brianhung/emoji-picker` | Components and hooks, and the types React code commonly needs from core (`EmojiSelection`, `EmojiRecord`, `EmojiItem`, `CustomEmoji`, `EmojiSearch`, …) |
+| `@brianhung/emoji-picker/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions.Popover` on Floating UI or React Aria ([Popovers](#popovers)); `@floating-ui/react` is an optional peer dependency |
 | `@brianhung/emoji-picker/tiptap`, `/lexical` | `:shortcode` typeahead for Tiptap and Lexical ([Your own editor](#your-own-editor)); their editor packages are optional peer dependencies |
-| `@brianhung/emoji-picker/data/en.json` | The English dataset |
 | `@brianhung/emoji-picker/tokens.css`, `theme.css`, `shadcn.css` | Color tokens, Tailwind utilities, and the shadcn/ui bridge |
+| `@brianhung/emoji-picker-core` | `createEmojiStore`, the picker's and the typeahead's state (`createPickerState`, `createEmojiSuggestions`), `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, `EmojiLabels`, the grid's rows and keyboard (`createEmojiGrid`, `moveInGrid`), and every public type. No React ([Without React](#without-react)). |
+| `@brianhung/emoji-picker-core/search` | Building blocks for the provider's `search` |
+| `@brianhung/emoji-picker-core/prosemirror` | The `:shortcode` typeahead as a ProseMirror plugin; `prosemirror-state` and `prosemirror-view` are optional peer dependencies |
+| `@brianhung/emoji-picker-core/data/en.json` | The English dataset |
 
 ## Pickers
 
@@ -146,7 +150,7 @@ A section title (`List.SectionTitle`) is text inside the listbox; its state has 
 
 ## Popovers
 
-`EmojiPopover` positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger, or, when a pick closes it, to `finalFocus` on the content (an element, a ref or a function: the editor a toolbar button inserts into). `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
+`EmojiPopover` (from `/floating-ui` or `/react-aria`) positions its content next to the trigger (it flips to the other side and shifts into the viewport; `--available-width` and `--available-height` on the content), closes on Escape, an outside click, or a pick, and returns focus to the trigger, or, when a pick closes it, to `finalFocus` on the content (an element, a ref or a function: the editor a toolbar button inserts into). `closeOnSelect={false}` keeps it open after a pick. `anchor` positions it against another element, a virtual element, or a function that returns a rect, such as an editor's caret.
 
 ```tsx
 <EmojiPopover.Root>
@@ -210,7 +214,7 @@ Each editor adapter returns the same `EmojiTypeahead` (`query`, `open`, `anchor`
 | `@brianhung/emoji-picker` | `useTextFieldEmojiTypeahead(ref, options)` | `<input>`, `<textarea>` |
 | `@brianhung/emoji-picker/tiptap` | `useTiptapEmojiTypeahead(editor, options)` | Tiptap 3, on the ProseMirror plugin |
 | `@brianhung/emoji-picker/lexical` | `useLexicalEmojiTypeahead(options)` | Lexical, inside `LexicalComposer` |
-| `@brianhung/emoji-picker/prosemirror` | `emojiTypeahead(store, options)`, no React | ProseMirror |
+| `@brianhung/emoji-picker-core/prosemirror` | `emojiTypeahead(store, options)`, no React | ProseMirror |
 
 ```tsx
 const editor = useEditor({ extensions: [StarterKit] });
@@ -231,11 +235,11 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 
 Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders Slack, Discord, Notion and Linear menus on a textarea, Tiptap and Lexical.
 
-`/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
+`@brianhung/emoji-picker-core/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
 
 ```ts
-import { createEmojiStore } from "@brianhung/emoji-picker/core";
-import { emojiTypeahead } from "@brianhung/emoji-picker/prosemirror";
+import { createEmojiStore } from "@brianhung/emoji-picker-core";
+import { emojiTypeahead } from "@brianhung/emoji-picker-core/prosemirror";
 
 const { plugin, suggestions, anchor } = emojiTypeahead(createEmojiStore({ data: "/emoji/en.json" }));
 new EditorView(editor, { state: EditorState.create({ schema, plugins: [plugin, keymap(baseKeymap)] }) });
@@ -264,10 +268,10 @@ suggestions.subscribe(() => {
 
 ### Without React
 
-The hooks are thin wrappers over stores in `/core` that any framework can drive: `subscribe`, read `getSnapshot()`, call actions, and spread the attribute getters.
+The hooks are thin wrappers over stores in `@brianhung/emoji-picker-core` that any framework can drive: `subscribe`, read `getSnapshot()`, call actions, and spread the attribute getters.
 
 ```ts
-import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker/core";
+import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker-core";
 
 const store = createEmojiStore({ data: "/emoji/en.json" });
 const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)) });
@@ -320,7 +324,7 @@ A search is a function, `(query, context) => hits | Promise<hits>`. Set it with 
 
 ```tsx
 import Fuse from "fuse.js";
-import { fallback, fuse, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker/search";
+import { fallback, fuse, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker-core/search";
 
 const typoTolerant = fallback(lexical(), fuse(Fuse));
 const personal = rerank(lexical(), preferFrequent());
@@ -419,7 +423,7 @@ Set sizes with CSS variables on `Root` or an ancestor:
 Japanese in three lines: build the data, pass it with the locale, and translate the strings you show.
 
 ```tsx
-// npx @brianhung/emoji-picker build-data ja --out public/emoji/ja.json
+// npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 <EmojiProvider data="/emoji/ja.json" locale="ja" labels={{ searchPlaceholder: "検索", noResults: "見つかりません" }}>…</EmojiProvider>
 ```
 
@@ -429,7 +433,7 @@ The package ships English. To build a dataset for another language, run the `bui
 
 ```bash
 npm install --save-dev emojibase-data
-npx @brianhung/emoji-picker build-data ja --out public/emoji/ja.json
+npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
 The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps Slack's English shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
@@ -445,17 +449,17 @@ Search follows the dataset's `locale`: it normalizes text (NFKC, so full-width `
 To change how text becomes words, pass a `segmenter` (any object with `Intl.Segmenter`'s `segment()`) or replace the tokenizer. A tokenizer receives text and returns words; it splits both the indexed names and the query.
 
 ```tsx
-import { lexical } from "@brianhung/emoji-picker/search";
+import { lexical } from "@brianhung/emoji-picker-core/search";
 
 const bigrams = (text: string) => Array.from({ length: Math.max(1, text.length - 1) }, (_, i) => text.slice(i, i + 2));
 
 <EmojiProvider data="/emoji/zh.json" searchEngine={lexical({ tokenize: bigrams })}>…</EmojiProvider>
 ```
 
-Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker/core` with English defaults in `defaultLabels`. Pass any of them as the provider's `labels`; its `locale` also sets React Aria's locale (text direction) and formats the default result count. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:
+Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker-core` with English defaults in `defaultLabels`. Pass any of them as the provider's `labels`; its `locale` also sets React Aria's locale (text direction) and formats the default result count. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:
 
 ```ts
-import { defaultLabels, plural, type EmojiLabels } from "@brianhung/emoji-picker/core";
+import { defaultLabels, plural, type EmojiLabels } from "@brianhung/emoji-picker-core";
 
 const ja: EmojiLabels = {
   ...defaultLabels,

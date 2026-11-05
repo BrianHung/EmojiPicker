@@ -1,4 +1,4 @@
-import { remote } from "@brianhung/emoji-picker/search";
+import { remote } from "@brianhung/emoji-picker-core/search";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
 

@@ -6,9 +6,7 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import { createEmojiGrid, type EmojiGrid, type EmojiGridMove, type EmojiGridRow } from "../../core/grid";
-import type { PickerState } from "../../core/picker";
-import type { EmojiItem, EmojiSection } from "../../core/sections";
+import { createEmojiGrid, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerState } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
 import { signal, usePicker, useSelector, type ListHandle } from "../root/context";

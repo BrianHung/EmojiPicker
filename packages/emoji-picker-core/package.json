@@ -1,0 +1,92 @@
+{
+  "name": "@brianhung/emoji-picker-core",
+  "version": "0.0.0",
+  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state, and a ProseMirror shortcode plugin.",
+  "keywords": [
+    "emoji",
+    "emoji-picker",
+    "headless",
+    "shortcodes",
+    "slack",
+    "search",
+    "skin-tone",
+    "autocomplete",
+    "prosemirror"
+  ],
+  "license": "MIT",
+  "author": "Brian Hung",
+  "homepage": "https://emoji.brianhung.me",
+  "bugs": "https://github.com/BrianHung/EmojiPicker/issues",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianHung/EmojiPicker.git",
+    "directory": "packages/emoji-picker-core"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "bin": {
+    "emoji-picker": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "data",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "@brianhung/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./search": {
+      "@brianhung/source": "./src/search/index.ts",
+      "types": "./dist/search/index.d.ts",
+      "import": "./dist/search/index.js"
+    },
+    "./prosemirror": {
+      "@brianhung/source": "./src/prosemirror.ts",
+      "types": "./dist/prosemirror.d.ts",
+      "import": "./dist/prosemirror.js"
+    },
+    "./data/en.json": "./data/en.json",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build:data": "tsx scripts/cli.ts build-data en --out data/en.json",
+    "build": "npm run build:data && tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "emojibase-data": ">=16.0.0",
+    "prosemirror-state": "^1.4.0",
+    "prosemirror-view": "^1.30.0"
+  },
+  "peerDependenciesMeta": {
+    "emojibase-data": {
+      "optional": true
+    },
+    "prosemirror-state": {
+      "optional": true
+    },
+    "prosemirror-view": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "emojibase-data": "^18.0.0",
+    "jsdom": "^30.1.3",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-schema-basic": "^1.2.5",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.42.9",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

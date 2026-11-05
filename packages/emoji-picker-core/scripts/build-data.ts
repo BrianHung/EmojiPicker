@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { GROUPS, withTone, type Dataset, type DatasetEmoji } from "../src/core/dataset";
+import { GROUPS, withTone, type Dataset, type DatasetEmoji } from "../src/dataset";
 
 type Skin = { hexcode: string; emoji: string; tone?: number | number[] };
 type EmojibaseEmoji = {

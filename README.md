@@ -5,7 +5,7 @@ shadcn for emoji pickers: headless, unstyled React parts for emoji pickers, tapb
 ## Install
 
 ```bash
-npm install @brianhung/emoji-picker
+npm install @brianhung/emoji-picker @brianhung/emoji-picker-core
 ```
 
 Or copy a styled shadcn/ui component into your project:
@@ -20,10 +20,11 @@ npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover-aria.jso
 
 | Path | Contents |
 |---|---|
-| `packages/emoji-picker` | The library, published as `@brianhung/emoji-picker`, with its data build and unit tests |
+| `packages/emoji-picker-core` | `@brianhung/emoji-picker-core`: data, search, stores and the ProseMirror plugin, with no dependencies; the data build and its unit tests |
+| `packages/emoji-picker` | `@brianhung/emoji-picker`: the React parts and hooks on React Aria, with its unit tests |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker. See its [README](apps/demo/README.md). |
 | `docs` | Research notes, including the [keyboard and accessibility audit](docs/keyboard-accessibility-audit.md) |
-| `.changeset` | Pending release notes for the library |
+| `.changeset` | Pending release notes for both packages |
 
 ## Commands
 
@@ -32,12 +33,12 @@ Run these from the repository root.
 ```bash
 npm install
 npm run dev          # the site at http://localhost:5199
-npm test             # library unit tests
+npm test             # both packages' unit tests
 npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visual specs
 npm run test:a11y    # axe on every page and picker surface
 npm run typecheck    # every workspace
 npm run check        # Biome lint and format check; `npm run format` formats
-npm run build        # the library, then the site and registry
+npm run build        # core, the React package, then the site and registry
 npm run size         # bundle-size budgets on the library build (.size-limit.json)
 npm run changeset    # describe a change for the next release
 ```

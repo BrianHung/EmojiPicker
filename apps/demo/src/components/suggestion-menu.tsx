@@ -1,4 +1,5 @@
-import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeahead } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStore, type EmojiTypeahead } from "@brianhung/emoji-picker";
+import { EmojiSuggestions } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 
 export type SuggestionMenuProps = { className?: string; side?: "top" | "bottom" };

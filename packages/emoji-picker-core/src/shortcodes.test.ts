@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
+import data from "../data/en.json";
 import { expandDataset, type Dataset } from "./dataset";
 import { createSearchIndex } from "./search/search-index";
 import { findShortcodeTrigger, isComposingKey, nameWithTone, replaceShortcodes, toneOf } from "./shortcodes";

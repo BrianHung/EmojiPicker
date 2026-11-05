@@ -26,6 +26,8 @@
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@brianhung/emoji-picker": "*",
+    "@brianhung/emoji-picker-core": "*",
+    "@floating-ui/react": "^0.27.20",
     "@huggingface/transformers": "^4.3.2",
     "@lexical/react": "^0.53.0",
     "@lisse/react": "^0.7.3",

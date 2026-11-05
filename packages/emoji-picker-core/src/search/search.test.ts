@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../../../data/en.json";
+import data from "../../data/en.json";
 import { expandDataset, unifiedToNative, type Dataset } from "../dataset";
 import { fallback, fuse, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "./search";
 

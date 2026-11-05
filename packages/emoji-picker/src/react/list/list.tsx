@@ -5,7 +5,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
-import type { EmojiItem, EmojiSection } from "../../core/sections";
+import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker, ViewportContext } from "../root/context";
 import { isRtl, useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../root/keyboard";

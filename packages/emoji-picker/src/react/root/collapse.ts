@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { PickerState } from "../../core/picker";
+import type { PickerState } from "@brianhung/emoji-picker-core";
 
 export type CollapsedCategories = {
   collapsed: readonly string[];

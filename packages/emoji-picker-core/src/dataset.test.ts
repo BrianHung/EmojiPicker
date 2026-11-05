@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
+import data from "../data/en.json";
 import { expandDataset, unifiedToNative, withTone, type Dataset } from "./dataset";
 
 const records = expandDataset(data as unknown as Dataset);

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { withoutTone } from "../../core/dataset";
+import { withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiImage } from "./image";
 
 export type Artwork = string | React.ReactNode;

@@ -1,6 +1,5 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
-import { nameWithTone } from "../../core/shortcodes";
+import { type EmojiRecord, nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";

@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { expect, it } from "vitest";
 import data from "../data/en.json";
-import type { Dataset } from "../src/core/dataset";
+import type { Dataset } from "../src/dataset";
 
 it("writes a localized dataset, with Slack's shortcodes before CLDR's", () => {
   const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "emoji-data-")), "ja.json");

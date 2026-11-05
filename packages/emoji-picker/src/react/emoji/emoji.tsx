@@ -1,8 +1,5 @@
 import * as React from "react";
-import { isUnified } from "../../core/dataset";
-import type { Renderer } from "../../core/platform";
-import { nameWithTone } from "../../core/shortcodes";
-import { missingEmojiText, resolveEmoji, type EmojiInput, type ResolvedEmoji } from "../../core/resolve";
+import { type EmojiInput, isUnified, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
 import { EmojiImage } from "./image";
 import { ArtworkGlyph, useArtwork } from "./overrides";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";

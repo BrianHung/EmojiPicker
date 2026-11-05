@@ -1,5 +1,5 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { cn } from "@/lib/utils";
 import { discord } from "./picker";

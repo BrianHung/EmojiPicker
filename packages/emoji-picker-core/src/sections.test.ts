@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
+import data from "../data/en.json";
 import { expandDataset, type Dataset } from "./dataset";
 import { defaultLabels } from "./labels";
 import { categorySections, itemFactory, resultSections } from "./sections";

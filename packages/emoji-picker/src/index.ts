@@ -38,41 +38,27 @@ export { Tapback } from "./react/tapback";
 export type { TapbackProps } from "./react/tapback";
 export { pickerInitialFocus, useEmojiPopover } from "./react/popover";
 export type { EmojiPopoverState, PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";
-export { EmojiPopover, EmojiSuggestions } from "./react/popover/floating-ui";
-export type { PopoverContentProps } from "./react/popover/floating-ui";
 export { Emoji, EmojiOverrides, findArtwork, useEmoji } from "./react/emoji";
 export type { Artwork, ArtworkMap, EmojiOverridesProps, EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";
-export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTrigger, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
+export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
 
-export { createEmojiGrid, createFrequencyStore, DEFAULT_FREQUENT, defaultLabels, findShortcodeTrigger, isComposingKey, memoryStorage, moveInGrid, plural, resolveEmoji, rowsPerPage, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./core";
+export { createFrequencyStore, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
 export type {
   CategoryId,
-  CompletionOrder,
   CustomEmoji,
-  CustomEmojiLoader,
   CustomEmojiSource,
   Dataset,
   EmojiDataSource,
-  EmojiGrid,
-  EmojiGridMove,
-  EmojiGridOptions,
-  EmojiGridRow,
-  EmojiGridSection,
-  EmojiInput,
   EmojiItem,
   EmojiRecord,
+  EmojiSearch,
   EmojiSection,
   EmojiSelection,
   EmojiStorage,
+  EmojiStore,
+  EmojiTrigger,
   FrequencyStore,
-  FrequencyStoreOptions,
-  PluralForms,
   Renderer,
-  ResolvedEmoji,
-  SearchIndex,
-  ShortcodeCompletion,
-  SkinToneNames,
   SkinToneValue,
-} from "./core";
-export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";
+} from "@brianhung/emoji-picker-core";

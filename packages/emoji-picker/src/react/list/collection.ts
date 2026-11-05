@@ -1,5 +1,5 @@
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiItem, EmojiSection } from "../../core/sections";
+import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 
 const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): Node<unknown> => ({
   type,
