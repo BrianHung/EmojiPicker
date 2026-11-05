@@ -41,7 +41,7 @@ function ThemeIcon({ theme }: { theme: Theme }) {
 const RENDERERS: { value: Renderer | "auto"; label: string }[] = [
   { value: "auto", label: "Auto" },
   { value: "native", label: "Native" },
-  { value: "twemoji", label: "Twemoji" },
+  { value: "image", label: "Twemoji" },
 ];
 
 function RendererSelect({ renderer, onRenderer, className }: { renderer: Renderer | "auto"; onRenderer: (r: Renderer | "auto") => void; className?: string }) {

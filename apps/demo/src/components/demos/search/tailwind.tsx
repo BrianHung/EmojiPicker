@@ -1,10 +1,20 @@
 import * as React from "react";
 import Fuse from "fuse.js";
 import en from "@brianhung/emoji-picker-core/data/en.json?url";
-import { EmojiProvider, type EmojiSearch, type EmojiSelection, type SearchResultsMode } from "@brianhung/emoji-picker";
-import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker-core/search";
+import { EmojiProvider, type EmojiRecord, type EmojiSearch, type EmojiSelection, type SearchResultsMode } from "@brianhung/emoji-picker";
+import { fallback, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker-core/search";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Chips } from "@/components/site/chips";
+
+const fuses = new WeakMap<readonly EmojiRecord[], Fuse<EmojiRecord>>();
+const fuse: EmojiSearch = (query, { records, limit }) => {
+  let index = fuses.get(records);
+  if (!index) {
+    index = new Fuse([...records], { keys: [{ name: "name", weight: 3 }, "shortcodes", { name: "tags", weight: 0.5 }], threshold: 0.4, ignoreLocation: true, includeScore: true });
+    fuses.set(records, index);
+  }
+  return index.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
+};
 
 const slowEndpoint: EmojiSearch = remote(
   (query, context) =>
@@ -20,7 +30,7 @@ const slowEndpoint: EmojiSearch = remote(
 const ENGINES = {
   default: { label: "lexical()", search: lexical() },
   exact: { label: "No typos", search: lexical({ typos: false }) },
-  fuse: { label: "+ Fuse", search: fallback(lexical(), fuse(Fuse)) },
+  fuse: { label: "+ Fuse", search: fallback(lexical(), fuse) },
   frequent: { label: "+ Frequents", search: rerank(lexical(), preferFrequent({ weight: 0.6 })) },
   remote: { label: "Async", search: slowEndpoint },
 } satisfies Record<string, { label: string; search: EmojiSearch }>;
@@ -34,7 +44,7 @@ export function SearchPicker({ onSelect }: { onSelect: (selection: EmojiSelectio
     <>
       <Chips label="Search engine" value={engine} onChange={setEngine} options={Object.entries(ENGINES).map(([id, e]) => [id as Engine, e.label])} />
       <Chips label="Results" value={mode} onChange={setMode} options={[["ranked", "Ranked"], ["grouped", "Grouped"]]} />
-      <EmojiProvider key={engine} data={en} searchEngine={ENGINES[engine].search}>
+      <EmojiProvider data={en} searchEngine={ENGINES[engine].search}>
         <EmojiPickerCard onSelect={onSelect} searchResults={mode} query={query} onQueryChange={setQuery} />
       </EmojiProvider>
     </>

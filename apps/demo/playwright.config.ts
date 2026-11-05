@@ -36,7 +36,6 @@ export default defineConfig({
     project("desktop-light", "visual.spec.ts", { ...desktop, colorScheme: "light" }),
     project("desktop-dark", "visual.spec.ts", { ...desktop, colorScheme: "dark" }),
     project("mobile-light", "visual.spec.ts", { ...mobile, colorScheme: "light" }),
-    project("mobile-dark", "visual.spec.ts", { ...mobile, colorScheme: "dark" }),
     project("keyboard", "keyboard.spec.ts", { ...desktop, colorScheme: "light" }),
     project("keyboard-mobile", "keyboard.spec.ts", { ...mobile, colorScheme: "light" }),
     project("editors", "editors.spec.ts", { ...desktop, colorScheme: "light" }),

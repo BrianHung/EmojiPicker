@@ -150,7 +150,7 @@ export function isNativeSupported(support: NativeSupport | null, unified: string
   return !support || !(support.failedVersions.has(version) || (!support.countryFlags && isCountryFlag(unified)));
 }
 
-export function needsTwemoji(): boolean {
+export function needsImageFallback(): boolean {
   const probe = nativeProbe();
   return probe ? !nativeSupport(probe, new Map()).countryFlags : colorless.has(DEFAULT_EMOJI_FONT);
 }

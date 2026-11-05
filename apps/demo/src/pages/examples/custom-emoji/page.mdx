@@ -25,7 +25,7 @@ const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
 
 A pack is a `pack.json` served as a static file and fetched at runtime, so it stays out of the JS bundle. Serve it from your own origin and no CORS is involved. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
 
-`customEmojis` also takes the array itself, or a loader that fetches through your own API, so the browser never requests another origin. Images load as `<img>`, which needs no CORS; under a strict Content-Security-Policy, self-host them too, and set `twemojiBaseUrl` if you render Twemoji.
+`customEmojis` also takes the array itself, or a loader that fetches through your own API, so the browser never requests another origin. Images load as `<img>`, which needs no CORS; under a strict Content-Security-Policy, self-host them too, and point `imageUrl` at your copy if you render images.
 
 ```json title="pack.json"
 [

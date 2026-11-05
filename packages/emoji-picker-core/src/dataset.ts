@@ -13,6 +13,20 @@ export type Dataset = {
   toneExceptions: Record<string, string[]>;
 };
 
+type EmojiDataInputEntry = ({ emoji: string; unified?: never } | { unified: string; emoji?: never }) & {
+  label: string;
+  tags?: readonly string[];
+  shortcodes?: readonly string[];
+  group: Group;
+  version?: number;
+};
+
+export type EmojiDataInput = {
+  locale: string;
+  groups: readonly { id: Group; label: string }[];
+  emojis: readonly EmojiDataInputEntry[];
+};
+
 export const SKIN_TONES = ["1f3fb", "1f3fc", "1f3fd", "1f3fe", "1f3ff"] as const;
 
 export type SkinToneValue = 0 | 1 | 2 | 3 | 4 | 5;
@@ -58,6 +72,18 @@ export const isUnified = (value: string) => UNIFIED.test(value);
 export const unifiedToNative = (unified: string) => (isUnified(unified) ? String.fromCodePoint(...unified.split("-").map((hex) => parseInt(hex, 16))) : "");
 
 export const nativeToUnified = (text: string) => [...text].map((c) => c.codePointAt(0)!.toString(16)).join("-");
+
+export function toDataset(data: Dataset | EmojiDataInput): Dataset {
+  if ("format" in data) return data;
+  return {
+    format: 1,
+    locale: data.locale,
+    emojibase: "",
+    groups: GROUPS.map((id) => data.groups.find((g) => g.id === id)?.label ?? id),
+    emojis: data.emojis.map((e) => [e.unified?.toLowerCase() ?? nativeToUnified(e.emoji!), e.label, e.tags ?? [], e.shortcodes ?? [], GROUPS.indexOf(e.group), e.version ?? 0, 0] as DatasetEmoji),
+    toneExceptions: {},
+  };
+}
 
 export function expandDataset(dataset: Dataset): EmojiRecord[] {
   return dataset.emojis.map(([unified, name, tags, shortcodes, group, version, hasTones], order) => ({

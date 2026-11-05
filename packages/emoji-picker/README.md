@@ -7,8 +7,8 @@ Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplet
 The library builds on [React Aria](https://react-spectrum.adobe.com/react-aria/) (`Autocomplete`, `SearchField`, `Toolbar`, and `useListBox` over a virtualized grid) and adds:
 
 - Tapbacks: the user's most-used emoji, with a button that expands into the full picker.
-- Slack shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete.
-- Native emoji on Apple and Android, and [Twemoji](https://github.com/jdecked/twemoji) where the system can't draw flags.
+- iamcal shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete; CLDR and other emojibase sets per locale.
+- Native emoji where the system draws them, and images ([Twemoji](https://github.com/jdecked/twemoji) by default) where it doesn't.
 - Custom emoji, artwork overrides, collapsible sections, and a horizontal list.
 - Replaceable search, from a built-in word index to embeddings.
 
@@ -43,6 +43,12 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url"; // Vite; other b
 ```
 
 Pass the dataset as a URL so it loads as a separate, cacheable asset. `data` also takes a dataset object or a loader, `({ signal }) => Promise<Dataset>`.
+
+Without `data`, the provider loads `data/en.json` from jsDelivr, pinned to the installed core version.
+
+`EmojiPicker.Root` creates a provider with these defaults when none is above it.
+
+Each part is also exported on its own (`EmojiPickerRoot`, `EmojiPickerSearch`, `EmojiPickerViewport`, `EmojiPickerList`, …) for bundlers such as esbuild that keep every member of a namespace import.
 
 To copy a styled shadcn/ui version into your project:
 
@@ -233,7 +239,7 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `anchor()`: the typed `:query`'s rect,
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
-Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders Slack, Discord, Notion and Linear menus on a textarea, Tiptap and Lexical.
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders menus on a textarea, Tiptap and Lexical.
 
 `@brianhung/emoji-picker-core/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
 
@@ -293,6 +299,8 @@ The picker state owns its highlight unless you control it: pass `highlighted` an
 
 `<Emoji emoji={…} />` draws one emoji the way the pickers do. It accepts a native emoji, a shortcode with or without colons, a unified code, a custom emoji id, an `EmojiSelection`, an `EmojiRecord`, or a `CustomEmoji`. Unknown input renders as text with `data-emoji-missing`. `useEmoji(input)` returns the resolved emoji, and `resolveEmoji(store, input)` does the same without React. The `unified` prop is a deprecated alias of `emoji`.
 
+The provider's `renderer` is `"native"`, `"image"` or `"auto"` (the default: images only where `needsImageFallback()` finds the system can't draw emoji, such as flags). Images come from `imageUrl(unified)`, Twemoji's `twemojiUrl` by default, capped at emoji version `imageVersion`. For a vendor set from [emoji-datasource](https://github.com/iamcal/emoji-data) (check the set's license): `` imageUrl={(u) => `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/${u}.png`} ``; swap `apple` for `google` or `facebook`.
+
 ### Artwork overrides
 
 `EmojiOverrides` draws particular emoji with your own art everywhere inside it: `<Emoji>`, picker cells, search results, and tapbacks. The emoji keep their identity for selection, search, and frequents. Keys are unified codes; a base code covers every skin tone.
@@ -323,10 +331,9 @@ Only visible rows render, so only their images load.
 A search is a function, `(query, context) => hits | Promise<hits>`. Set it with the provider's `searchEngine`; the picker, `useEmojiSearch`, and `useEmojiSearchState` call it.
 
 ```tsx
-import Fuse from "fuse.js";
-import { fallback, fuse, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker-core/search";
+import { fallback, lexical, preferFrequent, progressive, remote, rerank } from "@brianhung/emoji-picker-core/search";
 
-const typoTolerant = fallback(lexical(), fuse(Fuse));
+const typoTolerant = fallback(lexical(), fuzzy); // fuzzy: any EmojiSearch, such as the Fuse.js recipe in the core README
 const personal = rerank(lexical(), preferFrequent());
 const semantic = progressive(lexical(), remote((query, { signal }) => fetchEmoji(query, signal)));
 
@@ -345,7 +352,6 @@ Recipes for MiniSearch, Fuse.js and FlexSearch are in the [core README](https://
 | `rerank(search, ...rerankers)`, `preferFrequent({ weight })` | Reorders results |
 | `progressive(fast, slow)`, `withInterim(promise, hits)` | Shows fast results until slow ones arrive |
 | `remote(fetcher)` | Any async source of unified codes or hits |
-| `fuse(Fuse, options)` | Adapts Fuse.js, passed in so it stays optional |
 
 ## Keyboard
 
@@ -414,11 +420,15 @@ Set sizes with CSS variables on `Root` or an ancestor:
 | `--emoji-font-family` | System emoji fonts | Font for native emoji |
 | `--emoji-skin-tone-size` | `15px` | Default skin-tone swatch |
 
+The List sets `--emoji-picker-content-width` on Root to the grid's measured width, so a footer can cap at it with `max-width: var(--emoji-picker-content-width)`.
+
 `tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The library injects no CSS: the layout a part needs (a cell's size from `--emoji-cell-size`, the viewport's scroll axis, sticky titles) is inline and driven by the size variables, and everything visual (the Root's column, the emoji font via `--emoji-font-family`, forced-colors outlines, reduced motion) is your classes, as in the registry item.
 
 ## Data
 
-`data/en.json` is built from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
+`data/en.json` is built from emojibase and its iamcal shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
+
+A dataset object (`import en from ".../en.json"`) without `customEmojis` is ready on the first render, so server-rendered markup has the grid. Changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the provider in place, keeping frequents and skin tone; functions and objects compare by reference, so define them outside render or memoize them.
 
 ## Localization
 
@@ -440,12 +450,20 @@ npm install --save-dev emojibase-data
 npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
-The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps Slack's English shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
+The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps the English iamcal shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
 
 Pass the dataset as `data`:
 
 ```tsx
 <EmojiProvider data="/emoji/ja.json">…</EmojiProvider>
+```
+
+Or skip the build: `localeData(locale, { shortcodes = "iamcal", baseUrl })` returns the jsDelivr URL of that file in `@brianhung/emoji-picker-data`, at the version core was built with, or `${baseUrl}/${locale}/${shortcodes}.json` for your own copy:
+
+```tsx
+import { localeData } from "@brianhung/emoji-picker-core";
+
+<EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">…</EmojiProvider>
 ```
 
 Search follows the dataset's `locale`: it normalizes text (NFKC, so full-width `ｆｉｒｅ` finds 🔥), lowercases by the locale's rules (Turkish `İ` becomes `i`), splits Japanese, Chinese, and Thai into words with `Intl.Segmenter`, and orders alphabetical shortcode completion with `Intl.Collator`. Set `locale` on the provider to override the dataset's tag.

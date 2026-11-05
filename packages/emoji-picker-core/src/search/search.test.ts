@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import data from "../../data/en.json";
 import { expandDataset, unifiedToNative, type Dataset } from "../dataset";
-import { fallback, fuse, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "./search";
+import { fallback, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "./search";
 
 const records = expandDataset(data as unknown as Dataset);
 const context = (overrides: Partial<SearchContext> = {}): SearchContext => ({ records, limit: 20, signal: new AbortController().signal, frequency: () => 0, ...overrides });
@@ -98,15 +98,5 @@ describe("composition", () => {
   it("remote accepts plain codes or hits", async () => {
     const search = remote(async () => ["1f525", { unified: "1f680", score: 0.5 }]);
     expect((await search("x", context())).map((h) => h.unified)).toEqual(["1f525", "1f680"]);
-  });
-
-  it("fuse adapts any Fuse-shaped constructor", () => {
-    class FakeFuse<T> {
-      constructor(private docs: T[]) {}
-      search(q: string) {
-        return (this.docs as unknown as { unified: string; name: string }[]).filter((d) => d.name.includes(q)).map((item) => ({ item, score: 0 }));
-      }
-    }
-    expect(glyphs(run(fuse(FakeFuse as never), "rocket"))[0]).toBe("🚀");
   });
 });

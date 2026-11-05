@@ -1,4 +1,22 @@
 export * as EmojiPicker from "./react/parts";
+export {
+  CategoryNav as EmojiPickerCategoryNav,
+  Empty as EmojiPickerEmpty,
+  List as EmojiPickerList,
+  Loading as EmojiPickerLoading,
+  LoadError as EmojiPickerLoadError,
+  Panel as EmojiPickerPanel,
+  Preview as EmojiPickerPreview,
+  Reactions as EmojiPickerReactions,
+  Root as EmojiPickerRoot,
+  Search as EmojiPickerSearch,
+  SkinTone as EmojiPickerSkinTone,
+  Viewport as EmojiPickerViewport,
+  useActiveEmoji,
+  useCategoryNavigation,
+  useCollapsedCategories,
+  useSearchState,
+} from "./react/parts";
 
 export { EmojiProvider, useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps, EmojiSearchState } from "./react/provider";
@@ -49,6 +67,7 @@ export type {
   CustomEmoji,
   CustomEmojiSource,
   Dataset,
+  EmojiDataInput,
   EmojiDataSource,
   EmojiItem,
   EmojiRecord,

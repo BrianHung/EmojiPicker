@@ -36,6 +36,12 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - `EmojiProvider locale` sets React Aria's locale (`I18nProvider`: direction, number formatting) and formats the default result count; every string in `EmojiLabels` is used (`labels` takes any of them).
 - Data attributes on cells and tabs, as React Aria names them: `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, `data-selected`, `data-index`.
 
+- The provider follows its props: changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the store in place (frequents and skin tone stay; the old data shows until new data loads), so a `key` remount is no longer needed. A dataset object is ready on the first render, so server-rendered markup has the grid.
+- Zero-config: `data` defaults to core's `data/en.json` on jsDelivr, pinned to core's version, and `EmojiPicker.Root` creates a provider when none is above it.
+- `data` takes a hand-written `EmojiDataInput` (`{ locale, groups: [{ id, label }], emojis: [{ emoji | unified, label, tags?, shortcodes?, group, version? }] }`), normalized to the compact format on load. Core's `localeData(locale, { shortcodes, baseUrl })` returns the URL of a prebuilt dataset in `@brianhung/emoji-picker-data`.
+- Each part is exported on its own (`EmojiPickerRoot`, `EmojiPickerSearch`, `EmojiPickerList`, …) beside `EmojiPicker.*`, for bundlers that keep whole namespace imports.
+- The List sets `--emoji-picker-content-width` on Root to its measured width.
+
 ### Changed
 
 - Every part takes `render` (an element whose props and ref merge with the part's, or `(props, state) => element`, as Base UI's; built on React Aria's `composeRenderProps` and `mergeProps`), and `className` and `style` as values or functions of the part's state. State is also on data attributes, as before. `EmojiPopover.Trigger asChild` and `SearchInput as` are removed: use `render`.
@@ -53,8 +59,11 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - `useTextFieldEmojiTypeahead` opens on a field that starts with a `:query` (caret taken at the end while unfocused), until focus first lands elsewhere.
 - The package ships one module per source file: a bundler loads only what you import (`Emoji` alone is ~8 KB gzipped over React; the popover and tapback load only when used).
 
+- One image path: `Renderer` is `"native" | "image"`, and the provider's `renderer` also takes `"auto"` (images only where the system can't draw emoji). Image emoji come from the provider's `imageUrl(unified)`, `twemojiUrl` by default, capped at emoji version `imageVersion` (17 by default). Replaced: the `"twemoji"` renderer (`"image"`), `twemojiBaseUrl` (`imageUrl={(u) => twemojiUrl(u, base)}`), `twemojiVersion` (`imageVersion`), and core's `needsTwemoji` (`needsImageFallback`).
+
 ### Removed
 
+- `fuse()` from `@brianhung/emoji-picker-core/search`: core holds no adapters for libraries it doesn't depend on. The core README has a self-contained Fuse.js recipe, beside MiniSearch and FlexSearch.
 - Root `searchPlaceholder` and `autoFocusSearch` (`Search.Input` takes `placeholder` and `autoFocus`), `artwork` (wrap it in `EmojiOverrides`), `colorScheme`, `cssLayer` and `nonce`; `useSearchActions` (control `query`); `useShortcodeAutocomplete` and its types (`useTextFieldEmojiTypeahead`).
 
 - Output no longer contains emoji-picker-react markup (`epr-*` classes, `data-epr-*` attributes, `--epr-*` variables). Style `data-slot` and `data-*` attributes; CSS that targeted `[data-epr-part=category-content]` maps to `fitColumns` and `--emoji-list-padding-end`.

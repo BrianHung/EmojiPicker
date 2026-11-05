@@ -18,7 +18,8 @@ export type EmojiProps = BaseProps & {
 export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   const { store } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
-  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status]);
+  const data = useStoreSnapshot((s) => s.getSnapshot().data);
+  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status, data]);
   React.useEffect(() => {
     if (!resolved && status === "idle") store.load().catch(() => {});
   }, [resolved, status, store]);
@@ -53,7 +54,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
       </span>
     );
   }
-  const src = resolved.imageUrl ?? (renderer === "twemoji" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
+  const src = resolved.imageUrl ?? (renderer === "image" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
   if (src) {
     const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
     return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;

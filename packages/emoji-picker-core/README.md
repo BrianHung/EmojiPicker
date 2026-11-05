@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-core
 
-The framework-neutral half of [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), with no dependencies: emoji data, search, frequently used emoji, skin tones, the picker's and the typeahead's state, Slack shortcodes, and a ProseMirror plugin. It owns every public type and extension contract (`EmojiSearch`, `EmojiStorage`, `CustomEmojiSource`, `EmojiTrigger`, the dataset format, selections and records), so search engines, storage adapters and editor bindings can depend on it alone.
+The framework-neutral half of [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), with no dependencies: emoji data, search, frequently used emoji, skin tones, the picker's and the typeahead's state, iamcal and CLDR shortcodes, and a ProseMirror plugin. It owns every public type and extension contract (`EmojiSearch`, `EmojiStorage`, `CustomEmojiSource`, `EmojiTrigger`, the dataset format, selections and records), so search engines, storage adapters and editor bindings can depend on it alone.
 
 ```bash
 npm install @brianhung/emoji-picker-core
@@ -9,7 +9,7 @@ npm install @brianhung/emoji-picker-core
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker-core` | `createEmojiStore`, `createPickerState`, `createEmojiSuggestions`, `resolveEmoji`, frequency storage, Twemoji helpers, tokenizers, labels, the grid model, and every public type |
-| `@brianhung/emoji-picker-core/search` | Building blocks for `searchEngine`: `lexical`, `fuse`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent` |
+| `@brianhung/emoji-picker-core/search` | Building blocks for `searchEngine`: `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
 | `@brianhung/emoji-picker-core/prosemirror` | `emojiTypeahead(store, options)`: the `:shortcode` typeahead as a ProseMirror plugin (`prosemirror-state` and `prosemirror-view` are optional peer dependencies) |
 | `@brianhung/emoji-picker-core/data/en.json` | The English dataset |
 
@@ -28,6 +28,17 @@ Build a dataset for another locale with the `build-data` command (`npm install -
 
 ```bash
 npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
+```
+
+`data` also takes a hand-written `EmojiDataInput`, converted to the compact format on load:
+
+```ts
+const data: EmojiDataInput = {
+  locale: "en",
+  groups: [{ id: "smileys_people", label: "Smileys & People" }],
+  emojis: [{ emoji: "😀", label: "grinning face", tags: ["smile"], shortcodes: ["grinning"], group: "smileys_people" }],
+};
+createEmojiStore({ data });
 ```
 
 See the [`@brianhung/emoji-picker` README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker#readme) for the full API.
@@ -56,13 +67,22 @@ export const minisearch: EmojiSearch = (query, { records, limit }) => {
 };
 ```
 
-Fuse.js (the `fuse` adapter in `/search` does this, with weighted keys):
+Fuse.js:
 
 ```ts
 import Fuse from "fuse.js";
-import { fuse } from "@brianhung/emoji-picker-core/search";
+import type { EmojiRecord, EmojiSearch } from "@brianhung/emoji-picker-core";
 
-export const fuzzy = fuse(Fuse, { threshold: 0.3 });
+const indexes = new WeakMap<readonly EmojiRecord[], Fuse<EmojiRecord>>();
+
+export const fuzzy: EmojiSearch = (query, { records, limit }) => {
+  let index = indexes.get(records);
+  if (!index) {
+    index = new Fuse([...records], { keys: [{ name: "name", weight: 3 }, "shortcodes", { name: "tags", weight: 0.5 }], threshold: 0.4, ignoreLocation: true, includeScore: true });
+    indexes.set(records, index);
+  }
+  return index.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
+};
 ```
 
 FlexSearch:

@@ -150,3 +150,32 @@ describe("store.query", () => {
     expect((out as { emoji: string }[])[0]!.emoji).toBe("🔥");
   });
 });
+
+describe("store options", () => {
+  it("is ready at once for an in-memory dataset", () => {
+    const store = createEmojiStore({ data: dataset, frequents: frequents() });
+    expect(store.status()).toBe("ready");
+    expect(store.get("1f44d")?.emoji).toBe("👍");
+  });
+
+  it("swaps data in place, keeping skin tone and frequents, and the old data while new data loads", async () => {
+    const store = createEmojiStore({ data: tiny("en", [["1f600", "grinning"]]), frequents: frequents(), skinToneStorage: memoryStorage() });
+    store.setSkinTone(2);
+    store.select("1f600");
+    store.setOptions({ data: tiny("fr", [["1f600", "souriant"]]) });
+    expect([store.get("1f600")?.name, store.locale(), store.skinTone(), store.frequents.top(1)]).toEqual(["souriant", "fr", 2, ["1f600"]]);
+    store.setOptions({ data: async () => tiny("de", [["1f600", "grinsend"]]) });
+    expect(store.get("1f600")?.name).toBe("souriant");
+    await store.load();
+    expect(store.get("1f600")?.name).toBe("grinsend");
+  });
+
+  it("re-filters without reloading, and ignores an equivalent filter", () => {
+    const store = createEmojiStore({ data: dataset, frequents: frequents() });
+    const before = store.getSnapshot().data;
+    store.setOptions({ data: dataset, filter: () => true });
+    expect(store.getSnapshot().data).toBe(before);
+    store.setOptions({ data: dataset, filter: (r) => r.group !== "flags" });
+    expect(store.records().some((r) => r.group === "flags")).toBe(false);
+  });
+});

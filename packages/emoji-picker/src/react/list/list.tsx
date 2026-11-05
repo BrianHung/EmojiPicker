@@ -213,9 +213,15 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const onState = React.useCallback((state: VirtualizerState<CollectionNode<unknown>, React.ReactNode>) => {
     virtualizer.current = state;
   }, []);
+  const contentWidth = React.useRef(0);
   const onRendered = React.useCallback(() => {
     measure();
     latest.current.applyHighlight();
+    const width = virtualizer.current?.virtualizer.size.width ?? 0;
+    if (width !== contentWidth.current) {
+      contentWidth.current = width;
+      picker.root.current?.style.setProperty("--emoji-picker-content-width", `${width}px`);
+    }
     const shown = virtualizer.current?.virtualizer.getVisibleLayoutInfos();
     if (shown && !horizontal) request([...shown.keys()].flatMap((key) => latest.current.collection.emoji(key)?.unified ?? []));
     const rect = virtualizer.current?.virtualizer.visibleRect;
@@ -233,7 +239,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
       picker.state.setActiveSection(key == null ? null : String(key));
     }
     latest.current.syncStop();
-  }, [measure, layout, picker.state, searching, horizontal, request]);
+  }, [measure, layout, picker.state, picker.root, searching, horizontal, request]);
 
   const empty = useEmptyState();
   const { collection, persisted } = grid;

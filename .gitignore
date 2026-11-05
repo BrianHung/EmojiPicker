@@ -8,3 +8,5 @@ apps/demo/capture/frames
 apps/demo/capture/baseline
 apps/demo/capture/ref
 .claude/worktrees/
+
+packages/emoji-picker-data/data/

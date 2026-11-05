@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { needsTwemoji } from "./native";
-import { twemojiUrl } from "./platform";
+import { needsImageFallback } from "./native";
+import { localeData, twemojiUrl } from "./platform";
 
 describe("platform", () => {
   it("names Twemoji files like Twemoji does", () => {
@@ -8,7 +8,12 @@ describe("platform", () => {
     expect(twemojiUrl("1f3f3-fe0f-200d-1f308", "/t/")).toBe("/t/1f3f3-fe0f-200d-1f308.svg");
   });
 
+  it("points localeData at the data package, or at your own copy", () => {
+    expect(localeData("ja")).toMatch(/^https:\/\/cdn\.jsdelivr\.net\/npm\/@brianhung\/emoji-picker-data@[^/]+\/data\/ja\/iamcal\.json$/);
+    expect(localeData("ja", { shortcodes: "cldr", baseUrl: "/emoji" })).toBe("/emoji/ja/cldr.json");
+  });
+
   it("is false on the server", () => {
-    expect(needsTwemoji()).toBe(false);
+    expect(needsImageFallback()).toBe(false);
   });
 });

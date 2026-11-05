@@ -2,7 +2,7 @@
 
 ## Emoji data
 
-`data/en.json` is built from [emojibase-data](https://github.com/milesj/emojibase), MIT License, Copyright (c) 2017-2019 Miles Johnson. Its Slack shortcodes come from emojibase's copy of [iamcal/emoji-data](https://github.com/iamcal/emoji-data), MIT License, Copyright (c) 2013 Cal Henderson.
+`data/en.json` is built from [emojibase-data](https://github.com/milesj/emojibase), MIT License, Copyright (c) 2017-2019 Miles Johnson. Its iamcal shortcodes come from emojibase's copy of [iamcal/emoji-data](https://github.com/iamcal/emoji-data), MIT License, Copyright (c) 2013 Cal Henderson.
 
 ## emoji-picker-react
 
@@ -10,7 +10,7 @@ The native-emoji support probe is adapted from [emoji-picker-react](https://gith
 
 ## Twemoji
 
-With the Twemoji renderer, emoji images load from [jdecked/twemoji](https://github.com/jdecked/twemoji). The graphics are Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Apps that show them should include this attribution. This package doesn't redistribute the graphics.
+With the default `imageUrl`, emoji images load from [jdecked/twemoji](https://github.com/jdecked/twemoji). The graphics are Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Apps that show them should include this attribution. This package doesn't redistribute the graphics.
 
 ## MIT License
 

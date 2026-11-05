@@ -1,6 +1,7 @@
 import * as React from "react";
 import en from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiOverrides, EmojiProvider, type EmojiSelection, type Renderer } from "@brianhung/emoji-picker";
+import { twemojiUrl } from "@brianhung/emoji-picker-core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
 import { Label } from "@/components/ui/label";
@@ -23,13 +24,13 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   return (
     <>
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-        <Chips label="Renderer" value={renderer} onChange={setRenderer} options={[["auto", "Auto"], ["native", "Native"], ["twemoji", "Twemoji"]]} />
+        <Chips label="Renderer" value={renderer} onChange={setRenderer} options={[["auto", "Auto"], ["native", "Native"], ["image", "Twemoji"]]} />
         <Label className="flex items-center gap-2 text-sm font-normal">
           <Checkbox checked={custom} onCheckedChange={setCustom} />
           Custom ❤️ and 👍
         </Label>
       </div>
-      <EmojiProvider data={en} renderer={renderer}>
+      <EmojiProvider data={en} renderer={renderer} imageUrl={twemojiUrl}>
         {custom ? <EmojiOverrides artwork={artwork}>{pickers}</EmojiOverrides> : pickers}
       </EmojiProvider>
     </>

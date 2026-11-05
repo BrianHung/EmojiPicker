@@ -170,7 +170,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
 export const discord: Style = {
   id: "discord",
   label: "Discord",
-  renderer: "twemoji",
+  renderer: "image",
   tokens,
   Picker: DiscordPicker,
   size: { width: 498, height: 486 },

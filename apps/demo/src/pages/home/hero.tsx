@@ -9,7 +9,7 @@ import { AppleScene } from "@/styles/apple/scene";
 
 function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: Renderer | "auto" }) {
   return (
-    <EmojiProvider key={renderer} data={enUrl} renderer={appStyle.renderer ?? renderer}>
+    <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? renderer}>
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>
         <appStyle.Picker />
       </FitBox>

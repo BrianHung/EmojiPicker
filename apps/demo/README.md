@@ -81,12 +81,12 @@ npm run test:e2e    # Playwright, one spec per concern: keyboard, editors, layou
 npm run test:keyboard   # the keyboard contract on one surface per kind of picker, desktop and phone
 ```
 
-`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local: capture them with `npm run test:baseline`.
+`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local (light and dark on desktop, light on a phone): capture them with `npm run test:baseline`.
 
 ### Accessibility
 
 ```sh
-npm run test:a11y            # axe-core (WCAG 2.2 A/AA + best practice) on every page and picker surface, light and dark
+npm run test:a11y            # axe-core (WCAG 2.2 A/AA + best practice) on every page and picker surface, light and dark, desktop
 npm run test:sr:voiceover    # VoiceOver on macOS (Guidepup)
 npm run test:sr:nvda         # NVDA on Windows (Guidepup)
 ```
