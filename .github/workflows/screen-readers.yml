@@ -1,5 +1,4 @@
-# Accessibility checks for the demo site (apps/demo):
-#   a11y       axe-core on every page and picker surface (ubuntu)       npm run test:a11y
+# Screen reader checks for the demo site (apps/demo); axe runs in ci.yml:
 #   voiceover  Guidepup + VoiceOver (macOS)                             npm run test:sr:voiceover
 #   nvda       Guidepup + NVDA (Windows)                                npm run test:sr:nvda
 # Each Playwright run starts the demo's dev server itself (apps/demo/playwright.config.ts → webServer).
@@ -21,20 +20,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  a11y:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:a11y -w demo
-      - if: failure()
-        uses: actions/upload-artifact@v4
-        with: { name: a11y-results, path: apps/demo/e2e/a11y/.results, if-no-files-found: ignore }
-
   voiceover:
     runs-on: macos-latest
     timeout-minutes: 45
