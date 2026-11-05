@@ -35,7 +35,7 @@ export type GridGeometry = {
 };
 
 type Latest = { collection: EmojiCollection; virtual: boolean; geometry: GridGeometry; searching: boolean; rtl: boolean; listId: string };
-type CellElement = (key: Key | null | undefined) => HTMLElement | null;
+export type CellElement = (key: Key | null | undefined) => HTMLElement | null;
 
 const MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down", Home: "first", End: "last" };
 const NONE: HighlightSource = {};
@@ -103,6 +103,8 @@ function useHighlight(core: PickerState<React.ReactNode>, latest: React.RefObjec
   return { persisted, highlighted, lastKey, setHighlight, applyHighlight, retain };
 }
 
+export type Highlight = ReturnType<typeof useHighlight>;
+
 // One cell is the list's tab stop; a popover that asks for it also gets focus there on open
 function useFocusStop(listRef: React.RefObject<HTMLElement | null>, marks: MarksStore, latest: React.RefObject<Latest>, cellElement: CellElement) {
   const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
@@ -160,8 +162,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const collection = React.useMemo(() => new EmojiCollection(sections), [sections]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
   const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? NO_KEYS, disallowEmptySelection: value !== undefined, layoutDelegate: geometry.layoutDelegate });
-  const stateRef = React.useRef(state);
-  stateRef.current = state;
   const autocomplete = React.useContext(AutocompleteStateContext);
   const [marks] = React.useState(createMarks);
   const [elements] = React.useState(() => new Map<Key, HTMLElement>());
@@ -173,7 +173,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const latest = React.useRef<Latest>({ collection, virtual, geometry, searching, rtl, listId: picker.listId });
   latest.current = { ...latest.current, collection, virtual, geometry, searching, rtl };
 
-  const { persisted, highlighted, lastKey, setHighlight, applyHighlight, retain } = useHighlight(core, latest, picker.ownsFocus);
+  const highlight = useHighlight(core, latest, picker.ownsFocus);
+  const { persisted, highlighted, lastKey, setHighlight, applyHighlight, retain } = highlight;
   const { lastFocused, syncStop } = useFocusStop(listRef, marks, latest, cellElement);
   const variations = useVariations(core, cellElement, setHighlight);
 
@@ -274,7 +275,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   // Set the focused key before React Aria sees DOM focus, or it treats focus as entering with no key and jumps to the first cell
   const onFocusCapture = (e: React.FocusEvent) => {
     const id = cellOf(e.target)?.getAttribute("data-key");
-    const manager = stateRef.current.selectionManager;
+    const manager = state.selectionManager;
     if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
     manager.setFocusedKey(id);
   };
@@ -295,19 +296,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     return handle.move(to, { reason: "keyboard", event: e.nativeEvent }, cell);
   });
 
-  const cellHandlers = usePointerHighlight({
-    core,
-    marks,
-    listRef,
-    virtual,
-    keyed,
-    lastKey,
-    setHighlight,
-    ownsFocus: picker.ownsFocus,
-    openVariations: variations.open,
-    focusCell: (key) => cellElement(key)?.focus({ preventScroll: true }),
-    pick,
-  });
+  const cellHandlers = usePointerHighlight({ picker, highlight, marks, listRef, virtual, keyed, openVariations: variations.open, cellElement, pick });
   const { isFocusVisible: focusVisible } = useFocusVisible();
 
   const selectable = React.useContext(SelectableCollectionContext) as { ref?: React.Ref<HTMLElement>; filter?: unknown } | null;

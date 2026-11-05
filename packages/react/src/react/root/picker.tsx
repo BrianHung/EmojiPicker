@@ -209,7 +209,6 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       list,
       root: rootRef,
       searchInput,
-      registerInput: state.registerInput,
       listId,
     }),
     [store, state, labels, popover, columns, collapse, searchResults, value, pick, actions, target, listId],

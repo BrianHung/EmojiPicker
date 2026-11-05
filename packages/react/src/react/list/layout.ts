@@ -25,8 +25,8 @@ type Add = (info: LayoutInfo | null | undefined) => void;
 
 const same = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => a[k] === b[k]);
 
-const X = { horizontal: true, scroll: "scrollLeft", client: "clientWidth", by: "left" } as const;
-const Y = { horizontal: false, scroll: "scrollTop", client: "clientHeight", by: "top" } as const;
+const X = { horizontal: true, scroll: "scrollLeft", client: "clientWidth", by: "left", start: "x", end: "maxX", size: "width" } as const;
+const Y = { horizontal: false, scroll: "scrollTop", client: "clientHeight", by: "top", start: "y", end: "maxY", size: "height" } as const;
 
 export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOptions> {
   abstract readonly axis: typeof X | typeof Y;
@@ -41,10 +41,6 @@ export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLay
   protected abstract build(sections: EmojiSection[], options: EmojiGridLayoutOptions): void;
   protected abstract place(index: number, row: number, column: number): { x: number; y: number };
   protected abstract addCells(box: SectionBox, rect: Rect, add: Add): void;
-  abstract start(rect: Rect): number;
-  abstract end(rect: Rect): number;
-  abstract extent(size: { width: number; height: number }): number;
-  abstract shift(rect: Rect, by: number): Rect;
   abstract firstVisible(rect: Rect): Key | null;
   abstract revealBy(key: Key, cell: Rect, rect: Rect): number | null;
   abstract jumpTarget(section: Rect, viewport: number): number;
@@ -125,6 +121,14 @@ export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLay
     return out;
   }
 
+  start(rect: Rect) {
+    return rect[this.axis.start];
+  }
+
+  end(rect: Rect) {
+    return rect[this.axis.end];
+  }
+
   isVisible(key: Key, rect: Rect) {
     const r = this.getLayoutInfo(key)?.rect;
     return Boolean(r && this.end(r) > this.start(rect) && this.start(r) < this.end(rect));
@@ -174,23 +178,10 @@ export class VerticalLayout extends EmojiGridLayout {
     }
   }
 
-  start(rect: Rect) {
-    return rect.y;
-  }
-  end(rect: Rect) {
-    return rect.maxY;
-  }
-  extent(size: { height: number }) {
-    return size.height;
-  }
-  shift(rect: Rect, by: number) {
-    return new Rect(rect.x, rect.y + by, rect.width, rect.height);
-  }
-
   firstVisible(rect: Rect) {
     const { headerHeight } = this.metrics;
     for (const row of this.grid.rows) if (row.type === "emojis" && row.offset + row.size > rect.y + (row.section.header ? headerHeight : 0) + 1 && row.offset < rect.maxY) return row.items[0]!.id;
-    return this.grid.at(0)?.id ?? null;
+    return null;
   }
 
   revealBy(key: Key, cell: Rect, rect: Rect) {
@@ -234,25 +225,12 @@ export class HorizontalLayout extends EmojiGridLayout {
     for (let i = first * strip.rows; i < Math.min(s.count, (last + 1) * strip.rows); i++) add(this.getLayoutInfo(this.grid.at(s.start + i)!.id));
   }
 
-  start(rect: Rect) {
-    return rect.x;
-  }
-  end(rect: Rect) {
-    return rect.maxX;
-  }
-  extent(size: { width: number }) {
-    return size.width;
-  }
-  shift(rect: Rect, by: number) {
-    return new Rect(rect.x + by, rect.y, rect.width, rect.height);
-  }
-
   firstVisible(rect: Rect) {
     for (let i = 0; i < this.grid.count; i++) {
       const r = this.getLayoutInfo(this.grid.at(i)!.id)!.rect;
       if (r.maxX > rect.x + 1 && r.x < rect.maxX) return this.grid.at(i)!.id;
     }
-    return this.grid.at(0)?.id ?? null;
+    return null;
   }
 
   revealBy(_: Key, cell: Rect, rect: Rect) {

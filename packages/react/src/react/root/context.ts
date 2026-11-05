@@ -49,7 +49,6 @@ export type PickerContextValue = {
   list: React.MutableRefObject<ListHandle | null>;
   root: React.RefObject<HTMLElement | null>;
   searchInput: React.RefObject<HTMLInputElement | null>;
-  registerInput(): () => void;
   listId: string;
 };
 

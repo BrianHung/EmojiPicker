@@ -138,7 +138,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
       },
       firstVisible() {
         const rect = visibleRect();
-        return rect ? layout.firstVisible(rect) : navigation.getFirstKey();
+        return (rect && layout.firstVisible(rect)) ?? navigation.getFirstKey();
       },
       reveal(key, from) {
         const el = scroller();
@@ -149,7 +149,9 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         const a = from != null ? layout.getLayoutInfo(from)?.rect : null;
         const before = el[axis.scroll];
         if (a) el[axis.scroll] += (layout.start(info.rect) - layout.start(a)) * s;
-        const by = layout.revealBy(key, info.rect, layout.shift(seen, (el[axis.scroll] - before) * s));
+        const shown = seen.copy();
+        shown[axis.start] += (el[axis.scroll] - before) * s;
+        const by = layout.revealBy(key, info.rect, shown);
         if (by != null) el[axis.scroll] += s * by;
       },
       viewport() {
@@ -203,8 +205,9 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     const rect = virtualizer.current?.virtualizer.visibleRect;
     if (!rect) return;
     if (jumping.current) {
-      const max = layout.extent(layout.getContentSize()) - layout.extent(rect);
-      if (Math.abs(layout.start(rect) - Math.max(0, Math.min(layout.jumpTarget(jumping.current, layout.extent(rect)), max))) > 1) return;
+      const { size } = layout.axis;
+      const max = layout.getContentSize()[size] - rect[size];
+      if (Math.abs(layout.start(rect) - Math.max(0, Math.min(layout.jumpTarget(jumping.current, rect[size]), max))) > 1) return;
       jumping.current = null;
     }
     if (!searching) {

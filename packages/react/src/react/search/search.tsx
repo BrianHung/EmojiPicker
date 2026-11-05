@@ -39,7 +39,7 @@ const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", ali
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels } = picker;
-  React.useLayoutEffect(picker.registerInput, [picker.registerInput]);
+  React.useLayoutEffect(picker.state.registerInput, [picker.state]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
   const clear = React.useMemo(() => <SearchClear />, []);

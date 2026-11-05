@@ -47,15 +47,25 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
   const { selection: m } = cells;
   const { record, unified } = item;
   const position = cells.position(item.id);
-  const isFocused = Boolean(flags & FOCUSED);
-  const isSelected = m.selectionMode !== "none" && m.isSelected(item.id);
-  const highlighted = cells.virtual && isFocused;
-  const isActive = Boolean(flags & ACTIVE) || highlighted;
+  const focused = Boolean(flags & FOCUSED);
+  const highlighted = cells.virtual && focused;
+  const state: CellState = {
+    emoji: item,
+    row: position?.[3] ?? 0,
+    column: position?.[4] ?? 0,
+    highlighted,
+    active: Boolean(flags & ACTIVE) || highlighted,
+    hovered: Boolean(flags & HOVERED),
+    focused,
+    focusVisible: focused && cells.focusVisible,
+    pressed: Boolean(flags & PRESSED),
+    selected: m.selectionMode !== "none" && m.isSelected(item.id),
+  };
   const props = {
     id: `${cells.listId}-option-${item.id}`,
     role: "option",
     "aria-label": item.label,
-    "aria-selected": m.selectionMode === "none" ? undefined : isSelected,
+    "aria-selected": m.selectionMode === "none" ? undefined : state.selected,
     "aria-posinset": position?.[0],
     "aria-setsize": position?.[1],
     tabIndex: flags & STOP ? 0 : -1,
@@ -66,28 +76,16 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     "data-index": position?.[2],
     "data-row": position?.[3],
     "data-column": position?.[4],
-    "data-selected": isSelected || undefined,
-    "data-hovered": flags & HOVERED ? true : undefined,
-    "data-focused": isFocused || undefined,
-    "data-focus-visible": (isFocused && cells.focusVisible) || undefined,
-    "data-pressed": flags & PRESSED ? true : undefined,
+    "data-selected": state.selected || undefined,
+    "data-hovered": state.hovered || undefined,
+    "data-focused": focused || undefined,
+    "data-focus-visible": state.focusVisible || undefined,
+    "data-pressed": state.pressed || undefined,
     "data-highlighted": highlighted ? "" : undefined,
-    "data-active": isActive ? "" : undefined,
+    "data-active": state.active ? "" : undefined,
     "data-overridden": overridden ? "" : undefined,
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
-    children: <Glyph unified={unified} record={record} animate={isActive && Boolean(record.animated)} />,
-  };
-  const state: CellState = {
-    emoji: item,
-    row: position?.[3] ?? 0,
-    column: position?.[4] ?? 0,
-    highlighted,
-    active: isActive,
-    hovered: Boolean(flags & HOVERED),
-    focused: isFocused,
-    focusVisible: isFocused && cells.focusVisible,
-    pressed: Boolean(flags & PRESSED),
-    selected: isSelected,
+    children: <Glyph unified={unified} record={record} animate={state.active && Boolean(record.animated)} />,
   };
   return { props, state };
 }

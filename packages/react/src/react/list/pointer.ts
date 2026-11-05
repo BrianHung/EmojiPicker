@@ -1,9 +1,9 @@
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { PickerState } from "@brianhung/emoji-picker-core";
-import type { HighlightSource } from "../root/context";
+import type { PickerContextValue } from "../root/context";
 import { SLOTS } from "../utils/slots";
 import { cellOf, keyOf, type MarksStore } from "./cell";
+import type { CellElement, Highlight } from "./grid";
 
 // Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
 const pointer = { x: NaN, y: NaN, moved: false, list: null as Element | null, within: false };
@@ -29,20 +29,18 @@ function trackPointer() {
 const LONG_PRESS_MS = 500;
 
 type PointerOptions = {
-  core: PickerState<React.ReactNode>;
+  picker: PickerContextValue;
+  highlight: Highlight;
   marks: MarksStore;
   listRef: React.RefObject<HTMLElement | null>;
   virtual: boolean;
   keyed: React.MutableRefObject<boolean>;
-  lastKey(): Key | null;
-  setHighlight(key: Key | null, details?: HighlightSource): void;
-  ownsFocus(el: Element | null): boolean;
   openVariations(key: Key | null): boolean;
-  focusCell(key: Key): void;
+  cellElement: CellElement;
   pick(key: Key): void;
 };
 
-export function usePointerHighlight({ core, marks, listRef, virtual, keyed, lastKey, setHighlight, ownsFocus, openVariations, focusCell, pick }: PointerOptions): React.HTMLAttributes<HTMLElement> {
+export function usePointerHighlight({ picker: { state: core, ownsFocus }, highlight: { lastKey, setHighlight }, marks, listRef, virtual, keyed, openVariations, cellElement, pick }: PointerOptions): React.HTMLAttributes<HTMLElement> {
   React.useEffect(trackPointer, []);
   const hover = (key: Key | null) => core.hover(key == null ? null : String(key));
   const follow = (key: Key, event: Event) => {
@@ -72,7 +70,7 @@ export function usePointerHighlight({ core, marks, listRef, virtual, keyed, last
       e.preventDefault();
       if (e.pointerType === "touch") return;
       setHighlight(key, { reason: "pointer", event: e.nativeEvent });
-      if (!virtual) focusCell(key);
+      if (!virtual) cellElement(key)?.focus({ preventScroll: true });
     },
     onMouseDown(e) {
       if (keyOf(e) != null) e.preventDefault();
