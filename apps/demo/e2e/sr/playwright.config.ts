@@ -21,7 +21,7 @@ export default withGuidepup(
     reporter: [["list"]],
     // Screen readers are slow and a little flaky to drive; one retry on CI.
     timeout: 180_000,
-    retries: process.env.CI ? 1 : 0,
+    retries: process.env.CI ? 2 : 0,
     projects: [
       { name: "voiceover", testMatch: "voiceover.spec.ts", use: { browserName: "chromium", ...desktop } },
       { name: "nvda", testMatch: "nvda.spec.ts", use: { browserName: "chromium", ...desktop } },

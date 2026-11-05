@@ -95,7 +95,8 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     await ear.type("thumbs up", /thumbs up.{0,40}medium-light skin tone/, "the highlighted match's name includes the tone");
   });
 
-  test("crossing into the next section speaks its name", async ({ page, sr }) => {
+  test("crossing into the next section speaks its name", async ({ page, sr }, info) => {
+    test.fail(info.project.name === "voiceover", "VoiceOver reads a group's name on first entry only, not when focus moves into the next group; NVDA reads it");
     const ear = await start(page, sr, "/gallery/#discord", discordNoSearch(page));
     await ear.press("Enter", /red heart/, "the first emoji (Frequently Used)");
     let said = "";

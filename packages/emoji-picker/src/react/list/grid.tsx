@@ -20,8 +20,7 @@ import { Glyph } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
 import type { ListProps } from "./list";
-import { isApplePlatform, type KeyboardAction } from "../root/keymap";
-import { announce } from "@react-aria/live-announcer";
+import type { KeyboardAction } from "../root/keymap";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
@@ -346,12 +345,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const el = listRef.current;
     if (!el) return;
     const onFocusIn = (e: FocusEvent) => {
-      const { collection } = latest.current;
       const id = cellOf(e.target)?.getAttribute("data-key");
-      const item = collection.emoji(id);
-      const from = collection.emoji(cellOf(e.relatedTarget)?.getAttribute("data-key"))?.section;
-      // VoiceOver doesn't speak the group focus moves into: announce it with the emoji, as useComboBox does.
-      if (item && from && item.section !== from && isApplePlatform()) announce(`${collection.getTextValue(item.section)}, ${item.label}`);
       const manager = stateRef.current.selectionManager;
       if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
       manager.setFocusedKey(id);
