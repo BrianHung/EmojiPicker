@@ -31,14 +31,18 @@ export function usePickerKeyDown<T extends Element>(user: PickerKeyboardEventHan
   };
 }
 
-export function moveFocus(focus: FocusManager | undefined, key: string, rtl: boolean, vertical = false): boolean {
+export function rovingStep(key: string, rtl: boolean, vertical = false): "first" | "last" | 1 | -1 | null {
   const [back, next] = vertical ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
-  if (key === "Home") focus?.focusFirst();
-  else if (key === "End") focus?.focusLast();
-  else if (key === next) focus?.focusNext({ wrap: true });
-  else if (key === back) focus?.focusPrevious({ wrap: true });
-  else return false;
-  return true;
+  return key === "Home" ? "first" : key === "End" ? "last" : key === next ? 1 : key === back ? -1 : null;
+}
+
+export function moveFocus(focus: FocusManager | undefined, key: string, rtl: boolean, vertical = false): boolean {
+  const step = rovingStep(key, rtl, vertical);
+  if (step === "first") focus?.focusFirst();
+  else if (step === "last") focus?.focusLast();
+  else if (step === 1) focus?.focusNext({ wrap: true });
+  else if (step === -1) focus?.focusPrevious({ wrap: true });
+  return step != null;
 }
 
 export const hasModifier = (event: { ctrlKey: boolean; metaKey: boolean; altKey: boolean }) => event.ctrlKey || event.metaKey || event.altKey;

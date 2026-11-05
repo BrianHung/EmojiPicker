@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Category, EmojiGridMove, EmojiLabels, EmojiRecord, EmojiSection, EmojiSelection, EmojiStore, HighlightChangeDetails, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
+import type { EmojiGridMove, EmojiLabels, EmojiSelection, EmojiStore, HighlightChangeDetails, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
 
 export type { HighlightChangeDetails, SearchResultsMode };
@@ -37,21 +37,10 @@ export type PickerContextValue = {
   state: PickerState<React.ReactNode>;
   labels: EmojiLabels;
   inPopover: boolean;
-  disableVariations: boolean;
   columns?: number;
-  emojiVersion?: number;
-  categories: readonly Category<React.ReactNode>[];
-  categorySections: readonly EmojiSection[];
-  sections: readonly EmojiSection[];
   collapse: CollapsedCategories;
-  query: string;
-  searching: boolean;
   searchResults: SearchResultsMode;
-  searchLimit: number;
-  results: readonly EmojiRecord[];
-  pending: boolean;
   value: string | null | undefined;
-  virtual: boolean;
   pick(unified: string, details?: SelectDetails): EmojiSelection | undefined;
   actions: EmojiPickerActions;
   ownsFocus(el: Element | null): boolean;
@@ -60,7 +49,6 @@ export type PickerContextValue = {
   list: React.MutableRefObject<ListHandle | null>;
   root: React.RefObject<HTMLElement | null>;
   searchInput: React.RefObject<HTMLInputElement | null>;
-  registerInput(): () => void;
   listId: string;
 };
 

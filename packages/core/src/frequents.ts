@@ -1,5 +1,5 @@
 import { createChangeDetails, type ChangeDetails } from "./change";
-import { createStore } from "./reactive";
+import { cached, createStore } from "./reactive";
 
 export type EmojiStorage = {
   read(): string | null;
@@ -107,11 +107,11 @@ export function createFrequencyStore({
     clear: () => change({ type: "clear" }),
     top(n) {
       const state = entries();
-      const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
-      tops.set(state, byCount);
-      const list = byCount.get(n) ?? [...new Set([...ranked(state, Date.now(), tuning).map(([u]) => u), ...DEFAULTS])].slice(0, n);
-      byCount.set(n, list);
-      return list;
+      return cached(
+        cached(tops, state, () => new Map()),
+        n,
+        () => [...new Set([...ranked(state, Date.now(), tuning).map(([u]) => u), ...DEFAULTS])].slice(0, n),
+      );
     },
     score(unified) {
       const entry = entries()[unified];

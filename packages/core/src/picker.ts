@@ -5,7 +5,7 @@ import type { EmojiLabels } from "./labels";
 import { createStore, memo, stable, subscribeAll } from "./reactive";
 import { createSearch, type SearchState } from "./search/query";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
-import type { EmojiData, EmojiSelection, EmojiStore } from "./store";
+import { toned, type EmojiData, type EmojiSelection, type EmojiStore } from "./store";
 
 export type SearchResultsMode = "ranked" | "grouped";
 
@@ -54,6 +54,9 @@ export type PickerSnapshot<Icon = unknown> = {
   variations: string | null;
   reactions: readonly string[] | undefined;
 };
+
+type Toned = (unified: string) => string;
+type Items = ReturnType<typeof itemFactory>;
 
 const NO_IDS: readonly string[] = [];
 const NO_SECTIONS: readonly EmojiSection[] = [];
@@ -117,7 +120,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     },
     reduceUi,
   );
-  // Options arrive every render, so they update silently: nothing subscribes to this store
   const input = createStore<Input<Icon>, InputAction<Icon>>({ options, draft: null }, reduceInput);
   const search = createSearch(store);
   const set = (patch: Partial<Ui>) => ui.dispatch({ type: "set", patch });
@@ -132,26 +134,27 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       [...data.customGroups.values()].filter((g): g is string => !!g),
     ),
   );
-  const suggestedOf = memo((list: readonly string[], _tone: number) => list.map((u) => store.withSkinTone(u)));
-  const sectionsOf = memo((ready: boolean, categories: readonly Category<Icon>[], suggested: readonly string[], collapsed: readonly string[], emojiVersion: number | undefined, _tone: number, item: ReturnType<typeof itemFactory>) =>
+  const tonedIn = memo((data: EmojiData, tone: SkinToneValue) => (unified: string) => toned(data, tone, unified));
+  const suggestedOf = memo((list: readonly string[], withTone: Toned) => list.map((u) => withTone(u)));
+  const sectionsOf = memo((data: EmojiData, ready: boolean, categories: readonly Category<Icon>[], suggested: readonly string[], collapsed: readonly string[], emojiVersion: number | undefined, withTone: Toned, item: Items) =>
     ready
       ? categorySections({
           categories,
-          records: store.records(),
+          records: data.records,
           suggested,
-          customGroup: (u) => store.customGroups().get(u),
+          customGroup: (u) => data.customGroups.get(u),
           collapsed: (id) => collapsed.includes(id),
           emojiVersion,
           get: store.get,
-          withSkinTone: (u) => store.withSkinTone(u),
+          withSkinTone: withTone,
           item,
         })
       : NO_SECTIONS,
   );
   const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined) => (emojiVersion == null ? results : results.filter((r) => r.imageUrl || r.version <= emojiVersion)));
-  const resultSectionsOf = memo((results: readonly EmojiRecord[], mode: SearchResultsMode, categories: readonly Category<Icon>[], labels: EmojiLabels, groupNames: readonly string[], _tone: number, item: ReturnType<typeof itemFactory>) => {
+  const resultSectionsOf = memo((results: readonly EmojiRecord[], mode: SearchResultsMode, categories: readonly Category<Icon>[], labels: EmojiLabels, groupNames: readonly string[], withTone: Toned, item: Items) => {
     const name = (group: string) => categories.find((c) => c.id === group)?.name ?? (group === "custom" ? labels.custom : (groupNames[GROUPS.indexOf(group as (typeof GROUPS)[number])] ?? group));
-    return resultSections(results, mode, name, (u) => store.withSkinTone(u), item, labels.searchResults);
+    return resultSections(results, mode, name, withTone, item, labels.searchResults);
   });
   const activeOf = memo(findItem);
   const keep = stable<PickerSnapshot<Icon>>();
@@ -163,10 +166,11 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     const searching = query.trim().length > 0;
     const results = resultsOf(found.results, opts.emojiVersion);
     const categories = categoriesOf(data, ready, opts.categories, labels);
-    const suggested = suggestedOf(opts.suggested ?? (opts.frequent === false ? NO_IDS : frequent), tone);
+    const withTone = tonedIn(data, tone);
+    const suggested = suggestedOf(opts.suggested ?? (opts.frequent === false ? NO_IDS : frequent), withTone);
     const collapsed = collapsedOf(state, opts);
-    const categorySections = sectionsOf(ready, categories, suggested, collapsed, opts.emojiVersion, tone, item);
-    const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, labels, ready ? data.groupNames : NO_IDS, tone, item) : categorySections;
+    const categorySections = sectionsOf(data, ready, categories, suggested, collapsed, opts.emojiVersion, withTone, item);
+    const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, labels, ready ? data.groupNames : NO_IDS, withTone, item) : categorySections;
     const highlighted = highlightedOf(state, opts);
     const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
     return keep({
@@ -189,6 +193,8 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     });
   });
 
+  // Options arrive during render, where subscribers can't be told; a later notify publishes what they changed
+  let unpublished = false;
   const frequentCount = () => (opts().frequent ?? 16) || 1;
 
   function getSnapshot(): PickerSnapshot<Icon> {
@@ -215,8 +221,12 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     getSnapshot,
     subscribe: subscribeAll(ui.subscribe, store.subscribe, (listener) => store.frequents.subscribe(() => !ui.getSnapshot().held && listener()), search.subscribe),
     setOptions(next: PickerStateOptions<Icon>, { notify = false } = {}) {
+      const before = getSnapshot();
       input.dispatch({ type: "options", options: next });
-      if (notify) ui.dispatch({ type: "refresh" });
+      unpublished ||= getSnapshot() !== before;
+      if (!notify || !unpublished) return;
+      unpublished = false;
+      ui.dispatch({ type: "refresh" });
     },
     setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}) {
       if (value === queryOf(ui.getSnapshot(), opts())) return;

@@ -9,6 +9,7 @@ import { Glyph, useOverridden } from "../emoji/glyph";
 import { ReactionsContext, isPressed } from "./reactions-context";
 import { racParts, racState, renderElement, resolve, type InteractionState, type PartElementProps, type RacState } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 import { BUTTONS, ReactionBar, type ReactionBarProps } from "./reaction-bar";
 
 type Row = { shown: readonly string[]; selected: ReadonlySet<string> | null; expanding: React.MutableRefObject<boolean> };
@@ -29,6 +30,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
+  useStore(store);
   const row = React.useRef<HTMLDivElement | null>(null);
   const { drawable, request } = useDrawable(row);
   const shown = (state?.reactions ?? [])
@@ -90,7 +92,7 @@ export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButton
 const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
   const { selected } = useRow("Item");
-  const record = picker.store.get(unified);
+  const record = useStore(picker.store, () => picker.store.get(unified));
   const overridden = useOverridden(unified, record);
   const on = selected ? isPressed(selected, unified) : undefined;
   const attrs = {

@@ -29,7 +29,7 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
 
 export const VirtualCollection = React.memo(function VirtualCollection(options: Options) {
   const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
-  const horizontal = layoutOptions.orientation === "horizontal";
+  const horizontal = layout.axis.horizontal;
   const content = React.useRef<HTMLDivElement | null>(null);
   const scrollRef = React.useMemo(
     () => ({

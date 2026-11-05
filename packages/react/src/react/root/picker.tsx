@@ -92,13 +92,16 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     value: valueProp,
     defaultValue,
     onValueChange,
-    disableVariations = false,
+    highlight: _highlight,
+    defaultHighlight: _defaultHighlight,
+    onHighlightChange: _onHighlightChange,
+    disableVariations: _disableVariations,
     reactions,
     reactionsOpen: reactionsOpenProp,
     defaultReactionsOpen = true,
     onReactionsOpenChange,
     searchResults = "ranked",
-    searchLimit = 200,
+    searchLimit: _searchLimit,
     columns: columnsProp = "fit",
     className,
     style,
@@ -117,6 +120,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
+  React.useLayoutEffect(() => state.setOptions(options, { notify: true }));
   const view = useStore(
     state,
     ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }),
@@ -193,21 +197,10 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       state,
       labels,
       inPopover: Boolean(popover),
-      disableVariations,
       columns,
-      emojiVersion,
-      categories: view.categories,
-      categorySections: view.categorySections,
-      sections: view.sections,
       collapse,
-      query,
-      searching,
       searchResults,
-      searchLimit,
-      results,
-      pending,
       value,
-      virtual: view.focus === "virtual",
       pick,
       actions,
       ownsFocus: (el) => el != null && (el === searchInput.current || el === target()),
@@ -216,10 +209,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       list,
       root: rootRef,
       searchInput,
-      registerInput: state.registerInput,
       listId,
     }),
-    [store, state, labels, popover, disableVariations, columns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
+    [store, state, labels, popover, columns, collapse, searchResults, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false, "trigger-press") : undefined, panel, registerPanel } : null),
@@ -317,18 +309,18 @@ export function useActiveEmoji(): EmojiRecord | null {
 
 export function useCategoryNavigation() {
   const picker = usePicker("useCategoryNavigation");
-  const activeCategory = useStore(picker.state, (s) => s.activeSection);
+  const view = useStore(picker.state, ({ categories, categorySections, searching, activeSection }) => ({ categories, categorySections, searching, activeSection }), shallowEqual);
   const categories = React.useMemo(() => {
-    const shown = new Set(picker.categorySections.map((s) => s.id));
-    return picker.categories.filter((c) => c.nav && shown.has(c.id)).map(({ id, name, icon }) => ({ id, name, icon }));
-  }, [picker.categories, picker.categorySections]);
+    const shown = new Set(view.categorySections.map((s) => s.id));
+    return view.categories.filter((c) => c.nav && shown.has(c.id)).map(({ id, name, icon }) => ({ id, name, icon }));
+  }, [view.categories, view.categorySections]);
   const jumpToCategory = React.useCallback((id: string, options?: { instant?: boolean }) => picker.list.current?.jump(id, options), [picker.list]);
-  return { categories, activeCategory: picker.searching ? null : activeCategory, jumpToCategory };
+  return { categories, activeCategory: view.searching ? null : view.activeSection, jumpToCategory };
 }
 
 export function useSearchState(): { query: string; resultCount: number | null } {
-  const picker = usePicker("useSearchState");
-  return { query: picker.query, resultCount: picker.searching && !picker.pending ? picker.results.length : null };
+  const { state } = usePicker("useSearchState");
+  return useStore(state, ({ query, searching, pending, results }) => ({ query, resultCount: searching && !pending ? results.length : null }), shallowEqual);
 }
 
 type Orientation = "vertical" | "horizontal";
@@ -346,7 +338,8 @@ const SCROLL: Record<Orientation, React.CSSProperties> = {
 const FIXED_GUTTER: React.CSSProperties = { scrollbarGutter: "stable" };
 
 export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function Viewport({ onKeyDown, style, ...props }, ref) {
-  const { searching, columns } = usePicker("EmojiPicker.Viewport");
+  const { state, columns } = usePicker("EmojiPicker.Viewport");
+  const searching = useStore(state, (s) => s.searching);
   const [orientation, setOrientation] = React.useState<Orientation>("vertical");
   const keys = usePickerKeyDown(onKeyDown, () => false);
   return (

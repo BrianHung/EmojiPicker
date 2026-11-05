@@ -9,10 +9,11 @@ import { useHover } from "react-aria/useHover";
 import { usePress } from "react-aria/usePress";
 import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
-import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
+import { hasModifier, rovingStep, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { useCategoryNavigation } from "../root/picker";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 
 export type NavCategory = ReturnType<typeof useCategoryNavigation>["categories"][number];
 
@@ -37,6 +38,7 @@ const TabContext = React.createContext<NavCategory | null>(null);
 
 const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", onKeyDown, className, style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
+  const searching = useStore(picker.state, (s) => s.searching);
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const id = React.useId();
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
@@ -44,12 +46,10 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const [tabs] = React.useState(() => new Map<string, HTMLElement>());
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     const key = [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0];
-    if (key == null || picker.searching || hasModifier(e)) return false;
+    if (key == null || searching || hasModifier(e)) return false;
     const ids = categories.map((c) => c.id);
-    const i = ids.indexOf(key);
-    const rtl = orientation === "horizontal" && direction === "rtl";
-    const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
-    const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
+    const step = rovingStep(e.key, direction === "rtl", orientation === "vertical");
+    const to = step === "first" ? ids[0] : step === "last" ? ids[ids.length - 1] : step && ids[(ids.indexOf(key) + step + ids.length) % ids.length];
     if (to == null) return false;
     tabs.get(to)?.focus();
     return true;
@@ -58,7 +58,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
 
   const ids = categories.map((c) => c.id);
   const selected = activeCategory ?? ids[0]!;
-  const disabled = picker.searching;
+  const disabled = searching;
   const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
   const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
 

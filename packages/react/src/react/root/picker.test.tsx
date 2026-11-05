@@ -77,12 +77,36 @@ describe("Root keyboard", () => {
     press(input, "ArrowRight");
     expect(onHighlightChange).toHaveBeenLastCalledWith("smileys_people:1f603", expect.objectContaining({ reason: "keyboard" }));
     expect(highlighted(host)).toBe("1f600");
+    expect(host.querySelector("aside")!.hasAttribute("highlight")).toBe(false);
   });
 
   it("keeps the highlight where it is when onHighlightChange cancels", () => {
     const { input, host } = mount({ onHighlightChange: (_, details) => details.cancel() });
     press(input, "ArrowRight");
     expect(highlighted(host)).toBeUndefined();
+  });
+
+  it("renames categories in parts that did not re-render", () => {
+    const parts = (
+      <>
+        <EmojiPicker.CategoryNav />
+        <Grid />
+      </>
+    );
+    const host = document.body.appendChild(document.createElement("div"));
+    const root = createRoot(host);
+    const render = (name: string) =>
+      React.act(() =>
+        root.render(
+          <EmojiProvider data={en as unknown as Dataset} prepare={false}>
+            <EmojiPicker.Root categories={[{ id: "smileys_people", name }, { id: "animals_nature" }]}>{parts}</EmojiPicker.Root>
+          </EmojiProvider>,
+        ),
+      );
+    unmount = () => React.act(() => root.unmount());
+    render("Faces");
+    render("People");
+    expect(host.querySelector('[role="tab"]')?.getAttribute("aria-label")).toBe("People");
   });
 
   it("runs onKeyDown first, and preventEmojiPickerHandler skips the picker's handler", () => {
