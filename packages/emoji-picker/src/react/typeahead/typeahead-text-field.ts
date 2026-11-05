@@ -33,7 +33,6 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null
     const sync = () => matchAt(el.selectionEnd === el.selectionStart ? el.selectionStart : null);
     // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send)
     const keydown = (event: Event) => void (onKeyDown(event as KeyboardEvent) && event.stopPropagation());
-    // After React's handlers: a controlled field's onChange must commit the new value before this re-renders it
     const input = (event: Event) => event.target === el && sync();
     for (const type of EVENTS) el.addEventListener(type, sync);
     el.addEventListener("keydown", keydown);

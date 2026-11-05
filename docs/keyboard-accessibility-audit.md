@@ -36,7 +36,7 @@ The Instagram reaction bar is a `dialog` of buttons named by their emoji charact
 
 ## @brianhung/emoji-picker
 
-Defaults follow Discord; the rest is configurable. Each row is checked in Chrome by `npm run test:e2e` and `npm run test:a11y` in `packages/emoji-picker`, and on every demo surface (gallery, home page, examples) by the keyboard audit script.
+Defaults follow Discord; the rest is configurable. Each row is checked in Chrome by the demo's keyboard and axe suites (`npm run test:e2e`, `npm run test:a11y`).
 
 | | With a search field | Without a search field |
 |---|---|---|

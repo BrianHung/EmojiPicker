@@ -21,7 +21,6 @@ export class EmojiItem {
     readonly unified: string,
     readonly label: string,
   ) {}
-  // Node fields live on the prototype so an item costs only its five own fields
   get type() {
     return "item" as const;
   }

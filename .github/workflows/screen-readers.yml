@@ -1,13 +1,4 @@
-# Screen reader checks for the demo site (apps/demo); axe runs in ci.yml:
-#   voiceover  Guidepup + VoiceOver (macOS)                             npm run test:sr:voiceover
-#   nvda       Guidepup + NVDA (Windows)                                npm run test:sr:nvda
-# Each Playwright run starts the demo's dev server itself (apps/demo/playwright.config.ts → webServer).
-# Guidepup's environment setup follows https://github.com/guidepup/setup: `setup --ci` configures
-# the OS once per runner, `install` fetches the screen reader assets for this Guidepup version.
-# (guidepup/setup-action is archived; the CLI is the documented path.)
-# JAWS isn't automated: it needs a licence and Guidepup has no JAWS driver. Test it by hand
-# (see apps/demo/README.md, "Accessibility").
-name: Accessibility
+name: Screen readers
 
 on:
   push:
@@ -16,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: a11y-${{ github.ref }}
+  group: screen-readers-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,7 +25,16 @@ jobs:
       - name: Install Guidepup's VoiceOver assets
         working-directory: apps/demo
         run: npx @guidepup/setup install voiceover
-      - run: npm run test:sr:voiceover -w demo
+      - name: VoiceOver scenarios
+        working-directory: apps/demo
+        shell: bash
+        run: |
+          for attempt in 1 2; do
+            npm run test:sr:voiceover 2>&1 | tee "$RUNNER_TEMP/voiceover.log" && exit 0
+            grep -qE "VoiceOver cannot be started|osascript.*ETIMEDOUT" "$RUNNER_TEMP/voiceover.log" || exit 1
+            echo "::warning::VoiceOver couldn't start (attempt $attempt)"
+          done
+          exit 1
       - if: failure()
         uses: actions/upload-artifact@v4
         with: { name: voiceover-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore, include-hidden-files: true }
@@ -53,7 +53,8 @@ jobs:
       - name: Install Guidepup's NVDA
         working-directory: apps/demo
         run: npx @guidepup/setup install nvda
-      - run: npm run test:sr:nvda -w demo
+      - name: NVDA scenarios
+        run: npm run test:sr:nvda -w demo
       - if: failure()
         uses: actions/upload-artifact@v4
         with: { name: nvda-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore, include-hidden-files: true }

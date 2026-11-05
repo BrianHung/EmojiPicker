@@ -132,7 +132,6 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
     disabled,
   };
   const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
-  // The tabs scroll one list rather than switch panels, so there is no panel for aria-controls
   return renderElement(
     "div",
     {

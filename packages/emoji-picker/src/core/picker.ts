@@ -102,7 +102,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const highlighted = () => (opts.highlighted === undefined ? ui.highlighted : opts.highlighted);
   const query = () => opts.query ?? ownQuery;
   const collapsed = () => opts.collapsedCategories ?? ownCollapsed;
-  // Frequents change with every pick; held while the user is in the picker so nothing moves under them
   const frequents = () => {
     const n = (opts.frequent ?? 16) || 1;
     if (!top || (!ui.held && top.n !== n)) top = { n, list: store.frequents.top(n) };

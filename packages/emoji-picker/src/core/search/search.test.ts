@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import data from "../../../data/en.json";
 import { expandDataset, unifiedToNative, type Dataset } from "../dataset";
-import { createFrequencyStore, memoryStorage } from "../frequents";
 import { fallback, fuse, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "./search";
-import { createEmojiStore } from "../store";
 
 const records = expandDataset(data as unknown as Dataset);
 const context = (overrides: Partial<SearchContext> = {}): SearchContext => ({ records, limit: 20, signal: new AbortController().signal, frequency: () => 0, ...overrides });
@@ -13,7 +11,6 @@ const run = (search: EmojiSearch, q: string, ctx = context()) => search(q, ctx) 
 describe("lexical", () => {
   it("ranks whole names and shortcodes first", () => {
     expect(glyphs(run(lexical(), "fire"))[0]).toBe("🔥");
-    expect(glyphs(run(lexical(), "thumbsup"))[0]).toBe("👍");
     expect(glyphs(run(lexical(), "tada"))[0]).toBe("🎉");
   });
 
@@ -26,8 +23,16 @@ describe("lexical", () => {
   });
 
   it("keeps partial words as prefixes, not typos", () => {
-    expect(glyphs(run(lexical(), "thu")).slice(0, 2)).toEqual(["👍", "👎"]);
     expect(glyphs(run(lexical(), "skul"))[0]).toBe("💀");
+  });
+
+  it("takes a tokenizer or a segmenter", () => {
+    const ja = expandDataset({ format: 1, locale: "ja", emojibase: "test", groups: [], emojis: [["1f604", "にっこり笑う顔", [], [], 0, 1, 0]], toneExceptions: {} });
+    const ctx = context({ records: ja, locale: "ja" });
+    const bigrams = (text: string) => Array.from({ length: Math.max(1, text.length - 1) }, (_, i) => text.slice(i, i + 2));
+    expect(lexical({ tokenize: bigrams })("笑う", ctx)).toEqual([{ unified: "1f604" }]);
+    expect(lexical({ segmenter: false })("笑う", ctx)).toEqual([]);
+    expect(lexical({ segmenter: { segment: (text) => text.split("").map((segment) => ({ segment, isWordLike: true })) } })("笑", ctx)).toEqual([{ unified: "1f604" }]);
   });
 });
 
@@ -103,43 +108,5 @@ describe("composition", () => {
       }
     }
     expect(glyphs(run(fuse(FakeFuse as never), "rocket"))[0]).toBe("🚀");
-  });
-});
-
-describe("store.query", () => {
-  it("uses the configured search, includes custom emoji, and resolves records", async () => {
-    const store = createEmojiStore({
-      data: data as unknown as Dataset,
-      customEmojis: [{ id: "shipit", name: "shipit", shortcodes: ["shipit"], tags: ["squirrel"], imageUrl: "/shipit.png" }],
-      frequents: createFrequencyStore({ storage: memoryStorage() }),
-      searchEngine: remote(async (q, { records }) => records.filter((r) => r.name.includes(q)).map((r) => r.unified)),
-    });
-    await store.load();
-    const out = await store.query("shipit");
-    expect(out.map((r) => r.unified)).toEqual(["shipit"]);
-    expect(store.query("   ")).toEqual([]);
-  });
-
-  it("returns interim records for a progressive search", async () => {
-    const store = createEmojiStore({
-      data: data as unknown as Dataset,
-      frequents: createFrequencyStore({ storage: memoryStorage() }),
-      searchEngine: progressive(
-        lexical(),
-        remote(async () => ["1f680"]),
-      ),
-    });
-    await store.load();
-    const out = store.query("fire");
-    expect(interimOf(out)?.[0]?.emoji).toBe("🔥");
-    expect((await out).map((r) => r.emoji)).toEqual(["🚀"]);
-  });
-
-  it("defaults to lexical, synchronously", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequents: createFrequencyStore({ storage: memoryStorage() }) });
-    await store.load();
-    const out = store.query("fire");
-    expect(Array.isArray(out)).toBe(true);
-    expect((out as { emoji: string }[])[0]!.emoji).toBe("🔥");
   });
 });

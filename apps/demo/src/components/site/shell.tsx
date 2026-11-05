@@ -49,7 +49,6 @@ export type Page = "docs" | "gallery" | "examples";
 
 export const WIDTH = { column: "max-w-3xl", wide: "max-w-[1400px]" } as const;
 
-// CSS can't tell platforms apart, so the root is tagged once for SF on Apple and Inter elsewhere
 if (typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent)) {
   document.documentElement.classList.add("apple");
 }
@@ -64,7 +63,6 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
   return (
     <TooltipProvider>
       <RendererContext.Provider value={renderer}>
-        {/* Remount on renderer change: provider options are read once */}
         <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
           <div className="flex min-h-svh flex-col">
             <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />

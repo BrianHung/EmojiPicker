@@ -89,7 +89,6 @@ export function markdownDocs(): Plugin {
       });
     },
     generateBundle() {
-      // Once, with the pages: not again in the Worker's build environment
       if (this.environment && this.environment.name !== "client") return;
       for (const [fileName, route] of Object.entries(ROUTES)) this.emitFile({ type: "asset", fileName, source: route.render() });
     },

@@ -31,7 +31,6 @@ type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "
 
 export function EmojiImage({ src, alt, record, size, animate, fallback, style, ...props }: EmojiImageProps) {
   const reduce = usePrefersReducedMotion();
-  // Emoji newer than the Twemoji set 404: show the fallback, never a broken image
   const [failed, setFailed] = React.useState<string | null>(null);
   const still = record?.animated && record.stillUrl && (!animate || reduce) ? record.stillUrl : undefined;
   const width = record?.width ?? DEFAULT_SIZE;

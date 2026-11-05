@@ -1,4 +1,3 @@
-# Visual baselines are local-only (gitignored), so e2e runs every project except the four visual ones.
 name: CI
 
 on:
@@ -58,8 +57,9 @@ jobs:
           path: apps/demo/e2e/.cache
           key: e2e-remote-${{ github.run_id }}
           restore-keys: e2e-remote-
+      # Every project but visual: its baselines are local (gitignored)
       - working-directory: apps/demo
-        run: npx playwright test --shard ${{ matrix.shard }} --project desktop --project mobile --project editors --project grid --project ime --project perf
+        run: npx playwright test --shard ${{ matrix.shard }} --project keyboard --project keyboard-mobile --project editors --project layout --project ime --project perf
       - if: failure()
         uses: actions/upload-artifact@v4
         with:

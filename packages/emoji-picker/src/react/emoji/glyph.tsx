@@ -18,7 +18,6 @@ const TEXT: React.CSSProperties = {
   textAlign: "center",
   letterSpacing: 0,
 };
-// Pinned size, so page CSS like img { max-width: 100%; height: auto } can't resize it
 const IMAGE: React.CSSProperties = { boxSizing: "content-box", minWidth: 0, maxWidth: "none", minHeight: 0, maxHeight: "none", padding: 0, margin: "auto", alignSelf: "center", justifySelf: "center" };
 
 export const Glyph = React.memo(function Glyph({ unified, record, animate = false }: { unified: string; record: EmojiRecord | undefined; animate?: boolean }) {

@@ -29,7 +29,6 @@ async function renderVideo(out) {
   await page.evaluate(() => document.fonts.ready);
   const frames = mkdtempSync(join(tmpdir(), "og-video-"));
   for (let i = 0; i < DURATION * FPS; i++) {
-    // An edit elsewhere can reload the dev page mid-render: wait for the page's hooks to come back
     await page.waitForFunction(() => typeof window.setOgTime === "function" && [...document.images].every((img) => img.complete && img.naturalWidth));
     await page.evaluate((t) => window.setOgTime(t), i / FPS);
     await sharp(await page.locator("[data-og]").screenshot())

@@ -1,5 +1,3 @@
-// Pixel snapshots, one per element: every surface in surfaces.ts opened (inline ones as they load),
-// plus the static targets. Four projects: desktop/mobile × light/dark.
 import type { Locator, Page } from "@playwright/test";
 import { SHOTS, SURFACES } from "./surfaces";
 import { expect, fileName, quiet, settle, test, viewportOf, visit } from "./support";

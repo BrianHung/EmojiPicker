@@ -1,6 +1,5 @@
 "use client";
 
-// shadcn/ui Drawer (base-nova); local changes: cn from @/lib/utils, and container and viewportClassName props
 import * as React from "react";
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { cn } from "@/lib/utils";

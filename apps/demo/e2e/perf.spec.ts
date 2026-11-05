@@ -1,12 +1,7 @@
-// Cost budgets, so refactors can't silently regress them: the heap a picker adds on open (after GC), and the
-// React commits and component renders one hover or one ArrowRight costs, counted by a DevTools-hook fiber walk.
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import { card, preview } from "./surfaces";
 import { expect, frames, quiet, test, visit } from "./support";
 
-// A step re-renders the cells it leaves and enters and what shows the active emoji. Moving the
-// highlight from the search field also re-renders React Aria's Autocomplete, SearchField and Input
-// (aria-activedescendant): their 7 renders are counted on top.
 const BUDGET = { heapMB: 6, commits: 3, renders: 6, autocomplete: 7 };
 const STEPS = 20;
 
@@ -28,7 +23,6 @@ test.beforeEach(async ({ page }) => {
     const nameOf = (t: Component | null) => t?.displayName || t?.name || t?.render?.displayName || t?.render?.name || "?";
     const walk = (fiber: Fiber) => {
       for (let c = fiber.child; c; c = c.sibling) {
-        // Function, forwardRef and memo components that rendered (mounted, or PerformedWork).
         if ((c.tag === 0 || c.tag === 11 || c.tag === 15) && (!c.alternate || c.flags & 1)) {
           window.__renders++;
           window.__names[nameOf(c.type)] = (window.__names[nameOf(c.type)] ?? 0) + 1;
@@ -84,7 +78,6 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
   return { commits: (commits - start[0]!) / STEPS, renders: (renders - start[1]!) / STEPS, by };
 }
 
-/** Per hover over STEPS cells in view, per ArrowRight from the search field (virtual focus), and per ArrowRight with focus on a cell. */
 async function steps(page: Page, root: Locator) {
   await root.scrollIntoViewIfNeeded();
   const cells = await root.evaluate((el) => {

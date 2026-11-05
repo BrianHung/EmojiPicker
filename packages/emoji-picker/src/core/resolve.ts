@@ -74,7 +74,6 @@ export function resolveEmoji(store: EmojiLookup, input: EmojiInput): ResolvedEmo
     const record = store.fromShortcode(text);
     if (record) return fromRecord(record);
   }
-  // An unknown unified code is still drawable when it decodes to an emoji ("add" is hex, but not one)
   const native = isUnified(text) ? unifiedToNative(text) : "";
   if (native && NATIVE.test(native)) return { unified: text.toLowerCase(), name: text, native };
   return null;

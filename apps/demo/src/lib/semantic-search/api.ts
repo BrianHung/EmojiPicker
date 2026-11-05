@@ -17,7 +17,6 @@ const setStatus = (backend: Backend, value: ApiStatus) => {
   listeners.forEach((l) => l());
 };
 
-// Without the API (local dev, a static host) this returns no hits, so a fallback to lexical() still fills the picker
 function api(backend: Backend, path: string, body: Record<string, unknown> = {}) {
   return remote(async (query, { limit, signal, records }) => {
     try {

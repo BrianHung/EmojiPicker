@@ -49,7 +49,6 @@ export function Tabs({ items, active, className, tab, activeTab, inactiveTab, ri
   );
 }
 
-// Scrolls only the bar: scrollIntoView would scroll the page too
 export function useActiveTabInView(vertical = false) {
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -60,7 +59,6 @@ export function useActiveTabInView(vertical = false) {
       if (!tab) return;
       const b = bar.getBoundingClientRect();
       const t = tab.getBoundingClientRect();
-      // Rects are in screen px; a scaled picker (FitBox) scrolls in its own px
       if (vertical) {
         const k = bar.offsetHeight / b.height || 1;
         if (t.top < b.top) bar.scrollTop -= (b.top - t.top) * k;

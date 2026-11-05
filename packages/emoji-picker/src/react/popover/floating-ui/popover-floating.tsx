@@ -87,7 +87,6 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
     strategy: "fixed",
     placement: align === "center" ? side : `${side}-${align}`,
     transform: false,
-    // Not on layout shift: the anchor's own transitions (a trigger's hover or press scale) would move it
     whileElementsMounted: (reference, floating, update) => autoUpdate(reference, floating, update, { layoutShift: false }),
     middleware: [
       offset(sideOffset),

@@ -82,7 +82,6 @@ export function StyleAutocomplete({ appStyle, suggestions: menu, open, className
   const store = useEmojiStore();
   const a = appStyle.autocomplete;
   const list = React.useRef<HTMLUListElement>(null);
-  // Scrolls only the list: scrollIntoView would scroll the page too
   React.useLayoutEffect(() => {
     const el = list.current;
     const item = el?.querySelector("[data-highlighted]")?.getBoundingClientRect();

@@ -33,7 +33,7 @@ Run these from the repository root.
 npm install
 npm run dev          # the site at http://localhost:5199
 npm test             # library unit tests
-npm run test:e2e     # Playwright: behaviour, editors, grid, IME, perf and visual specs
+npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visual specs
 npm run test:a11y    # axe on every page and picker surface
 npm run typecheck    # every workspace
 npm run check        # Biome lint and format check; `npm run format` formats

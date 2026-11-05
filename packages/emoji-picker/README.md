@@ -474,11 +474,9 @@ This package is part of a monorepo; see the [root README](../../README.md).
 npm test                                         # unit tests
 npm run typecheck
 npm run build                                    # data/en.json and dist/
-npm run test:e2e                                 # browser checks against the demo at :5199
-npm run test:a11y
 ```
 
-To run the browser checks without the demo, start `npm run e2e:serve` and set `BASE_URL=http://localhost:5299`.
+Browser checks (keyboard, axe, screen readers) run against the demo site; see the [root README](../../README.md).
 
 ## License
 

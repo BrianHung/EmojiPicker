@@ -55,7 +55,6 @@ export function ApplePicker({ onSelect, search = true, autoFocus = false, fluid 
         <EmojiPicker.List className="outline-none">
           {() => (
             <EmojiPicker.List.Section>
-              {/* macOS shows no section titles; the visually hidden one still names the group */}
               <EmojiPicker.List.SectionTitle className="pointer-events-none h-0 overflow-hidden" />
               <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-xl hover:bg-picker-hover data-focus-visible:bg-picker-hover data-[highlighted]:bg-picker-hover")} />}</EmojiPicker.List.Items>
             </EmojiPicker.List.Section>

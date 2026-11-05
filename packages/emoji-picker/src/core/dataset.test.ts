@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import data from "../../data/en.json";
+import { expandDataset, unifiedToNative, withTone, type Dataset } from "./dataset";
+
+const records = expandDataset(data as unknown as Dataset);
+
+describe("dataset", () => {
+  it("computes skin tones like emojibase", () => {
+    expect(withTone("1f44d", 1)).toBe("1f44d-1f3fb");
+    expect(withTone("26f9-fe0f-200d-2642-fe0f", 5)).toBe("26f9-1f3ff-200d-2642-fe0f");
+    const thumbs = records.find((r) => r.name === "thumbs up")!;
+    expect(thumbs.tones).toHaveLength(5);
+    expect(thumbs.tones[2]).toBe("1f44d-1f3fd");
+  });
+
+  it("converts code points safely (custom ids are not code points)", () => {
+    expect(unifiedToNative("1f44d-1f3fd")).toBe("👍🏽");
+    expect(unifiedToNative("lgtm")).toBe("");
+    expect(unifiedToNative("")).toBe("");
+  });
+
+  it("keeps two-person tone exceptions", () => {
+    const kiss = records.find((r) => r.name === "kiss: woman, man")!;
+    expect(kiss.tones[0]).toBe("1f469-1f3fb-200d-2764-fe0f-200d-1f48b-200d-1f468-1f3fb");
+  });
+
+  it("has Slack shortcodes, matched without FE0F", () => {
+    expect(records.find((r) => r.emoji === "❤️")?.shortcodes).toContain("heart");
+    expect(records.find((r) => r.emoji === "👍")?.shortcodes).toEqual(["+1", "thumbsup"]);
+  });
+});

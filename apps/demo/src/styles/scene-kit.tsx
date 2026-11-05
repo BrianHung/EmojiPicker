@@ -85,7 +85,6 @@ export function FitViewport({ width, children }: { width: number; children: Reac
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, [width]);
-  // The popover mounts hidden while it measures, so the picker's autofocus can miss
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     let frames = 0;
@@ -177,7 +176,6 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
         data-style={style.id}
         className="border-picker-border bg-picker-background font-picker text-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-picker-muted/40"
         style={{ ...tokensOf(style), fontFamily: font }}
-        // Keyboard opens into search; a tap doesn't, so it won't raise the phone's keyboard
         initialFocus={(type) => (type === "touch" ? true : (body.current?.querySelector("input") ?? true))}
       >
         <DrawerTitle className="sr-only">{label}</DrawerTitle>
@@ -207,7 +205,6 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
     start.current = null;
   };
   React.useEffect(() => cancel, []);
-  // React bubbles events from portals; those aren't presses on the message
   const outside = (e: React.SyntheticEvent) => !(e.currentTarget as Node).contains(e.target as Node);
   return {
     onPointerDown: (e: React.PointerEvent) => {

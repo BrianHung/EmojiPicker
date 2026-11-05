@@ -1,4 +1,3 @@
-// React Aria's ListKeyboardDelegate skips a short last row on Down; this delegate clamps to it
 import type { Key, KeyboardDelegate } from "@react-types/shared";
 import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../../core/grid";
 import type { EmojiSection } from "../../core/sections";

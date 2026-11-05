@@ -1,9 +1,0 @@
-{
-  // The harness runs inside the demo's Vite server: its aliases and client types.
-  "extends": "../../../../tsconfig.base.json",
-  "compilerOptions": {
-    "types": ["vite/client", "node"],
-    "paths": { "@/registry/*": ["../../../../apps/demo/registry/*"], "@/*": ["../../../../apps/demo/src/*"] }
-  },
-  "include": ["harness.tsx", "host.tsx"]
-}

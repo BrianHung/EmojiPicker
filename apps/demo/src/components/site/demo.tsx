@@ -13,7 +13,6 @@ const CSS_MODULES = "css-modules/index.tsx";
 
 const modules: Record<Adapter, Record<string, Module>> = {
   "floating-ui": import.meta.glob("../demos/*/{tailwind.tsx,css-modules/index.tsx}", { eager: true }),
-  // vite.config.ts aliases a demo's Floating UI EmojiPopover to React Aria's under `?react-aria`
   "react-aria": import.meta.glob("../demos/popover/{tailwind.tsx,css-modules/index.tsx}", { eager: true, query: "?react-aria" }),
 };
 const sources = import.meta.glob<string>("../demos/*/{tailwind.tsx,css-modules/index.*}", { eager: true, query: "?raw", import: "default" });

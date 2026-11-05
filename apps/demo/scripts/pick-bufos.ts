@@ -1,4 +1,3 @@
-// all-the-bufo has no license: images are only fetched into memory, and pack.json stores their URLs
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";

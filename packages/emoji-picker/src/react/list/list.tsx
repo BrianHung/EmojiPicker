@@ -54,7 +54,6 @@ const HORIZONTAL: React.CSSProperties = { flex: "none", width: "max-content" };
 const UNPADDED = { "--ep-glyph-pad": "0px" } as React.CSSProperties;
 const COLUMNS: React.CSSProperties = { height: 0, width: "calc(var(--ep-columns) * var(--ep-cell) + 2 * var(--ep-pad))", maxWidth: "100%" };
 
-// Row heights in 1/64 px layout units at the element's zoom, so absolutely placed rows land on the same device pixels as a flow
 function layoutUnits(el: HTMLElement) {
   const zoom = (el as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom || 1;
   return (n: number) => (zoom === 1 ? Math.trunc(n * 64) / 64 : Math.trunc(n * zoom * 64) / 64 / zoom + 1e-6);
@@ -149,7 +148,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         const seen = visibleRect();
         const info = layout.getLayoutInfo(key);
         if (!el || !seen || !info) return;
-        // The visible rect follows scroll events, so it doesn't include this scroll yet
         const a = from != null ? layout.getLayoutInfo(from)?.rect : null;
         const sign = horizontal() && rtl() ? -1 : 1;
         const before = horizontal() ? el.scrollLeft : el.scrollTop;
@@ -432,7 +430,6 @@ function LoadMore() {
 
 export type SectionActionsState = SectionState & {
   toggle: () => void;
-  // No aria-controls: a section out of view has no element to name
   toggleProps: { "aria-expanded": boolean };
 };
 
@@ -451,7 +448,6 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
     const el = list.current;
     if (el && el.offsetTop !== top) setTop(el.offsetTop);
   });
-  // The actions follow the list in the DOM (a listbox holds only options), so Tab is routed to keep reading order
   const order = React.useRef(sections);
   order.current = sections;
   React.useEffect(() => {
@@ -470,7 +466,6 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
         if (!target && layer.current) target = nextTabbable(layer.current);
       }
       if (!target) return;
-      // Not on to React Aria, which would put focus back on the collection's last tabbable cell
       e.preventDefault();
       e.stopPropagation();
       target.focus();

@@ -34,7 +34,6 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
     ctx.fillText(text, 0, y);
     ctx.restore();
   };
-  // Drawn with and without tag characters (subdivision flags): a supported sequence has ink and differs from its parts
   const run = (candidates: [string, string, string][]) => {
     try {
       const height = candidates.length * CELL;

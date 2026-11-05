@@ -1,4 +1,3 @@
-# Opens (or updates) the "Version packages" PR from pending changesets. It never publishes.
 name: Release
 
 on:

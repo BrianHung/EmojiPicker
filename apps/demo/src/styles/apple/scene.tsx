@@ -78,7 +78,6 @@ function Reaction({ id, size, tapback = true }: { id: string; size: number; tapb
 }
 
 type Layer = { fill: string; stroke?: string; strokeWidth?: number; erode?: number };
-// Paint as style: light-dark() colors don't apply in SVG presentation attributes
 type Paint = { style: React.CSSProperties };
 const paint = (fill: string, stroke?: string, strokeWidth?: number): Paint => ({ style: { fill, stroke, strokeWidth } });
 
@@ -497,7 +496,6 @@ function Composer({
   );
 }
 
-// CSS keeps a wrapped box at its max width, so shrink the bubble to its longest line
 function useHugWidth(ref: React.RefObject<HTMLElement | null>, text: string) {
   React.useLayoutEffect(() => {
     const bubble = ref.current;
@@ -922,7 +920,6 @@ function IncomingReaction({ unified, phase, to, initials, avatar, onArrive }: In
       transition={fly ? { type: "spring", duration: 0.5, bounce: 0.1 } : { type: "spring", duration: 0.5, bounce: 0.3 }}
       onAnimationComplete={() => fly && onArrive()}
     >
-      {/* No filter on an ancestor of the blur: it would become the backdrop root */}
       <motion.div className="absolute inset-0" animate={fade}>
         <div className="absolute inset-0" style={{ borderRadius: CARD.radius + 4, boxShadow: `0 0 0 0.4px ${ld("rgb(0 0 0 / 0.16)", "rgb(255 255 255 / 0.18)")}, 0 10px 30px rgb(0 0 0 / 0.12)` }} />
         <div ref={card} className="absolute inset-0 backdrop-blur-[30px] backdrop-saturate-[1.6]" style={{ background: `linear-gradient(${ld("rgb(255 255 255 / 0.72)", "rgb(58 58 60 / 0.72)")}, ${ld("rgb(246 246 248 / 0.66)", "rgb(44 44 46 / 0.66)")})` }} />
@@ -1031,7 +1028,6 @@ function SymbolsGlyph() {
 
 const K = { col: 46, row: 38.4, rows: 5, left: 2.9, gap: 13.8, label: 61.6, grid: 81.2, labelInset: 9.8, emoji: 31.5 };
 const TAB = { first: 29 - 15 - 0.3, pitch: 37.84 };
-// Emoji 17 has no glyph in most system fonts yet
 const MAX_VERSION = 16;
 
 const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently Used", icon: <SFClock size={20} /> }, ...IOS_GROUPS.map((g) => ({ id: g.id, name: g.label, icon: g.icon }))];

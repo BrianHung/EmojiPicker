@@ -1,4 +1,3 @@
-// Declared by hand, not generated, so the tests and both config files describe one shape
 export interface Env {
   AI: Ai;
   EMOJI_INDEX: Vectorize;

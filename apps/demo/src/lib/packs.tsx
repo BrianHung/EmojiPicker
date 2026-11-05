@@ -27,7 +27,6 @@ export function loadPack(url: string): Promise<CustomEmoji[]> {
   return pending;
 }
 
-// all-the-bufo has no license: the manifest only references images on their own host, none are copied here
 export const BUFO_PACK_URL = "/packs/bufo/pack.json";
 
 export function usePack(url: string) {

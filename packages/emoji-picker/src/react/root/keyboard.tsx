@@ -1,4 +1,3 @@
-// A handled key stops at Root, as React Aria's do, so an Escape it used doesn't also close a dialog around it
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { actionFor, isTextEditingKey, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
@@ -91,7 +90,6 @@ function ancestors(from: Element, root: Element): Element[] {
   return out;
 }
 
-// Not Escape: with nothing to clear or close it goes on to the page, so a sheet or dialog around the picker closes
 const NATIVE_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " "]);
 
 type KeyboardProviderProps = {

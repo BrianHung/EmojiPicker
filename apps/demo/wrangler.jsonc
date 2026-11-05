@@ -1,4 +1,3 @@
-// Mirrors cloudflare.config.ts: the Deploy button and Workers Builds read only Wrangler config
 {
   "name": "emoji-picker",
   "main": "worker/index.ts",
