@@ -1,8 +1,8 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
-import { PopoverContext, type PopoverState } from "./popover-context";
+import { PopoverContext, type PopoverOpenChangeDetails, type PopoverOpenChangeReason, type PopoverState } from "./popover-context";
+import { useChangeState } from "../utils/state";
 import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { TABBABLE } from "../utils/utils";
@@ -17,10 +17,12 @@ export const anchorRect = (anchor: PopoverAnchor | undefined) => {
   return r ? new DOMRect(r.left, r.top, r.width, r.height) : undefined;
 };
 
+export type { PopoverOpenChangeDetails, PopoverOpenChangeReason };
+
 export type PopoverRootProps = {
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange?: (open: boolean, details: PopoverOpenChangeDetails) => void;
   closeOnSelect?: boolean;
   children: React.ReactNode;
 };
@@ -53,7 +55,7 @@ export type PopoverContentProps = Omit<React.HTMLAttributes<HTMLDivElement>, "cl
 export type SuggestionsPopoverProps = React.HTMLAttributes<HTMLDivElement> &
   PopoverPlacementProps & {
     open: boolean;
-    onOpenChange?: (open: boolean) => void;
+    onOpenChange?: (open: boolean, details: PopoverOpenChangeDetails) => void;
     anchor: PopoverAnchor;
   };
 
@@ -100,25 +102,24 @@ export function usePopoverInternals<T extends PopoverInternals>(part: string): T
 }
 
 export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, closeOnSelect = true }: Omit<PopoverRootProps, "children">) {
-  const overlay = useOverlayTriggerState({ isOpen: controlled, defaultOpen, onOpenChange });
-  const { isOpen: open, setOpen: setOverlayOpen } = overlay;
+  const [open, setState] = useChangeState(controlled, defaultOpen, onOpenChange);
   const selected = React.useRef(false);
   const setOpen = React.useCallback(
-    (next: boolean) => {
+    (next: boolean, reason: PopoverOpenChangeReason, event?: Event) => {
       if (next) selected.current = false;
-      setOverlayOpen(next);
+      setState(next, reason, event);
     },
-    [setOverlayOpen],
+    [setState],
   );
   // After the task's microtasks, so an editor focused in onSelect (Lexical updates in a microtask) keeps focus
   const close = React.useCallback(
-    (reason?: "select") => {
-      selected.current = reason === "select";
-      queueMicrotask(() => setOpen(false));
+    (reason: PopoverOpenChangeReason = "none", event?: Event) => {
+      selected.current = reason === "item-press";
+      queueMicrotask(() => setOpen(false, reason, event));
     },
     [setOpen],
   );
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, overlay }), [open, setOpen, close, closeOnSelect]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected }), [open, setOpen, close, closeOnSelect]);
 }
 
 export function ContentFocus({ initialFocus, children }: { initialFocus?: PopoverInitialFocus; children: React.ReactNode }) {
@@ -138,7 +139,7 @@ export function PopoverProvider({ value, children }: { value: PopoverInternals; 
 
 export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(function Trigger({ render, className, style, children, ...props }, ref) {
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
-  const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
+  const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open, "trigger-press", e.nativeEvent);
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
   const merged = triggerProps(
     mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-state": state.open ? "open" : "closed", onClick: toggle }),

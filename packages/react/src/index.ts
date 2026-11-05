@@ -45,7 +45,18 @@ export type { SkinToneGlyphProps, SkinToneOpenChangeDetails, SkinToneOptionProps
 export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
 export { pickerInitialFocus } from "./react/popover";
-export type { PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";
+export type {
+  PopoverAnchor,
+  PopoverFinalFocus,
+  PopoverInitialFocus,
+  PopoverOpenChangeDetails,
+  PopoverOpenChangeReason,
+  PopoverPlacementProps,
+  PopoverRootProps,
+  PopoverTriggerProps,
+  PopoverTriggerState,
+  SuggestionsPopoverProps,
+} from "./react/popover";
 export { Emoji, useEmoji } from "./react/emoji";
 export type { EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";

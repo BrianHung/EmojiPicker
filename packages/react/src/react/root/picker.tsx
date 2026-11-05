@@ -20,7 +20,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { useChangeState } from "../utils/state";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
-import { PopoverContext } from "../popover/popover-context";
+import { PopoverContext, type PopoverOpenChangeReason } from "../popover/popover-context";
 import { EmojiContext, EmojiProvider, useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
@@ -151,11 +151,16 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       const { onSelect, popover, selects } = latest.current;
       if (selects) setValue(selection.unified, "item-press");
       onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
-      if (popover?.closeOnSelect) popover.close("select");
+      if (popover?.closeOnSelect) popover.close("item-press");
       return selection;
     },
     [state, reactions, collapseToReactions, setValue],
   );
+  const closePopover = React.useCallback((reason: PopoverOpenChangeReason, event?: Event) => {
+    const { popover } = latest.current;
+    popover?.close(reason, event);
+    return Boolean(popover);
+  }, []);
   const skinTone = React.useRef<(() => void) | null>(null);
   const actions = React.useMemo<EmojiPickerActions>(
     () => ({
@@ -170,17 +175,13 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
         state.setQuery("");
         list.current?.clear();
       },
-      close() {
-        const { popover } = latest.current;
-        popover?.close();
-        return Boolean(popover);
-      },
+      close: () => closePopover("none"),
       toggleSkinTone() {
         skinTone.current?.();
         return Boolean(skinTone.current);
       },
     }),
-    [state],
+    [state, closePopover],
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => (keyboardTarget && "current" in keyboardTarget ? keyboardTarget.current : keyboardTarget) ?? null, [keyboardTarget]);
@@ -227,7 +228,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
-      if (!query) return Boolean(list.current?.clear()) || actions.close();
+      if (!query) return Boolean(list.current?.clear()) || closePopover("escape-key", e.nativeEvent);
       state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
       list.current?.clear();
       return true;

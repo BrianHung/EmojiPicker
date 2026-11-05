@@ -5,7 +5,11 @@ import { rowsOf } from "./rows";
 export const popoverRoot = rowsOf<PopoverRootProps>()([
   { name: "open", type: "boolean" },
   { name: "defaultOpen", type: "boolean", default: "false" },
-  { name: "onOpenChange", type: "(open: boolean) => void" },
+  {
+    name: "onOpenChange",
+    type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "scroll" | "none", event?, cancel() }) => void',
+    description: "details.cancel() keeps it as it is. The suggestions popover takes the same callback.",
+  },
   { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },
 ]);
 
