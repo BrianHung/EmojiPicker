@@ -2,6 +2,7 @@ import * as React from "react";
 import { AnimatePresence, MotionGlobalConfig, motion, type Transition } from "motion/react";
 import { useSmoothCorners } from "@lisse/react";
 import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker";
+import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { useEmojiTextField } from "@/components/emoji-text-field";
@@ -317,7 +318,7 @@ export function IMessageScreen({
           className="top-auto! right-[0.3px]! bottom-0! left-[0.3px]! h-[388.7px]! max-h-none! border-0! bg-transparent! text-base text-black dark:text-white duration-[380ms] ease-[cubic-bezier(0.2,1.1,0.32,1)] after:hidden data-ending-style:duration-[140ms]"
         >
           <DrawerTitle className="sr-only">Emoji keyboard</DrawerTitle>
-          <EmojiKeyboard onPick={(s) => (compose ? insert.current(s.emoji || `:${s.shortcode}:`) : message && react(message.id, s.unified))} onDelete={compose ? () => erase.current() : undefined} />
+          <EmojiKeyboard onPick={(s) => (copyEmoji(s), compose ? insert.current(s.emoji || `:${s.shortcode}:`) : message && react(message.id, s.unified))} onDelete={compose ? () => erase.current() : undefined} />
         </DrawerContent>
       </Drawer>
     </div>

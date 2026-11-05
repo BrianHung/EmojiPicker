@@ -2,7 +2,7 @@ import * as React from "react";
 import { Emoji, type EmojiSelection } from "@brianhung/emoji-picker";
 import { toast } from "@/components/ui/toast";
 
-function copyEmoji(selection: EmojiSelection) {
+export function copyEmoji(selection: EmojiSelection) {
   const shortcode = selection.shortcode || `:${selection.shortcodes[0] ?? selection.unified}:`;
   navigator.clipboard?.writeText(selection.emoji || shortcode).catch(() => {});
   const icon = (

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Emoji, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
+import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, ld, useCompact, useLongPress } from "@/styles/scene-kit";
@@ -159,6 +160,7 @@ function Row({ message, first, last, scroll, listRef, onReact, compact }: RowPro
   const hold = useLongPress(() => setBarOpen(true));
   const pick = (s: EmojiSelection) => {
     onReact(s.unified);
+    copyEmoji(s);
     setBarOpen(false);
   };
   const bubble = React.useRef<HTMLDivElement>(null);

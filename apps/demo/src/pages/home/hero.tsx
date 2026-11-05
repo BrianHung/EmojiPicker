@@ -2,6 +2,7 @@ import * as React from "react";
 import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
 import { CodeBlock, CopyButton } from "@/components/site/code";
+import { copyEmoji } from "@/components/site/picked";
 import { useRenderer } from "@/components/site/shell";
 import { Collapsible, FitBox, Tabs } from "@/components/site/docs";
 import { STYLES, sourceOf, styleById, type Style } from "@/styles";
@@ -11,7 +12,7 @@ function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: Rende
   return (
     <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? renderer}>
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>
-        <appStyle.Picker />
+        <appStyle.Picker onSelect={copyEmoji} />
       </FitBox>
     </EmojiProvider>
   );

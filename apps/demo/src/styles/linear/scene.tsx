@@ -3,6 +3,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Emoji, EmojiPicker, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
+import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { LINEAR_CATEGORIES, linear } from "./picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
@@ -601,6 +602,7 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
             <TeamPicker
               onSelect={(s) => {
                 onChange(s.unified);
+                copyEmoji(s);
                 setOpen(false);
               }}
               autoFocus

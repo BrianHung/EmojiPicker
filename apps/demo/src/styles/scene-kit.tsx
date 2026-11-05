@@ -4,6 +4,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { copyEmoji } from "@/components/site/picked";
 import { tokensOf, type Style, type StylePickerProps } from "./style";
 
 export const ld = (light: string, dark: string) => `light-dark(${light}, ${dark})`;
@@ -136,7 +137,7 @@ export function ScenePicker({ appStyle: style, onSelect, children, label, trigge
       </EmojiPopover.Trigger>
       <EmojiPopover.Content side={side} align={align} aria-label={`${style.label} style emoji picker`} style={{ fontFamily: font }}>
         <FitViewport width={style.size.width}>
-          <style.Picker onSelect={onSelect} autoFocus className={pickerClassName} />
+          <style.Picker onSelect={(s) => (onSelect(s), copyEmoji(s))} autoFocus className={pickerClassName} />
         </FitViewport>
       </EmojiPopover.Content>
     </EmojiPopover.Root>
@@ -185,6 +186,7 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
             fluid
             onSelect={(s) => {
               onSelect(s);
+              copyEmoji(s);
               setOpen(false);
             }}
             className="h-[min(420px,55dvh)] w-full rounded-none border-0 bg-transparent shadow-none backdrop-blur-none [&_[data-slot=emoji-picker-category-nav]]:min-w-0 [&_[data-slot=emoji-picker-category-nav]]:overflow-x-auto [&_[data-slot=emoji-picker-category-nav]]:[scrollbar-width:none]"

@@ -116,7 +116,7 @@ export function StyleAutocomplete({ appStyle, suggestions: menu, open, className
   );
 }
 
-export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style; reactions: Reaction[]; onToggle: (unified: string) => void }) {
+export function StylePills({ appStyle, reactions, onToggle, onSelect }: { appStyle: Style; reactions: Reaction[]; onToggle: (unified: string) => void; onSelect?: (s: EmojiSelection) => void }) {
   const store = useEmojiStore();
   return (
     <div data-style={appStyle.id} style={tokensOf(appStyle)} className="flex flex-wrap items-center gap-1">
@@ -136,7 +136,7 @@ export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style;
           </button>
         );
       })}
-      <StyleDropdown appStyle={appStyle} reaction label="Add reaction" onSelect={(s) => onToggle(s.unified)} triggerClassName={cn("flex items-center", appStyle.pill.add)}>
+      <StyleDropdown appStyle={appStyle} reaction label="Add reaction" onSelect={(s) => (onToggle(s.unified), onSelect?.(s))} triggerClassName={cn("flex items-center", appStyle.pill.add)}>
         {appStyle.pill.addIcon ?? <SmilePlus size={15} strokeWidth={2} />}
       </StyleDropdown>
     </div>
