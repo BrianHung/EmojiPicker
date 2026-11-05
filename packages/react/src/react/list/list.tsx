@@ -94,8 +94,8 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const results = searching ? picker.searchResults : undefined;
   const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(
-    () => ({ orientation, metrics, columns: picker.columns, fitColumns: picker.fitColumns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
-    [orientation, metrics, picker.columns, picker.fitColumns, horizontal, results, searching, searchRows, rows],
+    () => ({ orientation, metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
+    [orientation, metrics, picker.columns, horizontal, results, searching, searchRows, rows],
   );
   const measure = React.useCallback(() => {
     const probe = probeRef.current;

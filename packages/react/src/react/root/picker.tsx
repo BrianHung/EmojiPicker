@@ -26,8 +26,7 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
     actionsRef?: React.Ref<EmojiPickerActions>;
     keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;
-    columns?: number;
-    fitColumns?: boolean;
+    columns?: "fit" | number;
     categories?: readonly CategoryOption[];
     frequent?: number | false;
     collapsedCategories?: readonly string[];
@@ -85,8 +84,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     onReactionsOpenChange,
     searchResults = "ranked",
     searchLimit = 200,
-    columns,
-    fitColumns = true,
+    columns: columnsProp = "fit",
     className,
     style,
     render,
@@ -97,6 +95,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     ...rest
   } = props;
   const { store, labels, maxVersion } = useEmojiContext();
+  const columns = columnsProp === "fit" ? undefined : columnsProp;
   const popover = React.useContext(PopoverContext);
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = React.useRef<HTMLElement | null>(null);
@@ -180,7 +179,6 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       inPopover: Boolean(popover),
       disableVariations,
       columns,
-      fitColumns,
       emojiVersion,
       categories: view.categories,
       categorySections: view.categorySections,
@@ -206,7 +204,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       registerInput: state.registerInput,
       listId,
     }),
-    [store, state, labels, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
+    [store, state, labels, popover, disableVariations, columns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false) : undefined, panel, registerPanel } : null),

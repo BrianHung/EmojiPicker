@@ -37,7 +37,6 @@ export type PickerContextValue = {
   inPopover: boolean;
   disableVariations: boolean;
   columns?: number;
-  fitColumns: boolean;
   emojiVersion?: number;
   categories: readonly Category<React.ReactNode>[];
   categorySections: readonly EmojiSection[];

@@ -64,8 +64,7 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 12}
-      fitColumns={false}
+      columns={fluid ? "fit" : 12}
       categories={CATEGORIES}
       searchResults={searchResults}
       onSelect={onSelect}

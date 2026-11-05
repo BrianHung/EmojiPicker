@@ -36,7 +36,7 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 8}
+      columns={fluid ? "fit" : 8}
       suggested={REACTIONS}
       categories={CATEGORIES}
       searchResults={searchResults}

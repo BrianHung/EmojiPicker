@@ -79,8 +79,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
   const nav = useActiveTabInView(true);
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 9}
-      fitColumns={false}
+      columns={fluid ? "fit" : 9}
       frequent={18}
       categories={CATEGORIES}
       searchResults={searchResults}

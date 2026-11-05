@@ -28,7 +28,7 @@ export function ApplePicker({ onSelect, search = true, autoFocus = false, fluid 
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 6}
+      columns={fluid ? "fit" : 6}
       categories={CATEGORIES}
       searchResults={searchResults}
       onSelect={onSelect}

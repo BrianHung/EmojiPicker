@@ -3,8 +3,7 @@ import { rowsOf } from "./rows";
 
 export const root = rowsOf<RootProps>()([
   { name: "onSelect", type: "(selection: EmojiSelection, details: SelectDetails) => void" },
-  { name: "columns", type: "number", default: "fits width", description: "Emoji per row." },
-  { name: "fitColumns", type: "boolean", default: "true", description: "With columns: fewer per row when they don't fit; false keeps them." },
+  { name: "columns", type: '"fit" | number', default: '"fit"', description: "Emoji per row: as many as fit the width, or exactly this many." },
   { name: "categories", type: "readonly CategoryOption[]", description: "The sections to show, in order: { id: CategoryId, name?, icon?, nav? }." },
   { name: "frequent", type: "number | false", default: "16", description: "Number of frequently used emoji. false hides the section." },
   { name: "suggested", type: "readonly string[]", description: "Fixed emoji for the suggested section." },

@@ -84,7 +84,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 9}
+      columns={fluid ? "fit" : 9}
       categories={CATEGORIES}
       suggested={GETTING_WORK_DONE}
       searchResults={searchResults}

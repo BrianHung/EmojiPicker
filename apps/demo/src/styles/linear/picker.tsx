@@ -29,8 +29,7 @@ export const LINEAR_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Fr
 export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 9}
-      fitColumns={false}
+      columns={fluid ? "fit" : 9}
       frequent={18}
       categories={LINEAR_CATEGORIES}
       searchResults={searchResults}

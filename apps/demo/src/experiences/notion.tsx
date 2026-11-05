@@ -26,7 +26,6 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
         searchLimit={notionEmojiOptions.limit}
         categories={CATEGORIES}
         columns={12}
-        fitColumns={false}
         keyboardTarget={editor}
         actionsRef={actions}
         onSelect={(selection) =>
