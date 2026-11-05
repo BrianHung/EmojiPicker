@@ -1,6 +1,7 @@
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker-react";
+import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { discord } from "./picker";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -286,7 +287,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     const attrs = emojiAttrs(store, unified);
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
-  const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
+  const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, onSelect: copyEmoji, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
   const menuOpen = React.useRef(false);
   menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});

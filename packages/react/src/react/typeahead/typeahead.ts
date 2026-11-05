@@ -3,7 +3,7 @@ import { isComposingKey, syncCombobox, type EmojiStore, type EmojiSuggestionsMac
 import { useSuggestionsMachine, useSuggestionsStore, type EmojiSuggestionsOptions, type EmojiSuggestionsState, type KeyLike } from "./suggestions";
 import { useEmojiContext } from "../provider/provider";
 
-export type EmojiTypeaheadOptions = Pick<EmojiSuggestionsOptions, "limit" | "matchBy" | "order" | "columns"> & {
+export type EmojiTypeaheadOptions = Pick<EmojiSuggestionsOptions, "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
   insert?: "emoji" | "shortcode";
 };
 

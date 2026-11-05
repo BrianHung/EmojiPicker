@@ -3,7 +3,7 @@ import { createStore, memo, stable, subscribeAll } from "./reactive";
 import { createSearch } from "./search/query";
 import type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
 import { isComposingKey } from "./shortcodes";
-import type { EmojiStore } from "./store";
+import type { EmojiSelection, EmojiStore } from "./store";
 
 export type KeyLike = { key: string; shiftKey?: boolean; isComposing?: boolean; keyCode?: number; preventDefault(): void };
 
@@ -16,6 +16,7 @@ export type SuggestionsOptions = {
   order?: CompletionOrder;
   columns?: number;
   onChoose?: (suggestion: ShortcodeCompletion) => void;
+  onSelect?: (selection: EmojiSelection) => void;
   onDismiss?: () => void;
 };
 
@@ -114,8 +115,10 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
     choose(index = getSnapshot().highlightedIndex, { record = true } = {}) {
       const suggestion = getSnapshot().suggestions[index];
       if (!suggestion) return;
-      if (record) store.frequents.record(suggestion.record.unified);
+      const { unified, imageUrl } = suggestion.record;
+      const selection = store.select(imageUrl ? unified : store.withSkinTone(unified), { record });
       opts().onChoose?.(suggestion);
+      if (selection) opts().onSelect?.(selection);
     },
     dismiss() {
       ui.dispatch({ type: "dismiss", key: input.getSnapshot().resetKey });

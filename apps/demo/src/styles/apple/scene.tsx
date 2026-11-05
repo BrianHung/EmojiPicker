@@ -445,7 +445,7 @@ function Composer({
   erase: React.RefObject<() => void>;
 }) {
   const store = useEmojiStore();
-  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6 });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6, onSelect: copyEmoji });
   insert.current = insertAtCaret;
   erase.current = () => setText(segment(value).slice(0, -1).join(""));
   const submit = () => {

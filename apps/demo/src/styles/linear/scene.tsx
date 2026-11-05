@@ -407,7 +407,7 @@ function CommentCard({ comment, onToggle, compact = false }: { comment: Comment;
 }
 
 function Composer({ onSend, compact = false }: { onSend: (text: string) => void; compact?: boolean }) {
-  const { value, setText, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>(linearEmojiOptions);
+  const { value, setText, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...linearEmojiOptions, onSelect: copyEmoji });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);

@@ -69,7 +69,7 @@ const DRAFT = ":smi";
 
 function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
-  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}) });
+  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}), onSelect: copyEmoji });
   return (
     <div className="relative w-full max-w-[380px]">
       <StyleAutocomplete appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
