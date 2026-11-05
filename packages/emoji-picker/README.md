@@ -429,6 +429,8 @@ Japanese in three lines: build the data, pass it with the locale, and translate 
 
 `locale` is one setting for everything language-specific: case folding, word segmentation and A–Z order in search, the result count's digits and plural rules, and React Aria's text direction. Without it, the dataset's own `locale` is used. Each piece can be replaced on its own, and replacing one leaves the others on the locale: `labels` (any of `EmojiLabels`), `data` (a dataset per locale), `search` (`lexical({ segmenter, tokenize })`), `collator` (alphabetical shortcode order), and the shortcode sets (`build-data --shortcodes`). The same options work on `createEmojiStore` without React; `store.labels()` is the merged labels.
 
+Arrow keys and the grid's layout follow React Aria's locale direction, not CSS `direction`: for right-to-left, set an RTL `locale` (or wrap the app in React Aria's `I18nProvider`) along with `<html dir="rtl">`.
+
 The package ships English. To build a dataset for another language, run the `build-data` command with an [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales):
 
 ```bash

@@ -1,6 +1,7 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import type { Collection, Key, Node } from "@react-types/shared";
+import { useLocale } from "react-aria/I18nProvider";
 import { Rect, Size, useVirtualizerState, type LayoutInfo, type ReusableView, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiGridLayout, EmojiGridLayoutOptions } from "./layout";
 
@@ -38,9 +39,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     }),
     [],
   );
-  const [dir, setDir] = React.useState<"ltr" | "rtl">("ltr");
-  const dirRef = React.useRef(dir);
-  dirRef.current = dir;
+  const dir = useLocale().direction;
   const state = useVirtualizerState<Node<unknown>, React.ReactNode, EmojiGridLayoutOptions>({
     allowsWindowScrolling: true,
     layout,
@@ -68,7 +67,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const list = scrollRef.current;
       const el = list && scroller(list);
       if (!el || !list) return;
-      const rtl = getComputedStyle(list).direction === "rtl";
+      const rtl = dir === "rtl";
       // Sticky titles pin at the scroller's edge, not inside its padding
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
       content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding})`);
@@ -79,16 +78,15 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const extent = Math.max(0, (horizontal ? el.clientWidth : el.clientHeight) + Math.min(0, offset));
       const rect = horizontal ? new Rect(start, 0, extent, list.clientHeight) : new Rect(0, start, width, extent);
       const { virtualizer, setSize, setVisibleRect } = latest.current;
-      if (virtualizer.size.equals(size) && virtualizer.visibleRect.equals(rect) && (rtl ? "rtl" : "ltr") === dirRef.current) return;
+      if (virtualizer.size.equals(size) && virtualizer.visibleRect.equals(rect)) return;
       const apply = () => {
-        setDir(rtl ? "rtl" : "ltr");
         if (!virtualizer.size.equals(size)) setSize(size);
         if (!virtualizer.visibleRect.equals(rect)) setVisibleRect(rect);
       };
       if (flush) flushSync(apply);
       else apply();
     },
-    [scroller, scrollRef, horizontal],
+    [scroller, scrollRef, horizontal, dir],
   );
 
   React.useLayoutEffect(() => {

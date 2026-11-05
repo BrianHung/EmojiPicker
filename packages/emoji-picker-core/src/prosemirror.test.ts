@@ -30,5 +30,6 @@ it("opens on :smi, and ArrowDown + Enter replaces it with the emoji; a composing
   expect(view.state.doc.textContent).toBe(`hi ${suggestions.textFor(list[1]!)} `);
   expect(suggestions.getSnapshot().open).toBe(false);
   expect(view.dom.hasAttribute("aria-expanded")).toBe(false);
+  expect(view.dom.hasAttribute("role")).toBe(false);
   view.destroy();
 });

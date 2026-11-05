@@ -158,7 +158,7 @@ export function syncCombobox(el: Element, machine: EmojiSuggestionsMachine): () 
   };
   const sync = () => {
     if (!machine.getSnapshot().open) return restore();
-    role ??= el.getAttribute("role");
+    if (role === undefined) role = el.getAttribute("role");
     for (const [name, value] of Object.entries(machine.getInputProps())) {
       if (value === undefined) el.removeAttribute(name);
       else el.setAttribute(name, String(value));

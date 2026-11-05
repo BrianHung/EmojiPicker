@@ -1,15 +1,18 @@
 // Not React Aria's Tabs: they always select a tab, and "Frequently used" has none to select
 import * as React from "react";
+import type { Orientation } from "@react-types/shared";
+import { useLocale } from "react-aria/I18nProvider";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { useFocusVisible } from "react-aria/useFocusVisible";
+import { useFocusRing } from "react-aria/useFocusRing";
+import { useHover } from "react-aria/useHover";
+import { usePress } from "react-aria/usePress";
 import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
 import { useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
 import { useCategoryNavigation } from "../root/picker";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
-
-type Orientation = "horizontal" | "vertical";
 
 export type NavCategory = ReturnType<typeof useCategoryNavigation>["categories"][number];
 
@@ -26,10 +29,8 @@ type Nav = {
   selected: string;
   stop: string;
   disabled: boolean;
-  focus: { key: string | null; within: boolean };
-  pointer: { hovered: string | null; pressed: string | null };
-  focusVisible: boolean;
   tabs: Map<string, HTMLElement>;
+  choose(key: string, instant: boolean): void;
 };
 const NavContext = React.createContext<Nav | null>(null);
 const TabContext = React.createContext<NavCategory | null>(null);
@@ -41,8 +42,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
   const id = React.useId();
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
-  const [pointer, setPointer] = React.useState<{ hovered: string | null; pressed: string | null }>({ hovered: null, pressed: null });
-  const { isFocusVisible } = useFocusVisible();
+  const { direction } = useLocale();
   const [tabs] = React.useState(() => new Map<string, HTMLElement>());
   if (categories.length <= 1) return null;
 
@@ -62,17 +62,16 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
     const key = keyOf(e);
     if (key == null || disabled || e.altKey || e.ctrlKey || e.metaKey) return;
     const i = ids.indexOf(key);
-    const rtl = orientation === "horizontal" && getComputedStyle(e.currentTarget).direction === "rtl";
+    const rtl = orientation === "horizontal" && direction === "rtl";
     const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
     const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
-    if (to != null) tabs.get(to)?.focus();
-    else if (e.key === "Enter" || e.key === " ") choose(key, true);
-    else return;
+    if (to == null) return;
+    tabs.get(to)?.focus();
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const nav: Nav = { id, selected, stop, disabled, focus, pointer, focusVisible: isFocusVisible, tabs };
+  const nav: Nav = { id, selected, stop, disabled, tabs, choose };
   return (
     <NavContext.Provider value={nav}>
       {renderElement(
@@ -96,15 +95,6 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
           },
           onBlur: (e: React.FocusEvent) => {
             if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus((f) => ({ ...f, within: false }));
-          },
-          onPointerOver: (e: React.PointerEvent) => e.pointerType !== "touch" && setPointer((p) => ({ ...p, hovered: keyOf(e) })),
-          onPointerLeave: () => setPointer({ hovered: null, pressed: null }),
-          onPointerDown: (e: React.PointerEvent) => setPointer((p) => ({ ...p, pressed: keyOf(e) })),
-          onPointerUp: () => setPointer((p) => ({ ...p, pressed: null })),
-          onPointerCancel: () => setPointer((p) => ({ ...p, pressed: null })),
-          onClick: (e: React.MouseEvent) => {
-            const key = keyOf(e);
-            if (key != null && !disabled) choose(key, e.detail === 0);
           },
           children: categories.map((c) => (
             <TabContext.Provider key={c.id} value={c}>
@@ -135,16 +125,18 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
     [tabs, c.id],
   );
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(register, ref), [register, ref]);
+  const { hoverProps, isHovered } = useHover({ isDisabled: disabled });
+  const { pressProps, isPressed } = usePress({ isDisabled: disabled, onPress: (e) => nav.choose(c.id, e.pointerType === "keyboard" || e.pointerType === "virtual") });
+  const { focusProps, isFocused, isFocusVisible } = useFocusRing();
   const selected = c.id === nav.selected;
-  const focused = nav.focus.within && nav.focus.key === c.id;
   const state: CategoryTabState = {
     category: c,
     selected,
     active: selected && !disabled,
-    focused,
-    focusVisible: focused && nav.focusVisible,
-    hovered: !disabled && nav.pointer.hovered === c.id,
-    pressed: !disabled && nav.pointer.pressed === c.id,
+    focused: isFocused,
+    focusVisible: isFocusVisible,
+    hovered: isHovered,
+    pressed: isPressed,
     disabled,
   };
   const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
@@ -159,7 +151,7 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
       "aria-disabled": disabled || undefined,
       tabIndex: disabled ? undefined : c.id === nav.stop ? 0 : -1,
       className: "",
-      ...props,
+      ...mergeProps(props, hoverProps, pressProps, focusProps),
       ref: refs,
       "data-key": c.id,
       "data-selected": selected || undefined,

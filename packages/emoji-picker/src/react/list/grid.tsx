@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Key, LayoutDelegate } from "@react-types/shared";
 import { useFocusRing } from "react-aria/useFocusRing";
 import { useFocusVisible } from "react-aria/useFocusVisible";
+import { useLocale } from "react-aria/I18nProvider";
 import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
@@ -86,7 +87,6 @@ export type GridGeometry = {
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
 const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
-export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
 // Handlers are delegated from the list: one set for every mounted cell
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
 
@@ -137,8 +137,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const lastFocused = React.useRef<Key | null>(null);
   // After a key move, hover takes over only once the pointer moves: VoiceOver moves the pointer to what it reads, lagging focus
   const keyed = React.useRef(false);
-  const latest = React.useRef({ collection, virtual, geometry, searching });
-  latest.current = { collection, virtual, geometry, searching };
+  const rtl = useLocale().direction === "rtl";
+  const latest = React.useRef({ collection, virtual, geometry, searching, rtl });
+  latest.current = { collection, virtual, geometry, searching, rtl };
 
   const highlight = (): string | null => core.getSnapshot().highlighted;
   const position = React.useRef<Key | null>(null);
@@ -196,7 +197,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         return true;
       }
       let move = action;
-      if (isRtl(listRef.current) && (move === "move-left" || move === "move-right")) move = move === "move-left" ? "move-right" : "move-left";
+      if (latest.current.rtl && (move === "move-left" || move === "move-right")) move = move === "move-left" ? "move-right" : "move-left";
       const current = (dom ? cellOf(event?.target ?? null)?.getAttribute("data-key") : null) ?? highlight();
       if (current == null) {
         const start = move === "first" ? navigation.getFirstKey() : move === "last" ? navigation.getLastKey() : move === "move-down" || move === "move-right" || move === "page-down" ? geometry.firstVisible() : null;
