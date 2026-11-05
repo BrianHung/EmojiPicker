@@ -1,7 +1,7 @@
 import { GROUPS, type EmojiRecord } from "./dataset";
 import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
 import type { EmojiLabels } from "./labels";
-import { createSearch } from "./query";
+import { createSearch } from "./search/query";
 import { emitter, memo, same } from "./reactive";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
 import type { EmojiSelection, EmojiStore } from "./store";
@@ -133,12 +133,27 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   };
   const items = memo(itemFactory);
   const categoriesOf = memo((_status: string, categories: readonly CategoryOption<Icon>[] | undefined, labels: EmojiLabels) =>
-    categoryList(categories, store.status() === "ready" ? store.groupNames() : [], labels, [...store.customGroups().values()].filter((g): g is string => !!g)),
+    categoryList(
+      categories,
+      store.status() === "ready" ? store.groupNames() : [],
+      labels,
+      [...store.customGroups().values()].filter((g): g is string => !!g),
+    ),
   );
   const suggestedOf = memo((list: readonly string[], _tone: number) => list.map((u) => store.withSkinTone(u)));
   const sectionsOf = memo((status: string, categories: readonly Category<Icon>[], suggested: readonly string[], collapsed: readonly string[], emojiVersion: number | undefined, _tone: number, item: ReturnType<typeof itemFactory>) =>
     status === "ready"
-      ? categorySections({ categories, records: store.records(), suggested, customGroup: (u) => store.customGroups().get(u), collapsed: (id) => collapsed.includes(id), emojiVersion, get: store.get, withSkinTone: (u) => store.withSkinTone(u), item })
+      ? categorySections({
+          categories,
+          records: store.records(),
+          suggested,
+          customGroup: (u) => store.customGroups().get(u),
+          collapsed: (id) => collapsed.includes(id),
+          emojiVersion,
+          get: store.get,
+          withSkinTone: (u) => store.withSkinTone(u),
+          item,
+        })
       : NO_SECTIONS,
   );
   const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined) => (emojiVersion == null ? results : results.filter((r) => r.imageUrl || r.version <= emojiVersion)));
@@ -165,24 +180,25 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, l, tone, item) : categorySections;
     const { hovered, searchFields, mounted, domFocus } = ui;
     const virtual = (opts.focusModel ?? "input") === "input" && (searchFields > 0 || !mounted) && !domFocus;
-    return (cached = last = same(last, {
-      query: q,
-      searching,
-      results,
-      pending: raw.pending,
-      categories,
-      categorySections,
-      sections,
-      collapsed: collapsed(),
-      skinTone: tone,
-      focus: virtual ? "virtual" : "roving",
-      highlighted: highlighted(),
-      hovered,
-      active: activeOf(sections, hovered ?? highlighted()),
-      activeSection: ui.activeSection,
-      variations: ui.variations,
-      reactions: ui.held ? reactions : (reactions = opts.reactions),
-    }));
+    return (cached = last =
+      same(last, {
+        query: q,
+        searching,
+        results,
+        pending: raw.pending,
+        categories,
+        categorySections,
+        sections,
+        collapsed: collapsed(),
+        skinTone: tone,
+        focus: virtual ? "virtual" : "roving",
+        highlighted: highlighted(),
+        hovered,
+        active: activeOf(sections, hovered ?? highlighted()),
+        activeSection: ui.activeSection,
+        variations: ui.variations,
+        reactions: ui.held ? reactions : (reactions = opts.reactions),
+      }));
   }
 
   // Controlled, later calls before the next render build on the last change.

@@ -14,7 +14,12 @@ export const TWEMOJI_EMOJI_VERSION = 17;
  * 2764-fe0f → 2764.svg, 1f3f3-fe0f-200d-1f308 → 1f3f3-fe0f-200d-1f308.svg
  */
 export function twemojiUrl(unified: string, baseUrl = TWEMOJI_BASE_URL): string {
-  const code = unified.includes("200d") ? unified : unified.split("-").filter((c) => c !== "fe0f").join("-");
+  const code = unified.includes("200d")
+    ? unified
+    : unified
+        .split("-")
+        .filter((c) => c !== "fe0f")
+        .join("-");
   return `${baseUrl}${code}.svg`;
 }
 

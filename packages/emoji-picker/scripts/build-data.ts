@@ -54,7 +54,11 @@ export function findEmojibase(): { root: string; load: Load } | undefined {
 }
 
 /** Locales emojibase-data has data for. */
-export const emojibaseLocales = (root: string) => fs.readdirSync(root).filter((name) => fs.existsSync(path.join(root, name, "data.json"))).sort();
+export const emojibaseLocales = (root: string) =>
+  fs
+    .readdirSync(root)
+    .filter((name) => fs.existsSync(path.join(root, name, "data.json")))
+    .sort();
 
 const isEnglish = (locale: string) => locale.split("-")[0] === "en";
 
@@ -76,7 +80,12 @@ const MESSAGE_KEY: Record<(typeof GROUPS)[number], string> = {
 const ENGLISH_GROUPS = ["Smileys & People", "Animals & Nature", "Food & Drink", "Travel & Places", "Activities", "Objects", "Symbols", "Flags"];
 
 const toArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
-const stripFE0F = (hex: string) => hex.toLowerCase().split("-").filter((c) => c !== "fe0f").join("-");
+const stripFE0F = (hex: string) =>
+  hex
+    .toLowerCase()
+    .split("-")
+    .filter((c) => c !== "fe0f")
+    .join("-");
 // emojibase's hexcode can omit FE0F (❤️ is "2764"); the fully qualified `emoji`
 // string is what renders as emoji, and what emoji-picker-react and Twemoji key on.
 const qualified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
@@ -142,8 +151,7 @@ export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(l
   }
 
   const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase(locale) + s.slice(1);
-  const groups =
-    isEnglish(locale) ? ENGLISH_GROUPS : GROUPS.map((key) => capitalize(messages.groups.find((g) => g.key === MESSAGE_KEY[key])?.message ?? key));
+  const groups = isEnglish(locale) ? ENGLISH_GROUPS : GROUPS.map((key) => capitalize(messages.groups.find((g) => g.key === MESSAGE_KEY[key])?.message ?? key));
 
   return {
     dataset: { format: 1, locale, emojibase: version, groups, emojis, toneExceptions },

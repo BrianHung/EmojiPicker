@@ -19,7 +19,10 @@ await page.goto(`${SHOT}?view=og`, { waitUntil: "domcontentloaded" });
 await page.locator("[data-og] img").first().waitFor();
 await page.evaluate(() => document.fonts.ready);
 await page.waitForTimeout(800);
-await sharp(await page.locator("[data-og]").screenshot()).resize(1200, 630).png({ compressionLevel: 9 }).toFile(pub("og.png"));
+await sharp(await page.locator("[data-og]").screenshot())
+  .resize(1200, 630)
+  .png({ compressionLevel: 9 })
+  .toFile(pub("og.png"));
 
 /** Steps the og:video frame by frame and encodes it as H.264. */
 async function renderVideo(out) {
@@ -31,7 +34,9 @@ async function renderVideo(out) {
     // An edit elsewhere can reload the dev page mid-render: wait for the harness to come back.
     await page.waitForFunction(() => typeof window.setOgTime === "function" && [...document.images].every((img) => img.complete && img.naturalWidth));
     await page.evaluate((t) => window.setOgTime(t), i / FPS);
-    await sharp(await page.locator("[data-og]").screenshot()).resize(1200, 630).toFile(join(frames, `${String(i).padStart(4, "0")}.png`));
+    await sharp(await page.locator("[data-og]").screenshot())
+      .resize(1200, 630)
+      .toFile(join(frames, `${String(i).padStart(4, "0")}.png`));
   }
   execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-framerate", String(FPS), "-i", join(frames, "%04d.png"), "-c:v", "libx264", "-preset", "slow", "-crf", "24", "-pix_fmt", "yuv420p", "-movflags", "+faststart", pub(out)]);
   rmSync(frames, { recursive: true });

@@ -32,7 +32,11 @@ export const components: MDXComponents = {
   ),
   p: ({ children }) => <P>{children}</P>,
   code: ({ children }) => <C>{children}</C>,
-  ul: ({ children }) => <ul className="ml-5 list-disc space-y-1.5 text-[15px] leading-7 text-muted-foreground [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground">{children}</ul>,
+  ul: ({ children }) => (
+    <ul className="ml-5 list-disc space-y-1.5 text-[15px] leading-7 text-muted-foreground [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground">
+      {children}
+    </ul>
+  ),
   hr: () => <hr className="mt-8 border-border" />,
   Code: ({ code, label: _, ...props }: CodeProps) => <Code {...props}>{code}</Code>,
   CodeTabs: CodeBlockTabs,

@@ -8,7 +8,16 @@ const REAL = {
   linear: { theme: "light", parts: { root: [0, 0, 273, 321], input: [5.5, 4.5, 262, 28], emoji: [10.5, 65.5, 28, 28] } },
   notion: { theme: "light", parts: { root: [0, 0, 408, 390], input: [8, 48, 322, 28], tone: [372, 48, 28, 28], tab: [12, 348, 32, 32], emoji: [12, 124.5, 32, 32] } },
 };
-const SEL = { root: "[data-slot=emoji-picker]", tab: "[data-slot=category-tab]", input: "[data-slot=search-input]", viewport: "[data-slot=viewport]", emoji: "[data-slot=emoji]", tone: "[data-slot=skin-tone] > button", header: "[data-slot=category-header]", glyph: "[data-slot=emoji] > *" };
+const SEL = {
+  root: "[data-slot=emoji-picker]",
+  tab: "[data-slot=category-tab]",
+  input: "[data-slot=search-input]",
+  viewport: "[data-slot=viewport]",
+  emoji: "[data-slot=emoji]",
+  tone: "[data-slot=skin-tone] > button",
+  header: "[data-slot=category-header]",
+  glyph: "[data-slot=emoji] > *",
+};
 const b = await chromium.launch({ channel: "chrome", headless: true });
 for (const [style, { theme, parts }] of Object.entries(REAL)) {
   const p = await (await b.newContext({ deviceScaleFactor: 2 })).newPage();
@@ -16,7 +25,16 @@ for (const [style, { theme, parts }] of Object.entries(REAL)) {
   await p.locator(SEL.emoji).first().waitFor();
   const boxes = await p.evaluate((sel) => {
     const R = document.querySelector(sel.root).getBoundingClientRect();
-    return Object.fromEntries(Object.entries(sel).map(([k, s]) => { const e = document.querySelector(s); if (!e) return [k, null]; const r = e.getBoundingClientRect(), c = getComputedStyle(e), p = k === "glyph" ? [parseFloat(c.paddingLeft), parseFloat(c.paddingTop)] : [0, 0]; return [k, [r.x - R.x + p[0], r.y - R.y + p[1], r.width - 2 * p[0], r.height - 2 * p[1]]]; }));
+    return Object.fromEntries(
+      Object.entries(sel).map(([k, s]) => {
+        const e = document.querySelector(s);
+        if (!e) return [k, null];
+        const r = e.getBoundingClientRect(),
+          c = getComputedStyle(e),
+          p = k === "glyph" ? [parseFloat(c.paddingLeft), parseFloat(c.paddingTop)] : [0, 0];
+        return [k, [r.x - R.x + p[0], r.y - R.y + p[1], r.width - 2 * p[0], r.height - 2 * p[1]]];
+      }),
+    );
   }, SEL);
   let worst = 0;
   const rows = Object.entries(parts).map(([k, real]) => {

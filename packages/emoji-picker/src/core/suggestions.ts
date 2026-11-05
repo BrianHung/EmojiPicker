@@ -1,7 +1,7 @@
 import { unifiedToNative, type EmojiRecord } from "./dataset";
-import { createSearch } from "./query";
+import { createSearch } from "./search/query";
 import { emitter, memo, same } from "./reactive";
-import type { CompletionOrder, ShortcodeCompletion } from "./search-index";
+import type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
 import { isComposingKey } from "./shortcodes";
 import type { EmojiStore } from "./store";
 
@@ -69,11 +69,7 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
   const limit = () => opts.limit ?? 8;
   const id = (suffix: string) => `${opts.id ?? "emoji-suggestions"}-${suffix}`;
   const suggestionsOf = memo((status: string, q: string, n: number, matchBy: string | undefined, order: CompletionOrder | undefined, searched: readonly EmojiRecord[]) =>
-    status !== "ready" || !q
-      ? NONE
-      : matchBy === "search"
-        ? searched.map((record) => ({ record, shortcode: record.shortcodes[0] ?? record.name.replace(/\s+/g, "_"), match: null }))
-        : store.completeShortcode(q, n, order),
+    status !== "ready" || !q ? NONE : matchBy === "search" ? searched.map((record) => ({ record, shortcode: record.shortcodes[0] ?? record.name.replace(/\s+/g, "_"), match: null })) : store.completeShortcode(q, n, order),
   );
 
   function getSnapshot(): SuggestionsSnapshot {
@@ -146,8 +142,7 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       return true;
     },
     /** What a suggestion inserts: the emoji in the user's skin tone, or `:shortcode:` (always for custom emoji). */
-    textFor: ({ record, shortcode }: ShortcodeCompletion, insert: "emoji" | "shortcode" = "emoji") =>
-      record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified)),
+    textFor: ({ record, shortcode }: ShortcodeCompletion, insert: "emoji" | "shortcode" = "emoji") => (record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified))),
     getListProps: () => ({ id: id("listbox"), role: "listbox" as const }),
     getOptionProps(index: number) {
       const selected = index === getSnapshot().highlightedIndex;

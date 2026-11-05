@@ -76,13 +76,7 @@ export type MobileFrameProps = Omit<SceneFrameProps, "width" | "height"> & { hei
 
 export function MobileFrame({ height = 640, label, appStyle, className, style, children }: MobileFrameProps) {
   return (
-    <div
-      role="region"
-      aria-label={label}
-      data-style={appStyle?.id}
-      className={cn("relative mx-auto flex w-full max-w-[430px] flex-col overflow-hidden", className)}
-      style={{ ...tokensOf(appStyle), height, ...style }}
-    >
+    <div role="region" aria-label={label} data-style={appStyle?.id} className={cn("relative mx-auto flex w-full max-w-[430px] flex-col overflow-hidden", className)} style={{ ...tokensOf(appStyle), height, ...style }}>
       {children}
     </div>
   );
@@ -303,7 +297,7 @@ export function EmojiText({ text, size, className }: { text: string; size: numbe
     let run = "";
     segs.forEach((seg, i) => {
       const unified = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u.test(seg) ? toUnified(seg) : "";
-      const record = unified ? store.get(unified) ?? store.get(unified.replace(/-fe0f/g, "")) : undefined;
+      const record = unified ? (store.get(unified) ?? store.get(unified.replace(/-fe0f/g, ""))) : undefined;
       if (!record) return void (run += seg);
       if (run) out.push(run);
       run = "";

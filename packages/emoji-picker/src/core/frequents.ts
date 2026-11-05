@@ -34,12 +34,7 @@ export const DEFAULT_FREQUENT = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-f
 type Entry = [score: number, updatedAt: number];
 
 /** Frequency with recency decay: each use adds 1, and scores halve every `halfLifeDays`. */
-export function createFrequencyStore({
-  storage = localStorageAdapter("emoji-picker:frequents"),
-  halfLifeDays = 14,
-  defaults = DEFAULT_FREQUENT,
-  max = 64,
-}: FrequencyStoreOptions = {}): FrequencyStore {
+export function createFrequencyStore({ storage = localStorageAdapter("emoji-picker:frequents"), halfLifeDays = 14, defaults = DEFAULT_FREQUENT, max = 64 }: FrequencyStoreOptions = {}): FrequencyStore {
   const halfLife = halfLifeDays * 864e5;
   const listeners = new Set<() => void>();
   let entries: Record<string, Entry> = parse(storage.read());

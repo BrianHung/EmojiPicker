@@ -12,7 +12,8 @@ function TiptapEditor() {
   const store = useEmojiStore();
   const editor = useEditor({
     extensions: [StarterKit, EmojiNode.configure({ store })],
-    content: "<p>Type <code>:</code> followed by a shortcode, such as <code>:tada</code> or <code>:rocket</code>. Use the arrow keys to move, Enter or Tab to insert, and Escape to close. A complete <code>:rocket:</code> also converts.</p><p></p>",
+    content:
+      "<p>Type <code>:</code> followed by a shortcode, such as <code>:tada</code> or <code>:rocket</code>. Use the arrow keys to move, Enter or Tab to insert, and Escape to close. A complete <code>:rocket:</code> also converts.</p><p></p>",
     editorProps: { attributes: { class: "min-h-[180px] px-4 py-3 outline-none [&_p]:my-2 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:text-[0.9em]" } },
   });
   if (!editor) return null;

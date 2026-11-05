@@ -1,4 +1,4 @@
-export { EmojiPopover, EmojiSuggestions } from "./react/popover-floating";
-export type { PopoverContentProps } from "./react/popover-floating";
-export { pickerInitialFocus, useEmojiPopover } from "./react/popover-shared";
-export type { PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover-shared";
+export { EmojiPopover, EmojiSuggestions } from "./react/popover/floating-ui";
+export type { PopoverContentProps } from "./react/popover/floating-ui";
+export { pickerInitialFocus, useEmojiPopover } from "./react/popover";
+export type { PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";

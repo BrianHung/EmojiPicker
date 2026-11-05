@@ -55,8 +55,7 @@ export function decodeIndex(buffer: ArrayBuffer): VectorIndex {
   const vectors = new Int8Array(buffer, idsEnd + count * 4, count * dims);
   const words = dims / 32;
   const bits = new Uint32Array(count * words);
-  for (let i = 0; i < count; i++)
-    for (let d = 0; d < dims; d++) if (vectors[i * dims + d]! > 0) bits[i * words + (d >> 5)]! |= 1 << (d & 31);
+  for (let i = 0; i < count; i++) for (let d = 0; d < dims; d++) if (vectors[i * dims + d]! > 0) bits[i * words + (d >> 5)]! |= 1 << (d & 31);
   return { ids, dims, scales, vectors, bits };
 }
 
@@ -66,7 +65,7 @@ const popcount = (x: number) => {
   return (((x + (x >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24;
 };
 
-export type RankOptions = {
+type RankOptions = {
   limit: number;
   /** Rerank only the `shortlist` nearest by Hamming distance on sign bits. 0 scores every vector. */
   shortlist?: number;

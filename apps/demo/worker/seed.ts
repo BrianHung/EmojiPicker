@@ -47,9 +47,7 @@ export async function seed(env: Env, { from, count, custom }: SeedRequest): Prom
   for (let i = 0; i < batches.length; i += CONCURRENCY) {
     const group = batches.slice(i, i + CONCURRENCY);
     const embedded = await Promise.all(group.map((batch) => embed(env, batch.map(emojiText))));
-    group.forEach((batch, b) =>
-      batch.forEach((e, j) => vectors.push({ id: e.id, values: embedded[b]![j]!, metadata: e.custom ? { custom: true, name: e.name, imageUrl: e.custom.imageUrl } : { custom: false } })),
-    );
+    group.forEach((batch, b) => batch.forEach((e, j) => vectors.push({ id: e.id, values: embedded[b]![j]!, metadata: e.custom ? { custom: true, name: e.name, imageUrl: e.custom.imageUrl } : { custom: false } })));
   }
 
   const mutationIds: string[] = [];

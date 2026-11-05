@@ -25,12 +25,7 @@ export type { Lang };
 export function CodeBlock({ code, lang = "tsx", className }: { code: string; lang?: Lang; className?: string }) {
   const html = React.useMemo(() => highlight(code.trim(), lang), [code, lang]);
   // The highlighter emits its own <pre>; reset its theme background so the panel shows through.
-  return (
-    <div
-      className={cn("overflow-x-auto font-mono text-[13px] leading-[1.7] [&_code]:font-mono [&_pre]:!bg-transparent [&_pre]:px-4 [&_pre]:py-3.5", className)}
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
+  return <div className={cn("overflow-x-auto font-mono text-[13px] leading-[1.7] [&_code]:font-mono [&_pre]:!bg-transparent [&_pre]:px-4 [&_pre]:py-3.5", className)} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export function CopyButton({ text, className }: { text: string; className?: string }) {

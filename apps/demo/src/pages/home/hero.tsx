@@ -30,9 +30,7 @@ export function Hero() {
     <div className="flex flex-col gap-4">
       <Tabs label="App" value={id} onChange={setId} items={STYLES.map((s) => ({ value: s.id, label: s.label }))} />
       <div className="overflow-hidden rounded-xl border border-border">
-        <div className="flex min-h-[460px] flex-col items-center justify-center gap-4 px-4 py-8 sm:min-h-[580px] sm:px-10 sm:py-10">
-          {id === "apple" ? <AppleScene /> : <StylePreview key={id} appStyle={appStyle} renderer={renderer} />}
-        </div>
+        <div className="flex min-h-[460px] flex-col items-center justify-center gap-4 px-4 py-8 sm:min-h-[580px] sm:px-10 sm:py-10">{id === "apple" ? <AppleScene /> : <StylePreview key={id} appStyle={appStyle} renderer={renderer} />}</div>
         <div className="border-t border-border bg-code">
           <div className="flex h-10 items-center gap-2 pr-1.5 pl-4">
             <span className="truncate font-mono text-[12.5px] text-muted-foreground">styles/{id}/picker.tsx</span>

@@ -1,9 +1,9 @@
 // The picker's sections: category sections (and search results) of items cached per
 // labels, section and tone, so the same emoji is one object across renders and pickers.
 // An item also has the fields of a collection node, so a renderer can use it as one.
-import { GROUPS, type EmojiRecord } from "../core/dataset";
-import type { EmojiLabels } from "../core/labels";
-import { nameWithTone } from "../core/shortcodes";
+import { GROUPS, type EmojiRecord } from "./dataset";
+import type { EmojiLabels } from "./labels";
+import { nameWithTone } from "./shortcodes";
 
 export type CategoryOption<Icon = unknown> = {
   /** A built-in group ("smileys_people", ...), "suggested", "custom", or "custom:<group>". */
@@ -74,7 +74,7 @@ export type EmojiSection = {
 
 export type Category<Icon = unknown> = { id: string; name: string; icon?: Icon; nav: boolean };
 
-export const DEFAULT_ORDER = ["suggested", "custom", ...GROUPS] as const;
+const DEFAULT_ORDER = ["suggested", "custom", ...GROUPS] as const;
 const RESULT_ORDER = [...GROUPS, "custom"] as string[];
 
 /** Sections in order with names: `categories`, or every group, then custom groups no option lists. */
@@ -105,7 +105,7 @@ export function itemFactory(labels: EmojiLabels) {
   };
 }
 
-export type CategorySectionsInput = {
+type CategorySectionsInput = {
   categories: readonly Category<unknown>[];
   records: readonly EmojiRecord[];
   /** The suggested section's emoji (unified codes, skin tone applied). */

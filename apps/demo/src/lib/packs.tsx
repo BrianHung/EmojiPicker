@@ -18,8 +18,7 @@ export function loadPack(url: string): Promise<CustomEmoji[]> {
         if (!Array.isArray(json)) throw new Error("Expected a JSON array of custom emoji");
         const base = new URL(url, location.href);
         return json.map((e, i) => {
-          if (!e || typeof e.id !== "string" || typeof e.name !== "string" || typeof e.imageUrl !== "string")
-            throw new Error(`Entry ${i} needs string id, name and imageUrl`);
+          if (!e || typeof e.id !== "string" || typeof e.name !== "string" || typeof e.imageUrl !== "string") throw new Error(`Entry ${i} needs string id, name and imageUrl`);
           return { ...e, imageUrl: new URL(e.imageUrl, base).href } as CustomEmoji;
         });
       });
@@ -41,7 +40,10 @@ export function usePack(url: string) {
   const [pack, setPack] = React.useState<CustomEmoji[] | null>(null);
   React.useEffect(() => {
     let live = true;
-    loadPack(url).then((emoji) => live && setPack(emoji), () => live && setPack([]));
+    loadPack(url).then(
+      (emoji) => live && setPack(emoji),
+      () => live && setPack([]),
+    );
     return () => {
       live = false;
     };

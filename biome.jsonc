@@ -1,0 +1,95 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**", "!**/package-lock.json", "!packages/emoji-picker/data", "!apps/demo/public", "!apps/demo/e2e/fixtures", "!apps/demo/e2e/__snapshots__"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 240
+  },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all", "arrowParentheses": "always" }
+  },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        // Asserts what strict indexing (noUncheckedIndexedAccess) can't see.
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        // `void (x = y)` and `(cache = value)` are a deliberate terse idiom.
+        "noAssignInExpressions": "off",
+        // Expression-bodied `forEach` callbacks whose return value is ignored.
+        "useIterableCallbackReturn": "off",
+        // Static, never-reordered lists.
+        "noArrayIndexKey": "off",
+        // ASCII ranges (\x00-\x7f) are the point of these patterns.
+        "noControlCharactersInRegex": "off",
+        // Plain record fields named `then`, never awaited.
+        "noThenProperty": "off"
+      },
+      "complexity": {
+        // `(a(), b)` sequences in arrow bodies are deliberate.
+        "noCommaOperator": "off"
+      },
+      "correctness": {
+        // Dependencies are chosen deliberately: latest-value refs and mount-only effects.
+        "useExhaustiveDependencies": "off",
+        // Icon sets build components from a factory once, at module scope.
+        "noComponentHookFactories": "off",
+        // Flags a local `describe(element)` helper as Playwright's describe.
+        "usePlaywrightValidDescribeCallback": "off"
+      },
+      "performance": {
+        // e2e reads rendered text, which is what innerText is for.
+        "useDomNodeTextContent": "off"
+      },
+      "security": {
+        // The code panels render HTML from the syntax highlighter.
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        // ARIA patterns are React Aria's and the shadcn/ui components'; axe and screen-reader e2e cover them.
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "useKeyWithClickEvents": "off",
+        "noLabelWithoutControl": "off",
+        "useValidAnchor": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      // The site shows these sources verbatim in its code panels; public/r is built from the registry.
+      "includes": [
+        "apps/demo/registry/**",
+        "apps/demo/src/styles/*/picker.tsx",
+        "apps/demo/src/styles/*/scene.tsx",
+        "apps/demo/src/styles/variants.tsx",
+        "apps/demo/src/components/demos/**",
+        "apps/demo/src/docs/snippets/**",
+        "apps/demo/src/pages/examples/virtualizer/tanstack-list.tsx"
+      ],
+      "formatter": { "enabled": false },
+      "linter": { "enabled": false }
+    },
+    {
+      // Prose and its code samples are written by hand.
+      "includes": ["**/*.md"],
+      "formatter": { "enabled": false }
+    },
+    {
+      // ElementProps is public: whatever a part spreads, onto any element.
+      "includes": ["packages/emoji-picker/src/react/utils/render.tsx"],
+      "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
+    }
+  ]
+}

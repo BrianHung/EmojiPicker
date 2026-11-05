@@ -2,7 +2,7 @@
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
-export const BASE = process.env.BASE_URL ?? "http://localhost:5199";
+const BASE = process.env.BASE_URL ?? "http://localhost:5199";
 const HARNESS = fileURLToPath(new URL("./harness.tsx", import.meta.url));
 
 export async function openHarness() {

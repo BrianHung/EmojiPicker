@@ -9,9 +9,7 @@ const SETUP = "npx @guidepup/setup setup (once per machine; changes OS settings)
 
 /** Guidepup's screen reader assets, as `npx @guidepup/setup install` lays them out. */
 function assets(id: "voiceover" | "nvda") {
-  const root =
-    process.env.GUIDEPUP_SCREEN_READERS_PATH ??
-    (process.platform === "darwin" ? join(homedir(), "Library", "Caches", "guidepup") : join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"), "guidepup"));
+  const root = process.env.GUIDEPUP_SCREEN_READERS_PATH ?? (process.platform === "darwin" ? join(homedir(), "Library", "Caches", "guidepup") : join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"), "guidepup"));
   return existsSync(join(root, id));
 }
 
@@ -23,8 +21,7 @@ export function notReady(id: "voiceover" | "nvda"): string | null {
     try {
       scripting = execFileSync("defaults", ["read", "com.apple.VoiceOver4/default", "SCREnableAppleScript"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() === "1";
     } catch {}
-    if (!scripting || !existsSync("/private/var/db/Accessibility/.VoiceOverAppleScriptEnabled"))
-      return `VoiceOver isn't set up for automation ("Allow VoiceOver to be controlled with AppleScript" is off). Run: ${SETUP}`;
+    if (!scripting || !existsSync("/private/var/db/Accessibility/.VoiceOverAppleScriptEnabled")) return `VoiceOver isn't set up for automation ("Allow VoiceOver to be controlled with AppleScript" is off). Run: ${SETUP}`;
     if (!assets("voiceover")) return `Guidepup's VoiceOver assets aren't installed. Run: ${SETUP}`;
     return null;
   }

@@ -37,7 +37,16 @@ export function H3({ id, children, className }: { id: string; children: React.Re
 }
 
 export function P({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <p className={cn("text-[15px] leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:decoration-foreground/25 [&_a]:underline-offset-[5px] [&_a]:transition-colors [&_a:hover]:decoration-foreground [&_a:has(>code)]:underline-offset-[7px] [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground", className)}>{children}</p>;
+  return (
+    <p
+      className={cn(
+        "text-[15px] leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:decoration-foreground/25 [&_a]:underline-offset-[5px] [&_a]:transition-colors [&_a:hover]:decoration-foreground [&_a:has(>code)]:underline-offset-[7px] [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground",
+        className,
+      )}
+    >
+      {children}
+    </p>
+  );
 }
 
 export function C({ children }: { children: React.ReactNode }) {
@@ -77,11 +86,7 @@ export function Tabs<T extends string>({
         variant="line"
         aria-label={label}
         activateOnFocus
-        className={cn(
-          "max-w-full justify-start overflow-x-auto rounded-none p-0 [scrollbar-width:none] group-data-horizontal/tabs:h-auto",
-          bordered ? "gap-6 pb-1" : size === "md" ? "gap-5" : "gap-4",
-          className,
-        )}
+        className={cn("max-w-full justify-start overflow-x-auto rounded-none p-0 [scrollbar-width:none] group-data-horizontal/tabs:h-auto", bordered ? "gap-6 pb-1" : size === "md" ? "gap-5" : "gap-4", className)}
       >
         {items.map((t) => (
           <TabsTrigger
@@ -90,8 +95,8 @@ export function Tabs<T extends string>({
             className={cn(
               "h-auto flex-none rounded-none border-0 px-0 font-medium text-muted-foreground hover:text-foreground focus-visible:ring-0 focus-visible:outline-none focus-visible:text-foreground data-active:text-foreground dark:text-muted-foreground dark:data-active:text-foreground",
               bordered
-                // Base UI sets data-orientation, not the data-horizontal the shadcn group variants expect: place the underline directly.
-                ? "pt-1 pb-0.5 text-base after:inset-x-0 after:bottom-[-4px] after:h-0.5"
+                ? // Base UI sets data-orientation, not the data-horizontal the shadcn group variants expect: place the underline directly.
+                  "pt-1 pb-0.5 text-base after:inset-x-0 after:bottom-[-4px] after:h-0.5"
                 : cn("after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full", size === "md" ? "min-h-10 pt-1 pb-2.5 text-sm" : "pt-0.5 pb-2 text-[13px] max-sm:min-h-10 max-sm:pt-3"),
             )}
           >
@@ -132,21 +137,7 @@ const filesOf = (tab: CodeTab): CodeFile[] => tab.files ?? [{ name: tab.file ?? 
  * file names when a tab has several files, or a single file name. Long code
  * collapses behind "View Code". Controlled with `value`/`onChange`, or not.
  */
-export function CodeTabs({
-  tabs,
-  className,
-  collapse = 0,
-  defaultTab,
-  value,
-  onChange,
-}: {
-  tabs: CodeTab[];
-  className?: string;
-  collapse?: number;
-  defaultTab?: string;
-  value?: string;
-  onChange?: (label: string) => void;
-}) {
+export function CodeTabs({ tabs, className, collapse = 0, defaultTab, value, onChange }: { tabs: CodeTab[]; className?: string; collapse?: number; defaultTab?: string; value?: string; onChange?: (label: string) => void }) {
   const [own, setOwn] = React.useState(defaultTab ?? tabs[0]!.label);
   const active = value ?? own;
   const setActive = (label: string) => {
@@ -171,7 +162,15 @@ export function CodeTabs({
       </div>
       {files.length > 1 ? (
         <div className="flex h-9 items-center border-b border-border px-4">
-          <Tabs label="File" size="sm" bordered={false} value={file.name} onChange={setFileName} items={files.map((f) => ({ value: f.name, label: <span className="font-mono text-xs">{f.name}</span> }))} className="-mb-px h-full items-end" />
+          <Tabs
+            label="File"
+            size="sm"
+            bordered={false}
+            value={file.name}
+            onChange={setFileName}
+            items={files.map((f) => ({ value: f.name, label: <span className="font-mono text-xs">{f.name}</span> }))}
+            className="-mb-px h-full items-end"
+          />
         </div>
       ) : null}
       <Collapsible lines={file.code.trim().split("\n").length} collapse={collapse} resetKey={`${tab.label}:${file.name}`}>
@@ -345,4 +344,3 @@ export function AttrTable({ head, rows }: { head: [string, string] | [string, st
     </TableShell>
   );
 }
-

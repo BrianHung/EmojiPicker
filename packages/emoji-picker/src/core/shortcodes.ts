@@ -1,12 +1,12 @@
 import { SKIN_TONES, unifiedToNative, type EmojiRecord } from "./dataset";
 import { defaultLabels, type EmojiLabels } from "./labels";
-import type { SearchIndex } from "./search-index";
+import type { SearchIndex } from "./search/search-index";
 
 /** Slack writes skin tones as a second shortcode: :thumbsup::skin-tone-3: (2-6 map to tones 1-5). Localized codes may be in any script. */
 const SHORTCODE = /:([\p{L}\p{M}\p{N}_+\-']+):(?::skin-tone-([2-6]):)?/giu;
 
 // A ":" (or Japanese/Chinese full-width "：") after a space, bracket or CJK character, then the query up to the caret.
-const TRIGGER = /(?:^|[\s(\[{>]|(?<=[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}]))([:：]([\p{L}\p{M}\p{N}_+\-']+))$/u;
+const TRIGGER = /(?:^|[\s([{>]|(?<=[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}]))([:：]([\p{L}\p{M}\p{N}_+\-']+))$/u;
 const ASCII = /^[\x00-\x7f]*$/;
 
 /** The `:query` that `text` (what's before the caret) ends with, and the offset of its colon. ASCII queries need 2+ characters; one kanji or kana is enough. */

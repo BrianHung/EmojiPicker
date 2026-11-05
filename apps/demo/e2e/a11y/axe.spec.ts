@@ -12,7 +12,14 @@ const PAGES = ["/", ...STYLES.map((s) => `/gallery/#${s}`), "/examples/", "/exam
 
 /** Waits out open/close transitions so contrast is measured on the final colours. */
 async function still(page: Page) {
-  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {}))));
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
   await settle(page);
 }
 

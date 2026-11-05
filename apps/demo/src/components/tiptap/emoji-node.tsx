@@ -36,7 +36,10 @@ export function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiNodeA
 }
 
 /** The node and a space after it, as `insertContent` takes them. */
-export const emojiContent = (attrs: EmojiNodeAttrs) => [{ type: "emoji", attrs }, { type: "text", text: " " }];
+export const emojiContent = (attrs: EmojiNodeAttrs) => [
+  { type: "emoji", attrs },
+  { type: "text", text: " " },
+];
 
 function EmojiView({ node }: NodeViewProps) {
   const { unified } = node.attrs as EmojiNodeAttrs;

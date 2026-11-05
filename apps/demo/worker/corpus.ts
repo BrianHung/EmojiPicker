@@ -29,7 +29,6 @@ export type Entry = {
 // Dataset rows are [unified, name, tags, shortcodes, group, version, tones].
 export const BUILT_IN: Entry[] = (dataset.emojis as unknown as [string, string, string[], string[]][]).map(([id, name, tags, shortcodes]) => ({ id, name, shortcodes, tags }));
 
-export const fromCustom = (list: readonly CustomEmoji[]): Entry[] =>
-  list.map((c) => ({ id: c.id, name: c.name, shortcodes: c.shortcodes ?? [], tags: c.tags ?? [], description: c.description, custom: { imageUrl: c.imageUrl } }));
+export const fromCustom = (list: readonly CustomEmoji[]): Entry[] => list.map((c) => ({ id: c.id, name: c.name, shortcodes: c.shortcodes ?? [], tags: c.tags ?? [], description: c.description, custom: { imageUrl: c.imageUrl } }));
 
 export const CUSTOM: Entry[] = fromCustom(customEmoji as CustomEmoji[]);

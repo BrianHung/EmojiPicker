@@ -44,7 +44,7 @@ function remarkHeadingId() {
 /** MDX pages: `export const frontmatter` from the YAML header, components passed by the page. */
 export function mdx(): Plugin {
   // @mdx-js/rollup is typed against Rollup; Vite 8 runs it on Rolldown unchanged.
-  const plugin = mdxRollup({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkCode, remarkHeadingId] }) as unknown as Plugin & { transform: Extract<Plugin["transform"], Function> };
+  const plugin = mdxRollup({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkCode, remarkHeadingId] }) as unknown as Plugin & { transform: Extract<Plugin["transform"], (...args: never[]) => unknown> };
   return {
     ...plugin,
     enforce: "pre",

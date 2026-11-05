@@ -5,7 +5,7 @@ type Known = { rule: string; node: RegExp };
 
 const codeToken = /^<span style="color:/; // syntax-highlighted code on the docs pages
 
-export const KNOWN: Known[] = [
+const KNOWN: Known[] = [
   /* ---------------------------------------------------------- packages/emoji-picker */
   // Every picker root is an unnamed <aside>; pages with several pickers repeat the landmark.
   { rule: "landmark-unique", node: /^<aside data-slot="emoji-picker"/ },

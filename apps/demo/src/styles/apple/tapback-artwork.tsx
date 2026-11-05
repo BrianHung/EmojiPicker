@@ -1,15 +1,11 @@
-import * as React from "react";
+import type * as React from "react";
 import { Emoji } from "@brianhung/emoji-picker";
 
 const ROUNDED = "ui-rounded, 'SF Pro Rounded', system-ui";
 
 function Haha() {
   return (
-    <span
-      aria-hidden
-      className="flex flex-col items-center leading-[0.8] font-black tracking-[-0.05em]"
-      style={{ fontSize: "0.56em", fontFamily: ROUNDED, color: "#5fd0ff", WebkitTextStroke: "0.08em #1592f2", paintOrder: "stroke fill" }}
-    >
+    <span aria-hidden className="flex flex-col items-center leading-[0.8] font-black tracking-[-0.05em]" style={{ fontSize: "0.56em", fontFamily: ROUNDED, color: "#5fd0ff", WebkitTextStroke: "0.08em #1592f2", paintOrder: "stroke fill" }}>
       <span>HA</span>
       <span>HA</span>
     </span>
@@ -18,11 +14,7 @@ function Haha() {
 
 function Question() {
   return (
-    <span
-      aria-hidden
-      className="font-black"
-      style={{ fontSize: "1.18em", lineHeight: 1, fontFamily: ROUNDED, background: "linear-gradient(#cdb6ff, #8d63f2)", WebkitBackgroundClip: "text", color: "transparent" }}
-    >
+    <span aria-hidden className="font-black" style={{ fontSize: "1.18em", lineHeight: 1, fontFamily: ROUNDED, background: "linear-gradient(#cdb6ff, #8d63f2)", WebkitBackgroundClip: "text", color: "transparent" }}>
       ?
     </span>
   );

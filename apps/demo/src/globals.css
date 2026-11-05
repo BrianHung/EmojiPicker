@@ -5,7 +5,6 @@
 @import "@brianhung/emoji-picker/tokens.css";
 @import "@brianhung/emoji-picker/theme.css";
 
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* shadcn/ui tokens (neutral) */

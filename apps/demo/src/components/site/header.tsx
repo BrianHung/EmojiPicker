@@ -84,7 +84,12 @@ export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { pag
         <MobileMenu page={page} open={menu} onOpenChange={setMenu} renderer={renderer} onRenderer={onRenderer} />
         <nav aria-label="Main" className="flex items-center gap-0.5 max-sm:hidden">
           {NAV.map(([id, label, href]) => (
-            <a key={id} href={href} aria-current={id === page ? "page" : undefined} className={cn(buttonVariants({ variant: "ghost" }), "h-8 px-2.5 text-sm font-medium", id === page ? "text-foreground" : "text-foreground/70 hover:text-foreground")}>
+            <a
+              key={id}
+              href={href}
+              aria-current={id === page ? "page" : undefined}
+              className={cn(buttonVariants({ variant: "ghost" }), "h-8 px-2.5 text-sm font-medium", id === page ? "text-foreground" : "text-foreground/70 hover:text-foreground")}
+            >
               {label}
             </a>
           ))}

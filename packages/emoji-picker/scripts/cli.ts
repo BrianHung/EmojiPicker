@@ -43,7 +43,11 @@ function main(argv: string[]) {
   const locales = emojibaseLocales(emojibase.root);
   if (!locales.includes(locale)) fail(`emojibase-data has no locale "${locale}". Available: ${locales.join(", ")}`);
 
-  const shortcodes = values.shortcodes?.split(",").map((s) => s.trim()).filter(Boolean) ?? defaultShortcodeSets(locale);
+  const shortcodes =
+    values.shortcodes
+      ?.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean) ?? defaultShortcodeSets(locale);
   const { dataset, stats } = buildDataset({ locale, shortcodes, load: emojibase.load });
   const out = path.resolve(values.out ?? `${locale}.json`);
   const json = JSON.stringify(dataset);

@@ -172,10 +172,21 @@ describe("decision helpers", () => {
     expect(labels.get("thumbs up (2)")?.id).toBe("x");
   });
   it("packs questions under the token budget and the question limit", () => {
-    const questions = chunk(Array.from({ length: 1000 }, (_, i) => `option number ${i}`), 250);
+    const questions = chunk(
+      Array.from({ length: 1000 }, (_, i) => `option number ${i}`),
+      250,
+    );
     expect(pack(questions, 1_000_000)).toHaveLength(1);
     expect(pack(questions, 3000)).toHaveLength(4);
-    expect(pack(chunk(Array.from({ length: 100 }, (_, i) => `${i}`), 1), 1_000_000).map((r) => r.length)).toEqual([MAX_QUESTIONS, 100 - MAX_QUESTIONS]);
+    expect(
+      pack(
+        chunk(
+          Array.from({ length: 100 }, (_, i) => `${i}`),
+          1,
+        ),
+        1_000_000,
+      ).map((r) => r.length),
+    ).toEqual([MAX_QUESTIONS, 100 - MAX_QUESTIONS]);
   });
 });
 
@@ -186,7 +197,10 @@ describe("routing", () => {
   it("answers 503 on both search routes when the AI binding can't be reached (local dev without remote bindings)", async () => {
     const { env } = mockEnv();
     env.AI = { run: unreachable } as unknown as Ai;
-    for (const [path, body] of [["/api/embed-search", { query: "cat" }], ["/api/decide", { query: "cat", model: "jev" }]] as const) {
+    for (const [path, body] of [
+      ["/api/embed-search", { query: "cat" }],
+      ["/api/decide", { query: "cat", model: "jev" }],
+    ] as const) {
       const res = await fetch(post(path, body), env);
       expect(res.status).toBe(503);
       expect(await res.json()).toMatchObject({ error: "unavailable", message: expect.stringMatching(/remotely/) });

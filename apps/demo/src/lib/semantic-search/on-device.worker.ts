@@ -4,9 +4,7 @@ import { pipeline, type FeatureExtractionPipeline, type ProgressInfo } from "@hu
 import { QUERY_PREFIX } from "./emoji-text";
 import { decodeIndex, rank, type VectorIndex } from "./vectors";
 
-export type WorkerRequest =
-  | { type: "load"; model: string; index: string; custom?: string }
-  | { type: "search"; id: number; query: string; limit: number; custom: boolean };
+export type WorkerRequest = { type: "load"; model: string; index: string; custom?: string } | { type: "search"; id: number; query: string; limit: number; custom: boolean };
 
 export type WorkerResponse =
   | { type: "progress"; loaded: number; total: number }
@@ -37,12 +35,8 @@ async function load({ model, index, custom: customUrl }: Extract<WorkerRequest, 
     post({ type: "progress", loaded, total });
   };
   // q8: the 34 MB quantized ONNX file. The browser caches it (Cache API) after the first run.
-  [extract, builtIn, custom] = await Promise.all([
-    pipeline("feature-extraction", model, { dtype: "q8", device: "wasm", progress_callback: progress }),
-    fetchIndex(index),
-    customUrl ? fetchIndex(customUrl) : Promise.resolve(null),
-  ]);
-  await extract(QUERY_PREFIX + "warm up", { pooling: "cls", normalize: true });
+  [extract, builtIn, custom] = await Promise.all([pipeline("feature-extraction", model, { dtype: "q8", device: "wasm", progress_callback: progress }), fetchIndex(index), customUrl ? fetchIndex(customUrl) : Promise.resolve(null)]);
+  await extract(`${QUERY_PREFIX}warm up`, { pooling: "cls", normalize: true });
   post({ type: "ready", loadMs: Math.round(performance.now() - start), device: "wasm" });
 }
 
