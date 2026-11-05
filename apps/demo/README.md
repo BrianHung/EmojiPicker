@@ -24,7 +24,7 @@ Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/de
 | `registry/` | The shadcn registry items (`aria/` holds the React Aria popover; tsc skips it, as it needs that base). `npm run build:registry` writes them to `public/r/`. |
 | `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md` and `/llms.txt`. |
 | `worker/` | The Worker for `/api/*`. |
-| `capture/`, `shot.html` | Screenshot and parity tooling. |
+| `scripts/og/` | OG image and video generator (`npm run og`). |
 
 ## Deploy
 
