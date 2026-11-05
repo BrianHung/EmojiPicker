@@ -42,6 +42,9 @@
 }
 
 .tones {
+  inset-inline-end: 0;
+  top: 50%;
+  translate: 0 -50%;
   display: flex;
   padding: 2px;
   background: var(--emoji-picker-background);
@@ -137,4 +140,9 @@
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }
+}
+
+.skinTone {
+  position: relative;
+  display: inline-flex;
 }

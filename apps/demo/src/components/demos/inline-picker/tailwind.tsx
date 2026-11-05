@@ -10,11 +10,11 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
     >
       <EmojiPicker.Search className="flex items-center gap-2 p-3">
         <EmojiPicker.Search.Input className="h-8 w-full rounded-md border border-picker-input-border bg-picker-input px-3 text-sm text-picker-foreground outline-none placeholder:text-picker-subtle focus-visible:border-picker-ring" />
-        <EmojiPicker.SkinTone>
+        <EmojiPicker.SkinTone className="relative inline-flex">
           <EmojiPicker.SkinTone.Trigger className={tone}>
             <EmojiPicker.SkinTone.Glyph />
           </EmojiPicker.SkinTone.Trigger>
-          <EmojiPicker.SkinTone.Options className="flex rounded-lg border border-picker-border bg-picker-background p-0.5 shadow-picker">
+          <EmojiPicker.SkinTone.Options className="end-0 top-1/2 flex -translate-y-1/2 rounded-lg border border-picker-border bg-picker-background p-0.5 shadow-picker">
             {(t) => (
               <EmojiPicker.SkinTone.Option tone={t} className={tone}>
                 <EmojiPicker.SkinTone.Glyph />

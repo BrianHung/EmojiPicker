@@ -190,7 +190,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     const state = ui.getSnapshot();
     const options = opts();
     const { status, data } = store.getSnapshot();
-    const frequent = state.held?.suggested ?? store.frequents.top(frequentCount());
+    const frequent = state.held?.suggested ?? store.frequent(frequentCount());
     return select(state, options, status === "ready", data, store.skinTone(), frequent, search.run(queryOf(state, options), options.searchLimit ?? 200));
   }
 
@@ -241,7 +241,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     setDomFocus: (value: boolean) => set({ domFocus: value }),
     hold(value: boolean) {
       if (Boolean(ui.getSnapshot().held) === value) return;
-      set({ held: value ? { suggested: store.frequents.top(frequentCount()), reactions: opts().reactions } : null });
+      set({ held: value ? { suggested: store.frequent(frequentCount()), reactions: opts().reactions } : null });
     },
   };
   return state;
