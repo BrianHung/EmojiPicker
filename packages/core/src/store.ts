@@ -24,7 +24,6 @@ export type EmojiStoreOptions = {
   searchEngine?: EmojiSearch;
   locale?: string;
   labels?: Partial<EmojiLabels>;
-  collator?: Pick<Intl.Collator, "compare">;
 };
 
 export type EmojiSourceOptions = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale">;
@@ -99,7 +98,6 @@ export function createEmojiStore({
   onSkinToneChange,
   skinToneStorage = localStorageAdapter("emoji-picker:skin-tone"),
   labels: labelOverrides,
-  collator,
   ...source
 }: EmojiStoreOptions = {}) {
   let config: EmojiSourceOptions = source;
@@ -134,7 +132,7 @@ export function createEmojiStore({
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
   const frequentOf = new Map<number, (ranked: readonly string[], data: EmojiData, isReady: boolean) => readonly string[]>();
   const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
-  const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale, collator }));
+  const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale }));
 
   const store = {
     frequents,
@@ -209,7 +207,6 @@ export function createEmojiStore({
     },
 
     fromShortcode: (code: string) => (ready() ? store.index().byShortcode(code) : undefined),
-    search: (query: string, limit?: number) => (ready() ? store.index().search(query, limit) : []),
 
     query(text: string, { limit = 200, signal = new AbortController().signal }: { limit?: number; signal?: AbortSignal } = {}): EmojiRecord[] | Promise<EmojiRecord[]> | ProgressiveHits<EmojiRecord[]> {
       if (!ready() || !text.trim()) return [];

@@ -1,6 +1,5 @@
 // Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
-import { unifiedToNative } from "./dataset";
-import { createStore } from "./reactive";
+import { createStore, unifiedToNative } from "@brianhung/emoji-picker-core";
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 

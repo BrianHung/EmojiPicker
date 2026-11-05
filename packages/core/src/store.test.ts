@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import data from "../data/en.json";
 import type { CustomEmoji } from "./custom";
-import type { Dataset, DatasetEmoji } from "./dataset";
+import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { createFrequencyStore, memoryStorage } from "./frequents";
 import { defaultLabels } from "./labels";
 import { interimOf, lexical, progressive, remote } from "./search/search";
@@ -29,12 +29,12 @@ describe("store", () => {
       frequents: frequents(),
       customEmojis: [{ id: "parrot", name: "party parrot", imageUrl: "/parrot.gif", shortcodes: ["partyparrot"] }],
     });
-    expect(store.search("thumbs")).toEqual([]);
+    expect(store.query("thumbs")).toEqual([]);
     await store.load();
     const pick = store.select("1f44d-1f3fd")!;
     expect(pick).toMatchObject({ emoji: "👍🏽", baseUnified: "1f44d", skinTone: 3, shortcode: ":+1::skin-tone-4:", isCustom: false });
     expect(store.frequents.top(1)).toEqual(["1f44d"]);
-    expect(store.search("partyparrot")[0]?.imageUrl).toBe("/parrot.gif");
+    expect((store.query("partyparrot") as EmojiRecord[])[0]?.imageUrl).toBe("/parrot.gif");
     expect(store.select("parrot")).toMatchObject({ emoji: "", isCustom: true });
   });
 
@@ -68,8 +68,8 @@ describe("custom emoji in the store", () => {
   it("finds them by id words and by their base", async () => {
     const store = storeWith([frog("sleepyFrogFamily", { name: "sleepy", shortcodes: ["sleepyfrog"] }), frog("froge-toast", { name: "toasty", base: "1f35e" })]);
     await store.load();
-    expect(store.search("frog family").map((r) => r.unified)).toContain("sleepyFrogFamily");
-    expect(store.search("bread").map((r) => r.unified)).toContain("froge-toast");
+    expect((store.query("frog family") as EmojiRecord[]).map((r) => r.unified)).toContain("sleepyFrogFamily");
+    expect((store.query("bread") as EmojiRecord[]).map((r) => r.unified)).toContain("froge-toast");
     expect(store.customGroups().has("sleepyFrogFamily")).toBe(true);
   });
 
@@ -103,7 +103,7 @@ describe("store locale", () => {
     expect((store.query("İĞNE") as readonly { emoji: string }[]).map((r) => r.emoji)).toEqual(["🪡"]);
   });
 
-  it("sets collation and counts from it; each piece passed replaces only itself", async () => {
+  it("sets collation and counts from the locale; labels passed replace only themselves", async () => {
     const sv = tiny("sv", [
       ["1f600", "a", ["sz"]],
       ["1f601", "b", ["så"]],
@@ -115,11 +115,11 @@ describe("store locale", () => {
     expect(alphabetical(swedish)).toEqual(["sa", "sz", "så"]);
     expect(swedish.labels().resultCount(1234)).toBe(`${new Intl.NumberFormat("sv").format(1234)} results`);
 
-    const mixed = createEmojiStore({ data: sv, frequents: frequents(), collator: new Intl.Collator("en"), labels: { noResults: "Inga träffar" } });
+    const mixed = createEmojiStore({ data: sv, frequents: frequents(), locale: "en", labels: { noResults: "Inga träffar" } });
     await mixed.load();
     expect(alphabetical(mixed)).toEqual(["sa", "så", "sz"]);
     expect(mixed.labels()).toMatchObject({ noResults: "Inga träffar", searchPlaceholder: defaultLabels.searchPlaceholder });
-    expect(mixed.labels().resultCount(1234)).toBe(swedish.labels().resultCount(1234));
+    expect(mixed.labels().resultCount(1234)).toBe("1,234 results");
   });
 });
 

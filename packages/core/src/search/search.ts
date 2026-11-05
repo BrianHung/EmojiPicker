@@ -39,8 +39,7 @@ const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike
 const all = <T>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
 const indexes = new WeakMap<readonly EmojiRecord[], Map<Tokenizer, Map<string, SearchIndex>>>();
-export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale), collator }: SearchIndexOptions = {}): SearchIndex {
-  if (collator) return createSearchIndex(records, { locale, tokenize, collator });
+export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
   const byTokenizer = cached(indexes, records, () => new Map<Tokenizer, Map<string, SearchIndex>>());
   const byLocale = cached(byTokenizer, tokenize, () => new Map<string, SearchIndex>());
   return cached(byLocale, canonicalLocale(locale) ?? "", () => createSearchIndex(records, { locale, tokenize }));

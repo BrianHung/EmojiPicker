@@ -1,7 +1,8 @@
 import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
 import { useStore } from "../utils/store";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, localizeLabels, needsImageFallback, onNativeSupportChange, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { needsImageFallback, onNativeSupportChange } from "../emoji/native";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 
@@ -19,7 +20,6 @@ type ContextValue = {
   renderer: Renderer;
   imageUrl: (unified: string) => string;
   labels: EmojiLabels;
-  groups: ReadonlyMap<string, string | undefined>;
   maxVersion?: number;
 };
 
@@ -40,7 +40,6 @@ export function EmojiProvider({ renderer = "auto", imageUrl = twemojiUrl, imageV
   }, [renderer, prepare, store]);
 
   const resolved = renderer === "auto" ? detected : renderer;
-  const groups = useStore(store, (s) => s.data.customGroups);
   const loadedLocale = useStore(store, (s) => (s.status === "ready" ? s.data.locale : undefined));
   const merged = useLabels(labels, locale ?? loadedLocale);
   const value = React.useMemo<ContextValue>(
@@ -49,10 +48,9 @@ export function EmojiProvider({ renderer = "auto", imageUrl = twemojiUrl, imageV
       renderer: resolved,
       imageUrl,
       labels: merged,
-      groups,
       maxVersion: resolved === "image" ? imageVersion : undefined,
     }),
-    [store, resolved, imageUrl, imageVersion, merged, groups],
+    [store, resolved, imageUrl, imageVersion, merged],
   );
   const tree = <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
   return locale ? <I18nProvider locale={locale}>{tree}</I18nProvider> : tree;

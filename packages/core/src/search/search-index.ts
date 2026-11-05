@@ -9,7 +9,6 @@ const TAG = 2;
 export type SearchIndexOptions = {
   locale?: string;
   tokenize?: Tokenizer;
-  collator?: Pick<Intl.Collator, "compare">;
 };
 
 export type SearchIndex = {
@@ -28,8 +27,9 @@ export type ShortcodeCompletion = {
   match: [number, number] | null;
 };
 
-export function createSearchIndex(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale), collator = new Intl.Collator(canonicalLocale(locale)) }: SearchIndexOptions = {}): SearchIndex {
+export function createSearchIndex(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
   const normalize = normalizer(locale);
+  const collator = new Intl.Collator(canonicalLocale(locale));
   const entries: [token: string, id: number, kind: number][] = [];
   const shortcodes = new Map<string, number>();
   const shortcodeList: [code: string, id: number][] = [];

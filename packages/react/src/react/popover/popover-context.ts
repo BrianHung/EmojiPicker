@@ -12,7 +12,3 @@ export type PopoverState = {
 };
 
 export const PopoverContext = React.createContext<PopoverState | null>(null);
-
-export type EmojiPopoverState = { readonly open: boolean; setOpen(open: boolean): void };
-
-export const useEmojiPopover = (): EmojiPopoverState | null => React.useContext(PopoverContext);

@@ -1,5 +1,6 @@
 import * as React from "react";
-import { type EmojiRecord, isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
+import { type EmojiRecord, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
+import { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "./native";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
 type Drawable = (record: EmojiRecord, unified: string) => boolean;

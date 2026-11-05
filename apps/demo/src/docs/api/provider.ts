@@ -16,6 +16,5 @@ export const provider = rowsOf<EmojiProviderProps>()([
   { name: "skinToneStorage", type: "EmojiStorage | null", default: "localStorage", description: "Where the skin tone persists; null keeps it in memory." },
   { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order and the labels' counts." },
   { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce." },
-  { name: "collator", type: 'Pick<Intl.Collator, "compare">', default: "new Intl.Collator(locale)", description: "A–Z order of alphabetical shortcode completion." },
   { name: "prepare", type: "boolean", default: "true", description: "Loads data and builds the index when idle." },
 ]);

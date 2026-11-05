@@ -6,7 +6,7 @@ export { localeData, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from 
 export type { Renderer, ShortcodeSet } from "./platform";
 export { isUnified, nativeToUnified, unifiedToNative, withoutFe0f, withTone, withoutTone } from "./dataset";
 export type { Dataset, DatasetEmoji, EmojiDataInput, EmojiRecord, Group, SkinToneValue } from "./dataset";
-export type { CompletionOrder, EmojiSearch, SearchContext, SearchHit, SearchIndex, SearchIndexOptions, ShortcodeCompletion } from "./search";
+export type { CompletionOrder, EmojiSearch, SearchContext, SearchHit, SearchIndex, ShortcodeCompletion } from "./search";
 export { createTokenizer, normalizer } from "./search";
 export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./search";
 export { createSearch } from "./search/query";
@@ -24,7 +24,5 @@ export type { EmojiSuggestionsMachine, EmojiTrigger, KeyLike, SuggestionsMove, S
 export { createPickerState, moveHighlight } from "./picker";
 export type { HighlightChangeDetails, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
 export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
-export { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, needsImageFallback, onNativeSupportChange, PROBE_BATCH } from "./native";
-export type { NativeSupport } from "./native";
 export { createStore } from "./reactive";
 export type { Store } from "./reactive";
