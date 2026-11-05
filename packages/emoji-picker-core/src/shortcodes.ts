@@ -36,11 +36,11 @@ export function formatShortcode(record: EmojiRecord, tone = 0): string | undefin
 }
 
 export function replaceShortcodes(text: string, index: SearchIndex): string {
-  return text.replace(SHORTCODE, (match, code: string, slackTone?: string) => {
+  return text.replace(SHORTCODE, (match, code: string, toneCode?: string) => {
     const record = index.byShortcode(code);
     if (!record) return match;
     if (record.imageUrl) return match;
-    const variation = slackTone ? record.tones[Number(slackTone) - 2] : undefined;
+    const variation = toneCode ? record.tones[Number(toneCode) - 2] : undefined;
     return variation ? unifiedToNative(variation) : record.emoji;
   });
 }

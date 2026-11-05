@@ -24,7 +24,7 @@ describe("dataset", () => {
     expect(kiss.tones[0]).toBe("1f469-1f3fb-200d-2764-fe0f-200d-1f48b-200d-1f468-1f3fb");
   });
 
-  it("has Slack shortcodes, matched without FE0F", () => {
+  it("has iamcal shortcodes, matched without FE0F", () => {
     expect(records.find((r) => r.emoji === "❤️")?.shortcodes).toContain("heart");
     expect(records.find((r) => r.emoji === "👍")?.shortcodes).toEqual(["+1", "thumbsup"]);
   });
