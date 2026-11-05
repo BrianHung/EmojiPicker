@@ -81,6 +81,7 @@ def main(src, order_path, out, target):
         for seq in seqs:
             if len(seq) > 1:
                 starts.setdefault(seq[0], set()).add(g)
+
     def base(g):
         return min(sequences[g], key=len)[0]
 
@@ -103,12 +104,15 @@ def main(src, order_path, out, target):
                 if c in cmap and cmap[c] in sequences:
                     pending.append(cmap[c])
 
+    # WebKit looks up U+1F408 when it meets VS16, so the first screen's face carries it
+    chunks.append({"glyphs": set(), "unicodes": set(), "cost": {}})
+    add(chunks[0], cmap[0x1F408])
     for group, texts in order:
         glyphs = [g for t in texts if (g := glyph_for.get(strip(parse(t)))) and g not in owner]
         if group is None or not glyphs:
             continue
-        size = sum(chunks[-1]["cost"].values()) if chunks else 0
-        if not chunks or size >= target or (group != chunk_group and size >= target / 8):
+        size = sum(chunks[-1]["cost"].values())
+        if size >= target or (group != chunk_group and size >= target / 8):
             chunks.append({"glyphs": set(), "unicodes": set(), "cost": {}})
         chunk_group = group
         for g in glyphs:
@@ -140,7 +144,9 @@ def main(src, order_path, out, target):
         file = f"twemoji-{i}.woff2"
         part.flavor = "woff2"
         part.save(Path(out) / file)
-        subsets.append({"file": file, "range": unicode_range(unicodes), "glyphs": len(chunk["glyphs"])})
+        # Chromium fetches every face whose range meets the text; VS16 shapes without being in range, except before a keycap
+        keeps_vs16 = i == 0 or any(FE0F in seq[:-1] and seq[seq.index(FE0F) + 1] != 0x200D for g in chunk["glyphs"] for seq in sequences[g])
+        subsets.append({"file": file, "range": unicode_range(unicodes if keeps_vs16 else unicodes - {FE0F}), "glyphs": len(chunk["glyphs"])})
     print(json.dumps(subsets))
 
 

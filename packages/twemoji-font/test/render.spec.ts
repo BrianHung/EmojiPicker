@@ -69,6 +69,6 @@ test("draws each sequence as one Twemoji glyph", async ({ page }) => {
 });
 
 test("the first screen downloads only the smileys subset", async ({ page }) => {
-  const fonts = await open(page, `<p style="font:32px Twemoji">😀😃😄😁😆😅🤣😂🙂🙃🫠😉😊😇🥰😍🤩😘</p>`);
+  const fonts = await open(page, `<p style="font:32px Twemoji">😀😃😄😁😆😅🤣😂🙂🙃🫠😉😊😇🥰😍🤩😘☺️😮‍💨❤️❤️‍🔥</p>`);
   expect(fonts).toEqual(["twemoji-0.woff2"]);
 });

@@ -107,7 +107,8 @@ const face = ({ file, range }: Subset) => `@font-face {
   unicode-range: ${range};
 }
 `;
-fs.writeFileSync(path.join(out, "twemoji.css"), `/* Twemoji ${version} (https://github.com/jdecked/twemoji), © Twitter, Inc and other contributors, CC-BY 4.0 */\n${subsets.map(face).join("")}`);
+// browsers try overlapping faces last-declared first, so the first screen's subset goes last
+fs.writeFileSync(path.join(out, "twemoji.css"), `/* Twemoji ${version} (https://github.com/jdecked/twemoji), © Twitter, Inc and other contributors, CC-BY 4.0 */\n${subsets.map(face).reverse().join("")}`);
 
 const kb = (file: string) => (fs.statSync(path.join(out, file)).size / 1024).toFixed(1);
 for (const s of subsets) console.log(`${s.file}  ${s.glyphs} glyphs  ${kb(s.file)} kB`);
