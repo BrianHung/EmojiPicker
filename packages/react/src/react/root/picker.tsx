@@ -68,6 +68,8 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     children: React.ReactNode;
   };
 
+const IMPERATIVE = { reason: "imperative-action" } as const;
+
 const VARIABLES = {
   "--ep-size": "var(--emoji-size, 30px)",
   "--ep-cell": "var(--emoji-cell-size, calc(var(--ep-size) + 10px))",
@@ -168,18 +170,18 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const skinTone = React.useRef<(() => void) | null>(null);
   const actions = React.useMemo<EmojiPickerActions>(
     () => ({
-      move: (to) => Boolean(list.current?.move(to)),
+      move: (to) => Boolean(list.current?.move(to, IMPERATIVE)),
       pick: () => Boolean(list.current?.pick()),
-      highlight: (emoji) => (list.current ? list.current.highlight(emoji) : state.highlight(emoji)),
+      highlight: (emoji) => (list.current ? list.current.highlight(emoji, IMPERATIVE) : state.highlight(emoji, IMPERATIVE)),
       focusSearch() {
         searchInput.current?.focus();
         return Boolean(searchInput.current);
       },
       clearSearch() {
-        state.setQuery("");
+        state.setQuery("", IMPERATIVE);
         list.current?.clear();
       },
-      close: () => closePopover("none"),
+      close: () => closePopover("imperative-action"),
       toggleSkinTone() {
         skinTone.current?.();
         return Boolean(skinTone.current);
@@ -221,9 +223,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
       if (!query) return Boolean(list.current?.clear()) || closePopover("escape-key", e.nativeEvent);
-      state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
+      const details = state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
       list.current?.clear();
-      return true;
+      return !details?.isPropagationAllowed;
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });

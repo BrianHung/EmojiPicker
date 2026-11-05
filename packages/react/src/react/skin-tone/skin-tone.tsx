@@ -54,7 +54,7 @@ export type SkinToneProps = PartElementProps<SkinToneState> & {
   onOpenChange?: (open: boolean, details: SkinToneOpenChangeDetails) => void;
 };
 
-export type SkinToneOpenChangeDetails = ChangeDetails<"trigger-press" | "outside-press" | "escape-key" | "item-press" | "none">;
+export type SkinToneOpenChangeDetails = ChangeDetails<"trigger-press" | "outside-press" | "escape-key" | "item-press" | "imperative-action" | "none">;
 type OpenReason = SkinToneOpenChangeDetails["reason"];
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, children, ...props }, ref) {
@@ -71,10 +71,11 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   const { labels } = useEmojiContext();
   const close = (reason: OpenReason, event?: Event) => {
     const inside = optionsRef.current?.contains(document.activeElement);
-    setOpen(false, reason, event);
+    const details = setOpen(false, reason, event);
     if (inside) triggerRef.current?.focus();
+    return details;
   };
-  const toggle = (event?: Event) => (open ? close(event ? "trigger-press" : "none", event) : setOpen(true, event ? "trigger-press" : "none", event));
+  const toggle = (event?: Event) => (open ? close(event ? "trigger-press" : "imperative-action", event) : setOpen(true, event ? "trigger-press" : "imperative-action", event));
   const toggles = React.useContext(PickerContext)?.skinTone;
   const latest = React.useRef(toggle);
   latest.current = toggle;
@@ -88,8 +89,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   }, [toggles]);
   const keys = usePickerKeyDown(undefined, (e) => {
     if (!open || e.key !== "Escape") return false;
-    close("escape-key", e.nativeEvent);
-    return true;
+    return !close("escape-key", e.nativeEvent)?.isPropagationAllowed;
   });
 
   const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, rootRef), [ref]);

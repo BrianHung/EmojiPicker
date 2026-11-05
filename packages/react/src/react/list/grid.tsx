@@ -219,10 +219,10 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       pick(key);
       return true;
     },
-    highlight(emoji) {
+    highlight(emoji, details) {
       const key = emoji == null || latest.current.collection.emoji(emoji) ? emoji : (sections.flatMap((s) => s.items).find((i) => i.unified === emoji)?.id ?? null);
       if (key != null) geometry.reveal(key);
-      setHighlight(key);
+      setHighlight(key, details);
     },
     ids() {
       const key = highlighted();
