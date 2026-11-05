@@ -14,13 +14,13 @@ Builds a dataset for <locale> from emojibase-data.
                 iamcal, cldr, cldr-native, emojibase, github, joypixels.
                 Default: iamcal for English, iamcal,cldr otherwise.
 
-Example: npx @brianhung/emoji-picker build-data ja --out public/emoji/ja.json`;
+Example: npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json`;
 
 const INSTALL = `emoji-picker build-data reads emojibase-data. Install it in your project:
 
   npm install --save-dev emojibase-data
 
-or run both together: npx -p emojibase-data -p @brianhung/emoji-picker emoji-picker build-data <locale>`;
+or run both together: npx -p emojibase-data -p @brianhung/emoji-picker-core emoji-picker build-data <locale>`;
 
 function fail(message: string): never {
   console.error(message);

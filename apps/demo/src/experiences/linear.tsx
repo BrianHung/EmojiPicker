@@ -1,4 +1,4 @@
-import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
+import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { linear } from "@/styles/linear/picker";
 import { StyleAutocomplete } from "@/styles/variants";

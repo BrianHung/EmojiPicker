@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "@brianhung/emoji-picker";
+import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { PickerPopover } from "@/components/picker-popover";
 import { SmilePlus } from "./icons";

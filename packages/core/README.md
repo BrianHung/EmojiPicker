@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-core
 
-Framework-neutral data, search, and state for [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), with no dependencies.
+Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies.
 
 ## Installation
 

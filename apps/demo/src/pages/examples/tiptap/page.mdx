@@ -13,14 +13,14 @@ import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-tiptap.json" />
 
-Adds `hooks/emoji-tiptap.ts` and `lib/emoji-prosemirror.ts`, and installs `@brianhung/emoji-picker`, `@tiptap/core` and `@tiptap/pm`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/emoji-tiptap.ts` and `lib/emoji-prosemirror.ts`, and installs `@brianhung/emoji-picker-react`, `@tiptap/core` and `@tiptap/pm`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
 ## Usage
 
 ```tsx title="editor.tsx"
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { EmojiProvider } from "@brianhung/emoji-picker";
+import { EmojiProvider } from "@brianhung/emoji-picker-react";
 import { EmojiSuggestionMenu } from "./emoji-suggestion";
 
 function Editor() {

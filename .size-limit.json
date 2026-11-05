@@ -1,6 +1,6 @@
 [
-  { "name": "picker", "path": "packages/emoji-picker/dist/index.js", "import": "{ EmojiPicker, EmojiProvider }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "74.2 kB" },
-  { "name": "floating-ui popover", "path": "packages/emoji-picker/dist/floating-ui.js", "import": "{ EmojiPopover }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "20.8 kB" },
-  { "name": "react-aria popover", "path": "packages/emoji-picker/dist/react-aria.js", "import": "{ EmojiPopover }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "24.5 kB" },
-  { "name": "core", "path": "packages/emoji-picker-core/dist/index.js", "import": "*", "gzip": true, "limit": "13.1 kB" }
+  { "name": "picker", "path": "packages/react/dist/index.js", "import": "{ EmojiPicker, EmojiProvider }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "74.2 kB" },
+  { "name": "floating-ui popover", "path": "packages/react/dist/floating-ui.js", "import": "{ EmojiPopover }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "20.8 kB" },
+  { "name": "react-aria popover", "path": "packages/react/dist/react-aria.js", "import": "{ EmojiPopover }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "24.5 kB" },
+  { "name": "core", "path": "packages/core/dist/index.js", "import": "*", "gzip": true, "limit": "13.1 kB" }
 ]

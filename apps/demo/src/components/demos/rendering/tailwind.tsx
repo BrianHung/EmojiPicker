@@ -1,6 +1,6 @@
 import * as React from "react";
 import en from "@brianhung/emoji-picker-core/data/en.json?url";
-import { EmojiOverrides, EmojiProvider, type EmojiSelection, type Renderer } from "@brianhung/emoji-picker";
+import { EmojiOverrides, EmojiProvider, type EmojiSelection, type Renderer } from "@brianhung/emoji-picker-react";
 import { twemojiUrl } from "@brianhung/emoji-picker-core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";

@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { EmojiPicker } from "@brianhung/emoji-picker";
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { HandTone, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";

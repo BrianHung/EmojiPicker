@@ -1,4 +1,4 @@
-import type { SearchInputProps, SearchProps } from "@brianhung/emoji-picker";
+import type { SearchInputProps, SearchProps } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const search = rowsOf<SearchProps>()([

@@ -1,4 +1,4 @@
-import type { EmptyProps, LoadErrorProps, LoadingProps } from "@brianhung/emoji-picker";
+import type { EmptyProps, LoadErrorProps, LoadingProps } from "@brianhung/emoji-picker-react";
 import { rowsOfParts } from "./rows";
 
 export const states = rowsOfParts<{ Empty: EmptyProps; LoadError: LoadErrorProps; Loading: LoadingProps }>()([

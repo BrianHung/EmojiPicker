@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { pipeline } from "@huggingface/transformers";
-import type { CustomEmoji, Dataset } from "@brianhung/emoji-picker";
+import type { CustomEmoji, Dataset } from "@brianhung/emoji-picker-react";
 import { emojiText } from "../src/lib/semantic-search/emoji-text";
 import { encodeIndex } from "../src/lib/semantic-search/vectors";
 

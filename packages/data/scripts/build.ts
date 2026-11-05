@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildDataset, emojibaseLocales, findEmojibase } from "../../emoji-picker-core/scripts/build-data";
+import { buildDataset, emojibaseLocales, findEmojibase } from "../../core/scripts/build-data";
 
 const emojibase = findEmojibase();
 if (!emojibase) throw new Error("emojibase-data is not installed");

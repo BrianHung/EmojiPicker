@@ -1,8 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@brianhung/emoji-picker/tokens.css";
-@import "@brianhung/emoji-picker/theme.css";
+@import "@brianhung/emoji-picker-react/tokens.css";
+@import "@brianhung/emoji-picker-react/theme.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

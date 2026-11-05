@@ -17,7 +17,7 @@ function CopyPage({ md, className }: { md: string; className?: string }) {
   }, [load]);
 
   const url = typeof location === "undefined" ? md : new URL(md, location.origin).href;
-  const prompt = encodeURIComponent(`Read ${url} and help me integrate @brianhung/emoji-picker into my app.`);
+  const prompt = encodeURIComponent(`Read ${url} and help me integrate @brianhung/emoji-picker-react into my app.`);
 
   const copy = async () => {
     try {

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker-react";
 import { emojiTypeahead } from "@/lib/emoji-prosemirror";
 
 export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {

@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The library's notices (emojibase, iamcal/emoji-data, emoji-picker-react, Twemoji) are in [packages/emoji-picker/THIRD_PARTY_NOTICES.md](packages/emoji-picker/THIRD_PARTY_NOTICES.md).
+The library's notices (emojibase, iamcal/emoji-data, emoji-picker-react, Twemoji) are in [packages/react/THIRD_PARTY_NOTICES.md](packages/react/THIRD_PARTY_NOTICES.md).
 
 ## Demo site
 

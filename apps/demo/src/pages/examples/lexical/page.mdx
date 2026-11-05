@@ -12,7 +12,7 @@ import lexical from "@/registry/emoji-lexical.ts?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
 
-Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker`, `lexical` and `@lexical/react`.
+Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker-react`, `lexical` and `@lexical/react`.
 
 ## Usage
 
@@ -21,7 +21,7 @@ import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { EmojiProvider } from "@brianhung/emoji-picker";
+import { EmojiProvider } from "@brianhung/emoji-picker-react";
 import { EmojiTypeaheadPlugin } from "./emoji-typeahead-plugin";
 
 export function Editor() {

@@ -1,17 +1,17 @@
-# @brianhung/emoji-picker
+# @brianhung/emoji-picker-react
 
 Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 
 ## Installation
 
 ```bash
-npm install @brianhung/emoji-picker @brianhung/emoji-picker-core
+npm install @brianhung/emoji-picker-react @brianhung/emoji-picker-core
 ```
 
 ## Usage
 
 ```tsx
-import { EmojiPicker, EmojiProvider, Tapback } from "@brianhung/emoji-picker";
+import { EmojiPicker, EmojiProvider, Tapback } from "@brianhung/emoji-picker-react";
 import en from "@brianhung/emoji-picker-core/data/en.json?url";
 
 <EmojiProvider data={en}>
@@ -35,10 +35,10 @@ A styled shadcn/ui version: `npx shadcn@latest add https://emoji.brianhung.me/r/
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker` | Components, hooks, and common core types |
+| `@brianhung/emoji-picker-react` | Components, hooks, and common core types |
 | `/floating-ui`, `/react-aria` | `EmojiPopover`, `EmojiSuggestions.Popover`; `@floating-ui/react` is an optional peer |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Color tokens, Tailwind v4 utilities, shadcn/ui bridge |
-| `@brianhung/emoji-picker-core` | Data, search, stores, and every public type, without React ([README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker-core#readme)) |
+| `@brianhung/emoji-picker-core` | Data, search, stores, and every public type, without React ([README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/core#readme)) |
 
 ## Parts
 
@@ -91,7 +91,7 @@ Changing a prop updates the provider in place. Pass functions and objects with s
 
 ## Data
 
-`data/en.json` has 1,923 emoji from emojibase with iamcal shortcodes (192 KB, 50 KB gzipped). Build another locale with `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json` (requires `emojibase-data`), or load a prebuilt file with `localeData("ja", { shortcodes: "cldr" })` from [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker-data#readme). Every locale keeps the iamcal shortcodes.
+`data/en.json` has 1,923 emoji from emojibase with iamcal shortcodes (192 KB, 50 KB gzipped). Build another locale with `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json` (requires `emojibase-data`), or load a prebuilt file with `localeData("ja", { shortcodes: "cldr" })` from [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme). Every locale keeps the iamcal shortcodes.
 
 ## Search
 
@@ -106,7 +106,7 @@ A search is `(query, { records, limit, signal, frequency, locale }) => { unified
 | `progressive(fast, slow)`, `withInterim(promise, hits)` | Shows fast results until slow ones arrive |
 | `remote(fetcher)` | Any async source of hits |
 
-Embedding search: [Semantic search](https://emoji.brianhung.me/examples/semantic-search/). Third-party engine adapters: [core README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker-core#search-adapters). `useEmojiSearch` and `useEmojiSearchState` query the provider outside a picker.
+Embedding search: [Semantic search](https://emoji.brianhung.me/examples/semantic-search/). Third-party engine adapters: [core README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/core#search-adapters). `useEmojiSearch` and `useEmojiSearchState` query the provider outside a picker.
 
 ## Popovers
 

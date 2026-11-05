@@ -1,4 +1,4 @@
-import { Emoji, useEmojiStore, useFrequentEmoji, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStore, useFrequentEmoji, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { EmojiPickerCard, EmojiPickerCell } from "@/components/ui/emoji-picker";
 import styles from "./index.module.css";
 

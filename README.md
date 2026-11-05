@@ -13,11 +13,11 @@
 ## Install
 
 ```bash
-npm install @brianhung/emoji-picker
+npm i @brianhung/emoji-picker-react
 ```
 
 ```tsx
-import { EmojiPicker } from "@brianhung/emoji-picker";
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
   <EmojiPicker.Search />
@@ -39,9 +39,9 @@ npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker
 
 | Package | |
 |---|---|
-| [`@brianhung/emoji-picker`](packages/emoji-picker/README.md) | React parts and hooks |
-| [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md) | Data, search and state, with no dependencies |
-| [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md) | Datasets for every Emojibase locale |
+| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search and state, with no dependencies |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.
 

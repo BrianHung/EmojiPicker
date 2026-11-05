@@ -1,6 +1,6 @@
 # Demo site
 
-The documentation site for `@brianhung/emoji-picker`, served at [emoji.brianhung.me](https://emoji.brianhung.me). It's a Vite multipage app plus a Cloudflare Worker that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy as one Worker.
+The documentation site for `@brianhung/emoji-picker-react`, served at [emoji.brianhung.me](https://emoji.brianhung.me). It's a Vite multipage app plus a Cloudflare Worker that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy as one Worker.
 
 ## Run locally
 

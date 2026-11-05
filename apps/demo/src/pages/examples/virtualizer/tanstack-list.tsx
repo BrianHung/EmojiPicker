@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "@brianhung/emoji-picker";
+import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "@brianhung/emoji-picker-react";
 
 const Cell = React.memo(function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
   const { cellProps } = useEmojiCell(state, item);

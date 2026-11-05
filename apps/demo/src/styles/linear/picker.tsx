@@ -1,4 +1,4 @@
-import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker";
+import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { SearchClear } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";

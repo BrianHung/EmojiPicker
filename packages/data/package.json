@@ -1,7 +1,7 @@
 {
   "name": "@brianhung/emoji-picker-data",
   "version": "0.0.0",
-  "description": "Emoji datasets for @brianhung/emoji-picker in every emojibase locale and shortcode set.",
+  "description": "Emoji datasets for @brianhung/emoji-picker-react in every emojibase locale and shortcode set.",
   "keywords": [
     "emoji",
     "emoji-picker",
@@ -17,7 +17,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BrianHung/EmojiPicker.git",
-    "directory": "packages/emoji-picker-data"
+    "directory": "packages/data"
   },
   "files": [
     "data",

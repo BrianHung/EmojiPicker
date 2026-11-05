@@ -1,4 +1,4 @@
-import type { CategoryNavProps, CategoryTabProps } from "@brianhung/emoji-picker";
+import type { CategoryNavProps, CategoryTabProps } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const categoryNav = rowsOf<CategoryNavProps>()([

@@ -4,9 +4,9 @@
 
 | Path | Contents |
 |---|---|
-| `packages/emoji-picker-core` | [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md): data, search and stores, with no dependencies |
-| `packages/emoji-picker` | [`@brianhung/emoji-picker`](packages/emoji-picker/README.md): the React parts and hooks |
-| `packages/emoji-picker-data` | [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
+| `packages/core` | [`@brianhung/emoji-picker-core`](packages/core/README.md): data, search and stores, with no dependencies |
+| `packages/react` | [`@brianhung/emoji-picker-react`](packages/react/README.md): the React parts and hooks |
+| `packages/data` | [`@brianhung/emoji-picker-data`](packages/data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
 | `.changeset` | Pending release notes |
 
@@ -36,6 +36,6 @@ Visual baselines are local: capture them with `npm run test:baseline -w demo`. C
 Changes to a published package come with a changeset (`npm run changeset`). The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account:
 
 ```bash
-npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker
+npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react
 npx changeset publish
 ```
