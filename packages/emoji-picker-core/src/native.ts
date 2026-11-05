@@ -1,5 +1,6 @@
 // Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
 import { unifiedToNative } from "./dataset";
+import { createStore } from "./reactive";
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 
@@ -116,28 +117,24 @@ const sameVerdicts = (before: NativeProbe | null, after: NativeProbe | null) => 
   return [...before.probed()].every((unified) => before.result(unified) === after.result(unified));
 };
 
-const listeners = new Set<() => void>();
+const verdicts = createStore(0, (generation: number) => generation + 1);
+let watching = false;
 function recheck() {
   let changed = false;
   for (const [font, before] of probes) {
     const after = probeFor(font);
-    if (sameVerdicts(before, after)) continue;
-    probes.set(font, after);
-    changed = true;
+    if (!sameVerdicts(before, after)) changed = Boolean(probes.set(font, after));
   }
-  if (changed) for (const listener of listeners) listener();
+  if (changed) verdicts.dispatch(undefined);
 }
 
 // Emoji web fonts can finish loading after the first probe
 export function onNativeSupportChange(listener: () => void): () => void {
-  const fonts = typeof document === "undefined" ? undefined : document.fonts;
-  if (!fonts?.addEventListener) return () => {};
-  if (!listeners.size) fonts.addEventListener("loadingdone", recheck);
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-    if (!listeners.size) fonts.removeEventListener("loadingdone", recheck);
-  };
+  if (!watching && typeof document !== "undefined" && document.fonts?.addEventListener) {
+    watching = true;
+    document.fonts.addEventListener("loadingdone", recheck);
+  }
+  return verdicts.subscribe(listener);
 }
 
 export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, string>): NativeSupport {

@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { FocusManager } from "react-aria/FocusScope";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { actionFor, isTextEditingKey, resolveKeymap, type KeyboardAction, type Keymap } from "./keymap";
 
@@ -56,6 +57,15 @@ export function useSkinToneToggle(toggle: () => void) {
       if (ctx.skinTone.current === fn) ctx.skinTone.current = null;
     };
   }, [ctx]);
+}
+
+export function moveFocus(focus: FocusManager | undefined, action: KeyboardAction | null, rtl: boolean, vertical = false): boolean {
+  if (action === "first") focus?.focusFirst();
+  else if (action === "last") focus?.focusLast();
+  else if (action === (vertical ? "move-down" : rtl ? "move-left" : "move-right")) focus?.focusNext({ wrap: true });
+  else if (action === (vertical ? "move-up" : rtl ? "move-right" : "move-left")) focus?.focusPrevious({ wrap: true });
+  else return false;
+  return true;
 }
 
 function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {

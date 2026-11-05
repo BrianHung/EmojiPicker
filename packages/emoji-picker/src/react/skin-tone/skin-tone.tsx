@@ -9,17 +9,17 @@ import { useInteractOutside } from "react-aria/useInteractOutside";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { useToggleButtonGroup, useToggleButtonGroupItem } from "react-aria/useToggleButtonGroup";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
-import { type ToggleGroupState, useToggleGroupState } from "react-stately/useToggleGroupState";
+import type { ToggleGroupState } from "react-stately/useToggleGroupState";
 import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
-import { useKeyRegion, useSkinToneToggle } from "../root/keyboard";
-import type { KeyboardAction } from "../root/keymap";
+import { moveFocus, useKeyRegion, useSkinToneToggle } from "../root/keyboard";
 import { useEmojiContext } from "../provider/provider";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 const TONES = [0, 1, 2, 3, 4, 5] as const;
+const noop = () => {};
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];
 const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[tone] });
 
@@ -55,7 +55,8 @@ export type SkinToneProps = PartElementProps<SkinToneState> & {
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
-  const selection = useToggleGroupState({ selectionMode: "single", selectedKeys: [tone], disallowEmptySelection: true });
+  // The store owns the tone and a press picks it, so the group only reads it
+  const selection: ToggleGroupState = { selectionMode: "single", isDisabled: false, selectedKeys: new Set([tone]), toggleKey: noop, setSelected: noop, setSelectedKeys: noop };
   const state = useOverlayTriggerState({ isOpen: openProp, defaultOpen, onOpenChange });
   const open = state.isOpen;
   const rootRef = React.useRef<HTMLDivElement | null>(null);
@@ -161,15 +162,7 @@ const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(fun
   const focus = useFocusManager();
   const { groupProps } = useToggleButtonGroup({ orientation, "aria-label": group }, selection, optionsRef);
   const rtl = useLocale().direction === "rtl" && orientation === "horizontal";
-  const region = useKeyRegion((action) => {
-    const steps: Partial<Record<KeyboardAction, number>> = orientation === "vertical" ? { "move-down": 1, "move-up": -1 } : { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
-    const step = action ? steps[action] : undefined;
-    if (action === "first") focus?.focusFirst();
-    else if (action === "last") focus?.focusLast();
-    else if (step) step > 0 ? focus?.focusNext({ wrap: true }) : focus?.focusPrevious({ wrap: true });
-    else return "pass";
-    return "handled";
-  });
+  const region = useKeyRegion((action) => (moveFocus(focus, action, rtl, orientation === "vertical") ? "handled" : "pass"));
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, optionsRef, region), [ref, optionsRef, region]);
   return renderElement(
     "div",

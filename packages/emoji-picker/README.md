@@ -335,6 +335,8 @@ const semantic = progressive(lexical(), remote((query, { signal }) => fetchEmoji
 
 `context` provides `records`, `limit`, `signal` (aborted when the query changes), and `frequency(unified)`. Return `{ unified, score? }[]`, best first.
 
+Recipes for MiniSearch, Fuse.js and FlexSearch are in the [core README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker-core#bring-your-own-search).
+
 | Function | Description |
 |---|---|
 | `lexical({ typos, typoThreshold, locale, segmenter, tokenize })` | The default. A sorted word index over shortcodes, names, and tags, with typo correction. |

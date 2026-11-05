@@ -31,3 +31,58 @@ npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
 See the [`@brianhung/emoji-picker` README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker#readme) for the full API.
+
+## Bring your own search
+
+`searchEngine` takes any `EmojiSearch`: `(query, { records, limit, signal, frequency, locale }) => hits | Promise<hits>`, where hits are `{ unified, score? }[]`, best first. Build the index once per `records` array; the store passes the same array until its data changes. Adapters compose with `merge`, `fallback`, `progressive` and `rerank` from `/search`.
+
+MiniSearch:
+
+```ts
+import MiniSearch from "minisearch";
+import type { EmojiRecord, EmojiSearch } from "@brianhung/emoji-picker-core";
+
+const indexes = new WeakMap<readonly EmojiRecord[], MiniSearch<EmojiRecord>>();
+const text = (record: EmojiRecord, field: string) => [record[field as keyof EmojiRecord]].flat().join(" ");
+
+export const minisearch: EmojiSearch = (query, { records, limit }) => {
+  let index = indexes.get(records);
+  if (!index) {
+    index = new MiniSearch<EmojiRecord>({ idField: "unified", fields: ["name", "shortcodes", "tags"], extractField: text, searchOptions: { prefix: true, fuzzy: 0.2, boost: { name: 2 } } });
+    index.addAll(records);
+    indexes.set(records, index);
+  }
+  return index.search(query).slice(0, limit).map((hit) => ({ unified: hit.id, score: hit.score }));
+};
+```
+
+Fuse.js (the `fuse` adapter in `/search` does this, with weighted keys):
+
+```ts
+import Fuse from "fuse.js";
+import { fuse } from "@brianhung/emoji-picker-core/search";
+
+export const fuzzy = fuse(Fuse, { threshold: 0.3 });
+```
+
+FlexSearch:
+
+```ts
+import { Document } from "flexsearch";
+import type { EmojiRecord, EmojiSearch } from "@brianhung/emoji-picker-core";
+
+const indexes = new WeakMap<readonly EmojiRecord[], Document>();
+
+export const flexsearch: EmojiSearch = (query, { records, limit }) => {
+  let index = indexes.get(records);
+  if (!index) {
+    index = new Document({ tokenize: "forward", document: { id: "unified", index: ["name", "shortcodes", "tags"] } });
+    for (const r of records) index.add({ unified: r.unified, name: r.name, shortcodes: r.shortcodes.join(" "), tags: r.tags.join(" ") });
+    indexes.set(records, index);
+  }
+  const ids = new Set(index.search(query, { limit }).flatMap((field) => field.result));
+  return [...ids].slice(0, limit).map((id) => ({ unified: String(id) }));
+};
+```
+
+Pass one to `createEmojiStore({ searchEngine })`, or to the React provider's `searchEngine`.
