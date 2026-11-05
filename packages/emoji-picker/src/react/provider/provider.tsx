@@ -19,6 +19,7 @@ export type { EmojiLabels };
 
 export type EmojiProviderProps = EmojiStoreOptions & {
   renderer?: Renderer | "auto";
+  imageUrl?: (unified: string) => string;
   twemojiBaseUrl?: string;
   twemojiVersion?: number;
   prepare?: boolean;
@@ -37,7 +38,7 @@ type ContextValue = {
 
 const EmojiContext = React.createContext<ContextValue | null>(null);
 
-export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
+export function EmojiProvider({ renderer = "auto", imageUrl, twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
   const { skinTone, onSkinToneChange, data, customEmojis, filter, searchEngine } = options;
   React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
@@ -59,12 +60,12 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
     () => ({
       store,
       renderer: resolved,
-      imageUrl: (unified) => twemojiUrl(unified, twemojiBaseUrl),
+      imageUrl: imageUrl ?? ((unified) => twemojiUrl(unified, twemojiBaseUrl)),
       labels: merged,
       groups,
       maxVersion: resolved === "twemoji" ? twemojiVersion : undefined,
     }),
-    [store, resolved, twemojiBaseUrl, twemojiVersion, merged, groups],
+    [store, resolved, imageUrl, twemojiBaseUrl, twemojiVersion, merged, groups],
   );
   const tree = <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
   return locale ? <I18nProvider locale={locale}>{tree}</I18nProvider> : tree;

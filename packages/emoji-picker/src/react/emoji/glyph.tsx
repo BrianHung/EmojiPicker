@@ -26,7 +26,7 @@ export const Glyph = React.memo(function Glyph({ unified, record, animate = fals
   const art = artwork ? findArtwork(artwork, unified) : undefined;
   const alt = record?.name ?? unified;
   if (art !== undefined) return <ArtworkGlyph art={art} alt={alt} size={SIZE} style={typeof art === "string" ? IMAGE : undefined} />;
-  const src = record?.imageUrl ?? (renderer === "twemoji" && isUnified(unified) ? imageUrl(unified) : undefined);
+  const src = record?.imageUrl ?? (renderer !== "native" && isUnified(unified) ? imageUrl(unified) : undefined);
   if (src) return <EmojiImage src={src} alt={alt} record={record} size={SIZE} animate={animate} fallback={record?.imageUrl ? undefined : unifiedToNative(unified)} style={IMAGE} />;
   return (
     <span data-glyph="" style={TEXT}>

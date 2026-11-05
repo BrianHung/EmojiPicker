@@ -293,6 +293,8 @@ The picker state owns its highlight unless you control it: pass `highlighted` an
 
 `<Emoji emoji={…} />` draws one emoji the way the pickers do. It accepts a native emoji, a shortcode with or without colons, a unified code, a custom emoji id, an `EmojiSelection`, an `EmojiRecord`, or a `CustomEmoji`. Unknown input renders as text with `data-emoji-missing`. `useEmoji(input)` returns the resolved emoji, and `resolveEmoji(store, input)` does the same without React. The `unified` prop is a deprecated alias of `emoji`.
 
+`renderer="image"` draws every emoji from the provider's `imageUrl(unified)`, for example a vendor set from [emoji-datasource](https://github.com/iamcal/emoji-data) (check the set's license): `` imageUrl={(u) => `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/${u}.png`} ``; swap `apple` for `google` or `facebook`.
+
 ### Artwork overrides
 
 `EmojiOverrides` draws particular emoji with your own art everywhere inside it: `<Emoji>`, picker cells, search results, and tapbacks. The emoji keep their identity for selection, search, and frequents. Keys are unified codes; a base code covers every skin tone.
