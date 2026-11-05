@@ -1,60 +1,49 @@
-# EmojiPicker
-
-Unstyled React parts for emoji pickers, tapbacks and shortcode autocomplete on React Aria, a framework-neutral core, prebuilt locale datasets, and copy-in shadcn/ui components. Docs and demos: [emoji.brianhung.me](https://emoji.brianhung.me).
+<div align="center">
+  <a href="https://emoji.brianhung.me">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/picker-dark.png">
+      <img src=".github/assets/picker-light.png" width="352" alt="The emoji picker">
+    </picture>
+  </a>
+  <h1>EmojiPicker</h1>
+  <p>Accessible, virtualized emoji picker parts for React, built on React Aria.<br>Unstyled, with copy-in shadcn/ui components and app styles to start from.</p>
+  <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
+</div>
 
 ## Install
 
 ```bash
-npm install @brianhung/emoji-picker @brianhung/emoji-picker-core
+npm install @brianhung/emoji-picker
 ```
+
+```tsx
+import { EmojiPicker } from "@brianhung/emoji-picker";
+
+<EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
+  <EmojiPicker.Search />
+  <EmojiPicker.Viewport>
+    <EmojiPicker.List />
+  </EmojiPicker.Viewport>
+</EmojiPicker.Root>
+```
+
+Every part is unstyled: style it with Tailwind or CSS modules through `className` and its `data-*` state attributes.
 
 Or copy a styled shadcn/ui component into your project:
 
 ```bash
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json        # in your Base UI or Radix popover
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover-aria.json   # in a React Aria popover
+npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker
 ```
 
-## Repository layout
+## Packages
 
-| Path | Contents |
+| Package | |
 |---|---|
-| `packages/emoji-picker-core` | [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md): data, search, stores and the ProseMirror plugin, with no dependencies |
-| `packages/emoji-picker` | [`@brianhung/emoji-picker`](packages/emoji-picker/README.md): the React parts and hooks |
-| `packages/emoji-picker-data` | [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
-| `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
-| `.changeset` | Pending release notes |
+| [`@brianhung/emoji-picker`](packages/emoji-picker/README.md) | React parts and hooks |
+| [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md) | Data, search and state, with no dependencies |
+| [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md) | Datasets for every Emojibase locale |
 
-## Commands
-
-Run these from the repository root.
-
-```bash
-npm install
-npm run dev          # the site at http://localhost:5199
-npm test             # core and React unit tests
-npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visual specs
-npm run test:a11y    # axe on every page and picker surface
-npm run typecheck    # every workspace
-npm run check        # Biome lint and format check; `npm run format` formats
-npm run build        # core, the React package, then the site and registry
-npm run size         # bundle-size budgets on the library build (.size-limit.json)
-npm run changeset    # describe a change for the next release
-```
-
-In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
-
-Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the builds, the size budgets, the data package's validation, a packed-install smoke test, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
-
-## Releasing
-
-Changes to a published package come with a changeset (`npm run changeset`). The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account:
-
-```bash
-npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker
-npx changeset publish
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.
 
 ## License
 
