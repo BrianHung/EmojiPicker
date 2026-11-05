@@ -1,6 +1,6 @@
 import type { EmojiRecord } from "../dataset";
 import { createStore } from "../reactive";
-import type { EmojiStore } from "../store";
+import type { EmojiData, EmojiStore } from "../store";
 import type { ProgressiveHits } from "./search";
 
 export type SearchState = {
@@ -11,13 +11,13 @@ export type SearchState = {
 const NONE: readonly EmojiRecord[] = [];
 const IDLE: SearchState = { results: NONE, pending: false };
 
-type Run = { key: string | null; state: SearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
-type RunAction = { type: "start"; key: string; state: SearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
+type Run = { key: string | null; data: EmojiData | null; state: SearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
+type RunAction = { type: "start"; key: string; data: EmojiData; state: SearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
 
 const reduce = (run: Run, action: RunAction): Run => {
   switch (action.type) {
     case "start":
-      return { ...run, key: action.key, state: action.state, controller: action.controller };
+      return { ...run, key: action.key, data: action.data, state: action.state, controller: action.controller };
     case "settle":
       return run.controller === action.controller ? { ...run, state: { results: action.results, pending: false }, settled: action.results, controller: null } : run;
     case "abort":
@@ -27,7 +27,7 @@ const reduce = (run: Run, action: RunAction): Run => {
 
 // Runs lazily from getSnapshot, so a query set during render has results in that render; only settling notifies
 export function createSearch(store: EmojiStore) {
-  const run = createStore<Run, RunAction>({ key: "", state: IDLE, controller: null, settled: NONE }, reduce);
+  const run = createStore<Run, RunAction>({ key: "", data: null, state: IDLE, controller: null, settled: NONE }, reduce);
   const settled = createStore(0, (n: number) => n + 1);
   const watchers = createStore(0, (n: number, by: number) => n + by);
   const abort = () => {
@@ -36,9 +36,10 @@ export function createSearch(store: EmojiStore) {
   };
   return {
     run(query: string, limit: number): SearchState {
-      const key = store.status() === "ready" && query.trim() ? `${limit}:${query}` : "";
+      const { status, data } = store.getSnapshot();
+      const key = status === "ready" && query.trim() ? `${limit}:${query}` : "";
       const current = run.getSnapshot();
-      if (key === current.key) return current.state;
+      if (key === current.key && (!key || data === current.data)) return current.state;
       current.controller?.abort();
       if (!key) return start(key, IDLE, null);
       const controller = new AbortController();
@@ -65,7 +66,7 @@ export function createSearch(store: EmojiStore) {
   };
 
   function start(key: string, state: SearchState, controller: AbortController | null) {
-    run.dispatch({ type: "start", key, state, controller });
+    run.dispatch({ type: "start", key, data: store.getSnapshot().data, state, controller });
     return state;
   }
 }

@@ -420,6 +420,8 @@ Set sizes with CSS variables on `Root` or an ancestor:
 
 `data/en.json` is built from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
 
+A dataset object (`import en from ".../en.json"`) is ready on the first render, so server-rendered markup has the grid. Changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the provider in place, keeping frequents and skin tone; functions and objects compare by reference, so define them outside render or memoize them.
+
 ## Localization
 
 Japanese in three lines: build the data, pass it with the locale, and translate the strings you show.

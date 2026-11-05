@@ -34,7 +34,7 @@ export function SearchPicker({ onSelect }: { onSelect: (selection: EmojiSelectio
     <>
       <Chips label="Search engine" value={engine} onChange={setEngine} options={Object.entries(ENGINES).map(([id, e]) => [id as Engine, e.label])} />
       <Chips label="Results" value={mode} onChange={setMode} options={[["ranked", "Ranked"], ["grouped", "Grouped"]]} />
-      <EmojiProvider key={engine} data={en} searchEngine={ENGINES[engine].search}>
+      <EmojiProvider data={en} searchEngine={ENGINES[engine].search}>
         <EmojiPickerCard onSelect={onSelect} searchResults={mode} query={query} onQueryChange={setQuery} />
       </EmojiProvider>
     </>

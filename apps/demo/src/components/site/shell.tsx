@@ -63,7 +63,7 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
   return (
     <TooltipProvider>
       <RendererContext.Provider value={renderer}>
-        <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
+        <EmojiProvider data={enUrl} renderer={renderer}>
           <div className="flex min-h-svh flex-col">
             <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />
             <div className="flex-1">{children}</div>

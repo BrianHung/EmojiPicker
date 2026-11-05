@@ -47,7 +47,7 @@ export function Demo() {
   const [timing, setTiming] = React.useState<{ query: string; count: number; ms: number } | null>(null);
   const device = useStore(onDeviceStatus);
   const api = useStore(apiStatus);
-  const search = React.useMemo(() => timed(SEARCHES[tab], setTiming), [tab]);
+  const search = React.useMemo(() => timed(SEARCHES[tab], setTiming), [tab, device.state]);
 
   const backend = tab === "vector" ? "embeddings" : tab === "decision" ? "decision" : null;
   const unavailable = backend !== null && api[backend] === "unavailable";
@@ -80,7 +80,7 @@ export function Demo() {
         ) : null}
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
-        <EmojiProvider key={`${tab}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} searchEngine={search}>
+        <EmojiProvider data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} searchEngine={search}>
           <EmojiPickerCard query={query} onQueryChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
         </EmojiProvider>
         <p className="min-h-5 text-sm text-muted-foreground tabular-nums" data-testid="status" aria-live="polite">

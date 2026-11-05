@@ -39,8 +39,9 @@ const EmojiContext = React.createContext<ContextValue | null>(null);
 
 export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
-  const { skinTone, onSkinToneChange } = options;
+  const { skinTone, onSkinToneChange, data, customEmojis, filter, searchEngine } = options;
   React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
+  React.useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale }), [store, data, customEmojis, filter, searchEngine, locale]);
   const [detected, setDetected] = React.useState<Renderer>("native");
 
   React.useEffect(() => {
@@ -51,9 +52,9 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   }, [renderer, prepare, store]);
 
   const resolved = renderer === "auto" ? detected : renderer;
-  const status = useStore(store, (s) => s.status);
-  const groups = React.useMemo(() => store.customGroups(), [store, status]);
-  const merged = useLabels(labels, locale ?? (status === "ready" ? store.locale() : undefined));
+  const groups = useStore(store, (s) => s.data.customGroups);
+  const loadedLocale = useStore(store, (s) => (s.status === "ready" ? s.data.locale : undefined));
+  const merged = useLabels(labels, locale ?? loadedLocale);
   const value = React.useMemo<ContextValue>(
     () => ({
       store,

@@ -10,6 +10,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
   const { store, renderer } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
   const native = renderer === "native" && status === "ready";
+  const records = useStoreSnapshot((s) => s.records());
   const [support, setSupport] = React.useState<NativeSupport | null>(null);
   const [version, setVersion] = React.useState(0);
   const pending = React.useRef(new Set<string>());
@@ -19,7 +20,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
     if (!native || typeof window === "undefined") return setSupport(null);
     const font = (root.current && getComputedStyle(root.current).getPropertyValue("--emoji-font-family").trim()) || undefined;
     const samples = new Map<number, string>();
-    for (const r of store.records()) if (!r.imageUrl && !samples.has(r.version)) samples.set(r.version, r.unified);
+    for (const r of records) if (!r.imageUrl && !samples.has(r.version)) samples.set(r.version, r.unified);
     let current: NativeSupport | null = null;
     const update = () => {
       const probe = nativeProbe(font);
@@ -29,7 +30,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
     };
     update();
     return onNativeSupportChange(update);
-  }, [native, store, root]);
+  }, [native, records, root]);
 
   const request = React.useCallback(
     (unifieds: Iterable<string>) => {

@@ -47,7 +47,7 @@ describe("resolveEmoji", () => {
   });
 
   it("draws native emoji and unified codes before data loads, nothing else", () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset });
+    const store = createEmojiStore({ data: async () => data as unknown as Dataset });
     expect(resolveEmoji(store, "🎉")?.native).toBe("🎉");
     expect(resolveEmoji(store, "1f389")?.native).toBe("🎉");
     expect(resolveEmoji(store, ":tada:")).toBeNull();

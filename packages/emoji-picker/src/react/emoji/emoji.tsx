@@ -18,7 +18,8 @@ export type EmojiProps = BaseProps & {
 export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   const { store } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
-  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status]);
+  const data = useStoreSnapshot((s) => s.getSnapshot().data);
+  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status, data]);
   React.useEffect(() => {
     if (!resolved && status === "idle") store.load().catch(() => {});
   }, [resolved, status, store]);
