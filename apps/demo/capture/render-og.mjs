@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 import sharp from "sharp";
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";

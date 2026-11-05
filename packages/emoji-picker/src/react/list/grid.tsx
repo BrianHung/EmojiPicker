@@ -23,7 +23,7 @@ import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { Variations } from "./variations";
-import { moveVirtualFocus } from "./virtual-focus";
+import { moveVirtualFocus, scrollParent } from "../utils/utils";
 
 // Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
 const pointer = { x: NaN, y: NaN, moved: false, tracking: false, list: null as Element | null, within: false };
@@ -339,6 +339,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
   };
   const keyOf = (e: React.SyntheticEvent) => cellOf(e.target)?.getAttribute("data-key") ?? null;
+  // Not useLongPress: its press focuses the target and stops the click, and cells delegate from the list; it also has no move threshold
   const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
   const endPress = () => {
     marks.dispatch({ pressed: null });
@@ -571,8 +572,7 @@ export type UseEmojiGridOptions = {
 };
 
 function windowOf(list: HTMLElement | null) {
-  let el = list?.parentElement;
-  while (el && !/auto|scroll/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
+  const el = scrollParent(list);
   return list && el ? { el, top: el.getBoundingClientRect().top + el.clientTop - list.getBoundingClientRect().top, height: el.clientHeight } : null;
 }
 

@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 const REAL = {
   slack: { theme: "light", parts: { root: [0, 0, 361, 454], tab: [42.3, 4, 34.3, 38], input: [17.5, 56, 326, 36], glyph: [21.5, 132.5, 22, 22] } },
   discord: { theme: "dark", parts: { root: [0, 0, 498, 486], input: [16.8, 58.8, 414.4, 40], tone: [443.2, 59.8, 38, 38], tab: [8.8, 119.8, 32, 32], emoji: [56.8, 143.6, 48, 48] } },

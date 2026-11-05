@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { PAGE_SCROLLS } from "./known-issues";
 import { SURFACES, type Kind, type Surface } from "./surfaces";
-import { expect, fileName, matchFixture, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
+import { expect, fileName, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
 
 const REPRESENTATIVE = [
   "home/inline-tailwind",
@@ -205,7 +205,7 @@ for (const s of surfaces)
     await quiet(page);
     record.tab = { ...(await probe(page, root)), open: await isOpen(root), inside: await root.evaluate((el) => el.contains(document.activeElement), null, { timeout: 500 }).catch(() => false) };
 
-    matchFixture(info, fileName(s.id), record);
+    expect(`${JSON.stringify(record, null, 2)}\n`).toMatchSnapshot(`${fileName(s.id)}.json`);
     expect(
       keys.filter((k) => k.scrolled !== 0).map((k) => k.key),
       "keys that scrolled the page",
@@ -260,8 +260,7 @@ test("examples/virtualizer", async ({ page }) => {
   const cell = root.locator(`[id="${await search.getAttribute("aria-activedescendant")}"]`);
   const name = (await cell.getAttribute("aria-label"))!;
   expect(await highlighted()).not.toBe(first);
-  const [box, frame] = [(await cell.boundingBox())!, (await viewport.boundingBox())!];
-  expect(box.y >= frame.y && box.y + box.height <= frame.y + frame.height, "highlight scrolled into view").toBe(true);
+  await expect(cell, "highlight scrolled into view").toBeInViewport({ ratio: 1 });
   expect(await viewport.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);

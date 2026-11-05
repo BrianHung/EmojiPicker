@@ -14,6 +14,7 @@ import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "
 import { EmojiGridNavigation } from "./navigation";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { nextTabbable, TABBABLE } from "../utils/utils";
 import { useEmptyState } from "../root/viewport";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
@@ -518,16 +519,6 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
       })}
     </div>
   );
-}
-
-const TABBABLE = 'button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
-
-function nextTabbable(after: Element): HTMLElement | null {
-  for (const el of after.ownerDocument.querySelectorAll<HTMLElement>(TABBABLE)) {
-    if (after.contains(el) || el.tabIndex < 0 || !(after.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
-    if (el.getClientRects().length && getComputedStyle(el).visibility !== "hidden") return el;
-  }
-  return null;
 }
 
 export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell });

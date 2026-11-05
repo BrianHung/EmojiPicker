@@ -4,6 +4,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { PopoverContext, type PopoverState } from "./popover-context";
 import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
+import { TABBABLE } from "../utils/utils";
 
 export type Side = "top" | "bottom";
 export type Align = "start" | "center" | "end";
@@ -54,8 +55,6 @@ export type SuggestionsPopoverProps = React.HTMLAttributes<HTMLDivElement> &
     onOpenChange?: (open: boolean) => void;
     anchor: PopoverAnchor;
   };
-
-const TABBABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
 // For popovers this package doesn't render, so all it has is their content element
 export function pickerInitialFocus(root: Element | null | undefined): HTMLElement | null {
