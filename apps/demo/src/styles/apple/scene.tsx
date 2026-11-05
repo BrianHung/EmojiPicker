@@ -180,7 +180,7 @@ export function IMessageScreen({
       if (!rect) return;
       setSelected({ id, rect });
       setMode(next);
-      setCovering(next !== "menu");
+      setCovering(next === "emoji");
       setCompose(false);
     },
     [measure],
@@ -193,10 +193,10 @@ export function IMessageScreen({
     open();
   };
   React.useEffect(() => {
-    if (covering || !fromKeyboard.current || !selected) return;
+    if (mode !== "idle" || covering || !fromKeyboard.current || !selected) return;
     fromKeyboard.current = false;
     bubbles.current.get(selected.id)?.focus();
-  }, [covering]);
+  }, [mode, covering]);
   const insert = React.useRef<(text: string) => void>(() => {});
   const erase = React.useRef<() => void>(() => {});
   const modeRef = React.useRef(mode);
@@ -303,7 +303,7 @@ export function IMessageScreen({
           />
         ) : null}
         {active && mode === "tapback" ? (
-          <TapbackLayer key="tapback" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={opener(() => setMode("emoji"))} onClose={close} />
+          <TapbackLayer key="tapback" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={opener(() => (setCovering(true), setMode("emoji")))} onClose={close} />
         ) : null}
         {active && mode === "menu" ? <MenuLayer key="menu" rect={selected.rect} message={message} onReact={(u, t) => react(message.id, u, t)} onEmoji={opener(() => (setCovering(true), setMode("emoji")))} onClose={close} /> : null}
         {active && mode === "emoji" ? <EmojiLayer key="emoji" rect={selected.rect} message={message} onClose={close} /> : null}

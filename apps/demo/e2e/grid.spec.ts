@@ -85,3 +85,26 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover"])
       });
     expect(gap).toBe(0);
   });
+
+test.describe("phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("iMessage: the message stays visible while the tapback closes", async ({ page }) => {
+    await visit(page, "/gallery/#apple");
+    const scene = page.locator("[data-imessage]").first();
+    const tapbacks = scene.getByRole("toolbar", { name: "Tapbacks" });
+    await expect(tapbacks).toBeVisible();
+    const bubble = scene.locator('[aria-label^="They: perfect"]').first();
+    await tapbacks.getByRole("button", { name: "Like", exact: true }).tap();
+    const unseen = await bubble.evaluate(async (el) => {
+      let frames = 0;
+      for (let i = 0; i < 60; i++) {
+        await new Promise((r) => requestAnimationFrame(r));
+        const lifted = el.closest("[data-imessage]")!.querySelector(".z-20");
+        if (getComputedStyle(el).visibility === "hidden" && (!lifted || +getComputedStyle(lifted).opacity < 0.5)) frames++;
+      }
+      return frames;
+    });
+    expect(unseen).toBe(0);
+  });
+});
