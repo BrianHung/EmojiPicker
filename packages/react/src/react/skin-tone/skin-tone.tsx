@@ -238,3 +238,23 @@ function SkinToneGlyph({ emoji = "✋", style, ...props }: SkinToneGlyphProps) {
 }
 
 export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: SkinToneTrigger, Options: SkinToneOptions, Option: SkinToneOption, Glyph: SkinToneGlyph });
+
+export declare namespace SkinTone {
+  type Props = SkinToneProps;
+  type State = SkinToneState;
+  type OpenChangeDetails = SkinToneOpenChangeDetails;
+  namespace Trigger {
+    type Props = SkinToneTriggerProps;
+  }
+  namespace Options {
+    type Props = SkinToneOptionsProps;
+    type State = SkinToneOptionsState;
+  }
+  namespace Option {
+    type Props = SkinToneOptionProps;
+    type State = SkinToneOptionState;
+  }
+  namespace Glyph {
+    type Props = SkinToneGlyphProps;
+  }
+}

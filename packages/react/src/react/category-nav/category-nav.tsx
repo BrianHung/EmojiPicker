@@ -166,3 +166,12 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
 });
 
 export const CategoryNav = /* @__PURE__ */ Object.assign(CategoryNavRoot, { Tab: CategoryTab });
+
+export declare namespace CategoryNav {
+  type Props = CategoryNavProps;
+  type State = CategoryNavState;
+  namespace Tab {
+    type Props = CategoryTabProps;
+    type State = CategoryTabState;
+  }
+}

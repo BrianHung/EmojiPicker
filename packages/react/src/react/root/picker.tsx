@@ -308,6 +308,27 @@ export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props
   return React.useContext(EmojiContext) ? root : <EmojiProvider>{root}</EmojiProvider>;
 });
 
+type RootDetails = {
+  query: QueryChangeDetails;
+  highlight: HighlightChangeDetails;
+  value: ValueChangeDetails;
+  collapsed: CollapsedCategoriesChangeDetails;
+  reactionsOpen: ReactionsOpenChangeDetails;
+  select: SelectDetails;
+};
+
+export declare namespace Root {
+  type Props = RootProps;
+  type State = RootState;
+  type Actions = EmojiPickerActions;
+  type QueryChangeDetails = RootDetails["query"];
+  type HighlightChangeDetails = RootDetails["highlight"];
+  type ValueChangeDetails = RootDetails["value"];
+  type CollapsedCategoriesChangeDetails = RootDetails["collapsed"];
+  type ReactionsOpenChangeDetails = RootDetails["reactionsOpen"];
+  type SelectDetails = RootDetails["select"];
+}
+
 export function useActiveEmoji(): EmojiRecord | null {
   return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
 }
@@ -366,6 +387,11 @@ export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function
   );
 });
 
+export declare namespace Viewport {
+  type Props = ViewportProps;
+  type State = ViewportState;
+}
+
 export type PreviewState = { emoji: EmojiRecord | null };
 
 export type PreviewProps = PartElementProps<PreviewState>;
@@ -376,3 +402,8 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function P
   const caption = active ? `${active.imageUrl ? "" : active.emoji} ${active.name}`.trim() : labels.previewCaption;
   return renderElement("div", { "data-slot": SLOTS.preview, ...props, ref, children: children ?? caption }, { emoji: active });
 });
+
+export declare namespace Preview {
+  type Props = PreviewProps;
+  type State = PreviewState;
+}
