@@ -98,6 +98,8 @@ export function createEmojiStore({
   defaultFrequents,
   onFrequentsChange,
   frequentsStorage,
+  frequentsHalfLifeDays,
+  frequentsMax,
   skinTone: controlledTone,
   defaultSkinTone = 0,
   onSkinToneChange,
@@ -105,7 +107,7 @@ export function createEmojiStore({
   labels: labelOverrides,
   ...source
 }: EmojiStoreOptions = {}) {
-  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, frequentsStorage });
+  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, frequentsStorage, frequentsHalfLifeDays, frequentsMax });
   let config: EmojiSourceOptions = source;
   let raw = inline(config);
   let base: readonly EmojiRecord[] = [];

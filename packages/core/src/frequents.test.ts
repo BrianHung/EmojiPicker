@@ -17,6 +17,15 @@ describe("frequency store", () => {
     expect(store.entries().old).toEqual({ count: 3, lastUsed: 0 });
   });
 
+  it("takes its half-life and size", () => {
+    vi.useFakeTimers({ now: 0 });
+    const store = createFrequencyStore({ frequentsStorage: null, frequentsHalfLifeDays: 1, frequentsMax: 2 });
+    ["old", "old", "old", "mid"].forEach(store.record);
+    vi.setSystemTime(3 * DAY);
+    store.record("new");
+    expect(Object.keys(store.entries())).toEqual(["new", "old"]);
+  });
+
   it("returns stable snapshots per n until something changes", () => {
     const store = createFrequencyStore({ frequentsStorage: null });
     const five = store.top(5);

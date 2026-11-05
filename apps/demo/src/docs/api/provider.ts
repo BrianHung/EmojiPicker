@@ -18,6 +18,8 @@ export const provider = rowsOf<EmojiProviderProps>()([
   { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", description: "Used when frequentsStorage holds nothing." },
   { name: "onFrequentsChange", type: '(frequents, details: { reason: "pick" | "remove" | "clear", emoji?, cancel() }) => void' },
   { name: "frequentsStorage", type: "EmojiStorage | null", default: "localStorage", description: "Where uncontrolled frequents persist, synced across tabs; null keeps them in memory." },
+  { name: "frequentsHalfLifeDays", type: "number", default: "14", description: "Days for a use to count half." },
+  { name: "frequentsMax", type: "number", default: "64", description: "Emoji the history keeps." },
   { name: "skinTone", type: "SkinToneValue", description: "The skin tone, controlled: 0 (none) or 1–5, the Fitzpatrick tones." },
   { name: "defaultSkinTone", type: "SkinToneValue", default: "0" },
   { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "option-press" | "none", event?, cancel() }) => void' },

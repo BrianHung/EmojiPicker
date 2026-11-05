@@ -99,6 +99,7 @@ Every controllable state takes `x`, `defaultX` and `onXChange(value, details)`. 
 | `filter` | `(record) => boolean`; removes emoji from pickers and search |
 | `skinTone`, `defaultSkinTone`, `onSkinToneChange`, `skinToneStorage` | Shared skin tone; persisted to localStorage and synced across tabs unless `skinToneStorage={null}` |
 | `frequents`, `defaultFrequents`, `onFrequentsChange`, `frequentsStorage` | Frequently used emoji as `Record<unified, { count, lastUsed }>`, `count` halving every 14 days; uncontrolled, they persist to localStorage and sync across tabs. Pickers and `useFrequentEmoji` skip entries the current data or custom emoji don't include, so history survives switching packs |
+| `frequentsHalfLifeDays`, `frequentsMax` | How fast a use fades (default `14` days) and how many emoji the history keeps (default `64`) |
 | `renderer`, `imageUrl`, `imageVersion` | `"auto"` (default) uses images only where the system cannot draw an emoji. `imageUrl(unified, { renderer })` returns an image URL or `undefined` for native text; the default returns Twemoji when `renderer` is `"image"` |
 
 To replace particular emoji with your own artwork under any renderer:

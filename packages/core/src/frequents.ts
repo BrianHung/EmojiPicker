@@ -7,7 +7,7 @@ export type EmojiStorage = {
   subscribe?(listener: () => void): () => void;
 };
 
-// count is the use count decayed by half every 14 days, as of lastUsed
+// count is the use count decayed by half every frequentsHalfLifeDays (14 by default), as of lastUsed
 export type FrequentEntry = { count: number; lastUsed: number };
 export type Frequents = Readonly<Record<string, FrequentEntry>>;
 export type FrequentsChangeDetails = ChangeDetails<"pick" | "remove" | "clear"> & { emoji?: string };
@@ -27,34 +27,39 @@ export type FrequencyStoreOptions = {
   defaultFrequents?: Frequents;
   onFrequentsChange?: (frequents: Frequents, details: FrequentsChangeDetails) => void;
   frequentsStorage?: EmojiStorage | null;
+  frequentsHalfLifeDays?: number;
+  frequentsMax?: number;
 };
 
 const DEFAULTS = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
-const HALF_LIFE = 14 * 864e5;
-const MAX = 64;
 const NONE: Frequents = {};
 
-const decayed = ({ count, lastUsed }: FrequentEntry, now: number) => count * 0.5 ** ((now - lastUsed) / HALF_LIFE);
-const ranked = (entries: Frequents, now: number) => Object.entries(entries).sort((a, b) => decayed(b[1], now) - decayed(a[1], now));
-const capped = (entries: Frequents, now: number): Frequents => Object.fromEntries(ranked(entries, now).slice(0, MAX));
+type Tuning = { halfLifeDays: number; max: number };
+export type FrequentsTuning = Pick<FrequencyStoreOptions, "frequentsHalfLifeDays" | "frequentsMax">;
+const tuningOf = ({ frequentsHalfLifeDays = 14, frequentsMax = 64 }: FrequentsTuning = {}): Tuning => ({ halfLifeDays: frequentsHalfLifeDays, max: frequentsMax });
 
-export function mergeFrequents(a: Frequents, b: Frequents): Frequents {
+const decayed = ({ count, lastUsed }: FrequentEntry, now: number, { halfLifeDays }: Tuning) => count * 0.5 ** ((now - lastUsed) / (halfLifeDays * 864e5));
+const ranked = (entries: Frequents, now: number, tuning: Tuning) => Object.entries(entries).sort((a, b) => decayed(b[1], now, tuning) - decayed(a[1], now, tuning));
+const capped = (entries: Frequents, now: number, tuning: Tuning): Frequents => Object.fromEntries(ranked(entries, now, tuning).slice(0, tuning.max));
+
+export function mergeFrequents(a: Frequents, b: Frequents, options?: FrequentsTuning): Frequents {
+  const tuning = tuningOf(options);
   const merged: Record<string, FrequentEntry> = { ...a };
   for (const [unified, entry] of Object.entries(b)) {
     const other = merged[unified];
     const lastUsed = Math.max(entry.lastUsed, other?.lastUsed ?? 0);
-    merged[unified] = other ? { count: decayed(entry, lastUsed) + decayed(other, lastUsed), lastUsed } : entry;
+    merged[unified] = other ? { count: decayed(entry, lastUsed, tuning) + decayed(other, lastUsed, tuning), lastUsed } : entry;
   }
-  return capped(merged, Date.now());
+  return capped(merged, Date.now(), tuning);
 }
 
 export type FrequentsAction = { type: "pick"; emoji: string; now: number } | { type: "remove"; emoji: string } | { type: "clear" };
 
-export function reduceFrequents(entries: Frequents, action: FrequentsAction): Frequents {
+export function reduceFrequents(entries: Frequents, action: FrequentsAction, tuning: Tuning): Frequents {
   switch (action.type) {
     case "pick": {
       const prev = entries[action.emoji];
-      return capped({ ...entries, [action.emoji]: { count: (prev ? decayed(prev, action.now) : 0) + 1, lastUsed: action.now } }, action.now);
+      return capped({ ...entries, [action.emoji]: { count: (prev ? decayed(prev, action.now, tuning) : 0) + 1, lastUsed: action.now } }, action.now, tuning);
     }
     case "remove": {
       if (!(action.emoji in entries)) return entries;
@@ -77,15 +82,17 @@ export function createFrequencyStore({
   defaultFrequents = NONE,
   onFrequentsChange,
   frequentsStorage = localStorageAdapter("emoji-picker:frequents"),
+  ...options
 }: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {
   const read = () => parse(frequentsStorage?.read() ?? null) ?? defaultFrequents;
   const store = createStore<FrequencyState, FrequencyAction>({ own: read(), controlled: frequents }, reduce);
   const callbacks = { onFrequentsChange };
   const entries = () => store.getSnapshot().controlled ?? store.getSnapshot().own;
+  const tuning = tuningOf(options);
   const tops = new WeakMap<Frequents, Map<number, readonly string[]>>();
 
   const change = (action: FrequentsAction) => {
-    const next = reduceFrequents(entries(), action);
+    const next = reduceFrequents(entries(), action, tuning);
     if (next === entries()) return;
     const details = Object.assign(createChangeDetails(action.type), { emoji: "emoji" in action ? action.emoji : undefined });
     callbacks.onFrequentsChange?.(next, details);
@@ -102,13 +109,13 @@ export function createFrequencyStore({
       const state = entries();
       const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
       tops.set(state, byCount);
-      const list = byCount.get(n) ?? [...new Set([...ranked(state, Date.now()).map(([u]) => u), ...DEFAULTS])].slice(0, n);
+      const list = byCount.get(n) ?? [...new Set([...ranked(state, Date.now(), tuning).map(([u]) => u), ...DEFAULTS])].slice(0, n);
       byCount.set(n, list);
       return list;
     },
     score(unified) {
       const entry = entries()[unified];
-      return entry ? decayed(entry, Date.now()) : 0;
+      return entry ? decayed(entry, Date.now(), tuning) : 0;
     },
     entries,
     subscribe: syncWith(frequentsStorage, store.subscribe, () => store.dispatch({ type: "own", entries: read() })),

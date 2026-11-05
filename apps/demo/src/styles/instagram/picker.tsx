@@ -32,11 +32,11 @@ const CATEGORIES = withIcons(I.ICONS.instagram, {
   hide: ["suggested", "custom"],
 });
 
-export function InstagramPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+export function InstagramPicker({ onSelect, search = true, autoFocus = false, fluid = false, columns, searchResults, className }: StylePickerProps) {
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? "fit" : 8}
+      columns={columns ?? (fluid ? "fit" : 8)}
       suggested={REACTIONS}
       categories={CATEGORIES}
       searchResults={searchResults}
@@ -86,6 +86,7 @@ export const instagram: Style = {
   tokens,
   Picker: InstagramPicker,
   size: { width: 340, height: 316 },
+  sheetColumns: 7,
   tapback: {
     className: "flex w-fit items-center rounded-[26px] bg-picker-background shadow-picker",
     reactions:

@@ -183,7 +183,7 @@ export function GalleryPage() {
           <FitBox width={appStyle.size.width} height={361} className="items-end">
             <div className="overflow-hidden rounded-t-[20px] border border-b-0 border-border bg-background" style={{ width: appStyle.size.width }}>
               <div className="mx-auto my-2 h-1 w-9 rounded-full bg-muted-foreground/30" />
-              <appStyle.Picker onSelect={copyEmoji} className="h-[340px] w-full rounded-none border-0 shadow-none" />
+              <appStyle.Picker onSelect={copyEmoji} columns={appStyle.sheetColumns} className="h-[340px] w-full rounded-none border-0 shadow-none" />
             </div>
           </FitBox>
         </GalleryCard>
