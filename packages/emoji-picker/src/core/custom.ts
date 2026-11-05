@@ -1,7 +1,7 @@
 // Custom emoji: their shape, where they come from (inline, a URL, a loader), and
 // how they become records the picker and search treat like any other emoji.
 import type { EmojiRecord } from "./dataset";
-import { tokenizerFor } from "./tokenize";
+import { tokenizerFor } from "./search/tokenize";
 
 export type CustomEmoji = {
   id: string;

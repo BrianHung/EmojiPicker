@@ -1,7 +1,7 @@
 import { unifiedToNative, type EmojiRecord } from "./dataset";
-import { createSearch } from "./query";
+import { createSearch } from "./search/query";
 import { emitter, memo, same } from "./reactive";
-import type { CompletionOrder, ShortcodeCompletion } from "./search-index";
+import type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
 import { isComposingKey } from "./shortcodes";
 import type { EmojiStore } from "./store";
 

@@ -1,7 +1,7 @@
 import { GROUPS, type EmojiRecord } from "./dataset";
 import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
 import type { EmojiLabels } from "./labels";
-import { createSearch } from "./query";
+import { createSearch } from "./search/query";
 import { emitter, memo, same } from "./reactive";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
 import type { EmojiSelection, EmojiStore } from "./store";

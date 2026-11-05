@@ -1,6 +1,6 @@
 import { SKIN_TONES, unifiedToNative, type EmojiRecord } from "./dataset";
 import { defaultLabels, type EmojiLabels } from "./labels";
-import type { SearchIndex } from "./search-index";
+import type { SearchIndex } from "./search/search-index";
 
 /** Slack writes skin tones as a second shortcode: :thumbsup::skin-tone-3: (2-6 map to tones 1-5). Localized codes may be in any script. */
 const SHORTCODE = /:([\p{L}\p{M}\p{N}_+\-']+):(?::skin-tone-([2-6]):)?/giu;

@@ -2,8 +2,8 @@ import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRec
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
-import type { CompletionOrder, SearchIndex } from "./search-index";
-import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search";
+import type { CompletionOrder, SearchIndex } from "./search/search-index";
+import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
 /** A dataset object, a URL to one, or a loader. Load it as a separate asset, not inlined into JS. */

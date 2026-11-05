@@ -6,9 +6,9 @@ export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./freq
 export { needsTwemoji, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer } from "./platform";
 export type { Dataset, EmojiRecord, Group } from "./dataset";
-export type { CompletionOrder, SearchIndex, SearchIndexOptions } from "./search-index";
-export { createTokenizer, normalizer } from "./tokenize";
-export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./tokenize";
+export type { CompletionOrder, SearchIndex, SearchIndexOptions, ShortcodeCompletion } from "./search";
+export { createTokenizer, normalizer } from "./search";
+export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./search";
 export { defaultLabels, localizeLabels, plural } from "./labels";
 export type { EmojiLabels, PluralForms, SkinToneNames } from "./labels";
 export { nativeToUnified, resolveEmoji } from "./resolve";
@@ -19,7 +19,6 @@ export type { EmojiGrid, EmojiGridMove, EmojiGridOptions, EmojiGridRow, EmojiGri
 export { findShortcodeTrigger, isComposingKey } from "./shortcodes";
 export { createEmojiSuggestions } from "./suggestions";
 export type { EmojiSuggestionsMachine, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
-export type { ShortcodeCompletion } from "./search-index";
 export { createPickerState, moveHighlight } from "./picker";
 export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
 export type { Category, CategoryOption, EmojiItem, EmojiSection } from "./sections";
