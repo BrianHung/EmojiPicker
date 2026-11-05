@@ -12,7 +12,7 @@ import { localeData } from "@brianhung/emoji-picker-core";
 
 To self-host, copy `data/` and pass `baseUrl`: `localeData("ja", { baseUrl: "/emoji" })` is `/emoji/ja/iamcal.json`. With a bundler, import a file directly: `@brianhung/emoji-picker-data/ja/cldr.json`.
 
-Shortcode sets: `iamcal` (Slack), `cldr`, `cldr-native`, `emojibase`, `emojibase-legacy`, `github` and `joypixels` for every locale, and `emojibase-native` where emojibase has it. English-only sets keep their English shortcodes in other locales.
+Shortcode sets: `iamcal`, `cldr`, `cldr-native`, `emojibase`, `emojibase-legacy`, `github` and `joypixels` for every locale, and `emojibase-native` where emojibase has it. English-only sets keep their English shortcodes in other locales.
 
 ## License
 

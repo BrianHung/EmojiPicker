@@ -6,7 +6,7 @@ import { expect, it } from "vitest";
 import data from "../data/en.json";
 import type { Dataset } from "../src/dataset";
 
-it("writes a localized dataset, with Slack's shortcodes before CLDR's", () => {
+it("writes a localized dataset, with iamcal shortcodes before CLDR's", () => {
   const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "emoji-data-")), "ja.json");
   execFileSync(process.execPath, ["--import", "tsx", path.join(__dirname, "cli.ts"), "build-data", "ja", "--out", out], { stdio: "pipe" });
   const ja = JSON.parse(fs.readFileSync(out, "utf8")) as Dataset;

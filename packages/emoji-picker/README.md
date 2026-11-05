@@ -7,8 +7,8 @@ Unstyled React components for emoji pickers, tapbacks, and shortcode autocomplet
 The library builds on [React Aria](https://react-spectrum.adobe.com/react-aria/) (`Autocomplete`, `SearchField`, `Toolbar`, and `useListBox` over a virtualized grid) and adds:
 
 - Tapbacks: the user's most-used emoji, with a button that expands into the full picker.
-- Slack shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete.
-- Native emoji on Apple and Android, and [Twemoji](https://github.com/jdecked/twemoji) where the system can't draw flags.
+- iamcal shortcodes (`:thumbsup:`, `:+1::skin-tone-4:`) in search, in selections, and as `:thu` autocomplete; CLDR and other emojibase sets per locale.
+- Native emoji where the system draws them, and images ([Twemoji](https://github.com/jdecked/twemoji) by default) where it doesn't.
 - Custom emoji, artwork overrides, collapsible sections, and a horizontal list.
 - Replaceable search, from a built-in word index to embeddings.
 
@@ -239,7 +239,7 @@ For any other editor, `useEmojiTypeahead(trigger, options, element)` takes three
 - `anchor()`: the typed `:query`'s rect,
 - `replace(text, suggestion)`: put `text` where the `:query` is.
 
-Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders Slack, Discord, Notion and Linear menus on a textarea, Tiptap and Lexical.
+Forward the editor's keydown to `onKeyDown` (it returns true when it handled the key), and pass `element` for the combobox attributes. The [gallery](https://emoji.brianhung.me/gallery/) renders menus on a textarea, Tiptap and Lexical.
 
 `@brianhung/emoji-picker-core/prosemirror` has no React: `emojiTypeahead(store, options)` returns a `plugin` (it finds the `:query`, handles the keys, replaces the query, and makes the editor a combobox while open), the `suggestions` store to render, and `anchor()`. `content(text, suggestion, schema)` inserts a node instead of text. In React, `useEmojiTypeaheadStore((store, options) => emojiTypeahead(store, options), [])` gives the same `EmojiTypeahead` as the hooks. Without a framework:
 
@@ -426,7 +426,7 @@ The List sets `--emoji-picker-content-width` on Root to the grid's measured widt
 
 ## Data
 
-`data/en.json` is built from emojibase and its iamcal (Slack) shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
+`data/en.json` is built from emojibase and its iamcal shortcodes: 1,923 emoji, 1,914 with shortcodes, 192 KB (50 KB gzipped). Skin-tone variations are computed at load. The provider's `filter` removes emoji from pickers and search.
 
 A dataset object (`import en from ".../en.json"`) is ready on the first render, so server-rendered markup has the grid. Changing `data`, `locale`, `filter`, `customEmojis` or `searchEngine` updates the provider in place, keeping frequents and skin tone; functions and objects compare by reference, so define them outside render or memoize them.
 
@@ -450,7 +450,7 @@ npm install --save-dev emojibase-data
 npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
-The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps Slack's English shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
+The dataset has the locale's emoji names, tags, and category names, and the same format as `en.json`. Every locale keeps the English iamcal shortcodes, so `:thumbsup:` works everywhere, followed by the locale's CLDR shortcodes (`:samuzuappu:`). Choose other emojibase sets with `--shortcodes`, for example `--shortcodes iamcal,cldr-native`.
 
 Pass the dataset as `data`:
 

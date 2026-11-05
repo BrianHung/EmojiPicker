@@ -2,7 +2,7 @@
 
 ## Emoji data
 
-`data/en.json` is built from [emojibase-data](https://github.com/milesj/emojibase), MIT License, Copyright (c) 2017-2019 Miles Johnson. Its Slack shortcodes come from emojibase's copy of [iamcal/emoji-data](https://github.com/iamcal/emoji-data), MIT License, Copyright (c) 2013 Cal Henderson.
+`data/en.json` is built from [emojibase-data](https://github.com/milesj/emojibase), MIT License, Copyright (c) 2017-2019 Miles Johnson. Its iamcal shortcodes come from emojibase's copy of [iamcal/emoji-data](https://github.com/iamcal/emoji-data), MIT License, Copyright (c) 2013 Cal Henderson.
 
 ## emoji-picker-react
 

@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-core
 
-The framework-neutral half of [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), with no dependencies: emoji data, search, frequently used emoji, skin tones, the picker's and the typeahead's state, Slack shortcodes, and a ProseMirror plugin. It owns every public type and extension contract (`EmojiSearch`, `EmojiStorage`, `CustomEmojiSource`, `EmojiTrigger`, the dataset format, selections and records), so search engines, storage adapters and editor bindings can depend on it alone.
+The framework-neutral half of [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), with no dependencies: emoji data, search, frequently used emoji, skin tones, the picker's and the typeahead's state, iamcal and CLDR shortcodes, and a ProseMirror plugin. It owns every public type and extension contract (`EmojiSearch`, `EmojiStorage`, `CustomEmojiSource`, `EmojiTrigger`, the dataset format, selections and records), so search engines, storage adapters and editor bindings can depend on it alone.
 
 ```bash
 npm install @brianhung/emoji-picker-core

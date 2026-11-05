@@ -1,6 +1,6 @@
 # EmojiPicker
 
-shadcn for emoji pickers: headless, unstyled React parts for emoji pickers, tapbacks and shortcode autocomplete, built on React Aria, plus copy-in components from a shadcn registry. Docs and demos: [emoji.brianhung.me](https://emoji.brianhung.me). API reference: the [library README](packages/emoji-picker/README.md).
+Unstyled React parts for emoji pickers, tapbacks and shortcode autocomplete on React Aria, a framework-neutral core, prebuilt locale datasets, and copy-in shadcn/ui components. Docs and demos: [emoji.brianhung.me](https://emoji.brianhung.me).
 
 ## Install
 
@@ -20,11 +20,11 @@ npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover-aria.jso
 
 | Path | Contents |
 |---|---|
-| `packages/emoji-picker-core` | `@brianhung/emoji-picker-core`: data, search, stores and the ProseMirror plugin, with no dependencies; the data build and its unit tests |
-| `packages/emoji-picker` | `@brianhung/emoji-picker`: the React parts and hooks on React Aria, with its unit tests |
-| `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker. See its [README](apps/demo/README.md). |
-| `docs` | Research notes, including the [keyboard and accessibility audit](docs/keyboard-accessibility-audit.md) |
-| `.changeset` | Pending release notes for both packages |
+| `packages/emoji-picker-core` | [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md): data, search, stores and the ProseMirror plugin, with no dependencies |
+| `packages/emoji-picker` | [`@brianhung/emoji-picker`](packages/emoji-picker/README.md): the React parts and hooks |
+| `packages/emoji-picker-data` | [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
+| `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
+| `.changeset` | Pending release notes |
 
 ## Commands
 
@@ -33,7 +33,7 @@ Run these from the repository root.
 ```bash
 npm install
 npm run dev          # the site at http://localhost:5199
-npm test             # both packages' unit tests
+npm test             # core and React unit tests
 npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visual specs
 npm run test:a11y    # axe on every page and picker surface
 npm run typecheck    # every workspace
@@ -43,24 +43,18 @@ npm run size         # bundle-size budgets on the library build (.size-limit.jso
 npm run changeset    # describe a change for the next release
 ```
 
-In the workspace, the site resolves `@brianhung/emoji-picker` to the library's TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
+In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
 
-Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the build, the size budgets, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
+Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the builds, the size budgets, the data package's validation, a packed-install smoke test, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
 
 ## Releasing
 
-Changes that affect the published package come with a changeset (`npm run changeset`). The Release workflow, run by hand from the Actions tab, opens a "Version packages" PR that applies them (`npm run version-packages`: bumps the version, writes the CHANGELOG). It never publishes. Publishing is the owner's call and needs the owner's npm account or token:
+Changes to a published package come with a changeset (`npm run changeset`). The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account:
 
 ```bash
-npm run build -w @brianhung/emoji-picker
+npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker
 npx changeset publish
 ```
-
-## Design notes
-
-Search runs on an in-memory index, built once and lazily. Measured in headless Chrome (M-series Mac, iamcal dataset, 7 runs, 1x / 4x CPU throttle), it answered a query in under 0.05 ms against 0.2 / 0.9 ms for IndexedDB, with a p95 of 0.2 / 1.2 ms against 3.9 / 11.9 ms. IndexedDB only wins on warm startup (1.9 ms) and about 0.8 MB of JS heap.
-
-The dataset ships as a separate hashed `.json` asset. Inlining it into JS as a `JSON.parse("…")` string costs 2.5x the heap (2.1 MB against 844 KB), because V8 keeps the script source.
 
 ## License
 
