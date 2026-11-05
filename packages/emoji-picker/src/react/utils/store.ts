@@ -1,5 +1,5 @@
 import { createStore, type Store } from "@brianhung/emoji-picker-core";
-import { useSyncExternalStoreWithSelector } from "use-sync-external-store/shim/with-selector";
+import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 
 type Source<S> = { subscribe(listener: () => void): () => void; getSnapshot(): S; getServerSnapshot?: () => S };
 

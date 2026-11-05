@@ -1,5 +1,5 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
-import { customRecords, customSources, inlineCustomEmojis, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
+import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
@@ -86,10 +86,7 @@ const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], 
 
 type Raw = [dataset: Dataset, packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] }];
 
-function inline({ data, customEmojis }: EmojiSourceOptions): Raw | null {
-  const packs = inlineCustomEmojis(customSources(customEmojis));
-  return packs && typeof data === "object" ? [toDataset(data), packs] : null;
-}
+const inline = ({ data, customEmojis }: EmojiSourceOptions): Raw | null => (typeof data === "object" && !customSources(customEmojis).length ? [toDataset(data), { emojis: [], errors: [] }] : null);
 
 const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
 const sameSource = (a: EmojiSourceOptions, b: EmojiSourceOptions) => a.data === b.data && sameItems(customSources(a.customEmojis), customSources(b.customEmojis));
@@ -147,8 +144,8 @@ export function createEmojiStore({
     load(): Promise<void> {
       const { loading } = state.getSnapshot();
       if (loading || raw) return loading ?? Promise.resolve();
-      const current = new AbortController();
-      const { signal } = (controller = current);
+      const current = (controller = new AbortController());
+      const { signal } = current;
       const pending = Promise.all([resolve(config.data ?? DEFAULT_DATA_URL, signal).then(toDataset), loadCustomEmojis(customSources(config.customEmojis), signal)]).then(
         (next) => {
           if (controller === current) publish(next);
@@ -177,11 +174,10 @@ export function createEmojiStore({
         else if (status !== "idle") store.load().catch(() => {});
         return;
       }
-      if (!raw || (next.filter === previous.filter && next.locale === previous.locale && next.searchEngine === previous.searchEngine)) return;
+      if (!raw) return;
       const kept = base;
-      const data = build(raw);
-      const fresh = next.locale !== previous.locale || !sameItems(kept, base);
-      if (fresh || next.searchEngine !== previous.searchEngine) state.dispatch({ type: "loaded", data: fresh ? data : { ...loaded() } });
+      const data = next.filter === previous.filter && next.locale === previous.locale ? { ...loaded() } : build(raw);
+      if (next.locale !== previous.locale || !sameItems(kept, base) || next.searchEngine !== previous.searchEngine) state.dispatch({ type: "loaded", data });
     },
 
     prepare() {

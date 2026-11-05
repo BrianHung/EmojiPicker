@@ -75,13 +75,12 @@ export const nativeToUnified = (text: string) => [...text].map((c) => c.codePoin
 
 export function toDataset(data: Dataset | EmojiDataInput): Dataset {
   if ("format" in data) return data;
-  const labels = new Map(data.groups.map((g) => [g.id, g.label]));
   return {
     format: 1,
     locale: data.locale,
     emojibase: "",
-    groups: GROUPS.map((id) => labels.get(id) ?? id),
-    emojis: data.emojis.map((e): DatasetEmoji => [e.unified?.toLowerCase() ?? nativeToUnified(e.emoji!), e.label, [...(e.tags ?? [])], [...(e.shortcodes ?? [])], Math.max(0, GROUPS.indexOf(e.group)), e.version ?? 0, 0]),
+    groups: GROUPS.map((id) => data.groups.find((g) => g.id === id)?.label ?? id),
+    emojis: data.emojis.map((e) => [e.unified?.toLowerCase() ?? nativeToUnified(e.emoji!), e.label, e.tags ?? [], e.shortcodes ?? [], GROUPS.indexOf(e.group), e.version ?? 0, 0] as DatasetEmoji),
     toneExceptions: {},
   };
 }
