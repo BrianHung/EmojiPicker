@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
       - uses: changesets/action@v1
         with:
-          version: npm run version
+          version: npm run version-packages
           title: Version packages
           commit: Version packages
         env:

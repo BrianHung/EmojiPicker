@@ -48,7 +48,7 @@ Visual baselines are local: capture them with `npm run test:baseline -w demo`. C
 
 ## Releasing
 
-Changes that affect the published package come with a changeset (`npm run changeset`). The Release workflow, run by hand from the Actions tab, opens a "Version packages" PR that applies them (`npm run version`: bumps the version, writes the CHANGELOG). It never publishes. Publishing is the owner's call and needs the owner's npm account or token:
+Changes that affect the published package come with a changeset (`npm run changeset`). The Release workflow, run by hand from the Actions tab, opens a "Version packages" PR that applies them (`npm run version-packages`: bumps the version, writes the CHANGELOG). It never publishes. Publishing is the owner's call and needs the owner's npm account or token:
 
 ```bash
 npm run build -w @brianhung/emoji-picker

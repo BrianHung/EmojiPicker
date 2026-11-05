@@ -18,7 +18,7 @@
     "check": "biome check .",
     "size": "size-limit",
     "changeset": "changeset",
-    "version": "changeset version && npm install --package-lock-only"
+    "version-packages": "changeset version && npm install --package-lock-only"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.5",
