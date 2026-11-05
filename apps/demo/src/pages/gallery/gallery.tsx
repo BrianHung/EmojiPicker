@@ -1,6 +1,6 @@
 import * as React from "react";
 import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
-import { Emoji, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
+import { Emoji, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";

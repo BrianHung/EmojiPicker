@@ -1,5 +1,5 @@
 {
-  "name": "@brianhung/emoji-picker",
+  "name": "@brianhung/emoji-picker-react",
   "version": "3.0.0-alpha.0",
   "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
   "keywords": [
@@ -21,7 +21,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/BrianHung/EmojiPicker.git",
-    "directory": "packages/emoji-picker"
+    "directory": "packages/react"
   },
   "engines": {
     "node": ">=20"

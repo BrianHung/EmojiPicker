@@ -11,7 +11,7 @@ const NAMES = EXAMPLES.map((e) => e.id);
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
 function readme(text: string) {
-  return text.replace(/\]\((?!https?:|#|mailto:)([^)\s]+)\)/g, (_, link: string) => `](${GITHUB}/${posix.normalize(posix.join("packages/emoji-picker", link))})`);
+  return text.replace(/\]\((?!https?:|#|mailto:)([^)\s]+)\)/g, (_, link: string) => `](${GITHUB}/${posix.normalize(posix.join("packages/react", link))})`);
 }
 
 type Page = { title: string; description: string; body: string };
@@ -59,14 +59,14 @@ const index = (link: (name: string) => string) =>
 type Route = { type: "text/markdown" | "text/plain" | "application/xml"; render: () => string };
 
 const ROUTES: Record<string, Route> = {
-  "docs.md": { type: "text/markdown", render: () => readme(read("../../packages/emoji-picker/README.md")) },
+  "docs.md": { type: "text/markdown", render: () => readme(read("../../packages/react/README.md")) },
   "examples.md": { type: "text/markdown", render: () => `# Examples\n\nWorking integrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
   ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => example(name) } satisfies Route])),
   "llms.txt": {
     type: "text/plain",
     render: () => `# Emoji Picker
 
-> Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete (@brianhung/emoji-picker).
+> Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete (@brianhung/emoji-picker-react).
 
 ## Docs
 

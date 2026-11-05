@@ -1,4 +1,4 @@
-import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
+import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import { discord, discordAutocompleteOptions } from "@/styles/discord/picker";
 import { useFontStylesheet } from "@/styles/scene-kit";

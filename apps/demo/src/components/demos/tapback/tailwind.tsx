@@ -1,4 +1,4 @@
-import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker-react";
 
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-picker-hover";
 

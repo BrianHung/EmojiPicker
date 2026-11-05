@@ -1,5 +1,5 @@
 import type { PropRow } from "@/components/site/docs";
-import type { ListProps } from "@brianhung/emoji-picker";
+import type { ListProps } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const list = rowsOf<ListProps>()([

@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker";
+import type { EmojiSelection } from "@brianhung/emoji-picker-react";
 import { Chips } from "./chips";
 import { CodeTabs, Preview, codeTabsOf, type CodeTab } from "./docs";
 import { usePickedEmoji } from "./picked";

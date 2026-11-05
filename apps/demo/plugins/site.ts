@@ -3,7 +3,7 @@ import type { HtmlTagDescriptor, Plugin } from "vite";
 export const SITE = "https://emoji.brianhung.me";
 const NAME = "Emoji Picker";
 const TAGLINE = "A virtualized, unstyled, and composable emoji picker for React.";
-const PACKAGE = "@brianhung/emoji-picker";
+const PACKAGE = "@brianhung/emoji-picker-react";
 
 type Page = { entry: string; heading: string; description: string; title?: string };
 

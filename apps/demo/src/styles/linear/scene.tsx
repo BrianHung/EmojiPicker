@@ -1,8 +1,8 @@
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Emoji, EmojiPicker, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
-import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
+import { Emoji, EmojiPicker, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker-react";
+import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { LINEAR_CATEGORIES, linear } from "./picker";

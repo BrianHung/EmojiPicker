@@ -1,5 +1,5 @@
-import type { PopoverRootProps, PopoverTriggerProps } from "@brianhung/emoji-picker";
-import type { PopoverContentProps } from "@brianhung/emoji-picker/floating-ui";
+import type { PopoverRootProps, PopoverTriggerProps } from "@brianhung/emoji-picker-react";
+import type { PopoverContentProps } from "@brianhung/emoji-picker-react/floating-ui";
 import { rowsOf } from "./rows";
 
 export const popoverRoot = rowsOf<PopoverRootProps>()([

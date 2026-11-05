@@ -8,7 +8,7 @@ import { markdownDocs } from "./plugins/markdown-docs";
 import { mdx } from "./plugins/mdx";
 import { entries as pages, site } from "./plugins/site";
 
-const workspace = existsSync(new URL("../../packages/emoji-picker/src", import.meta.url));
+const workspace = existsSync(new URL("../../packages/react/src", import.meta.url));
 
 export default defineConfig({
   plugins: [
@@ -21,7 +21,7 @@ export default defineConfig({
       name: "react-aria-demos",
       enforce: "pre",
       resolveId(source, importer) {
-        if (source === "@brianhung/emoji-picker/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("@brianhung/emoji-picker/react-aria", importer, { skipSelf: true });
+        if (source === "@brianhung/emoji-picker-react/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("@brianhung/emoji-picker-react/react-aria", importer, { skipSelf: true });
       },
     },
     {
@@ -35,7 +35,7 @@ export default defineConfig({
   resolve: {
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
     alias: [
-      ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker\/floating-ui$/, replacement: "@brianhung/emoji-picker/react-aria" }] : []),
+      ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker-react\/floating-ui$/, replacement: "@brianhung/emoji-picker-react/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\/components\/ui\/emoji-picker$/, replacement: fileURLToPath(new URL("./registry/emoji-picker.tsx", import.meta.url)) },
       { find: /^@\/(?:hooks|lib)\/(emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },

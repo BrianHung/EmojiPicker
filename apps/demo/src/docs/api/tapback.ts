@@ -1,4 +1,4 @@
-import type { ReactionsExpandProps, ReactionsItemProps, ReactionsProps, TapbackProps } from "@brianhung/emoji-picker";
+import type { ReactionsExpandProps, ReactionsItemProps, ReactionsProps, TapbackProps } from "@brianhung/emoji-picker-react";
 import { rowsOf, rowsOfParts } from "./rows";
 
 export const tapback = rowsOf<TapbackProps>()([

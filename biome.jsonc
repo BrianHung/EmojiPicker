@@ -2,7 +2,7 @@
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
-    "includes": ["**", "!**/package-lock.json", "!packages/emoji-picker-core/data", "!apps/demo/public", "!apps/demo/e2e/fixtures", "!apps/demo/e2e/__snapshots__"]
+    "includes": ["**", "!**/package-lock.json", "!packages/core/data", "!apps/demo/public", "!apps/demo/e2e/fixtures", "!apps/demo/e2e/__snapshots__"]
   },
   "formatter": {
     "enabled": true,
@@ -72,7 +72,7 @@
       "formatter": { "enabled": false }
     },
     {
-      "includes": ["packages/emoji-picker/src/react/utils/render.tsx"],
+      "includes": ["packages/react/src/react/utils/render.tsx"],
       "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
     }
   ]

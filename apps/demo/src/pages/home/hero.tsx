@@ -1,6 +1,6 @@
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
-import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
+import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker-react";
 import { CodeBlock, CopyButton } from "@/components/site/code";
 import { copyEmoji } from "@/components/site/picked";
 import { useRenderer } from "@/components/site/shell";

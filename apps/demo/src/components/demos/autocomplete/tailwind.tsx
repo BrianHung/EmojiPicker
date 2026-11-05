@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Emoji, useEmojiSearch, useEmojiStore, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiSearch, useEmojiStore, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker-react";
 
 function Composer() {
   const ref = React.useRef<HTMLInputElement>(null);

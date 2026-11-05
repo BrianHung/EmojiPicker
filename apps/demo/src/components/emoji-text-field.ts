@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useTextFieldEmojiTypeahead, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
+import { useTextFieldEmojiTypeahead, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
 
 export function useEmojiTextField<T extends HTMLInputElement | HTMLTextAreaElement>(options?: EmojiTypeaheadOptions) {
   const ref = React.useRef<T>(null);

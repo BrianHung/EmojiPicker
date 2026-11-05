@@ -7,8 +7,8 @@
       "name": "emoji-picker",
       "type": "registry:ui",
       "title": "Emoji Picker",
-      "description": "Emoji picker and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker.",
-      "dependencies": ["@brianhung/emoji-picker"],
+      "description": "Emoji picker and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker-react.",
+      "dependencies": ["@brianhung/emoji-picker-react"],
       "registryDependencies": ["utils"],
       "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }]
     },
@@ -41,7 +41,7 @@
       "type": "registry:hook",
       "title": "Emoji Tiptap",
       "description": "useTiptapEmojiTypeahead: shortcode suggestions for a Tiptap 3 editor, on the ProseMirror plugin.",
-      "dependencies": ["@brianhung/emoji-picker", "@tiptap/core", "@tiptap/pm"],
+      "dependencies": ["@brianhung/emoji-picker-react", "@tiptap/core", "@tiptap/pm"],
       "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json"],
       "files": [{ "path": "registry/emoji-tiptap.ts", "type": "registry:hook" }]
     },
@@ -50,7 +50,7 @@
       "type": "registry:hook",
       "title": "Emoji Lexical",
       "description": "useLexicalEmojiTypeahead: shortcode suggestions for a Lexical editor, inside LexicalComposer.",
-      "dependencies": ["@brianhung/emoji-picker", "lexical", "@lexical/react"],
+      "dependencies": ["@brianhung/emoji-picker-react", "lexical", "@lexical/react"],
       "files": [{ "path": "registry/emoji-lexical.ts", "type": "registry:hook" }]
     }
   ]

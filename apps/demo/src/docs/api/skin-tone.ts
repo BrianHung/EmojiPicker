@@ -1,4 +1,4 @@
-import type { SkinToneGlyphProps, SkinToneOptionProps, SkinToneOptionsProps, SkinToneProps, SkinToneTriggerProps } from "@brianhung/emoji-picker";
+import type { SkinToneGlyphProps, SkinToneOptionProps, SkinToneOptionsProps, SkinToneProps, SkinToneTriggerProps } from "@brianhung/emoji-picker-react";
 import { rowsOf, rowsOfParts } from "./rows";
 
 export const skinTone = [

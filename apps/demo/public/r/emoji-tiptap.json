@@ -4,7 +4,7 @@
   "title": "Emoji Tiptap",
   "description": "useTiptapEmojiTypeahead: shortcode suggestions for a Tiptap 3 editor, on the ProseMirror plugin.",
   "dependencies": [
-    "@brianhung/emoji-picker",
+    "@brianhung/emoji-picker-react",
     "@tiptap/core",
     "@tiptap/pm"
   ],
@@ -14,7 +14,7 @@
   "files": [
     {
       "path": "registry/emoji-tiptap.ts",
-      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from \"@brianhung/emoji-picker\";\nimport { emojiTypeahead } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {\n  content?: (text: string, suggestion: ShortcodeSuggestion) => Content;\n};\n\nexport function useTiptapEmojiTypeahead(editor: Editor | null, { content, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {\n  const latest = React.useRef(content);\n  latest.current = content;\n  const { plugin, ...typeahead } = useEmojiTypeaheadStore(\n    (store, options) =>\n      emojiTypeahead(store, {\n        ...options,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        content(text, suggestion, schema) {\n          const replacement = latest.current?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));\n  }, [editor, plugin]);\n  return typeahead;\n}\n",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from \"@brianhung/emoji-picker-react\";\nimport { emojiTypeahead } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {\n  content?: (text: string, suggestion: ShortcodeSuggestion) => Content;\n};\n\nexport function useTiptapEmojiTypeahead(editor: Editor | null, { content, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {\n  const latest = React.useRef(content);\n  latest.current = content;\n  const { plugin, ...typeahead } = useEmojiTypeaheadStore(\n    (store, options) =>\n      emojiTypeahead(store, {\n        ...options,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        content(text, suggestion, schema) {\n          const replacement = latest.current?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));\n  }, [editor, plugin]);\n  return typeahead;\n}\n",
       "type": "registry:hook"
     }
   ],

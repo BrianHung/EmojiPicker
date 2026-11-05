@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { Emoji } from "@brianhung/emoji-picker";
+import { Emoji } from "@brianhung/emoji-picker-react";
 
 const ROUNDED = "ui-rounded, 'SF Pro Rounded', system-ui";
 

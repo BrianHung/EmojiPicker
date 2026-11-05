@@ -21,7 +21,7 @@ import registry from "@/registry/emoji-picker.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-Adds `components/ui/emoji-picker.tsx` and installs `@brianhung/emoji-picker`.
+Adds `components/ui/emoji-picker.tsx` and installs `@brianhung/emoji-picker-react`.
 
 </Step>
 
@@ -61,7 +61,7 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <Step title="Install the following dependency.">
 
-<PackageManagers install="@brianhung/emoji-picker" />
+<PackageManagers install="@brianhung/emoji-picker-react" />
 
 </Step>
 
@@ -69,8 +69,8 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 ```css title="app/globals.css"
 @import "tailwindcss";
-@import "@brianhung/emoji-picker/tokens.css";
-@import "@brianhung/emoji-picker/theme.css";
+@import "@brianhung/emoji-picker-react/tokens.css";
+@import "@brianhung/emoji-picker-react/theme.css";
 ```
 
 </Step>
@@ -78,8 +78,8 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 <Step title="Optional: map the tokens to your shadcn/ui theme.">
 
 ```css title="app/globals.css"
-@import "@brianhung/emoji-picker/tokens.css";
-@import "@brianhung/emoji-picker/shadcn.css";
+@import "@brianhung/emoji-picker-react/tokens.css";
+@import "@brianhung/emoji-picker-react/shadcn.css";
 ```
 
 </Step>
@@ -144,8 +144,8 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url";
 Import the parts and assemble them.
 
 ```tsx title="anatomy.tsx"
-import { EmojiProvider, EmojiPicker, Tapback, Emoji } from "@brianhung/emoji-picker";
-import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
+import { EmojiProvider, EmojiPicker, Tapback, Emoji } from "@brianhung/emoji-picker-react";
+import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 <EmojiProvider data={en}>
   <EmojiPicker.Root>
@@ -344,8 +344,8 @@ A popover that positions a picker next to its trigger.
 The root export is built on Floating UI. The same `EmojiPopover` and `EmojiSuggestions.Popover` (a `:shortcode` menu at a text field's caret that never takes focus) also come from either subpath; an app bundles only the one it imports. React Aria's popover is modal: focus stays inside and the page doesn't scroll until it closes. Its non-modal popover closes when the page scrolls and stays open on a press outside, so editor menus should use the Floating UI `EmojiSuggestions.Popover`.
 
 ```tsx title="imports.tsx"
-import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker/floating-ui"; // the default
-import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker/react-aria";
+import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui"; // the default
+import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/react-aria";
 ```
 
 #### Your own popover
@@ -354,7 +354,7 @@ A picker works in any popover. In Base UI or shadcn/ui, close it from `onSelect`
 
 ```tsx title="emoji-button.tsx"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker";
+import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker-react";
 
 <Popover open={open} onOpenChange={setOpen}>
   <PopoverTrigger>😀</PopoverTrigger>

@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-data
 
-Prebuilt [emojibase](https://emojibase.dev) datasets for [`@brianhung/emoji-picker`](https://www.npmjs.com/package/@brianhung/emoji-picker), one file per locale and shortcode set at `data/<locale>/<shortcodes>.json`.
+Prebuilt [emojibase](https://emojibase.dev) datasets for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), one file per locale and shortcode set at `data/<locale>/<shortcodes>.json`.
 
 ## Usage
 

@@ -1,4 +1,4 @@
-import type { RootProps } from "@brianhung/emoji-picker";
+import type { RootProps } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const root = rowsOf<RootProps>()([

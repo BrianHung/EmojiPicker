@@ -1,4 +1,4 @@
-import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker";
+import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import styles from "./index.module.css";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
