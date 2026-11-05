@@ -38,6 +38,15 @@ describe("store", () => {
     expect(store.select("parrot")).toMatchObject({ emoji: "", isCustom: true });
   });
 
+  it("skips frequent custom emoji the current sources no longer have, keeping the count", () => {
+    const history = frequents();
+    ["parrot", "1f44d", "1f525"].forEach((u) => history.record(u));
+    const store = createEmojiStore({ data: dataset, frequents: history });
+    expect(store.frequent(3)).not.toContain("parrot");
+    expect(store.frequent(3)).toHaveLength(3);
+    expect(store.frequent(3)).toBe(store.frequent(3));
+  });
+
   it("persists an uncontrolled skin tone and only reports a controlled one", () => {
     const skinToneStorage = memoryStorage();
     const own = createEmojiStore({ data: dataset, skinToneStorage });

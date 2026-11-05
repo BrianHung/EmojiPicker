@@ -85,7 +85,7 @@ Each part renders a default when it has no children, and takes `render` (an elem
 | `customEmojis` | A `CustomEmoji`, pack URL, loader, or an array of them; see [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/) |
 | `filter` | `(record) => boolean`; removes emoji from pickers and search |
 | `skinTone`, `defaultSkinTone`, `onSkinToneChange`, `skinToneStorage` | Shared skin tone; persisted to localStorage unless `skinToneStorage={null}` |
-| `frequents` | A `FrequencyStore` from `createFrequencyStore` |
+| `frequents` | A `FrequencyStore` from `createFrequencyStore`. Pickers and `useFrequentEmoji` skip entries the current data or custom emoji don't include, so history survives switching packs |
 | `renderer`, `imageUrl`, `imageVersion` | `"auto"` (default) uses images only where the system cannot draw an emoji; images default to Twemoji |
 
 Changing a prop updates the provider in place. Pass functions and objects with stable identity. A dataset object without `customEmojis` renders on the first pass, including on the server.

@@ -8,12 +8,12 @@ import { Label } from "@/components/ui/label";
 import { Chips } from "@/components/site/chips";
 
 const artwork = {
-  "2764-fe0f": "/reactions/heart.svg",
-  "1f44d": "/reactions/thumbs-up.svg",
-  "1f44e": "/reactions/thumbs-down.svg",
+  "2764-fe0f": "/reactions/heart.webp",
+  "1f44d": "/reactions/thumbs-up.webp",
+  "1f44e": "/reactions/thumbs-down.webp",
   "1f602": "/reactions/haha.svg",
-  "203c-fe0f": "/reactions/exclamation.svg",
-  "2753": "/reactions/question.svg",
+  "203c-fe0f": "/reactions/exclamation.webp",
+  "2753": "/reactions/question.webp",
 };
 
 export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
