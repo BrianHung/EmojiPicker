@@ -21,7 +21,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   const [custom, setCustom] = React.useState(true);
   const pickers = (
     <div className="flex flex-col items-center gap-4">
-      <EmojiTapback onSelect={onSelect} />
+      <EmojiTapback onSelect={onSelect} count={6} />
       <EmojiPickerCard footer={false} onSelect={onSelect} className="h-[300px]" />
     </div>
   );

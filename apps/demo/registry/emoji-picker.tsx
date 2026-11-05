@@ -111,10 +111,11 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
   );
 });
 
-export function EmojiTapback({ onSelect, className }: { onSelect: (selection: EmojiSelection) => void; className?: string }) {
+export function EmojiTapback({ onSelect, count, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
     <Tapback
       onSelect={onSelect}
+      count={count}
       className={cn(
         root,
         "w-fit max-w-[352px] rounded-full border border-border bg-popover text-foreground shadow-lg",
