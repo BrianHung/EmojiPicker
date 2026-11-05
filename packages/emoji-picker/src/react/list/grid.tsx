@@ -42,7 +42,7 @@ function trackPointer() {
   addEventListener(
     "pointermove",
     (e) => {
-      const list = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.list}"]`) : null;
+      const list = cellOf(e.target)?.closest(`[data-slot="${SLOTS.list}"]`) ?? null;
       pointer.moved = e.clientX !== pointer.x || e.clientY !== pointer.y;
       pointer.within = list !== null && list === pointer.list;
       pointer.list = list;
@@ -348,10 +348,10 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const onFocusIn = (e: FocusEvent) => {
       const { collection } = latest.current;
       const id = cellOf(e.target)?.getAttribute("data-key");
-      const section = collection.emoji(id)?.section;
+      const item = collection.emoji(id);
       const from = collection.emoji(cellOf(e.relatedTarget)?.getAttribute("data-key"))?.section;
-      // VoiceOver doesn't speak the group focus moves into, so announce it, as useComboBox does.
-      if (section && from && section !== from && isApplePlatform()) announce(collection.getTextValue(section), "polite");
+      // VoiceOver doesn't speak the group focus moves into: announce it with the emoji, as useComboBox does.
+      if (item && from && item.section !== from && isApplePlatform()) announce(`${collection.getTextValue(item.section)}, ${item.label}`);
       const manager = stateRef.current.selectionManager;
       if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
       manager.setFocusedKey(id);
