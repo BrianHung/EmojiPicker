@@ -38,7 +38,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   return (
     <>
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-        <Chips label="Renderer" value={choice} onChange={setChoice} options={[["auto", "Auto"], ["native", "Native"], ["image", "Twemoji"], ["noto", "Noto Color Emoji"]]} />
+        <Chips label="Renderer" value={choice} onChange={setChoice} options={[["auto", "Auto"], ["native", "Native"], ["image", "Twemoji"], ["noto", "Noto"]]} />
         <Label className="flex items-center gap-2 text-sm font-normal">
           <Checkbox checked={custom} onCheckedChange={setCustom} />
           Custom tapbacks
