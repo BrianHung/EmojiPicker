@@ -10,6 +10,4 @@ export type ReactionsState = {
 };
 export const ReactionsContext = React.createContext<ReactionsState | null>(null);
 
-export const reactionKey = (unified: string) => withoutTone(unified.toLowerCase());
-
-export const isPressed = (selected: ReadonlySet<string>, unified: string) => selected.has(reactionKey(unified));
+export const isPressed = (selected: ReadonlySet<string>, unified: string) => selected.has(withoutTone(unified));

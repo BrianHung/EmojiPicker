@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
-import type { Dataset } from "./dataset";
-import { missingEmojiText, nativeToUnified, resolveEmoji } from "./resolve";
+import { nativeToUnified, type Dataset } from "./dataset";
+import { missingEmojiText, resolveEmoji } from "./resolve";
 import { createEmojiStore } from "./store";
 
 const parrot = { id: "partyparrot", name: "Party parrot", imageUrl: "/parrot.gif", shortcodes: ["partyparrot"] };

@@ -6,7 +6,7 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
 import { usePicker, type ListHandle } from "../root/context";
@@ -86,7 +86,6 @@ export type GridGeometry = {
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
 const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
-const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
 // Handlers are delegated from the list: one set for every mounted cell
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
@@ -125,7 +124,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const { labels, searching, focusModel, value } = picker;
   const { navigation } = geometry;
   const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
-  const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => baseOf(i.unified) === baseOf(value)).map((i) => i.id))), [value, sections]);
+  const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
   const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? NO_KEYS, disallowEmptySelection: value !== undefined, layoutDelegate: geometry.layoutDelegate });
   const stateRef = React.useRef(state);
   stateRef.current = state;

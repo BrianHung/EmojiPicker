@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { needsTwemoji, twemojiUrl } from "./platform";
+import { needsTwemoji } from "./native";
+import { twemojiUrl } from "./platform";
 
 describe("platform", () => {
   it("names Twemoji files like Twemoji does", () => {

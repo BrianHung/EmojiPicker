@@ -1,9 +1,8 @@
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker-core";
+import { type EmojiSelection, withoutTone } from "@brianhung/emoji-picker-core";
 import { useFrequentEmoji } from "../provider/hooks";
 import { PickerRoot, type RootProps } from "../root/picker";
 import { Reactions } from "../reactions/reactions";
-import { reactionKey } from "../reactions/reactions-context";
 
 export type TapbackProps = Omit<RootProps, "children" | "onSelect"> & {
   onSelect: (selection: EmojiSelection) => void;
@@ -17,7 +16,7 @@ export type TapbackProps = Omit<RootProps, "children" | "onSelect"> & {
 
 export const Tapback = React.forwardRef<HTMLElement, TapbackProps>(function Tapback({ onSelect, count = 5, reactions, collapseOnSelect = true, expandable = true, selected, children, ...root }, ref) {
   const top = useFrequentEmoji(count);
-  const pressed = React.useMemo(() => (selected ? new Set(selected.map(reactionKey)) : null), [selected]);
+  const pressed = React.useMemo(() => (selected ? new Set(selected.map(withoutTone)) : null), [selected]);
   return (
     <PickerRoot
       ref={ref}

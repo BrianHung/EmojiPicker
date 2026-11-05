@@ -21,9 +21,12 @@ const TONE_CODES = new Set<string>(SKIN_TONES);
 
 export const withoutTone = (unified: string) =>
   unified
+    .toLowerCase()
     .split("-")
     .filter((part) => !TONE_CODES.has(part))
     .join("-");
+
+export const withoutFe0f = (unified: string) => unified.replace(/-fe0f/gi, "");
 
 export function withTone(unified: string, tone: number): string {
   const [first, ...rest] = unified.split("-");
@@ -53,6 +56,8 @@ const UNIFIED = /^[0-9a-f]{2,6}(?:-[0-9a-f]{2,6})*$/i;
 export const isUnified = (value: string) => UNIFIED.test(value);
 
 export const unifiedToNative = (unified: string) => (isUnified(unified) ? String.fromCodePoint(...unified.split("-").map((hex) => parseInt(hex, 16))) : "");
+
+export const nativeToUnified = (text: string) => [...text].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
 export function expandDataset(dataset: Dataset): EmojiRecord[] {
   return dataset.emojis.map(([unified, name, tags, shortcodes, group, version, hasTones], order) => ({
