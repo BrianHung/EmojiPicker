@@ -43,7 +43,7 @@ async function stableProbe(page: Page, root: Locator): Promise<Probe> {
 async function press(page: Page, root: Locator, key: string): Promise<Step> {
   const before = await scrollY(page);
   await page.keyboard.press(key);
-  return { key, ...(await stableProbe(page, root)), scrolled: (await scrollY(page)) - before };
+  return { key, ...(await stableProbe(page, root)), scrolled: Math.sign((await scrollY(page)) - before) };
 }
 
 /** Fresh load, then open: [where focus returns, the open surface]. */

@@ -8,7 +8,7 @@
       "key": "ArrowDown",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": 40
+      "scrolled": 1
     },
     {
       "key": "ArrowRight",
@@ -26,7 +26,7 @@
       "key": "ArrowDown",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": 40
+      "scrolled": 1
     },
     {
       "key": "ArrowLeft",
@@ -38,31 +38,31 @@
       "key": "ArrowUp",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": -40
+      "scrolled": -1
     },
     {
       "key": "End",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": 3164
+      "scrolled": 1
     },
     {
       "key": "Home",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": -3658
+      "scrolled": -1
     },
     {
       "key": "PageDown",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": 804
+      "scrolled": 1
     },
     {
       "key": "PageUp",
       "focus": "button \"Emoji\"",
       "highlight": null,
-      "scrolled": -804
+      "scrolled": -1
     }
   ],
   "enter": {

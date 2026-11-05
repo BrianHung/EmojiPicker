@@ -323,7 +323,7 @@ export function IMessageScreen({
       >
         <DrawerContent
           container={screen}
-          initialFocus={() => fromKeyboard.current}
+          initialFocus={() => fromKeyboard.current || matchMedia("(pointer: fine)").matches}
           finalFocus={false}
           className="top-auto! right-[0.3px]! bottom-0! left-[0.3px]! h-[388.7px]! max-h-none! border-0! bg-transparent! text-base text-black dark:text-white duration-[380ms] ease-[cubic-bezier(0.2,1.1,0.32,1)] after:hidden data-ending-style:duration-[140ms]"
         >
