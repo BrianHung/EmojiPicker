@@ -1,10 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH, KEY_DOWN_COMMAND, type LexicalNode, type NodeKey } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";
-import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "./react/typeahead";
-
-export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";
+import { findShortcodeTrigger, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 
 export type LexicalEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
   node?: (text: string, suggestion: ShortcodeSuggestion) => LexicalNode;

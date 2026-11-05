@@ -61,7 +61,7 @@ export type { Artwork, ArtworkMap, EmojiOverridesProps, EmojiProps } from "./rea
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";
 export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
 
-export { createFrequencyStore, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
+export { createFrequencyStore, findShortcodeTrigger, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
 export type {
   CategoryId,
   CustomEmoji,

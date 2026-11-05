@@ -4,8 +4,15 @@ description: Shortcode suggestions and an emoji picker for the Lexical editor.
 ---
 
 import { Editor } from "./editor";
+import lexical from "@/registry/emoji-lexical.ts?raw";
 
 <Editor />
+
+## Installation
+
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
+
+Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker`, `lexical` and `@lexical/react`.
 
 ## Usage
 
@@ -34,6 +41,8 @@ export function Editor() {
 `useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches and handles the keys through Lexical's command system, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
 
 ```tsx title="emoji-typeahead-plugin.tsx (excerpt)"
+import { useLexicalEmojiTypeahead } from "@/hooks/emoji-lexical";
+
 const emoji = useLexicalEmojiTypeahead({
   node: (text, s) => (s.record.imageUrl ? $createEmojiNode(attrs) : $createTextNode(`${text} `)),
 });
@@ -44,3 +53,7 @@ const emoji = useLexicalEmojiTypeahead({
   </ul>
 </EmojiSuggestions.Popover>
 ```
+
+## Source
+
+<Code title="hooks/emoji-lexical.ts" code={lexical} />

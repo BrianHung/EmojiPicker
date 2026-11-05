@@ -1,10 +1,6 @@
 import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import type { ShortcodeCompletion } from "./search/search-index";
-import { findShortcodeTrigger, isComposingKey } from "./shortcodes";
-import type { EmojiStore } from "./store";
-import { createStore } from "./reactive";
-import { createEmojiSuggestions, syncCombobox, type KeyLike, type SuggestionsOptions } from "./suggestions";
+import { createEmojiSuggestions, createStore, findShortcodeTrigger, isComposingKey, syncCombobox, type EmojiStore, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
 
 type Node = EditorState["doc"];
 

@@ -3,7 +3,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { Emoji } from "@brianhung/emoji-picker";
 import { notion } from "./picker";
-import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
+import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { NotionEmojiMenu, notionEmojiOptions } from "@/experiences/notion";
 import { cn } from "@/lib/utils";
 import { ld, MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";

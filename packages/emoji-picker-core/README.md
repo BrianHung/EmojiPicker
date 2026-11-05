@@ -34,7 +34,6 @@ picker.choose();
 |---|---|
 | `@brianhung/emoji-picker-core` | Stores, emoji resolution, frequency storage, labels, tokenizers, Twemoji helpers, grid model, and every public type |
 | `/search` | `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
-| `/prosemirror` | `emojiTypeahead(store, options)`; `prosemirror-state` and `prosemirror-view` are optional peers |
 | `/data/en.json` | The English dataset |
 
 ## API
@@ -51,6 +50,8 @@ picker.choose();
 | `defaultLabels`, `localizeLabels`, `plural` | `EmojiLabels` and CLDR plural formatting |
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
 | `twemojiUrl`, `needsImageFallback` | Image URLs and native-support detection |
+
+A ProseMirror plugin on `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey` and `syncCombobox` is a registry item: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 
 ## Data
 

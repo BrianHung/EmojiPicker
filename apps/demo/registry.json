@@ -27,6 +27,31 @@
       "description": "The emoji picker in your shadcn/ui React Aria popover: a trigger that opens it, picking closes it.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [{ "path": "registry/aria/emoji-picker-popover.tsx", "type": "registry:ui" }]
+    },
+    {
+      "name": "emoji-prosemirror",
+      "type": "registry:lib",
+      "title": "Emoji ProseMirror",
+      "description": "Shortcode suggestions as a ProseMirror plugin, without React: finds the :query, handles the keys and replaces the query with the chosen emoji.",
+      "dependencies": ["@brianhung/emoji-picker-core", "prosemirror-state", "prosemirror-view"],
+      "files": [{ "path": "registry/emoji-prosemirror.ts", "type": "registry:lib" }]
+    },
+    {
+      "name": "emoji-tiptap",
+      "type": "registry:hook",
+      "title": "Emoji Tiptap",
+      "description": "useTiptapEmojiTypeahead: shortcode suggestions for a Tiptap 3 editor, on the ProseMirror plugin.",
+      "dependencies": ["@brianhung/emoji-picker", "@tiptap/core", "@tiptap/pm"],
+      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json"],
+      "files": [{ "path": "registry/emoji-tiptap.ts", "type": "registry:hook" }]
+    },
+    {
+      "name": "emoji-lexical",
+      "type": "registry:hook",
+      "title": "Emoji Lexical",
+      "description": "useLexicalEmojiTypeahead: shortcode suggestions for a Lexical editor, inside LexicalComposer.",
+      "dependencies": ["@brianhung/emoji-picker", "lexical", "@lexical/react"],
+      "files": [{ "path": "registry/emoji-lexical.ts", "type": "registry:hook" }]
     }
   ]
 }

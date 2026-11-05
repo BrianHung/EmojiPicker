@@ -50,16 +50,6 @@
       "types": "./dist/react-aria.d.ts",
       "import": "./dist/react-aria.js"
     },
-    "./tiptap": {
-      "@brianhung/source": "./src/tiptap.ts",
-      "types": "./dist/tiptap.d.ts",
-      "import": "./dist/tiptap.js"
-    },
-    "./lexical": {
-      "@brianhung/source": "./src/lexical.ts",
-      "types": "./dist/lexical.d.ts",
-      "import": "./dist/lexical.js"
-    },
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",
     "./shadcn.css": "./src/styles/shadcn.css",
@@ -72,27 +62,11 @@
   },
   "peerDependencies": {
     "@floating-ui/react": "^0.27.0",
-    "@lexical/react": ">=0.53.0",
-    "@tiptap/core": "^3.0.0",
-    "@tiptap/pm": "^3.0.0",
-    "lexical": ">=0.53.0",
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
     "@floating-ui/react": {
-      "optional": true
-    },
-    "@lexical/react": {
-      "optional": true
-    },
-    "@tiptap/core": {
-      "optional": true
-    },
-    "@tiptap/pm": {
-      "optional": true
-    },
-    "lexical": {
       "optional": true
     }
   },
@@ -107,16 +81,10 @@
   },
   "devDependencies": {
     "@floating-ui/react": "^0.27.20",
-    "@lexical/react": "^0.53.0",
-    "@tiptap/core": "^3.32.2",
-    "@tiptap/pm": "^3.32.2",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/use-sync-external-store": "^1.7.0",
-    "lexical": "^0.53.0",
-    "prosemirror-state": "^1.4.4",
-    "prosemirror-view": "^1.42.9",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",

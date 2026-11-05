@@ -13,7 +13,14 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["vite/client", "node", "mdx"],
-    "paths": { "@/registry/*": ["./registry/*"], "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"], "@/*": ["./src/*"] }
+    "paths": {
+      "@/registry/*": ["./registry/*"],
+      "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"],
+      "@/lib/emoji-prosemirror": ["./registry/emoji-prosemirror.ts"],
+      "@/hooks/emoji-tiptap": ["./registry/emoji-tiptap.ts"],
+      "@/hooks/emoji-lexical": ["./registry/emoji-lexical.ts"],
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src", "registry", "scripts", "plugins", "vite.config.ts"],
   "exclude": ["registry/aria"]

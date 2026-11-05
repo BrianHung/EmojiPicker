@@ -17,11 +17,13 @@ function readme(text: string) {
 type Page = { title: string; description: string; body: string };
 
 function inlineSources(dir: string, mdx: string) {
-  const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "(\.[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, path!]));
-  return mdx.replace(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/gm, (line, title: string, id: string) => {
-    const path = files[id];
-    return path ? `\`\`\`${posix.extname(path).slice(1)} title="${title}"\n${read(posix.join(dir, path)).trim()}\n\`\`\`` : line;
-  });
+  const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "((?:\.|@\/registry\/)[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, path!.startsWith("@/") ? path!.slice(2) : posix.join(dir, path!)]));
+  return mdx
+    .replace(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/gm, (line, title: string, id: string) => {
+      const path = files[id];
+      return path ? `\`\`\`${posix.extname(path).slice(1)} title="${title}"\n${read(path).trim()}\n\`\`\`` : line;
+    })
+    .replace(/^<PackageManagers dlx="([^"]+)" \/>$/gm, "```bash\nnpx $1\n```");
 }
 
 function page(name: string): Page {

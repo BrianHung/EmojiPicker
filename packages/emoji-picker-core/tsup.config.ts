@@ -11,7 +11,7 @@ export default defineConfig([
   {
     entry: modules,
     format: ["esm"],
-    dts: { entry: { index: "src/index.ts", "search/index": "src/search/index.ts", prosemirror: "src/prosemirror.ts" } },
+    dts: { entry: { index: "src/index.ts", "search/index": "src/search/index.ts" } },
     sourcemap: true,
     clean: true,
     define: { __CORE_VERSION__: versionOf("package.json"), __DATA_VERSION__: versionOf("../emoji-picker-data/package.json") },

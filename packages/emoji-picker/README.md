@@ -37,7 +37,6 @@ A styled shadcn/ui version: `npx shadcn@latest add https://emoji.brianhung.me/r/
 |---|---|
 | `@brianhung/emoji-picker` | Components, hooks, and common core types |
 | `/floating-ui`, `/react-aria` | `EmojiPopover`, `EmojiSuggestions.Popover`; `@floating-ui/react` is an optional peer |
-| `/tiptap`, `/lexical` | `useTiptapEmojiTypeahead`, `useLexicalEmojiTypeahead`; editor packages are optional peers |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Color tokens, Tailwind v4 utilities, shadcn/ui bridge |
 | `@brianhung/emoji-picker-core` | Data, search, stores, and every public type, without React ([README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker-core#readme)) |
 
@@ -133,12 +132,10 @@ Each hook returns an `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`,
 | Hook | Target |
 |---|---|
 | `useTextFieldEmojiTypeahead(ref, options)` | `<input>`, `<textarea>` |
-| `useTiptapEmojiTypeahead(editor, options)` from `/tiptap` | Tiptap 3 ([example](https://emoji.brianhung.me/examples/tiptap/)) |
-| `useLexicalEmojiTypeahead(options)` from `/lexical` | Lexical, inside `LexicalComposer` ([example](https://emoji.brianhung.me/examples/lexical/)) |
 | `useEmojiTypeahead({ query, anchor, replace }, options, element)` | Any editor; `findShortcodeTrigger(textBeforeCaret)` finds the query |
 | `useEmojiSuggestions({ query, onChoose })` | Suggestions state only |
 
-ProseMirror without React: `emojiTypeahead(store, options)` from `@brianhung/emoji-picker-core/prosemirror`.
+Tiptap, Lexical and ProseMirror adapters are registry items (`emoji-tiptap.json`, `emoji-lexical.json`, `emoji-prosemirror.json`), built on these hooks: see the [Tiptap](https://emoji.brianhung.me/examples/tiptap/) and [Lexical](https://emoji.brianhung.me/examples/lexical/) examples.
 
 ## Tapbacks and emoji
 

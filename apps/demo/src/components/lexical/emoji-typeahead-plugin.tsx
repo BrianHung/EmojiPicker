@@ -1,5 +1,5 @@
 import { $createTextNode } from "lexical";
-import { useLexicalEmojiTypeahead } from "@brianhung/emoji-picker/lexical";
+import { useLexicalEmojiTypeahead } from "@/hooks/emoji-lexical";
 import { SuggestionMenu } from "@/components/suggestion-menu";
 import { $createEmojiNode } from "./emoji-node";
 

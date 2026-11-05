@@ -38,6 +38,7 @@ export default defineConfig({
       ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker\/floating-ui$/, replacement: "@brianhung/emoji-picker/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\/components\/ui\/emoji-picker$/, replacement: fileURLToPath(new URL("./registry/emoji-picker.tsx", import.meta.url)) },
+      { find: /^@\/(?:hooks|lib)\/(emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
   },

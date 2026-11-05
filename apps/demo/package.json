@@ -33,6 +33,7 @@
     "@lexical/react": "^0.53.0",
     "@lisse/react": "^0.7.3",
     "@pierre/highlights": "^0.4.0",
+    "@tiptap/core": "^3.32.2",
     "@tiptap/extension-document": "^3.32.2",
     "@tiptap/extension-paragraph": "^3.32.2",
     "@tiptap/extension-text": "^3.32.2",

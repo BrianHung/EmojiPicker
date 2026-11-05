@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/react";
-import { useTiptapEmojiTypeahead, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker/tiptap";
+import type { EmojiTypeaheadOptions } from "@brianhung/emoji-picker";
+import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { SuggestionMenu, type SuggestionMenuProps } from "@/components/suggestion-menu";
 import { emojiContent } from "./emoji-node";
 
