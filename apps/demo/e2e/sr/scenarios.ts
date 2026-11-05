@@ -1,7 +1,3 @@
-// High-intent screen reader scenarios, shared by VoiceOver and NVDA. Keys go in through Playwright;
-// each assertion is on what the screen reader said (Guidepup's spoken phrase log, lowercased,
-// matched loosely) or where focus is. Nothing here depends on the markup's roles, so the suite holds
-// across the grid → listbox migration: role words are matched from either vocabulary.
 import type { Locator, Page, TestType } from "@playwright/test";
 import type { VoiceOverPlaywright } from "@guidepup/playwright";
 import { card } from "../surfaces";
@@ -9,18 +5,15 @@ import { expect, visit } from "../support";
 
 export type Reader = Pick<VoiceOverPlaywright, "capture" | "spokenPhraseLog" | "navigateToWebContent">;
 
-/** How a text field is announced: "combo box" / "search field" / "edit" / "search box"… */
 const FIELD = /combo ?box|search ?(text )?field|search ?box|\bedit\b|text field/;
 const SEARCH = /search for an emoji/;
 
-/** Listens to the screen reader while actions run. */
 class Ear {
   constructor(
     private sr: Reader,
     private page: Page,
   ) {}
 
-  /** Runs `action`, then keeps listening (up to `ms`) until `pattern` is heard; returns everything said, lowercased. */
   async hear(action: () => Promise<unknown>, pattern?: RegExp, ms = 5_000) {
     const from = (await this.sr.spokenPhraseLog()).length;
     const said = async () => (await this.sr.spokenPhraseLog()).slice(from).join(" | ").toLowerCase();
@@ -29,22 +22,18 @@ class Ear {
     return said();
   }
 
-  /** Presses a key and asserts what was said. */
   async press(key: string, pattern: RegExp, why: string) {
     const said = await this.hear(() => this.page.keyboard.press(key), pattern);
     expect(said, why).toMatch(pattern);
     return said;
   }
 
-  /** Types into the focused field and asserts what was said. */
   async type(text: string, pattern: RegExp, why: string) {
     const said = await this.hear(() => this.page.keyboard.type(text, { delay: 60 }), pattern);
     expect(said, why).toMatch(pattern);
     return said;
   }
 }
-
-/* ------------------------------------------------------------------ where */
 
 const homePopover = (p: Page) => p.locator("section:has(> h3#popover)").getByRole("button", { name: "Open emoji picker", exact: true });
 const homeTapbackAnchor = (p: Page) => p.locator("section:has(> h3#tapback)").getByRole("link", { name: "Link to this section" });
@@ -57,8 +46,6 @@ async function start(page: Page, sr: Reader, path: string, focus: Locator) {
   await focus.focus();
   return new Ear(sr, page);
 }
-
-/* ------------------------------------------------------------------ scenarios */
 
 export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
   test.afterEach(async ({ sr }, info) => {
@@ -84,8 +71,7 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     const next = await ear.press("ArrowRight", /\w/, "the next result's name");
     expect(next, "a different emoji").not.toBe(first);
 
-    // Skin tone: the tone button, its options, then the toned name in the results.
-    await page.keyboard.press("Escape"); // clears the query
+    await page.keyboard.press("Escape");
     await ear.press("Tab", /skin tone/, "the skin tone button");
     await ear.press("Enter", /default skin tone/, "the tone options open on the current one");
     await ear.press("ArrowRight", /light skin tone/, "the next tone");

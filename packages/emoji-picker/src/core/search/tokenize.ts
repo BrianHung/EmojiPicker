@@ -8,10 +8,8 @@ export type TokenizerOptions = {
 };
 
 const SEPARATORS = /[\s_\-:,.()]+/;
-// ASCII runs are split by SEPARATORS alone, so English tokens don't depend on ICU
 const NON_ASCII = /[^\x00-\x7f]/;
 
-// An invalid locale tag would make Intl throw
 export function canonicalLocale(locale: string | undefined): string | undefined {
   if (!locale) return undefined;
   try {

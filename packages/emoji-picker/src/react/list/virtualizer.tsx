@@ -1,4 +1,3 @@
-// React Aria's Virtualizer scrolls the collection element itself; here the Viewport scrolls and owns the scrollbar
 import * as React from "react";
 import { flushSync } from "react-dom";
 import type { Collection, Key, Node } from "@react-types/shared";
@@ -30,7 +29,6 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
 export const VirtualCollection = React.memo(function VirtualCollection(options: Options) {
   const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
   const horizontal = layoutOptions.orientation === "horizontal";
-  // The collection element is this content's parent: its ref isn't attached yet when our effects first run
   const content = React.useRef<HTMLDivElement | null>(null);
   const scrollRef = React.useMemo(
     () => ({

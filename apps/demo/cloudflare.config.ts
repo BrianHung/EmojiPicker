@@ -1,4 +1,3 @@
-// wrangler.jsonc mirrors this for the Deploy button and Workers Builds; worker/test/config.test.ts checks drift
 import { bindings, defineConfig } from "cf/config";
 import * as entrypoint from "./worker/index.ts" with { type: "cf-worker" };
 

@@ -39,7 +39,6 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
   const highlighted = Math.max(0, order.indexOf(menu.highlightedIndex));
   const activeSection = sections.find((s) => s.items.includes(order[highlighted]!))?.id;
   const scroller = React.useRef<HTMLDivElement>(null);
-  // Sections reorder the ranked matches, so the highlight starts on the first cell shown, not the first match
   const moved = React.useRef<string | null>(null);
   const move = (at: number) => {
     moved.current = query;

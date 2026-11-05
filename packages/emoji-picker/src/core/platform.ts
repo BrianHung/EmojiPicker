@@ -22,7 +22,6 @@ export function needsTwemoji(): boolean {
     const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (!ctx) return (cached = false);
     ctx.font = "16px sans-serif";
-    // A supported flag is one glyph; without flag support it falls back to two indicator letters side by side
     const flag = ctx.measureText("\u{1F1FA}\u{1F1F8}").width;
     const letters = ctx.measureText("\u{1F1FA}").width * 2;
     cached = flag >= letters * 0.9;

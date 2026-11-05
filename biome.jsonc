@@ -55,7 +55,6 @@
   },
   "overrides": [
     {
-      // The site shows these sources verbatim in its code panels; public/r is built from the registry
       "includes": [
         "apps/demo/registry/**",
         "apps/demo/src/styles/*/picker.tsx",

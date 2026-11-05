@@ -92,7 +92,6 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     const fit = Math.max(1, Math.floor(rowWidth / cellWidth));
     const lanes = results && columns ? columns : columns ? Math.min(columns, fit) : fit;
     const gap = lanes > 1 ? Math.max(0, rowWidth - lanes * cellWidth) / (lanes - 1) : 0;
-    // Category cells snap to whole pixels; results are CSS-grid tracks and don't
     this.x = (lane) => padding + (results ? lane * (cellWidth + gap) : Math.round(lane * (cellWidth + gap)));
     this.lanes = lanes;
     this.grid = createEmojiGrid(sections, { columns: lanes, rowHeight: cellHeight, headerHeight, padding: results === "ranked" ? padding : 0 });

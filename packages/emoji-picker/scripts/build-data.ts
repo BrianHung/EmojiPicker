@@ -71,7 +71,6 @@ const stripFE0F = (hex: string) =>
     .split("-")
     .filter((c) => c !== "fe0f")
     .join("-");
-// emojibase's hexcode can omit FE0F (❤️ is 2764); the fully qualified emoji is what renders and what Twemoji keys on
 const qualified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
 function loadShortcodes(load: Load, locale: string, sets: readonly string[]): Map<string, string[]> {

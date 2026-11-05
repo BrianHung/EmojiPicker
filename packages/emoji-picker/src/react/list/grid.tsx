@@ -258,7 +258,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     };
   });
 
-  // React Aria builds the new collection in a later render, so the highlight is applied once a render has it
   const kept = React.useRef<{ query: string; unified?: string }>({ query: "" });
   const pendingHighlight = React.useRef<{ key: Key | null } | null>(null);
   React.useLayoutEffect(() => {
@@ -409,7 +408,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       shouldFocusWrap: false,
       onAction: pick,
       onFocus(e: React.FocusEvent) {
-        // Real DOM focus only: virtual focus (aria-activedescendant) dispatches focus events too
         const cell = cellOf(e.target);
         if (!cell || e.target !== document.activeElement) return;
         const id = cell.getAttribute("data-key");
@@ -465,7 +463,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     gridProps: {
       ...mergeProps(listBoxProps, focusProps, cellHandlers),
       ref: merged,
-      // No tabindex under Autocomplete: it turns virtual focus off for a collection that has one
       tabIndex: fieldRef ? undefined : -1,
       "data-slot": SLOTS.list,
       "data-orientation": orientation,

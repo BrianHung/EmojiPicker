@@ -37,7 +37,6 @@ function useRovingRow(row: React.RefObject<HTMLElement | null>) {
       const active = document.activeElement;
       if (button && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
     };
-    // Cross-axis arrows are swallowed so they don't scroll the page
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
       const across = el.getAttribute("aria-orientation") === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
@@ -100,7 +99,6 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       return record != null && drawable(record, unified);
     });
   React.useEffect(() => request(shown));
-  // Captured on expand: the row is gone by the time the full picker shows
   const expandFocus = React.useRef<Element | null>(null);
   React.useEffect(() => {
     const root = expandFocus.current;
@@ -114,7 +112,6 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     };
     requestAnimationFrame(land);
   }, [state?.open]);
-  // Collapsing back after a pick hides what had focus, so the row takes it
   const wasOpen = React.useRef(state?.open);
   React.useEffect(() => {
     const reopened = state?.open && wasOpen.current === false;

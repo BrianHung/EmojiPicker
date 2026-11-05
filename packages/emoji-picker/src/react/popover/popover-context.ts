@@ -1,4 +1,3 @@
-// Kept apart from the popover so a picker can read it without pulling a popover library in
 import * as React from "react";
 
 export type PopoverState = {

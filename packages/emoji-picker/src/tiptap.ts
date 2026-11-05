@@ -30,7 +30,6 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, insert
   );
   React.useEffect(() => {
     if (!editor || editor.isDestroyed) return;
-    // First, so its keys (Enter, arrows) come before the editor's keymaps
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
     return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));
   }, [editor, plugin]);

@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-// The vanilla ProseMirror plugin in a real EditorView, no React: type `:smi`, pick with the keyboard.
 import { expect, it } from "vitest";
 import { schema } from "prosemirror-schema-basic";
 import { EditorState } from "prosemirror-state";

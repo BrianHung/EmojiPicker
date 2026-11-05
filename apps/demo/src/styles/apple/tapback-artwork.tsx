@@ -20,7 +20,6 @@ function Question() {
   );
 }
 
-// As text: an <Emoji> of the same code would be overridden again
 const native = (char: string) => (
   <span aria-hidden style={{ fontSize: "1em", lineHeight: 1 }}>
     {char}

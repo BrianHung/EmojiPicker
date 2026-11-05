@@ -1,4 +1,3 @@
-// simple-icons (CC0): markdown and claude from develop, openai from v13.0.0 (later releases dropped it)
 import type * as React from "react";
 
 type IconProps = React.SVGProps<SVGSVGElement>;

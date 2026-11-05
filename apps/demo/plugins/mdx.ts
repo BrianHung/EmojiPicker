@@ -26,7 +26,6 @@ function remarkCode() {
     });
 }
 
-// MDX would read `{#id}` as an expression, so it is escaped before MDX parses the heading
 const HEADING_ID = /^(#{1,6} .*) \{#([\w-]+)\}$/gm;
 
 function remarkHeadingId() {
@@ -41,7 +40,6 @@ function remarkHeadingId() {
 }
 
 export function mdx(): Plugin {
-  // @mdx-js/rollup is typed against Rollup; Vite 8 runs it on Rolldown unchanged
   const plugin = mdxRollup({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkCode, remarkHeadingId] }) as unknown as Plugin & { transform: Extract<Plugin["transform"], (...args: never[]) => unknown> };
   return {
     ...plugin,

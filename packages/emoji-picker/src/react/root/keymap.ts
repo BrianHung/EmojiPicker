@@ -39,7 +39,6 @@ function isApplePlatform(): boolean {
   return /mac|iphone|ipad|ipod/i.test(platform);
 }
 
-// Shift is optional for a printable non-letter key unless written: layouts need it to type "?" or "+"
 export function parseChord(chord: string, apple = isApplePlatform()): Chord {
   const parts = chord.split("+");
   let key = parts.pop()!;

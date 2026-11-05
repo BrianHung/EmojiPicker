@@ -35,7 +35,6 @@ export function renderElement<S, E extends Element = HTMLElement>(tag: keyof Rea
   return custom ? custom(resolved, state) : React.createElement(tag, resolved);
 }
 
-// Never undefined, which would make React Aria apply its default class
 export const racClassName =
   <S,>(className: PartProps<S>["className"]) =>
   (state: S): string =>

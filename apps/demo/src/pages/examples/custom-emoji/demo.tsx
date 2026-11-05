@@ -55,7 +55,6 @@ export function BufoPicker() {
       <CardContent className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
         <div ref={pickerRef} className="flex shrink-0 flex-col items-center gap-3">
           {bufo ? (
-            // Provider options are read once: remount when the set of packs changes
             <EmojiProvider key={packs.map((p) => p.key).join()} data={enUrl} customEmojis={customEmojis}>
               <EmojiPickerCard onSelect={setPicked} categories={categories} />
             </EmojiProvider>

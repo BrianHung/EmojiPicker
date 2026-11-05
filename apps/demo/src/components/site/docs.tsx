@@ -82,8 +82,7 @@ export function Tabs<T extends string>({
             className={cn(
               "h-auto flex-none rounded-none border-0 px-0 font-medium text-muted-foreground hover:text-foreground focus-visible:ring-0 focus-visible:outline-none focus-visible:text-foreground data-active:text-foreground dark:text-muted-foreground dark:data-active:text-foreground",
               bordered
-                ? // Base UI sets data-orientation, not the data-horizontal shadcn's group variants expect
-                  "pt-1 pb-0.5 text-base after:inset-x-0 after:bottom-[-4px] after:h-0.5"
+                ? "pt-1 pb-0.5 text-base after:inset-x-0 after:bottom-[-4px] after:h-0.5"
                 : cn("after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full", size === "md" ? "min-h-10 pt-1 pb-2.5 text-sm" : "pt-0.5 pb-2 text-[13px] max-sm:min-h-10 max-sm:pt-3"),
             )}
           >
@@ -210,7 +209,6 @@ export function Preview({ children, className }: { children: React.ReactNode; cl
   return <div className={cn("flex min-h-[320px] items-center justify-center rounded-xl border border-border bg-background p-6 sm:p-10", className)}>{children}</div>;
 }
 
-// A transform, not CSS zoom: the virtualized grid measures its own width, which a transform leaves alone
 export function FitBox({ width, height, maxHeight = Infinity, children, className }: { width: number; height: number; maxHeight?: number; children: React.ReactNode; className?: string }) {
   const outer = React.useRef<HTMLDivElement>(null);
   const [available, setAvailable] = React.useState(width);

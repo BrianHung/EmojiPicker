@@ -18,7 +18,6 @@ describe("resolveEmoji", () => {
     expect(resolveEmoji(store, "🎉")).toMatchObject({ unified: "1f389", name: "party popper", native: "🎉" });
     expect(resolveEmoji(store, "👍🏽")).toMatchObject({ unified: "1f44d-1f3fd", name: "thumbs up", native: "👍🏽" });
     expect(resolveEmoji(store, "👩‍💻")?.record?.name).toBe("woman technologist");
-    // Written without U+FE0F, found with it.
     expect(resolveEmoji(store, "❤")?.record?.unified).toBe("2764-fe0f");
     expect(resolveEmoji(store, "🇯🇵")?.record?.shortcodes).toContain("jp");
   });
@@ -57,7 +56,7 @@ describe("resolveEmoji", () => {
   it("returns null for unknown input, and the literal to show instead", async () => {
     const store = await loadedStore();
     expect(resolveEmoji(store, ":not_an_emoji:")).toBeNull();
-    expect(resolveEmoji(store, "add")).toBeNull(); // hex, but not an emoji code point
+    expect(resolveEmoji(store, "add")).toBeNull();
     expect(resolveEmoji(store, "")).toBeNull();
     expect(missingEmojiText("not_an_emoji")).toBe(":not_an_emoji:");
     expect(missingEmojiText(":nope:")).toBe(":nope:");

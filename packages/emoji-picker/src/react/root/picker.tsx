@@ -129,7 +129,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     reactions,
   }));
   React.useEffect(() => void state.mount(), [state]);
-  // Frequents are held while the user is in the picker so nothing moves under the pointer or the focused cell
   useActiveWithin(rootRef, state.hold);
   useClippedScrollGuard(rootRef);
 

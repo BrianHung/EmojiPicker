@@ -77,7 +77,11 @@ npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/
 npm test            # Worker tests, with Workers AI and Vectorize mocked
 npm run typecheck
 npx tsx worker/test/mock-server.ts --port 8799   # the Worker over mocked bindings
+npm run test:e2e    # Playwright, one spec per concern: keyboard, editors, layout, ime, perf, visual
+npm run test:keyboard   # the keyboard contract on one surface per kind of picker, desktop and phone
 ```
+
+`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local: capture them with `npm run test:baseline`.
 
 ### Accessibility
 

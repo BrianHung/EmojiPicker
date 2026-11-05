@@ -255,7 +255,6 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           </div>
         )}
       </div>
-      {/* Outside the row: the sheet's portaled pointer events would reach its press-and-hold */}
       {compact ? <PickerSheet appStyle={discord} label="Add Reaction" open={pickerOpen} onOpenChange={setPickerOpen} onSelect={(s) => onToggle(s.unified)} font={FONT} /> : null}
     </>
   );
@@ -288,7 +287,6 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
   const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
-  // ProseMirror keeps the handlers it was created with
   const menuOpen = React.useRef(false);
   menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});

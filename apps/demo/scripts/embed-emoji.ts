@@ -27,7 +27,6 @@ if (values.custom) {
 }
 const out = resolve(values.out ?? resolve(here, "../public/embeddings", values.custom ? "custom.i8" : "emoji.i8"));
 
-// q8 matches the model the browser runs; BGE is pooled on the CLS token, then normalized
 const extract = await pipeline("feature-extraction", MODEL, { dtype: "q8" });
 const vectors: Float32Array[] = [];
 let dims = 0;

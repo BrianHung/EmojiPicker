@@ -27,7 +27,6 @@ type ContextValue = {
 const EmojiContext = React.createContext<ContextValue | null>(null);
 
 export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
-  // Options are read once, like a store: remount the provider to change data; the skin tone stays controllable
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
   const { skinTone, onSkinToneChange } = options;
   React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);

@@ -17,7 +17,6 @@ export async function embedSearch(env: Env, { query, limit, custom }: { query: s
   const t0 = performance.now();
   const [vector] = await embed(env, [QUERY_PREFIX + query]);
   const t1 = performance.now();
-  // With metadata, Vectorize returns at most 50 matches
   const { matches } = await binding(() => env.EMOJI_INDEX.query(vector!, { topK: custom ? limit : 50, returnMetadata: "all" }));
   const t2 = performance.now();
   if (matches.length === 0) {
@@ -31,6 +30,5 @@ export async function embedSearch(env: Env, { query, limit, custom }: { query: s
     hits.push(isCustom ? { unified: match.id, score: match.score, custom: true, imageUrl: String(match.metadata?.imageUrl ?? "") || undefined } : { unified: match.id, score: match.score });
     if (hits.length === limit) break;
   }
-  // Workers' clock advances only across I/O, which is what these measure
   return { hits, model: EMBEDDING_MODEL, timings: { embedMs: Math.round(t1 - t0), queryMs: Math.round(t2 - t1) } };
 }

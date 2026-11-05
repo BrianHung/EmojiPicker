@@ -29,7 +29,6 @@ export function createFrequencyStore({ storage = localStorageAdapter("emoji-pick
   const listeners = new Set<() => void>();
   let entries: Record<string, Entry> = parse(storage.read());
   let version = 0;
-  // Per-n cache: snapshots must stay referentially stable, and callers ask for different n (picker 16, tapback 5)
   let cache = new Map<number, readonly string[]>();
 
   const decayed = ([score, at]: Entry, now: number) => score * 0.5 ** ((now - at) / halfLife);

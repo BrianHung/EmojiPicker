@@ -10,7 +10,6 @@ const ITEM = "h-9 gap-2.5 rounded-md px-2.5 text-sm [&_svg]:size-4";
 
 function CopyPage({ md, className }: { md: string; className?: string }) {
   const [copied, setCopied] = React.useState(false);
-  // Fetched before the click so the clipboard write happens inside the user gesture
   const markdown = React.useRef<Promise<string> | null>(null);
   const load = React.useCallback(() => (markdown.current ??= fetch(md).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status} ${md}`))))), [md]);
   React.useEffect(() => {

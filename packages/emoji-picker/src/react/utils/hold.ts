@@ -1,4 +1,3 @@
-// Holds frequents and reactions steady while the user works in the picker: nothing should move under them
 import * as React from "react";
 
 export function useActiveWithin(root: React.RefObject<HTMLElement | null>, onChange: (active: boolean) => void) {

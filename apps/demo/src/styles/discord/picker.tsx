@@ -66,7 +66,6 @@ function Footer() {
   const active = EmojiPicker.useActiveEmoji();
   const store = useEmojiStore();
   const first = useFrequentEmoji(1)[0];
-  // A preview, not a pick: read the record, since select() would count a use
   const shown = active ?? (first ? store.get(first) : undefined);
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 bg-picker-panel px-4">

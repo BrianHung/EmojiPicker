@@ -51,7 +51,6 @@ function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | nul
 const placementOf = (side: Side, align: Align) => (align === "center" ? side : (`${side} ${align}` as const));
 
 function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitialFocus; content: React.RefObject<HTMLElement | null> }) {
-  // Before the Popover's own effect, which focuses the dialog itself unless focus is already inside
   React.useEffect(() => void initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true }), []);
   return null;
 }
@@ -62,7 +61,6 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
 ) {
   const { duration: _duration, ...props } = rest as typeof rest & { duration?: unknown };
   const p = usePopoverInternals<Internals>("Content");
-  // Before the focus scope restores focus to the trigger, which it does only while focus is still inside
   const wasOpen = React.useRef(p.state.open);
   React.useEffect(() => {
     if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });

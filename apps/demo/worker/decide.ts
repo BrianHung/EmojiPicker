@@ -1,4 +1,3 @@
-// A question takes at most 255 options: round 1 shortlists per chunk of names, round 2 ranks the finalists
 import { BUILT_IN, CUSTOM, type Entry } from "./corpus";
 import type { Hit } from "./embed-search";
 import type { Env } from "./env";
