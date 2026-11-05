@@ -23,18 +23,6 @@
     "animated": true
   },
   {
-    "id": "bufo-party",
-    "name": "bufo party",
-    "imageUrl": "https://all-the.bufo.zone/bufo-party.gif",
-    "shortcodes": [
-      "bufo-party"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128,
-    "animated": true
-  },
-  {
     "id": "bufo-lgtm",
     "name": "bufo lgtm",
     "imageUrl": "https://all-the.bufo.zone/bufo-lgtm.png",
@@ -74,17 +62,6 @@
     "imageUrl": "https://all-the.bufo.zone/bufo-thumbsup.png",
     "shortcodes": [
       "bufo-thumbsup"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-celebrate",
-    "name": "bufo celebrate",
-    "imageUrl": "https://all-the.bufo.zone/bufo-celebrate.png",
-    "shortcodes": [
-      "bufo-celebrate"
     ],
     "group": "Bufo",
     "width": 128,
@@ -303,17 +280,6 @@
     "height": 128
   },
   {
-    "id": "bufo-sigh",
-    "name": "bufo sigh",
-    "imageUrl": "https://all-the.bufo.zone/bufo-sigh.png",
-    "shortcodes": [
-      "bufo-sigh"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-wat",
     "name": "bufo wat",
     "imageUrl": "https://all-the.bufo.zone/bufo-wat.png",
@@ -409,17 +375,6 @@
     "imageUrl": "https://all-the.bufo.zone/bufo-blep.png",
     "shortcodes": [
       "bufo-blep"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-peek",
-    "name": "bufo peek",
-    "imageUrl": "https://all-the.bufo.zone/bufo-peek.png",
-    "shortcodes": [
-      "bufo-peek"
     ],
     "group": "Bufo",
     "width": 128,
@@ -593,33 +548,11 @@
     "height": 128
   },
   {
-    "id": "bufo-rocket",
-    "name": "bufo rocket",
-    "imageUrl": "https://all-the.bufo.zone/bufo-rocket.png",
-    "shortcodes": [
-      "bufo-rocket"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-medal",
     "name": "bufo medal",
     "imageUrl": "https://all-the.bufo.zone/bufo-medal.png",
     "shortcodes": [
       "bufo-medal"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-confetti",
-    "name": "bufo confetti",
-    "imageUrl": "https://all-the.bufo.zone/bufo-confetti.png",
-    "shortcodes": [
-      "bufo-confetti"
     ],
     "group": "Bufo",
     "width": 128,
@@ -704,17 +637,6 @@
     "width": 128,
     "height": 128,
     "animated": true
-  },
-  {
-    "id": "bufo-taco",
-    "name": "bufo taco",
-    "imageUrl": "https://all-the.bufo.zone/bufo-taco.png",
-    "shortcodes": [
-      "bufo-taco"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
   },
   {
     "id": "bufo-shipping",
@@ -862,17 +784,6 @@
     "width": 128,
     "height": 128,
     "animated": true
-  },
-  {
-    "id": "bufo-think",
-    "name": "bufo think",
-    "imageUrl": "https://all-the.bufo.zone/bufo-think.png",
-    "shortcodes": [
-      "bufo-think"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
   },
   {
     "id": "bufo-wink",
@@ -1080,33 +991,11 @@
     "animated": true
   },
   {
-    "id": "bufo-unicorn",
-    "name": "bufo unicorn",
-    "imageUrl": "https://all-the.bufo.zone/bufo-unicorn.png",
-    "shortcodes": [
-      "bufo-unicorn"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-magician",
     "name": "bufo magician",
     "imageUrl": "https://all-the.bufo.zone/bufo-magician.png",
     "shortcodes": [
       "bufo-magician"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-ninja",
-    "name": "bufo ninja",
-    "imageUrl": "https://all-the.bufo.zone/bufo-ninja.png",
-    "shortcodes": [
-      "bufo-ninja"
     ],
     "group": "Bufo",
     "width": 128,
@@ -1135,55 +1024,11 @@
     "height": 128
   },
   {
-    "id": "bufo-spooky-szn",
-    "name": "bufo spooky szn",
-    "imageUrl": "https://all-the.bufo.zone/bufo-spooky-szn.png",
-    "shortcodes": [
-      "bufo-spooky-szn"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-ghost-costume",
-    "name": "bufo ghost costume",
-    "imageUrl": "https://all-the.bufo.zone/bufo-ghost-costume.png",
-    "shortcodes": [
-      "bufo-ghost-costume"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-santa",
     "name": "bufo santa",
     "imageUrl": "https://all-the.bufo.zone/bufo-santa.png",
     "shortcodes": [
       "bufo-santa"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-morning-sun",
-    "name": "bufo morning sun",
-    "imageUrl": "https://all-the.bufo.zone/bufo-morning-sun.png",
-    "shortcodes": [
-      "bufo-morning-sun"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-reading",
-    "name": "bufo reading",
-    "imageUrl": "https://all-the.bufo.zone/bufo-reading.png",
-    "shortcodes": [
-      "bufo-reading"
     ],
     "group": "Bufo",
     "width": 128,
@@ -1235,17 +1080,6 @@
     "height": 128
   },
   {
-    "id": "bufo-hotdog-rocket",
-    "name": "bufo hotdog rocket",
-    "imageUrl": "https://all-the.bufo.zone/bufo-hotdog-rocket.png",
-    "shortcodes": [
-      "bufo-hotdog-rocket"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-wizard",
     "name": "bufo wizard",
     "imageUrl": "https://all-the.bufo.zone/bufo-wizard.gif",
@@ -1291,17 +1125,6 @@
     "height": 128
   },
   {
-    "id": "bufo-sushi",
-    "name": "bufo sushi",
-    "imageUrl": "https://all-the.bufo.zone/bufo-sushi.png",
-    "shortcodes": [
-      "bufo-sushi"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-cookie",
     "name": "bufo cookie",
     "imageUrl": "https://all-the.bufo.zone/bufo-cookie.png",
@@ -1313,110 +1136,11 @@
     "height": 128
   },
   {
-    "id": "bufo-dog",
-    "name": "bufo dog",
-    "imageUrl": "https://all-the.bufo.zone/bufo-dog.png",
-    "shortcodes": [
-      "bufo-dog"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
     "id": "bufo-offers-avocado",
     "name": "bufo offers avocado",
     "imageUrl": "https://all-the.bufo.zone/bufo-offers-avocado.png",
     "shortcodes": [
       "bufo-offers-avocado"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-watermelon",
-    "name": "bufo watermelon",
-    "imageUrl": "https://all-the.bufo.zone/bufo-watermelon.png",
-    "shortcodes": [
-      "bufo-watermelon"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-strawberry",
-    "name": "bufo strawberry",
-    "imageUrl": "https://all-the.bufo.zone/bufo-strawberry.png",
-    "shortcodes": [
-      "bufo-strawberry"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-pineapple",
-    "name": "bufo pineapple",
-    "imageUrl": "https://all-the.bufo.zone/bufo-pineapple.png",
-    "shortcodes": [
-      "bufo-pineapple"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-lemon",
-    "name": "bufo lemon",
-    "imageUrl": "https://all-the.bufo.zone/bufo-lemon.png",
-    "shortcodes": [
-      "bufo-lemon"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-potato",
-    "name": "bufo potato",
-    "imageUrl": "https://all-the.bufo.zone/bufo-potato.png",
-    "shortcodes": [
-      "bufo-potato"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-corn",
-    "name": "bufo corn",
-    "imageUrl": "https://all-the.bufo.zone/bufo-corn.png",
-    "shortcodes": [
-      "bufo-corn"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-basketball",
-    "name": "bufo basketball",
-    "imageUrl": "https://all-the.bufo.zone/bufo-basketball.png",
-    "shortcodes": [
-      "bufo-basketball"
-    ],
-    "group": "Bufo",
-    "width": 128,
-    "height": 128
-  },
-  {
-    "id": "bufo-soccer",
-    "name": "bufo soccer",
-    "imageUrl": "https://all-the.bufo.zone/bufo-soccer.png",
-    "shortcodes": [
-      "bufo-soccer"
     ],
     "group": "Bufo",
     "width": 128,
