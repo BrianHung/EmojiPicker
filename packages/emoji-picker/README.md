@@ -48,6 +48,8 @@ Without `data`, the provider loads `data/en.json` from jsDelivr, pinned to the i
 
 `EmojiPicker.Root` creates a provider with these defaults when none is above it.
 
+Each part is also exported on its own (`EmojiPickerRoot`, `EmojiPickerSearch`, `EmojiPickerViewport`, `EmojiPickerList`, …) for bundlers such as esbuild that keep every member of a namespace import.
+
 To copy a styled shadcn/ui version into your project:
 
 ```bash
