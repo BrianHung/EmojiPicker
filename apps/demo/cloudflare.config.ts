@@ -7,9 +7,10 @@ export default defineConfig({
     domains: process.env.CF_DOMAIN?.split(",").filter(Boolean) ?? [],
     compatibilityDate: "2026-10-30",
     entrypoint,
-    assets: { runWorkerFirst: ["/api/*"] },
+    assets: { runWorkerFirst: true },
     observability: { enabled: true },
     env: {
+      ASSETS: bindings.assets(),
       AI: bindings.ai(),
       EMOJI_INDEX: bindings.vectorize({ name: "emoji-bge-large" }),
       ALLOWED_ORIGINS: bindings.text("http://localhost:*"),

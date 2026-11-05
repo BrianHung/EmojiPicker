@@ -15,6 +15,6 @@
     "types": ["vite/client", "node", "mdx"],
     "paths": { "@/registry/*": ["./registry/*"], "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"], "@/*": ["./src/*"] }
   },
-  "include": ["src", "registry", "capture", "scripts", "plugins", "vite.config.ts"],
-  "exclude": ["capture/out", "registry/aria"]
+  "include": ["src", "registry", "scripts", "plugins", "vite.config.ts"],
+  "exclude": ["registry/aria"]
 }

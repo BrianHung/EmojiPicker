@@ -8,6 +8,8 @@ import { authorized, parseSeed, seed } from "./seed";
 
 export type { Env };
 
+const CANONICAL_HOST = "emoji.brianhung.me";
+const ALIAS_HOST = "emojis.brianhung.me";
 const MAX_QUERY = 200;
 const MAX_LIMIT = 50;
 
@@ -29,6 +31,12 @@ const limited = async (limiter: RateLimit, request: Request) => !(await limiter.
 export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
+    if (request.headers.get("host") === ALIAS_HOST) {
+      url.protocol = "https:";
+      url.host = CANONICAL_HOST;
+      return Response.redirect(url.href, 301);
+    }
+    if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
     const origin = allowedOrigin(request, env.ALLOWED_ORIGINS ?? "");
     const cors = corsHeaders(origin);
     const json = (data: unknown, status = 200, headers: Record<string, string> = {}) => Response.json(data, { status, headers: { ...cors, ...headers } });

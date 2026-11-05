@@ -2,10 +2,11 @@ import { readFileSync } from "node:fs";
 import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
+import { EXAMPLES } from "../src/lib/examples";
+import { PAGES, pageUrl, SITE } from "./site";
 
-const SITE = "https://emoji.brianhung.me";
 const GITHUB = "https://github.com/BrianHung/EmojiPicker/blob/main";
-const EXAMPLES = ["tiptap", "lexical", "custom-emoji", "semantic-search", "virtualizer"];
+const NAMES = EXAMPLES.map((e) => e.id);
 
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
@@ -48,17 +49,17 @@ function example(name: string) {
 }
 
 const index = (link: (name: string) => string) =>
-  EXAMPLES.map((name) => {
+  NAMES.map((name) => {
     const { title, description } = page(name);
     return `- [${title}](${link(name)}): ${description}`;
   }).join("\n");
 
-type Route = { type: "text/markdown" | "text/plain"; render: () => string };
+type Route = { type: "text/markdown" | "text/plain" | "application/xml"; render: () => string };
 
 const ROUTES: Record<string, Route> = {
   "docs.md": { type: "text/markdown", render: () => readme(read("../../packages/emoji-picker/README.md")) },
   "examples.md": { type: "text/markdown", render: () => `# Examples\n\nWorking integrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
-  ...Object.fromEntries(EXAMPLES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => example(name) } satisfies Route])),
+  ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => example(name) } satisfies Route])),
   "llms.txt": {
     type: "text/plain",
     render: () => `# Emoji Picker
@@ -74,6 +75,14 @@ const ROUTES: Record<string, Route> = {
 - [Examples](${SITE}/examples.md): index of the integrations.
 ${index((name) => `${SITE}/examples/${name}.md`)}
 `,
+  },
+  "robots.txt": { type: "text/plain", render: () => `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n` },
+  "sitemap.xml": {
+    type: "application/xml",
+    render: () =>
+      `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${Object.values(PAGES)
+        .map((page) => `  <url><loc>${pageUrl(page)}</loc></url>`)
+        .join("\n")}\n</urlset>\n`,
   },
 };
 

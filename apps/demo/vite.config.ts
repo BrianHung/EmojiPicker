@@ -6,20 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { markdownDocs } from "./plugins/markdown-docs";
 import { mdx } from "./plugins/mdx";
+import { entries as pages, site } from "./plugins/site";
 
 const workspace = existsSync(new URL("../../packages/emoji-picker/src", import.meta.url));
-
-const pages = {
-  main: "index.html",
-  shot: "shot.html",
-  gallery: "gallery/index.html",
-  examples: "examples/index.html",
-  tiptap: "examples/tiptap/index.html",
-  lexical: "examples/lexical/index.html",
-  "semantic-search": "examples/semantic-search/index.html",
-  "custom-emoji": "examples/custom-emoji/index.html",
-  virtualizer: "examples/virtualizer/index.html",
-};
 
 export default defineConfig({
   plugins: [
@@ -27,6 +16,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
     markdownDocs(),
+    site(),
     {
       name: "react-aria-demos",
       enforce: "pre",
@@ -53,5 +43,5 @@ export default defineConfig({
   },
   environments: { client: { build: { rollupOptions: { input: pages } } } },
   optimizeDeps: { entries: Object.values(pages) },
-  server: { port: 5199, strictPort: true, watch: { ignored: ["**/capture/out/**", "**/capture/*.mjs", "**/capture/*.py"] } },
+  server: { port: 5199, strictPort: true },
 });

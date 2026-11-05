@@ -2,7 +2,7 @@
   "name": "emoji-picker",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-30",
-  "assets": { "directory": "./.cloudflare/output/v0/workers/default/assets", "run_worker_first": ["/api/*"] },
+  "assets": { "directory": "./.cloudflare/output/v0/workers/default/assets", "binding": "ASSETS", "run_worker_first": true },
   "observability": { "enabled": true },
   "ai": { "binding": "AI" },
   "vectorize": [{ "binding": "EMOJI_INDEX", "index_name": "emoji-bge-large" }],

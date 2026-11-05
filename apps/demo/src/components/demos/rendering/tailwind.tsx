@@ -10,6 +10,10 @@ import { Chips } from "@/components/site/chips";
 const artwork = {
   "2764-fe0f": "/reactions/heart.svg",
   "1f44d": "/reactions/thumbs-up.svg",
+  "1f44e": "/reactions/thumbs-down.svg",
+  "1f602": "/reactions/haha.svg",
+  "203c-fe0f": "/reactions/exclamation.svg",
+  "2753": "/reactions/question.svg",
 };
 
 export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
@@ -27,7 +31,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
         <Chips label="Renderer" value={renderer} onChange={setRenderer} options={[["auto", "Auto"], ["native", "Native"], ["image", "Twemoji"]]} />
         <Label className="flex items-center gap-2 text-sm font-normal">
           <Checkbox checked={custom} onCheckedChange={setCustom} />
-          Custom ❤️ and 👍
+          Custom tapbacks
         </Label>
       </div>
       <EmojiProvider data={en} renderer={renderer} imageUrl={twemojiUrl}>

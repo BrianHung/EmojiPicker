@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -6,18 +7,16 @@ import sharp from "sharp";
 const INDEX = "https://raw.githubusercontent.com/knobiknows/all-the-bufo/main/index.md";
 const IMAGE = "https://all-the.bufo.zone/";
 const MIN_SIZE = 96;
-const SHEET = fileURLToPath(new URL("../capture/out/bufo-picks.png", import.meta.url));
+const SHEET = join(tmpdir(), "bufo-picks.png");
 const PACK = fileURLToPath(new URL("../public/packs/bufo/pack.json", import.meta.url));
 
 const PICKS = [
   "bufo-yes",
   "bufo-no",
-  "bufo-party",
   "bufo-lgtm",
   "bufo-wave",
   "bufo-heart",
   "bufo-thumbsup",
-  "bufo-celebrate",
   "bufo-laugh-xd",
   "bufo-hug",
   "bufo-pray",
@@ -37,7 +36,6 @@ const PICKS = [
   "bufo-shy",
   "bufo-worried",
   "bufo-phew",
-  "bufo-sigh",
   "bufo-wat",
   "bufo-idk",
   "bufo-please",
@@ -47,7 +45,6 @@ const PICKS = [
   "bufo-confused",
   "bufo-uwu",
   "bufo-blep",
-  "bufo-peek",
   "bufo-chefkiss",
   "bufo-innocent",
   "bufo-pog",
@@ -63,9 +60,7 @@ const PICKS = [
   "bufo-king",
   "bufo-nerd",
   "bufo-science",
-  "bufo-rocket",
   "bufo-medal",
-  "bufo-confetti",
   "bufo-yay",
   "bufo-starstruck",
   "bufo-cuppa",
@@ -73,7 +68,6 @@ const PICKS = [
   "bufo-ice-cream",
   "bufo-popcorn",
   "bufo-ramen",
-  "bufo-taco",
   "bufo-shipping",
   "bufo-offers-a-deploy-lock",
   "bufo-code-freeze",
@@ -87,7 +81,6 @@ const PICKS = [
   "bufo-this-is-fine",
   "bufo-panic",
   "bufo-deep-hmm",
-  "bufo-think",
   "bufo-wink",
   "bufo-extra-cool",
   "bufo-ok",
@@ -106,37 +99,20 @@ const PICKS = [
   "bufo-offers-a-cake",
   "bufo-disco",
   "bufo-hype",
-  "bufo-unicorn",
   "bufo-magician",
-  "bufo-ninja",
   "bufo-gamer",
   "bufo-photographer",
-  "bufo-spooky-szn",
-  "bufo-ghost-costume",
   "bufo-santa",
-  "bufo-morning-sun",
-  "bufo-reading",
   "bufo-cash-money",
   "bufo-make-it-rain",
   "bufo-offers-chart-with-upwards-trend",
   "bufo-has-a-hot-take",
-  "bufo-hotdog-rocket",
   "bufo-wizard",
   "bufo-offers-coffee",
   "bufo-beer",
   "bufo-chef",
-  "bufo-sushi",
   "bufo-cookie",
-  "bufo-dog",
   "bufo-offers-avocado",
-  "bufo-watermelon",
-  "bufo-strawberry",
-  "bufo-pineapple",
-  "bufo-lemon",
-  "bufo-potato",
-  "bufo-corn",
-  "bufo-basketball",
-  "bufo-soccer",
   "bufo-firefighter",
 ];
 
