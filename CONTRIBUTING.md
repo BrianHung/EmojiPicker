@@ -7,6 +7,7 @@
 | `packages/core` | [`@brianhung/emoji-picker-core`](packages/core/README.md): data, search and stores, with no dependencies |
 | `packages/react` | [`@brianhung/emoji-picker-react`](packages/react/README.md): the React parts and hooks |
 | `packages/data` | [`@brianhung/emoji-picker-data`](packages/data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
+| `packages/twemoji-font` | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md): Twemoji as a COLRv0 web font, built at pack time with nanoemoji (Python 3.12); the site needs it built once |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
 | `.changeset` | Pending release notes |
 
@@ -22,14 +23,14 @@ npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visu
 npm run test:a11y    # axe on every page and picker surface
 npm run typecheck    # every workspace
 npm run check        # Biome lint and format check; `npm run format` formats
-npm run build        # core, the React package, then the site and registry
+npm run build        # core, the React package, the Twemoji font, then the site and registry
 npm run size         # bundle-size budgets on the library build (.size-limit.json)
 npm run changeset    # describe a change for the next release
 ```
 
 In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
 
-Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the builds, the size budgets, the data package's validation, a packed-install smoke test, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
+Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the builds, the size budgets, the data package's validation, the Twemoji font build and its Chromium, WebKit and Firefox render test, a packed-install smoke test, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA. [upstream.yml](.github/workflows/upstream.yml), run by hand, bumps the pinned emojibase-data and Twemoji versions, rebuilds, tests and opens a PR.
 
 ## API conventions
 

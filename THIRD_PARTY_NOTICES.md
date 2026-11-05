@@ -2,6 +2,10 @@
 
 The library's notices (emojibase, iamcal/emoji-data, emoji-picker-react, Twemoji) are in [packages/react/THIRD_PARTY_NOTICES.md](packages/react/THIRD_PARTY_NOTICES.md).
 
+## Twemoji font
+
+`@brianhung/emoji-picker-twemoji-font` ships a font built from the [jdecked/twemoji](https://github.com/jdecked/twemoji) SVGs, Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Its `LICENSE` and `NOTICE` carry the license and the changes made. The build scripts are MIT.
+
 ## Demo site
 
 - **Twemoji.** The demo renders emoji with [jdecked/twemoji](https://github.com/jdecked/twemoji) graphics, Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/).

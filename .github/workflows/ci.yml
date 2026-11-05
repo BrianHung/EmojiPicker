@@ -52,7 +52,50 @@ jobs:
           npx vite build --sourcemap
           node check.mjs
 
+  twemoji-font:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/twemoji-*
+          key: twemoji-svg-${{ hashFiles('packages/twemoji-font/package.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/venv
+          key: twemoji-venv-${{ runner.os }}-py3.12-${{ hashFiles('packages/twemoji-font/requirements.txt') }}
+      # nanoemoji's ninja build is incremental, so a stale build dir only rebuilds what changed
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/build
+          key: twemoji-build-${{ runner.os }}-${{ hashFiles('packages/twemoji-font/package.json', 'packages/twemoji-font/requirements.txt', 'packages/twemoji-font/scripts/build.ts') }}
+          restore-keys: twemoji-build-${{ runner.os }}-
+      - run: npm run build -w @brianhung/emoji-picker-twemoji-font
+      - id: playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-all-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - if: steps.playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium webkit firefox
+      - if: steps.playwright.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit firefox
+      - run: npm test -w @brianhung/emoji-picker-twemoji-font
+      - run: npx publint packages/twemoji-font
+      - uses: actions/upload-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist, if-no-files-found: error }
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: twemoji-font-results, path: packages/twemoji-font/test/.results, if-no-files-found: ignore }
+
   e2e:
+    needs: twemoji-font
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -66,6 +109,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
       - id: playwright
         uses: actions/cache@v4
         with:
@@ -93,6 +138,7 @@ jobs:
           if-no-files-found: ignore
 
   a11y:
+    needs: twemoji-font
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -100,6 +146,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
       - id: playwright
         uses: actions/cache@v4
         with:

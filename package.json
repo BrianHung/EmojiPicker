@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run dev -w demo",
-    "build": "npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react && npm run build -w demo",
+    "build": "npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react && npm run build -w @brianhung/emoji-picker-twemoji-font && npm run build -w demo",
     "test": "npm test -w @brianhung/emoji-picker-core -w @brianhung/emoji-picker-react",
     "test:e2e": "npm run test:e2e -w demo",
     "test:a11y": "npm run test:a11y -w demo",
