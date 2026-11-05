@@ -1,5 +1,4 @@
-import * as React from "react";
-import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiPickerActions, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker-react";
 import { EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
@@ -11,13 +10,7 @@ export const notionEmojiOptions: EmojiTypeaheadOptions = { matchBy: "search", li
 const ICONS: I.IconSet = I.ICONS.notion;
 const CATEGORIES = NOTION_SECTIONS.filter((c) => c.id !== "suggested");
 
-export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, keyHandler, editor, className, container = false }: EmojiMenuProps & { editor: HTMLElement; container?: HTMLElement | false }) {
-  const actions = React.useRef<EmojiPickerActions>(null);
-  React.useLayoutEffect(() => {
-    keyHandler.current = (event) => event.key === "Tab" && Boolean(actions.current?.pick()) && (event.preventDefault(), true);
-    return () => void (keyHandler.current = null);
-  });
-
+export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, editor, className, container = false }: EmojiMenuProps & { editor: HTMLElement; container?: HTMLElement | false }) {
   return (
     <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={container} className={className}>
       <EmojiPicker.Root
@@ -27,13 +20,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
         categories={CATEGORIES}
         columns={12}
         keyboardTarget={editor}
-        actionsRef={actions}
-        onSelect={(selection) =>
-          menu.choose(
-            menu.suggestions.findIndex((s) => s.record.unified === selection.baseUnified),
-            { record: false },
-          )
-        }
+        onSelect={menu.insert}
         data-style={notion.id}
         style={tokensOf(notion)}
         className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [--emoji-cell-size:32px] [--emoji-header-height:34px] [--emoji-list-padding:12px] [--emoji-size:24px] [--emoji-image-size:24px] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"

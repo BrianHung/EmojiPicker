@@ -265,6 +265,9 @@ const isTextField = (el: EventTarget | null) =>
 
 const TARGET_MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down" };
 
+// A combobox with its popup open accepts on Tab, as the typeahead's own menus do
+const accepts = (el: HTMLElement) => el.getAttribute("aria-expanded") === "true";
+
 function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
   React.useEffect(() => {
     const el = target();
@@ -273,7 +276,7 @@ function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<
     const onKeyDown = (event: KeyboardEvent) => {
       if (isComposingKey(event) || hasModifier(event)) return;
       const to = TARGET_MOVES[event.key];
-      const handled = to ? list.current?.move(to, { reason: "keyboard", event }) : event.key === "Enter" && !event.shiftKey && list.current?.pick();
+      const handled = to ? list.current?.move(to, { reason: "keyboard", event }) : !event.shiftKey && (event.key === "Enter" || (event.key === "Tab" && accepts(el))) && list.current?.pick();
       if (!handled) return;
       event.preventDefault();
       // The editor's own keydown listeners on this element would move the caret too

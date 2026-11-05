@@ -56,6 +56,11 @@ describe("Root keyboard", () => {
     expect(input.getAttribute("aria-activedescendant")).toBe(host.querySelector("[data-highlighted]")!.id);
     press(input, "Enter");
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f603" }), expect.anything());
+    press(input, "Tab");
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    input.setAttribute("aria-expanded", "true");
+    press(input, "Tab");
+    expect(onSelect).toHaveBeenCalledTimes(2);
     React.act(() => void actions.move("left"));
     React.act(() => void actions.pick());
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f600" }), expect.anything());

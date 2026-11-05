@@ -36,6 +36,11 @@ describe("suggestions", () => {
     expect(selected).toEqual(["1f44e"]);
     expect(store.frequents.top(1)).toEqual(["1f44e"]);
 
+    typeahead.insert(store.select("1f389", { record: false })!);
+    expect(chosen).toEqual(["👎", "🎉"]);
+    expect(selected).toEqual(["1f44e", "1f389"]);
+    expect(store.frequents.score("1f389")).toBe(0);
+
     expect(typeahead.keydown(key("Escape"))).toBe(true);
     expect(typeahead.getSnapshot().open).toBe(false);
     typeahead.setQuery("tada");
