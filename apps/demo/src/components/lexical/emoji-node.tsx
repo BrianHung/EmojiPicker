@@ -1,6 +1,3 @@
-// An inline emoji node for Lexical, drawn with the library's <Emoji>, so custom emoji
-// show as their image and Twemoji applies when the provider uses it. As text it is the
-// character (or `:shortcode:` for custom emoji), so content round-trips through Markdown.
 import * as React from "react";
 import { $applyNodeReplacement, DecoratorNode, TextNode, type EditorConfig, type NodeKey, type SerializedLexicalNode, type Spread } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
@@ -8,17 +5,13 @@ import { Emoji, useEmojiStore } from "@brianhung/emoji-picker";
 import type { EmojiStore } from "@brianhung/emoji-picker/core";
 
 export type EmojiAttrs = {
-  /** Unified code ("1f389") or a custom emoji id ("partyparrot"). */
   unified: string;
-  /** First shortcode, for text export of custom emoji. */
   shortcode: string;
-  /** The character for standard emoji; null for custom emoji (images). */
   text: string | null;
 };
 
 type SerializedEmojiNode = Spread<EmojiAttrs, SerializedLexicalNode>;
 
-/** Attributes for an emoji from the store, by unified code, custom id or shortcode. */
 export function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiAttrs | null {
   const record = store.get(idOrShortcode) ?? store.fromShortcode(idOrShortcode);
   if (!record) return null;
@@ -81,7 +74,6 @@ export function $createEmojiNode(attrs: EmojiAttrs) {
 
 const SHORTCODE = /:([a-z0-9_+'-]+):/i;
 
-/** Converts a complete `:shortcode:` typed in text into an EmojiNode. Requires EmojiNode in the composer's `nodes`. */
 export function EmojiShortcodePlugin() {
   const [editor] = useLexicalComposerContext();
   const store = useEmojiStore();

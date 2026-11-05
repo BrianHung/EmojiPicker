@@ -1,9 +1,4 @@
-// One-off: checks the curated Bufo images the custom emoji example references by URL.
-// all-the-bufo (https://github.com/knobiknows/all-the-bufo) has no license, so nothing
-// from it is written into the repo: picks are fetched into memory, measured,
-// and written to public/packs/bufo/pack.json as image URLs on all-the.bufo.zone (never the images). A contact sheet
-// for checking them by eye goes to capture/out/bufo-picks.png.
-// Run from apps/demo: `npx tsx scripts/pick-bufos.ts`.
+// all-the-bufo has no license: images are only fetched into memory, and pack.json stores their URLs
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,12 +6,10 @@ import sharp from "sharp";
 
 const INDEX = "https://raw.githubusercontent.com/knobiknows/all-the-bufo/main/index.md";
 const IMAGE = "https://all-the.bufo.zone/";
-/** Smallest side that stays crisp in a 32px cell on a 3x display. */
 const MIN_SIZE = 96;
 const SHEET = fileURLToPath(new URL("../capture/out/bufo-picks.png", import.meta.url));
 const PACK = fileURLToPath(new URL("../public/packs/bufo/pack.json", import.meta.url));
 
-// Fun, expressive, readable at 24–32px: reactions, dev jokes, celebrations, food. Order is the grid order.
 const PICKS = [
   "bufo-yes",
   "bufo-no",
@@ -150,7 +143,6 @@ const PICKS = [
 
 type Candidate = { file: string; width: number; height: number; animated: boolean; buf: Buffer };
 
-/** True when every k×k block is one color: an image upscaled from pixel art. */
 async function isPixelArt(buf: Buffer): Promise<boolean> {
   const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: w, height: h } = info;
@@ -195,7 +187,6 @@ async function main() {
     picks.push({ file, width, height, animated: (meta.pages ?? 1) > 1, buf });
   }
 
-  // Contact sheet: 8 columns of 96px tiles with names, first frames for GIFs.
   const T = 96;
   const L = 28;
   const cols = 8;

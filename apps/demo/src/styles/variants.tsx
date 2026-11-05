@@ -6,7 +6,6 @@ import { SmilePlus } from "./icons";
 import { FitViewport, type Reaction } from "./scene-kit";
 import { OPTION, tokensOf, type Style } from "./style";
 
-/** Popover picker from a trigger, with or without search. */
 export function StyleDropdown({
   appStyle,
   reaction = false,
@@ -19,7 +18,6 @@ export function StyleDropdown({
   triggerClassName,
 }: {
   appStyle: Style;
-  /** The style's reaction picker, where it has its own. */
   reaction?: boolean;
   onSelect: (s: EmojiSelection) => void;
   search?: boolean;
@@ -30,7 +28,6 @@ export function StyleDropdown({
   triggerClassName?: string;
 }) {
   const Picker = (reaction && appStyle.ReactionPicker) || appStyle.Picker;
-  // The popover measures its content, and picking closes it.
   return (
     <PickerPopover
       onSelect={onSelect}
@@ -39,7 +36,6 @@ export function StyleDropdown({
       label={label}
       triggerClassName={triggerClassName}
       picker={
-        // Wider than a phone (Discord's 498px): zoom to fit, keeping the app's layout.
         <FitViewport width={appStyle.size.width}>
           <Picker onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
         </FitViewport>
@@ -50,7 +46,6 @@ export function StyleDropdown({
   );
 }
 
-/** Tapback row: top frequents + a "+" that opens the style's full picker. One tab stop; arrows, Home and End move along it. */
 export function StyleTapback({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
   const store = useEmojiStore();
   const frequent = useFrequentEmoji(count);
@@ -65,7 +60,6 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
               key={u}
               type="button"
               aria-label={store.get(u)?.name ?? u}
-              // Press feedback: a slight shrink while held.
               className="transition-transform duration-150 ease-out active:not-disabled:scale-[0.97]"
               onClick={() => {
                 const s = store.select(unified);
@@ -84,12 +78,11 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
   );
 }
 
-/** The :shortcode: list in an app style, on any editor's typeahead, with the typed part of each code highlighted. */
 export function StyleAutocomplete({ appStyle, suggestions: menu, open, className }: Pick<EmojiTypeahead, "suggestions" | "open"> & { appStyle: Style; className?: string }) {
   const store = useEmojiStore();
   const a = appStyle.autocomplete;
   const list = React.useRef<HTMLUListElement>(null);
-  // Keeps the highlighted option in view, scrolling only the list (scrollIntoView would scroll the page too).
+  // Scrolls only the list: scrollIntoView would scroll the page too
   React.useLayoutEffect(() => {
     const el = list.current;
     const item = el?.querySelector("[data-highlighted]")?.getBoundingClientRect();
@@ -124,7 +117,6 @@ export function StyleAutocomplete({ appStyle, suggestions: menu, open, className
   );
 }
 
-/** Reaction pills with counts, plus an add-reaction picker (Slack / Discord / Linear / Notion). */
 export function StylePills({ appStyle, reactions, onToggle }: { appStyle: Style; reactions: Reaction[]; onToggle: (unified: string) => void }) {
   const store = useEmojiStore();
   return (

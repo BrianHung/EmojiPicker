@@ -1,6 +1,4 @@
-// Keyboard navigation over the grid's rows (core/grid), or the horizontal strip, as a React Aria
-// KeyboardDelegate. React Aria's ListKeyboardDelegate moves Down to the next item with the same
-// x, skipping a short last row; this one clamps to it. Directions are logical; callers mirror for RTL.
+// React Aria's ListKeyboardDelegate skips a short last row on Down; this delegate clamps to it
 import type { Key, KeyboardDelegate } from "@react-types/shared";
 import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../../core/grid";
 import type { EmojiSection } from "../../core/sections";
@@ -13,7 +11,6 @@ const STRIP: Partial<Record<EmojiGridMove, StripKey>> = { up: "ArrowUp", down: "
 export class EmojiGridNavigation implements KeyboardDelegate {
   constructor(private source: () => NavigationSource) {}
 
-  /** Where a move from `key` lands (a page is what fits in `viewport` px), or null at an edge. */
   move(key: Key, move: EmojiGridMove, viewport = 0): Key | null {
     const { grid, strip, metrics } = this.source();
     const index = grid.indexOf(String(key));
@@ -34,7 +31,6 @@ export class EmojiGridNavigation implements KeyboardDelegate {
   getFirstKey = () => this.source().grid.at(0)?.id ?? null;
   getLastKey = () => this.source().grid.at(this.source().grid.count - 1)?.id ?? null;
 
-  /** Type-to-select (no search field): the first emoji from `fromKey` on whose name starts with the text. */
   getKeyForSearch = (search: string, fromKey?: Key | null) => {
     const { grid } = this.source();
     const text = search.toLocaleLowerCase();

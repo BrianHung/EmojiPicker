@@ -5,11 +5,8 @@ import { createEmojiSuggestions, findShortcodeTrigger, isComposingKey, type Emoj
 type Node = EditorState["doc"];
 
 export type ProseMirrorEmojiTypeaheadOptions = Pick<SuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns"> & {
-  /** What a choice inserts: the emoji (default) or `:shortcode:`. Custom emoji always insert their shortcode. */
   insert?: "emoji" | "shortcode";
-  /** What replaces the typed `:query`; default the text and a space. Return nodes for custom emoji (an image node). */
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
-  /** Sees keys first while the list is open, for a menu with a layout of its own; true when it handled one. */
   handleKeyDown?: (event: KeyLike) => boolean;
 };
 
@@ -20,10 +17,6 @@ function matchIn({ selection: { $from, empty } }: EditorState): Match | null {
   return found && { query: found.query, from: $from.start() + found.offset, to: $from.pos };
 }
 
-/**
- * `:shortcode` typeahead for ProseMirror: add `plugin` to the editor (before its keymaps) and
- * render `suggestions` (core's store) however you like, at `anchor()`.
- */
 export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, handleKeyDown, ...options }: ProseMirrorEmojiTypeaheadOptions = {}) {
   let view: EditorView | null = null;
   let match: Match | null = null;
@@ -84,14 +77,12 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
   return {
     plugin,
     suggestions,
-    /** Where the typed `:query` is on screen, to position a menu; null when there's none. */
     anchor(): DOMRect | null {
       if (!view || !match) return null;
       const start = view.coordsAtPos(match.from);
       const end = view.coordsAtPos(match.to);
       return new DOMRect(start.left, start.top, end.right - start.left, start.bottom - start.top);
     },
-    /** The plugin's key handling, to forward keys from elsewhere. */
     keydown,
   };
 }

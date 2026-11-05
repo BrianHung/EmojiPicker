@@ -1,7 +1,3 @@
-// Virtual focus as React Aria dispatches it: focus events on the option the field's
-// aria-activedescendant names, which useAutocomplete listens for.
-
-/** The option the focused element points at with aria-activedescendant, else the focused element. */
 function virtuallyFocused(doc: Document): Element | null {
   const active = doc.activeElement;
   const id = active?.getAttribute("aria-activedescendant");

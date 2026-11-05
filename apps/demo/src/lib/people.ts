@@ -1,5 +1,3 @@
-// The recurring people in the app scenes, and "You" (the viewer), each with one Bufo from
-// the pack as their avatar: all-the-bufo art, loaded from its own host at view time.
 const bufo = (file: string) => `https://all-the.bufo.zone/${file}`;
 
 const AVATARS: Record<string, string> = {
@@ -11,5 +9,4 @@ const AVATARS: Record<string, string> = {
   You: bufo("bufo-cowboy.png"),
 };
 
-/** A person's avatar by first name: "Maya Lin" is Maya. */
 export const avatarFor = (name: string): string | undefined => AVATARS[name.split(" ")[0]!];

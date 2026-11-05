@@ -1,4 +1,3 @@
-# Side by side: reference | ours | difference. python3 compare.py slack-light
 import sys
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 

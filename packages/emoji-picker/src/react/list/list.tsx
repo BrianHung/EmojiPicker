@@ -1,9 +1,4 @@
-// EmojiPicker.List: the emoji grid (grid.tsx: a React Aria listbox of sections), virtualized
-// inside the Viewport by EmojiGridLayout. Categories, or the search results as their own small
-// collection; items are shared objects (see sections.ts), and the collection is built from them
-// directly (collection.ts), never by rendering them.
-// Not React Aria's ListBox: its collection is a hidden React tree with a fiber, props and
-// node per emoji per picker (+6.4 MB heap on open, 2.4x per extra picker), and +2.7 KB gzip.
+// Not React Aria's ListBox: its collection renders a hidden React tree with a fiber per emoji per picker
 import * as React from "react";
 import type { Node as CollectionNode } from "@react-types/shared";
 import { mergeProps } from "react-aria/mergeProps";
@@ -25,27 +20,12 @@ export type ListState = { orientation: "vertical" | "horizontal"; searching: boo
 
 export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> &
   PartProps<ListState, HTMLDivElement> & {
-    /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-    /**
-     * Each section, called only for the sections in view: a `List.Section` of `List.SectionTitle`,
-     * `List.Items` (each emoji, called only for the emoji in view) and `List.SectionActions`.
-     * Default: a title, and a `List.Cell` per emoji.
-     */
     children?: (section: EmojiSection) => React.ReactNode;
-    /**
-     * "vertical" (default): sections stacked, scrolling down. "horizontal": sections side
-     * by side, each a column-major grid of `rows` rows with its title above its first
-     * column, scrolling sideways (the iOS and Gboard emoji keyboards).
-     */
     orientation?: "vertical" | "horizontal";
-    /** Horizontal only: rows per section. Default 5. */
     rows?: number;
-    /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
     searchRows?: number;
-    /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
     onLoadMore?: () => void;
-    /** A page is loading: the end of the list shows `loadingIndicator`. */
     loadingMore?: boolean;
     loadingIndicator?: React.ReactNode;
   };
@@ -72,13 +52,9 @@ const PROBE: React.CSSProperties = {
 
 const HORIZONTAL: React.CSSProperties = { flex: "none", width: "max-content" };
 const UNPADDED = { "--ep-glyph-pad": "0px" } as React.CSSProperties;
-/** Sizes a picker without a width to `columns`. */
 const COLUMNS: React.CSSProperties = { height: 0, width: "calc(var(--ep-columns) * var(--ep-cell) + 2 * var(--ep-pad))", maxWidth: "100%" };
 
-/**
- * A row height in layout units (1/64 px) at the element's CSS zoom, as the browser lays out a flow
- * of rows: absolutely placed rows then land on the same device pixels, also under zoom.
- */
+// Row heights in 1/64 px layout units at the element's zoom, so absolutely placed rows land on the same device pixels as a flow
 function layoutUnits(el: HTMLElement) {
   const zoom = (el as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom || 1;
   return (n: number) => (zoom === 1 ? Math.trunc(n * 64) / 64 : Math.trunc(n * zoom * 64) / 64 / zoom + 1e-6);
@@ -111,7 +87,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const { sections, request, probeRoot } = useGridSections(horizontal);
   const loader = Boolean(onLoadMore && !searching);
 
-  // --- Geometry ---------------------------------------------------------------
   const [layout] = React.useState(() => new EmojiGridLayout());
   const [navigation] = React.useState(() => new EmojiGridNavigation(() => layout));
   const [metrics, setMetrics] = React.useState<GridMetrics>(layout.metrics);
@@ -122,8 +97,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     () => ({ orientation, metrics, columns: picker.columns, fitColumns: picker.fitColumns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
     [orientation, metrics, picker.columns, picker.fitColumns, horizontal, results, searching, searchRows, rows],
   );
-  // Sizes come from CSS: the probe reads the variables; a rendered cell and title give their
-  // real size (classes may change them). Re-read after every render of the list or its rows.
   const measure = React.useCallback(() => {
     const probe = probeRef.current;
     const list = listRef.current;
@@ -159,7 +132,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         const rect = visibleRect();
         return Boolean(r && rect && (horizontal() ? r.maxX > rect.x && r.x < rect.maxX : r.maxY > rect.y && r.y < rect.maxY));
       },
-      /** The first emoji in view, in reading order (below a stuck title). */
       firstVisible() {
         const rect = visibleRect();
         const { grid, metrics } = layout;
@@ -177,7 +149,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         const seen = visibleRect();
         const info = layout.getLayoutInfo(key);
         if (!el || !seen || !info) return;
-        // A page scrolls as far as it moves. The visible rect follows scroll events: that scroll isn't in it yet.
+        // The visible rect follows scroll events, so it doesn't include this scroll yet
         const a = from != null ? layout.getLayoutInfo(from)?.rect : null;
         const sign = horizontal() && rtl() ? -1 : 1;
         const before = horizontal() ? el.scrollLeft : el.scrollTop;
@@ -214,7 +186,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         } else el.scrollBy({ top: info.rect.y - rect.y, behavior });
         return true;
       },
-      /** Over the emoji (under it in the first row in view), centered on it and inside the list. */
       overlay(key) {
         const cell = layout.getLayoutInfo(key)?.rect;
         const list = listRef.current;
@@ -233,7 +204,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const latest = React.useRef(grid);
   latest.current = grid;
 
-  // --- Scroll: the current section and the tab stop ---------------------------------
   const onState = React.useCallback((state: VirtualizerState<CollectionNode<unknown>, React.ReactNode>) => {
     virtualizer.current = state;
   }, []);
@@ -252,7 +222,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
       jumping.current = null;
     }
     if (!searching) {
-      // At the end, the last section is current even when it's short.
       const end = horizontal ? layout.getContentSize().width - rect.width : layout.getContentSize().height - rect.height;
       const key = end > 0 && offset >= end - 1 && horizontal ? (layout.sections[layout.sections.length - 1]?.key ?? null) : layout.sectionAt(horizontal ? offset + layout.metrics.padding + layout.metrics.cellWidth / 2 : offset);
       picker.state.setActiveSection(key == null ? null : String(key));
@@ -322,7 +291,6 @@ function useSection(part: string) {
   return data;
 }
 
-/** The parts a List.Section's children describe; they render where the layout places them, not in place. */
 function collectParts(children: React.ReactNode): Parts {
   const parts: Parts = {};
   React.Children.forEach(children, (child) => {
@@ -334,7 +302,6 @@ function collectParts(children: React.ReactNode): Parts {
   return parts;
 }
 
-/** The parts of the List.Section a section's template returns. */
 const partsOf = (node: React.ReactNode) => (React.isValidElement<SectionProps>(node) && node.type === Section ? collectParts(node.props.children) : {});
 
 const defaultSection = () => (
@@ -351,11 +318,9 @@ function SectionView({ section }: { section: EmojiSection }) {
 }
 
 export type SectionProps = Omit<PartElementProps<SectionState, HTMLElement>, "children"> & {
-  /** `List.SectionTitle`, `List.Items` and `List.SectionActions`. */
   children?: React.ReactNode;
 };
 
-/** A section of the list (a `group`): its title, items and title actions. */
 const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ children, style, ...props }, ref) {
   const cells = React.useContext(CellsContext)!;
   const { section, groupProps } = useSection("Section");
@@ -371,7 +336,6 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
           "data-category": section.category,
           "data-collapsed": section.collapsed || undefined,
           ...props,
-          // The whole section's height: its title sticks within it.
           style: (s: SectionState) => ({ height: "100%", ...resolve(style, s) }),
           ref,
           children: <VirtualBranch parent={section.id} />,
@@ -384,7 +348,6 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
 
 export type SectionTitleProps = PartElementProps<SectionState, HTMLElement>;
 
-/** A section's title, text in the listbox, sticky where the layout puts it. Children default to the section's name. */
 const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function SectionTitle({ children, style, ...props }, ref) {
   const { section, headingProps } = useSection("SectionTitle");
   return renderElement(
@@ -409,11 +372,9 @@ function SectionHeader() {
 }
 
 export type ItemsProps = {
-  /** Each emoji in view. Default: `List.Cell`. */
   children?: (emoji: EmojiItem) => React.ReactNode;
 };
 
-/** A section's emoji, each through `children`. */
 function Items(_: ItemsProps): null {
   return null;
 }
@@ -425,7 +386,6 @@ function ItemView({ item }: { item: EmojiItem }) {
 
 export type CellProps = PartElementProps<CellState>;
 
-/** An emoji: an `option`, with its state on data attributes. Children default to its glyph. */
 const Cell = React.forwardRef<HTMLDivElement, CellProps>(function Cell({ className, style, render, children, ...props }, ref) {
   const cells = React.useContext(CellsContext);
   const item = React.useContext(ItemContext);
@@ -442,7 +402,6 @@ const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
 const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
 
-/** The end of the list: loads the next page as it nears the viewport, and shows `loadingIndicator` while one loads. */
 function LoadMore() {
   const more = React.useContext(LoadMoreContext);
   const sentinel = React.useRef<HTMLDivElement | null>(null);
@@ -452,7 +411,6 @@ function LoadMore() {
     const el = sentinel.current;
     const root = el?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`);
     if (!el || typeof IntersectionObserver === "undefined") return;
-    // Observed again for every collection: a page that still leaves room loads the next.
     const observer = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && latest.current?.(), { root, rootMargin: "0px 100% 100% 100%" });
     observer.observe(el);
     return () => observer.disconnect();
@@ -474,16 +432,12 @@ function LoadMore() {
 
 export type SectionActionsState = SectionState & {
   toggle: () => void;
-  /** For the control that toggles: `aria-expanded`. No `aria-controls`: a section out of view has no element to name. */
+  // No aria-controls: a section out of view has no element to name
   toggleProps: { "aria-expanded": boolean };
 };
 
 export type SectionActionsProps = PartElementProps<SectionActionsState>;
 
-/**
- * Controls for a section's title (a collapse chevron, a "Customize" link): a layer over the list,
- * outside the listbox, pinned with the title as it sticks.
- */
 function SectionActions(_: SectionActionsProps): null {
   return null;
 }
@@ -497,8 +451,7 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
     const el = list.current;
     if (el && el.offsetTop !== top) setTop(el.offsetTop);
   });
-  // The actions sit after the list in the DOM (a listbox holds only options), but Tab keeps reading
-  // order: from a cell, forward to the next section's actions, back to its own section's.
+  // The actions follow the list in the DOM (a listbox holds only options), so Tab is routed to keep reading order
   const order = React.useRef(sections);
   order.current = sections;
   React.useEffect(() => {
@@ -514,11 +467,10 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
       if (e.shiftKey) for (let i = at; i >= 0 && !target; i--) target = actions(i);
       else {
         for (let i = at + 1; i < order.current.length && !target; i++) target = actions(i);
-        // None after: past the actions too, to what follows the list.
         if (!target && layer.current) target = nextTabbable(layer.current);
       }
       if (!target) return;
-      // Not on to React Aria, which would put focus back on the collection's last tabbable cell.
+      // Not on to React Aria, which would put focus back on the collection's last tabbable cell
       e.preventDefault();
       e.stopPropagation();
       target.focus();
@@ -557,7 +509,6 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
 
 const TABBABLE = 'button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
-/** The first tabbable element after `after` (and outside it) in document order. */
 function nextTabbable(after: Element): HTMLElement | null {
   for (const el of after.ownerDocument.querySelectorAll<HTMLElement>(TABBABLE)) {
     if (after.contains(el) || el.tabIndex < 0 || !(after.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;

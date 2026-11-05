@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 const Subsection = ({ id, children }: HeadingProps) => <H3 id={id ?? slug(children)}>{children}</H3>;
 
-/** An h2 and what follows. Each h3 starts a subsection, after the h2's introduction. */
 function Section({ className, children }: { className?: string; children: React.ReactNode }) {
   const nodes = React.Children.toArray(children);
   const starts = nodes.flatMap((node, i) => (React.isValidElement(node) && node.type === Subsection ? [i] : []));
@@ -29,7 +28,6 @@ function Section({ className, children }: { className?: string; children: React.
   );
 }
 
-/** The home page's MDX: full-size headings, sections, demos and API tables. */
 export const homeComponents: MDXComponents = {
   ...components,
   h2: ({ id, children }: HeadingProps) => <H2 id={id ?? slug(children)}>{children}</H2>,

@@ -1,4 +1,3 @@
-// Dump geometry of one example's parts, relative to the picker root.
 import { chromium } from "playwright";
 const [style = "slack", theme = "light"] = process.argv.slice(2);
 const browser = await chromium.launch({ channel: "chrome", headless: true });

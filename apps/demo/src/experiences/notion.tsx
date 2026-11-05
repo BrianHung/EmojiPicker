@@ -1,10 +1,3 @@
-// Notion's ":" menu: not a list but a compact picker at the caret. Measured in Notion
-// (light, Chrome, Nov 2026): a 408×356 card (the picker's radius and shadow) 4px under
-// the caret line, its left edge on the ":"; no tabs or filter, the query's matches in
-// Notion's sections (12px/500 titles at x=8, the first at y≈13), 12 columns of 32px cells
-// from x=12 (first row y≈34.5), the first match on the hover wash, and the picker's
-// bottom bar of eleven 32px buttons at y=314. The editor keeps focus: Left/Right move
-// a cell, Up/Down a row, Enter/Tab insert, Escape closes.
 import * as React from "react";
 import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeaheadOptions, type KeyLike, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 import * as I from "@/styles/icons";
@@ -25,7 +18,6 @@ function sectionsOf(suggestions: readonly ShortcodeSuggestion[]): Section[] {
     .filter((s) => s.items.length);
 }
 
-/** Where an arrow moves within the sectioned grid (positions in display order); null: stay. */
 function step(sections: Section[], at: number, key: string): number | null {
   const rows: { start: number; length: number }[] = [];
   let start = 0;
@@ -47,7 +39,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
   const highlighted = Math.max(0, order.indexOf(menu.highlightedIndex));
   const activeSection = sections.find((s) => s.items.includes(order[highlighted]!))?.id;
   const scroller = React.useRef<HTMLDivElement>(null);
-  // The highlight starts on the first cell shown (sections reorder the ranked matches) until the user moves it.
+  // Sections reorder the ranked matches, so the highlight starts on the first cell shown, not the first match
   const moved = React.useRef<string | null>(null);
   const move = (at: number) => {
     moved.current = query;
@@ -67,7 +59,6 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
     return () => void (keyHandler.current = null);
   });
 
-  // Keep the highlighted cell in view, below the sticky section title.
   React.useLayoutEffect(() => {
     const view = scroller.current;
     const cell = view?.querySelector<HTMLElement>("[data-highlighted]");

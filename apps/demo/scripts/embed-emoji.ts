@@ -1,11 +1,3 @@
-// Precomputes the on-device index: embeds emoji with bge-small-en-v1.5 (the model
-// the page runs in the browser) and writes int8 vectors (vectors.ts has the format).
-//
-//   npx tsx scripts/embed-emoji.ts                                          built-in emoji → public/embeddings/emoji.i8
-//   npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/custom.i8
-//
-// --custom takes the library's CustomEmoji[] (a Slack or Discord export mapped to
-// { id, name, imageUrl, shortcodes?, tags? }), plus an optional `description`.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
@@ -35,7 +27,7 @@ if (values.custom) {
 }
 const out = resolve(values.out ?? resolve(here, "../public/embeddings", values.custom ? "custom.i8" : "emoji.i8"));
 
-// q8 matches the browser; BGE is pooled on the CLS token, then normalized.
+// q8 matches the model the browser runs; BGE is pooled on the CLS token, then normalized
 const extract = await pipeline("feature-extraction", MODEL, { dtype: "q8" });
 const vectors: Float32Array[] = [];
 let dims = 0;

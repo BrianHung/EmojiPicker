@@ -1,5 +1,3 @@
-// In-memory stand-ins for the AI binding (an embedding model and the decision models)
-// and the Vectorize binding.
 import type { SystemOneRequest, SystemOneResponse } from "../decide";
 import { EMBEDDING_MODEL } from "../embed-search";
 import type { Env } from "../env";
@@ -65,7 +63,6 @@ export const post = (path: string, body: unknown, headers: Record<string, string
     body: JSON.stringify(body),
   });
 
-/** A deterministic "embedding": words hashed into 1024 buckets, normalized. */
 function fakeEmbed(text: string): number[] {
   const v = new Array<number>(1024).fill(0);
   for (const word of text
@@ -81,7 +78,6 @@ function fakeEmbed(text: string): number[] {
   return v.map((x) => x / norm);
 }
 
-/** A fake System One model: probability by word overlap between the query (state) and each option. */
 function decide(request: SystemOneRequest): Omit<SystemOneResponse, "model"> {
   const words = new Set(request.state.toLowerCase().split(/\W+/).filter(Boolean));
   const answers: SystemOneResponse["answers"] = {};

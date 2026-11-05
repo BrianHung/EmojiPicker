@@ -1,4 +1,3 @@
-// The styling contract: every part carries a stable `data-slot`, and sizes come from public CSS variables.
 import type * as React from "react";
 
 export const SLOTS = {

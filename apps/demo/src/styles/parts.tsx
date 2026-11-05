@@ -5,7 +5,6 @@ import type * as I from "./icons";
 
 const DEFAULT_ORDER: CategoryId[] = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
 
-/** Sections with the app's tab icons; `hide` keeps sections in the list without a tab. */
 export function withIcons(
   icons: I.IconSet,
   { categories = DEFAULT_ORDER.map((id) => ({ id })), size = 20, strokeWidth = 1.75, hide = [] }: { categories?: CategoryOption[]; size?: number; strokeWidth?: number; hide?: string[] } = {},
@@ -16,7 +15,6 @@ export function withIcons(
   });
 }
 
-/** Slack's and Discord's skin tone: an emoji (✋) in each tone. */
 export function HandTone({ emoji, className }: { emoji?: string; className: string }) {
   return (
     <EmojiPicker.SkinTone className="relative inline-flex">
@@ -34,12 +32,10 @@ export function HandTone({ emoji, className }: { emoji?: string; className: stri
   );
 }
 
-/** Clears the query, at the field's end. */
 export function SearchClear() {
   return <EmojiPicker.Search.Clear className="absolute end-[var(--emoji-list-padding,10px)] top-1/2 flex size-[30px] -translate-y-1/2 items-center justify-center" />;
 }
 
-/** Static tabs above a picker (Notion's Emoji / Icons / Upload, Discord's GIFs / Stickers / Emoji). */
 export function Tabs({ items, active, className, tab, activeTab, inactiveTab, right }: { items: React.ReactNode[]; active: number; className: string; tab: string; activeTab: string; inactiveTab?: string; right?: React.ReactNode }) {
   return (
     <div className={className} role="tablist">
@@ -53,7 +49,7 @@ export function Tabs({ items, active, className, tab, activeTab, inactiveTab, ri
   );
 }
 
-/** Keeps the active tab of a scrolling category bar in view, scrolling only the bar (scrollIntoView would scroll the page too). */
+// Scrolls only the bar: scrollIntoView would scroll the page too
 export function useActiveTabInView(vertical = false) {
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -64,7 +60,7 @@ export function useActiveTabInView(vertical = false) {
       if (!tab) return;
       const b = bar.getBoundingClientRect();
       const t = tab.getBoundingClientRect();
-      // Rects are in screen px; a scaled picker (FitBox) scrolls in its own px.
+      // Rects are in screen px; a scaled picker (FitBox) scrolls in its own px
       if (vertical) {
         const k = bar.offsetHeight / b.height || 1;
         if (t.top < b.top) bar.scrollTop -= (b.top - t.top) * k;

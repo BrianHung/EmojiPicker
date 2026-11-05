@@ -18,7 +18,6 @@ export const slug = (node: React.ReactNode) =>
 
 export type HeadingProps = { id?: string; children: React.ReactNode };
 
-/** Markdown elements as the docs primitives. Fenced code arrives as <Code> (plugins/mdx.ts). */
 export const components: MDXComponents = {
   h2: ({ id, children }: HeadingProps) => (
     <H2 id={id ?? slug(children)} className="mt-8 text-xl">
@@ -44,7 +43,6 @@ export const components: MDXComponents = {
 
 type Frontmatter = { title: string; description: string; toc?: boolean };
 
-/** Renders an MDX page (`page.mdx` with title/description frontmatter) inside the site shell. */
 export function renderMdxPage({ default: Content, frontmatter }: { default: MDXContent; frontmatter: Frontmatter }, md: string, wrapper: React.ComponentType<{ children: React.ReactNode }> = React.Fragment) {
   const Wrapper = wrapper;
   createRoot(document.getElementById("root")!).render(

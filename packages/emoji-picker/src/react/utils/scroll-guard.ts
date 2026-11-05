@@ -1,13 +1,6 @@
-// Internal: keeps clipped parts of the picker from scrolling.
 import * as React from "react";
 
-/**
- * Focusing a partly hidden element (the last category tab, a cell under a
- * rounded corner) makes the browser scroll every ancestor to show it, including
- * `overflow: hidden` ones, which users can't scroll back. Inside the picker those
- * snap back; real scrollers (the Viewport, a scrolling tab bar) are left alone.
- * Scroll events fire before paint, so the shift never shows.
- */
+// Focusing a clipped element scrolls overflow:hidden ancestors users can't scroll back: snap them back
 export function useClippedScrollGuard(root: React.RefObject<HTMLElement | null>) {
   React.useEffect(() => {
     const el = root.current;

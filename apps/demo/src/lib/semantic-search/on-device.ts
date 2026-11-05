@@ -1,5 +1,3 @@
-// On device: bge-small-en-v1.5 (384-d) in a Web Worker, ranked against vectors
-// precomputed at build time (scripts/embed-emoji.ts). No server, nothing leaves the device.
 import type { EmojiSearch } from "@brianhung/emoji-picker";
 import type { WorkerRequest, WorkerResponse } from "./on-device.worker";
 
@@ -21,7 +19,6 @@ let worker: Worker | null = null;
 let nextId = 0;
 const pending = new Map<number, (result: Extract<WorkerResponse, { type: "result" | "error" }>) => void>();
 
-/** Downloads the model (34 MB, cached by the browser after) and the emoji vectors. */
 export function loadOnDevice() {
   if (worker) return;
   worker = new Worker(new URL("./on-device.worker.ts", import.meta.url), { type: "module" });
@@ -39,7 +36,7 @@ export function loadOnDevice() {
   worker.postMessage({ type: "load", model: MODEL, index: `${base}embeddings/emoji.i8`, custom: `${base}embeddings/custom.i8` } satisfies WorkerRequest);
 }
 
-/** Empty until the model is loaded, so `fallback(onDeviceSearch, lexical())` answers meanwhile. */
+// Empty until the model loads, so fallback(onDeviceSearch, lexical()) answers meanwhile
 export const onDeviceSearch: EmojiSearch = (query, { limit, records, signal }) => {
   if (!worker || status.state !== "ready") return [];
   const custom = records.some((r) => r.group === "custom");

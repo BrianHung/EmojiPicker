@@ -2,9 +2,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "tsup";
 
-// One output file per source module, importing its siblings as they are in the source: a bundler
-// then drops the modules a consumer doesn't use (`sideEffects`), so an app that renders only
-// <Emoji> doesn't load the picker, and a picker alone doesn't load the popover or the tapback.
+// One output file per source module so bundlers can drop unused parts (an <Emoji> alone doesn't load the picker)
 const modules = (dir: string) => Object.fromEntries(readdirSync(`src/${dir}`, { recursive: true, encoding: "utf8" }).flatMap((f) => (/(?<!\.test)\.tsx?$/.test(f) ? [[`${dir}/${f.replace(/\.tsx?$/, "")}`, `src/${dir}/${f}`]] : [])));
 
 export default defineConfig([

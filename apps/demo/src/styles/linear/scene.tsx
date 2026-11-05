@@ -65,9 +65,8 @@ const COMMENTS: Comment[] = [
   { id: 2, author: "Jordan Park", color: "#22c55e", time: "1d ago", text: "Nice catch. Shipping the fix with the next release 🚀", reactions: [{ unified: "1f389", count: 3, mine: false }] },
 ];
 
-/** The issue's state, shared by the desktop and phone layouts. */
 function useIssue() {
-  const [icon, setIcon] = React.useState("1f41b"); // 🐛
+  const [icon, setIcon] = React.useState("1f41b");
   const [reactions, setReactions] = React.useState<Reaction[]>([]);
   const [comments, setComments] = React.useState(COMMENTS);
   const scroller = React.useRef<HTMLDivElement>(null);
@@ -143,7 +142,6 @@ function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   );
 }
 
-/** Linear's narrow (phone) issue view. */
 function MobileIssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   const round = "flex size-7 items-center justify-center rounded-full border-[0.5px]";
@@ -512,7 +510,6 @@ function Description({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** Linear's team-icon picker: 14 columns of 28px, inside its own popup with tabs. */
 function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
   return (
     <EmojiPicker.Root
@@ -605,7 +602,7 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
 }
 
 function TeamFrame({ compact }: { compact: boolean }) {
-  const [icon, setIcon] = React.useState("1f680"); // 🚀
+  const [icon, setIcon] = React.useState("1f680");
   if (compact)
     return (
       <MobileFrame label="Linear style team header" appStyle={linear} height={150} style={{ background: C.panel, color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'" }}>

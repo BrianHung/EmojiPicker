@@ -1,5 +1,3 @@
-// The page hero: one preview card with app tabs (like shadcn's "Base UI / Radix UI"
-// tabs), the app's picker live, and that app's file under it, collapsed.
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
@@ -9,7 +7,6 @@ import { Collapsible, FitBox, Tabs } from "@/components/site/docs";
 import { STYLES, sourceOf, styleById, type Style } from "@/styles";
 import { AppleScene } from "@/styles/apple/scene";
 
-/** One style's live picker, sized to fit its card. */
 function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: Renderer | "auto" }) {
   return (
     <EmojiProvider key={renderer} data={enUrl} renderer={appStyle.renderer ?? renderer}>

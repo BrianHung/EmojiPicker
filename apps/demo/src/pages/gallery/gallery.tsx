@@ -1,5 +1,3 @@
-// The gallery page: a tab per app style and a grid of cards, one per pattern
-// (the app in context, inline picker, popovers, tapback, reactions, autocomplete, sheet).
 import * as React from "react";
 import { usePickedEmoji } from "@/components/site/picked";
 import { Emoji, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
@@ -14,7 +12,6 @@ import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/st
 import variants from "@/styles/variants.tsx?raw";
 import { discordEmojiOptions } from "@/experiences/discord";
 
-/** One exported function from a source file, up to its closing brace. */
 function extract(source: string, name: string) {
   const lines = source.split("\n");
   const start = lines.findIndex((l) => l.startsWith(`export function ${name}`));
@@ -23,7 +20,6 @@ function extract(source: string, name: string) {
   return lines.slice(start, end + 1).join("\n");
 }
 
-/** A gallery card (shadcn charts): title, one line, a live preview and its code behind "View Code". */
 function GalleryCard({
   title,
   description,
@@ -69,7 +65,6 @@ function GalleryCard({
   );
 }
 
-/** The card starts mid-shortcode, so its `:` menu shows without typing. */
 const DRAFT = ":smi";
 
 function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
@@ -152,9 +147,7 @@ export function GalleryPage() {
   return (
     <div className="flex flex-col gap-8">
       <Tabs label="App" value={styleId} onChange={select} items={STYLES.map((s) => ({ value: s.id, label: s.label }))} />
-      {/* Remount per style: each card's state belongs to one app. */}
       <div key={appStyle.id} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {/* On a phone the app scenes fill the card (they are the phone's screen); Apple's is a device mockup. */}
         <GalleryCard
           code={sourceOf(appStyle.id, "scene")}
           file={`styles/${appStyle.id}/scene.tsx`}
@@ -187,7 +180,6 @@ export function GalleryPage() {
           <AutocompleteDemo appStyle={appStyle} />
         </GalleryCard>
         <GalleryCard title="Sheet" description="A picker docked at full width." code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`} file={file} previewClassName="items-end p-0 pt-6">
-          {/* The sheet keeps the app's own width (Discord needs ~420px for its rail and "Add Emoji") and scales down to the card. */}
           <FitBox width={appStyle.size.width} height={361} className="items-end">
             <div className="overflow-hidden rounded-t-[20px] border border-b-0 border-border bg-background" style={{ width: appStyle.size.width }}>
               <div className="mx-auto my-2 h-1 w-9 rounded-full bg-muted-foreground/30" />

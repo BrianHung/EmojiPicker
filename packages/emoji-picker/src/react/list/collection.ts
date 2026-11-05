@@ -1,6 +1,3 @@
-// The List's React Aria collection, built from its sections without rendering them:
-// items are the shared EmojiItem objects, so a collection is its sections, their
-// titles, and an index of keys.
 import type { Collection, Key, Node } from "@react-types/shared";
 import type { EmojiItem, EmojiSection } from "../../core/sections";
 
@@ -74,7 +71,6 @@ export class EmojiCollection implements Collection<Node<unknown>> {
   getTextValue(key: Key) {
     return this.getItem(key)?.textValue ?? "";
   }
-  /** The emoji item for a key, or undefined for a section, title or loader. */
   emoji(key: Key | null | undefined): EmojiItem | undefined {
     const n = key == null ? null : this.getItem(key);
     return n?.type === "item" ? (n as unknown as EmojiItem) : undefined;

@@ -39,9 +39,7 @@ export type Message = {
   text: string;
   reactions: string[];
   time?: string;
-  /** Default "me". */
   reactedBy?: "me" | "them";
-  /** Drawn in its iOS tapback artwork. */
   tapback?: boolean;
 };
 export type Incoming = { id: number; unified: string };
@@ -80,11 +78,9 @@ function Reaction({ id, size, tapback = true }: { id: string; size: number; tapb
 }
 
 type Layer = { fill: string; stroke?: string; strokeWidth?: number; erode?: number };
-/** Paint as style: light-dark() colors don't apply in SVG presentation attributes. */
+// Paint as style: light-dark() colors don't apply in SVG presentation attributes
 type Paint = { style: React.CSSProperties };
 const paint = (fill: string, stroke?: string, strokeWidth?: number): Paint => ({ style: { fill, stroke, strokeWidth } });
-
-/** Shapes drawn as one outline: every layer paints all shapes, so overlaps merge. */
 
 function Union({ layers, children, className, style }: { layers: Layer[]; children: (paint: Paint) => React.ReactNode; className?: string; style?: React.CSSProperties }) {
   const id = React.useId().replace(/:/g, "");
@@ -114,7 +110,6 @@ function Union({ layers, children, className, style }: { layers: Layer[]; childr
 
 const GLASS: Layer[] = [{ fill: "none", stroke: ld("rgb(0 0 0 / 0.2)", "rgb(255 255 255 / 0.18)"), strokeWidth: 1 }, { fill: ld("#fdfdfd", "#2c2c2e") }, { fill: "glass", erode: 0.65 }];
 
-/** Concave fillets where a circle hangs off a horizontal edge at `y` (the pill's bottom). */
 function fillets(cx: number, cy: number, r: number, y: number, rf = 5.5) {
   const d = cy - y;
   if (d <= -r || d >= r) return [];
@@ -146,13 +141,10 @@ export function IMessageScreen({
   messages?: Message[];
   contact?: Contact;
   initialMode?: IMessageMode;
-  /** Render the bare screen scaled, without the device frame. */
   scale?: number;
   time?: string;
   notice?: boolean;
-  /** Hold this incoming reaction's card on screen. */
   incoming?: Incoming;
-  /** The other person reacts to each message you send with this emoji (null: never). */
   replyWith?: string | null;
 }) {
   const [messages, setMessages] = React.useState(initial);
@@ -164,7 +156,6 @@ export function IMessageScreen({
   const scroller = React.useRef<HTMLDivElement>(null);
   const bubbles = React.useRef(new Map<number, HTMLElement>());
 
-  /** A bubble's box in screen points (the phone may be scaled). */
   const measure = React.useCallback((id: number): Rect | null => {
     const el = bubbles.current.get(id);
     const frame = screen.current;
@@ -257,7 +248,6 @@ export function IMessageScreen({
         height: H,
         background: C.page,
         fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
-        // Keeps the drawer's fixed layers inside the screen.
         contain: "layout paint",
       }}
     >
@@ -437,7 +427,6 @@ function Squircle({ radius, className, children }: { radius: number; className?:
   );
 }
 
-/** In compose mode the composer rides up with the keyboard, 8 pt above it. */
 const COMPOSE_LIFT = 846.7 - (485.3 - 8);
 
 function Composer({
@@ -456,7 +445,6 @@ function Composer({
   erase: React.RefObject<() => void>;
 }) {
   const store = useEmojiStore();
-  // :shortcodes: typed in full are converted on send.
   const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6 });
   insert.current = insertAtCaret;
   erase.current = () => setText(segment(value).slice(0, -1).join(""));
@@ -509,7 +497,7 @@ function Composer({
   );
 }
 
-/** Shrinks a wrapped bubble to its longest line (CSS keeps wrapped boxes at their max width). */
+// CSS keeps a wrapped box at its max width, so shrink the bubble to its longest line
 function useHugWidth(ref: React.RefObject<HTMLElement | null>, text: string) {
   React.useLayoutEffect(() => {
     const bubble = ref.current;
@@ -590,7 +578,6 @@ function BubbleShape({ message, lifted, className }: { message: Message & { tail
   const ref = React.useRef<HTMLDivElement>(null);
   useHugWidth(ref, message.text);
   const color = lifted ? C.lifted : me ? C.blue : C.them;
-  // Squircle corners clip the fill; the tail sits outside it.
   const fill = React.useRef<HTMLSpanElement>(null);
   useSmoothCorners(fill, { radius: 20.5, smoothing: 0.6 });
   return (
@@ -645,10 +632,8 @@ const Bubble = React.forwardRef<HTMLDivElement, { message: Shown; gap: number; h
 
 const PILL = { w: 375, h: 64, inset: 16.3, gap: 68.4 };
 
-/** The bubble moves only if the pill would hit the header. */
 const tapbackTop = (rect: Rect) => Math.max(rect.top, 100 + PILL.gap);
 
-/** The tapbacks, then recents, with my current reaction marked. */
 function useReactionItems(message: Message, recentCount: number) {
   const recents = useFrequentEmoji(16).slice(0, recentCount);
   const mine = (message.reactedBy ?? "me") === "me" ? message.reactions.at(-1) : undefined;
@@ -670,7 +655,6 @@ function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect
   const anchor = me ? rect.left : rect.left + rect.width;
   const cx0 = Math.min(Math.max(anchor + 28.7 * s, pillX + 44), pillX + PILL.w - 44);
 
-  // Scrolling the pill folds the thought bubble into it.
   const [p, setP] = React.useState(0);
   const lerp = (a: number, b: number) => a + (b - a) * p;
   const R = lerp(22.3, 11.7);
@@ -800,7 +784,6 @@ const MENU = {
   font: 18,
 };
 
-/** "Tapback Details": a thought bubble with a plus. */
 function TapbackDetailsGlyph() {
   const circles = [
     { cx: 8.1, cy: 8.3, r: 7.6 },
@@ -923,7 +906,6 @@ function IncomingReaction({ unified, phase, to, initials, avatar, onArrive }: In
   const card = React.useRef<HTMLDivElement>(null);
   useSmoothCorners(card, { radius: CARD.radius, smoothing: 0.6 });
   const fly = phase === "fly" && to;
-  // The thought circle lands on the badge's circle.
   const k = 16.85 / THOUGHT.r;
   const ox = CARD.left + THOUGHT.cx;
   const oy = CARD.top + THOUGHT.cy;
@@ -940,7 +922,7 @@ function IncomingReaction({ unified, phase, to, initials, avatar, onArrive }: In
       transition={fly ? { type: "spring", duration: 0.5, bounce: 0.1 } : { type: "spring", duration: 0.5, bounce: 0.3 }}
       onAnimationComplete={() => fly && onArrive()}
     >
-      {/* No filter on an ancestor of the blur: it would become the backdrop root. */}
+      {/* No filter on an ancestor of the blur: it would become the backdrop root */}
       <motion.div className="absolute inset-0" animate={fade}>
         <div className="absolute inset-0" style={{ borderRadius: CARD.radius + 4, boxShadow: `0 0 0 0.4px ${ld("rgb(0 0 0 / 0.16)", "rgb(255 255 255 / 0.18)")}, 0 10px 30px rgb(0 0 0 / 0.12)` }} />
         <div ref={card} className="absolute inset-0 backdrop-blur-[30px] backdrop-saturate-[1.6]" style={{ background: `linear-gradient(${ld("rgb(255 255 255 / 0.72)", "rgb(58 58 60 / 0.72)")}, ${ld("rgb(246 246 248 / 0.66)", "rgb(44 44 46 / 0.66)")})` }} />
@@ -1026,7 +1008,6 @@ const IOS_GROUPS: { id: EmojiRecord["group"]; label: string; icon: React.ReactNo
   { id: "flags", label: "Flags", icon: <SFFlag size={17.5} /> },
 ];
 
-/** iOS's thought-bubble grin, heavier than SF face.smiling. */
 function Grin({ size, className }: { size: number; className?: string }) {
   return (
     <svg aria-hidden width={size} height={size} viewBox="0 0 24 24" className={className}>
@@ -1050,14 +1031,13 @@ function SymbolsGlyph() {
 
 const K = { col: 46, row: 38.4, rows: 5, left: 2.9, gap: 13.8, label: 61.6, grid: 81.2, labelInset: 9.8, emoji: 31.5 };
 const TAB = { first: 29 - 15 - 0.3, pitch: 37.84 };
-/** Emoji 17 has no glyph in most system fonts yet. */
+// Emoji 17 has no glyph in most system fonts yet
 const MAX_VERSION = 16;
 
 const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently Used", icon: <SFClock size={20} /> }, ...IOS_GROUPS.map((g) => ({ id: g.id, name: g.label, icon: g.icon }))];
 
 const KEYBOARD_SIZES = {
   "--emoji-size": `${K.emoji}px`,
-  // The text font first: iOS draws emoji on the text baseline.
   "--emoji-font-family": '-apple-system, system-ui, "SF Pro Text", sans-serif',
   "--emoji-cell-width": `${K.col}px`,
   "--emoji-cell-height": `${K.row}px`,
@@ -1071,7 +1051,6 @@ const SHEET: React.CSSProperties = {
   boxShadow: `inset 0 0 0 0.34px ${ld("rgb(0 0 0 / 0.35)", "rgb(255 255 255 / 0.12)")}, inset 0 1px 0 0.7px ${ld("rgb(255 255 255 / 0.6)", "rgb(255 255 255 / 0.08)")}`,
 };
 
-/** The iOS emoji keyboard: the library's picker parts with a horizontal List. */
 function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelection) => void; onDelete?: () => void; className?: string }) {
   const sheet = React.useRef<HTMLDivElement>(null);
   useSmoothCorners(sheet, {

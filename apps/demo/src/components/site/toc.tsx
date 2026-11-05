@@ -1,4 +1,3 @@
-// "On this page": the headings marked `data-toc` inside `root`, with the one in view highlighted.
 import * as React from "react";
 import { useActiveHeading } from "@/hooks/use-active-heading";
 import { cn } from "@/lib/utils";
@@ -8,7 +7,6 @@ type Item = { id: string; title: string; depth: number };
 export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | null> }) {
   const [items, setItems] = React.useState<Item[]>([]);
 
-  // Collect headings (and re-collect if the content changes).
   React.useEffect(() => {
     const el = root.current;
     if (!el) return;
@@ -25,7 +23,6 @@ export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | 
   const ids = React.useMemo(() => items.map((item) => item.id), [items]);
   const active = useActiveHeading(ids);
 
-  // Keep the active entry visible inside the (scrollable) list.
   const list = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
     const box = list.current;
@@ -38,7 +35,6 @@ export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | 
   if (!items.length) return null;
   return (
     <nav aria-label="On this page" className="text-[13px]">
-      {/* As on Base UI: the heading goes back to the top of the page. */}
       <a
         href="#"
         onClick={(e) => {

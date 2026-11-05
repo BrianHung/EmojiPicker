@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmojiPickerFooter } from "@/registry/emoji-picker";
 import { TanStackList } from "./tanstack-list";
 
-/** The registry card's search and footer around a TanStack Virtual grid. */
 export function TanStackPicker() {
   const [, setPicked] = usePickedEmoji();
   return (

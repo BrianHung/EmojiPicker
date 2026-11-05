@@ -1,5 +1,3 @@
-// cloudflare.config.ts (cf CLI) and wrangler.jsonc (Deploy button, Workers Builds)
-// must describe the same Worker.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 

@@ -1,6 +1,3 @@
-// Markdown copies of the docs pages, for "Copy Page" and LLMs: /docs.md (the package README),
-// /examples.md, /examples/<name>.md (each example's page.mdx) and /llms.txt. Built from the
-// sources on every request (dev) and at build (emitted assets), so they never drift.
 import { readFileSync } from "node:fs";
 import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,14 +9,12 @@ const EXAMPLES = ["tiptap", "lexical", "custom-emoji", "semantic-search", "virtu
 
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
-/** README links are relative to packages/emoji-picker; make them absolute GitHub URLs. */
 function readme(text: string) {
   return text.replace(/\]\((?!https?:|#|mailto:)([^)\s]+)\)/g, (_, link: string) => `](${GITHUB}/${posix.normalize(posix.join("packages/emoji-picker", link))})`);
 }
 
 type Page = { title: string; description: string; body: string };
 
-/** `<Code title code={file} />` with `import file from "./file.tsx?raw"` as the fenced block it shows. */
 function inlineSources(dir: string, mdx: string) {
   const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "(\.[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, path!]));
   return mdx.replace(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/gm, (line, title: string, id: string) => {
@@ -28,7 +23,6 @@ function inlineSources(dir: string, mdx: string) {
   });
 }
 
-/** An MDX page as Markdown: frontmatter, then the body without its imports and JSX-only lines (the live demos). */
 function page(name: string): Page {
   const dir = `src/pages/examples/${name}`;
   const source = inlineSources(dir, read(`${dir}/page.mdx`));
@@ -95,7 +89,7 @@ export function markdownDocs(): Plugin {
       });
     },
     generateBundle() {
-      // Once, with the pages: not again in the Worker's build environment.
+      // Once, with the pages: not again in the Worker's build environment
       if (this.environment && this.environment.name !== "client") return;
       for (const [fileName, route] of Object.entries(ROUTES)) this.emitFile({ type: "asset", fileName, source: route.render() });
     },

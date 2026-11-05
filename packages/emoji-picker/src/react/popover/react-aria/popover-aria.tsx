@@ -37,7 +37,6 @@ function Root({ children, ...props }: PopoverRootProps) {
   return <PopoverProvider value={value}>{children}</PopoverProvider>;
 }
 
-/** React Aria positions against an element: for a rect or a caret, a hidden fixed box over it. */
 function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
   const virtual = !!anchor && !(anchor instanceof Element);
@@ -52,7 +51,7 @@ function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | nul
 const placementOf = (side: Side, align: Align) => (align === "center" ? side : (`${side} ${align}` as const));
 
 function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitialFocus; content: React.RefObject<HTMLElement | null> }) {
-  // Before the Popover's own effect, which focuses the dialog itself unless focus is already inside.
+  // Before the Popover's own effect, which focuses the dialog itself unless focus is already inside
   React.useEffect(() => void initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true }), []);
   return null;
 }
@@ -61,10 +60,9 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, children, ...rest },
   ref,
 ) {
-  // Floating UI's `duration`, for content shared between the adapters; not a DOM attribute here.
   const { duration: _duration, ...props } = rest as typeof rest & { duration?: unknown };
   const p = usePopoverInternals<Internals>("Content");
-  // On close, before the popover's focus scope restores focus to the trigger (it does only while focus is still inside).
+  // Before the focus scope restores focus to the trigger, which it does only while focus is still inside
   const wasOpen = React.useRef(p.state.open);
   React.useEffect(() => {
     if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });
@@ -129,7 +127,5 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
   );
 }
 
-/** Popover for pickers on React Aria: `<EmojiPopover.Root><EmojiPopover.Trigger/><EmojiPopover.Content>…</EmojiPopover.Content></EmojiPopover.Root>`. */
 export const EmojiPopover = { Root, Trigger, Content };
-/** `<EmojiSuggestions.Popover open anchor={caretRect}>` around a `useEmojiSuggestions` listbox: the text field keeps focus. */
 export const EmojiSuggestions = { Popover: SuggestionsPopover };

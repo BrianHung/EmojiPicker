@@ -1,6 +1,3 @@
-// EmojiPicker.Search: a row around React Aria's SearchField (Search.Input). With focusModel
-// "input" it sits in Root's Autocomplete, so keys move a virtual highlight through the List
-// while focus stays here; with "grid", Down moves focus into the cells.
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
@@ -14,11 +11,9 @@ import { SLOTS } from "../utils/slots";
 export type SearchState = { empty: boolean };
 
 export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" | "onKeyDown" | "dangerouslySetInnerHTML"> & {
-  /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
 };
 
-/** The search row: `Search.Input` by default, or your own composition around it. */
 const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
   const { query } = usePicker("EmojiPicker.Search");
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
@@ -30,9 +25,7 @@ export type SearchInputState = Omit<InteractionState, "pressed">;
 
 export type SearchInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "onKeyDown" | "className" | "style"> &
   PartProps<SearchInputState, HTMLInputElement> & {
-    /** Runs before the picker handles the key; see Root's `onKeyDown`. */
     onKeyDown?: PickerKeyboardEventHandler<HTMLInputElement>;
-    /** Inside the field, after the input. Default: `Search.Clear`. */
     children?: React.ReactNode;
   };
 
@@ -42,14 +35,12 @@ const EmptyContext = React.createContext(true);
 
 const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
 
-/** The search field: the picker's query and its keys. `placeholder` defaults to the labels'; `autoFocus` to being in an EmojiPopover. */
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels, focusModel } = picker;
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
-  // Stable, so the field re-rendering with each highlight move (aria-activedescendant) skips it.
   const clear = React.useMemo(() => <SearchClear />, []);
 
   const region = useKeyRegion((action, event) => {
@@ -57,7 +48,6 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
     if (!(field instanceof HTMLInputElement) || !action) return "pass";
     const rtl = getComputedStyle(field).direction === "rtl";
     const back = rtl ? "move-right" : "move-left";
-    // Left and Right edit the query unless the caret is at its end.
     if ((action === "move-left" || action === "move-right") && !caretAtEnd(field)) return "native";
     const list = picker.list.current;
     if (!list) return "pass";
@@ -65,7 +55,6 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
       const forward = rtl ? "move-left" : "move-right";
       return (action === "move-down" || (picker.searching && action === forward)) && list.focus() ? "handled" : "pass";
     }
-    // Left from the first emoji goes back to editing the text.
     if (action === back && list.atStart()) return "native";
     return list.key(action, "input", event) ? "handled" : "pass";
   });
@@ -88,7 +77,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
             placeholder={placeholder ?? labels.searchPlaceholder}
             aria-label={props["aria-label"] ?? labels.searchLabel}
             data-slot={SLOTS.searchInput}
-            // An EmojiPopover focuses it once visible (autoFocus misses a hidden field).
+            // autoFocus misses a field that is still hidden while the popover opens
             {...(focusOnMount ? { "data-autofocus": "" } : {})}
           />
           {children ?? clear}
@@ -101,7 +90,6 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
 export type SearchClearState = InteractionState;
 export type SearchClearProps = PartElementProps<SearchClearState, HTMLButtonElement, "onClick">;
 
-/** Clears the query; rendered only while there is one. */
 const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Search.Clear");
   if (React.useContext(EmptyContext)) return null;

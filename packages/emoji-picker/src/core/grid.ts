@@ -1,31 +1,24 @@
-// The picker's grid as rows: a section title, then its emoji in rows of `columns`. Pure: the
-// default list's layout and keyboard, and any virtualizer you bring, read the same rows.
-
 export type EmojiGridSection = { id: string; items: readonly { id: string }[]; header?: boolean };
 
 export type EmojiGridOptions = {
   columns: number;
   rowHeight: number;
   headerHeight?: number;
-  /** Space before the first row and after the last. */
   padding?: number;
 };
 
 export type EmojiGridRow<S extends EmojiGridSection = EmojiGridSection> =
   | { type: "header"; key: string; section: S; offset: number; size: number }
-  /** `start`: the index of the row's first emoji in the whole grid. */
   | { type: "emojis"; key: string; section: S; items: S["items"]; start: number; offset: number; size: number };
 
 export type EmojiGrid<S extends EmojiGridSection = EmojiGridSection> = {
   rows: EmojiGridRow<S>[];
-  /** Header rows, for sticky titles. */
   stickyIndexes: number[];
   size: number;
   columns: number;
   count: number;
   at(index: number): S["items"][number] | undefined;
   indexOf(id: string): number;
-  /** Where an emoji is: its row, column, section, and index within the section. */
   locate(index: number): { row: number; column: number; section: S; index: number } | null;
 };
 
@@ -85,15 +78,10 @@ export function createEmojiGrid<S extends EmojiGridSection>(sections: readonly S
   };
 }
 
-/** Whole rows in a viewport, under what sticks over its top (a title). At least one. */
 export function rowsPerPage(viewport: number, rowHeight: number, inset = 0): number {
   return rowHeight > 0 ? Math.max(1, Math.floor((viewport - Math.max(0, inset)) / rowHeight)) : 1;
 }
 
-/**
- * The emoji a move lands on, or null at an edge. Left and Right go in reading order across
- * sections; Up and Down keep the column, clamped to a short row, across section titles.
- */
 export function moveInGrid(grid: EmojiGrid, index: number, move: EmojiGridMove, pageRows = 1): number | null {
   const last = grid.count - 1;
   const at = grid.locate(index);

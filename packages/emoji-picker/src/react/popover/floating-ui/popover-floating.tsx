@@ -44,7 +44,6 @@ import {
 } from "../popover-shared";
 
 export type PopoverContentProps = SharedContentProps & {
-  /** How long the content stays mounted with `data-ending-style` after closing, ms (Floating UI's `useTransitionStatus`). Default 0. */
   duration?: number | { open?: number; close?: number };
 };
 
@@ -75,7 +74,6 @@ function RootNode({ children, ...props }: PopoverRootProps) {
   );
 }
 
-/** Scale from the anchor: its center along the edge facing it. */
 const transformOrigin: Middleware = {
   name: "transformOrigin",
   fn: ({ x, y, placement, rects: { reference: r, floating: f } }) => ({
@@ -89,7 +87,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
     strategy: "fixed",
     placement: align === "center" ? side : `${side}-${align}`,
     transform: false,
-    // Not on layout shift: the anchor's own transitions (a trigger's hover or press scale) would move it.
+    // Not on layout shift: the anchor's own transitions (a trigger's hover or press scale) would move it
     whileElementsMounted: (reference, floating, update) => autoUpdate(reference, floating, update, { layoutShift: false }),
     middleware: [
       offset(sideOffset),
@@ -166,7 +164,6 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
 
 function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, style, children, ...props }: SuggestionsPopoverProps) {
   const { refs, context, side: placed, style: position } = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { open, onOpenChange: (next) => onOpenChange?.(next) });
-  // The text field handles Escape (useEmojiSuggestions' onKeyDown).
   const { getFloatingProps } = useInteractions([useDismiss(context, { escapeKey: false })]);
   if (!open) return null;
   return portal(
@@ -184,7 +181,5 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
   );
 }
 
-/** Popover for pickers: `<EmojiPopover.Root><EmojiPopover.Trigger/><EmojiPopover.Content>…</EmojiPopover.Content></EmojiPopover.Root>`. */
 export const EmojiPopover = { Root, Trigger, Content };
-/** `<EmojiSuggestions.Popover open anchor={caretRect}>` around a `useEmojiSuggestions` listbox: the text field keeps focus. */
 export const EmojiSuggestions = { Popover: SuggestionsPopover };

@@ -4,7 +4,6 @@ import * as I from "@/styles/icons";
 import { HandTone, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
-/** Slack's first section, pinned rather than learned. */
 const GETTING_WORK_DONE = [
   "2705", "1f440", "1f64c", "1f64f", "2795", "1f44f", "1f4a1", "1f3af", "1f44b",
   "1f44d", "1f389", "31-fe0f-20e3", "32-fe0f-20e3", "33-fe0f-20e3", "1f4e3", "26aa", "1f535", "1f534",
@@ -28,7 +27,6 @@ const CATEGORIES = withIcons(I.ICONS.slack, {
   hide: ["suggested", "custom"],
 });
 
-/** The four-pill mark on Slack's "Custom" tab, drawn at its 20px size. */
 function CustomTabIcon() {
   return (
     <svg viewBox="0 0 20 20" width={20} height={20} fill="currentColor" aria-hidden>
@@ -131,7 +129,6 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
               <EmojiPicker.List.SectionTitle className="block h-7 bg-picker-background/95 pt-px pr-3.5 pl-3.5 text-[13px] leading-6 font-bold text-picker-foreground" />
               <EmojiPicker.List.Items>
                 {() => (
-                  // The 35×32 hover box sits 1px left of the 33px cell and stops 1px above the next row.
                   <EmojiPicker.List.Cell className={cn(CELL, "isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-focus-visible:before:bg-picker-selected data-[highlighted]:before:bg-picker-selected")} />
                 )}
               </EmojiPicker.List.Items>

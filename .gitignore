@@ -3,7 +3,6 @@ dist
 *.log
 .DS_Store
 
-# Capture tooling output and reference screenshots (personal device captures stay local)
 apps/demo/capture/out
 apps/demo/capture/frames
 apps/demo/capture/baseline

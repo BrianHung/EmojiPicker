@@ -26,70 +26,34 @@ export type RootState = { searching: boolean; reactionsOpen: boolean };
 export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "onKeyDown" | "className" | "style" | "defaultValue"> &
   PartProps<RootState> & {
     onSelect?: (selection: EmojiSelection, details: SelectDetails) => void;
-    /**
-     * Keys for the picker's actions, replacing the defaults per action (`DEFAULT_KEYMAP`).
-     * `KeyboardEvent.key` values with optional modifiers: `{ select: ["Enter", "Tab"], "page-down": ["PageDown", "Ctrl+d"] }`.
-     * An empty array unbinds an action.
-     */
     keymap?: Partial<Record<KeyboardAction, readonly string[]>>;
-    /**
-     * Runs before the picker handles the key (after any part's own `onKeyDown`). Call
-     * `event.preventEmojiPickerHandler()` to keep the picker (and React Aria) from handling it.
-     */
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-    /** Emoji per row; by default as many as the width fits. */
     columns?: number;
-    /**
-     * With `columns`: false keeps that many per row even when the width is a little
-     * short (the last column runs into the end padding, or under a scrollbar). Default
-     * true: fewer columns when they don't fit.
-     */
     fitColumns?: boolean;
-    /** Which categories show, in order, with optional names and icons. */
     categories?: readonly CategoryOption[];
-    /** Size of the "Frequently used" section; false hides it. Default 16. */
     frequent?: number | false;
-    /** Collapsed sections (category ids), controlled. Collapsed sections keep their header and hide their rows. */
     collapsedCategories?: readonly string[];
-    /** Sections collapsed on mount, uncontrolled. */
     defaultCollapsedCategories?: readonly string[];
     onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
-    /** Fixed emoji (unified codes) for the suggested section instead of frequents, e.g. Slack's "Getting Work Done". Name it with `categories`. */
     suggested?: readonly string[];
-    /**
-     * How search results show: "ranked" (one list, best match first and highlighted,
-     * Enter picks it) or "grouped" (category sections, each in rank order). Results
-     * come from the provider's `searchEngine`. Default "ranked".
-     */
     searchResults?: SearchResultsMode;
-    /** Most results to show for a query. Default 200. */
     searchLimit?: number;
-    /** The search text, controlled. */
     query?: string;
     defaultQuery?: string;
     onQueryChange?: (query: string) => void;
-    /** A value picker (a page icon): the emoji shown as chosen (`aria-selected`), compared without skin tone; null for none. Controlled. */
     value?: string | null;
     defaultValue?: string | null;
     onValueChange?: (unified: string) => void;
-    /** The keyboard position: an item id (`EmojiItem.id`, "smileys_people:1f600"), or null. Controlled. */
     highlighted?: string | null;
     defaultHighlighted?: string | null;
     onHighlightedChange?: (id: string | null) => void;
-    /** The emoji (unified codes) of `EmojiPicker.Reactions`. */
     reactions?: readonly string[];
-    /** The reaction row shows, rather than the full picker in `EmojiPicker.Panel`. Controlled. */
     reactionsOpen?: boolean;
-    /** Default true. */
     defaultReactionsOpen?: boolean;
     onReactionsOpenChange?: (open: boolean) => void;
-    /** Where focus lives while navigating: "input" (default; a highlight moves, focus stays in search) or "grid" (focus moves into the cells). */
     focusModel?: FocusModel;
-    /** "follows" (default): hover moves the keyboard position. "independent": hover is only a style. */
     pointerModel?: PointerModel;
-    /** Hide emoji added after this Unicode emoji version (e.g. 15.1), in the list and in search results. */
     emojiVersion?: number;
-    /** Turn off an emoji's skin-tone variations (Shift+Space and long press on it). */
     disableVariations?: boolean;
     children: React.ReactNode;
   };
@@ -108,7 +72,6 @@ const VARIABLES = {
 } as React.CSSProperties;
 
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
-  // The core state takes the props it knows by name (query, categories, frequent, collapse…).
   const {
     onSelect,
     frequent,
@@ -147,9 +110,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     ...rest
   } = props;
   const { store, labels, maxVersion } = useEmojiContext();
-  // Inside an EmojiPopover: picking closes it (unless closeOnSelect={false}).
   const popover = React.useContext(PopoverContext);
-  // The renderer's limit (Twemoji's set) applies on top of the picker's own.
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = React.useRef<HTMLElement | null>(null);
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
@@ -168,8 +129,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     reactions,
   }));
   React.useEffect(() => void state.mount(), [state]);
-  // Frequents change with every pick; held while the user is in the picker so
-  // nothing moves under the pointer or the focused cell.
+  // Frequents are held while the user is in the picker so nothing moves under the pointer or the focused cell
   useActiveWithin(rootRef, state.hold);
   useClippedScrollGuard(rootRef);
 
@@ -281,7 +241,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
           {
             ref: mergeRefs(ref, rootRef, keyboard.ref),
             "data-slot": SLOTS.root,
-            // The root is an <aside> landmark, which needs a name; pass aria-label or aria-labelledby for another.
             "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
             ...rest,
             "data-columns": columns ?? undefined,
@@ -318,12 +277,10 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
 
 export const Root = PickerRoot as React.ForwardRefExoticComponent<RootProps & React.RefAttributes<HTMLElement>>;
 
-/** The hovered or highlighted emoji, resolved against the shared dataset. */
 export function useActiveEmoji(): EmojiRecord | null {
   return useSelector(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
 }
 
-/** Sections that have a tab, the current one, and a jump to one (what CategoryNav uses). */
 export function useCategoryNavigation() {
   const picker = usePicker("useCategoryNavigation");
   const activeCategory = useSelector(picker.state, (s) => s.activeSection);
@@ -335,7 +292,6 @@ export function useCategoryNavigation() {
   return { categories, activeCategory: picker.searching ? null : activeCategory, jumpToCategory };
 }
 
-/** The applied query and how many results it shows (null while no query is applied). */
 export function useSearchState(): { query: string; resultCount: number | null } {
   const picker = usePicker("useSearchState");
   return { query: picker.query, resultCount: picker.searching && !picker.pending ? picker.results.length : null };
@@ -346,7 +302,6 @@ type Orientation = "vertical" | "horizontal";
 export type ViewportState = { searching: boolean; orientation: Orientation };
 
 export type ViewportProps = PartElementProps<ViewportState, HTMLDivElement, "onKeyDown"> & {
-  /** Runs before the picker handles the key; see Root's `onKeyDown`. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
 };
 
@@ -354,10 +309,8 @@ const SCROLL: Record<Orientation, React.CSSProperties> = {
   vertical: { overflowX: "hidden", overflowY: "scroll", overscrollBehavior: "contain" },
   horizontal: { overflowX: "auto", overflowY: "hidden", overscrollBehavior: "contain" },
 };
-/** With `columns`, a scrollbar appearing never takes a column. */
 const FIXED_GUTTER: React.CSSProperties = { scrollbarGutter: "stable" };
 
-/** The scroll container: holds one List, and Empty, Loading and LoadError (which the List shows when it has nothing). */
 export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function Viewport({ onKeyDown, style, ...props }, ref) {
   const { searching, columns } = usePicker("EmojiPicker.Viewport");
   const [orientation, setOrientation] = React.useState<Orientation>("vertical");
@@ -385,7 +338,6 @@ export type PreviewState = { emoji: EmojiRecord | null };
 
 export type PreviewProps = PartElementProps<PreviewState>;
 
-/** The hovered or highlighted emoji with its name, or the caption when there's none. */
 export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function Preview({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Preview");
   const active = useActiveEmoji();

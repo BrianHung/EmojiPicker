@@ -24,7 +24,6 @@ const tokens: Tokens = {
   "--notion-mine-foreground": "light-dark(#2783de, #529cca)",
 };
 
-/** Notion's sections, in the order its bar shows them. */
 export const NOTION_SECTIONS = [
   { id: "suggested", name: "Recent" },
   { id: "smileys_people", name: "People" },
@@ -40,7 +39,6 @@ export const NOTION_SECTIONS = [
 
 const CATEGORIES = withIcons(I.ICONS.notion, { categories: NOTION_SECTIONS, size: 22, strokeWidth: 1.5 });
 
-/** Notion's shuffle: picks a random emoji. */
 function Shuffle({ onPick }: { onPick: (s: EmojiSelection) => void }) {
   const store = useEmojiStore();
   return (
@@ -60,7 +58,6 @@ function Shuffle({ onPick }: { onPick: (s: EmojiSelection) => void }) {
   );
 }
 
-/** The page-icon picker (tabs, shuffle) or, with `reaction`, the one reactions open. */
 function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps & { reaction: boolean }) {
   const nav = useActiveTabInView();
   return (

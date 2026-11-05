@@ -1,4 +1,3 @@
-// One style picker, alone, for side-by-side captures: /shot.html?style=slack&theme=dark&search=1
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { createRoot } from "react-dom/client";
@@ -12,7 +11,6 @@ import { OgImage } from "./og-image";
 import { OgVideo } from "./og-video";
 import "@/globals.css";
 
-// Captures compare final frames: no animation (?anim=1 keeps them, for flow recordings).
 MotionGlobalConfig.skipAnimations = new URLSearchParams(location.search).get("anim") !== "1";
 
 const params = new URLSearchParams(location.search);
@@ -23,11 +21,7 @@ const dark = params.get("theme") === "dark";
 document.documentElement.classList.toggle("dark", dark);
 document.body.style.background = params.get("bg") ?? (dark ? "#1a1d21" : "#ffffff");
 
-// Fixtures: the frequents each reference capture showed, most used first, so the
-// "Frequently used" rows compare like for like. Test-only; the examples don't use them.
 const SEEDS: Record<string, string[]> = {
-  // iOS 27 keyboard "Frequently Used", most used first (iOS fills its columns top to bottom):
-  // the first six are also the tapback pill's recents (😂 ❤️ 😍 😒 👌 ☺️).
   imessage27: [
     "1f602",
     "2764-fe0f",
@@ -77,7 +71,6 @@ function Seeded({ children }: { children: React.ReactNode }) {
   return ready ? children : null;
 }
 
-/** og:video frames: capture/render-og.mjs sets the time with window.setOgTime(seconds). */
 function OgVideoFrame() {
   const [t, setT] = React.useState(0);
   React.useEffect(() => {
@@ -90,7 +83,6 @@ function Shot() {
   if (view === "og") return <OgImage />;
   if (view === "og-video") return <OgVideoFrame />;
   if (view === "scene") {
-    // One in-situ scene (styles/<id>/scene.tsx): /shot.html?view=scene&style=discord[&width=375]
     const Scene = SCENES[params.get("style") ?? "discord"];
     document.body.style.margin = "0";
     return (
@@ -102,9 +94,6 @@ function Shot() {
     );
   }
   if (view === "imessage27") {
-    // The iOS 27.2 captures (ref/imessage27-*.png): one "Hi" from an unknown number.
-    // state = reacted | pill | keyboard | menu (right-click) | selected (the pill with my
-    // heart already on the message) | incoming (they react to my reply: the card, held).
     const state = params.get("state") ?? "reacted";
     document.body.style.background = "#fff";
     document.body.style.margin = "0";
@@ -136,7 +125,6 @@ function Shot() {
     );
   }
   if (view === "tapback") {
-    // A style's reaction bar alone: /shot.html?view=tapback&style=instagram
     return (
       <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? "native"}>
         <div style={{ padding: 24, display: "inline-block" }}>
@@ -150,7 +138,6 @@ function Shot() {
     );
   }
   if (view === "frame") {
-    // The hero: Device Hub frame around the default conversation.
     document.body.style.background = params.get("bg") ?? "#292827";
     return (
       <EmojiProvider data={enUrl} renderer="native">

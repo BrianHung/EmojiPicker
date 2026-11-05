@@ -4,43 +4,32 @@ export type EmojiStorage = {
 };
 
 export type FrequencyStore = {
-  /** Count one use of an emoji (pass the base unified code, without skin tone). */
   record(unified: string): void;
-  /** Most-used emoji, with `defaults` filling the rest until there is history. */
   top(n: number): readonly string[];
-  /** Decayed use count of one emoji; 0 when unused (defaults don't count). */
   score(unified: string): number;
   subscribe(listener: () => void): () => void;
-  /** Changes on every record(); usable as a useSyncExternalStore snapshot. */
   version(): number;
   clear(): void;
 };
 
 export type FrequencyStoreOptions = {
-  /** Default: localStorage under `key` (memory only when unavailable). */
   storage?: EmojiStorage;
   key?: string;
-  /** A use counts half as much after this many days. Default 14. */
   halfLifeDays?: number;
-  /** Fills the list until there is history. Default: iOS tapback set. */
   defaults?: readonly string[];
-  /** Keep at most this many emoji. Default 64. */
   max?: number;
 };
 
-/** ❤️ 👍 👎 😂 ‼️ ❓, the iOS tapback set. */
 export const DEFAULT_FREQUENT = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
 
 type Entry = [score: number, updatedAt: number];
 
-/** Frequency with recency decay: each use adds 1, and scores halve every `halfLifeDays`. */
 export function createFrequencyStore({ storage = localStorageAdapter("emoji-picker:frequents"), halfLifeDays = 14, defaults = DEFAULT_FREQUENT, max = 64 }: FrequencyStoreOptions = {}): FrequencyStore {
   const halfLife = halfLifeDays * 864e5;
   const listeners = new Set<() => void>();
   let entries: Record<string, Entry> = parse(storage.read());
   let version = 0;
-  // Per-n cache: snapshots must be referentially stable between changes, and
-  // different components ask for different n (picker 16, tapback 5).
+  // Per-n cache: snapshots must stay referentially stable, and callers ask for different n (picker 16, tapback 5)
   let cache = new Map<number, readonly string[]>();
 
   const decayed = ([score, at]: Entry, now: number) => score * 0.5 ** ((now - at) / halfLife);
@@ -98,7 +87,6 @@ function parse(raw: string | null): Record<string, Entry> {
   }
 }
 
-/** localStorage, falling back to memory where it's missing or throws (SSR, private mode). */
 export function localStorageAdapter(key: string): EmojiStorage {
   let memory: string | null = null;
   return {
@@ -113,9 +101,7 @@ export function localStorageAdapter(key: string): EmojiStorage {
       memory = value;
       try {
         globalThis.localStorage?.setItem(key, value);
-      } catch {
-        // memory copy is kept
-      }
+      } catch {}
     },
   };
 }

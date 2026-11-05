@@ -17,7 +17,6 @@ function EmojiPickerPopover({
   "aria-label": ariaLabel,
 }: {
   onSelect: (selection: EmojiSelection) => void;
-  /** Focused once the popover closes, instead of the trigger (an editor). Base UI's finalFocus. */
   finalFocus?: React.ComponentProps<typeof PopoverContent>["finalFocus"];
   side?: "top" | "bottom";
   align?: "start" | "center" | "end";

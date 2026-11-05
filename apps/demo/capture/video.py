@@ -1,9 +1,8 @@
-# Side-by-side video of frames/<style>/real-N.png | ours-N.png → out/<style>-side-by-side.mp4 (+ .gif)
 import glob, os, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont
 
 style = sys.argv[1]
-w, h = (int(v) for v in sys.argv[2].split("x"))  # CSS size of the picker
+w, h = (int(v) for v in sys.argv[2].split("x"))
 bg = sys.argv[3] if len(sys.argv) > 3 else "white"
 steps = sys.argv[4].split(",") if len(sys.argv) > 4 else []
 d = f"frames/{style}"

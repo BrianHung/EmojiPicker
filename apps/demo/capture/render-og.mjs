@@ -1,4 +1,3 @@
-// Renders the Open Graph image, the og:video and the PNG favicons into public/. Needs the dev server on :5199.
 import { chromium } from "playwright";
 import sharp from "sharp";
 import { execFileSync } from "node:child_process";
@@ -24,14 +23,13 @@ await sharp(await page.locator("[data-og]").screenshot())
   .png({ compressionLevel: 9 })
   .toFile(pub("og.png"));
 
-/** Steps the og:video frame by frame and encodes it as H.264. */
 async function renderVideo(out) {
   await page.goto(`${SHOT}?view=og-video`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => "setOgTime" in window && [...document.images].every((img) => img.complete && img.naturalWidth));
   await page.evaluate(() => document.fonts.ready);
   const frames = mkdtempSync(join(tmpdir(), "og-video-"));
   for (let i = 0; i < DURATION * FPS; i++) {
-    // An edit elsewhere can reload the dev page mid-render: wait for the harness to come back.
+    // An edit elsewhere can reload the dev page mid-render: wait for the page's hooks to come back
     await page.waitForFunction(() => typeof window.setOgTime === "function" && [...document.images].every((img) => img.complete && img.naturalWidth));
     await page.evaluate((t) => window.setOgTime(t), i / FPS);
     await sharp(await page.locator("[data-og]").screenshot())
@@ -45,7 +43,6 @@ async function renderVideo(out) {
 await renderVideo("og.mp4");
 await browser.close();
 
-// favicon.svg is the 🫪 character (each system draws its own); the PNG fallbacks use Twemoji's.
 const twemoji = Buffer.from(await (await fetch("https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/1faea.svg")).arrayBuffer());
 const svg = sharp(twemoji, { density: 512 });
 await svg.clone().resize(140, 140).extend({ top: 20, bottom: 20, left: 20, right: 20, background: "#ffffff" }).flatten({ background: "#ffffff" }).png().toFile(pub("apple-touch-icon.png"));

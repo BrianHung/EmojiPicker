@@ -1,11 +1,3 @@
-/**
- * Builds a dataset (data/<locale>.json's format) from emojibase-data: names,
- * tags and categories in the locale, Slack (iamcal) shortcodes plus the
- * locale's CLDR ones.
- *
- * Skin-tone variations are not stored: `withTone()` computes them, and this
- * verifies the rule against emojibase, keeping only the exceptions.
- */
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -28,11 +20,8 @@ type ShortcodeSet = Record<string, string | string[]>;
 type Load = <T>(file: string) => T;
 
 export type BuildDataOptions = {
-  /** An emojibase-data locale: "ja", "zh", "zh-hant", "pt", "en-gb". */
   locale: string;
-  /** emojibase shortcode sets, in priority order. Default `iamcal` for English, `iamcal,cldr` otherwise. */
   shortcodes?: readonly string[];
-  /** Reads a file from emojibase-data ("ja/data.json"). Default: the package resolved by `findEmojibase()`. */
   load?: Load;
 };
 
@@ -41,7 +30,6 @@ export type BuildDataResult = {
   stats: { emoji: number; withShortcodes: number; computedTones: number; toneExceptions: number };
 };
 
-/** emojibase-data from the current project, else next to this package; undefined when neither has it. */
 export function findEmojibase(): { root: string; load: Load } | undefined {
   for (const base of [path.join(process.cwd(), "package.json"), import.meta.url]) {
     const require = createRequire(base);
@@ -53,7 +41,6 @@ export function findEmojibase(): { root: string; load: Load } | undefined {
   return undefined;
 }
 
-/** Locales emojibase-data has data for. */
 export const emojibaseLocales = (root: string) =>
   fs
     .readdirSync(root)
@@ -64,7 +51,6 @@ const isEnglish = (locale: string) => locale.split("-")[0] === "en";
 
 export const defaultShortcodeSets = (locale: string) => (isEnglish(locale) ? ["iamcal"] : ["iamcal", "cldr"]);
 
-// emojibase group index → ours (smileys and people merge, components are dropped).
 const GROUP_OF: Record<number, number> = { 0: 0, 1: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7 };
 const MESSAGE_KEY: Record<(typeof GROUPS)[number], string> = {
   smileys_people: "people-body",
@@ -76,7 +62,6 @@ const MESSAGE_KEY: Record<(typeof GROUPS)[number], string> = {
   symbols: "symbols",
   flags: "flags",
 };
-// emojibase's English messages are lowercase and split smileys from people; these are Slack's and emoji-mart's.
 const ENGLISH_GROUPS = ["Smileys & People", "Animals & Nature", "Food & Drink", "Travel & Places", "Activities", "Objects", "Symbols", "Flags"];
 
 const toArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
@@ -86,14 +71,12 @@ const stripFE0F = (hex: string) =>
     .split("-")
     .filter((c) => c !== "fe0f")
     .join("-");
-// emojibase's hexcode can omit FE0F (❤️ is "2764"); the fully qualified `emoji`
-// string is what renders as emoji, and what emoji-picker-react and Twemoji key on.
+// emojibase's hexcode can omit FE0F (❤️ is 2764); the fully qualified emoji is what renders and what Twemoji keys on
 const qualified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
 function loadShortcodes(load: Load, locale: string, sets: readonly string[]): Map<string, string[]> {
   const byHex = new Map<string, string[]>();
   for (const set of sets) {
-    // iamcal, github and joypixels exist in English only.
     const codes = tryLoad<ShortcodeSet>(load, `${locale}/shortcodes/${set}.json`) ?? tryLoad<ShortcodeSet>(load, `en/shortcodes/${set}.json`);
     if (!codes) throw new Error(`emojibase-data has no "${set}" shortcodes`);
     for (const [hex, value] of Object.entries(codes)) {
@@ -130,7 +113,6 @@ export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(l
     if (group === undefined) continue;
     const unified = qualified(r.emoji);
 
-    // Single-tone variations only (uniform tone across all people), in tone order 1..5.
     const tones = (r.skins ?? [])
       .filter((s) => toArray(s.tone).length > 0 && new Set(toArray(s.tone)).size === 1)
       .sort((a, b) => toArray(a.tone)[0]! - toArray(b.tone)[0]!)

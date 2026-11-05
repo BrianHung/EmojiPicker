@@ -8,10 +8,6 @@ type Match = { query: string; from: number; to: number };
 
 const EVENTS = ["selectionchange", "click", "keyup"];
 
-/**
- * `useEmojiTypeahead` for an `<input>` or `<textarea>`, controlled or not: finds the `:query`
- * before the caret, anchors at it, and inserts with the browser's undo intact.
- */
 export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null>, options?: EmojiTypeaheadOptions): EmojiTypeahead {
   const [match, setMatch] = React.useState<Match | null>(null);
   const typeahead = useEmojiTypeahead(
@@ -35,15 +31,13 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null
       setMatch((prev) => (found && to != null ? (prev && prev.query === found.query && prev.from === found.offset ? prev : { query: found.query, from: found.offset, to }) : null));
     };
     const sync = () => matchAt(el.selectionEnd === el.selectionStart ? el.selectionStart : null);
-    // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send).
+    // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send)
     const keydown = (event: Event) => void (onKeyDown(event as KeyboardEvent) && event.stopPropagation());
-    // After them: a controlled field's onChange must commit the new value before this re-renders it.
+    // After React's handlers: a controlled field's onChange must commit the new value before this re-renders it
     const input = (event: Event) => event.target === el && sync();
     for (const type of EVENTS) el.addEventListener(type, sync);
     el.addEventListener("keydown", keydown);
     el.ownerDocument.addEventListener("input", input);
-    // A field that starts with a `:query` opens on it (an unfocused field's caret is taken to be at its end),
-    // until focus first lands elsewhere, as it would close on blur.
     const elsewhere = (event: FocusEvent) => {
       el.ownerDocument.removeEventListener("focusin", elsewhere);
       if (event.target !== el) matchAt(null);

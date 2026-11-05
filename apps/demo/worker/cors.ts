@@ -1,5 +1,3 @@
-// CORS allowlist: ALLOWED_ORIGINS="https://emoji.example.com,http://localhost:*".
-
 export function allowedOrigin(request: Request, allowlist: string): string | null {
   const origin = request.headers.get("origin");
   if (!origin) return null;

@@ -1,8 +1,3 @@
-// iOS 27.2 Messages parity: screenshot our screen at 3x (402×874 pt → 1206×2622, like the
-// simulator captures in ref/imessage27-*.png) in each state, then compare per part.
-//   node capture/imessage27-parity.mjs [reacted pill keyboard menu selected incoming]   (dev server on :5199)
-// Writes out/imessage27-<state>.png, out/imessage27-<state>-compare.png,
-// out/imessage27-side-by-side.png and out/imessage27-parity.json.
 import { chromium } from "playwright";
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
@@ -12,7 +7,6 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const states = process.argv.slice(2).length ? process.argv.slice(2) : ["reacted", "pill", "keyboard", "menu", "selected", "incoming"];
 const ready = { reacted: '[data-imessage] [role="button"]', pill: '[role="toolbar"]', selected: '[role="toolbar"]', menu: '[role="menu"]', incoming: '[aria-label="Reaction received"]', keyboard: "[data-emoji-keyboard] [data-slot=emoji]" };
-// States without a reference capture: screenshot only (no compare).
 const noRef = new Set(["selected", "incoming"]);
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });
@@ -25,7 +19,6 @@ for (const state of states) {
   await page.goto(`http://localhost:5199/shot.html?view=imessage27&state=${state}`);
   await page.locator(ready[state]).first().waitFor();
   await page.evaluate(() => document.fonts.ready);
-  // The sheet's open transition is CSS (the Drawer), not motion: let it settle.
   await page.waitForTimeout(state === "keyboard" ? 900 : 500);
   await page.locator('[data-shot="imessage27"]').screenshot({ path: `${here}/out/imessage27-${state}.png` });
   await ctx.close();

@@ -1,20 +1,14 @@
-// The site on Cloudflare, for the Deploy to Cloudflare button and Workers Builds (they
-// read only Wrangler config): the Vite build as static assets, plus worker/index.ts for
-// /api/*. The `cf` CLI reads cloudflare.config.ts; worker/test/config.test.ts keeps the
-// two in step. No account id: deploys go to the account you use.
+// Mirrors cloudflare.config.ts: the Deploy button and Workers Builds read only Wrangler config
 {
   "name": "emoji-picker",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-30",
-  // `npm run build` (vite build) writes the pages here; `wrangler deploy` uploads them.
   "assets": { "directory": "./.cloudflare/output/v0/workers/default/assets", "run_worker_first": ["/api/*"] },
   "observability": { "enabled": true },
   "ai": { "binding": "AI" },
-  // 1024 dimensions, cosine: `npm run create-index`, then `npm run seed`.
   "vectorize": [{ "binding": "EMOJI_INDEX", "index_name": "emoji-bge-large" }],
   "vars": {
     "ALLOWED_ORIGINS": "http://localhost:*",
     "AI_GATEWAY_ID": "default"
   }
-  // Secrets: ADMIN_TOKEN (see .dev.vars.example).
 }

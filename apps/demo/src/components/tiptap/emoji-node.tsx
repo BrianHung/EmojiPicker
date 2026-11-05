@@ -1,22 +1,14 @@
-// An inline emoji node for Tiptap, drawn with the library's <Emoji>, so custom emoji
-// show as their image and Twemoji applies when the provider uses it. Copied or exported
-// as text it becomes the character (or `:shortcode:` for custom emoji), so documents
-// round-trip through Markdown. Typing a complete `:tada:` converts to the node.
 import { InputRule, Node, NodeViewWrapper, ReactNodeViewRenderer, mergeAttributes, type NodeViewProps } from "@tiptap/react";
 import { Emoji } from "@brianhung/emoji-picker";
 import type { EmojiStore } from "@brianhung/emoji-picker/core";
 
 export type EmojiNodeAttrs = {
-  /** Unified code ("1f389") or a custom emoji id ("partyparrot"). */
   unified: string;
-  /** First shortcode, for text export of custom emoji. */
   shortcode: string;
-  /** The character for standard emoji; null for custom emoji (images). */
   text: string | null;
 };
 
 export type EmojiNodeOptions = {
-  /** The provider's store (`useEmojiStore()`), used to resolve `:shortcode:` input. */
   store: EmojiStore | null;
 };
 
@@ -26,7 +18,6 @@ declare module "@tiptap/react" {
   }
 }
 
-/** Attributes for an emoji from the store, by unified code, custom id or shortcode. */
 export function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiNodeAttrs | null {
   const record = store.get(idOrShortcode) ?? store.fromShortcode(idOrShortcode);
   if (!record) return null;
@@ -35,7 +26,6 @@ export function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiNodeA
   return { unified, shortcode: record.shortcodes[0] ?? record.unified, text };
 }
 
-/** The node and a space after it, as `insertContent` takes them. */
 export const emojiContent = (attrs: EmojiNodeAttrs) => [
   { type: "emoji", attrs },
   { type: "text", text: " " },

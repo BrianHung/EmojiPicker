@@ -65,7 +65,6 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-/** The built-in glyph for a category, filling its tab. */
 export function DefaultCategoryIcon({ category }: { category: string }) {
   return (
     <svg

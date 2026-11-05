@@ -1,5 +1,3 @@
-// Empty, Loading and LoadError: composed next to the List, rendered by it as its
-// empty state (React Aria's renderEmptyState); on their own where there's no List.
 import * as React from "react";
 import { usePicker } from "./context";
 import { useEmojiStore, useStoreSnapshot } from "../provider/provider";
@@ -18,7 +16,6 @@ export function useEmptyStateSlots(): Registry {
   return state;
 }
 
-/** The List's empty state: whichever registered part applies now. */
 export function useEmptyState(): React.ReactNode {
   const ctx = React.useContext(EmptyStateContext);
   const slots = useSignal(ctx?.slots ?? NO_SLOTS);
@@ -36,7 +33,6 @@ export function useEmptyState(): React.ReactNode {
 }
 const NO_SLOTS = signal<Slots>({});
 
-/** Registers `element` as the List's empty state of this kind; renders it in place when there's no List. */
 function useSlot(kind: Kind, element: React.ReactElement, visible: boolean): React.ReactElement | null {
   const ctx = React.useContext(EmptyStateContext);
   const lists = useSignal(ctx?.lists ?? NO_LISTS);
@@ -59,7 +55,6 @@ const NO_LISTS = signal(0);
 export type EmptyState = { search: string };
 export type EmptyProps = PartElementProps<EmptyState, HTMLDivElement, "role">;
 
-/** Shown when a search finds nothing. */
 export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(function Empty({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Empty");
   const element = renderElement("div", { ...props, ref, role: "status", "data-slot": SLOTS.empty, children: children ?? picker.labels.noResults }, { search: picker.query });
@@ -68,7 +63,6 @@ export const Empty = React.forwardRef<HTMLDivElement, EmptyProps>(function Empty
 
 export type LoadingProps = PartElementProps<object, HTMLDivElement, "role">;
 
-/** Shown while the dataset loads. */
 export const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(function Loading({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Loading");
   const status = useStoreSnapshot((s) => s.status());
@@ -79,7 +73,6 @@ export const Loading = React.forwardRef<HTMLDivElement, LoadingProps>(function L
 export type LoadErrorState = { error: Error; retry: () => void };
 export type LoadErrorProps = PartElementProps<LoadErrorState, HTMLDivElement, "role">;
 
-/** Shown when the dataset fails to load, with a retry. */
 export const LoadError = React.forwardRef<HTMLDivElement, LoadErrorProps>(function LoadError({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.LoadError");
   const store = useEmojiStore();

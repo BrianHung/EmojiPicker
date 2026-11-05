@@ -17,7 +17,6 @@ const BUTTONS: { side: "left" | "right"; top: number; bottom: number }[] = [
   { side: "right", top: 243, bottom: 346 },
 ];
 
-/** An iPhone 18 Pro around a 402×874 screen; `children` render at screen size. */
 export function IPhoneFrame({ children, scale = 1, className, style }: { children: React.ReactNode; scale?: number; className?: string; style?: React.CSSProperties }) {
   return (
     <div className={className} style={{ width: FRAME_SIZE.width * scale, height: FRAME_SIZE.height * scale, flexShrink: 0, ...style }}>
@@ -65,7 +64,7 @@ export function IPhoneFrame({ children, scale = 1, className, style }: { childre
             height: SCREEN.height,
             borderRadius: SCREEN.radius,
             overflow: "hidden",
-            // Safari: keeps the rounded clip on transformed children.
+            // Safari drops the rounded clip on transformed children without this
             isolation: "isolate",
           }}
         >
