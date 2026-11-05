@@ -1,7 +1,7 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { createChangeDetails, type ChangeDetails } from "./change";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
-import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type FrequencyStoreOptions } from "./frequents";
+import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type FrequencyStoreOptions, type FrequentsTuning } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
 import { cached, createStore, memo } from "./reactive";
@@ -13,14 +13,15 @@ export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { s
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
-export type EmojiStoreOptions = FrequencyStoreOptions & {
+export type EmojiStoreOptions = Pick<FrequencyStoreOptions, "frequents" | "defaultFrequents" | "onFrequentsChange"> & {
+  storage?: { frequents?: EmojiStorage | null; skinTone?: EmojiStorage | null };
+  frequentsTuning?: FrequentsTuning;
   data?: EmojiDataSource;
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   filter?: (record: EmojiRecord) => boolean;
   skinTone?: SkinToneValue;
   defaultSkinTone?: SkinToneValue;
   onSkinToneChange?: (tone: SkinToneValue, details: SkinToneChangeDetails) => void;
-  skinToneStorage?: EmojiStorage | null;
   searchEngine?: EmojiSearch;
   locale?: string;
   labels?: Partial<EmojiLabels>;
@@ -104,17 +105,15 @@ export function createEmojiStore({
   frequents: controlledFrequents,
   defaultFrequents,
   onFrequentsChange,
-  frequentsStorage,
-  frequentsHalfLifeDays,
-  frequentsMax,
+  storage: { frequents: frequentsStorage, skinTone: skinToneStorage = localStorageAdapter("emoji-picker:skin-tone") } = {},
+  frequentsTuning,
   skinTone: controlledTone,
   defaultSkinTone = 0,
   onSkinToneChange,
-  skinToneStorage = localStorageAdapter("emoji-picker:skin-tone"),
   labels: labelOverrides,
   ...source
 }: EmojiStoreOptions = {}) {
-  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, frequentsStorage, frequentsHalfLifeDays, frequentsMax });
+  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, storage: frequentsStorage, tuning: frequentsTuning });
   let config: EmojiSourceOptions = source;
   let raw: Raw | null = null;
   let base: readonly EmojiRecord[] = [];

@@ -18,7 +18,7 @@ function mount(children: React.ReactNode) {
   const root = createRoot(host);
   React.act(() =>
     root.render(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false} skinToneStorage={null}>
+      <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ skinTone: null }}>
         <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>{children}</EmojiPicker.Root>
       </EmojiProvider>,
     ),

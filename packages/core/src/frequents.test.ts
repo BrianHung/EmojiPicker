@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createFrequencyStore, memoryStorage, mergeFrequents, type EmojiStorage } from "./frequents";
+import { createFrequencyStore, memoryStorageAdapter, mergeFrequents, type EmojiStorage } from "./frequents";
 
 const DAY = 864e5;
 
@@ -8,7 +8,7 @@ describe("frequency store", () => {
 
   it("ranks by count decayed over time, filling with defaults", () => {
     vi.useFakeTimers({ now: 0 });
-    const store = createFrequencyStore({ frequentsStorage: null });
+    const store = createFrequencyStore({ storage: null });
     expect(store.top(2)).toEqual(["2764-fe0f", "1f44d"]);
     ["old", "old", "old"].forEach(store.record);
     vi.setSystemTime(42 * DAY);
@@ -19,7 +19,7 @@ describe("frequency store", () => {
 
   it("takes its half-life and size", () => {
     vi.useFakeTimers({ now: 0 });
-    const store = createFrequencyStore({ frequentsStorage: null, frequentsHalfLifeDays: 1, frequentsMax: 2 });
+    const store = createFrequencyStore({ storage: null, tuning: { halfLifeDays: 1, max: 2 } });
     ["old", "old", "old", "mid"].forEach(store.record);
     vi.setSystemTime(3 * DAY);
     store.record("new");
@@ -27,7 +27,7 @@ describe("frequency store", () => {
   });
 
   it("returns stable snapshots per n until something changes", () => {
-    const store = createFrequencyStore({ frequentsStorage: null });
+    const store = createFrequencyStore({ storage: null });
     const five = store.top(5);
     expect(store.top(5)).toBe(five);
     store.record("1f525");
@@ -37,7 +37,7 @@ describe("frequency store", () => {
   it("reports picks, removals and clears; controlled entries stay with their owner, and cancel() keeps them", () => {
     const onFrequentsChange = vi.fn();
     const frequents = { "1f525": { count: 2, lastUsed: Date.now() } };
-    const store = createFrequencyStore({ frequents, onFrequentsChange, frequentsStorage: null });
+    const store = createFrequencyStore({ frequents, onFrequentsChange, storage: null });
     store.record("1f44d");
     expect(onFrequentsChange).toHaveBeenLastCalledWith(expect.objectContaining({ "1f44d": expect.objectContaining({ count: 1 }) }), expect.objectContaining({ reason: "pick", emoji: "1f44d" }));
     store.remove("1f525");
@@ -45,17 +45,17 @@ describe("frequency store", () => {
     store.clear();
     expect(onFrequentsChange).toHaveBeenLastCalledWith({}, expect.objectContaining({ reason: "clear" }));
     expect(store.entries()).toBe(frequents);
-    const canceled = createFrequencyStore({ onFrequentsChange: (_, details) => details.cancel(), frequentsStorage: null });
+    const canceled = createFrequencyStore({ onFrequentsChange: (_, details) => details.cancel(), storage: null });
     canceled.record("1f44d");
     expect(canceled.entries()).toEqual({});
   });
 
   it("persists through its storage and picks up writes from elsewhere while subscribed", () => {
-    const memory = memoryStorage();
+    const memory = memoryStorageAdapter();
     const listeners = new Set<() => void>();
     const storage: EmojiStorage = { ...memory, subscribe: (l) => (listeners.add(l), () => listeners.delete(l)) };
-    createFrequencyStore({ frequentsStorage: storage }).record("1f525");
-    const store = createFrequencyStore({ frequentsStorage: storage });
+    createFrequencyStore({ storage }).record("1f525");
+    const store = createFrequencyStore({ storage });
     expect(store.top(1)).toEqual(["1f525"]);
     const off = store.subscribe(() => {});
     memory.write(JSON.stringify({ "1f680": { count: 5, lastUsed: Date.now() } }));

@@ -5,7 +5,7 @@ import { createPickerState, moveHighlight, setCategoryCollapsed } from "./picker
 import { createEmojiStore } from "./store";
 
 const ready = async () => {
-  const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
+  const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
   await store.load();
   return store;
 };

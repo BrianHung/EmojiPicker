@@ -14,7 +14,7 @@ const key = (key: string) => ({
 
 describe("suggestions", () => {
   it("matches a query, moves, and chooses with keys", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
+    const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
     await store.load();
     const chosen: string[] = [];
     const selected: string[] = [];
@@ -45,7 +45,7 @@ describe("suggestions", () => {
   });
 
   it("resets the highlight whenever the reset key changes, even back to an earlier one", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
+    const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
     await store.load();
     const typeahead = createEmojiSuggestions(store, { query: "heart" });
     typeahead.highlight(2);
