@@ -263,7 +263,14 @@ Each part follows its WAI-ARIA Authoring Practices pattern. Nothing animates by 
 
 **Self-hosted data.** Copy `node_modules/@brianhung/emoji-picker-core/data/en.json` to a path you serve and pass its URL: `<EmojiProvider data="/emoji/en.json">`. Other locales: `localeData("ja", { baseUrl: "/emoji" })` after copying `@brianhung/emoji-picker-data`'s `data/`, or build one with `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json` (requires `emojibase-data`). Every locale keeps the iamcal shortcodes.
 
-**Own artwork.** Replace particular emoji under any renderer:
+**Emoji fonts.** Native rendering draws text in `--emoji-font-family`, so any color emoji font works, including one you ship with your own emoji. Support detection and image fallback use that font. For example, Noto from Google Fonts:
+
+```css
+@import url("https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap");
+[data-slot="emoji-picker"] { --emoji-font-family: "Noto Color Emoji"; }
+```
+
+**Own artwork.** Images instead of a font: `imageUrl` replaces particular emoji (or all of them) under any renderer:
 
 ```tsx
 const imageUrl: ImageUrl = (unified, { renderer }) => ART[withoutTone(unified)] ?? (renderer === "image" ? twemojiUrl(unified) : undefined);
