@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createSearch, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiStore, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
@@ -24,7 +24,7 @@ export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): Freque
   return React.useMemo(() => ({ items, record, remove, clear }), [items, record, remove, clear]);
 }
 
-export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {
+export function useSkinTone(): [tone: SkinToneValue, setTone: EmojiStore["setSkinTone"]] {
   const { store } = useEmojiContext();
   return [useStoreSnapshot((s) => s.skinTone()), store.setSkinTone];
 }

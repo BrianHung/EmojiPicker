@@ -1,4 +1,5 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
+import { createChangeDetails, type ChangeDetails } from "./change";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type FrequencyStoreOptions } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
@@ -18,12 +19,14 @@ export type EmojiStoreOptions = FrequencyStoreOptions & {
   filter?: (record: EmojiRecord) => boolean;
   skinTone?: SkinToneValue;
   defaultSkinTone?: SkinToneValue;
-  onSkinToneChange?: (tone: SkinToneValue) => void;
+  onSkinToneChange?: (tone: SkinToneValue, details: SkinToneChangeDetails) => void;
   skinToneStorage?: EmojiStorage | null;
   searchEngine?: EmojiSearch;
   locale?: string;
   labels?: Partial<EmojiLabels>;
 };
+
+export type SkinToneChangeDetails = ChangeDetails<"option-press" | "none">;
 
 export type EmojiSourceOptions = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale">;
 
@@ -132,7 +135,7 @@ export function createEmojiStore({
   function storedTone() {
     return clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
   }
-  const callbacks = { onSkinToneChange };
+  const callbacks: Pick<EmojiStoreOptions, "onSkinToneChange"> = { onSkinToneChange };
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
@@ -231,16 +234,16 @@ export function createEmojiStore({
       const { controlledTone, ownTone } = state.getSnapshot();
       return controlledTone === undefined ? ownTone : clampTone(controlledTone);
     },
-    setSkinTone(next: SkinToneValue) {
+    setSkinTone(next: SkinToneValue, { reason = "none", event }: { reason?: SkinToneChangeDetails["reason"]; event?: Event } = {}) {
       const value = clampTone(next);
-      const { controlledTone, ownTone } = state.getSnapshot();
-      if (controlledTone === undefined && value !== ownTone) {
-        skinToneStorage?.write(String(value));
-        state.dispatch({ type: "tone", tone: value });
-      }
-      callbacks.onSkinToneChange?.(value);
+      if (value === store.skinTone()) return;
+      const details = createChangeDetails(reason, event);
+      callbacks.onSkinToneChange?.(value, details);
+      if (details.isCanceled || state.getSnapshot().controlledTone !== undefined) return;
+      skinToneStorage?.write(String(value));
+      state.dispatch({ type: "tone", tone: value });
     },
-    controlSkinTone(value: SkinToneValue | undefined, onChange?: (tone: SkinToneValue) => void) {
+    controlSkinTone(value: SkinToneValue | undefined, onChange?: EmojiStoreOptions["onSkinToneChange"]) {
       callbacks.onSkinToneChange = onChange;
       state.dispatch({ type: "control", tone: value });
     },

@@ -7,23 +7,10 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import {
-  createEmojiGrid,
-  createStore,
-  type EmojiGrid,
-  type EmojiGridMove,
-  type EmojiGridRow,
-  type EmojiItem,
-  type EmojiRecord,
-  type EmojiSection,
-  type HighlightChangeDetails,
-  type PickerSnapshot,
-  type PickerState,
-  withoutTone,
-} from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiRecord, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
-import { usePicker, type ListHandle } from "../root/context";
+import { usePicker, type HighlightSource, type ListHandle } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { usePickerKeyDown, type KeyResult } from "../utils/keyboard";
@@ -98,7 +85,7 @@ export type GridGeometry = {
 };
 
 const MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down", Home: "first", End: "last" };
-const NONE: HighlightChangeDetails = { reason: "none" };
+const NONE: HighlightSource = {};
 const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
 // Handlers are delegated from the list: one set for every mounted cell
@@ -478,7 +465,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       target: picker.target,
       reveal: (id) => latest.current.geometry.reveal(id),
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
-      toggle: (id) => picker.collapse.toggle(id),
+      toggle: (id) => picker.state.toggleCollapsed(id, { reason: "trigger-press" }),
     }),
     [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, core, marks, picker.target, picker.listId, picker.collapse, orientation],
   );

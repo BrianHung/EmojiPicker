@@ -1,11 +1,23 @@
 import * as React from "react";
-import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiGridMove, type EmojiRecord, type EmojiSelection, isComposingKey, type PickerState, type PickerStateOptions } from "@brianhung/emoji-picker-core";
+import {
+  type CategoryOption as CoreCategoryOption,
+  type ChangeDetails,
+  type CollapsedCategoriesChangeDetails,
+  createPickerState,
+  type QueryChangeDetails,
+  type EmojiGridMove,
+  type EmojiRecord,
+  type EmojiSelection,
+  isComposingKey,
+  type PickerState,
+  type PickerStateOptions,
+} from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { useCollapse } from "./collapse";
 import { PickerContext, usePicker, ViewportContext, type EmojiPickerActions, type HighlightChangeDetails, type ListHandle, type PickerContextValue, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "../utils/hold";
 import { mergeProps } from "react-aria/mergeProps";
-import { useControlledState } from "react-stately/useControlledState";
+import { useChangeState } from "../utils/state";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { PopoverContext } from "../popover/popover-context";
@@ -17,6 +29,9 @@ import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
+
+export type ValueChangeDetails = ChangeDetails<"item-press">;
+export type ReactionsOpenChangeDetails = ChangeDetails<"trigger-press" | "item-press" | "none">;
 
 export type RootState = { searching: boolean; reactionsOpen: boolean };
 
@@ -31,23 +46,23 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     frequent?: number | false;
     collapsedCategories?: readonly string[];
     defaultCollapsedCategories?: readonly string[];
-    onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
+    onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
     suggested?: readonly string[];
     searchResults?: SearchResultsMode;
     searchLimit?: number;
     query?: string;
     defaultQuery?: string;
-    onQueryChange?: (query: string) => void;
+    onQueryChange?: (query: string, details: QueryChangeDetails) => void;
     value?: string | null;
     defaultValue?: string | null;
-    onValueChange?: (unified: string) => void;
+    onValueChange?: (unified: string, details: ValueChangeDetails) => void;
     highlight?: string | null;
     defaultHighlight?: string | null;
     onHighlightChange?: (emoji: string | null, details: HighlightChangeDetails) => void;
     reactions?: readonly string[];
     reactionsOpen?: boolean;
     defaultReactionsOpen?: boolean;
-    onReactionsOpenChange?: (open: boolean) => void;
+    onReactionsOpenChange?: (open: boolean, details: ReactionsOpenChangeDetails) => void;
     emojiVersion?: number;
     disableVariations?: boolean;
     children: React.ReactNode;
@@ -123,10 +138,10 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   }, []);
   const listId = React.useId();
 
-  const [value, setValue] = useControlledState<string | null | undefined, string>(valueProp as string | null, defaultValue, onValueChange);
-  const [open, setReactionsOpen] = useControlledState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
+  const [value, setValue] = useChangeState<string | null | undefined, ValueChangeDetails["reason"]>(valueProp, defaultValue, onValueChange as (value: string | null | undefined, details: ValueChangeDetails) => void);
+  const [open, setReactionsOpen] = useChangeState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
-  const collapseToReactions = React.useCallback(() => setReactionsOpen(true), [setReactionsOpen]);
+  const collapseToReactions = React.useCallback(() => setReactionsOpen(true, "item-press"), [setReactionsOpen]);
   const latest = React.useRef({ onSelect, popover, selects: value !== undefined });
   latest.current = { onSelect, popover, selects: value !== undefined };
   const pick = React.useCallback(
@@ -134,7 +149,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       const selection = state.choose(unified);
       if (!selection) return undefined;
       const { onSelect, popover, selects } = latest.current;
-      if (selects) setValue(selection.unified);
+      if (selects) setValue(selection.unified, "item-press");
       onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
       if (popover?.closeOnSelect) popover.close("select");
       return selection;
@@ -185,7 +200,6 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       sections: view.sections,
       collapse,
       query,
-      setQuery: state.setQuery,
       searching,
       searchResults,
       searchLimit,
@@ -207,14 +221,15 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     [store, state, labels, popover, disableVariations, columns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
-    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false) : undefined, panel, registerPanel } : null),
+    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false, "trigger-press") : undefined, panel, registerPanel } : null),
     [reactions, view.reactions, reactionsOpen, panels, setReactionsOpen, registerPanel],
   );
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
       if (!query) return Boolean(list.current?.clear()) || actions.close();
-      actions.clearSearch();
+      state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
+      list.current?.clear();
       return true;
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
@@ -237,7 +252,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       render,
       children: (
         <>
-          <Autocomplete inputValue={query} onInputChange={state.setQuery}>
+          <Autocomplete inputValue={query} onInputChange={(text) => state.setQuery(text, { reason: "input-change" })}>
             <PickerContext.Provider value={context}>
               <ReactionsContext.Provider value={reactionsState}>{children}</ReactionsContext.Provider>
             </PickerContext.Provider>

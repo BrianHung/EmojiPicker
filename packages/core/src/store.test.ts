@@ -55,7 +55,7 @@ describe("store", () => {
     const controlled = createEmojiStore({ data: dataset, skinTone: 2, onSkinToneChange, skinToneStorage });
     controlled.setSkinTone(5);
     expect(controlled.skinTone()).toBe(2);
-    expect(onSkinToneChange).toHaveBeenCalledWith(5);
+    expect(onSkinToneChange).toHaveBeenCalledWith(5, expect.objectContaining({ reason: "none" }));
     controlled.controlSkinTone(5, onSkinToneChange);
     expect(controlled.skinTone()).toBe(5);
     expect(skinToneStorage.read()).toBe("3");

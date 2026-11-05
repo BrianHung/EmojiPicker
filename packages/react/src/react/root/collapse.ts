@@ -13,7 +13,7 @@ const noop = () => {};
 const EMPTY: CollapsedCategories = { collapsed: [], isCollapsed: () => false, toggle: noop, setCollapsed: noop };
 
 export function useCollapse(state: PickerState<React.ReactNode>, collapsed: readonly string[]): CollapsedCategories {
-  return React.useMemo(() => ({ collapsed, isCollapsed: (id) => collapsed.includes(id), toggle: state.toggleCollapsed, setCollapsed: state.setCollapsed }), [state, collapsed]);
+  return React.useMemo(() => ({ collapsed, isCollapsed: (id) => collapsed.includes(id), toggle: (id) => state.toggleCollapsed(id), setCollapsed: (id, value) => state.setCollapsed(id, value) }), [state, collapsed]);
 }
 
 export function useCollapsedCategories(): CollapsedCategories {

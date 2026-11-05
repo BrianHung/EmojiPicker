@@ -1,3 +1,4 @@
+import { createChangeDetails, type ChangeDetails } from "./change";
 import { GROUPS, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
 import type { EmojiLabels } from "./labels";
@@ -8,7 +9,11 @@ import type { EmojiData, EmojiSelection, EmojiStore } from "./store";
 
 export type SearchResultsMode = "ranked" | "grouped";
 
-export type HighlightChangeDetails = { reason: "keyboard" | "pointer" | "none"; event?: Event };
+export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "none">;
+export type QueryChangeDetails = ChangeDetails<"input-change" | "escape-key" | "none">;
+export type CollapsedCategoriesChangeDetails = ChangeDetails<"trigger-press" | "none">;
+
+type Source<D extends ChangeDetails> = { reason?: D["reason"]; event?: Event };
 
 export type PickerStateOptions<Icon = unknown> = {
   labels?: EmojiLabels;
@@ -20,10 +25,10 @@ export type PickerStateOptions<Icon = unknown> = {
   searchLimit?: number;
   query?: string;
   defaultQuery?: string;
-  onQueryChange?: (query: string) => void;
+  onQueryChange?: (query: string, details: QueryChangeDetails) => void;
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
-  onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
+  onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
   highlight?: string | null;
   defaultHighlight?: string | null;
   onHighlightChange?: (id: string | null, details: HighlightChangeDetails) => void;
@@ -194,14 +199,16 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     return select(state, options, status === "ready", data, store.skinTone(), frequent, search.run(queryOf(state, options), options.searchLimit ?? 200));
   }
 
-  const setCollapsed = (id: string, value?: boolean) => {
+  const setCollapsed = (id: string, value: boolean | undefined, { reason = "none", event }: Source<CollapsedCategoriesChangeDetails>) => {
     const { options, draft } = input.getSnapshot();
     const current = draft ?? collapsedOf(ui.getSnapshot(), options);
     const ids = setCategoryCollapsed(current, id, value);
     if (ids === current) return;
+    const details = createChangeDetails(reason, event);
+    options.onCollapsedCategoriesChange?.(ids, details);
+    if (details.isCanceled) return;
     if (options.collapsedCategories === undefined) set({ collapsed: ids });
     else input.dispatch({ type: "draft", ids });
-    options.onCollapsedCategoriesChange?.(ids);
   };
 
   const state = {
@@ -211,20 +218,22 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       input.dispatch({ type: "options", options: next });
       if (notify) ui.dispatch({ type: "refresh" });
     },
-    setQuery(value: string) {
-      if (opts().query === undefined) set({ query: value });
-      opts().onQueryChange?.(value);
+    setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}) {
+      if (value === queryOf(ui.getSnapshot(), opts())) return;
+      const details = createChangeDetails(reason, event);
+      opts().onQueryChange?.(value, details);
+      if (!details.isCanceled && opts().query === undefined) set({ query: value });
     },
-    toggleCollapsed: (id: string) => setCollapsed(id),
-    setCollapsed: (id: string, value: boolean) => setCollapsed(id, value),
-    highlight(id: string | null, details: HighlightChangeDetails = { reason: "none" }) {
+    toggleCollapsed: (id: string, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, undefined, source),
+    setCollapsed: (id: string, value: boolean, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, value, source),
+    highlight(id: string | null, { reason = "none", event }: Source<HighlightChangeDetails> = {}) {
       if (id === highlightedOf(ui.getSnapshot(), opts())) return;
-      if (opts().highlight === undefined) set({ highlighted: id });
+      const details = createChangeDetails(reason, event);
       opts().onHighlightChange?.(id, details);
+      if (!details.isCanceled && opts().highlight === undefined) set({ highlighted: id });
     },
     hover: (id: string | null) => set({ hovered: id }),
     setActiveSection: (id: string | null) => set({ activeSection: id }),
-    setSkinTone: (tone: SkinToneValue) => store.setSkinTone(tone),
     choose: (id = highlightedOf(ui.getSnapshot(), opts())): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
     openVariations(id: string | null) {
       const record = findItem(getSnapshot().sections, id)?.record;

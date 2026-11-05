@@ -23,6 +23,7 @@ export type {
   CollapsedCategories,
   EmojiPickerActions,
   HighlightChangeDetails,
+  ReactionsOpenChangeDetails,
   PickerKeyboardEvent,
   PickerKeyboardEventHandler,
   PreviewProps,
@@ -31,6 +32,7 @@ export type {
   RootState,
   SearchResultsMode,
   SelectDetails,
+  ValueChangeDetails,
   ViewportProps,
   ViewportState,
 } from "./react/root";
@@ -39,7 +41,7 @@ export { useEmojiCell, useEmojiGrid } from "./react/list";
 export type { CellProps, CellState, EmptyState, EmojiGridState, ItemsProps, ListProps, ListState, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps, UseEmojiGridOptions } from "./react/list";
 export type { SearchClearProps, SearchClearState, SearchInputProps, SearchInputState, SearchProps, SearchState } from "./react/search";
 export type { CategoryNavProps, CategoryNavState, CategoryTabProps, CategoryTabState, NavCategory } from "./react/category-nav";
-export type { SkinToneGlyphProps, SkinToneOptionProps, SkinToneOptionState, SkinToneOptionsProps, SkinToneOptionsState, SkinToneProps, SkinToneState, SkinToneTriggerProps } from "./react/skin-tone";
+export type { SkinToneGlyphProps, SkinToneOpenChangeDetails, SkinToneOptionProps, SkinToneOptionState, SkinToneOptionsProps, SkinToneOptionsState, SkinToneProps, SkinToneState, SkinToneTriggerProps } from "./react/skin-tone";
 export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
 export { pickerInitialFocus } from "./react/popover";
@@ -52,6 +54,8 @@ export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, Em
 export { findShortcodeTrigger, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
 export type {
   CategoryId,
+  ChangeDetails,
+  CollapsedCategoriesChangeDetails,
   CustomEmoji,
   CustomEmojiSource,
   Dataset,
@@ -65,9 +69,11 @@ export type {
   EmojiStorage,
   EmojiStore,
   EmojiTrigger,
+  QueryChangeDetails,
   FrequentEntry,
   Frequents,
   FrequentsChangeDetails,
   Renderer,
+  SkinToneChangeDetails,
   SkinToneValue,
 } from "@brianhung/emoji-picker-core";

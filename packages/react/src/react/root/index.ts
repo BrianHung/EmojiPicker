@@ -1,5 +1,5 @@
 export { Preview, Root, useActiveEmoji, useCategoryNavigation, useSearchState, Viewport } from "./picker";
-export type { CategoryOption, PreviewProps, PreviewState, RootProps, RootState, ViewportProps, ViewportState } from "./picker";
+export type { CategoryOption, PreviewProps, PreviewState, ReactionsOpenChangeDetails, RootProps, RootState, ValueChangeDetails, ViewportProps, ViewportState } from "./picker";
 export { useEmojiPickerActions } from "./context";
 export type { EmojiPickerActions, HighlightChangeDetails, SearchResultsMode, SelectDetails } from "./context";
 export { useCollapsedCategories } from "./collapse";

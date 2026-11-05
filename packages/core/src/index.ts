@@ -1,5 +1,5 @@
 export { createEmojiStore } from "./store";
-export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiData, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreState, EmojiStoreStatus } from "./store";
+export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiData, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreState, EmojiStoreStatus, SkinToneChangeDetails } from "./store";
 export { localStorageAdapter, memoryStorage, mergeFrequents } from "./frequents";
 export type { EmojiStorage, FrequencyStore, FrequentEntry, Frequents, FrequentsChangeDetails } from "./frequents";
 export { localeData, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
@@ -22,7 +22,9 @@ export { findShortcodeTrigger, isComposingKey, nameWithTone } from "./shortcodes
 export { createEmojiSuggestions, syncCombobox } from "./suggestions";
 export type { EmojiSuggestionsMachine, EmojiTrigger, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
 export { createPickerState, moveHighlight } from "./picker";
-export type { HighlightChangeDetails, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
+export type { CollapsedCategoriesChangeDetails, HighlightChangeDetails, PickerSnapshot, PickerState, PickerStateOptions, QueryChangeDetails, SearchResultsMode } from "./picker";
+export { createChangeDetails } from "./change";
+export type { ChangeDetails } from "./change";
 export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
 export { createStore } from "./reactive";
 export type { Store } from "./reactive";

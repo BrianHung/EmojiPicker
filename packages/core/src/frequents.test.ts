@@ -25,17 +25,20 @@ describe("frequency store", () => {
     expect(store.top(5)).not.toBe(five);
   });
 
-  it("reports picks, removals and clears, and leaves controlled entries to their owner", () => {
+  it("reports picks, removals and clears; controlled entries stay with their owner, and cancel() keeps them", () => {
     const onFrequentsChange = vi.fn();
     const frequents = { "1f525": { count: 2, lastUsed: Date.now() } };
     const store = createFrequencyStore({ frequents, onFrequentsChange, frequentsStorage: null });
     store.record("1f44d");
-    expect(onFrequentsChange).toHaveBeenLastCalledWith(expect.objectContaining({ "1f44d": expect.objectContaining({ count: 1 }) }), { reason: "pick", emoji: "1f44d" });
+    expect(onFrequentsChange).toHaveBeenLastCalledWith(expect.objectContaining({ "1f44d": expect.objectContaining({ count: 1 }) }), expect.objectContaining({ reason: "pick", emoji: "1f44d" }));
     store.remove("1f525");
-    expect(onFrequentsChange).toHaveBeenLastCalledWith({}, { reason: "remove", emoji: "1f525" });
+    expect(onFrequentsChange).toHaveBeenLastCalledWith({}, expect.objectContaining({ reason: "remove", emoji: "1f525" }));
     store.clear();
-    expect(onFrequentsChange).toHaveBeenLastCalledWith({}, { reason: "clear" });
+    expect(onFrequentsChange).toHaveBeenLastCalledWith({}, expect.objectContaining({ reason: "clear" }));
     expect(store.entries()).toBe(frequents);
+    const canceled = createFrequencyStore({ onFrequentsChange: (_, details) => details.cancel(), frequentsStorage: null });
+    canceled.record("1f44d");
+    expect(canceled.entries()).toEqual({});
   });
 
   it("persists through its storage and picks up writes from elsewhere while subscribed", () => {
