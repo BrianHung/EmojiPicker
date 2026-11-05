@@ -49,6 +49,7 @@ export type {
   CustomEmoji,
   CustomEmojiSource,
   Dataset,
+  EmojiDataInput,
   EmojiDataSource,
   EmojiItem,
   EmojiRecord,

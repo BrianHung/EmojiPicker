@@ -1,4 +1,4 @@
-import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord, type SkinToneValue } from "./dataset";
+import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { customRecords, customSources, inlineCustomEmojis, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
@@ -7,7 +7,7 @@ import type { CompletionOrder, SearchIndex } from "./search/search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
-export type EmojiDataSource = Dataset | string | ((options: { signal: AbortSignal }) => Promise<Dataset>);
+export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { signal: AbortSignal }) => Promise<Dataset | EmojiDataInput>);
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
@@ -91,9 +91,9 @@ export type EmojiStore = ReturnType<typeof createEmojiStore>;
 const defaultEngine = lexical();
 const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customs: [], customGroups: new Map(), packErrors: [] };
 
-type Loaded = { dataset: Dataset; packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] } };
+type Loaded = { dataset: Dataset | EmojiDataInput; packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] } };
 
-function ingest({ dataset, packs }: Loaded, all: readonly EmojiRecord[], base: readonly EmojiRecord[], locale: string | undefined): EmojiData {
+function ingest(dataset: Dataset, { packs }: Loaded, all: readonly EmojiRecord[], base: readonly EmojiRecord[], locale: string | undefined): EmojiData {
   const byCode = new Map(all.map((r) => [r.unified, r]));
   const records = [...base, ...customRecords(packs.emojis, base.length, (u) => byCode.get(u.toLowerCase()))];
   const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
@@ -122,12 +122,14 @@ export function createEmojiStore({
   let raw = inline(config);
   let base: readonly EmojiRecord[] = [];
   let controller: AbortController | null = null;
+  const normalize = memo(toDataset);
   const expand = memo(expandDataset);
   const build = (next: Loaded) => {
     raw = next;
-    const all = expand(next.dataset);
+    const dataset = normalize(next.dataset);
+    const all = expand(dataset);
     base = config.filter ? all.filter(config.filter) : all;
-    return ingest(next, all, base, config.locale);
+    return ingest(dataset, next, all, base, config.locale);
   };
   const state = createStore<EmojiStoreState, EmojiStoreAction>(
     {
@@ -284,18 +286,18 @@ export function createEmojiStore({
 
 const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 && n <= SKIN_TONES.length ? (n as SkinToneValue) : 0);
 
-const byUrl = new Map<string, Promise<Dataset>>();
+const byUrl = new Map<string, Promise<Dataset | EmojiDataInput>>();
 
-function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset> {
+function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset | EmojiDataInput> {
   if (typeof source === "function") return source({ signal });
   if (typeof source !== "string") return Promise.resolve(source);
   return byUrl.get(source) ?? fetchDataset(source);
 }
 
-function fetchDataset(url: string): Promise<Dataset> {
+function fetchDataset(url: string): Promise<Dataset | EmojiDataInput> {
   const pending = fetch(url, { priority: "low" } as RequestInit).then((response) => {
     if (!response.ok) throw new Error(`emoji data: ${response.status} ${response.statusText}`);
-    return response.json() as Promise<Dataset>;
+    return response.json() as Promise<Dataset | EmojiDataInput>;
   });
   pending.catch(() => byUrl.delete(url));
   byUrl.set(url, pending);

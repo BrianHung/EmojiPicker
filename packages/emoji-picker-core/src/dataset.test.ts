@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
-import { expandDataset, unifiedToNative, withTone, type Dataset } from "./dataset";
+import { expandDataset, toDataset, unifiedToNative, withTone, type Dataset } from "./dataset";
 
 const records = expandDataset(data as unknown as Dataset);
 
@@ -27,5 +27,20 @@ describe("dataset", () => {
   it("has Slack shortcodes, matched without FE0F", () => {
     expect(records.find((r) => r.emoji === "❤️")?.shortcodes).toContain("heart");
     expect(records.find((r) => r.emoji === "👍")?.shortcodes).toEqual(["+1", "thumbsup"]);
+  });
+
+  it("normalizes the hand-written form", () => {
+    const [heart, frog] = expandDataset(
+      toDataset({
+        locale: "en",
+        groups: [{ id: "animals_nature", label: "Animals" }],
+        emojis: [
+          { emoji: "❤️", label: "heart", group: "smileys_people" },
+          { unified: "1F438", label: "frog", tags: ["toad"], shortcodes: ["frog"], group: "animals_nature", version: 0.6 },
+        ],
+      }),
+    );
+    expect(heart).toMatchObject({ unified: "2764-fe0f", emoji: "❤️", group: "smileys_people", version: 0, tones: [] });
+    expect(frog).toMatchObject({ unified: "1f438", emoji: "🐸", tags: ["toad"], shortcodes: ["frog"], group: "animals_nature", version: 0.6 });
   });
 });

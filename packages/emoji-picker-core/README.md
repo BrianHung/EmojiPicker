@@ -30,6 +30,17 @@ Build a dataset for another locale with the `build-data` command (`npm install -
 npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
+`data` also takes a hand-written `EmojiDataInput`, converted to the compact format on load:
+
+```ts
+const data: EmojiDataInput = {
+  locale: "en",
+  groups: [{ id: "smileys_people", label: "Smileys & People" }],
+  emojis: [{ emoji: "😀", label: "grinning face", tags: ["smile"], shortcodes: ["grinning"], group: "smileys_people" }],
+};
+createEmojiStore({ data });
+```
+
 See the [`@brianhung/emoji-picker` README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/emoji-picker#readme) for the full API.
 
 ## Bring your own search

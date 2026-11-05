@@ -5,7 +5,7 @@ export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./freq
 export { twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer } from "./platform";
 export { isUnified, nativeToUnified, unifiedToNative, withoutFe0f, withTone, withoutTone } from "./dataset";
-export type { Dataset, DatasetEmoji, EmojiRecord, Group, SkinToneValue } from "./dataset";
+export type { Dataset, DatasetEmoji, EmojiDataInput, EmojiRecord, Group, SkinToneValue } from "./dataset";
 export type { CompletionOrder, EmojiSearch, SearchContext, SearchHit, SearchIndex, SearchIndexOptions, ShortcodeCompletion } from "./search";
 export { createTokenizer, normalizer } from "./search";
 export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./search";
