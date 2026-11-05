@@ -3,10 +3,8 @@ import type { EmojiRecord } from "../core/dataset";
 import { createSearch, type SearchState } from "../core/query";
 import { emitter } from "../core/reactive";
 import type { ShortcodeCompletion } from "../core/search-index";
-import { findShortcodeTrigger } from "../core/shortcodes";
 import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type SuggestionsOptions, type SuggestionsSnapshot } from "../core/suggestions";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
-import { useForcedColorsHighlight } from "./style-sheet";
 
 /** Top `n` emoji (base unified codes) by decayed frequency, filled with defaults. */
 export function useFrequentEmoji(n = 5): readonly string[] {
@@ -61,7 +59,6 @@ export function useEmojiSearchState(query: string, { limit = 50 }: { limit?: num
 
 export type ShortcodeSuggestion = ShortcodeCompletion;
 
-export type AutocompleteResult = { value: string; caret: number };
 
 export type { KeyLike };
 
@@ -70,7 +67,7 @@ export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> &
   query: string;
 };
 
-export type EmojiSuggestions = SuggestionsSnapshot & {
+export type EmojiSuggestionsState = SuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
   /** Choose a suggestion (the highlighted one by default): records it as used and calls onChoose. */
   choose(index?: number): void;
@@ -91,7 +88,7 @@ export type EmojiSuggestions = SuggestionsSnapshot & {
  * Headless emoji suggestions for a query you already extracted (core's `createEmojiSuggestions`).
  * Use it where something else finds the trigger and forwards its key events.
  */
-export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestions {
+export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestionsState {
   const { store } = useEmojiContext();
   const id = React.useId();
   const [machine] = React.useState(() => createEmojiSuggestions(store, { ...options, id }));
@@ -100,9 +97,8 @@ export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSugg
 }
 
 /** React state of a suggestions store made elsewhere: an editor plugin's (`emojiTypeahead`). */
-export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestions {
+export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestionsState {
   useEmojiStatus();
-  useForcedColorsHighlight();
   const snapshot = React.useSyncExternalStore(machine.subscribe, machine.getSnapshot, machine.getSnapshot);
   return {
     ...snapshot,
@@ -124,52 +120,3 @@ export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSugg
   };
 }
 
-export type ShortcodeAutocompleteOptions = Pick<EmojiSuggestionsOptions, "limit" | "matchBy" | "order" | "columns"> & {
-  /** Current text and caret position of the input. */
-  value: string;
-  caret: number;
-  /**
-   * What a choice inserts: the emoji (iMessage) or the `:shortcode:` text
-   * (Slack, rendered on send with `store.replaceShortcodes`). Custom emoji
-   * always insert their shortcode. Default "emoji".
-   */
-  insert?: "emoji" | "shortcode";
-  /** Called with the new text and caret when a suggestion is chosen. */
-  onChoose?: (result: AutocompleteResult, suggestion: ShortcodeSuggestion) => void;
-};
-
-export type ShortcodeAutocomplete = Omit<EmojiSuggestions, "activeDescendant"> & {
-  /** The new value and caret for a suggestion, without choosing it. */
-  apply(suggestion: ShortcodeSuggestion): AutocompleteResult;
-  /** ARIA combobox wiring for the text input. */
-  getInputProps(): Record<string, string | boolean | undefined>;
-};
-
-/**
- * Headless `:tada` → 🎉 autocomplete for a textarea, input or editor: you
- * render the popup however you like; this owns matching, highlight,
- * keyboard handling and ARIA.
- */
-export function useShortcodeAutocomplete({ value, caret, limit, insert = "emoji", columns, matchBy, order, onChoose }: ShortcodeAutocompleteOptions): ShortcodeAutocomplete {
-  const match = findShortcodeTrigger(value.slice(0, caret));
-  const typed = match?.query ?? "";
-  const start = match?.offset ?? caret;
-  // Called only after `core` exists (on choose, or by the caller).
-  const apply = (suggestion: ShortcodeSuggestion): AutocompleteResult => {
-    const text = `${core.textFor(suggestion, insert)} `;
-    return { value: value.slice(0, start) + text + value.slice(caret), caret: start + text.length };
-  };
-  // The same shortcode typed at another position is a new query: key it by position too.
-  const { activeDescendant, ...core } = useEmojiSuggestions({ query: typed, resetKey: `${start}:${typed}`, limit, matchBy, order, columns, onChoose: (s) => onChoose?.(apply(s), s) });
-  return {
-    ...core,
-    apply,
-    getInputProps: () => ({
-      role: "combobox",
-      "aria-autocomplete": "list",
-      "aria-expanded": core.open,
-      "aria-controls": core.open ? core.getListProps().id : undefined,
-      "aria-activedescendant": activeDescendant,
-    }),
-  };
-}

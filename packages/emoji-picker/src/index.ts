@@ -1,5 +1,3 @@
-import { EmojiSuggestions as Suggestions } from "./floating-ui";
-import type { EmojiSuggestions as SuggestionsState } from "./react/hooks";
 export { EmojiProvider, useEmojiStore } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps } from "./react/provider";
 export * as EmojiPicker from "./react/parts";
@@ -24,7 +22,7 @@ export type { KeyboardAction, Keymap } from "./react/keymap";
 export type { PickerKeyboardEvent, PickerKeyboardEventHandler } from "./react/keyboard";
 export type { EmojiSearch, SearchContext, SearchHit } from "./core/search";
 export { Tapback } from "./react/tapback";
-export { EmojiPopover, pickerInitialFocus, useEmojiPopover } from "./floating-ui";
+export { EmojiPopover, EmojiSuggestions, pickerInitialFocus, useEmojiPopover } from "./floating-ui";
 export type { PopoverAnchor, PopoverContentProps, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./floating-ui";
 export type { TapbackProps } from "./react/tapback";
 export { Emoji, useEmoji } from "./react/emoji";
@@ -33,8 +31,8 @@ export type { Artwork, ArtworkMap, EmojiOverridesProps } from "./react/overrides
 export type { EmojiProps } from "./react/emoji";
 export { resolveEmoji } from "./core/resolve";
 export type { EmojiInput, ResolvedEmoji } from "./core/resolve";
-export { useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiSuggestions, useFrequentEmoji, useShortcodeAutocomplete, useSkinTone } from "./react/hooks";
-export type { AutocompleteResult, EmojiSearchState, EmojiSuggestionsOptions, KeyLike, ShortcodeAutocomplete, ShortcodeAutocompleteOptions, ShortcodeSuggestion } from "./react/hooks";
+export { useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiSuggestions, useFrequentEmoji, useSkinTone } from "./react/hooks";
+export type { EmojiSearchState, EmojiSuggestionsOptions, EmojiSuggestionsState, KeyLike, ShortcodeSuggestion } from "./react/hooks";
 export { findShortcodeTrigger, isComposingKey } from "./core/shortcodes";
 export { useEmojiTypeahead, useEmojiTypeaheadStore } from "./react/typeahead";
 export type { EmojiTrigger, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore } from "./react/typeahead";
@@ -43,13 +41,9 @@ export { useTextFieldEmojiTypeahead } from "./react/typeahead-text-field";
 export { createFrequencyStore, memoryStorage, DEFAULT_FREQUENT } from "./core/frequents";
 export { defaultLabels, plural } from "./core/labels";
 export type { PluralForms, SkinToneNames } from "./core/labels";
-export type { FrequencyStorage, FrequencyStore, FrequencyStoreOptions } from "./core/frequents";
+export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./core/frequents";
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiDataSource, EmojiSelection } from "./core/store";
 export type { Dataset, EmojiRecord } from "./core/dataset";
 export type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./core/search-index";
 export { TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./core/platform";
 export type { Renderer } from "./core/platform";
-
-/** `EmojiSuggestions.Popover`; as a type, what `useEmojiSuggestions` returns. */
-export const EmojiSuggestions = Suggestions;
-export type EmojiSuggestions = SuggestionsState;

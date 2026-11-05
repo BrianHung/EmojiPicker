@@ -15,7 +15,7 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - Keyboard moves scroll only the picker's own viewport, never the page.
 - With `List.SectionActions`, Tab from an emoji goes to the next section's actions (Shift+Tab: its own), as if they were in reading order.
 - `EmojiPopover`: Tab out of the content (also from a toolbar inside, which moves focus itself) returns to the page after the trigger and closes.
-- `EmojiPopover` (both adapters): a picker with no search field to focus focuses its current emoji once its grid renders; the trigger has `aria-haspopup="dialog"` and `aria-expanded`; the picker fits the space left (`--available-height`, capped at the viewport less 16px) and scrolls inside.
+- `EmojiPopover` (both adapters): a picker with no search field to focus focuses its current emoji once its grid renders; the trigger has `aria-haspopup="dialog"` and `aria-expanded`; the content sets `--available-height`, which a picker's `max-height` can use to fit the space left and scroll inside.
 
 ### Added
 
@@ -44,12 +44,14 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - A highlight or hover move re-renders only the cells it leaves and enters (and what shows the active emoji): the highlight lives in the core state, each cell subscribes to its own, and the List and Root don't; the cell it lands on takes focus or virtual focus itself. `useEmojiCell(state, item)` does the same for `useEmojiGrid`'s cells (`useEmojiGrid` returns `state`; `getCellProps` is removed).
 - `EmojiPopover.Content finalFocus` (both adapters; Base UI's name): where focus goes once a pick closes the content, instead of the trigger (other closes return to it). An element, a ref, or a function returning one.
 - Skin-tone variations per emoji (Shift+Space on the highlighted or focused emoji, or a long press) open a row of its six tones over it: a `listbox` (`data-slot="variations"`, options `data-slot="emoji"`) named by `labels.skinTone`, focused on the current tone; Left/Right, Home and End move along it, Enter or Space picks, Escape closes back to the emoji. `Root disableVariations` turns them off.
+- No injected CSS: the structural stylesheet, the forced-colors stylesheet and `Root cssLayer` and `nonce` are gone. What a part needs to lay out is inline and driven by the size variables (a cell's size, a title's height, the viewport's scroll axis, the column sizer for `columns`, a skin-tone menu's `position: absolute`, a hidden Panel); everything visual is your classes (see the registry item): the Root's flex column, a cell's centering, the emoji font (`--emoji-font-family`, defaulted in `tokens.css`), forced-colors outlines, reduced motion, a popover's `max-height: var(--available-height)`.
+- Controlled state, Base UI style: Root `query` / `defaultQuery` / `onQueryChange` (was `search` / `defaultSearch` / `onSearchChange`), `value` / `defaultValue` / `onValueChange` (was `List value`, and `useEmojiGrid`'s), `highlightedEmoji` / `defaultHighlightedEmoji` / `onHighlightedEmojiChange`, and `reactions` with `reactionsOpen` / `defaultReactionsOpen` / `onReactionsOpenChange` (Root has `data-reactions-open`). The provider's skin tone: `skinTone` / `defaultSkinTone` / `onSkinToneChange`, persisted by `skinToneStorage` (localStorage `emoji-picker:skin-tone` by default, `null` for memory). Core `createPickerState` takes `query`, `defaultQuery`, `onQueryChange` and `defaultHighlighted`.
+- Renamed: the provider's `search` engine is `searchEngine`; the `useEmojiSuggestions` state type is `EmojiSuggestionsState` (`EmojiSuggestions` is only the value, `EmojiSuggestions.Popover`); `FrequencyStorage` is `EmojiStorage`; `useSearchState()` returns `query`.
+- `useTextFieldEmojiTypeahead` opens on a field that starts with a `:query` (caret taken at the end while unfocused), until focus first lands elsewhere.
 - The package ships one module per source file: a bundler loads only what you import (`Emoji` alone is ~8 KB gzipped over React; the popover and tapback load only when used).
 
-### Deprecated
-
-- `Root colorScheme`: the picker draws no colors of its own. It now only sets `color-scheme` on Root; use `tokens.css` or your own CSS.
-
 ### Removed
+
+- Root `searchPlaceholder` and `autoFocusSearch` (`Search.Input` takes `placeholder` and `autoFocus`), `artwork` (wrap it in `EmojiOverrides`), `colorScheme`, `cssLayer` and `nonce`; `useSearchActions` (control `query`); `useShortcodeAutocomplete` and its types (`useTextFieldEmojiTypeahead`).
 
 - Output no longer contains emoji-picker-react markup (`epr-*` classes, `data-epr-*` attributes, `--epr-*` variables). Style `data-slot` and `data-*` attributes; CSS that targeted `[data-epr-part=category-content]` maps to `fitColumns` and `--emoji-list-padding-end`.

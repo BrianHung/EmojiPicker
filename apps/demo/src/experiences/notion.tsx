@@ -9,7 +9,7 @@ import * as React from "react";
 import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeaheadOptions, type KeyLike, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
-import { useStyleTokens } from "@/styles/style-picker";
+import { OPTION, tokensOf } from "@/styles/style";
 import type { EmojiMenuProps } from ".";
 
 export const notionEmojiOptions: EmojiTypeaheadOptions = { matchBy: "search", limit: 200 };
@@ -41,7 +41,6 @@ function step(sections: Section[], at: number, key: string): number | null {
 }
 
 export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, keyHandler, className, container = false }: EmojiMenuProps & { container?: HTMLElement | false }) {
-  useStyleTokens(notion.id, notion.layout.tokens);
   const store = useEmojiStore();
   const sections = React.useMemo(() => sectionsOf(menu.suggestions), [menu.suggestions]);
   const order = React.useMemo(() => sections.flatMap((s) => s.items), [sections]);
@@ -92,6 +91,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
     <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={container} className={className}>
       <div
         data-style={notion.id}
+        style={tokensOf(notion)}
         className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
       >
         <div ref={scroller} {...menu.getListProps()} aria-label="Emoji suggestions" className="relative min-h-0 flex-1 overflow-y-auto pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent]">
@@ -110,7 +110,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
                       {...menu.getOptionProps(index)}
                       aria-label={s.record.name}
                       onPointerMove={() => at !== highlighted && move(at)}
-                      className="flex h-8 cursor-pointer items-center justify-center rounded-[4px] data-[highlighted]:bg-picker-selected"
+                      className={`flex h-8 cursor-pointer items-center justify-center rounded-[4px] data-[highlighted]:bg-picker-selected ${OPTION}`}
                     >
                       <Emoji emoji={store.withSkinTone(s.record.unified)} size={24} className="text-[24px] leading-none" />
                     </div>

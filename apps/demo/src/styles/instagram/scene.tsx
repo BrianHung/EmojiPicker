@@ -4,7 +4,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, ld, useCompact, useLongPress } from "@/styles/scene-kit";
-import { StylePicker } from "@/styles/style-picker";
+import { tokensOf } from "@/styles/style";
 
 const W = 720;
 const H = 640;
@@ -306,7 +306,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
         initialFocus={anchor ? first : undefined}
         aria-label="Reactions"
       >
-        <ReactionRow data-style="instagram" className={tb.className} aria-label="Reactions">
+        <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={tb.className} aria-label="Reactions">
           <div className={tb.reactions}>
             {tb.pinned!.map((u, i) => (
               <button
@@ -334,7 +334,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
                 </EmojiPopover.Trigger>
                 <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker">
                   <FitViewport width={instagram.size.width}>
-                    <StylePicker layout={instagram.layout} onSelect={onSelect} autoFocus />
+                    <instagram.Picker onSelect={onSelect} autoFocus />
                   </FitViewport>
                 </EmojiPopover.Content>
               </EmojiPopover.Root>

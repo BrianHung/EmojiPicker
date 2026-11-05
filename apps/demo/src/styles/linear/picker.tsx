@@ -1,4 +1,7 @@
-import { type Style, type Tokens } from "@/styles/style-picker";
+import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker";
+import { cn } from "@/lib/utils";
+import { SearchClear } from "@/styles/parts";
+import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(lch(100 0 282), lch(12.72 0.85 272))",
@@ -21,25 +24,49 @@ const tokens: Tokens = {
 
 const POPUP = "rounded-picker border-[0.5px] border-picker-border bg-picker-background shadow-picker";
 
+export const LINEAR_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently used" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "travel_places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
+
+export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+  return (
+    <EmojiPicker.Root
+      columns={fluid ? undefined : 9}
+      fitColumns={false}
+      frequent={18}
+      categories={LINEAR_CATEGORIES}
+      searchResults={searchResults}
+      onSelect={onSelect}
+      data-style="linear"
+      style={tokens}
+      className={cn(ROOT, "h-[321px] w-[273px] font-picker text-picker-foreground [--emoji-cell-size:28px] [--emoji-header-height:28px] [--emoji-image-size:20px] [--emoji-list-padding:9.5px] [--emoji-size:19px]", POPUP, className)}
+    >
+      {search ? (
+        <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
+          <EmojiPicker.Search.Input placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle">
+            <SearchClear />
+          </EmojiPicker.Search.Input>
+        </EmojiPicker.Search>
+      ) : null}
+      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
+        <EmojiPicker.List className="outline-none">
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted" />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[highlighted]:bg-picker-selected")} />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
+        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
+
 export const linear: Style = {
   id: "linear",
   label: "Linear",
+  tokens,
+  Picker: LinearPicker,
   size: { width: 273, height: 321 },
-  layout: {
-    id: "linear",
-    tokens,
-    root: `h-[321px] w-[273px] ${POPUP} font-picker text-picker-foreground [--emoji-size:19px] [--emoji-cell-size:28px] [--emoji-image-size:20px] [--emoji-header-height:28px] [--emoji-list-padding:9.5px]`,
-    columns: 9,
-    frequent: 18,
-    placeholder: "Search emoji…",
-    cell: "rounded-[8px] hover:bg-picker-hover data-[highlighted]:bg-picker-selected data-focus-visible:bg-picker-selected",
-    header: "h-7 bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted",
-    searchRow: "border-b border-(--linear-divider) px-[5px] pt-1 pb-1",
-    input: "h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",
-    scrollbar: "overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]",
-    fixedColumns: true,
-    categories: [{ id: "suggested", name: "Frequently used" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "travel_places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
-  },
   tapback: {
     className: `flex w-fit flex-col overflow-hidden ${POPUP}`,
     reactions: "flex items-center gap-0.5 p-1 [--emoji-image-size:18px] [&_button]:flex [&_button]:size-7 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[8px] [&_button]:text-[18px] [&_button:hover]:bg-picker-hover",

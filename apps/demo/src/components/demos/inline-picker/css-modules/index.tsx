@@ -3,7 +3,7 @@ import styles from "./index.module.css";
 
 export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {
   return (
-    <EmojiPicker.Root onSelect={onSelect} autoFocusSearch={false} className={styles.root}>
+    <EmojiPicker.Root onSelect={onSelect} className={styles.root}>
       <EmojiPicker.Search className={styles.search}>
         <EmojiPicker.Search.Input className={styles.input} />
         <EmojiPicker.SkinTone>

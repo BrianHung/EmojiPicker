@@ -1,7 +1,7 @@
 // Japanese and Chinese input: while an IME composes, its keys (the Enter that commits, arrows over candidates,
 // Escape that cancels) belong to the IME, so nothing sends, picks, moves or closes.
 import type { CDPSession, Locator, Page } from "@playwright/test";
-import { card } from "./surfaces";
+import { card, clearTextField } from "./surfaces";
 import { expect, frames, quiet, test, visit } from "./support";
 
 async function ime(page: Page) {
@@ -30,6 +30,7 @@ for (const c of COMPOSERS)
     await visit(page, c.path);
     const field = card(page).getByLabel(c.label, { exact: true });
     await field.focus();
+    await clearTextField(field);
     await page.keyboard.type("hi ");
     const keys = await ime(page);
     await keys.compose("にほん");

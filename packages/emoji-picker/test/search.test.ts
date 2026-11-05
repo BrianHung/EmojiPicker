@@ -106,7 +106,7 @@ describe("store.query", () => {
       data: data as unknown as Dataset,
       customEmojis: [{ id: "shipit", name: "shipit", shortcodes: ["shipit"], tags: ["squirrel"], imageUrl: "/shipit.png" }],
       frequents: createFrequencyStore({ storage: memoryStorage() }),
-      search: remote(async (q, { records }) => records.filter((r) => r.name.includes(q)).map((r) => r.unified)),
+      searchEngine: remote(async (q, { records }) => records.filter((r) => r.name.includes(q)).map((r) => r.unified)),
     });
     await store.load();
     const out = await store.query("shipit");
@@ -118,7 +118,7 @@ describe("store.query", () => {
     const store = createEmojiStore({
       data: data as unknown as Dataset,
       frequents: createFrequencyStore({ storage: memoryStorage() }),
-      search: progressive(lexical(), remote(async () => ["1f680"])),
+      searchEngine: progressive(lexical(), remote(async () => ["1f680"])),
     });
     await store.load();
     const out = store.query("fire");

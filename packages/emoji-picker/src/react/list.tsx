@@ -11,7 +11,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "../core/sections";
-import { usePicker } from "./context";
+import { usePicker, ViewportContext } from "./context";
 import { isRtl, useEmojiCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "./keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
@@ -42,9 +42,6 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
   rows?: number;
   /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
   searchRows?: number;
-
-  /** A value picker (a page icon): the emoji shown as chosen, with `aria-selected`. Compared without skin tone. */
-  value?: string | null;
   /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
   onLoadMore?: () => void;
   /** A page is loading: the end of the list shows `loadingMore`. */
@@ -53,6 +50,7 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
 };
 
 const CellsContext = React.createContext<Cells | null>(null);
+const HorizontalContext = React.createContext(false);
 const TemplateContext = React.createContext<(section: EmojiSection) => React.ReactNode>(() => null);
 
 const PROBE: React.CSSProperties = {
@@ -70,6 +68,11 @@ const PROBE: React.CSSProperties = {
   paddingBottom: "var(--emoji-section-min-width, 0px)",
   marginRight: "var(--emoji-list-padding-end, var(--ep-pad))",
 };
+
+const HORIZONTAL: React.CSSProperties = { flex: "none", width: "max-content" };
+const UNPADDED = { "--ep-glyph-pad": "0px" } as React.CSSProperties;
+/** Sizes a picker without a width to `columns`. */
+const COLUMNS: React.CSSProperties = { height: 0, width: "calc(var(--ep-columns) * var(--ep-cell) + 2 * var(--ep-pad))", maxWidth: "100%" };
 
 /**
  * A row height in layout units (1/64 px) at the element's CSS zoom, as the browser lays out a flow
@@ -90,12 +93,14 @@ function readProbe(probe: HTMLElement): GridMetrics {
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
 const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
-  { children, orientation = "vertical", rows = 5, searchRows, onKeyDown, value, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest },
+  { children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest },
   ref,
 ) {
   const picker = usePicker("EmojiPicker.List");
   const { searching } = picker;
   const horizontal = orientation === "horizontal";
+  const setViewportOrientation = React.useContext(ViewportContext);
+  React.useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
 
   const { sections, request, probeRoot } = useGridSections(horizontal);
   const loader = Boolean(onLoadMore && !searching);
@@ -218,7 +223,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, value, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 
@@ -262,6 +267,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
 
   return (
     <CellsContext.Provider value={grid.cells}>
+      <HorizontalContext.Provider value={horizontal}>
       <TemplateContext.Provider value={template}>
         <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
           {renderElement(
@@ -270,10 +276,11 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
               ...rest,
               ...grid.gridProps,
               className,
-              style,
+              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
               render,
               children: (
                 <>
+                  {picker.columns && !horizontal ? <div aria-hidden style={COLUMNS} /> : null}
                   <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
                   <div ref={probeRef} aria-hidden style={PROBE} />
                   {collection.size === 0 ? (
@@ -290,6 +297,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
         {grid.variations}
         {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} /> : null}
       </TemplateContext.Provider>
+      </HorizontalContext.Provider>
     </CellsContext.Provider>
   );
 });
@@ -342,7 +350,7 @@ export type SectionProps = Omit<PartElementProps<SectionState, HTMLElement>, "ch
 };
 
 /** A section of the list (a `group`): its title, items and title actions. */
-const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ children, ...props }, ref) {
+const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ children, style, ...props }, ref) {
   const cells = React.useContext(CellsContext)!;
   const { section, groupProps } = useSection("Section");
   const parts = collectParts(children);
@@ -357,6 +365,8 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
           "data-category": section.category,
           "data-collapsed": section.collapsed || undefined,
           ...props,
+          // The whole section's height: its title sticks within it.
+          style: (s: SectionState) => ({ height: "100%", ...resolve(style, s) }),
           ref,
           children: <VirtualBranch parent={section.id} />,
         },
@@ -369,9 +379,13 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
 export type SectionTitleProps = PartElementProps<SectionState, HTMLElement>;
 
 /** A section's title, text in the listbox, sticky where the layout puts it. Children default to the section's name. */
-const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function SectionTitle({ children, ...props }, ref) {
+const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function SectionTitle({ children, style, ...props }, ref) {
   const { section, headingProps } = useSection("SectionTitle");
-  return renderElement("header", { ...headingProps, className: props.className, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, ...props, ref, children: children ?? section.name }, { section, collapsed: section.collapsed });
+  return renderElement(
+    "header",
+    { ...headingProps, className: props.className, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, ...props, style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }), ref, children: children ?? section.name },
+    { section, collapsed: section.collapsed },
+  );
 });
 
 function SectionHeader() {
@@ -401,10 +415,14 @@ const Cell = React.forwardRef<HTMLElement, CellProps>(function Cell({ className,
   const cells = React.useContext(CellsContext);
   const item = React.useContext(ItemContext);
   if (!cells || !item) throw new Error("EmojiPicker.List.Cell must be inside List.Items.");
+  const horizontal = React.useContext(HorizontalContext);
   const { cellProps, state } = useEmojiCell(cells, item);
   const refs = React.useMemo(() => mergeRefs(cellProps.ref, ref), [cellProps.ref, ref]);
-  return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style, render, children: children ?? cellProps.children }, state);
+  return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style: (s: CellState) => ({ ...(horizontal ? FILL : CELL), ...resolve(style, s) }), render, children: children ?? cellProps.children }, state);
 });
+
+const CELL: React.CSSProperties = { width: "var(--ep-cell)", height: "var(--ep-cell)", maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)" };
+const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 
 type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
 const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
@@ -509,7 +527,7 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
                 ...props,
                 "data-slot": SLOTS.headerActions,
                 "data-section": s.id,
-                style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "none", ...resolve(style, st) }),
+                style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
                 children,
               },
               state,

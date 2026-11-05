@@ -84,9 +84,9 @@ export function Demo() {
         ) : null}
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
-        {/* The provider reads `search` once: remount it per backend, and when the model arrives. */}
-        <EmojiProvider key={`${tab}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} search={search}>
-          <EmojiPickerCard search={query} onSearchChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
+        {/* The provider reads `searchEngine` once: remount it per backend, and when the model arrives. */}
+        <EmojiProvider key={`${tab}:${device.state}`} data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} searchEngine={search}>
+          <EmojiPickerCard query={query} onQueryChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
         </EmojiProvider>
         <p className="min-h-5 text-sm text-muted-foreground tabular-nums" data-testid="status" aria-live="polite">
           {status}

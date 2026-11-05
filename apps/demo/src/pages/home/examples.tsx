@@ -257,8 +257,8 @@ function SearchExample() {
       <Chips label="Search engine" value={engine} onChange={setEngine} options={Object.entries(ENGINES).map(([id, e]) => [id as EngineId, e.label])} />
       <Chips label="Results" value={mode} onChange={setMode} options={[["ranked", "Ranked"], ["grouped", "Grouped"]]} />
       {/* Remount per engine: provider options are read once, like a store. */}
-      <EmojiProvider key={engine} data={enUrl} search={current.search}>
-        <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} searchResults={mode} search={query} onSearchChange={setQuery} />
+      <EmojiProvider key={engine} data={enUrl} searchEngine={current.search}>
+        <EmojiPickerCard onSelect={setPicked} searchResults={mode} query={query} onQueryChange={setQuery} />
       </EmojiProvider>
     </Example>
   );
@@ -310,7 +310,7 @@ function RenderingExample() {
   const body = (
     <div className="flex flex-col items-center gap-4">
       <EmojiTapback onSelect={setPicked} />
-      <EmojiPickerCard autoFocusSearch={false} footer={false} onSelect={setPicked} className="h-[300px]" />
+      <EmojiPickerCard footer={false} onSelect={setPicked} className="h-[300px]" />
     </div>
   );
   return (
@@ -375,7 +375,7 @@ function CustomEmojiExample() {
       ]}
     >
       <EmojiProvider data={enUrl} customEmojis={BUFO_PACK_URL}>
-        <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} categories={CUSTOM_CATEGORIES} />
+        <EmojiPickerCard onSelect={setPicked} categories={CUSTOM_CATEGORIES} />
       </EmojiProvider>
     </Example>
   );
@@ -511,7 +511,7 @@ function RowsExample() {
     >
       {/* The old Rows and cells example's anchor. */}
       <span id="rows-and-cells" className="sr-only" aria-hidden />
-      <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} rows={<QuickRow onPick={setPicked} />} cell={roundCell} columns={7} frequent={false} className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]" />
+      <EmojiPickerCard onSelect={setPicked} rows={<QuickRow onPick={setPicked} />} cell={roundCell} columns={7} frequent={false} className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]" />
     </Example>
   );
 }

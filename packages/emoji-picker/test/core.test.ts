@@ -143,6 +143,22 @@ describe("store", () => {
     expect(store.search("partyparrot")[0]?.imageUrl).toBe("/parrot.gif");
     expect(store.select("parrot")).toMatchObject({ emoji: "", isCustom: true });
   });
+
+  it("persists an uncontrolled skin tone and only reports a controlled one", () => {
+    const skinToneStorage = memoryStorage();
+    const own = createEmojiStore({ data: dataset, skinToneStorage });
+    own.setSkinTone(3);
+    expect(createEmojiStore({ data: dataset, skinToneStorage }).skinTone()).toBe(3);
+
+    const onSkinToneChange = vi.fn();
+    const controlled = createEmojiStore({ data: dataset, skinTone: 2, onSkinToneChange, skinToneStorage });
+    controlled.setSkinTone(5);
+    expect(controlled.skinTone()).toBe(2);
+    expect(onSkinToneChange).toHaveBeenCalledWith(5);
+    controlled.controlSkinTone(5, onSkinToneChange);
+    expect(controlled.skinTone()).toBe(5);
+    expect(skinToneStorage.read()).toBe("3");
+  });
 });
 
 describe("platform", () => {

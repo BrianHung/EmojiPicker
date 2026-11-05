@@ -144,7 +144,7 @@ const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(f
       "aria-label": group,
       "data-slot": SLOTS.skinToneOptions,
       "data-orientation": orientation,
-      style: (s: SkinToneOptionsState) => (orientation === "vertical" ? { flexDirection: "column", ...resolve(style, s) } : resolve(style, s)),
+      style: (s: SkinToneOptionsState) => ({ position: "absolute", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
       children: TONES.map((t) => <OptionContext.Provider key={t} value={t}>{children ? children(t) : <SkinToneOption tone={t} />}</OptionContext.Provider>),
     },
     { orientation, tone },

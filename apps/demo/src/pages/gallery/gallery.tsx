@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CodeBlock, CopyButton } from "@/components/site/code";
 import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
-import { SCENES, STYLES, StylePicker, sourceOf, type Style } from "@/styles";
+import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
 import { toggleReaction, type Reaction } from "@/styles/scene-kit";
 import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
@@ -53,6 +53,9 @@ function GalleryCard({ title, description, code, file, children, className, prev
   );
 }
 
+/** The card starts mid-shortcode, so its `:` menu shows without typing. */
+const DRAFT = ":smi";
+
 function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
   const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}) });
@@ -62,6 +65,7 @@ function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
       <input
         ref={ref}
         aria-label="Message"
+        defaultValue={DRAFT}
         placeholder="Type :smiling or :tad"
         className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
@@ -103,7 +107,7 @@ function InlineDemo({ appStyle }: { appStyle: Style }) {
   return (
     <div className="flex w-full flex-col items-center gap-3">
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>
-        <StylePicker layout={appStyle.layout} onSelect={setPicked} />
+        <appStyle.Picker onSelect={setPicked} />
       </FitBox>
     </div>
   );
@@ -159,7 +163,7 @@ export function GalleryPage() {
         <GalleryCard
           title="Sheet"
           description="A picker docked at full width."
-          code={`<StylePicker layout={${appStyle.id}.layout} className="h-[340px] rounded-none border-0 shadow-none" />`}
+          code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`}
           file={file}
           previewClassName="items-end p-0 pt-6"
         >
@@ -167,7 +171,7 @@ export function GalleryPage() {
           <FitBox width={appStyle.size.width} height={361} className="items-end">
             <div className="overflow-hidden rounded-t-[20px] border border-b-0 border-border bg-background" style={{ width: appStyle.size.width }}>
               <div className="mx-auto my-2 h-1 w-9 rounded-full bg-muted-foreground/30" />
-              <StylePicker layout={appStyle.layout} className="h-[340px] w-full rounded-none border-0 shadow-none" />
+              <appStyle.Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />
             </div>
           </FitBox>
         </GalleryCard>

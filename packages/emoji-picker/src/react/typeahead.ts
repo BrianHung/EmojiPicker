@@ -2,7 +2,7 @@ import * as React from "react";
 import { isComposingKey } from "../core/shortcodes";
 import type { EmojiStore } from "../core/store";
 import type { EmojiSuggestionsMachine } from "../core/suggestions";
-import { useEmojiSuggestions, useSuggestionsStore, type EmojiSuggestions, type EmojiSuggestionsOptions, type KeyLike, type ShortcodeSuggestion } from "./hooks";
+import { useEmojiSuggestions, useSuggestionsStore, type EmojiSuggestionsOptions, type EmojiSuggestionsState, type KeyLike, type ShortcodeSuggestion } from "./hooks";
 import { useEmojiContext } from "./provider";
 
 /** What an editor tells `useEmojiTypeahead` while a `:query` is being typed. */
@@ -25,7 +25,7 @@ export type EmojiTypeahead = {
   query: string;
   open: boolean;
   anchor: () => DOMRect | null;
-  suggestions: EmojiSuggestions;
+  suggestions: EmojiSuggestionsState;
   dismiss(): void;
   /** Forward the editor's keydown here; true when it handled (and prevented) the key. */
   onKeyDown(event: KeyLike): boolean;
@@ -73,7 +73,7 @@ export function useEmojiTypeaheadStore<T extends EmojiTypeaheadStore>(
   return { ...rest, query: suggestions.query, open: suggestions.open, anchor, suggestions, dismiss: suggestions.dismiss, onKeyDown: keydown, keyHandler };
 }
 
-function useComboboxAttributes(element: (() => HTMLElement | null | undefined) | undefined, { open, activeDescendant, getListProps, dismiss }: EmojiSuggestions) {
+function useComboboxAttributes(element: (() => HTMLElement | null | undefined) | undefined, { open, activeDescendant, getListProps, dismiss }: EmojiSuggestionsState) {
   const listId = getListProps().id;
   const dismissed = React.useRef(dismiss);
   dismissed.current = dismiss;

@@ -1,4 +1,4 @@
-export type FrequencyStorage = {
+export type EmojiStorage = {
   read(): string | null;
   write(value: string): void;
 };
@@ -18,7 +18,7 @@ export type FrequencyStore = {
 
 export type FrequencyStoreOptions = {
   /** Default: localStorage under `key` (memory only when unavailable). */
-  storage?: FrequencyStorage;
+  storage?: EmojiStorage;
   key?: string;
   /** A use counts half as much after this many days. Default 14. */
   halfLifeDays?: number;
@@ -104,7 +104,7 @@ function parse(raw: string | null): Record<string, Entry> {
 }
 
 /** localStorage, falling back to memory where it's missing or throws (SSR, private mode). */
-export function localStorageAdapter(key: string): FrequencyStorage {
+export function localStorageAdapter(key: string): EmojiStorage {
   let memory: string | null = null;
   return {
     read() {
@@ -125,7 +125,7 @@ export function localStorageAdapter(key: string): FrequencyStorage {
   };
 }
 
-export const memoryStorage = (): FrequencyStorage => {
+export const memoryStorage = (): EmojiStorage => {
   let value: string | null = null;
   return { read: () => value, write: (v) => void (value = v) };
 };

@@ -20,6 +20,9 @@ export type VariationsProps = {
   onClose(restore: boolean): void;
 };
 
+const ROW: React.CSSProperties = { zIndex: 4, display: "flex", background: "var(--emoji-picker-background, Canvas)", borderRadius: "var(--emoji-picker-radius, 8px)", boxShadow: "var(--emoji-picker-shadow, 0 4px 12px rgb(0 0 0 / 0.15))" };
+const OPTION: React.CSSProperties = { position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "var(--ep-cell)", height: "var(--ep-cell)", overflow: "hidden", cursor: "default" };
+
 export function Variations({ record, style, onPick, onClose }: VariationsProps) {
   const { store, labels } = usePicker("EmojiPicker.List");
   const row = React.useRef<HTMLDivElement | null>(null);
@@ -55,7 +58,7 @@ export function Variations({ record, style, onPick, onClose }: VariationsProps) 
       aria-label={labels.skinTone}
       aria-orientation="horizontal"
       data-slot={SLOTS.variations}
-      style={style}
+      style={{ ...ROW, ...style }}
       onBlur={(e) => !e.currentTarget.contains(e.relatedTarget as Node | null) && onClose(false)}
     >
       {variants.map((unified, i) => (
@@ -67,6 +70,7 @@ export function Variations({ record, style, onPick, onClose }: VariationsProps) 
           tabIndex={i === current ? 0 : -1}
           data-slot={SLOTS.emoji}
           data-unified={unified}
+          style={OPTION}
           onClick={() => onPick(unified)}
         >
           <Glyph unified={unified} record={record} />

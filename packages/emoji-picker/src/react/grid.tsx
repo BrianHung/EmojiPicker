@@ -130,7 +130,7 @@ export function useGridSections(horizontal: boolean) {
   return { sections: picker.searching ? picker.sections : categories, request, probeRoot };
 }
 
-type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | "aria-labelledby"> & {
+type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labelledby"> & {
   sections: readonly EmojiSection[];
   geometry: GridGeometry;
   orientation: "vertical" | "horizontal";
@@ -141,9 +141,9 @@ type ControllerOptions = Pick<ListProps, "value" | "onKeyDown" | "aria-label" | 
 };
 
 /** The grid's state, its listbox props and its cells' context. */
-export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, value, onKeyDown, ...aria }: ControllerOptions) {
+export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
-  const { labels, searching, focusModel } = picker;
+  const { labels, searching, focusModel, value } = picker;
   const { navigation } = geometry;
   const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => baseOf(i.unified) === baseOf(value)).map((i) => i.id))), [value, sections]);
@@ -615,8 +615,6 @@ export type UseEmojiGridOptions = {
    * Without it the grid's scroll container is scrolled directly.
    */
   scrollToIndex?: (index: number, options: { align: "start" | "end" }) => void;
-  /** A value picker: the emoji shown as chosen, with `aria-selected`. */
-  value?: string | null;
   "aria-label"?: string;
 };
 
@@ -632,7 +630,7 @@ function windowOf(list: HTMLElement | null) {
  * rows (core/grid), and props for the grid, the section titles and the cells, with the keyboard,
  * highlight, hover, presses and skin-tone variations of EmojiPicker.List. Inside EmojiPicker.Root.
  */
-export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, value, "aria-label": label }: UseEmojiGridOptions) {
+export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions) {
   const picker = usePicker("useEmojiGrid");
   const { sections, request, probeRoot } = useGridSections(false);
   const grid = React.useMemo(() => createEmojiGrid(sections, { columns: columns ?? picker.columns ?? 9, rowHeight, headerHeight }), [sections, columns, picker.columns, rowHeight, headerHeight]);
@@ -686,7 +684,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
       },
     };
   });
-  const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, value, "aria-label": label });
+  const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, "aria-label": label });
 
   // After each render and scroll: the search highlight, the tab stop, the current section, and probes of what's shown.
   const sync = React.useRef(() => {});
