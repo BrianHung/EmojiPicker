@@ -31,6 +31,24 @@ In the workspace, the site resolves the packages to their TypeScript source thro
 
 Visual baselines are local: capture them with `npm run test:baseline -w demo`. CI ([ci.yml](.github/workflows/ci.yml)) runs Biome, typecheck, unit tests, the builds, the size budgets, the data package's validation, a packed-install smoke test, the other e2e specs against a production build, and axe. [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
 
+## API conventions
+
+Base UI's surface, React Aria's engine. Base UI wins on API shape; React Aria wins on behaviour.
+
+| Rule | Source |
+|---|---|
+| Parts compose (`EmojiPicker.Root`, `List.Cell`); types are namespaced on the part (`EmojiPicker.Root.Props`, `.State`, `.Actions`) beside flat aliases | Base UI |
+| Every part takes `render`, `className` and `style`, each a value or a function of state | Base UI |
+| State is `x` / `defaultX` / `onXChange(value, details)`; `details` is `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` | Base UI |
+| Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `imperative-action`, `none` | Base UI |
+| Imperative calls go through `actionsRef`; `event.preventEmojiPickerHandler()` skips a part's own key handling | Base UI |
+| State attributes: `data-highlighted`, `data-selected`, `data-pressed`, `data-disabled`, `data-open` / `data-closed`, `data-popup-open`, `data-starting-style` / `data-ending-style` | Base UI |
+| ARIA patterns, focus management, virtual focus (`aria-activedescendant`) and keyboard delegates | React Aria |
+| Press, hover and focus-ring state through `usePress`, `useHover`, `useFocusRing` (`data-hovered`, `data-focus-visible`) | React Aria |
+| Locale, RTL and collation through `I18nProvider` and `useLocale` | React Aria |
+| Collections take render-function children and `renderEmptyState`; layout and virtualization follow `Virtualizer` / `Layout` | React Aria |
+| Headless hooks return prop getters (`getListProps`, `getOptionProps`), as `useAutocomplete` returns `inputProps` and `collectionProps` | React Aria |
+
 ## Releasing
 
 Changes to a published package come with a changeset (`npm run changeset`). The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account:

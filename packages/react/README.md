@@ -93,6 +93,17 @@ Each part renders a default when it has no children, and takes `render` (an elem
 | `onKeyDown`, `actionsRef`, `keyboardTarget` | See [Keyboard](#keyboard) |
 | `disableVariations` | Disables the long-press skin-tone menu |
 
+Every part but `List` can be your own Base UI, React Aria, or shadcn/ui component on a hook:
+
+| Part | Seam |
+|---|---|
+| `Search` | `useSearchState()` for the query and count; an input you render drives the grid as `keyboardTarget` |
+| `SkinTone` | `useSkinTone()` returns `[tone, setTone]` |
+| `CategoryNav` | `useCategoryNavigation()` returns `{ categories, activeCategory, jumpToCategory }` |
+| `Reactions` | `useFrequentEmoji({ limit })` for the items, `useEmojiPickerActions()` to pick or expand |
+| `EmojiPopover` | Any popover, with `pickerInitialFocus` as its initial focus |
+| `List` | Owned here, since Base UI has no virtualization; bring a virtualizer with `useEmojiGrid` and `useEmojiCell` |
+
 `List.SectionActions` renders controls over a sticky title, outside the listbox; its `toggle` and `toggleProps` collapse the section. `<List orientation="horizontal" rows={5} />` lays sections side by side; `searchRows` sets rows for results. `List renderEmptyState({ status, query, error, retry })` renders while data loads (`"loading"`), after it fails (`"error"`), and when nothing matches (`"empty"`).
 
 ## Provider
@@ -160,7 +171,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 </EmojiPopover.Root>
 ```
 
-Content exposes `data-starting-style`, `data-ending-style`, `data-state`, `data-side`, `data-align`, `--transform-origin`, `--available-width`, and `--available-height` for CSS transitions.
+Content exposes `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin`, `--available-width`, and `--available-height` for CSS transitions.
 
 ## Typeahead
 
@@ -217,7 +228,7 @@ Parts handle their keys with React Aria: arrows, Page Up/Down, Home/End and Ente
 
 ## Styling
 
-Each part has a `data-slot` prefixed `emoji-picker-` (`emoji-picker-search-input`, `emoji-picker-list`, `emoji-picker-emoji`, …) and state attributes: `data-highlighted`, `data-active`, `data-collapsed`, `data-searching`, `data-empty`, `data-disabled`, `data-has-variations`, `data-state`, and React Aria's `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, `data-selected`.
+Each part has a `data-slot` prefixed `emoji-picker-` (`emoji-picker-search-input`, `emoji-picker-list`, `emoji-picker-emoji`, …) and Base UI's state attributes: `data-highlighted` (the highlighted cell while focus stays in a search field or keyboard target), `data-selected`, `data-pressed`, `data-disabled`, `data-active` (the category tab in view, as on `Tabs.Tab`), `data-open` and `data-closed` on popups, `data-popup-open` on their triggers, and `data-starting-style` / `data-ending-style`. `data-hovered` (no hover on touch), `data-focus-visible`, and `data-focused` (real DOM focus, on the list, tabs and search field) come from React Aria. Emoji-specific: `data-unified`, `data-section`, `data-row`, `data-column`, `data-index`, `data-overridden`, `data-has-variations`, `data-collapsed`, `data-searching`, `data-empty`, `data-orientation`.
 
 ```css
 [data-slot="emoji-picker-emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
