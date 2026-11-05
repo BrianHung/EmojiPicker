@@ -48,6 +48,24 @@ export function mergeFrequents(a: Frequents, b: Frequents): Frequents {
   return capped(merged, Date.now());
 }
 
+export type FrequentsAction = { type: "pick"; emoji: string; now: number } | { type: "remove"; emoji: string } | { type: "clear" };
+
+export function reduceFrequents(entries: Frequents, action: FrequentsAction): Frequents {
+  switch (action.type) {
+    case "pick": {
+      const prev = entries[action.emoji];
+      return capped({ ...entries, [action.emoji]: { count: (prev ? decayed(prev, action.now) : 0) + 1, lastUsed: action.now } }, action.now);
+    }
+    case "remove": {
+      if (!(action.emoji in entries)) return entries;
+      const { [action.emoji]: _, ...rest } = entries;
+      return rest;
+    }
+    case "clear":
+      return NONE;
+  }
+}
+
 type FrequencyState = { own: Frequents; controlled: Frequents | undefined };
 type FrequencyAction = { type: "own"; entries: Frequents } | { type: "control"; entries: Frequents | undefined };
 
@@ -66,8 +84,10 @@ export function createFrequencyStore({
   const entries = () => store.getSnapshot().controlled ?? store.getSnapshot().own;
   const tops = new WeakMap<Frequents, Map<number, readonly string[]>>();
 
-  const change = (next: Frequents, reason: FrequentsChangeDetails["reason"], emoji?: string) => {
-    const details = Object.assign(createChangeDetails(reason), { emoji });
+  const change = (action: FrequentsAction) => {
+    const next = reduceFrequents(entries(), action);
+    if (next === entries()) return;
+    const details = Object.assign(createChangeDetails(action.type), { emoji: "emoji" in action ? action.emoji : undefined });
     callbacks.onFrequentsChange?.(next, details);
     if (details.isCanceled || store.getSnapshot().controlled !== undefined) return;
     frequentsStorage?.write(JSON.stringify(next));
@@ -75,17 +95,9 @@ export function createFrequencyStore({
   };
 
   return {
-    record(unified) {
-      const now = Date.now();
-      const prev = entries()[unified];
-      change(capped({ ...entries(), [unified]: { count: (prev ? decayed(prev, now) : 0) + 1, lastUsed: now } }, now), "pick", unified);
-    },
-    remove(unified) {
-      if (!(unified in entries())) return;
-      const { [unified]: _, ...rest } = entries();
-      change(rest, "remove", unified);
-    },
-    clear: () => change(NONE, "clear"),
+    record: (emoji) => change({ type: "pick", emoji, now: Date.now() }),
+    remove: (emoji) => change({ type: "remove", emoji }),
+    clear: () => change({ type: "clear" }),
     top(n) {
       const state = entries();
       const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
