@@ -82,7 +82,7 @@ const reduce = (state: EmojiStoreState, action: EmojiStoreAction): EmojiStoreSta
 export type EmojiStore = ReturnType<typeof createEmojiStore>;
 
 const defaultEngine = lexical();
-const CODEPOINTS = /^[\da-f]+(?:-[\da-f]+)*$/i;
+const CODEPOINTS = /^[\da-f-]+$/i;
 const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customs: [], customGroups: new Map(), packErrors: [] };
 
 type Raw = [dataset: Dataset, packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] }];
@@ -132,13 +132,7 @@ export function createEmojiStore({
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
-  const known = new WeakMap<readonly string[], WeakMap<EmojiData, Map<string, readonly string[]>>>();
-  const knownFrequents = (ranked: readonly string[], data: EmojiData, isReady: boolean, n: number) =>
-    cached(
-      cached(cached(known, ranked, () => new WeakMap()), data, () => new Map()),
-      `${isReady}:${n}`,
-      () => ranked.filter((u) => (isReady ? data.byUnified.has(u.toLowerCase()) || data.byUnified.has(u) : CODEPOINTS.test(u))).slice(0, n),
-    );
+  const frequentOf = new Map<number, (ranked: readonly string[], data: EmojiData, isReady: boolean) => readonly string[]>();
   const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale, collator }));
 
@@ -206,7 +200,7 @@ export function createEmojiStore({
 
     get: (unified: string) => loaded().byUnified.get(unified.toLowerCase()) ?? loaded().byUnified.get(unified),
 
-    frequent: (n: number): readonly string[] => knownFrequents(frequents.top(Number.POSITIVE_INFINITY), loaded(), ready(), n),
+    frequent: (n: number) => cached(frequentOf, n, () => memo((ranked: readonly string[], _data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? store.get(u) : CODEPOINTS.test(u))).slice(0, n)))(frequents.top(Infinity), loaded(), ready()),
 
     index(): SearchIndex {
       if (!ready()) throw new Error("emoji data is not loaded; await store.load() first");
