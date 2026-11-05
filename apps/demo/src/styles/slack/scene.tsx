@@ -7,7 +7,7 @@ import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Smile, SmilePlus } from "@/styles/icons";
-import { PickerSheet, toggleReaction, useCompact, type Reaction } from "@/styles/scene-kit";
+import { PickerSheet, SceneFrame, toggleReaction, useCompact, type Reaction } from "@/styles/scene-kit";
 import { StyleDropdown, StylePills } from "@/styles/variants";
 import { slack } from "./picker";
 
@@ -85,12 +85,7 @@ export function SlackScene() {
 
   return (
     <div ref={ref} className="w-full">
-      <div
-        className={cn(
-          "mx-auto flex h-[640px] w-full max-w-[560px] flex-col overflow-hidden rounded-xl border border-[#dddddd] bg-white font-[Lato,system-ui,sans-serif] text-[#1d1c1d] shadow-2xl dark:border-[#35373b] dark:bg-[#1a1d21] dark:text-[#d1d2d3]",
-          compact && "rounded-none border-0 shadow-none",
-        )}
-      >
+      <Frame compact={compact}>
         <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
           <span className="text-[18px] leading-6 font-black"># general</span>
           <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
@@ -101,8 +96,19 @@ export function SlackScene() {
           ))}
         </div>
         <SlackComposer onSend={send} compact={compact} />
-      </div>
+      </Frame>
     </div>
+  );
+}
+
+const SURFACE = "flex flex-col bg-white font-[Lato,system-ui,sans-serif] text-[#1d1c1d] dark:bg-[#1a1d21] dark:text-[#d1d2d3]";
+
+function Frame({ compact, children }: { compact: boolean; children: React.ReactNode }) {
+  if (compact) return <div className={cn(SURFACE, "h-[640px] w-full overflow-hidden")}>{children}</div>;
+  return (
+    <SceneFrame label="Slack style channel" className={cn(SURFACE, "border-[#dddddd] dark:border-[#35373b]")}>
+      {children}
+    </SceneFrame>
   );
 }
 

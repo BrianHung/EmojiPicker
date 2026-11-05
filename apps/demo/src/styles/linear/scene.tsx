@@ -13,8 +13,6 @@ import { CELL, ROOT, tokensOf, type StylePickerProps } from "@/styles/style";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 import { Avatar, EmojiText, FitViewport, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
 
-const W = 1000;
-const H = 800;
 
 const C = {
   window: ld("lch(94.44 0.5 282)", "lch(2.595 0.4 272)"),
@@ -83,8 +81,8 @@ function useIssue() {
 function IssueFrame({ issue }: { issue: ReturnType<typeof useIssue> }) {
   const { icon, setIcon, reactions, setReactions, comments, toggleComment, send, scroller } = issue;
   return (
-    <SceneFrame width={W} height={H} label="Linear style issue" appStyle={linear} className="rounded-xl shadow-2xl" style={{ ...FRAME, background: C.window }}>
-      <div className={cn("absolute inset-[8.5px] flex flex-col overflow-hidden rounded-[12px]", CARD_SHADOW)} style={{ background: C.panel, border: `0.5px solid ${C.panelBorder}` }}>
+    <SceneFrame label="Linear style issue" appStyle={linear} style={{ ...FRAME, background: C.panel, borderColor: C.panelBorder }}>
+      <div className="absolute inset-0 flex flex-col overflow-hidden">
         <Breadcrumb icon={icon} />
         <div className="flex min-h-0 flex-1">
           <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pb-10 [scrollbar-width:none]">

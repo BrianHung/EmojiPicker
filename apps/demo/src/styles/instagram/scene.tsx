@@ -7,8 +7,6 @@ import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, ld, useCompact, useLongPress } from "@/styles/scene-kit";
 import { tokensOf } from "@/styles/style";
 
-const W = 720;
-const H = 640;
 
 const C = {
   page: ld("#ffffff", "#0c1014"),
@@ -59,11 +57,9 @@ export function InstagramScene() {
         </MobileFrame>
       ) : (
         <SceneFrame
-          width={W}
-          height={H}
           label="Instagram style direct messages"
           appStyle={instagram}
-          className="flex flex-col rounded-[12px] shadow-2xl ring-1 ring-black/10 dark:ring-white/10"
+          className="flex flex-col border-black/10 dark:border-white/10"
           style={{ background: C.page, color: C.text, fontFamily: FONT }}
         >
           <Header />
