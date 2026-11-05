@@ -4,7 +4,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { PAGE_SCROLLS } from "./known-issues";
 import { SURFACES, type Kind, type Surface } from "./surfaces";
-import { expect, fileName, frames, matchFixture, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
+import { expect, fileName, matchFixture, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
 
 /**
  * The navigation keys, in order, per kind of surface. A `:` menu owns only ArrowUp/Down: the other keys

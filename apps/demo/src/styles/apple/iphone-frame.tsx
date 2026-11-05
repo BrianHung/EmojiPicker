@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 
 const SCREEN = { width: 402, height: 874, radius: 62.7 } as const;
 const RIM = 8.5;

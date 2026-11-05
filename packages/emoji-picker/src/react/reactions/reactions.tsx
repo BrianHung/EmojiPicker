@@ -141,7 +141,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     if (active && active !== document.body && !(root?.contains(active) && active.closest("[inert],[hidden]"))) return;
     el.querySelector<HTMLElement>(`${BUTTONS}:not([tabindex="-1"])`)?.focus({ preventScroll: true });
   }, [state?.open]);
-  if (!state || !state.open) return null;
+  if (!state?.open) return null;
   const content =
     typeof children === "function" || children === undefined ? (
       <>

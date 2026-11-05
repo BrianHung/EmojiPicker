@@ -194,7 +194,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
   );
 
-  const escape = () => {
+  const onEscape = () => {
     if (query) {
       state.setQuery("");
       list.current?.clear();
@@ -220,7 +220,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   );
 
   return (
-    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={escape} focusSearch={focusSearch} variations={(target) => Boolean(list.current?.variations(target))} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
+    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={onEscape} focusSearch={focusSearch} variations={(target) => Boolean(list.current?.variations(target))} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
       {(keyboard) =>
         renderElement(
           "aside",

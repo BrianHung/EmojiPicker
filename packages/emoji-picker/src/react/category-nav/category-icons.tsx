@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 
 const dot = (cx: number, cy: number) => <circle cx={cx} cy={cy} r={1.1} fill="currentColor" stroke="none" />;
 

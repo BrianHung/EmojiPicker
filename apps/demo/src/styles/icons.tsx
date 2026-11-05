@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 
 type IconProps = React.SVGProps<SVGSVGElement> & { size?: number; strokeWidth?: number };
 
@@ -12,9 +12,7 @@ const icon = (paths: React.ReactNode) =>
   };
 
 const Utensils = icon(
-  <>
-    <path d="M7 3v7a2 2 0 0 0 4 0V3M9 10v11M17 21V3c-2 1.5-3 4-3 7v3h3" />
-  </>,
+  <path d="M7 3v7a2 2 0 0 0 4 0V3M9 10v11M17 21V3c-2 1.5-3 4-3 7v3h3" />,
 );
 export const Plus = icon(<path d="M12 5v14M5 12h14" />);
 const Clock = icon(

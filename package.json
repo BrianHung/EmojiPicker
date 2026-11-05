@@ -10,6 +10,12 @@
     "dev": "npm run dev -w demo",
     "build": "npm run build -w @brianhung/emoji-picker && npm run build -w demo",
     "test": "npm test -w @brianhung/emoji-picker",
-    "typecheck": "npm run typecheck --workspaces"
+    "typecheck": "npm run typecheck --workspaces",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.5"
   }
 }

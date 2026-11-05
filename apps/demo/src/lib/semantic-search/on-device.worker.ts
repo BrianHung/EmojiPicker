@@ -42,7 +42,7 @@ async function load({ model, index, custom: customUrl }: Extract<WorkerRequest, 
     fetchIndex(index),
     customUrl ? fetchIndex(customUrl) : Promise.resolve(null),
   ]);
-  await extract(QUERY_PREFIX + "warm up", { pooling: "cls", normalize: true });
+  await extract(`${QUERY_PREFIX}warm up`, { pooling: "cls", normalize: true });
   post({ type: "ready", loadMs: Math.round(performance.now() - start), device: "wasm" });
 }
 

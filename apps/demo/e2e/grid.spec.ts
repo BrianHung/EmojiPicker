@@ -47,7 +47,7 @@ test("moving up never hides the highlighted emoji under a sticky section title",
 
 test("forced colors: the highlighted emoji and suggestion keep a visible outline", async ({ page }) => {
   await page.emulateMedia({ forcedColors: "active" });
-  const outline = (el: Element) => getComputedStyle(el).outlineStyle + " " + getComputedStyle(el).outlineWidth;
+  const outline = (el: Element) => `${getComputedStyle(el).outlineStyle} ${getComputedStyle(el).outlineWidth}`;
   await visit(page, "/");
   await focusSearch(page);
   expect(await highlighted(page).evaluate(outline)).toBe("solid 2px");

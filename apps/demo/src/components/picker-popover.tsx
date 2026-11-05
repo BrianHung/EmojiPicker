@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import type { EmojiSelection, PopoverFinalFocus } from "@brianhung/emoji-picker";
 import { EmojiPopover as FloatingPopover } from "@brianhung/emoji-picker/floating-ui";
 import { EmojiPopover as AriaPopover } from "@brianhung/emoji-picker/react-aria";

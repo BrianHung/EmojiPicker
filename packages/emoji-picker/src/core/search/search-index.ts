@@ -153,14 +153,14 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
         offer(id, code, code === p ? 0 : offset === 0 ? 1 : 2, [offset, offset + p.length]);
       }
       // Codes typed with separators (":smiling_f") only match as a whole prefix.
-      if (/[_\-]/.test(p)) {
+      if (/[_-]/.test(p)) {
         for (let j = lowerBound(shortcodeKeys, p); j < shortcodeKeys.length && shortcodeKeys[j]!.startsWith(p); j++) {
           const [code, id] = shortcodeList[j]!;
           offer(id, code, code === p ? 0 : 1, [0, p.length]);
         }
       }
       // 3: name or tag matches ("smiling" → :blush: via "smiling face with smiling eyes"), shown by their first code.
-      if (!/[_\-]/.test(p)) for (const record of api.search(p, limit * 2)) {
+      if (!/[_-]/.test(p)) for (const record of api.search(p, limit * 2)) {
         const id = idOf.get(record)!;
         if (record.shortcodes[0]) offer(id, normalize(record.shortcodes[0]), 3, null);
       }

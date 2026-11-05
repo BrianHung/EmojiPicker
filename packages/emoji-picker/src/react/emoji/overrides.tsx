@@ -20,7 +20,7 @@ export function findArtwork(map: ArtworkMap, unified: string): Artwork | undefin
   const code = unified.toLowerCase();
   const candidates = [code, withoutFe0f(code), withoutTone(code), withoutFe0f(withoutTone(code))];
   for (const key of candidates) {
-    if (Object.prototype.hasOwnProperty.call(map, key)) return map[key];
+    if (Object.hasOwn(map, key)) return map[key];
   }
   // Keys written with FE0F where the emoji's code has none ("2764-fe0f" for "2764").
   for (const key of Object.keys(map)) {
