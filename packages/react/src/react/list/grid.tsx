@@ -7,17 +7,16 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiRecord, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
 import { usePicker, type HighlightSource, type ListHandle } from "../root/context";
-import { Glyph } from "../emoji/glyph";
+import { Glyph, useOverridden } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { usePickerKeyDown, type KeyResult } from "../utils/keyboard";
 import type { ListProps } from "./list";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
-import { useEmojiContext } from "../provider/provider";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
@@ -560,11 +559,6 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     selected: isSelected,
   };
   return { props, state };
-}
-
-export function useOverridden(unified: string, record: EmojiRecord | undefined) {
-  const { renderer, image } = useEmojiContext();
-  return renderer === "native" && !record?.imageUrl && image(unified) !== undefined;
 }
 
 declare const gridState: unique symbol;

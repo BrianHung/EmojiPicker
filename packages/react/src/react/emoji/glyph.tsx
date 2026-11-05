@@ -29,3 +29,8 @@ export const Glyph = React.memo(function Glyph({ unified, record, animate = fals
     </span>
   );
 });
+
+export function useOverridden(unified: string, record: EmojiRecord | undefined) {
+  const { renderer, image } = useEmojiContext();
+  return renderer === "native" && !record?.imageUrl && image(unified) !== undefined;
+}
