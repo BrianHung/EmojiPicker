@@ -9,7 +9,8 @@ export default async function warmup(config: FullConfig) {
   for (const path of paths) {
     for (let i = 0; i < 2; i++) {
       await page.goto(baseURL + path);
-      await page.waitForLoadState("networkidle");
+      // Warmup only primes caches; a slow remote asset must not fail the run.
+      await page.waitForLoadState("networkidle").catch(() => {});
     }
   }
   await browser.close();
