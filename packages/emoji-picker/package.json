@@ -131,6 +131,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.20",
+    "@react-aria/live-announcer": "^3.5.1",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",

@@ -35,6 +35,13 @@ class Ear {
     expect(said, why).toMatch(pattern);
     return said;
   }
+
+  /** Types into the focused field and asserts what was said. */
+  async type(text: string, pattern: RegExp, why: string) {
+    const said = await this.hear(() => this.page.keyboard.type(text, { delay: 60 }), pattern);
+    expect(said, why).toMatch(pattern);
+    return said;
+  }
 }
 
 /* ------------------------------------------------------------------ where */
@@ -54,6 +61,13 @@ async function start(page: Page, sr: Reader, path: string, focus: Locator) {
 /* ------------------------------------------------------------------ scenarios */
 
 export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
+  test.afterEach(async ({ sr }, info) => {
+    if (info.status === info.expectedStatus) return;
+    const log = (await sr.spokenPhraseLog()).join("\n");
+    console.log(`Spoken in "${info.title}":\n${log}`);
+    await info.attach("spoken-phrases", { body: log, contentType: "text/plain" });
+  });
+
   test("popover with search: the field is announced, then the result count", async ({ page, sr }) => {
     const ear = await start(page, sr, "/", homePopover(page));
     const opened = await ear.press("Enter", SEARCH, "opening announces the search field by name");
@@ -78,8 +92,7 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     await ear.press("ArrowRight", /medium-light skin tone/, "the next tone");
     await ear.press("Enter", /medium-light skin tone/, "the chosen tone");
     await ear.press("Shift+Tab", SEARCH, "back to the search field");
-    await ear.hear(() => page.keyboard.type("thumbs up", { delay: 60 }));
-    await ear.press("ArrowDown", /thumbs up.{0,40}medium-light skin tone/, "the name includes the tone");
+    await ear.type("thumbs up", /thumbs up.{0,40}medium-light skin tone/, "the highlighted match's name includes the tone");
   });
 
   test("crossing into the next section speaks its name", async ({ page, sr }) => {
@@ -94,8 +107,7 @@ export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     const trigger = homePopover(page);
     const ear = await start(page, sr, "/", trigger);
     await ear.press("Enter", SEARCH, "the search field");
-    await ear.hear(() => page.keyboard.type("thumbs up", { delay: 60 }));
-    await ear.press("ArrowDown", /thumbs up/, "the highlighted result");
+    await ear.type("thumbs up", /thumbs up/, "the highlighted match");
     await ear.press("Enter", /thumbs up[\s\S]*open emoji picker|open emoji picker[\s\S]*thumbs up/, "the pick (toast) and the returning trigger are announced");
     await expect(trigger).toBeFocused();
   });

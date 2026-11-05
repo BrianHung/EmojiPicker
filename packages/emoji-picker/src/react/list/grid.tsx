@@ -20,7 +20,8 @@ import { Glyph } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
 import type { ListProps } from "./list";
-import type { KeyboardAction } from "../root/keymap";
+import { isApplePlatform, type KeyboardAction } from "../root/keymap";
+import { announce } from "@react-aria/live-announcer";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
@@ -34,14 +35,17 @@ import { moveVirtualFocus } from "./virtual-focus";
  * slides cells under a resting pointer, and the browser reports hovers (and moves at
  * the same spot) for them.
  */
-const pointer = { x: NaN, y: NaN, moved: false, tracking: false };
+const pointer = { x: NaN, y: NaN, moved: false, tracking: false, list: null as Element | null, within: false };
 function trackPointer() {
   if (pointer.tracking) return;
   pointer.tracking = true;
   addEventListener(
     "pointermove",
     (e) => {
+      const list = cellOf(e.target)?.closest(`[data-slot="${SLOTS.list}"]`) ?? null;
       pointer.moved = e.clientX !== pointer.x || e.clientY !== pointer.y;
+      pointer.within = list !== null && list === pointer.list;
+      pointer.list = list;
       pointer.x = e.clientX;
       pointer.y = e.clientY;
     },
@@ -159,6 +163,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
   const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
+  // Focus moved by key: a hover takes it back only once the pointer moves within the list, as
+  // VoiceOver moves the pointer to what it reads, which lags behind focus.
+  const keyed = React.useRef(false);
   const latest = React.useRef({ collection, virtual, geometry, searching });
   latest.current = { collection, virtual, geometry, searching };
 
@@ -213,6 +220,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const handle: ListHandle = {
     key(action, from, event) {
       const dom = from === "list";
+      if (dom) keyed.current = true;
       if (action === "select") {
         const key = highlight();
         if (key == null) return false;
@@ -338,8 +346,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const el = listRef.current;
     if (!el) return;
     const onFocusIn = (e: FocusEvent) => {
-      const manager = stateRef.current.selectionManager;
+      const { collection } = latest.current;
       const id = cellOf(e.target)?.getAttribute("data-key");
+      const item = collection.emoji(id);
+      const from = collection.emoji(cellOf(e.relatedTarget)?.getAttribute("data-key"))?.section;
+      // VoiceOver doesn't speak the group focus moves into: announce it with the emoji, as useComboBox does.
+      if (item && from && item.section !== from && isApplePlatform()) announce(`${collection.getTextValue(item.section)}, ${item.label}`);
+      const manager = stateRef.current.selectionManager;
       if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
       manager.setFocusedKey(id);
     };
@@ -370,6 +383,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     // Hover moves the keyboard position: the highlight while the field has focus, focus
     // itself once it's in the grid. Never from outside the picker.
     if (list?.contains(active) && active !== list) {
+      if (keyed.current && !pointer.within) return;
+      keyed.current = false;
       setHighlight(key);
       marks.stop.set(key);
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
@@ -459,6 +474,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       },
       onBlur(e: React.FocusEvent) {
         if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        keyed.current = false;
         core.setDomFocus(false);
         setHighlight(null);
       },

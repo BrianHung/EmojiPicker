@@ -37,7 +37,7 @@ jobs:
       - run: npm run test:sr:voiceover -w demo
       - if: failure()
         uses: actions/upload-artifact@v4
-        with: { name: voiceover-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore }
+        with: { name: voiceover-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore, include-hidden-files: true }
 
   nvda:
     runs-on: windows-latest
@@ -56,4 +56,4 @@ jobs:
       - run: npm run test:sr:nvda -w demo
       - if: failure()
         uses: actions/upload-artifact@v4
-        with: { name: nvda-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore }
+        with: { name: nvda-results, path: apps/demo/e2e/sr/.results, if-no-files-found: ignore, include-hidden-files: true }
