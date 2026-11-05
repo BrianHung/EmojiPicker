@@ -15,26 +15,24 @@ export {
   useActiveEmoji,
   useCategoryNavigation,
   useCollapsedCategories,
+  useEmojiPickerActions,
   useSearchState,
 } from "./react/parts";
 
 export { EmojiProvider, useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
 export type { EmojiLabels, EmojiProviderProps, EmojiSearchState } from "./react/provider";
-export { DEFAULT_KEYMAP } from "./react/root";
 export type {
   CategoryOption,
   CollapsedCategories,
   EmptyProps,
+  EmojiPickerActions,
   EmptyState,
-  FocusModel,
-  KeyboardAction,
-  Keymap,
+  HighlightChangeDetails,
   LoadErrorProps,
   LoadErrorState,
   LoadingProps,
   PickerKeyboardEvent,
   PickerKeyboardEventHandler,
-  PointerModel,
   PreviewProps,
   PreviewState,
   RootProps,

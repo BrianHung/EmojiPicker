@@ -27,7 +27,7 @@ describe("picker state", () => {
     expect(moveHighlight(picker, "right", { columns: 8 })).toBe(second!.id);
     expect(picker.getSnapshot().active).toBe(second);
     picker.hover(first!.id);
-    expect(picker.getSnapshot().active).toBe(first);
+    expect(picker.getSnapshot().active).toBe(second);
 
     expect(picker.choose()).toMatchObject({ emoji: second!.record.emoji, name: second!.record.name });
     picker.toggleCollapsed("flags");
@@ -38,8 +38,8 @@ describe("picker state", () => {
 
   it("leaves a controlled highlight to its owner", async () => {
     const asked: (string | null)[] = [];
-    const options = { frequent: false as const, onHighlightedChange: (id: string | null) => asked.push(id) };
-    const picker = createPickerState(await ready(), { ...options, highlighted: null });
+    const options = { frequent: false as const, onHighlightChange: (id: string | null) => asked.push(id) };
+    const picker = createPickerState(await ready(), { ...options, highlight: null });
     let renders = 0;
     const off = picker.subscribe(() => renders++);
     const [first, second] = picker.getSnapshot().sections[0]!.items;
@@ -49,7 +49,7 @@ describe("picker state", () => {
     expect(picker.getSnapshot().highlighted).toBeNull();
     expect(renders).toBe(0);
 
-    picker.setOptions({ ...options, highlighted: second!.id }, { notify: true });
+    picker.setOptions({ ...options, highlight: second!.id }, { notify: true });
     expect(renders).toBe(1);
     expect(picker.getSnapshot()).toMatchObject({ highlighted: second!.id, active: second });
     expect(picker.choose()).toMatchObject({ emoji: second!.record.emoji });

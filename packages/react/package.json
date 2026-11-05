@@ -85,6 +85,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/use-sync-external-store": "^1.7.0",
+    "jsdom": "^26.1.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",

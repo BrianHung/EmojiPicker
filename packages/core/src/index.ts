@@ -22,7 +22,7 @@ export { findShortcodeTrigger, isComposingKey, nameWithTone } from "./shortcodes
 export { createEmojiSuggestions, syncCombobox } from "./suggestions";
 export type { EmojiSuggestionsMachine, EmojiTrigger, KeyLike, SuggestionsMove, SuggestionsOptions, SuggestionsSnapshot } from "./suggestions";
 export { createPickerState, moveHighlight } from "./picker";
-export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
+export type { HighlightChangeDetails, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
 export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
 export { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, needsImageFallback, onNativeSupportChange, PROBE_BATCH } from "./native";
 export type { NativeSupport } from "./native";

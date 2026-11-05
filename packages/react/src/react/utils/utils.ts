@@ -1,19 +1,14 @@
-export function isApplePlatform(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? "";
-  return /mac|iphone|ipad|ipod/i.test(platform);
-}
-
 function virtuallyFocused(doc: Document): Element | null {
   const active = doc.activeElement;
   const id = active?.getAttribute("aria-activedescendant");
   return (id && doc.getElementById(id)) || active;
 }
 
-export function moveVirtualFocus(to: Element) {
+// The keyboard target isn't blurred: an editor's blur listener would close its menu
+export function moveVirtualFocus(to: Element, owner?: Element | null) {
   const from = virtuallyFocused(to.ownerDocument);
   if (from === to) return;
-  if (from) {
+  if (from && from !== owner) {
     from.dispatchEvent(new FocusEvent("blur", { relatedTarget: to }));
     from.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: to }));
   }

@@ -1,14 +1,13 @@
 import * as React from "react";
-import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiRecord, type EmojiSelection, type PickerStateOptions } from "@brianhung/emoji-picker-core";
+import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiGridMove, type EmojiRecord, type EmojiSelection, isComposingKey, type PickerState, type PickerStateOptions } from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { useCollapse } from "./collapse";
-import { PickerContext, usePicker, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
+import { PickerContext, usePicker, ViewportContext, type EmojiPickerActions, type HighlightChangeDetails, type ListHandle, type PickerContextValue, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "../utils/hold";
 import { mergeProps } from "react-aria/mergeProps";
 import { useControlledState } from "react-stately/useControlledState";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { KeyboardProvider, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
-import type { KeyboardAction } from "./keymap";
+import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { PopoverContext } from "../popover/popover-context";
 import { EmojiContext, EmojiProvider, useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
@@ -25,8 +24,9 @@ export type RootState = { searching: boolean; reactionsOpen: boolean };
 export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "onKeyDown" | "className" | "style" | "defaultValue"> &
   PartProps<RootState> & {
     onSelect?: (selection: EmojiSelection, details: SelectDetails) => void;
-    keymap?: Partial<Record<KeyboardAction, readonly string[]>>;
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
+    actionsRef?: React.Ref<EmojiPickerActions>;
+    keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;
     columns?: number;
     fitColumns?: boolean;
     categories?: readonly CategoryOption[];
@@ -43,15 +43,13 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     value?: string | null;
     defaultValue?: string | null;
     onValueChange?: (unified: string) => void;
-    highlighted?: string | null;
-    defaultHighlighted?: string | null;
-    onHighlightedChange?: (id: string | null) => void;
+    highlight?: string | null;
+    defaultHighlight?: string | null;
+    onHighlightChange?: (emoji: string | null, details: HighlightChangeDetails) => void;
     reactions?: readonly string[];
     reactionsOpen?: boolean;
     defaultReactionsOpen?: boolean;
     onReactionsOpenChange?: (open: boolean) => void;
-    focusModel?: FocusModel;
-    pointerModel?: PointerModel;
     emojiVersion?: number;
     disableVariations?: boolean;
     children: React.ReactNode;
@@ -100,11 +98,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     className,
     style,
     render,
-    keymap,
     onKeyDown,
-    onKeyDownCapture,
-    focusModel = "input",
-    pointerModel = "follows",
+    actionsRef,
+    keyboardTarget,
     children,
     ...rest
   } = props;
@@ -149,20 +145,41 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     },
     [state, reactions, collapseToReactions, setValue],
   );
-  const close = React.useCallback(() => {
-    const { popover } = latest.current;
-    if (!popover) return false;
-    popover.close();
-    return true;
-  }, []);
+  const skinTone = React.useRef<(() => void) | null>(null);
+  const actions = React.useMemo<EmojiPickerActions>(
+    () => ({
+      move: (to) => Boolean(list.current?.move(to)),
+      pick: () => Boolean(list.current?.pick()),
+      highlight: (emoji) => (list.current ? list.current.highlight(emoji) : state.highlight(emoji)),
+      focusSearch() {
+        searchInput.current?.focus();
+        return Boolean(searchInput.current);
+      },
+      clearSearch() {
+        state.setQuery("");
+        list.current?.clear();
+      },
+      close() {
+        const { popover } = latest.current;
+        popover?.close();
+        return Boolean(popover);
+      },
+      toggleSkinTone() {
+        skinTone.current?.();
+        return Boolean(skinTone.current);
+      },
+    }),
+    [state],
+  );
+  React.useImperativeHandle(actionsRef, () => actions, [actions]);
+  const target = React.useCallback(() => (keyboardTarget && "current" in keyboardTarget ? keyboardTarget.current : keyboardTarget) ?? null, [keyboardTarget]);
+  useKeyboardTarget(target, state, list);
 
   const context = React.useMemo<PickerContextValue>(
     () => ({
       store,
       state,
       labels,
-      focusModel,
-      pointer: pointerModel,
       inPopover: Boolean(popover),
       disableVariations,
       columns,
@@ -182,91 +199,104 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       value,
       virtual: view.focus === "virtual",
       pick,
-      close,
+      actions,
+      ownsFocus: (el) => el != null && (el === searchInput.current || el === target()),
+      target,
+      skinTone,
       list,
       root: rootRef,
       searchInput,
-      registerSearch: state.registerSearch,
+      registerInput: state.registerInput,
       listId,
     }),
-    [store, state, labels, focusModel, pointerModel, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, close, listId],
+    [store, state, labels, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed, panel } : null),
     [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
   );
 
-  const onEscape = () => {
-    if (query) {
-      state.setQuery("");
-      list.current?.clear();
+  const keys = usePickerKeyDown(onKeyDown, (e) => {
+    if (e.key === "Escape") {
+      if (!query) return Boolean(list.current?.clear()) || actions.close();
+      actions.clearSearch();
       return true;
     }
-    return Boolean(list.current?.clear()) || close();
-  };
-  const focusSearch = () => {
-    searchInput.current?.focus();
-    return Boolean(searchInput.current);
-  };
+    return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
+  });
   const emptyState = useEmptyStateSlots();
   const count = !searching || pending ? "" : labels.resultCount(results.length);
-  const body = (
-    <PickerContext.Provider value={context}>
-      <ReactionsContext.Provider value={reactionsState}>
-        <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
-      </ReactionsContext.Provider>
-    </PickerContext.Provider>
-  );
 
-  return (
-    <KeyboardProvider
-      keymap={keymap}
-      onKeyDown={onKeyDown}
-      close={onEscape}
-      focusSearch={focusSearch}
-      variations={(target) => Boolean(list.current?.variations(target))}
-      // Composite widgets own their arrow keys, including ones the app renders inside the picker
-      ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}
-    >
-      {(keyboard) =>
-        renderElement(
-          "aside",
-          {
-            ref: mergeRefs(ref, rootRef, keyboard.ref),
-            "data-slot": SLOTS.root,
-            "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
-            ...mergeProps(rest, activeWithin),
-            "data-columns": columns ?? undefined,
-            "data-searching": searching ? "" : undefined,
-            "data-reactions-open": reactionsOpen ? "" : undefined,
-            onKeyDownCapture: (e: React.KeyboardEvent<HTMLElement>) => {
-              onKeyDownCapture?.(e);
-              if (!e.isPropagationStopped()) keyboard.onKeyDownCapture(e);
-            },
-            className,
-            style: (s: RootState) => ({ ...VARIABLES, ...(columns ? { "--ep-columns": columns } : {}), ...resolve(style, s) }) as React.CSSProperties,
-            render,
-            children: (
-              <>
-                {focusModel === "input" ? (
-                  <Autocomplete inputValue={query} onInputChange={state.setQuery}>
-                    {body}
-                  </Autocomplete>
-                ) : (
-                  body
-                )}
-                <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
-                  {count}
-                </span>
-              </>
-            ),
-          },
-          { searching, reactionsOpen },
-        )
-      }
-    </KeyboardProvider>
+  return renderElement(
+    "aside",
+    {
+      ref: mergeRefs(ref, rootRef),
+      "data-slot": SLOTS.root,
+      "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
+      ...mergeProps(rest, activeWithin),
+      "data-columns": columns ?? undefined,
+      "data-searching": searching ? "" : undefined,
+      "data-reactions-open": reactionsOpen ? "" : undefined,
+      onKeyDown: keys,
+      className,
+      style: (s: RootState) => ({ ...VARIABLES, ...(columns ? { "--ep-columns": columns } : {}), ...resolve(style, s) }) as React.CSSProperties,
+      render,
+      children: (
+        <>
+          <Autocomplete inputValue={query} onInputChange={state.setQuery}>
+            <PickerContext.Provider value={context}>
+              <ReactionsContext.Provider value={reactionsState}>
+                <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
+              </ReactionsContext.Provider>
+            </PickerContext.Provider>
+          </Autocomplete>
+          <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+            {count}
+          </span>
+        </>
+      ),
+    },
+    { searching, reactionsOpen },
   );
 });
+
+const isTextField = (el: EventTarget | null) =>
+  el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "checkbox", "radio", "submit", "reset"].includes(el.type)) || (el instanceof HTMLElement && el.isContentEditable);
+
+const TARGET_MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down" };
+
+function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
+  React.useEffect(() => {
+    const el = target();
+    if (!el) return;
+    const unregister = state.registerInput();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (isComposingKey(event) || hasModifier(event)) return;
+      const to = TARGET_MOVES[event.key];
+      const handled = to ? list.current?.move(to, { reason: "keyboard", event }) : event.key === "Enter" && !event.shiftKey && list.current?.pick();
+      if (!handled) return;
+      event.preventDefault();
+      // The editor's own keydown listeners on this element would move the caret too
+      event.stopImmediatePropagation();
+    };
+    el.addEventListener("keydown", onKeyDown, true);
+    return () => {
+      el.removeEventListener("keydown", onKeyDown, true);
+      unregister();
+      el.removeAttribute("aria-activedescendant");
+      el.removeAttribute("aria-controls");
+    };
+  }, [target, state, list]);
+  useStore(state, (s) => (target() ? s.highlighted : null));
+  React.useLayoutEffect(() => {
+    const el = target();
+    const ids = el && list.current?.ids();
+    if (!el || !ids) return;
+    el.setAttribute("aria-controls", ids.list);
+    if (ids.active) el.setAttribute("aria-activedescendant", ids.active);
+    else el.removeAttribute("aria-activedescendant");
+  });
+}
 
 export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props, ref) {
   const root = <PickerRoot {...props} ref={ref} />;
@@ -310,8 +340,7 @@ const FIXED_GUTTER: React.CSSProperties = { scrollbarGutter: "stable" };
 export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function Viewport({ onKeyDown, style, ...props }, ref) {
   const { searching, columns } = usePicker("EmojiPicker.Viewport");
   const [orientation, setOrientation] = React.useState<Orientation>("vertical");
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
+  const keys = usePickerKeyDown(onKeyDown, () => false);
   return (
     <ViewportContext.Provider value={setOrientation}>
       {renderElement(
@@ -321,7 +350,8 @@ export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function
           "data-orientation": orientation,
           "data-searching": searching || undefined,
           ...props,
-          ref: merged,
+          ref,
+          onKeyDown: keys,
           style: (s: ViewportState) => ({ ...SCROLL[s.orientation], ...(columns ? FIXED_GUTTER : null), ...resolve(style, s) }),
         },
         { searching, orientation },

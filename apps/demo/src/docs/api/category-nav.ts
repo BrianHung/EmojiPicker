@@ -5,7 +5,7 @@ export const categoryNav = rowsOf<CategoryNavProps>()([
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
   { name: "children", type: "(category: NavCategory) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab: { id, name, icon }." },
   { name: "className", type: "string | ({ orientation, disabled }) => string | undefined" },
-  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
+  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
 ]);
 
 export const categoryNavTab = rowsOf<CategoryTabProps>()([
