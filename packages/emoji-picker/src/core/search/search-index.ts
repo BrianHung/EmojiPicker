@@ -160,10 +160,11 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
         }
       }
       // 3: name or tag matches ("smiling" → :blush: via "smiling face with smiling eyes"), shown by their first code.
-      if (!/[_-]/.test(p)) for (const record of api.search(p, limit * 2)) {
-        const id = idOf.get(record)!;
-        if (record.shortcodes[0]) offer(id, normalize(record.shortcodes[0]), 3, null);
-      }
+      if (!/[_-]/.test(p))
+        for (const record of api.search(p, limit * 2)) {
+          const id = idOf.get(record)!;
+          if (record.shortcodes[0]) offer(id, normalize(record.shortcodes[0]), 3, null);
+        }
       const relevance = (a: { score: number; shortcode: string; record: EmojiRecord }, b: typeof a) => a.score - b.score || a.shortcode.length - b.shortcode.length || a.record.order - b.record.order;
       // Alphabetical: exact, then prefixes A–Z, then everything else A–Z.
       const tier = (score: number) => (score <= 1 ? score : 2);

@@ -50,8 +50,6 @@ function useTheme(): [Theme, () => void] {
   return [theme, toggle];
 }
 
-
-
 export type Page = "docs" | "gallery" | "examples";
 
 /** Page column widths; the footer aligns with the page's column. */
@@ -72,17 +70,17 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
   React.useEffect(() => write("demo:renderer", renderer), [renderer]);
   return (
     <TooltipProvider>
-    <RendererContext.Provider value={renderer}>
-      {/* Remount on renderer change: provider options are read once. */}
-      <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
-        <div className="flex min-h-svh flex-col">
-          <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />
-          <div className="flex-1">{children}</div>
-          <SiteFooter width={width} />
-        </div>
-        <Toaster />
-      </EmojiProvider>
-    </RendererContext.Provider>
+      <RendererContext.Provider value={renderer}>
+        {/* Remount on renderer change: provider options are read once. */}
+        <EmojiProvider key={renderer} data={enUrl} renderer={renderer}>
+          <div className="flex min-h-svh flex-col">
+            <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />
+            <div className="flex-1">{children}</div>
+            <SiteFooter width={width} />
+          </div>
+          <Toaster />
+        </EmojiProvider>
+      </RendererContext.Provider>
     </TooltipProvider>
   );
 }
@@ -90,8 +88,14 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
 function SiteFooter({ width }: { width: keyof typeof WIDTH }) {
   return (
     <footer className={cn("mx-auto w-full px-4 pt-24 pb-8 text-xs text-muted-foreground sm:px-6", WIDTH[width])}>
-      <a href="https://github.com/jdecked/twemoji" className="underline decoration-current/30 underline-offset-4 transition-colors hover:text-foreground hover:decoration-current">Twemoji</a> graphics by Twitter and jdecked,{" "}
-      <a href="https://creativecommons.org/licenses/by/4.0/" className="underline decoration-current/30 underline-offset-4 transition-colors hover:text-foreground hover:decoration-current">CC-BY 4.0</a>.
+      <a href="https://github.com/jdecked/twemoji" className="underline decoration-current/30 underline-offset-4 transition-colors hover:text-foreground hover:decoration-current">
+        Twemoji
+      </a>{" "}
+      graphics by Twitter and jdecked,{" "}
+      <a href="https://creativecommons.org/licenses/by/4.0/" className="underline decoration-current/30 underline-offset-4 transition-colors hover:text-foreground hover:decoration-current">
+        CC-BY 4.0
+      </a>
+      .
     </footer>
   );
 }

@@ -6,7 +6,10 @@ import type * as I from "./icons";
 const DEFAULT_ORDER = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
 
 /** Sections with the app's tab icons; `hide` keeps sections in the list without a tab. */
-export function withIcons(icons: I.IconSet, { categories = DEFAULT_ORDER.map((id) => ({ id })), size = 20, strokeWidth = 1.75, hide = [] }: { categories?: CategoryOption[]; size?: number; strokeWidth?: number; hide?: string[] } = {}): CategoryOption[] {
+export function withIcons(
+  icons: I.IconSet,
+  { categories = DEFAULT_ORDER.map((id) => ({ id })), size = 20, strokeWidth = 1.75, hide = [] }: { categories?: CategoryOption[]; size?: number; strokeWidth?: number; hide?: string[] } = {},
+): CategoryOption[] {
   return categories.map((c) => {
     const Icon = icons[c.id];
     return { ...c, icon: Icon ? <Icon size={size} strokeWidth={strokeWidth} /> : c.icon, ...(hide.includes(c.id) ? { nav: false } : {}) };

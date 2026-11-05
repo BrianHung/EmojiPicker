@@ -4,7 +4,6 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverState } from "./popover-context";
 import { renderElement, type PartElementProps } from "../utils/render";
 
-
 export type Side = "top" | "bottom";
 export type Align = "start" | "center" | "end";
 type AnchorRect = { top: number; left: number; width: number; height: number };
@@ -171,6 +170,8 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
   const refs = React.useMemo(() => mergeRefs<HTMLElement>(setTrigger, ref as React.Ref<HTMLElement>), [setTrigger, ref]);
-  const merged = triggerProps(mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }));
+  const merged = triggerProps(
+    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }),
+  );
   return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
 });

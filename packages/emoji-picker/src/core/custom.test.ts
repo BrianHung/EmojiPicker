@@ -6,8 +6,7 @@ import { createFrequencyStore, memoryStorage } from "./frequents";
 import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
 const frog = (id: string, extra: Partial<CustomEmoji> = {}): CustomEmoji => ({ id, name: id, imageUrl: `/frogs/${id}.png`, ...extra });
-const storeWith = (customEmojis: EmojiStoreOptions["customEmojis"]) =>
-  createEmojiStore({ data: data as unknown as Dataset, customEmojis, frequents: createFrequencyStore({ storage: memoryStorage() }) });
+const storeWith = (customEmojis: EmojiStoreOptions["customEmojis"]) => createEmojiStore({ data: data as unknown as Dataset, customEmojis, frequents: createFrequencyStore({ storage: memoryStorage() }) });
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -35,18 +34,23 @@ describe("custom emoji", () => {
   });
 
   it("loads packs from loaders and URLs in parallel, keeps the first of a repeated id, and skips a failed pack", async () => {
-    const fetchMock = vi.fn(async (url: string) =>
-      url === "/good.json" ? new Response(JSON.stringify([frog("a"), frog("b")])) : new Response("nope", { status: 404, statusText: "Not Found" }),
-    );
+    const fetchMock = vi.fn(async (url: string) => (url === "/good.json" ? new Response(JSON.stringify([frog("a"), frog("b")])) : new Response("nope", { status: 404, statusText: "Not Found" })));
     vi.stubGlobal("fetch", fetchMock);
     const { emojis, errors } = await loadCustomEmojis([frog("a", { name: "first a" }), "/good.json", "/missing.json", async () => [frog("c")]], new AbortController().signal);
-    expect(emojis.map((e) => [e.id, e.name])).toEqual([["a", "first a"], ["b", "b"], ["c", "c"]]);
+    expect(emojis.map((e) => [e.id, e.name])).toEqual([
+      ["a", "first a"],
+      ["b", "b"],
+      ["c", "c"],
+    ]);
     expect(errors).toHaveLength(1);
     expect(errors[0]!.message).toMatch(/404/);
   });
 
   it("merges pack loading into the store's status, and keeps working without a failed pack", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 500, statusText: "Server Error" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 500, statusText: "Server Error" })),
+    );
     const store = storeWith([async () => [frog("lily")], "/broken-pack.json"]);
     const loading = store.load();
     expect(store.status()).toBe("loading");

@@ -116,7 +116,14 @@ describe("the grid's rows", () => {
   const grid = createEmojiGrid([section("a", 4), section("b", 5)], { columns: 3, rowHeight: 40, headerHeight: 30 });
 
   it("stacks titles and rows, with offsets and lookups", () => {
-    expect(grid.rows.map((r) => [r.type, r.offset])).toEqual([["header", 0], ["emojis", 30], ["emojis", 70], ["header", 110], ["emojis", 140], ["emojis", 180]]);
+    expect(grid.rows.map((r) => [r.type, r.offset])).toEqual([
+      ["header", 0],
+      ["emojis", 30],
+      ["emojis", 70],
+      ["header", 110],
+      ["emojis", 140],
+      ["emojis", 180],
+    ]);
     expect(grid.size).toBe(220);
     expect(grid.stickyIndexes).toEqual([0, 3]);
     expect(grid.at(grid.indexOf("b4"))?.id).toBe("b4");

@@ -68,7 +68,11 @@ export const post = (path: string, body: unknown, headers: Record<string, string
 /** A deterministic "embedding": words hashed into 1024 buckets, normalized. */
 function fakeEmbed(text: string): number[] {
   const v = new Array<number>(1024).fill(0);
-  for (const word of text.toLowerCase().replace(/^represent this sentence for searching relevant passages: /, "").split(/[^a-z0-9]+/).filter(Boolean)) {
+  for (const word of text
+    .toLowerCase()
+    .replace(/^represent this sentence for searching relevant passages: /, "")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)) {
     let h = 2166136261;
     for (const c of word) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
     v[(h >>> 0) % 1024]! += 1;
@@ -86,7 +90,14 @@ function decide(request: SystemOneRequest): Omit<SystemOneResponse, "model"> {
   for (const [id, q] of Object.entries(request.questions)) {
     const options = Object.keys(q.criteria);
     if (options.length < 2 || options.length > 255) throw new Error("2-255 options per question");
-    const raw = options.map((o) => 0.01 + o.toLowerCase().split(/\W+/).filter((w) => words.has(w)).length);
+    const raw = options.map(
+      (o) =>
+        0.01 +
+        o
+          .toLowerCase()
+          .split(/\W+/)
+          .filter((w) => words.has(w)).length,
+    );
     const sum = raw.reduce((a, b) => a + b, 0);
     answers[id] = { type: "choice", choice: options[raw.indexOf(Math.max(...raw))]!, probabilities: Object.fromEntries(options.map((o, i) => [o, raw[i]! / sum])) };
     tokens += options.join(" ").length / 4;

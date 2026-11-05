@@ -18,7 +18,19 @@ const { env } = mockEnv({ ALLOWED_ORIGINS: "http://localhost:*" });
 const handle = worker.fetch as (request: Request, e: typeof env) => Promise<Response>;
 await handle(post("/api/admin/seed", {}, { authorization: `Bearer ${env.ADMIN_TOKEN}` }), env);
 
-const TYPES: Record<string, string> = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp", ".wasm": "application/wasm", ".md": "text/markdown", ".txt": "text/plain" };
+const TYPES: Record<string, string> = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".wasm": "application/wasm",
+  ".md": "text/markdown",
+  ".txt": "text/plain",
+};
 
 function asset(path: string): string | null {
   if (!values.assets) return null;

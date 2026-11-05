@@ -37,8 +37,7 @@ const pickerIn = (scope: Locator) => scope.locator('xpath=descendant-or-self::*[
 const button = (scope: Page | Locator, name: string) => scope.getByRole("button", { name, exact: true });
 
 /** A gallery card by title; no title is the app scene at the top. */
-export const card = (page: Page, title?: string) =>
-  title ? page.locator('[data-slot="card"]').filter({ has: page.getByRole("heading", { name: title, exact: true }) }) : page.locator('[data-slot="card"]').first();
+export const card = (page: Page, title?: string) => (title ? page.locator('[data-slot="card"]').filter({ has: page.getByRole("heading", { name: title, exact: true }) }) : page.locator('[data-slot="card"]').first());
 /** A home-page example section (by its h3 id) and its live preview. */
 const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
 export const preview = (page: Page, id: string) => example(page, id).locator("div.relative").first();
@@ -170,10 +169,7 @@ function scene(s: StyleId): Surface[] {
         menu(id("autocomplete"), path, (p) => sc(p).getByLabel("Message #general", { exact: true }), ":smi", shotCard),
       ];
     case "notion":
-      return [
-        popover(id("page-icon"), path, (p) => button(sc(p), "Change icon")),
-        menu(id("colon-menu"), path, (p) => sc(p).getByLabel("Page content", { exact: true }), ":sm", shotCard),
-      ];
+      return [popover(id("page-icon"), path, (p) => button(sc(p), "Change icon")), menu(id("colon-menu"), path, (p) => sc(p).getByLabel("Page content", { exact: true }), ":sm", shotCard)];
     case "linear":
       return [
         popover(id("issue-icon"), path, (p) => button(sc(p), "Set icon")),
@@ -261,16 +257,18 @@ export const SURFACES: Surface[] = [...STYLES.flatMap(gallery), ...home, ...exam
 export type Shot = { id: string; path: string; only?: Viewport; prepare?: (page: Page) => Promise<void>; frame: (page: Page) => Locator; mask?: (page: Page) => Locator[] };
 
 const ENGINES = ["lexical()", "No typos", "+ Fuse", "+ Frequents", "Async"];
-const searchFor = (engine: string, mode = "Ranked") => async (p: Page) => {
-  const ex = example(p, "search");
-  // By keyboard: at phone width the Results chips overlap the last engine chip ("Async").
-  for (const name of [engine, mode]) {
-    await ex.getByRole("tab", { name, exact: true }).focus();
-    await p.keyboard.press("Enter");
-  }
-  await preview(p, "search").locator('[data-slot="search-input"]').fill("smile");
-  await preview(p, "search").locator('[data-slot="emoji"]').first().waitFor();
-};
+const searchFor =
+  (engine: string, mode = "Ranked") =>
+  async (p: Page) => {
+    const ex = example(p, "search");
+    // By keyboard: at phone width the Results chips overlap the last engine chip ("Async").
+    for (const name of [engine, mode]) {
+      await ex.getByRole("tab", { name, exact: true }).focus();
+      await p.keyboard.press("Enter");
+    }
+    await preview(p, "search").locator('[data-slot="search-input"]').fill("smile");
+    await preview(p, "search").locator('[data-slot="emoji"]').first().waitFor();
+  };
 
 export const SHOTS: Shot[] = [
   ...STYLES.flatMap((s): Shot[] => {

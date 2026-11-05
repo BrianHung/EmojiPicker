@@ -31,7 +31,7 @@ export type EmojiSearch = (query: string, context: SearchContext) => Hits | Prom
 /** A pending result with something to show meanwhile: `interim` renders now, the promise replaces it. */
 export type ProgressiveHits<T = Hits> = PromiseLike<T> & { readonly interim: T };
 
-export const isThenable = <T,>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
+export const isThenable = <T>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
 
 /** Attaches interim results to a promise. */
 export function withInterim<T>(promise: PromiseLike<T>, interim: T): ProgressiveHits<T> {
@@ -55,7 +55,7 @@ const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike
   const early = fn(interim);
   return isThenable(early) ? next : withInterim(next, early);
 };
-const all = <T,>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
+const all = <T>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
 const cached = <K, V>(map: Map<K, V>, key: K, create: () => V): V => {
   let value = map.get(key);
@@ -108,8 +108,7 @@ export type LexicalOptions = {
  */
 export function lexical({ typos = true, typoThreshold = 8, locale, segmenter, tokenize }: LexicalOptions = {}): EmojiSearch {
   const tokenizers = new Map<string, Tokenizer>();
-  const tokenizerOf = (tag: string | undefined) =>
-    tokenize ?? (segmenter === undefined ? tokenizerFor(tag) : cached(tokenizers, tag ?? "", () => createTokenizer({ locale: tag, segmenter })));
+  const tokenizerOf = (tag: string | undefined) => tokenize ?? (segmenter === undefined ? tokenizerFor(tag) : cached(tokenizers, tag ?? "", () => createTokenizer({ locale: tag, segmenter })));
   return (query, context) => {
     const { records, limit } = context;
     const tag = locale ?? context.locale;
@@ -174,10 +173,7 @@ function correctQuery(query: string, index: SearchIndex): string[] {
 
 /** Use `secondary` only to fill in when `primary` finds fewer than `min` results. */
 export function fallback(primary: EmojiSearch, secondary: EmojiSearch, { min = 8 }: { min?: number } = {}): EmojiSearch {
-  return (query, context) =>
-    then(primary(query, context), (first) =>
-      first.length >= min ? first : then(secondary(query, context), (more) => dedupe([...first, ...more], context.limit)),
-    );
+  return (query, context) => then(primary(query, context), (first) => (first.length >= min ? first : then(secondary(query, context), (more) => dedupe([...first, ...more], context.limit))));
 }
 
 /**
@@ -205,7 +201,10 @@ export function merge(...searches: EmojiSearch[]): EmojiSearch {
     then(all(searches.map((s) => s(query, context))), (lists) => {
       const scores = new Map<string, number>();
       for (const list of lists) list.forEach((hit, rank) => scores.set(hit.unified, (scores.get(hit.unified) ?? 0) + 1 / (60 + rank)));
-      return [...scores].sort((a, b) => b[1] - a[1]).slice(0, context.limit).map(([unified, score]) => ({ unified, score }));
+      return [...scores]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, context.limit)
+        .map(([unified, score]) => ({ unified, score }));
     });
 }
 
@@ -251,7 +250,11 @@ export function fuse(Fuse: FuseConstructor<FuseDoc>, options: object = {}): Emoj
     if (!instance) {
       const docs = records.map((r) => ({ unified: r.unified, name: r.name, shortcodes: r.shortcodes.join(" ").replace(/_/g, " "), tags: r.tags.join(" ") }));
       instance = new Fuse(docs, {
-        keys: [{ name: "shortcodes", weight: 1 }, { name: "name", weight: 3 }, { name: "tags", weight: 0.5 }],
+        keys: [
+          { name: "shortcodes", weight: 1 },
+          { name: "name", weight: 3 },
+          { name: "tags", weight: 0.5 },
+        ],
         threshold: 0.4,
         ignoreLocation: true,
         includeScore: true,

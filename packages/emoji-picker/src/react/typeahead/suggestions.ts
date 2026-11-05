@@ -6,7 +6,6 @@ import { useEmojiContext } from "../provider/provider";
 
 export type ShortcodeSuggestion = ShortcodeCompletion;
 
-
 export type { KeyLike };
 
 export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> & {

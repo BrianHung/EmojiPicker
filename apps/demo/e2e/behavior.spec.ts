@@ -26,9 +26,7 @@ const isOpen = (root: Locator) => root.isVisible();
 // The trigger may unmount on pick (iMessage's tapback pill): then it holds nothing.
 const holdsFocus = (target: Locator) => target.evaluate((el) => el === document.activeElement, null, { timeout: 500 }).catch(() => false);
 const fieldText = (target: Locator) =>
-  target
-    .evaluate((el) => (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : (el as HTMLElement).isContentEditable ? el.textContent : null), null, { timeout: 500 })
-    .catch(() => null);
+  target.evaluate((el) => (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : (el as HTMLElement).isContentEditable ? el.textContent : null), null, { timeout: 500 }).catch(() => null);
 
 /** Probes until two reads 100 ms apart agree: Page/Home/End scroll a virtualized grid, then move focus. */
 async function stableProbe(page: Page, root: Locator): Promise<Probe> {
@@ -113,7 +111,10 @@ for (const s of SURFACES)
 
     matchFixture(info, fileName(s.id), record);
     // Keyboard moves never scroll the page (the surface's own scroller may).
-    expect(keys.filter((k) => k.scrolled !== 0).map((k) => k.key), "keys that scrolled the page").toEqual(PAGE_SCROLLS[`${info.project.name}:${s.id}`] ?? []);
+    expect(
+      keys.filter((k) => k.scrolled !== 0).map((k) => k.key),
+      "keys that scrolled the page",
+    ).toEqual(PAGE_SCROLLS[`${info.project.name}:${s.id}`] ?? []);
   });
 
 // The "Bring your own virtualizer" recipe: useEmojiGrid on TanStack Virtual keeps the List's keyboard.
@@ -147,7 +148,10 @@ test("a popover's picker fits a short viewport", async ({ page }, info) => {
   await root.locator('[data-slot="emoji"]').first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
-  expect([box.y, box.y + box.height].every((y) => y >= 0 && y <= 500), JSON.stringify(box)).toBe(true);
+  expect(
+    [box.y, box.y + box.height].every((y) => y >= 0 && y <= 500),
+    JSON.stringify(box),
+  ).toBe(true);
 });
 
 /** The highlighted item (the active descendant, the focused item, else [data-highlighted]), marked with `data-e2e`. */

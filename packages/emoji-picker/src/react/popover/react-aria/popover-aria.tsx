@@ -4,7 +4,25 @@ import { Popover, type PopoverRenderProps } from "react-aria-components/Popover"
 import { mergeProps } from "react-aria/mergeProps";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
-import { anchorRect, ContentFocus, contentAttributes, finalFocusTarget, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type Align, type PopoverAnchor, type PopoverContentProps, type PopoverInitialFocus, type PopoverInternals, type PopoverRootProps, type Side, type SuggestionsPopoverProps } from "../popover-shared";
+import {
+  anchorRect,
+  ContentFocus,
+  contentAttributes,
+  finalFocusTarget,
+  initialFocusTarget,
+  PopoverProvider,
+  Trigger,
+  usePopoverInternals,
+  usePopoverState,
+  type Align,
+  type PopoverAnchor,
+  type PopoverContentProps,
+  type PopoverInitialFocus,
+  type PopoverInternals,
+  type PopoverRootProps,
+  type Side,
+  type SuggestionsPopoverProps,
+} from "../popover-shared";
 
 type Internals = PopoverInternals & { id?: string };
 
@@ -101,9 +119,7 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
         UNSTABLE_portalContainer={container || undefined}
         className={className}
         style={style}
-        render={(dom, { placement }) => (
-          <div {...mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom)} data-slot="suggestions-popover" data-side={placement ?? side} data-align={align} />
-        )}
+        render={(dom, { placement }) => <div {...mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom)} data-slot="suggestions-popover" data-side={placement ?? side} data-align={align} />}
       >
         {children}
       </Popover>

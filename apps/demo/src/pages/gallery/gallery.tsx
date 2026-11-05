@@ -24,7 +24,23 @@ function extract(source: string, name: string) {
 }
 
 /** A gallery card (shadcn charts): title, one line, a live preview and its code behind "View Code". */
-function GalleryCard({ title, description, code, file, children, className, previewClassName }: { title?: string; description?: string; code: string; file: string; children: React.ReactNode; className?: string; previewClassName?: string }) {
+function GalleryCard({
+  title,
+  description,
+  code,
+  file,
+  children,
+  className,
+  previewClassName,
+}: {
+  title?: string;
+  description?: string;
+  code: string;
+  file: string;
+  children: React.ReactNode;
+  className?: string;
+  previewClassName?: string;
+}) {
   const [open, setOpen] = React.useState(false);
   return (
     <Card className={cn("min-w-0 gap-0 bg-background", title ? "pt-5" : "pt-0", className)}>
@@ -139,7 +155,12 @@ export function GalleryPage() {
       {/* Remount per style: each card's state belongs to one app. */}
       <div key={appStyle.id} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {/* On a phone the app scenes fill the card (they are the phone's screen); Apple's is a device mockup. */}
-        <GalleryCard code={sourceOf(appStyle.id, "scene")} file={`styles/${appStyle.id}/scene.tsx`} className="overflow-hidden md:col-span-2 xl:col-span-3" previewClassName={cn("overflow-x-auto sm:p-8", appStyle.id === "apple" ? "p-4" : "p-0")}>
+        <GalleryCard
+          code={sourceOf(appStyle.id, "scene")}
+          file={`styles/${appStyle.id}/scene.tsx`}
+          className="overflow-hidden md:col-span-2 xl:col-span-3"
+          previewClassName={cn("overflow-x-auto sm:p-8", appStyle.id === "apple" ? "p-4" : "p-0")}
+        >
           <Scene />
         </GalleryCard>
         <GalleryCard title="Inline picker" description="A picker placed in the page." code={sourceOf(appStyle.id, "picker")} file={file} className="md:row-span-2" previewClassName="md:min-h-[560px]">
@@ -148,7 +169,12 @@ export function GalleryPage() {
         <GalleryCard title="Popover" description="A picker that opens from a trigger." code={extract(variants, "StyleDropdown")} file="styles/variants.tsx">
           <DropdownDemo appStyle={appStyle} search />
         </GalleryCard>
-        <GalleryCard title="Popover without search" description="A popover that omits the Search part." code={`<StyleDropdown appStyle={${appStyle.id}} search={false} onSelect={onSelect}>\n  🙂\n</StyleDropdown>\n\n${extract(variants, "StyleDropdown")}`} file="styles/variants.tsx">
+        <GalleryCard
+          title="Popover without search"
+          description="A popover that omits the Search part."
+          code={`<StyleDropdown appStyle={${appStyle.id}} search={false} onSelect={onSelect}>\n  🙂\n</StyleDropdown>\n\n${extract(variants, "StyleDropdown")}`}
+          file="styles/variants.tsx"
+        >
           <DropdownDemo appStyle={appStyle} search={false} />
         </GalleryCard>
         <GalleryCard title="Tapback" description="The most-used emoji and an expand button." code={extract(variants, "StyleTapback")} file="styles/variants.tsx">
@@ -160,13 +186,7 @@ export function GalleryPage() {
         <GalleryCard title="Autocomplete" description="Shortcode suggestions for a text field." code={extract(variants, "StyleAutocomplete")} file="styles/variants.tsx" previewClassName="items-end pt-72">
           <AutocompleteDemo appStyle={appStyle} />
         </GalleryCard>
-        <GalleryCard
-          title="Sheet"
-          description="A picker docked at full width."
-          code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`}
-          file={file}
-          previewClassName="items-end p-0 pt-6"
-        >
+        <GalleryCard title="Sheet" description="A picker docked at full width." code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`} file={file} previewClassName="items-end p-0 pt-6">
           {/* The sheet keeps the app's own width (Discord needs ~420px for its rail and "Add Emoji") and scales down to the card. */}
           <FitBox width={appStyle.size.width} height={361} className="items-end">
             <div className="overflow-hidden rounded-t-[20px] border border-b-0 border-border bg-background" style={{ width: appStyle.size.width }}>

@@ -39,11 +39,14 @@ export const test = base.extend({
   page: async ({ page, colorScheme }, use) => {
     // A new context per test already has empty storage; clearing on the first load says so (and keeps
     // "Frequently used" at its defaults), and reloads within a test keep what the test picked.
-    await page.addInitScript((theme) => {
-      if (!sessionStorage.getItem("e2e")) localStorage.clear();
-      sessionStorage.setItem("e2e", "1");
-      localStorage.setItem("demo:theme", theme);
-    }, colorScheme === "dark" ? "dark" : "light");
+    await page.addInitScript(
+      (theme) => {
+        if (!sessionStorage.getItem("e2e")) localStorage.clear();
+        sessionStorage.setItem("e2e", "1");
+        localStorage.setItem("demo:theme", theme);
+      },
+      colorScheme === "dark" ? "dark" : "light",
+    );
     await page.route("https://all-the.bufo.zone/**", (route) => route.fulfill({ contentType: "image/png", body: REMOTE_IMAGE }));
     await page.route(/^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//, fromCache);
     await use(page);
@@ -69,9 +72,7 @@ export const frames = (page: Page) => page.evaluate(() => new Promise<void>((r) 
  */
 export async function quiet(page: Page) {
   await settle(page);
-  await page
-    .waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running" || a.effect?.getComputedTiming().iterations === Infinity), null, { timeout: 3_000 })
-    .catch(() => {});
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running" || a.effect?.getComputedTiming().iterations === Infinity), null, { timeout: 3_000 }).catch(() => {});
   await page.waitForTimeout(150);
   await frames(page);
 }

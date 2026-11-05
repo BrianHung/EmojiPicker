@@ -150,16 +150,39 @@ describe("sections", () => {
 
   it("lays out results as one section, or one per category", () => {
     const hits = ["1f1fa-1f1f8", "1f600", "1f1ef-1f1f5"].map((u) => get(u)!);
-    const ranked = resultSections(hits, "ranked", (g) => g, (u) => u, item, "Results");
+    const ranked = resultSections(
+      hits,
+      "ranked",
+      (g) => g,
+      (u) => u,
+      item,
+      "Results",
+    );
     expect(ranked).toHaveLength(1);
     expect(ranked[0]!.header).toBe(false);
     expect(ranked[0]!.items.map((i) => i.record)).toEqual(hits);
-    const grouped = resultSections(hits, "grouped", (g) => g.toUpperCase(), (u) => u, item, "Results");
+    const grouped = resultSections(
+      hits,
+      "grouped",
+      (g) => g.toUpperCase(),
+      (u) => u,
+      item,
+      "Results",
+    );
     expect(grouped.map((s) => [s.name, s.category, s.items.map((i) => hits.indexOf(i.record))])).toEqual([
       ["SMILEYS_PEOPLE", "smileys_people", [1]],
       ["FLAGS", "flags", [0, 2]],
     ]);
     // The same emoji in the same section and tone is the same object, render to render.
-    expect(resultSections(hits, "ranked", (g) => g, (u) => u, item, "Results")[0]!.items[0]).toBe(ranked[0]!.items[0]);
+    expect(
+      resultSections(
+        hits,
+        "ranked",
+        (g) => g,
+        (u) => u,
+        item,
+        "Results",
+      )[0]!.items[0],
+    ).toBe(ranked[0]!.items[0]);
   });
 });

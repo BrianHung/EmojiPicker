@@ -64,7 +64,7 @@ export function signal<T>(initial: T): Signal<T> {
   };
 }
 
-export const useSignal = <T,>(s: Signal<T>) => React.useSyncExternalStore(s.subscribe, s.get, s.get);
+export const useSignal = <T>(s: Signal<T>) => React.useSyncExternalStore(s.subscribe, s.get, s.get);
 
 /** Part of a core store's snapshot; re-renders only when it changes (an object, shallowly). */
 export function useSelector<S, T>(store: { subscribe(listener: () => void): () => void; getSnapshot(): S }, select: (snapshot: S) => T): T {

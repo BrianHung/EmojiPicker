@@ -57,8 +57,17 @@ describe("search across scripts", () => {
   });
 
   it("orders alphabetical completions by the locale's collation", () => {
-    const records = expandDataset(dataset("sv", [["1f600", "a", ["sz"]], ["1f601", "b", ["så"]], ["1f602", "c", ["sa"]]]));
-    const order = (locale: string) => createSearchIndex(records, { locale }).completeShortcode("s", 8, "alphabetical").map((c) => c.shortcode);
+    const records = expandDataset(
+      dataset("sv", [
+        ["1f600", "a", ["sz"]],
+        ["1f601", "b", ["så"]],
+        ["1f602", "c", ["sa"]],
+      ]),
+    );
+    const order = (locale: string) =>
+      createSearchIndex(records, { locale })
+        .completeShortcode("s", 8, "alphabetical")
+        .map((c) => c.shortcode);
     expect(order("sv")).toEqual(["sa", "sz", "så"]);
     expect(order("en")).toEqual(["sa", "så", "sz"]);
   });
@@ -80,7 +89,11 @@ describe("search across scripts", () => {
 
 describe("one locale", () => {
   it("sets collation and counts from the store's locale; each piece passed replaces only itself", async () => {
-    const data = dataset("sv", [["1f600", "a", ["sz"]], ["1f601", "b", ["så"]], ["1f602", "c", ["sa"]]]);
+    const data = dataset("sv", [
+      ["1f600", "a", ["sz"]],
+      ["1f601", "b", ["så"]],
+      ["1f602", "c", ["sa"]],
+    ]);
     const frequents = createFrequencyStore({ storage: memoryStorage() });
     const alphabetical = (store: ReturnType<typeof createEmojiStore>) => store.completeShortcode("s", 8, "alphabetical").map((c) => c.shortcode);
     const swedish = createEmojiStore({ data, frequents });

@@ -183,7 +183,9 @@ function App({ f }: { f: Fixture }) {
             <button type="button">❤️</button>
           </div>
         </EmojiPopover.Content>
-        <button type="button" data-testid="after">after</button>
+        <button type="button" data-testid="after">
+          after
+        </button>
       </EmojiPopover.Root>
     );
   else if (f.kind === "tapback")

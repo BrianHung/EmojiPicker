@@ -46,7 +46,16 @@ function CopyPage({ md, className }: { md: string; className?: string }) {
         {copied ? "Copied" : "Copy Page"}
       </Button>
       <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="secondary" size="icon-sm" aria-label="More page options" className="relative bg-clip-border before:absolute before:top-1/2 before:left-0 before:h-4 before:w-px before:-translate-y-1/2 before:bg-foreground/15 max-sm:size-10" />}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              aria-label="More page options"
+              className="relative bg-clip-border before:absolute before:top-1/2 before:left-0 before:h-4 before:w-px before:-translate-y-1/2 before:bg-foreground/15 max-sm:size-10"
+            />
+          }
+        >
           <ChevronDownIcon />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 p-1">

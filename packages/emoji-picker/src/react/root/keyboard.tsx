@@ -197,11 +197,7 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, focusSea
     [handlers, regions],
   );
 
-  return (
-    <KeyboardContext.Provider value={value}>
-      {children({ ref: mergeRefs<HTMLElement>(root, rootHandlerRef), onKeyDownCapture })}
-    </KeyboardContext.Provider>
-  );
+  return <KeyboardContext.Provider value={value}>{children({ ref: mergeRefs<HTMLElement>(root, rootHandlerRef), onKeyDownCapture })}</KeyboardContext.Provider>;
 }
 
 /** First/last for a row of buttons (reactions): Home and End focus its ends. */

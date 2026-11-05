@@ -19,7 +19,11 @@ export class EmojiGridNavigation implements KeyboardDelegate {
     const index = grid.indexOf(String(key));
     const page = move === "page-up" || move === "page-down";
     const next =
-      strip && STRIP[move] ? moveInStrip(strip, index, STRIP[move]) : strip && page ? pageInStrip(strip, index, move === "page-down" ? 1 : -1, columnsPerPage(strip, viewport)) : moveInGrid(grid, index, move, rowsPerPage(viewport, metrics.cellHeight, metrics.headerHeight));
+      strip && STRIP[move]
+        ? moveInStrip(strip, index, STRIP[move])
+        : strip && page
+          ? pageInStrip(strip, index, move === "page-down" ? 1 : -1, columnsPerPage(strip, viewport))
+          : moveInGrid(grid, index, move, rowsPerPage(viewport, metrics.cellHeight, metrics.headerHeight));
     return index < 0 || next == null ? null : (grid.at(next)?.id ?? null);
   }
 

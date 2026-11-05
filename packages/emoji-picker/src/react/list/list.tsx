@@ -23,31 +23,32 @@ import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
 export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
 
-export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> & PartProps<ListState> & {
-  /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
-  onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
-  /**
-   * Each section, called only for the sections in view: a `List.Section` of `List.SectionTitle`,
-   * `List.Items` (each emoji, called only for the emoji in view) and `List.SectionActions`.
-   * Default: a title, and a `List.Cell` per emoji.
-   */
-  children?: (section: EmojiSection) => React.ReactNode;
-  /**
-   * "vertical" (default): sections stacked, scrolling down. "horizontal": sections side
-   * by side, each a column-major grid of `rows` rows with its title above its first
-   * column, scrolling sideways (the iOS and Gboard emoji keyboards).
-   */
-  orientation?: "vertical" | "horizontal";
-  /** Horizontal only: rows per section. Default 5. */
-  rows?: number;
-  /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
-  searchRows?: number;
-  /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
-  onLoadMore?: () => void;
-  /** A page is loading: the end of the list shows `loadingMore`. */
-  isLoadingMore?: boolean;
-  loadingMore?: React.ReactNode;
-};
+export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> &
+  PartProps<ListState> & {
+    /** Runs before the picker handles the key (on any cell); see Root's `onKeyDown`. */
+    onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
+    /**
+     * Each section, called only for the sections in view: a `List.Section` of `List.SectionTitle`,
+     * `List.Items` (each emoji, called only for the emoji in view) and `List.SectionActions`.
+     * Default: a title, and a `List.Cell` per emoji.
+     */
+    children?: (section: EmojiSection) => React.ReactNode;
+    /**
+     * "vertical" (default): sections stacked, scrolling down. "horizontal": sections side
+     * by side, each a column-major grid of `rows` rows with its title above its first
+     * column, scrolling sideways (the iOS and Gboard emoji keyboards).
+     */
+    orientation?: "vertical" | "horizontal";
+    /** Horizontal only: rows per section. Default 5. */
+    rows?: number;
+    /** Horizontal only: rows while search results show. Default `rows`; 1 gives a single scrolling row, as iOS does. */
+    searchRows?: number;
+    /** Paging a large custom pack: called as the end of the list scrolls into view (React Aria's ListBoxLoadMoreItem). */
+    onLoadMore?: () => void;
+    /** A page is loading: the end of the list shows `loadingMore`. */
+    isLoadingMore?: boolean;
+    loadingMore?: React.ReactNode;
+  };
 
 const CellsContext = React.createContext<Cells | null>(null);
 const HorizontalContext = React.createContext(false);
@@ -87,15 +88,20 @@ function readProbe(probe: HTMLElement): GridMetrics {
   const cs = getComputedStyle(probe);
   const px = (v: string) => parseFloat(v) || 0;
   const unit = layoutUnits(probe);
-  return { cellWidth: px(cs.width) || 40, cellHeight: unit(px(cs.height)) || 40, headerHeight: unit(px(cs.paddingTop)), padding: px(cs.paddingLeft), paddingEnd: px(cs.marginRight), sectionGap: px(cs.paddingRight), sectionMinWidth: px(cs.paddingBottom) };
+  return {
+    cellWidth: px(cs.width) || 40,
+    cellHeight: unit(px(cs.height)) || 40,
+    headerHeight: unit(px(cs.paddingTop)),
+    padding: px(cs.paddingLeft),
+    paddingEnd: px(cs.marginRight),
+    sectionGap: px(cs.paddingRight),
+    sectionMinWidth: px(cs.paddingBottom),
+  };
 }
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
-const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
-  { children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest },
-  ref,
-) {
+const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, isLoadingMore, loadingMore, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
   const { searching } = picker;
   const horizontal = orientation === "horizontal";
@@ -268,35 +274,35 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List(
   return (
     <CellsContext.Provider value={grid.cells}>
       <HorizontalContext.Provider value={horizontal}>
-      <TemplateContext.Provider value={template}>
-        <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
-          {renderElement(
-            "div",
-            {
-              ...rest,
-              ...grid.gridProps,
-              className,
-              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
-              render,
-              children: (
-                <>
-                  {picker.columns && !horizontal ? <div aria-hidden style={COLUMNS} /> : null}
-                  <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
-                  <div ref={probeRef} aria-hidden style={PROBE} />
-                  {collection.size === 0 ? (
-                    <div role="option" style={{ display: "contents" }}>
-                      {empty}
-                    </div>
-                  ) : null}
-                </>
-              ),
-            },
-            { orientation, searching, empty: collection.size === 0 },
-          )}
-        </LoadMoreContext.Provider>
-        {grid.variations}
-        {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} /> : null}
-      </TemplateContext.Provider>
+        <TemplateContext.Provider value={template}>
+          <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: isLoadingMore, children: loadingMore, collection } : null}>
+            {renderElement(
+              "div",
+              {
+                ...rest,
+                ...grid.gridProps,
+                className,
+                style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
+                render,
+                children: (
+                  <>
+                    {picker.columns && !horizontal ? <div aria-hidden style={COLUMNS} /> : null}
+                    <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
+                    <div ref={probeRef} aria-hidden style={PROBE} />
+                    {collection.size === 0 ? (
+                      <div role="option" style={{ display: "contents" }}>
+                        {empty}
+                      </div>
+                    ) : null}
+                  </>
+                ),
+              },
+              { orientation, searching, empty: collection.size === 0 },
+            )}
+          </LoadMoreContext.Provider>
+          {grid.variations}
+          {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} /> : null}
+        </TemplateContext.Provider>
       </HorizontalContext.Provider>
     </CellsContext.Provider>
   );
@@ -383,7 +389,16 @@ const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function S
   const { section, headingProps } = useSection("SectionTitle");
   return renderElement(
     "header",
-    { ...headingProps, className: props.className, "data-slot": SLOTS.categoryHeader, "data-collapsed": section.collapsed || undefined, ...props, style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }), ref, children: children ?? section.name },
+    {
+      ...headingProps,
+      className: props.className,
+      "data-slot": SLOTS.categoryHeader,
+      "data-collapsed": section.collapsed || undefined,
+      ...props,
+      style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),
+      ref,
+      children: children ?? section.name,
+    },
     { section, collapsed: section.collapsed },
   );
 });

@@ -29,12 +29,36 @@ const SEEDS: Record<string, string[]> = {
   // iOS 27 keyboard "Frequently Used", most used first (iOS fills its columns top to bottom):
   // the first six are also the tapback pill's recents (😂 ❤️ 😍 😒 👌 ☺️).
   imessage27: [
-    "1f602", "2764-fe0f", "1f60d", "1f612", "1f44c",
-    "263a-fe0f", "1f60a", "1f618", "1f62d", "1f629",
-    "1f495", "1f614", "1f60f", "1f601", "1f633",
-    "1f44d", "270c-fe0f", "1f609", "1f60c", "1f481",
-    "1f648", "1f60e", "1f3b6", "1f440", "1f611",
-    "1f634", "1f604", "1f61c", "1f60b", "1f44f",
+    "1f602",
+    "2764-fe0f",
+    "1f60d",
+    "1f612",
+    "1f44c",
+    "263a-fe0f",
+    "1f60a",
+    "1f618",
+    "1f62d",
+    "1f629",
+    "1f495",
+    "1f614",
+    "1f60f",
+    "1f601",
+    "1f633",
+    "1f44d",
+    "270c-fe0f",
+    "1f609",
+    "1f60c",
+    "1f481",
+    "1f648",
+    "1f60e",
+    "1f3b6",
+    "1f440",
+    "1f611",
+    "1f634",
+    "1f604",
+    "1f61c",
+    "1f60b",
+    "1f44f",
   ],
   linear: ["1f44d", "1f44c", "1f64f", "1f602", "2764-fe0f", "1f440", "2705", "1f642", "1f603", "1f604", "1f600", "1f914", "1f605", "26a0-fe0f", "1f615", "274c", "1f64c", "1f389"],
   discord: ["1f44d", "1f496", "1f440", "2764-fe0f", "1f605", "1f389", "1f914", "1f60e", "1f60a", "263a-fe0f", "1f680", "1f602", "1fae1", "1f44b", "2705", "1f525", "1f60d", "1f62e-200d-1f4a8", "1f972"],
@@ -141,7 +165,12 @@ function Shot() {
       <div style={{ padding: 24, display: "inline-block" }}>
         <div data-shot={appStyle.id} style={{ display: "inline-block" }}>
           <Seeded>
-            <appStyle.Picker search={params.get("search") !== "0"} searchResults={params.get("results") === "grouped" ? "grouped" : "ranked"} onSelect={(s) => ((window as unknown as { picked: unknown[] }).picked ??= []).push(s)} autoFocus />
+            <appStyle.Picker
+              search={params.get("search") !== "0"}
+              searchResults={params.get("results") === "grouped" ? "grouped" : "ranked"}
+              onSelect={(s) => ((window as unknown as { picked: unknown[] }).picked ??= []).push(s)}
+              autoFocus
+            />
           </Seeded>
         </div>
       </div>

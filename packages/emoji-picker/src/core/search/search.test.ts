@@ -32,8 +32,14 @@ describe("lexical", () => {
 });
 
 describe("composition", () => {
-  const only = (...codes: string[]): EmojiSearch => () => codes.map((unified) => ({ unified }));
-  const later = (...codes: string[]): EmojiSearch => () => Promise.resolve(codes.map((unified) => ({ unified })));
+  const only =
+    (...codes: string[]): EmojiSearch =>
+    () =>
+      codes.map((unified) => ({ unified }));
+  const later =
+    (...codes: string[]): EmojiSearch =>
+    () =>
+      Promise.resolve(codes.map((unified) => ({ unified })));
 
   it("fallback fills in only below the threshold, without duplicates", () => {
     expect(run(fallback(only("1f525"), only("1f680", "1f525"), { min: 2 }), "x").map((h) => h.unified)).toEqual(["1f525", "1f680"]);
@@ -118,7 +124,10 @@ describe("store.query", () => {
     const store = createEmojiStore({
       data: data as unknown as Dataset,
       frequents: createFrequencyStore({ storage: memoryStorage() }),
-      searchEngine: progressive(lexical(), remote(async () => ["1f680"])),
+      searchEngine: progressive(
+        lexical(),
+        remote(async () => ["1f680"]),
+      ),
     });
     await store.load();
     const out = store.query("fire");

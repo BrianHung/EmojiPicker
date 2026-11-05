@@ -58,7 +58,15 @@ export function Demo({ name, className, adapters, children }: { name: string; cl
         <Preview className={className}>
           {adapters ? (
             <div className="absolute top-3 right-3">
-              <Chips label="Popover" value={adapter} onChange={setAdapter} options={[["floating-ui", "Floating UI"], ["react-aria", "React Aria"]]} />
+              <Chips
+                label="Popover"
+                value={adapter}
+                onChange={setAdapter}
+                options={[
+                  ["floating-ui", "Floating UI"],
+                  ["react-aria", "React Aria"],
+                ]}
+              />
             </div>
           ) : null}
           <Component onSelect={onSelect} />

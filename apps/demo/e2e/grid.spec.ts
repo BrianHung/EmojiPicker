@@ -38,7 +38,13 @@ test("moving up never hides the highlighted emoji under a sticky section title",
       const cell = root.querySelector('[data-slot="emoji"][data-highlighted]')?.getBoundingClientRect();
       if (!cell) return null;
       const top = root.querySelector('[data-slot="viewport"]')!.getBoundingClientRect().top;
-      return Math.max(0, ...[...root.querySelectorAll('[data-slot="category-header"]')].map((h) => h.getBoundingClientRect()).filter((h) => Math.abs(h.top - top) < 2).map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)));
+      return Math.max(
+        0,
+        ...[...root.querySelectorAll('[data-slot="category-header"]')]
+          .map((h) => h.getBoundingClientRect())
+          .filter((h) => Math.abs(h.top - top) < 2)
+          .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
+      );
     });
     if (hidden === null) break;
     expect(hidden).toBe(0);
@@ -66,12 +72,16 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover"])
     await visit(page, surface.path);
     await surface.open(page);
     await quiet(page);
-    const gap = await surface.root(page).locator('[data-slot="viewport"]').first().evaluate(async (viewport) => {
-      viewport.scrollBy(0, 330);
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      const top = viewport.getBoundingClientRect().top;
-      const pinned = [...viewport.querySelectorAll('[data-slot="category-header"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
-      return pinned ? pinned.top - top : null;
-    });
+    const gap = await surface
+      .root(page)
+      .locator('[data-slot="viewport"]')
+      .first()
+      .evaluate(async (viewport) => {
+        viewport.scrollBy(0, 330);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const top = viewport.getBoundingClientRect().top;
+        const pinned = [...viewport.querySelectorAll('[data-slot="category-header"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
+        return pinned ? pinned.top - top : null;
+      });
     expect(gap).toBe(0);
   });

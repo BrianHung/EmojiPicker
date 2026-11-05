@@ -14,7 +14,7 @@ export const root: PropRow[] = [
   { name: "value", type: "string | null", description: "A value picker (a page icon): the emoji shown as chosen, compared without skin tone." },
   { name: "defaultValue", type: "string | null" },
   { name: "onValueChange", type: "(unified: string) => void" },
-  { name: "highlightedEmoji", type: "string | null", description: "The keyboard position, an item id (\"smileys_people:1f600\"), controlled." },
+  { name: "highlightedEmoji", type: "string | null", description: 'The keyboard position, an item id ("smileys_people:1f600"), controlled.' },
   { name: "defaultHighlightedEmoji", type: "string | null" },
   { name: "onHighlightedEmojiChange", type: "(id: string | null) => void" },
   { name: "reactions", type: "readonly string[]", description: "The emoji of EmojiPicker.Reactions." },

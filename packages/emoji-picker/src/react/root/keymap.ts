@@ -2,19 +2,7 @@
 // resolution rules are unit-tested on their own.
 
 /** What a key can do in a picker. Directions are physical: in a right-to-left picker, "move-left" goes to the next emoji. */
-export type KeyboardAction =
-  | "move-up"
-  | "move-down"
-  | "move-left"
-  | "move-right"
-  | "page-up"
-  | "page-down"
-  | "first"
-  | "last"
-  | "select"
-  | "close"
-  | "focus-search"
-  | "toggle-skin-tone";
+export type KeyboardAction = "move-up" | "move-down" | "move-left" | "move-right" | "page-up" | "page-down" | "first" | "last" | "select" | "close" | "focus-search" | "toggle-skin-tone";
 
 /**
  * Keys per action: `KeyboardEvent.key` values, optionally with modifiers joined by

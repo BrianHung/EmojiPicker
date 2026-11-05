@@ -50,7 +50,11 @@ for (const focusModel of ["input", "grid"]) {
     const controlled = await page.evaluate((id) => document.getElementById(id ?? "")?.getAttribute("role"), controls);
     const expanded = await attr('[data-slot="search-input"]', "aria-expanded");
     // React Aria's Autocomplete: a searchbox that controls the results listbox (no aria-expanded: the list is always shown).
-    check("search field: a searchbox that controls the results listbox", (await attr('[data-slot="search-input"]', "role")) === "searchbox" && controlled === "listbox" && expanded === null, `role=${await attr('[data-slot="search-input"]', "role")} controls=${controlled} expanded=${expanded}`);
+    check(
+      "search field: a searchbox that controls the results listbox",
+      (await attr('[data-slot="search-input"]', "role")) === "searchbox" && controlled === "listbox" && expanded === null,
+      `role=${await attr('[data-slot="search-input"]', "role")} controls=${controlled} expanded=${expanded}`,
+    );
     const status = await page.evaluate(() => [...document.querySelectorAll('#harness [role="status"]')].map((s) => s.textContent?.trim()).filter(Boolean));
     check("search results: one live region announces the count", status.length === 1 && /^\d+ results?$/.test(status[0] ?? ""), JSON.stringify(status));
   }
@@ -67,13 +71,20 @@ const variation = await page.evaluate((scope) => {
   const option = row?.querySelector('[role="option"][tabindex="0"]');
   return { role: row?.getAttribute("role"), name: row?.getAttribute("aria-label"), option: option?.getAttribute("aria-label"), selected: option?.getAttribute("aria-selected"), focused: document.activeElement === option };
 }, SCOPE);
-check("variations: a named listbox of tone options, the current one selected and focused", variation.role === "listbox" && Boolean(variation.name) && variation.option === "thumbs up" && variation.selected === "true" && variation.focused, JSON.stringify(variation));
+check(
+  "variations: a named listbox of tone options, the current one selected and focused",
+  variation.role === "listbox" && Boolean(variation.name) && variation.option === "thumbs up" && variation.selected === "true" && variation.focused,
+  JSON.stringify(variation),
+);
 await page.keyboard.press("Escape");
 await search().fill("");
 const landmark = await page.evaluate((scope) => (({ tagName, ariaLabel }) => ({ tagName, ariaLabel }))(document.querySelector(`${scope} [data-slot="emoji-picker"]`)), SCOPE);
-check("root: a named landmark (aside, default \"Emoji picker\")", landmark.tagName === "ASIDE" && landmark.ariaLabel === "Emoji picker", JSON.stringify(landmark));
+check('root: a named landmark (aside, default "Emoji picker")', landmark.tagName === "ASIDE" && landmark.ariaLabel === "Emoji picker", JSON.stringify(landmark));
 await page.locator(`${SCOPE} [data-slot="skin-tone"] > button`).click();
-await page.locator(`${SCOPE} [data-slot="skin-tone-option"]`).nth(3).evaluate((b) => b.click());
+await page
+  .locator(`${SCOPE} [data-slot="skin-tone-option"]`)
+  .nth(3)
+  .evaluate((b) => b.click());
 await page.waitForTimeout(200);
 const toned = () => page.evaluate((scope) => document.querySelector(`${scope} [data-slot="emoji"][data-unified="1f44d-1f3fd"]`)?.getAttribute("aria-label"), SCOPE);
 const inList = await toned();

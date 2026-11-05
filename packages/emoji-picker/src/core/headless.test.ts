@@ -12,7 +12,13 @@ const ready = async () => {
   await store.load();
   return store;
 };
-const key = (key: string) => ({ key, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } });
+const key = (key: string) => ({
+  key,
+  defaultPrevented: false,
+  preventDefault() {
+    this.defaultPrevented = true;
+  },
+});
 
 describe("suggestions without React", () => {
   it("matches a query, moves, and chooses with keys", async () => {

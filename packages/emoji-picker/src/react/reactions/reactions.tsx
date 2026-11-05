@@ -109,10 +109,12 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   const edges = useEdgeKeys(BUTTONS);
   const row = React.useRef<HTMLDivElement | null>(null);
   const { drawable, request } = useDrawable(row);
-  const shown = (state?.reactions ?? []).map((base) => store.withSkinTone(base)).filter((unified) => {
-    const record = store.get(unified);
-    return record != null && drawable(record, unified);
-  });
+  const shown = (state?.reactions ?? [])
+    .map((base) => store.withSkinTone(base))
+    .filter((unified) => {
+      const record = store.get(unified);
+      return record != null && drawable(record, unified);
+    });
   React.useEffect(() => request(shown));
   // Set on expand: this picker's root (the row is gone by the time the full picker shows).
   const expandFocus = React.useRef<Element | null>(null);

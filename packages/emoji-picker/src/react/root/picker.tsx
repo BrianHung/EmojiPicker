@@ -109,7 +109,46 @@ const VARIABLES = {
 
 export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
   // The core state takes the props it knows by name (query, categories, frequent, collapse…).
-  const { onSelect, frequent, suggested, emojiVersion: emojiVersionProp, categories, collapsedCategories, defaultCollapsedCategories, onCollapsedCategoriesChange, query: _query, defaultQuery, onQueryChange, value: valueProp, defaultValue, onValueChange, highlightedEmoji, defaultHighlightedEmoji, onHighlightedEmojiChange, disableVariations = false, reactions, reactionsOpen: reactionsOpenProp, defaultReactionsOpen = true, onReactionsOpenChange, allowExpandReactions = true, pressed = null, searchResults = "ranked", searchLimit = 200, columns, fitColumns = true, className, style, render, keymap, onKeyDown, onKeyDownCapture, focusModel = "input", pointer = "follows", children, ...rest } = props;
+  const {
+    onSelect,
+    frequent,
+    suggested,
+    emojiVersion: emojiVersionProp,
+    categories,
+    collapsedCategories,
+    defaultCollapsedCategories,
+    onCollapsedCategoriesChange,
+    query: _query,
+    defaultQuery,
+    onQueryChange,
+    value: valueProp,
+    defaultValue,
+    onValueChange,
+    highlightedEmoji,
+    defaultHighlightedEmoji,
+    onHighlightedEmojiChange,
+    disableVariations = false,
+    reactions,
+    reactionsOpen: reactionsOpenProp,
+    defaultReactionsOpen = true,
+    onReactionsOpenChange,
+    allowExpandReactions = true,
+    pressed = null,
+    searchResults = "ranked",
+    searchLimit = 200,
+    columns,
+    fitColumns = true,
+    className,
+    style,
+    render,
+    keymap,
+    onKeyDown,
+    onKeyDownCapture,
+    focusModel = "input",
+    pointer = "follows",
+    children,
+    ...rest
+  } = props;
   const { store, labels, maxVersion } = useEmojiContext();
   // Inside an EmojiPopover: picking closes it (unless closeOnSelect={false}).
   const popover = useEmojiPopover();
@@ -119,7 +158,18 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion, highlighted: highlightedEmoji, defaultHighlighted: defaultHighlightedEmoji, onHighlightChange: onHighlightedEmojiChange };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
-  const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }));
+  const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({
+    query,
+    searching,
+    results,
+    pending,
+    categories,
+    categorySections,
+    sections,
+    collapsed,
+    focus,
+    reactions,
+  }));
   React.useEffect(() => void state.mount(), [state]);
   // Frequents change with every pick; held while the user is in the picker so
   // nothing moves under the pointer or the focused cell.
@@ -220,7 +270,14 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   );
 
   return (
-    <KeyboardProvider keymap={keymap} onKeyDown={onKeyDown} close={onEscape} focusSearch={focusSearch} variations={(target) => Boolean(list.current?.variations(target))} ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}>
+    <KeyboardProvider
+      keymap={keymap}
+      onKeyDown={onKeyDown}
+      close={onEscape}
+      focusSearch={focusSearch}
+      variations={(target) => Boolean(list.current?.variations(target))}
+      ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}
+    >
       {(keyboard) =>
         renderElement(
           "aside",
@@ -287,7 +344,6 @@ export function useSearchState(): { query: string; resultCount: number | null } 
   return { query: picker.query, resultCount: picker.searching && !picker.pending ? picker.results.length : null };
 }
 
-
 type Orientation = "vertical" | "horizontal";
 
 export type ViewportState = { searching: boolean; orientation: Orientation };
@@ -312,7 +368,11 @@ export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function
   const merged = React.useMemo(() => mergeRefs(ref, userKeys), [ref, userKeys]);
   return (
     <ViewportContext.Provider value={setOrientation}>
-      {renderElement("div", { "data-slot": SLOTS.viewport, "data-orientation": orientation, ...props, ref: merged, style: (s: ViewportState) => ({ ...SCROLL[s.orientation], ...(columns ? FIXED_GUTTER : null), ...resolve(style, s) }) }, { searching, orientation })}
+      {renderElement(
+        "div",
+        { "data-slot": SLOTS.viewport, "data-orientation": orientation, ...props, ref: merged, style: (s: ViewportState) => ({ ...SCROLL[s.orientation], ...(columns ? FIXED_GUTTER : null), ...resolve(style, s) }) },
+        { searching, orientation },
+      )}
     </ViewportContext.Provider>
   );
 });

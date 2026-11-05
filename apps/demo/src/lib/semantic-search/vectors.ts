@@ -55,8 +55,7 @@ export function decodeIndex(buffer: ArrayBuffer): VectorIndex {
   const vectors = new Int8Array(buffer, idsEnd + count * 4, count * dims);
   const words = dims / 32;
   const bits = new Uint32Array(count * words);
-  for (let i = 0; i < count; i++)
-    for (let d = 0; d < dims; d++) if (vectors[i * dims + d]! > 0) bits[i * words + (d >> 5)]! |= 1 << (d & 31);
+  for (let i = 0; i < count; i++) for (let d = 0; d < dims; d++) if (vectors[i * dims + d]! > 0) bits[i * words + (d >> 5)]! |= 1 << (d & 31);
   return { ids, dims, scales, vectors, bits };
 }
 

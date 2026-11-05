@@ -51,7 +51,10 @@ export function IPhoneFrame({ children, scale = 1, className, style }: { childre
             boxShadow: "inset 0 0 0 1.1px #121212, inset 0 0 0 2.1px rgb(125 125 125), inset 0 0 0 3.4px rgb(58 58 58), 0 18px 50px rgb(0 0 0 / 0.28), 0 4px 14px rgb(0 0 0 / 0.18)",
           }}
         />
-        <div aria-hidden style={{ position: "absolute", left: BUTTON + RIM, top: RIM, width: OUTER.width - RIM * 2, height: OUTER.height - RIM * 2, borderRadius: OUTER_RADIUS - RIM, background: "#000", boxShadow: "0 0 0 0.6px rgb(0 0 0 / 0.9)" }} />
+        <div
+          aria-hidden
+          style={{ position: "absolute", left: BUTTON + RIM, top: RIM, width: OUTER.width - RIM * 2, height: OUTER.height - RIM * 2, borderRadius: OUTER_RADIUS - RIM, background: "#000", boxShadow: "0 0 0 0.6px rgb(0 0 0 / 0.9)" }}
+        />
         <div
           data-iphone-screen=""
           style={{

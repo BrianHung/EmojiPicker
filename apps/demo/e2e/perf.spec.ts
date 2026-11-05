@@ -76,10 +76,13 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
     await frames(page);
   }
   const [commits, renders, names] = await page.evaluate(() => [window.__commits, window.__renders, window.__names] as const);
-  const by = Object.fromEntries(Object.entries(names).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, +(v / STEPS).toFixed(2)]));
+  const by = Object.fromEntries(
+    Object.entries(names)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => [k, +(v / STEPS).toFixed(2)]),
+  );
   return { commits: (commits - start[0]!) / STEPS, renders: (renders - start[1]!) / STEPS, by };
 }
-
 
 /** Per hover over STEPS cells in view, per ArrowRight from the search field (virtual focus), and per ArrowRight with focus on a cell. */
 async function steps(page: Page, root: Locator) {

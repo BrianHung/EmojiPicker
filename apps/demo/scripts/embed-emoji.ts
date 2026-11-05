@@ -48,7 +48,11 @@ for (let i = 0; i < items.length; i += BATCH) {
   for (let j = 0; j < batch.length; j++) vectors.push(data.slice(j * dims, (j + 1) * dims));
   process.stdout.write(`\r${vectors.length}/${items.length}`);
 }
-const bytes = encodeIndex(items.map((e) => e.id), vectors, dims);
+const bytes = encodeIndex(
+  items.map((e) => e.id),
+  vectors,
+  dims,
+);
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, bytes);
 console.log(`\n${items.length} × ${dims} in ${((performance.now() - start) / 1000).toFixed(1)} s → ${out} (${(bytes.length / 1024).toFixed(0)} KB)`);

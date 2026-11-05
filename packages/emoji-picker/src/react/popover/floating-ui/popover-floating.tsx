@@ -1,7 +1,45 @@
 import * as React from "react";
-import { autoUpdate, flip, FloatingFocusManager, FloatingNode, FloatingPortal, FloatingTree, offset, shift, size, useDismiss, useFloating, useFloatingNodeId, useFloatingParentNodeId, useFloatingRootContext, useInteractions, useMergeRefs, useRole, useTransitionStatus, type FloatingRootContext, type Middleware, type UseFloatingOptions } from "@floating-ui/react";
+import {
+  autoUpdate,
+  flip,
+  FloatingFocusManager,
+  FloatingNode,
+  FloatingPortal,
+  FloatingTree,
+  offset,
+  shift,
+  size,
+  useDismiss,
+  useFloating,
+  useFloatingNodeId,
+  useFloatingParentNodeId,
+  useFloatingRootContext,
+  useInteractions,
+  useMergeRefs,
+  useRole,
+  useTransitionStatus,
+  type FloatingRootContext,
+  type Middleware,
+  type UseFloatingOptions,
+} from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
-import { anchorRect, ContentFocus, contentAttributes, finalFocusTarget, initialFocusTarget, PopoverProvider, Trigger, usePopoverInternals, usePopoverState, type PopoverAnchor, type PopoverContentProps as SharedContentProps, type PopoverInternals, type PopoverPlacementProps, type PopoverRootProps, type SuggestionsPopoverProps } from "../popover-shared";
+import {
+  anchorRect,
+  ContentFocus,
+  contentAttributes,
+  finalFocusTarget,
+  initialFocusTarget,
+  PopoverProvider,
+  Trigger,
+  usePopoverInternals,
+  usePopoverState,
+  type PopoverAnchor,
+  type PopoverContentProps as SharedContentProps,
+  type PopoverInternals,
+  type PopoverPlacementProps,
+  type PopoverRootProps,
+  type SuggestionsPopoverProps,
+} from "../popover-shared";
 
 export type PopoverContentProps = SharedContentProps & {
   /** How long the content stays mounted with `data-ending-style` after closing, ms (Floating UI's `useTransitionStatus`). Default 0. */
@@ -70,9 +108,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   const { setPositionReference, domReference } = floating.refs;
   const key = anchor instanceof Element ? anchor : anchor ? "virtual" : null;
   React.useLayoutEffect(() => {
-    setPositionReference(
-      key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() },
-    );
+    setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference]);
   return { ...floating, side: floating.placement.split("-")[0]!, style: { position: floating.strategy, top: floating.y, left: floating.x } as const };
 }
@@ -90,8 +126,23 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const mergedRef = useMergeRefs([node, p.setFloating, ref]);
   const latest = React.useRef({ initialFocus, finalFocus, p });
   latest.current = { initialFocus, finalFocus, p };
-  const [focusTarget] = React.useState(() => ({ get current() { return initialFocusTarget(latest.current.initialFocus, node.current); } }) as React.MutableRefObject<HTMLElement | null>);
-  const [returnTarget] = React.useState(() => ({ get current() { const { finalFocus, p } = latest.current; return finalFocus && p.state.selected.current ? finalFocusTarget(finalFocus) : p.trigger; } }) as React.MutableRefObject<HTMLElement | null>);
+  const [focusTarget] = React.useState(
+    () =>
+      ({
+        get current() {
+          return initialFocusTarget(latest.current.initialFocus, node.current);
+        },
+      }) as React.MutableRefObject<HTMLElement | null>,
+  );
+  const [returnTarget] = React.useState(
+    () =>
+      ({
+        get current() {
+          const { finalFocus, p } = latest.current;
+          return finalFocus && p.state.selected.current ? finalFocusTarget(finalFocus) : p.trigger;
+        },
+      }) as React.MutableRefObject<HTMLElement | null>,
+  );
 
   if (!isMounted) return null;
   return portal(

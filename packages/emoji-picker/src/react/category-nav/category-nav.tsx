@@ -133,7 +133,16 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
   const { disabled } = nav;
   const selected = c.id === nav.selected;
   const focused = nav.focus.within && nav.focus.key === c.id;
-  const state: CategoryTabState = { category: c, selected, active: selected && !disabled, focused, focusVisible: focused && nav.focusVisible, hovered: !disabled && nav.pointer.hovered === c.id, pressed: !disabled && nav.pointer.pressed === c.id, disabled };
+  const state: CategoryTabState = {
+    category: c,
+    selected,
+    active: selected && !disabled,
+    focused,
+    focusVisible: focused && nav.focusVisible,
+    hovered: !disabled && nav.pointer.hovered === c.id,
+    pressed: !disabled && nav.pointer.pressed === c.id,
+    disabled,
+  };
   const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
   // The tabs scroll one list rather than switch panels: no aria-controls to a panel that doesn't exist.
   return renderElement(

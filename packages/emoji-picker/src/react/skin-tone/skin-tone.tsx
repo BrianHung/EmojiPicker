@@ -95,7 +95,22 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   };
   return (
     <SkinToneContext.Provider value={context}>
-      {renderElement("div", { ...props, ref: merged, "data-slot": SLOTS.skinTone, "data-state": open ? "open" : "closed", children: children ?? <><SkinToneTrigger /><SkinToneOptions /></> }, { open, tone })}
+      {renderElement(
+        "div",
+        {
+          ...props,
+          ref: merged,
+          "data-slot": SLOTS.skinTone,
+          "data-state": open ? "open" : "closed",
+          children: children ?? (
+            <>
+              <SkinToneTrigger />
+              <SkinToneOptions />
+            </>
+          ),
+        },
+        { open, tone },
+      )}
     </SkinToneContext.Provider>
   );
 });
@@ -145,7 +160,11 @@ const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(f
       "data-slot": SLOTS.skinToneOptions,
       "data-orientation": orientation,
       style: (s: SkinToneOptionsState) => ({ position: "absolute", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
-      children: TONES.map((t) => <OptionContext.Provider key={t} value={t}>{children ? children(t) : <SkinToneOption tone={t} />}</OptionContext.Provider>),
+      children: TONES.map((t) => (
+        <OptionContext.Provider key={t} value={t}>
+          {children ? children(t) : <SkinToneOption tone={t} />}
+        </OptionContext.Provider>
+      )),
     },
     { orientation, tone },
   );

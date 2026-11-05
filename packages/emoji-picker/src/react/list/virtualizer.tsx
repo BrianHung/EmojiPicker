@@ -43,7 +43,14 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
   const horizontal = layoutOptions.orientation === "horizontal";
   // The collection element is this content's parent (its ref isn't attached yet when our effects first run).
   const content = React.useRef<HTMLDivElement | null>(null);
-  const scrollRef = React.useMemo(() => ({ get current() { return content.current?.parentElement ?? null; } }), []);
+  const scrollRef = React.useMemo(
+    () => ({
+      get current() {
+        return content.current?.parentElement ?? null;
+      },
+    }),
+    [],
+  );
   const [dir, setDir] = React.useState<"ltr" | "rtl">("ltr");
   const dirRef = React.useRef(dir);
   dirRef.current = dir;
