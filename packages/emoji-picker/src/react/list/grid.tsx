@@ -35,14 +35,17 @@ import { moveVirtualFocus } from "./virtual-focus";
  * slides cells under a resting pointer, and the browser reports hovers (and moves at
  * the same spot) for them.
  */
-const pointer = { x: NaN, y: NaN, moved: false, tracking: false };
+const pointer = { x: NaN, y: NaN, moved: false, tracking: false, list: null as Element | null, within: false };
 function trackPointer() {
   if (pointer.tracking) return;
   pointer.tracking = true;
   addEventListener(
     "pointermove",
     (e) => {
+      const list = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.list}"]`) : null;
       pointer.moved = e.clientX !== pointer.x || e.clientY !== pointer.y;
+      pointer.within = list !== null && list === pointer.list;
+      pointer.list = list;
       pointer.x = e.clientX;
       pointer.y = e.clientY;
     },
@@ -160,6 +163,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   // In an EmojiPopover that leaves initial focus to the picker: its tab stop, once rendered (syncStop).
   const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
+  // Focus moved by key: a hover takes it back only once the pointer moves within the list, as
+  // VoiceOver moves the pointer to what it reads, which lags behind focus.
+  const keyed = React.useRef(false);
   const latest = React.useRef({ collection, virtual, geometry, searching });
   latest.current = { collection, virtual, geometry, searching };
 
@@ -214,6 +220,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const handle: ListHandle = {
     key(action, from, event) {
       const dom = from === "list";
+      if (dom) keyed.current = true;
       if (action === "select") {
         const key = highlight();
         if (key == null) return false;
@@ -376,6 +383,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     // Hover moves the keyboard position: the highlight while the field has focus, focus
     // itself once it's in the grid. Never from outside the picker.
     if (list?.contains(active) && active !== list) {
+      if (keyed.current && !pointer.within) return;
+      keyed.current = false;
       setHighlight(key);
       marks.stop.set(key);
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
@@ -465,6 +474,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       },
       onBlur(e: React.FocusEvent) {
         if (!e.nativeEvent.isTrusted || e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        keyed.current = false;
         core.setDomFocus(false);
         setHighlight(null);
       },
