@@ -297,7 +297,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
             children: (
               <>
                 {focusModel === "input" ? (
-                  <Autocomplete inputValue={query} onInputChange={state.setQuery} disableAutoFocusFirst>
+                  <Autocomplete inputValue={query} onInputChange={state.setQuery}>
                     {body}
                   </Autocomplete>
                 ) : (
