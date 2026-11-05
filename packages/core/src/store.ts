@@ -93,6 +93,13 @@ const inline = ({ data, customEmojis }: EmojiSourceOptions): Raw | null => (type
 const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
 const sameSource = (a: EmojiSourceOptions, b: EmojiSourceOptions) => a.data === b.data && sameItems(customSources(a.customEmojis), customSources(b.customEmojis));
 
+const lookup = (data: EmojiData, unified: string) => data.byUnified.get(unified.toLowerCase()) ?? data.byUnified.get(unified);
+
+export function toned(data: EmojiData, tone: SkinToneValue, unified: string): string {
+  const record = lookup(data, unified);
+  return record && tone && record.tones[tone - 1] ? record.tones[tone - 1]! : unified;
+}
+
 export function createEmojiStore({
   frequents: controlledFrequents,
   defaultFrequents,
@@ -109,9 +116,10 @@ export function createEmojiStore({
 }: EmojiStoreOptions = {}) {
   const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, frequentsStorage, frequentsHalfLifeDays, frequentsMax });
   let config: EmojiSourceOptions = source;
-  let raw = inline(config);
+  let raw: Raw | null = null;
   let base: readonly EmojiRecord[] = [];
   let controller: AbortController | undefined;
+  let onToneChange = onSkinToneChange;
   const expand = memo(expandDataset);
   const build = (next: Raw): EmojiData => {
     raw = next;
@@ -123,25 +131,22 @@ export function createEmojiStore({
     const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
     return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customs: emojis, customGroups: new Map(emojis.map((c) => [c.id, c.group])), packErrors: errors };
   };
-  const state = createStore<EmojiStoreState, EmojiStoreAction>(
-    {
-      status: raw ? "ready" : "idle",
-      error: null,
-      loading: null,
-      data: raw ? build(raw) : { ...NO_DATA, locale: config.locale },
-      ownTone: storedTone(),
-      controlledTone,
-    },
-    reduce,
-  );
-  function storedTone() {
-    return clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
-  }
-  const callbacks: Pick<EmojiStoreOptions, "onSkinToneChange"> = { onSkinToneChange };
+  const storedTone = () => clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
+  const state = createStore<EmojiStoreState, EmojiStoreAction>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, ownTone: storedTone(), controlledTone }, reduce);
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
-  const frequentOf = new Map<number, (ranked: readonly string[], data: EmojiData, isReady: boolean) => readonly string[]>();
+  const reload = () => {
+    const { status } = state.getSnapshot();
+    controller?.abort();
+    controller = undefined;
+    raw = inline(config);
+    state.dispatch({ type: "load", loading: null });
+    if (raw) publish(raw);
+    else if (status !== "idle") store.load().catch(() => {});
+  };
+  const known = memo((ranked: readonly string[], data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? lookup(data, u) : CODEPOINTS.test(u))));
+  const tops = new WeakMap<readonly string[], Map<number, readonly string[]>>();
   const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale }));
 
@@ -176,16 +181,7 @@ export function createEmojiStore({
     setOptions(next: EmojiSourceOptions) {
       const previous = config;
       config = next;
-      if (!sameSource(previous, next)) {
-        const { status } = state.getSnapshot();
-        controller?.abort();
-        controller = undefined;
-        raw = inline(next);
-        state.dispatch({ type: "load", loading: null });
-        if (raw) publish(raw);
-        else if (status !== "idle") store.load().catch(() => {});
-        return;
-      }
+      if (!sameSource(previous, next)) return reload();
       if (!raw) return;
       const kept = base;
       const data = next.filter === previous.filter && next.locale === previous.locale ? { ...loaded() } : build(raw);
@@ -208,10 +204,16 @@ export function createEmojiStore({
     locale: () => loaded().locale,
     labels: (): EmojiLabels => labelsFor(loaded().locale),
 
-    get: (unified: string) => loaded().byUnified.get(unified.toLowerCase()) ?? loaded().byUnified.get(unified),
+    get: (unified: string) => lookup(loaded(), unified),
 
-    frequent: (n: number) =>
-      cached(frequentOf, n, () => memo((ranked: readonly string[], _data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? store.get(u) : CODEPOINTS.test(u))).slice(0, n)))(frequents.top(Infinity), loaded(), ready()),
+    frequent(n: number): readonly string[] {
+      const all = known(frequents.top(Infinity), loaded(), ready());
+      return cached(
+        cached(tops, all, () => new Map()),
+        n,
+        () => all.slice(0, n),
+      );
+    },
 
     index(): SearchIndex {
       if (!ready()) throw new Error("emoji data is not loaded; await store.load() first");
@@ -240,13 +242,13 @@ export function createEmojiStore({
       const value = clampTone(next);
       if (value === store.skinTone()) return;
       const details = createChangeDetails(reason, event);
-      callbacks.onSkinToneChange?.(value, details);
+      onToneChange?.(value, details);
       if (details.isCanceled || state.getSnapshot().controlledTone !== undefined) return;
       skinToneStorage?.write(String(value));
       state.dispatch({ type: "tone", tone: value });
     },
     controlSkinTone(value: SkinToneValue | undefined, onChange?: EmojiStoreOptions["onSkinToneChange"]) {
-      callbacks.onSkinToneChange = onChange;
+      onToneChange = onChange;
       state.dispatch({ type: "control", tone: value });
     },
 
@@ -269,14 +271,11 @@ export function createEmojiStore({
       };
     },
 
-    withSkinTone(unified: string): string {
-      const record = store.get(unified);
-      const current = store.skinTone();
-      return record && current && record.tones[current - 1] ? record.tones[current - 1]! : unified;
-    },
+    withSkinTone: (unified: string): string => toned(loaded(), store.skinTone(), unified),
 
     subscribe: syncWith(skinToneStorage, state.subscribe, () => state.dispatch({ type: "tone", tone: storedTone() })),
   };
+  reload();
   return store;
 }
 
@@ -287,17 +286,14 @@ const byUrl = new Map<string, Promise<Dataset | EmojiDataInput>>();
 function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset | EmojiDataInput> {
   if (typeof source === "function") return source({ signal });
   if (typeof source !== "string") return Promise.resolve(source);
-  return byUrl.get(source) ?? fetchDataset(source);
-}
-
-function fetchDataset(url: string): Promise<Dataset | EmojiDataInput> {
-  const pending = fetch(url, { priority: "low" } as RequestInit).then((response) => {
-    if (!response.ok) throw new Error(`emoji data: ${response.status} ${response.statusText}`);
-    return response.json() as Promise<Dataset | EmojiDataInput>;
+  return cached(byUrl, source, () => {
+    const pending = fetch(source, { priority: "low" } as RequestInit).then((response) => {
+      if (!response.ok) throw new Error(`emoji data: ${response.status} ${response.statusText}`);
+      return response.json() as Promise<Dataset | EmojiDataInput>;
+    });
+    pending.catch(() => byUrl.delete(source));
+    return pending;
   });
-  pending.catch(() => byUrl.delete(url));
-  byUrl.set(url, pending);
-  return pending;
 }
 
 function idle(fn: () => void) {
