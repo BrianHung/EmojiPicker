@@ -5,7 +5,7 @@ import { defineConfig } from "tsup";
 // One output file per source module so bundlers can drop unused parts
 const modules = Object.fromEntries(readdirSync("src", { recursive: true, encoding: "utf8" }).flatMap((f) => (/(?<!\.test)\.ts$/.test(f) ? [[f.replace(/\.ts$/, ""), `src/${f}`]] : [])));
 
-const { version } = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
+const versionOf = (file: string) => JSON.stringify((JSON.parse(readFileSync(file, "utf8")) as { version: string }).version);
 
 export default defineConfig([
   {
@@ -14,7 +14,7 @@ export default defineConfig([
     dts: { entry: { index: "src/index.ts", "search/index": "src/search/index.ts", prosemirror: "src/prosemirror.ts" } },
     sourcemap: true,
     clean: true,
-    define: { __CORE_VERSION__: JSON.stringify(version) },
+    define: { __CORE_VERSION__: versionOf("package.json"), __DATA_VERSION__: versionOf("../emoji-picker-data/package.json") },
     esbuildPlugins: [
       {
         name: "sibling-modules",

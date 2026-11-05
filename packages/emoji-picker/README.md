@@ -460,6 +460,14 @@ Pass the dataset as `data`:
 <EmojiProvider data="/emoji/ja.json">…</EmojiProvider>
 ```
 
+Or skip the build: `localeData(locale, { shortcodes = "iamcal", baseUrl })` returns the jsDelivr URL of that file in `@brianhung/emoji-picker-data`, at the version core was built with, or `${baseUrl}/${locale}/${shortcodes}.json` for your own copy:
+
+```tsx
+import { localeData } from "@brianhung/emoji-picker-core";
+
+<EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">…</EmojiProvider>
+```
+
 Search follows the dataset's `locale`: it normalizes text (NFKC, so full-width `ｆｉｒｅ` finds 🔥), lowercases by the locale's rules (Turkish `İ` becomes `i`), splits Japanese, Chinese, and Thai into words with `Intl.Segmenter`, and orders alphabetical shortcode completion with `Intl.Collator`. Set `locale` on the provider to override the dataset's tag.
 
 To change how text becomes words, pass a `segmenter` (any object with `Intl.Segmenter`'s `segment()`) or replace the tokenizer. A tokenizer receives text and returns words; it splits both the indexed names and the query.

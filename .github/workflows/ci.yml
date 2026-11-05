@@ -29,7 +29,8 @@ jobs:
       - run: npm run build -w @brianhung/emoji-picker-core
       - run: npm run build -w @brianhung/emoji-picker
       - run: npm run size
-      - run: npx publint packages/emoji-picker-core && npx publint packages/emoji-picker
+      - run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
+      - run: npx publint packages/emoji-picker-core && npx publint packages/emoji-picker && npx publint packages/emoji-picker-data
       - run: npx @arethetypeswrong/cli --pack packages/emoji-picker-core --profile esm-only && npx @arethetypeswrong/cli --pack packages/emoji-picker --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css
 
   e2e:
