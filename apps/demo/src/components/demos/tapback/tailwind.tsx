@@ -1,11 +1,15 @@
-import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
 
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-picker-hover";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
-    <Tapback
-      onSelect={onSelect}
+    <EmojiPicker.Root
+      reactions={useFrequentEmoji(5)}
+      onSelect={(selection, { collapse }) => {
+        onSelect(selection);
+        collapse?.();
+      }}
       className="flex w-fit max-w-full flex-col overflow-hidden rounded-full border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:36px] [--emoji-size:24px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:h-[380px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:w-[352px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:rounded-picker"
     >
       <EmojiPicker.Reactions className="flex items-center gap-0.5 p-1.5 [--emoji-image-size:28px]">
@@ -31,6 +35,6 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
           </EmojiPicker.List>
         </EmojiPicker.Viewport>
       </EmojiPicker.Panel>
-    </Tapback>
+    </EmojiPicker.Root>
   );
 }

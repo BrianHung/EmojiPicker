@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmojiPicker, Tapback, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useFrequentEmoji, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -120,11 +120,14 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
   );
 });
 
-export function EmojiTapback({ onSelect, count, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
+export function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
-    <Tapback
-      onSelect={onSelect}
-      count={count}
+    <EmojiPicker.Root
+      reactions={useFrequentEmoji(count)}
+      onSelect={(selection, { collapse }) => {
+        onSelect(selection);
+        collapse?.();
+      }}
       className={cn(
         root,
         "w-fit max-w-[352px] rounded-full border border-border bg-popover text-foreground shadow-lg",
@@ -143,6 +146,6 @@ export function EmojiTapback({ onSelect, count, className }: { onSelect: (select
       <EmojiPicker.Panel className="flex min-h-0 min-w-0 flex-1 flex-col">
         <EmojiPickerBody footer={false} />
       </EmojiPicker.Panel>
-    </Tapback>
+    </EmojiPicker.Root>
   );
 }

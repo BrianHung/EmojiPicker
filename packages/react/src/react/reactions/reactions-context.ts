@@ -5,8 +5,8 @@ export type ReactionsState = {
   reactions: readonly string[];
   open: boolean;
   expand?: () => void;
-  pressed: ReadonlySet<string> | null;
   panel: React.RefObject<HTMLDivElement | null>;
+  registerPanel(): () => void;
 };
 export const ReactionsContext = React.createContext<ReactionsState | null>(null);
 

@@ -54,11 +54,6 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     children: React.ReactNode;
   };
 
-type InternalRootProps = RootProps & {
-  allowExpandReactions?: boolean;
-  pressed?: ReadonlySet<string> | null;
-};
-
 const VARIABLES = {
   "--ep-size": "var(--emoji-size, 30px)",
   "--ep-cell": "var(--emoji-cell-size, calc(var(--ep-size) + 10px))",
@@ -67,7 +62,7 @@ const VARIABLES = {
   "--ep-glyph-pad": "calc((var(--ep-cell) - var(--ep-size)) / 2)",
 } as React.CSSProperties;
 
-export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
+const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(props, ref) {
   const {
     onSelect,
     frequent,
@@ -88,8 +83,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     reactionsOpen: reactionsOpenProp,
     defaultReactionsOpen = true,
     onReactionsOpenChange,
-    allowExpandReactions = true,
-    pressed = null,
     searchResults = "ranked",
     searchLimit = 200,
     columns,
@@ -124,6 +117,11 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const list = React.useRef<ListHandle | null>(null);
   const searchInput = React.useRef<HTMLInputElement | null>(null);
   const panel = React.useRef<HTMLDivElement | null>(null);
+  const [panels, setPanels] = React.useState(0);
+  const registerPanel = React.useCallback(() => {
+    setPanels((n) => n + 1);
+    return () => setPanels((n) => n - 1);
+  }, []);
   const listId = React.useId();
 
   const [value, setValue] = useControlledState<string | null | undefined, string>(valueProp as string | null, defaultValue, onValueChange);
@@ -211,8 +209,8 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     [store, state, labels, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
-    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed, panel } : null),
-    [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
+    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false) : undefined, panel, registerPanel } : null),
+    [reactions, view.reactions, reactionsOpen, panels, setReactionsOpen, registerPanel],
   );
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {

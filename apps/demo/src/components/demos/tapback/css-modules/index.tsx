@@ -1,9 +1,16 @@
-import { EmojiPicker, Tapback, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import styles from "./index.module.css";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
-    <Tapback onSelect={onSelect} className={styles.root}>
+    <EmojiPicker.Root
+      reactions={useFrequentEmoji(5)}
+      onSelect={(selection, { collapse }) => {
+        onSelect(selection);
+        collapse?.();
+      }}
+      className={styles.root}
+    >
       <EmojiPicker.Reactions className={styles.reactions}>
         <EmojiPicker.Reactions.Items>{(emoji) => <EmojiPicker.Reactions.Item emoji={emoji} className={styles.reaction} />}</EmojiPicker.Reactions.Items>
         <EmojiPicker.Reactions.Expand className={styles.reaction} />
@@ -23,6 +30,6 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
           </EmojiPicker.List>
         </EmojiPicker.Viewport>
       </EmojiPicker.Panel>
-    </Tapback>
+    </EmojiPicker.Root>
   );
 }

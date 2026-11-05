@@ -144,7 +144,7 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url";
 Import the parts and assemble them.
 
 ```tsx title="anatomy.tsx"
-import { EmojiProvider, EmojiPicker, Tapback, Emoji } from "@brianhung/emoji-picker-react";
+import { EmojiProvider, EmojiPicker, Emoji, useFrequentEmoji } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 <EmojiProvider data={en}>
@@ -168,10 +168,10 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
     <EmojiPopover.Content>…</EmojiPopover.Content>
   </EmojiPopover.Root>
 
-  <Tapback>
+  <EmojiPicker.Root reactions={useFrequentEmoji(5)}>
     <EmojiPicker.Reactions />
     <EmojiPicker.Panel>…</EmojiPicker.Panel>
-  </Tapback>
+  </EmojiPicker.Root>
 
   <Emoji emoji="1f44d-1f3fd" />
 </EmojiProvider>
@@ -329,13 +329,9 @@ The state `List renderEmptyState` receives.
 
 <PropsTable rows={api.states} />
 
-### Tapback {#api-tapback}
+### Reactions {#api-tapback}
 
-A row of the most-used emoji that expands into a picker.
-
-<PropsTable rows={api.tapback} />
-
-#### Reactions
+A Root with `reactions` shows a reaction row that expands into the picker in `Panel`. `onSelect`'s `details.collapse()` shows the row again.
 
 <PropsTable rows={api.reactions} />
 
