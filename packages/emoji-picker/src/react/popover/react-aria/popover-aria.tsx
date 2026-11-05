@@ -39,9 +39,11 @@ function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitial
 }
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, children, ...rest },
   ref,
 ) {
+  // Floating UI's `duration`, for content shared between the adapters; not a DOM attribute here.
+  const { duration: _duration, ...props } = rest as typeof rest & { duration?: unknown };
   const p = usePopoverInternals<Internals>("Content");
   // On close, before the popover's focus scope restores focus to the trigger (it does only while focus is still inside).
   const wasOpen = React.useRef(p.state.open);
