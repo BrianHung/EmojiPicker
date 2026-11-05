@@ -165,9 +165,8 @@ function scene(s: StyleId): Surface[] {
       return [popover(id("page-icon"), path, (p) => button(sc(p), "Change icon")), menu(id("colon-menu"), path, (p) => sc(p).getByLabel("Page content", { exact: true }), ":sm", shotCard)];
     case "linear":
       return [
-        popover(id("issue-icon"), path, (p) => button(sc(p), "Set icon")),
+        popover(id("issue-icon"), path, (p) => button(sc(p), "Change issue icon")),
         popover(id("reaction"), path, (p) => button(sc(p), "Add reaction").first()),
-        popover(id("team-icon"), path, (p) => button(p, "Change team icon")),
         menu(id("comment-autocomplete"), path, (p) => sc(p).getByLabel("Leave a comment", { exact: true }), ":smi", shotCard),
       ];
     case "instagram": {
