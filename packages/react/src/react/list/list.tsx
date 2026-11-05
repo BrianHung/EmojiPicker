@@ -17,6 +17,7 @@ import { renderElement, resolve, type PartElementProps, type PartProps } from ".
 import { SLOTS } from "../utils/slots";
 import { nextTabbable, TABBABLE } from "../utils/utils";
 import { useStoreSnapshot } from "../provider/provider";
+import { shallowEqual, useStore } from "../utils/store";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
 export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
@@ -81,7 +82,7 @@ const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyo
 
 const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, renderEmptyState, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
-  const { searching } = picker;
+  const searching = useStore(picker.state, (s) => s.searching);
   const horizontal = orientation === "horizontal";
   const setViewportOrientation = React.useContext(ViewportContext);
   React.useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
@@ -392,7 +393,8 @@ const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 const CONTENTS: React.CSSProperties = { display: "contents" };
 
 function EmptyOption({ render }: { render: (state: EmptyState) => React.ReactNode }) {
-  const { store, query, pending } = usePicker();
+  const { store, state: picker } = usePicker();
+  const { query, pending } = useStore(picker, ({ query, pending }) => ({ query, pending }), shallowEqual);
   const status = useStoreSnapshot((s) => s.status());
   if (status === "ready" && pending) return null;
   const state: EmptyState = { status: status === "error" ? "error" : status === "ready" ? "empty" : "loading", query, error: store.error(), retry: () => void store.load().catch(() => {}) };

@@ -4,6 +4,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { createEmojiGrid, type EmojiGridRow, type EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 import { scrollParent } from "../utils/utils";
 import type { EmojiGridState } from "./cell";
 import { useGridController, useGridSections, type GridGeometry } from "./grid";
@@ -24,6 +25,7 @@ function windowOf(list: HTMLElement | null) {
 
 export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions) {
   const picker = usePicker("useEmojiGrid");
+  const searching = useStore(picker.state, (s) => s.searching);
   const { sections, request, probeRoot } = useGridSections(false);
   const grid = React.useMemo(() => createEmojiGrid(sections, { columns: columns ?? picker.columns ?? 9, rowHeight, headerHeight }), [sections, columns, picker.columns, rowHeight, headerHeight]);
   const listRef = React.useRef<HTMLElement | null>(null);
@@ -83,7 +85,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     const v = windowOf(listRef.current);
     const shown = v ? grid.rows.filter((r) => r.offset + r.size > v.top && r.offset < v.top + v.height) : [];
     request(shown.flatMap((r) => (r.type === "emojis" ? r.items.map((i) => i.unified) : [])));
-    if (!picker.searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
+    if (!searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
     controller.flushJump();
   };
   React.useLayoutEffect(() => sync.current());

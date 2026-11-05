@@ -13,6 +13,7 @@ import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "
 import { useCategoryNavigation } from "../root/picker";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 
 export type NavCategory = ReturnType<typeof useCategoryNavigation>["categories"][number];
 
@@ -37,6 +38,7 @@ const TabContext = React.createContext<NavCategory | null>(null);
 
 const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", onKeyDown, className, style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
+  const searching = useStore(picker.state, (s) => s.searching);
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const id = React.useId();
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
@@ -44,7 +46,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const [tabs] = React.useState(() => new Map<string, HTMLElement>());
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     const key = [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0];
-    if (key == null || picker.searching || hasModifier(e)) return false;
+    if (key == null || searching || hasModifier(e)) return false;
     const ids = categories.map((c) => c.id);
     const i = ids.indexOf(key);
     const rtl = orientation === "horizontal" && direction === "rtl";
@@ -58,7 +60,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
 
   const ids = categories.map((c) => c.id);
   const selected = activeCategory ?? ids[0]!;
-  const disabled = picker.searching;
+  const disabled = searching;
   const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
   const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
 

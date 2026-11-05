@@ -8,6 +8,7 @@ import { usePicker } from "../root/context";
 import { usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { racParts, racState, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 
 export type SearchState = { empty: boolean };
 
@@ -16,9 +17,9 @@ export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" |
 };
 
 const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
-  const { query } = usePicker("EmojiPicker.Search");
+  const empty = useStore(usePicker("EmojiPicker.Search").state, (s) => s.query === "");
   const keys = usePickerKeyDown(onKeyDown, () => false);
-  return renderElement("div", { "data-slot": SLOTS.search, "data-empty": query === "" || undefined, ...props, ref, onKeyDown: keys, children: children ?? <SearchInput /> }, { empty: query === "" });
+  return renderElement("div", { "data-slot": SLOTS.search, "data-empty": empty || undefined, ...props, ref, onKeyDown: keys, children: children ?? <SearchInput /> }, { empty });
 });
 
 export type SearchInputState = Omit<InteractionState, "pressed">;

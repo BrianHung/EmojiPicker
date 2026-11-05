@@ -17,7 +17,7 @@ import type { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
-import { useStore } from "../utils/store";
+import { shallowEqual, useStore } from "../utils/store";
 import { Variations } from "./variations";
 import { cellOf, createMarks, type Cells, type MarksStore } from "./cell";
 import { usePointerHighlight } from "./pointer";
@@ -43,21 +43,22 @@ const NO_KEYS: Key[] = [];
 
 export function useGridSections(horizontal: boolean) {
   const picker = usePicker("EmojiPicker.List");
+  const { searching, categorySections, sections } = useStore(picker.state, ({ searching, categorySections, sections }) => ({ searching, categorySections, sections }), shallowEqual);
   const probeRoot = React.useRef<HTMLElement | null>(null);
   const { drawable, request } = useDrawable(probeRoot);
   const categories = React.useMemo(
     () =>
       horizontal
-        ? picker.categorySections
-        : picker.categorySections.flatMap((s) => {
+        ? categorySections
+        : categorySections.flatMap((s) => {
             const seen = new Set<string>();
             const items = s.items.filter((i) => drawable(i.record, i.unified) && !seen.has(i.unified) && seen.add(i.unified));
             if (items.length === s.items.length) return [s];
             return items.length || s.collapsed ? [{ ...s, items }] : [];
           }),
-    [horizontal, picker.categorySections, drawable],
+    [horizontal, categorySections, drawable],
   );
-  return { sections: picker.searching ? picker.sections : categories, request, probeRoot };
+  return { sections: searching ? sections : categories, request, probeRoot };
 }
 
 // A new query keeps the highlighted emoji when it is still a result, and the highlighted cell stays mounted off screen
@@ -153,7 +154,8 @@ type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labe
 
 export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
-  const { labels, searching, value, virtual, state: core } = picker;
+  const { labels, value, state: core } = picker;
+  const { searching, virtual, query, pending } = useStore(core, (s) => ({ searching: s.searching, virtual: s.focus === "virtual", query: s.query, pending: s.pending }), shallowEqual);
   const { navigation } = geometry;
   const collection = React.useMemo(() => new EmojiCollection(sections), [sections]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
@@ -262,7 +264,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (picker.list.current === handle) picker.list.current = null;
     };
   });
-  React.useLayoutEffect(() => retain(sections, picker.query), [sections]);
+  React.useLayoutEffect(() => retain(sections, query), [sections]);
   const flushJump = () => {
     const jump = pendingJump.current;
     pendingJump.current = null;
@@ -401,7 +403,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       "data-focus-visible": isFocusVisible || undefined,
       "data-searching": searching || undefined,
       "data-results": searching ? picker.searchResults : undefined,
-      "aria-busy": (searching && picker.pending) || undefined,
+      "aria-busy": (searching && pending) || undefined,
     } as React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement> },
     variations: varied ? (
       <Variations
