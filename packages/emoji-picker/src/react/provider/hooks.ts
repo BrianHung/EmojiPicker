@@ -5,7 +5,11 @@ import { useEmojiContext, useStoreSnapshot } from "./provider";
 
 export function useFrequentEmoji(n = 5): readonly string[] {
   const { store } = useEmojiContext();
-  return useStore({ subscribe: store.frequents.subscribe, getSnapshot: () => store.frequents.top(n) });
+  const subscribe = React.useCallback((listener: () => void) => {
+    const off = [store.frequents.subscribe(listener), store.subscribe(listener)];
+    return () => off.forEach((unsubscribe) => unsubscribe());
+  }, [store]);
+  return useStore({ subscribe, getSnapshot: () => store.frequent(n) });
 }
 
 export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {
