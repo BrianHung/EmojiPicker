@@ -1,4 +1,5 @@
 export interface Env {
+  ASSETS: Fetcher;
   AI: Ai;
   EMOJI_INDEX: Vectorize;
   ALLOWED_ORIGINS: string;

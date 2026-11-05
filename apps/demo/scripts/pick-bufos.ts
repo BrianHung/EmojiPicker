@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -6,7 +7,7 @@ import sharp from "sharp";
 const INDEX = "https://raw.githubusercontent.com/knobiknows/all-the-bufo/main/index.md";
 const IMAGE = "https://all-the.bufo.zone/";
 const MIN_SIZE = 96;
-const SHEET = fileURLToPath(new URL("../capture/out/bufo-picks.png", import.meta.url));
+const SHEET = join(tmpdir(), "bufo-picks.png");
 const PACK = fileURLToPath(new URL("../public/packs/bufo/pack.json", import.meta.url));
 
 const PICKS = [

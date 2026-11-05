@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
     "embed": "tsx scripts/embed-emoji.ts",
+    "og": "node scripts/og/render-og.mjs",
     "create-index": "wrangler vectorize create emoji-bge-large --dimensions=1024 --metric=cosine",
     "seed": "tsx scripts/seed.ts",
     "test": "vitest run --config worker/vitest.config.ts",

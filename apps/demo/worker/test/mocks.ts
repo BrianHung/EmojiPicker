@@ -52,6 +52,7 @@ export function mockEnv(overrides: Partial<Env> = {}) {
     SEARCH_LIMIT: allow,
     DECIDE_LIMIT: allow,
     ALLOWED_ORIGINS: "http://localhost:*,https://emoji.example.com",
+    ASSETS: { fetch: async () => new Response("asset") } as unknown as Fetcher,
     AI_GATEWAY_ID: "default",
     ADMIN_TOKEN: "admin",
     ...overrides,

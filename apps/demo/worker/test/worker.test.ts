@@ -16,6 +16,14 @@ const seeded = async (overrides = {}) => {
 const unreachable = () => Promise.reject(new Error("Binding AI needs to be run remotely"));
 const search = async (path: string, body: object, env: Mock["env"]) => (await (await fetch(post(path, body), env)).json()) as EmbedSearchResponse & DecisionResponse;
 
+describe("canonical host", () => {
+  it("301s every path on the alias host to the same path on emoji.brianhung.me", async () => {
+    const res = await fetch(new Request("https://emojis.brianhung.me/examples/tiptap/?q=cat", { headers: { host: "emojis.brianhung.me" } }), mockEnv().env);
+    expect(res.status).toBe(301);
+    expect(res.headers.get("location")).toBe("https://emoji.brianhung.me/examples/tiptap/?q=cat");
+  });
+});
+
 describe("CORS", () => {
   it("answers preflight for allowed origins, wildcard ports included", async () => {
     const { env } = mockEnv();
