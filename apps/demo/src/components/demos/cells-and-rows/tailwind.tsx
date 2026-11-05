@@ -35,7 +35,7 @@ export function CellsAndRowsPicker({ onSelect }: { onSelect: (selection: EmojiSe
       onSelect={onSelect}
       rows={<QuickRow onPick={onSelect} />}
       cell={roundCell}
-      columns={7}
+      columns={6}
       frequent={false}
       className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]"
     />

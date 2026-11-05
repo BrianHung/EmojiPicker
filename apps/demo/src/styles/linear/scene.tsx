@@ -525,7 +525,7 @@ function Description({ compact = false }: { compact?: boolean }) {
 function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
   return (
     <EmojiPicker.Root
-      columns={fluid ? "fit" : 14}
+      columns={fluid ? "fit" : 13}
       frequent={18}
       categories={LINEAR_CATEGORIES}
       searchResults={searchResults}
