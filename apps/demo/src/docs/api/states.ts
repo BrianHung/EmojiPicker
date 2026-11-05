@@ -1,8 +1,9 @@
-import type { EmptyProps, LoadErrorProps, LoadingProps } from "@brianhung/emoji-picker-react";
-import { rowsOfParts } from "./rows";
+import type { EmptyState } from "@brianhung/emoji-picker-react";
+import { rowsOf } from "./rows";
 
-export const states = rowsOfParts<{ Empty: EmptyProps; LoadError: LoadErrorProps; Loading: LoadingProps }>()([
-  { name: "Empty › children", type: "ReactNode | ({ search }) => ReactNode", default: "labels.noResults", description: "Shown when a search has no results." },
-  { name: "LoadError › children", type: "ReactNode | ({ error, retry }) => ReactNode", default: "a message and a retry button" },
-  { name: "Loading › children", type: "ReactNode", default: "labels.loading" },
+export const states = rowsOf<EmptyState>()([
+  { name: "status", type: '"loading" | "error" | "empty"', description: "empty: the data loaded and nothing matches." },
+  { name: "query", type: "string" },
+  { name: "error", type: "Error | null", description: "Why loading failed." },
+  { name: "retry", type: "() => void", description: "Loads the data again." },
 ]);

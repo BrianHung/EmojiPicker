@@ -24,7 +24,7 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
         </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1">
-        <EmojiPicker.List>
+        <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && <div className="py-10 text-center text-sm text-picker-muted">No emoji found.</div>}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex items-center bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
@@ -32,7 +32,6 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm text-picker-muted">No emoji found.</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <EmojiPicker.CategoryNav className="flex justify-between border-t border-picker-border px-2 py-1.5">
         {() => <EmojiPicker.CategoryNav.Tab className="flex size-8 items-center justify-center rounded-md text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected data-active:text-picker-foreground" />}

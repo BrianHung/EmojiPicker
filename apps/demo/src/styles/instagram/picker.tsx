@@ -1,7 +1,7 @@
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
+import { noEmoji, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
@@ -62,7 +62,7 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-width:none]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex h-[34px] items-center bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
@@ -70,7 +70,6 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <div className="flex h-[42px] shrink-0 items-center border-t border-picker-border px-[10.5px]">
         <EmojiPicker.CategoryNav ref={nav} className="flex w-full min-w-0 flex-1 items-center justify-between overflow-x-auto [scrollbar-width:none]">

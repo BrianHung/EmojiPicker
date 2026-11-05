@@ -59,7 +59,18 @@ export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = tr
       <EmojiPickerSearch autoFocus={autoFocus} />
       {rows}
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List
+          className="outline-none"
+          renderEmptyState={({ status, retry }) => (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              {status === "empty" ? empty : status === "loading" ? "Loading…" : (
+                <button type="button" className="underline" onClick={retry}>
+                  Could not load emoji. Try again
+                </button>
+              )}
+            </div>
+          )}
+        >
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex items-center bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
@@ -67,8 +78,6 @@ export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = tr
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-6 text-center text-sm text-muted-foreground">{empty}</EmojiPicker.Empty>
-        <EmojiPicker.Loading className="py-6 text-center text-sm text-muted-foreground">Loading…</EmojiPicker.Loading>
       </EmojiPicker.Viewport>
       {footer ? <EmojiPickerFooter /> : null}
     </>

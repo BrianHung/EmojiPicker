@@ -1,7 +1,7 @@
 import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { HandTone, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
+import { HandTone, noEmoji, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
@@ -140,7 +140,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
               !search && "pt-[var(--emoji-list-padding,8px)]",
             )}
           >
-            <EmojiPicker.List className="outline-none">
+            <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
               {(section) => {
                 const Icon = ICONS[section.category];
                 return (
@@ -158,7 +158,6 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
                 );
               }}
             </EmojiPicker.List>
-            <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
           </EmojiPicker.Viewport>
           <Footer />
         </div>

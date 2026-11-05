@@ -1,9 +1,11 @@
 import * as React from "react";
-import { EmojiPicker, type CategoryId, type CategoryOption } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type CategoryId, type CategoryOption, type EmptyState } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import type * as I from "./icons";
 
 const DEFAULT_ORDER: CategoryId[] = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
+
+export const noEmoji = ({ status }: EmptyState) => (status === "empty" ? <div className="py-10 text-center text-sm opacity-60">No emoji found</div> : null);
 
 export function withIcons(
   icons: I.IconSet,

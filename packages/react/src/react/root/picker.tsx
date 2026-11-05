@@ -15,7 +15,6 @@ import { renderElement, resolve, type PartElementProps, type PartProps } from ".
 import { useClippedScrollGuard } from "../utils/scroll-guard";
 import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
-import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 
@@ -224,7 +223,6 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });
-  const emptyState = useEmptyStateSlots();
   const count = !searching || pending ? "" : labels.resultCount(results.length);
 
   return renderElement(
@@ -245,9 +243,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
         <>
           <Autocomplete inputValue={query} onInputChange={state.setQuery}>
             <PickerContext.Provider value={context}>
-              <ReactionsContext.Provider value={reactionsState}>
-                <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
-              </ReactionsContext.Provider>
+              <ReactionsContext.Provider value={reactionsState}>{children}</ReactionsContext.Provider>
             </PickerContext.Provider>
           </Autocomplete>
           <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>

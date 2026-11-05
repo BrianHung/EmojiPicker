@@ -129,14 +129,13 @@ type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labe
   listRef: React.RefObject<HTMLElement | null>;
   ref?: React.Ref<HTMLElement>;
   probeRoot?: React.Ref<HTMLElement>;
-  loader?: boolean;
 };
 
-export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, onKeyDown, ...aria }: ControllerOptions) {
+export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
   const { labels, searching, value } = picker;
   const { navigation } = geometry;
-  const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
+  const collection = React.useMemo(() => new EmojiCollection(sections), [sections]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
   const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? NO_KEYS, disallowEmptySelection: value !== undefined, layoutDelegate: geometry.layoutDelegate });
   const stateRef = React.useRef(state);

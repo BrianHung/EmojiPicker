@@ -19,14 +19,13 @@ export class EmojiCollection implements Collection<Node<unknown>> {
   private readonly top: Node<unknown>[] = [];
   private readonly positions = new Map<Key, number>();
 
-  constructor(sections: readonly EmojiSection[], loader = false) {
+  constructor(sections: readonly EmojiSection[]) {
     for (const s of sections) {
       const header = s.header ? [node("header", `header:${s.id}`, s, s.name, [], s.id)] : [];
       const children = [...header, ...(s.items as readonly Node<unknown>[])];
       this.add(node("section", s.id, s, s.name, children), true);
       for (const child of children) this.add(child);
     }
-    if (loader) this.add(node("loader", "loader", null, ""), true);
   }
 
   private add(n: Node<unknown>, top = false) {

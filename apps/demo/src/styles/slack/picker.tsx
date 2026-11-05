@@ -2,7 +2,7 @@ import type * as React from "react";
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { HandTone, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
+import { HandTone, noEmoji, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const GETTING_WORK_DONE = [
@@ -129,7 +129,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
           !search && "pt-[var(--emoji-list-padding,8px)]",
         )}
       >
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="mr-[3px] -ml-px block h-[26px] bg-picker-background/95 px-3.5 text-[13px] leading-[26px] font-bold text-picker-foreground" />
@@ -144,7 +144,6 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <div className="flex h-[60px] shrink-0 items-center border-t border-(--slack-divider) bg-picker-panel pt-0.5 pr-[26px] pl-3.5">
         <button type="button" className="h-7 rounded border border-(--slack-button-border,var(--emoji-picker-input-border)) bg-picker-background px-3 pt-[0.5px] text-[13px] font-bold hover:bg-picker-hover">

@@ -158,10 +158,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
       </EmojiPicker.SkinTone>
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
-      <EmojiPicker.List />
-      <EmojiPicker.Empty />
-      <EmojiPicker.Loading />
-      <EmojiPicker.LoadError />
+      <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && "No emoji found"} />
     </EmojiPicker.Viewport>
     <EmojiPicker.Preview />
   </EmojiPicker.Root>
@@ -326,9 +323,9 @@ The shared skin tone: a trigger, and the six tones it opens as a radio group.
 
 <PropsTable rows={api.skinTone} />
 
-### Empty, Loading, LoadError {#api-states}
+### Empty state {#api-states}
 
-Content for the empty, loading and error states.
+The state `List renderEmptyState` receives.
 
 <PropsTable rows={api.states} />
 

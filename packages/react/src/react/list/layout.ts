@@ -37,7 +37,6 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
   private infos = new Map<Key, LayoutInfo>();
   private cellInfos = new Map<Key, LayoutInfo>();
   private size = new Size();
-  private loader: LayoutInfo | null = null;
 
   shouldInvalidateLayoutOptions(next: EmojiGridLayoutOptions, prev: EmojiGridLayoutOptions) {
     return next.orientation !== prev.orientation || next.columns !== prev.columns || next.fitColumns !== prev.fitColumns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
@@ -53,18 +52,9 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     this.strip = null;
     const collection = this.virtualizer!.collection;
     const sections: EmojiSection[] = [];
-    let loader: Node<unknown> | null = null;
-    for (const n of collection) {
-      if (n.type === "loader") loader = n;
-      if (n.type === "section") sections.push(n.value as EmojiSection);
-    }
+    for (const n of collection) if (n.type === "section") sections.push(n.value as EmojiSection);
     if (options.orientation === "horizontal") this.horizontal(sections, options.rows ?? 5);
     else this.vertical(sections, options);
-    if (loader) {
-      const horizontal = options.orientation === "horizontal";
-      this.loader = new LayoutInfo("loader", loader.key, horizontal ? new Rect(this.size.width, 0, 1, this.size.height) : new Rect(0, this.size.height, this.size.width, 1));
-      this.infos.set(loader.key, this.loader);
-    } else this.loader = null;
   }
 
   private section(s: EmojiSection, rect: Rect, results?: string) {
@@ -158,7 +148,6 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
           if (row.type === "emojis" && row.offset + row.size > rect.y && row.offset <= rect.maxY) for (const item of row.items) add(this.getLayoutInfo(item.id));
         }
     }
-    add(this.loader);
     for (const key of this.virtualizer!.persistedKeys) {
       const cell = this.getLayoutInfo(key);
       const box = cell?.parentKey == null ? undefined : this.sections.find((b) => b.key === cell.parentKey);

@@ -115,10 +115,10 @@ describe("store locale", () => {
     expect(alphabetical(swedish)).toEqual(["sa", "sz", "så"]);
     expect(swedish.labels().resultCount(1234)).toBe(`${new Intl.NumberFormat("sv").format(1234)} results`);
 
-    const mixed = createEmojiStore({ data: sv, frequents: frequents(), locale: "en", labels: { noResults: "Inga träffar" } });
+    const mixed = createEmojiStore({ data: sv, frequents: frequents(), locale: "en", labels: { searchPlaceholder: "Sök" } });
     await mixed.load();
     expect(alphabetical(mixed)).toEqual(["sa", "så", "sz"]);
-    expect(mixed.labels()).toMatchObject({ noResults: "Inga träffar", searchPlaceholder: defaultLabels.searchPlaceholder });
+    expect(mixed.labels()).toMatchObject({ searchPlaceholder: "Sök", searchLabel: defaultLabels.searchLabel });
     expect(mixed.labels().resultCount(1234)).toBe("1,234 results");
   });
 });

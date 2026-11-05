@@ -1,7 +1,7 @@
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
+import { noEmoji, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
@@ -52,7 +52,7 @@ export function ApplePicker({ onSelect, search = true, autoFocus = false, fluid 
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-width:thin]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="pointer-events-none h-0 overflow-hidden" />
@@ -60,7 +60,6 @@ export function ApplePicker({ onSelect, search = true, autoFocus = false, fluid 
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <div className="flex h-[52px] shrink-0 items-center gap-0.5 border-t border-picker-border px-2">
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-between gap-0 overflow-x-auto [scrollbar-width:none]">

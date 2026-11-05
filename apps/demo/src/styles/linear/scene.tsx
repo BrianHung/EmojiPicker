@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { LINEAR_CATEGORIES, linear } from "./picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { LinearEmojiMenu, linearEmojiOptions } from "@/experiences/linear";
-import { SearchClear } from "@/styles/parts";
+import { noEmoji, SearchClear } from "@/styles/parts";
 import { CELL, ROOT, tokensOf, type StylePickerProps } from "@/styles/style";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 import { Avatar, EmojiText, FitViewport, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
@@ -540,7 +540,7 @@ function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
         </EmojiPicker.Search.Input>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1 [scrollbar-width:thin]">
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-[10.5px] text-[12px] leading-[22px] font-medium text-picker-muted" />
@@ -548,7 +548,6 @@ function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
     </EmojiPicker.Root>
   );

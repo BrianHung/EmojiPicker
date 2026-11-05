@@ -1,6 +1,6 @@
 import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
-import { SearchClear } from "@/styles/parts";
+import { noEmoji, SearchClear } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
@@ -47,7 +47,7 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted" />
@@ -55,7 +55,6 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
     </EmojiPicker.Root>
   );
