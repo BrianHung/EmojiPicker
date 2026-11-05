@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import type { MDXComponents, MDXContent } from "mdx/types";
 import { Code } from "./code";
 import { PageHeader } from "./copy-page";
-import { C, CodeBlockTabs, H2, H3, P, type CodeProps } from "./docs";
+import { C, CodeBlockTabs, H2, H3, P, PackageManagers, type CodeProps } from "./docs";
 import { DocsLayout } from "./docs-layout";
 import { SiteShell } from "./shell";
 
@@ -39,6 +39,7 @@ export const components: MDXComponents = {
   hr: () => <hr className="mt-8 border-border" />,
   Code: ({ code, label: _, ...props }: CodeProps) => <Code {...props}>{code}</Code>,
   CodeTabs: CodeBlockTabs,
+  PackageManagers,
 };
 
 type Frontmatter = { title: string; description: string; toc?: boolean };

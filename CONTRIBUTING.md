@@ -4,7 +4,7 @@
 
 | Path | Contents |
 |---|---|
-| `packages/emoji-picker-core` | [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md): data, search, stores and the ProseMirror plugin, with no dependencies |
+| `packages/emoji-picker-core` | [`@brianhung/emoji-picker-core`](packages/emoji-picker-core/README.md): data, search and stores, with no dependencies |
 | `packages/emoji-picker` | [`@brianhung/emoji-picker`](packages/emoji-picker/README.md): the React parts and hooks |
 | `packages/emoji-picker-data` | [`@brianhung/emoji-picker-data`](packages/emoji-picker-data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |

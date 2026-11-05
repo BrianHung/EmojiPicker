@@ -1,9 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { emojiTypeahead } from "@brianhung/emoji-picker-core/prosemirror";
-import { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "./react/typeahead";
-
-export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";
+import { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { emojiTypeahead } from "@/lib/emoji-prosemirror";
 
 export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
   content?: (text: string, suggestion: ShortcodeSuggestion) => Content;

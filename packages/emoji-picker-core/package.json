@@ -1,7 +1,7 @@
 {
   "name": "@brianhung/emoji-picker-core",
   "version": "0.0.0",
-  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state, and a ProseMirror shortcode plugin.",
+  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state.",
   "keywords": [
     "emoji",
     "emoji-picker",
@@ -9,8 +9,7 @@
     "shortcodes",
     "search",
     "skin-tone",
-    "autocomplete",
-    "prosemirror"
+    "autocomplete"
   ],
   "license": "MIT",
   "author": "Brian Hung",
@@ -45,11 +44,6 @@
       "types": "./dist/search/index.d.ts",
       "import": "./dist/search/index.js"
     },
-    "./prosemirror": {
-      "@brianhung/source": "./src/prosemirror.ts",
-      "types": "./dist/prosemirror.d.ts",
-      "import": "./dist/prosemirror.js"
-    },
     "./data/en.json": "./data/en.json",
     "./package.json": "./package.json"
   },
@@ -60,18 +54,10 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "emojibase-data": ">=16.0.0",
-    "prosemirror-state": "^1.4.0",
-    "prosemirror-view": "^1.30.0"
+    "emojibase-data": ">=16.0.0"
   },
   "peerDependenciesMeta": {
     "emojibase-data": {
-      "optional": true
-    },
-    "prosemirror-state": {
-      "optional": true
-    },
-    "prosemirror-view": {
       "optional": true
     }
   },
@@ -79,10 +65,6 @@
     "@types/node": "^22.20.5",
     "emojibase": "^18.0.0",
     "emojibase-data": "^18.0.0",
-    "jsdom": "^30.1.3",
-    "prosemirror-schema-basic": "^1.2.5",
-    "prosemirror-state": "^1.4.4",
-    "prosemirror-view": "^1.42.9",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",

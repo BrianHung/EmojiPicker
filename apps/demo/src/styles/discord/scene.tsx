@@ -7,7 +7,7 @@ import { EditorContent, useEditor } from "@tiptap/react";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
-import { useTiptapEmojiTypeahead } from "@brianhung/emoji-picker/tiptap";
+import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-node";
 import { DiscordEmojiMenu, discordEmojiOptions } from "@/experiences/discord";
 import { Avatar, EmojiText, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
