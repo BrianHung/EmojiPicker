@@ -77,6 +77,7 @@ describe("Root keyboard", () => {
     press(input, "ArrowRight");
     expect(onHighlightChange).toHaveBeenLastCalledWith("smileys_people:1f603", expect.objectContaining({ reason: "keyboard" }));
     expect(highlighted(host)).toBe("1f600");
+    expect(host.querySelector("aside")!.hasAttribute("highlight")).toBe(false);
   });
 
   it("keeps the highlight where it is when onHighlightChange cancels", () => {

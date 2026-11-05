@@ -92,6 +92,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     value: valueProp,
     defaultValue,
     onValueChange,
+    highlight: _highlight,
+    defaultHighlight: _defaultHighlight,
+    onHighlightChange: _onHighlightChange,
     disableVariations: _disableVariations,
     reactions,
     reactionsOpen: reactionsOpenProp,
@@ -116,11 +119,8 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const rootRef = React.useRef<HTMLElement | null>(null);
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
-  const optionsChanged = React.useRef(0);
-  const before = state.getSnapshot();
   state.setOptions(options);
-  // Options update the state silently, so parts learn of what they changed through the context
-  if (state.getSnapshot() !== before) optionsChanged.current++;
+  React.useLayoutEffect(() => state.setOptions(options, { notify: true }));
   const view = useStore(
     state,
     ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }),
@@ -212,7 +212,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       registerInput: state.registerInput,
       listId,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, value, pick, actions, target, listId, optionsChanged.current],
+    [store, state, labels, popover, columns, collapse, searchResults, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
     () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false, "trigger-press") : undefined, panel, registerPanel } : null),

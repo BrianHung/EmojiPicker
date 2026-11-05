@@ -120,7 +120,6 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     },
     reduceUi,
   );
-  // Options arrive every render, so they update silently: nothing subscribes to this store
   const input = createStore<Input<Icon>, InputAction<Icon>>({ options, draft: null }, reduceInput);
   const search = createSearch(store);
   const set = (patch: Partial<Ui>) => ui.dispatch({ type: "set", patch });
@@ -194,6 +193,8 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     });
   });
 
+  // Options arrive during render, where subscribers can't be told; a later notify publishes what they changed
+  let unpublished = false;
   const frequentCount = () => (opts().frequent ?? 16) || 1;
 
   function getSnapshot(): PickerSnapshot<Icon> {
@@ -220,8 +221,12 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     getSnapshot,
     subscribe: subscribeAll(ui.subscribe, store.subscribe, (listener) => store.frequents.subscribe(() => !ui.getSnapshot().held && listener()), search.subscribe),
     setOptions(next: PickerStateOptions<Icon>, { notify = false } = {}) {
+      const before = getSnapshot();
       input.dispatch({ type: "options", options: next });
-      if (notify) ui.dispatch({ type: "refresh" });
+      unpublished ||= getSnapshot() !== before;
+      if (!notify || !unpublished) return;
+      unpublished = false;
+      ui.dispatch({ type: "refresh" });
     },
     setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}) {
       if (value === queryOf(ui.getSnapshot(), opts())) return;
