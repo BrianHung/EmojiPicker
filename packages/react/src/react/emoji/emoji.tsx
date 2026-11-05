@@ -63,7 +63,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
     );
   }
   return (
-    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={{ fontFamily: "var(--emoji-font-family)", ...(size === undefined ? null : { fontSize: size, lineHeight: 1 }), ...props.style }}>
+    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
       {resolved.native}
     </span>
   );
