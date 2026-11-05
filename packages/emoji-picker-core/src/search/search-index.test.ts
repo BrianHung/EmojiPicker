@@ -39,7 +39,7 @@ describe("search index", () => {
     expect(smile).toContain("smiley");
   });
 
-  it("completes like Slack: words inside shortcodes, with match ranges", () => {
+  it("completes words inside shortcodes, with match ranges", () => {
     const smiling = index.completeShortcode("smiling", 20);
     const codes = smiling.map((c) => c.shortcode);
     expect(codes).toContain("smiling_imp");
@@ -49,7 +49,7 @@ describe("search index", () => {
     expect(index.completeShortcode("smiling_f").every((c) => c.shortcode.startsWith("smiling_f"))).toBe(true);
   });
 
-  it("completes like Discord in alphabetical order: prefixes A–Z, then the rest A–Z, an exact match first", () => {
+  it("orders completions alphabetically: prefixes A–Z, then the rest A–Z, an exact match first", () => {
     const codes = index.completeShortcode("smi", 14, "alphabetical").map((c) => c.shortcode);
     expect(codes.slice(0, 5)).toEqual(["smile", "smile_cat", "smiley", "smiley_cat", "smiling_face_with_3_hearts"]);
     const prefixed = codes.filter((c) => c.startsWith("smi"));

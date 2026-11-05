@@ -17,6 +17,6 @@ export const listParts: PropRow[] = [
   { name: "List.Section", type: "{ section, collapsed }", description: "A section (group): List.SectionTitle, List.Items, List.SectionActions." },
   { name: "List.SectionTitle", type: "{ section, collapsed }", default: "section.name", description: "Text in the listbox, sticky where the layout puts it." },
   { name: "List.Items › children", type: "(emoji: EmojiItem) => ReactNode", default: "<List.Cell />", description: "Called only for the emoji in view." },
-  { name: "List.Cell", type: "{ emoji, highlighted, active, hovered, focused, focusVisible, pressed, selected }", default: "the glyph", description: "An option; re-renders only when its own state changes." },
+  { name: "List.Cell", type: "{ emoji, row, column, highlighted, active, hovered, focused, focusVisible, pressed, selected }", default: "the glyph", description: "An option; re-renders only when its own state changes." },
   { name: "List.SectionActions", type: "{ section, collapsed, toggle, toggleProps }", description: "Controls over the title, outside the listbox." },
 ];

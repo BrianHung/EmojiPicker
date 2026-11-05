@@ -7,7 +7,7 @@ import { findShortcodeTrigger, isComposingKey, nameWithTone, replaceShortcodes, 
 const index = createSearchIndex(expandDataset(data as unknown as Dataset));
 
 describe("shortcodes", () => {
-  it("replaces Slack shortcodes, including :skin-tone-N:, dropping a tone the emoji doesn't take", () => {
+  it("replaces shortcodes, including :skin-tone-N:, dropping a tone the emoji doesn't take", () => {
     expect(replaceShortcodes(":thumbsup::skin-tone-3: ok :nope: :heart:", index)).toBe("👍🏼 ok :nope: ❤️");
     expect(replaceShortcodes(":heart::skin-tone-4:", index)).toBe("❤️");
   });

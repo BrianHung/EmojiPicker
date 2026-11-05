@@ -22,7 +22,7 @@ describe("resolveEmoji", () => {
     expect(resolveEmoji(store, "🇯🇵")?.record?.shortcodes).toContain("jp");
   });
 
-  it("reads shortcodes with or without colons, Slack skin tones and custom emoji", async () => {
+  it("reads shortcodes with or without colons, skin-tone suffixes and custom emoji", async () => {
     const store = await loadedStore();
     expect(resolveEmoji(store, ":tada:")?.unified).toBe("1f389");
     expect(resolveEmoji(store, "tada")?.unified).toBe("1f389");

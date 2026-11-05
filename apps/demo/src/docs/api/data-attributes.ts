@@ -19,6 +19,7 @@ export const stateAttributes: [string, string][] = [
   ["data-empty", "Search with no query; List with nothing to show."],
   ["data-has-variations", "Present on cells with skin-tone variations."],
   ["data-unified", "The cell's unified code."],
+  ["data-row · data-column", "The cell's row, counted across the whole list, and its column."],
   ['data-state="open" | "closed"', "SkinTone and its Trigger: whether the options are open."],
   ["data-orientation", "Viewport, List, CategoryNav and SkinTone options: horizontal or vertical."],
 ];

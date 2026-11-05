@@ -20,8 +20,10 @@ const tokens: Tokens = {
   "--notion-control": "light-dark(#383836, color-mix(in oklab, #fff 60%, transparent))",
   "--notion-placeholder": "light-dark(rgb(44 44 43 / 0.375), color-mix(in oklab, #fff 30%, transparent))",
   "--notion-edge": "light-dark(rgb(28 19 1 / 0.11), rgb(255 255 255 / 0.094))",
-  "--notion-mine": "light-dark(rgb(0 124 215 / 0.094), rgb(35 131 226 / 0.2))",
-  "--notion-mine-foreground": "light-dark(#2783de, #529cca)",
+  "--notion-mine": "light-dark(rgb(0 124 215 / 0.094), rgb(67 155 255 / 0.24))",
+  "--notion-mine-foreground": "#2783de",
+  "--notion-pill": "light-dark(rgb(42 28 0 / 0.07), rgb(255 255 243 / 0.082))",
+  "--notion-bar-rule": "light-dark(#f0efed, #2c2c2b)",
 };
 
 export const NOTION_SECTIONS = [
@@ -117,7 +119,7 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
         </EmojiPicker.List>
         <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
-      <div className="flex h-[51px] shrink-0 items-center border-t border-picker-border px-3 pt-2 pb-2.5">
+      <div className="flex h-[51px] shrink-0 items-center border-t border-(--notion-bar-rule) px-3 pt-2 pb-2.5">
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-start gap-[3.2px] overflow-x-auto [scrollbar-width:none]">
           {() => <EmojiPicker.CategoryNav.Tab className="relative flex size-8 shrink-0 items-center justify-center rounded-[6px] text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected" />}
         </EmojiPicker.CategoryNav>
@@ -150,10 +152,10 @@ export const notion: Style = {
     showName: true,
   },
   pill: {
-    base: "h-[25px] rounded-[100px] bg-picker-border px-2 py-0.5 text-[12px] text-picker-subtle",
+    base: "h-[25px] rounded-[100px] bg-(--notion-pill) px-2 py-0.5 text-[12px] text-picker-subtle",
     mine: "aria-pressed:bg-(--notion-mine) aria-pressed:text-(--notion-mine-foreground)",
-    count: "font-medium",
-    add: "h-[25px] w-8 justify-center rounded-[100px] bg-picker-border text-picker-subtle hover:bg-picker-hover",
+    count: "leading-[14.4px] font-medium",
+    add: "h-[25px] w-8 justify-center rounded-[100px] bg-(--notion-pill) text-picker-subtle hover:bg-picker-hover",
     addIcon: <I.SmilePlus size={16} strokeWidth={1.75} />,
   },
 };
