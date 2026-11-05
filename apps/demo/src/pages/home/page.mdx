@@ -113,13 +113,13 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 <CodeTabs>
 
 ```tsx title="app/providers.tsx" label="Package"
-import en from "@brianhung/emoji-picker/data/en.json?url";
+import en from "@brianhung/emoji-picker-core/data/en.json?url";
 
 <EmojiProvider data={en}>
 ```
 
 ```tsx title="app/providers.tsx" label="Self-hosted"
-// cp node_modules/@brianhung/emoji-picker/data/en.json public/emoji/en.json
+// cp node_modules/@brianhung/emoji-picker-core/data/en.json public/emoji/en.json
 <EmojiProvider data="/emoji/en.json">
 ```
 
@@ -144,7 +144,8 @@ import en from "@brianhung/emoji-picker/data/en.json?url";
 Import the parts and assemble them.
 
 ```tsx title="anatomy.tsx"
-import { EmojiProvider, EmojiPicker, EmojiPopover, Tapback, Emoji } from "@brianhung/emoji-picker";
+import { EmojiProvider, EmojiPicker, Tapback, Emoji } from "@brianhung/emoji-picker";
+import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 
 <EmojiProvider data={en}>
   <EmojiPicker.Root>

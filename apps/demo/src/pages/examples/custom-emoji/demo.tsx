@@ -1,5 +1,5 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type CategoryOption, type CustomEmoji } from "@brianhung/emoji-picker";
 import { usePickedEmoji } from "@/components/site/picked";
 import { Button } from "@/components/ui/button";

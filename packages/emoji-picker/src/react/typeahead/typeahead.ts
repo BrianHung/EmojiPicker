@@ -1,15 +1,7 @@
 import * as React from "react";
-import { isComposingKey } from "../../core/shortcodes";
-import type { EmojiStore } from "../../core/store";
-import type { EmojiSuggestionsMachine } from "../../core/suggestions";
-import { useEmojiSuggestions, useSuggestionsStore, type EmojiSuggestionsOptions, type EmojiSuggestionsState, type KeyLike, type ShortcodeSuggestion } from "./suggestions";
+import { isComposingKey, type EmojiStore, type EmojiSuggestionsMachine, type EmojiTrigger } from "@brianhung/emoji-picker-core";
+import { useEmojiSuggestions, useSuggestionsStore, type EmojiSuggestionsOptions, type EmojiSuggestionsState, type KeyLike } from "./suggestions";
 import { useEmojiContext } from "../provider/provider";
-
-export type EmojiTrigger = {
-  query: string;
-  anchor: () => DOMRect | null;
-  replace: (text: string, suggestion: ShortcodeSuggestion) => void;
-};
 
 export type EmojiTypeaheadOptions = Pick<EmojiSuggestionsOptions, "limit" | "matchBy" | "order" | "columns"> & {
   insert?: "emoji" | "shortcode";
@@ -62,6 +54,7 @@ function useComboboxAttributes(element: (() => HTMLElement | null | undefined) |
   React.useEffect(() => {
     const el = open ? element?.() : null;
     if (!el) return;
+    // The editor element is the app's: the combobox attributes and the blur go on it directly
     const role = el.getAttribute("role");
     const attrs = { role: "combobox", "aria-autocomplete": "list", "aria-expanded": "true", "aria-controls": listId };
     for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value);

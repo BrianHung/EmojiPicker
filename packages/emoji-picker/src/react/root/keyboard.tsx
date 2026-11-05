@@ -163,16 +163,3 @@ export function KeyboardProvider({ keymap: overrides, onKeyDown, close, focusSea
 
   return <KeyboardContext.Provider value={value}>{children({ ref: mergeRefs<HTMLElement>(root, rootHandlerRef), onKeyDownCapture })}</KeyboardContext.Provider>;
 }
-
-export function useEdgeKeys(selector: string): React.RefCallback<Element> {
-  const element = React.useRef<Element | null>(null);
-  const region = useKeyRegion((action) => {
-    if (action !== "first" && action !== "last") return "pass";
-    const items = [...(element.current?.querySelectorAll<HTMLElement>(selector) ?? [])].filter((el) => !el.hidden && el.getAttribute("aria-hidden") !== "true");
-    const item = action === "first" ? items[0] : items[items.length - 1];
-    if (!item) return "pass";
-    item.focus();
-    return "handled";
-  });
-  return React.useMemo(() => mergeRefs(element, region) as React.RefCallback<Element>, [region]);
-}

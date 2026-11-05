@@ -1,6 +1,5 @@
 import type { Key, KeyboardDelegate } from "@react-types/shared";
-import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../../core/grid";
-import type { EmojiSection } from "../../core/sections";
+import { type EmojiGrid, type EmojiGridMove, type EmojiSection, moveInGrid, rowsPerPage } from "@brianhung/emoji-picker-core";
 import { columnsPerPage, moveInStrip, pageInStrip, type StripKey, type StripLayout } from "./strip-layout";
 
 type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };

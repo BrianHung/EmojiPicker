@@ -6,12 +6,10 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import { createEmojiGrid, type EmojiGrid, type EmojiGridMove, type EmojiGridRow } from "../../core/grid";
-import type { PickerState } from "../../core/picker";
-import type { EmojiItem, EmojiSection } from "../../core/sections";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
-import { signal, usePicker, useSelector, type ListHandle } from "../root/context";
+import { usePicker, type ListHandle } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
@@ -22,6 +20,7 @@ import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
+import { useStore } from "../utils/store";
 import { Variations } from "./variations";
 import { moveVirtualFocus } from "./virtual-focus";
 
@@ -49,20 +48,12 @@ const ACTIVE = 2;
 const HOVERED = 4;
 const PRESSED = 8;
 const FOCUSED = 16;
-function cellMarks(state: PickerState<React.ReactNode>) {
-  const marks = { stop: signal<Key | null>(null), pressed: signal<Key | null>(null) };
-  return {
-    ...marks,
-    subscribe(listener: () => void) {
-      const off = [marks.stop.subscribe(listener), marks.pressed.subscribe(listener), state.subscribe(listener)];
-      return () => off.forEach((f) => f());
-    },
-    of(key: Key) {
-      const { hovered, highlighted } = state.getSnapshot();
-      return (marks.stop.get() === key ? STOP : 0) | ((hovered ?? highlighted) === key ? ACTIVE : 0) | (hovered === key ? HOVERED : 0) | (marks.pressed.get() === key ? PRESSED : 0) | (highlighted === key ? FOCUSED : 0);
-    },
-  };
-}
+type Marks = { stop: Key | null; pressed: Key | null };
+
+const createMarks = () => createStore<Marks, Partial<Marks>>({ stop: null, pressed: null }, (marks, patch) => ((Object.keys(patch) as (keyof Marks)[]).every((k) => Object.is(marks[k], patch[k])) ? marks : { ...marks, ...patch }));
+
+const pickerFlags = ({ hovered, highlighted }: PickerSnapshot, key: Key) => ((hovered ?? highlighted) === key ? ACTIVE : 0) | (hovered === key ? HOVERED : 0) | (highlighted === key ? FOCUSED : 0);
+const markFlags = ({ stop, pressed }: Marks, key: Key) => (stop === key ? STOP : 0) | (pressed === key ? PRESSED : 0);
 
 export type Cells = {
   selection: ListState<unknown>["selectionManager"];
@@ -71,7 +62,10 @@ export type Cells = {
   focusVisible: boolean;
   position: (id: Key) => readonly [number, number, number] | undefined;
   virtual: boolean;
-  marks: ReturnType<typeof cellMarks>;
+  elements: Map<Key, HTMLElement>;
+  headers: Set<HTMLElement>;
+  picker: PickerState<React.ReactNode>;
+  marks: ReturnType<typeof createMarks>;
   reveal(id: Key): void;
   sectionDomId(id: string): string;
   toggle(id: string): void;
@@ -86,7 +80,7 @@ export type GridGeometry = {
   reveal(key: Key, from?: Key): void;
   viewport(): number;
   jump(section: string, instant: boolean): boolean;
-  overlay(key: Key): React.CSSProperties;
+  overlay(key: Key, cell: Element | null): React.CSSProperties;
 };
 
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
@@ -94,6 +88,7 @@ const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
 const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
+// Handlers are delegated from the list: one set for every mounted cell
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
 
 export function useGridSections(horizontal: boolean) {
@@ -137,7 +132,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const autocomplete = React.useContext(AutocompleteStateContext);
   const core = picker.state;
   const { virtual } = picker;
-  const [marks] = React.useState(() => cellMarks(core));
+  const [marks] = React.useState(createMarks);
   const [persisted] = React.useState(() => new Set<Key>());
   const focusGrid = React.useRef(Boolean(React.useContext(PopoverContext)?.focusGrid));
   const lastFocused = React.useRef<Key | null>(null);
@@ -161,7 +156,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const moveTo = (key: Key, dom: boolean, from?: Key) => {
     geometry.reveal(key, from);
     setHighlight(key);
-    if (dom) marks.stop.set(key);
+    if (dom) marks.dispatch({ stop: key });
   };
 
   const pick = (key: Key) => {
@@ -169,10 +164,12 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (it) picker.pick(it.unified);
   };
 
-  const focusInput = () => listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? null;
-  const cellElement = (key: Key | null | undefined) => (key == null ? null : (listRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"][data-key="${CSS.escape(String(key))}"]`) ?? null));
+  const focusInput = () => picker.searchInput.current;
+  const [elements] = React.useState(() => new Map<Key, HTMLElement>());
+  const [headers] = React.useState(() => new Set<HTMLElement>());
+  const cellElement = (key: Key | null | undefined) => (key == null ? null : (elements.get(key) ?? null));
 
-  const variations = useSelector(core, (s) => s.variations);
+  const variations = useStore(core, (s) => s.variations);
   const back = React.useRef<HTMLElement | null>(null);
   const openVariations = (key: Key | null) => {
     const active = document.activeElement;
@@ -235,11 +232,12 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       moveTo(key, true);
       return true;
     },
-    jump(id, { instant = false } = {}) {
+    jump(id, { instant = false, afterRender = false } = {}) {
+      if (afterRender) return void (pendingJump.current = { id, instant });
       if (!geometry.jump(id, instant)) return;
       core.setActiveSection(id);
       const first = sections.find((s) => s.id === id)?.items[0]?.id;
-      if (first != null) marks.stop.set(first);
+      if (first != null) marks.dispatch({ stop: first });
     },
     atStart() {
       const key = highlight();
@@ -257,6 +255,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (picker.list.current === handle) picker.list.current = null;
     };
   });
+
+  const pendingJump = React.useRef<{ id: string; instant: boolean } | null>(null);
+  const flushJump = () => {
+    const jump = pendingJump.current;
+    pendingJump.current = null;
+    if (jump) handle.jump(jump.id, { instant: jump.instant });
+  };
 
   const kept = React.useRef<{ query: string; unified?: string }>({ query: "" });
   const pendingHighlight = React.useRef<{ key: Key | null } | null>(null);
@@ -290,28 +295,23 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const list = listRef.current;
     if (list?.contains(document.activeElement) && document.activeElement !== list) return void (focusGrid.current = false);
     const { collection, geometry } = latest.current;
-    const stop = marks.stop.get();
-    if (stop == null || !geometry.isVisible(stop) || !collection.emoji(stop)) marks.stop.set(collection.emoji(lastFocused.current) && geometry.isVisible(lastFocused.current!) ? lastFocused.current : geometry.firstVisible());
-    const cell = focusGrid.current ? cellElement(marks.stop.get()) : null;
+    const stop = marks.getSnapshot().stop;
+    if (stop == null || !geometry.isVisible(stop) || !collection.emoji(stop)) marks.dispatch({ stop: collection.emoji(lastFocused.current) && geometry.isVisible(lastFocused.current!) ? lastFocused.current : geometry.firstVisible() });
+    const cell = focusGrid.current ? cellElement(marks.getSnapshot().stop) : null;
     if (!cell) return;
     focusGrid.current = false;
+    // On mount this runs before the root's ref attaches and maybe before the search field mounts, so it asks the DOM
     const root = cell.closest(`[data-slot="${SLOTS.root}"]`);
     if (root && !root.contains(document.activeElement) && !root.querySelector("[data-autofocus]")) cell.focus({ preventScroll: true });
   };
 
   // Set the focused key before React Aria sees DOM focus, or it treats focus as entering with no key and jumps to the first cell
-  React.useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    const onFocusIn = (e: FocusEvent) => {
-      const id = cellOf(e.target)?.getAttribute("data-key");
-      const manager = stateRef.current.selectionManager;
-      if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
-      manager.setFocusedKey(id);
-    };
-    el.addEventListener("focusin", onFocusIn);
-    return () => el.removeEventListener("focusin", onFocusIn);
-  }, []);
+  const onFocusCapture = (e: React.FocusEvent) => {
+    const id = cellOf(e.target)?.getAttribute("data-key");
+    const manager = stateRef.current.selectionManager;
+    if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
+    manager.setFocusedKey(id);
+  };
 
   const region = useKeyRegion((action, event) => {
     const cell = cellOf(event.target);
@@ -330,18 +330,18 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (!pointer.moved || picker.pointer !== "follows" || lastKey() === key) return;
     const active = document.activeElement;
     const list = listRef.current;
-    const root = list?.closest(`[data-slot="${SLOTS.root}"]`);
+    const root = picker.root.current;
     if (list?.contains(active) && active !== list) {
       if (keyed.current && !pointer.within) return;
       keyed.current = false;
       setHighlight(key);
-      marks.stop.set(key);
+      marks.dispatch({ stop: key });
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
   };
   const keyOf = (e: React.SyntheticEvent) => cellOf(e.target)?.getAttribute("data-key") ?? null;
   const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
   const endPress = () => {
-    marks.pressed.set(null);
+    marks.dispatch({ pressed: null });
     if (longPress.current) clearTimeout(longPress.current.timer);
   };
   const cellHandlers: React.HTMLAttributes<HTMLElement> = {
@@ -349,7 +349,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       const key = keyOf(e);
       if (key == null || e.button !== 0) return;
       endPress();
-      marks.pressed.set(key);
+      marks.dispatch({ pressed: key });
       longPress.current = { x: e.clientX, y: e.clientY, fired: false, timer: window.setTimeout(() => longPress.current && (longPress.current.fired = openVariations(key)), LONG_PRESS_MS) };
       e.preventDefault();
       if (e.pointerType === "touch") return;
@@ -412,7 +412,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         if (!cell || e.target !== document.activeElement) return;
         const id = cell.getAttribute("data-key");
         lastFocused.current = id;
-        marks.stop.set(id);
+        marks.dispatch({ stop: id });
         setHighlight(id);
         if (focusModel === "input") core.setDomFocus(true);
       },
@@ -443,12 +443,15 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         return at ? [at.index + 1, at.section.items.length, index] : undefined;
       },
       virtual,
+      elements,
+      headers,
+      picker: core,
       marks,
       reveal: (id) => latest.current.geometry.reveal(id),
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
       toggle: (id) => picker.collapse.toggle(id),
     }),
-    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, marks, picker.listId, picker.collapse],
+    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, core, marks, picker.listId, picker.collapse],
   );
 
   const varied = variations != null ? collection.emoji(variations) : undefined;
@@ -460,8 +463,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     persisted,
     applyHighlight,
     syncStop,
+    flushJump,
     gridProps: {
-      ...mergeProps(listBoxProps, focusProps, cellHandlers),
+      ...mergeProps(listBoxProps, focusProps, cellHandlers, { onFocusCapture }),
       ref: merged,
       tabIndex: fieldRef ? undefined : -1,
       "data-slot": SLOTS.list,
@@ -477,7 +481,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     variations: varied ? (
       <Variations
         record={varied.record}
-        style={geometry.overlay(variations!)}
+        style={geometry.overlay(variations!, cellElement(variations))}
         onPick={(unified) => {
           closeVariations(true);
           picker.pick(unified);
@@ -532,13 +536,18 @@ export type EmojiGridState = { readonly [gridState]: true };
 
 export function useCell(grid: Cells, item: EmojiItem) {
   const artwork = useArtworkMap();
-  const flags = React.useSyncExternalStore(grid.marks.subscribe, () => grid.marks.of(item.id));
+  const picked = useStore(grid.picker, (s) => pickerFlags(s, item.id));
+  const marked = useStore(grid.marks, (m) => markFlags(m, item.id));
+  const flags = picked | marked;
   const element = React.useRef<HTMLElement | null>(null);
   const ref = React.useCallback(
     (el: HTMLElement | null) => {
+      if (element.current && grid.elements.get(item.id) === element.current) grid.elements.delete(item.id);
       element.current = el;
+      if (!el) return;
       // React Aria's scrollIntoViewport would scroll the page too; the keyboard moves already scrolled the scroller
-      if (el) el.scrollIntoView = () => grid.reveal(item.id);
+      el.scrollIntoView = () => grid.reveal(item.id);
+      grid.elements.set(item.id, el);
     },
     [grid, item.id],
   );
@@ -609,9 +618,8 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
         if (index >= 0) scroll(index, "start");
         return index >= 0;
       },
-      overlay(key) {
+      overlay(_, cell) {
         const list = listRef.current;
-        const cell = list?.querySelector(`[data-key="${CSS.escape(String(key))}"]`);
         if (!list || !cell) return { position: "absolute", visibility: "hidden" };
         const [l, c] = [list.getBoundingClientRect(), cell.getBoundingClientRect()];
         const above = c.top - l.top - c.height;
@@ -630,8 +638,10 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     const shown = v ? grid.rows.filter((r) => r.offset + r.size > v.top && r.offset < v.top + v.height) : [];
     request(shown.flatMap((r) => (r.type === "emojis" ? r.items.map((i) => i.unified) : [])));
     if (!picker.searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
+    controller.flushJump();
   };
   React.useLayoutEffect(() => sync.current());
+  // The app's virtualizer owns the scroller
   React.useEffect(() => {
     const el = windowOf(listRef.current)?.el;
     const onScroll = () => sync.current();

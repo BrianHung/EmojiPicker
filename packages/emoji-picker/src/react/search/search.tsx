@@ -70,7 +70,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
         <EmptyContext.Provider value={isEmpty}>
           <Input
             {...props}
-            ref={mergeRefs<HTMLInputElement>(own, ref, userKeys)}
+            ref={mergeRefs<HTMLInputElement>(own, picker.searchInput, ref, userKeys)}
             type="text"
             role="searchbox"
             {...racParts<InteractionState, HTMLInputElement>({ className, style, render })}

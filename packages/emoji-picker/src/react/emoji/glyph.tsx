@@ -1,5 +1,5 @@
 import * as React from "react";
-import { isUnified, unifiedToNative, type EmojiRecord } from "../../core/dataset";
+import { type EmojiRecord, isUnified, unifiedToNative } from "@brianhung/emoji-picker-core";
 import { EmojiImage } from "./image";
 import { ArtworkGlyph, findArtwork, useArtworkMap } from "./overrides";
 import { useEmojiContext } from "../provider/provider";

@@ -1,13 +1,11 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
-import { createPickerState, type PickerStateOptions } from "../../core/picker";
-import type { CategoryOption as CoreCategoryOption } from "../../core/sections";
-import type { EmojiSelection } from "../../core/store";
+import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiRecord, type EmojiSelection, type PickerStateOptions } from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
-import { PickerContext, usePicker, useSelector, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
-import { useControllable } from "../utils/controllable";
+import { PickerContext, usePicker, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "../utils/hold";
+import { mergeProps } from "react-aria/mergeProps";
+import { useControlledState } from "react-stately/useControlledState";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { KeyboardProvider, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
@@ -16,6 +14,7 @@ import { useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
+import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
 import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
@@ -116,29 +115,24 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
-  const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({
-    query,
-    searching,
-    results,
-    pending,
-    categories,
-    categorySections,
-    sections,
-    collapsed,
-    focus,
-    reactions,
-  }));
+  const view = useStore(
+    state,
+    ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }),
+    shallowEqual,
+  );
   React.useEffect(() => void state.mount(), [state]);
-  useActiveWithin(rootRef, state.hold);
+  const activeWithin = useActiveWithin(state.hold);
   useClippedScrollGuard(rootRef);
 
   const collapse = useCollapse(state, view.collapsed);
   const { query, searching, results, pending } = view;
   const list = React.useRef<ListHandle | null>(null);
+  const searchInput = React.useRef<HTMLInputElement | null>(null);
+  const panel = React.useRef<HTMLDivElement | null>(null);
   const listId = React.useId();
 
-  const [value, setValue] = useControllable<string | null | undefined, string>(valueProp, defaultValue, onValueChange);
-  const [open, setReactionsOpen] = useControllable(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
+  const [value, setValue] = useControlledState<string | null | undefined, string>(valueProp as string | null, defaultValue, onValueChange);
+  const [open, setReactionsOpen] = useControlledState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
   const collapseToReactions = React.useCallback(() => setReactionsOpen(true), [setReactionsOpen]);
   const latest = React.useRef({ onSelect, popover, selects: value !== undefined });
@@ -190,13 +184,15 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       pick,
       close,
       list,
+      root: rootRef,
+      searchInput,
       registerSearch: state.registerSearch,
       listId,
     }),
     [store, state, labels, focusModel, pointerModel, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, close, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
-    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),
+    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed, panel } : null),
     [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
   );
 
@@ -209,9 +205,8 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     return Boolean(list.current?.clear()) || close();
   };
   const focusSearch = () => {
-    const input = rootRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`);
-    input?.focus();
-    return Boolean(input);
+    searchInput.current?.focus();
+    return Boolean(searchInput.current);
   };
   const emptyState = useEmptyStateSlots();
   const count = !searching || pending ? "" : labels.resultCount(results.length);
@@ -232,6 +227,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       close={onEscape}
       focusSearch={focusSearch}
       variations={(target) => Boolean(list.current?.variations(target))}
+      // Composite widgets own their arrow keys, including ones the app renders inside the picker
       ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}
     >
       {(keyboard) =>
@@ -241,7 +237,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
             ref: mergeRefs(ref, rootRef, keyboard.ref),
             "data-slot": SLOTS.root,
             "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
-            ...rest,
+            ...mergeProps(rest, activeWithin),
             "data-columns": columns ?? undefined,
             "data-searching": searching ? "" : undefined,
             "data-reactions-open": reactionsOpen ? "" : undefined,
@@ -277,12 +273,12 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
 export const Root = PickerRoot as React.ForwardRefExoticComponent<RootProps & React.RefAttributes<HTMLElement>>;
 
 export function useActiveEmoji(): EmojiRecord | null {
-  return useSelector(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
+  return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
 }
 
 export function useCategoryNavigation() {
   const picker = usePicker("useCategoryNavigation");
-  const activeCategory = useSelector(picker.state, (s) => s.activeSection);
+  const activeCategory = useStore(picker.state, (s) => s.activeSection);
   const categories = React.useMemo(() => {
     const shown = new Set(picker.categorySections.map((s) => s.id));
     return picker.categories.filter((c) => c.nav && shown.has(c.id)).map(({ id, name, icon }) => ({ id, name, icon }));

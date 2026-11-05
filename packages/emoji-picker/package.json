@@ -30,12 +30,8 @@
   "sideEffects": [
     "**/*.css"
   ],
-  "bin": {
-    "emoji-picker": "./dist/cli.js"
-  },
   "files": [
     "dist",
-    "data",
     "src/styles",
     "THIRD_PARTY_NOTICES.md"
   ],
@@ -44,16 +40,6 @@
       "@brianhung/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./core": {
-      "@brianhung/source": "./src/core/index.ts",
-      "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.js"
-    },
-    "./search": {
-      "@brianhung/source": "./src/search.ts",
-      "types": "./dist/search.d.ts",
-      "import": "./dist/search.js"
     },
     "./floating-ui": {
       "@brianhung/source": "./src/floating-ui.ts",
@@ -70,40 +56,34 @@
       "types": "./dist/tiptap.d.ts",
       "import": "./dist/tiptap.js"
     },
-    "./prosemirror": {
-      "@brianhung/source": "./src/prosemirror.ts",
-      "types": "./dist/prosemirror.d.ts",
-      "import": "./dist/prosemirror.js"
-    },
     "./lexical": {
       "@brianhung/source": "./src/lexical.ts",
       "types": "./dist/lexical.d.ts",
       "import": "./dist/lexical.js"
     },
-    "./data/en.json": "./data/en.json",
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",
     "./shadcn.css": "./src/styles/shadcn.css",
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build:data": "tsx scripts/cli.ts build-data en --out data/en.json",
-    "build": "npm run build:data && tsup",
+    "build": "tsup",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@floating-ui/react": "^0.27.0",
     "@lexical/react": ">=0.53.0",
     "@tiptap/core": "^3.0.0",
     "@tiptap/pm": "^3.0.0",
-    "emojibase-data": ">=16.0.0",
     "lexical": ">=0.53.0",
-    "prosemirror-state": "^1.4.0",
-    "prosemirror-view": "^1.30.0",
     "react": "^18.2.0 || ^19.0.0",
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
+    "@floating-ui/react": {
+      "optional": true
+    },
     "@lexical/react": {
       "optional": true
     },
@@ -113,45 +93,34 @@
     "@tiptap/pm": {
       "optional": true
     },
-    "emojibase-data": {
-      "optional": true
-    },
     "lexical": {
-      "optional": true
-    },
-    "prosemirror-state": {
-      "optional": true
-    },
-    "prosemirror-view": {
       "optional": true
     }
   },
   "dependencies": {
-    "@floating-ui/react": "^0.27.20",
+    "@brianhung/emoji-picker-core": "^0.0.0",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",
     "react-aria-components": "^1.22.1",
-    "react-stately": "^3.51.0"
+    "react-stately": "^3.51.0",
+    "use-sync-external-store": "^1.7.0"
   },
   "devDependencies": {
+    "@floating-ui/react": "^0.27.20",
     "@lexical/react": "^0.53.0",
     "@tiptap/core": "^3.32.2",
     "@tiptap/pm": "^3.32.2",
     "@types/node": "^22.20.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "emojibase-data": "^18.0.0",
-    "jsdom": "^30.1.3",
+    "@types/use-sync-external-store": "^1.7.0",
     "lexical": "^0.53.0",
-    "prosemirror-model": "^1.25.12",
-    "prosemirror-schema-basic": "^1.2.5",
     "prosemirror-state": "^1.4.4",
     "prosemirror-view": "^1.42.9",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "tsup": "^9.0.0",
-    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^5.0.5"
   }

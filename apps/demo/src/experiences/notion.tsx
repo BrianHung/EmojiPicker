@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Emoji, EmojiSuggestions, useEmojiStore, type EmojiTypeaheadOptions, type KeyLike, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { Emoji, useEmojiStore, type EmojiTypeaheadOptions, type KeyLike, type ShortcodeSuggestion } from "@brianhung/emoji-picker";
+import { EmojiSuggestions } from "@brianhung/emoji-picker/floating-ui";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
 import { OPTION, tokensOf } from "@/styles/style";

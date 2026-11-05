@@ -1,7 +1,7 @@
 import * as React from "react";
 import { $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH, KEY_DOWN_COMMAND, type LexicalNode, type NodeKey } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { findShortcodeTrigger } from "./core";
+import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";
 import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "./react/typeahead";
 
 export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";

@@ -1,6 +1,6 @@
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import enUrl from "@brianhung/emoji-picker/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";

@@ -2,53 +2,26 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { defineConfig } from "tsup";
 
-// One output file per source module so bundlers can drop unused parts (an <Emoji> alone doesn't load the picker)
-const modules = (dir: string) => Object.fromEntries(readdirSync(`src/${dir}`, { recursive: true, encoding: "utf8" }).flatMap((f) => (/(?<!\.test)\.tsx?$/.test(f) ? [[`${dir}/${f.replace(/\.tsx?$/, "")}`, `src/${dir}/${f}`]] : [])));
+const entries = { index: "src/index.ts", "floating-ui": "src/floating-ui.ts", "react-aria": "src/react-aria.ts", tiptap: "src/tiptap.ts", lexical: "src/lexical.ts" };
 
-export default defineConfig([
-  {
-    entry: {
-      index: "src/index.ts",
-      search: "src/search.ts",
-      "floating-ui": "src/floating-ui.ts",
-      "react-aria": "src/react-aria.ts",
-      tiptap: "src/tiptap.ts",
-      lexical: "src/lexical.ts",
-      prosemirror: "src/prosemirror.ts",
-      ...modules("core"),
-      ...modules("react"),
-    },
-    format: ["esm"],
-    dts: {
-      entry: {
-        index: "src/index.ts",
-        "core/index": "src/core/index.ts",
-        search: "src/search.ts",
-        "floating-ui": "src/floating-ui.ts",
-        "react-aria": "src/react-aria.ts",
-        tiptap: "src/tiptap.ts",
-        lexical: "src/lexical.ts",
-        prosemirror: "src/prosemirror.ts",
+// One output file per source module so bundlers can drop unused parts (an <Emoji> alone doesn't load the picker)
+const modules = Object.fromEntries(readdirSync("src/react", { recursive: true, encoding: "utf8" }).flatMap((f) => (/(?<!\.test)\.tsx?$/.test(f) ? [[`react/${f.replace(/\.tsx?$/, "")}`, `src/react/${f}`]] : [])));
+
+export default defineConfig({
+  entry: { ...entries, ...modules },
+  format: ["esm"],
+  dts: { entry: entries },
+  sourcemap: true,
+  clean: true,
+  external: ["react", "react-dom"],
+  esbuildPlugins: [
+    {
+      name: "sibling-modules",
+      setup(build) {
+        build.onResolve({ filter: /^\.\.?\// }, ({ path, kind, resolveDir }) =>
+          kind === "entry-point" ? undefined : { path: [".ts", ".tsx"].some((ext) => existsSync(join(resolveDir, path + ext))) ? `${path}.js` : `${path}/index.js`, external: true },
+        );
       },
     },
-    sourcemap: true,
-    clean: true,
-    external: ["react", "react-dom"],
-    esbuildPlugins: [
-      {
-        name: "sibling-modules",
-        setup(build) {
-          build.onResolve({ filter: /^\.\.?\// }, ({ path, kind, resolveDir }) =>
-            kind === "entry-point" ? undefined : { path: [".ts", ".tsx"].some((ext) => existsSync(join(resolveDir, path + ext))) ? `${path}.js` : `${path}/index.js`, external: true },
-          );
-        },
-      },
-    ],
-  },
-  {
-    entry: { cli: "scripts/cli.ts" },
-    format: ["esm"],
-    platform: "node",
-    target: "node20",
-  },
-]);
+  ],
+});

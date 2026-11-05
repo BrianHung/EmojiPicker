@@ -1,8 +1,7 @@
 import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
-import { localizeLabels, type EmojiLabels } from "../../core/labels";
-import { needsTwemoji, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl, type Renderer } from "../../core/platform";
-import { createEmojiStore, type EmojiStore, type EmojiStoreOptions } from "../../core/store";
+import { useStore } from "../utils/store";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, localizeLabels, needsTwemoji, type Renderer, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 
@@ -38,7 +37,7 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   }, [renderer, prepare, store]);
 
   const resolved = renderer === "auto" ? detected : renderer;
-  const status = React.useSyncExternalStore(store.subscribe, store.status, store.status);
+  const status = useStore(store, (s) => s.status);
   const groups = React.useMemo(() => store.customGroups(), [store, status]);
   const merged = useLabels(labels, locale ?? (status === "ready" ? store.locale() : undefined));
   const value = React.useMemo<ContextValue>(
@@ -73,9 +72,5 @@ export const useEmojiStore = () => useEmojiContext().store;
 
 export function useStoreSnapshot<T>(read: (store: EmojiStore) => T): T {
   const { store } = useEmojiContext();
-  return React.useSyncExternalStore(
-    store.subscribe,
-    () => read(store),
-    () => read(store),
-  );
+  return useStore(store, () => read(store));
 }

@@ -5,7 +5,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
-import type { EmojiItem, EmojiSection } from "../../core/sections";
+import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker, ViewportContext } from "../root/context";
 import { isRtl, useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../root/keyboard";
@@ -102,8 +102,9 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     if (!probe || !list) return;
     const next = readProbe(probe);
     if (!horizontal && !results) {
-      const cell = list.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"]`);
-      const header = list.querySelector<HTMLElement>(`[data-slot="${SLOTS.categoryHeader}"]`);
+      const { elements, headers } = latest.current.cells;
+      const cell = elements.values().next().value;
+      const header = headers.values().next().value;
       const unit = layoutUnits(list);
       if (cell?.offsetHeight) {
         next.cellWidth = cell.offsetHeight;
@@ -117,6 +118,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
 
   const virtualizer = React.useRef<VirtualizerState<CollectionNode<unknown>, React.ReactNode> | null>(null);
   const jumping = React.useRef<{ x: number; y: number } | null>(null);
+  // The Viewport's ref isn't attached yet when the list's first layout effects run
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
   const geometry = React.useMemo<GridGeometry>(() => {
     const visibleRect = () => virtualizer.current?.virtualizer.visibleRect ?? null;
@@ -202,6 +204,8 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const latest = React.useRef(grid);
   latest.current = grid;
 
+  React.useLayoutEffect(() => latest.current.flushJump());
+
   const onState = React.useCallback((state: VirtualizerState<CollectionNode<unknown>, React.ReactNode>) => {
     virtualizer.current = state;
   }, []);
@@ -237,6 +241,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   }, []);
   const template = children ?? defaultSection;
   const actions = React.useMemo(() => !horizontal && !searching && sections.some((s) => s.header && partsOf(template(s)).actions), [horizontal, searching, sections, template]);
+  const tab = useActionsTab(sections);
 
   return (
     <CellsContext.Provider value={grid.cells}>
@@ -248,6 +253,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
               {
                 ...rest,
                 ...grid.gridProps,
+                onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
                 className,
                 style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
                 render,
@@ -268,7 +274,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
             )}
           </LoadMoreContext.Provider>
           {grid.variations}
-          {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} /> : null}
+          {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} actions={tab.actions} /> : null}
         </TemplateContext.Provider>
       </HorizontalContext.Provider>
     </CellsContext.Provider>
@@ -348,6 +354,17 @@ export type SectionTitleProps = PartElementProps<SectionState, HTMLElement>;
 
 const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function SectionTitle({ children, style, ...props }, ref) {
   const { section, headingProps } = useSection("SectionTitle");
+  const { headers } = React.useContext(CellsContext)!;
+  const element = React.useRef<HTMLElement | null>(null);
+  const register = React.useCallback(
+    (el: HTMLElement | null) => {
+      if (element.current) headers.delete(element.current);
+      element.current = el;
+      if (el) headers.add(el);
+    },
+    [headers],
+  );
+  const refs = React.useMemo(() => mergeRefs<HTMLElement>(register, ref), [register, ref]);
   return renderElement(
     "header",
     {
@@ -357,7 +374,7 @@ const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function S
       "data-collapsed": section.collapsed || undefined,
       ...props,
       style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),
-      ref,
+      ref: refs,
       children: children ?? section.name,
     },
     { section, collapsed: section.collapsed },
@@ -439,47 +456,44 @@ function SectionActions(_: SectionActionsProps): null {
   return null;
 }
 
-function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; sections: readonly EmojiSection[] }) {
+type ActionBlocks = { layer: React.RefObject<HTMLDivElement | null>; blocks: Map<string, HTMLElement> };
+
+function useActionsTab(sections: readonly EmojiSection[]) {
+  const [actions] = React.useState<ActionBlocks>(() => ({ layer: { current: null }, blocks: new Map() }));
+  const onKeyDownCapture = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab" || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.emoji}"]`) : null;
+    const at = sections.findIndex((s) => s.items.some((i) => i.id === cell?.getAttribute("data-key")));
+    if (!cell || at < 0) return;
+    // Header actions take any buttons and links, and the layer sits outside the grid's tab order: find the tabbables
+    const tabbable = (i: number) => actions.blocks.get(sections[i]!.id)?.querySelector<HTMLElement>(TABBABLE) ?? null;
+    const before = sections.slice(0, at + 1).map((_, i) => at - i);
+    const after = sections.slice(at + 1).map((_, i) => at + 1 + i);
+    const target = (e.shiftKey ? before : after).reduce<HTMLElement | null>((found, i) => found ?? tabbable(i), null) ?? (!e.shiftKey && actions.layer.current ? nextTabbable(actions.layer.current) : null);
+    if (!target) return;
+    e.preventDefault();
+    e.stopPropagation();
+    target.focus();
+  };
+  return { actions, onKeyDownCapture };
+}
+
+function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLayout; list: React.RefObject<HTMLDivElement | null>; sections: readonly EmojiSection[]; actions: ActionBlocks }) {
   const cells = React.useContext(CellsContext)!;
   const template = React.useContext(TemplateContext);
   const [top, setTop] = React.useState(0);
-  const layer = React.useRef<HTMLDivElement | null>(null);
   React.useLayoutEffect(() => {
     const el = list.current;
     if (el && el.offsetTop !== top) setTop(el.offsetTop);
   });
-  const order = React.useRef(sections);
-  order.current = sections;
-  React.useEffect(() => {
-    const el = list.current;
-    if (!el) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Tab" || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
-      const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.emoji}"]`) : null;
-      const at = order.current.findIndex((s) => s.items.some((i) => i.id === cell?.getAttribute("data-key")));
-      if (!cell || at < 0) return;
-      const actions = (i: number) => layer.current?.querySelector<HTMLElement>(`[data-section="${CSS.escape(order.current[i]!.id)}"]`)?.querySelector<HTMLElement>(TABBABLE) ?? null;
-      let target: HTMLElement | null = null;
-      if (e.shiftKey) for (let i = at; i >= 0 && !target; i--) target = actions(i);
-      else {
-        for (let i = at + 1; i < order.current.length && !target; i++) target = actions(i);
-        if (!target && layer.current) target = nextTabbable(layer.current);
-      }
-      if (!target) return;
-      e.preventDefault();
-      e.stopPropagation();
-      target.focus();
-    };
-    el.addEventListener("keydown", onKeyDown);
-    return () => el.removeEventListener("keydown", onKeyDown);
-  }, [list]);
+  const block = (id: string) => (el: HTMLElement | null) => void (el ? actions.blocks.set(id, el) : actions.blocks.delete(id));
   return (
-    <div ref={layer} role="presentation" style={{ position: "absolute", top, insetInlineStart: 0, width: "100%", height: layout.getContentSize().height, pointerEvents: "none" }}>
+    <div ref={actions.layer} role="presentation" style={{ position: "absolute", top, insetInlineStart: 0, width: "100%", height: layout.getContentSize().height, pointerEvents: "none" }}>
       {sections.map((s) => {
         const info = layout.getLayoutInfo(s.id);
-        const actions = s.header ? partsOf(template(s)).actions : undefined;
-        if (!info || !actions) return null;
-        const { style, children, ...props } = actions.props;
+        const part = s.header ? partsOf(template(s)).actions : undefined;
+        if (!info || !part) return null;
+        const { style, children, ...props } = part.props;
         const state: SectionActionsState = { section: s, collapsed: s.collapsed, toggle: () => cells.toggle(s.id), toggleProps: { "aria-expanded": !s.collapsed } };
         return (
           <div key={s.id} style={{ position: "absolute", top: info.rect.y, insetInlineStart: 0, width: "100%", height: info.rect.height }}>
@@ -487,6 +501,7 @@ function ActionsLayer({ layout, list, sections }: { layout: EmojiGridLayout; lis
               "div",
               {
                 ...props,
+                ref: mergeRefs<HTMLDivElement>((props as { ref?: React.Ref<HTMLDivElement> }).ref, block(s.id)),
                 "data-slot": SLOTS.headerActions,
                 "data-section": s.id,
                 "data-collapsed": s.collapsed || undefined,

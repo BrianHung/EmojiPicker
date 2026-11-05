@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { emojiTypeahead } from "./prosemirror";
+import { emojiTypeahead } from "@brianhung/emoji-picker-core/prosemirror";
 import { useEmojiTypeaheadStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "./react/typeahead";
 
 export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";

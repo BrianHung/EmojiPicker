@@ -1,8 +1,8 @@
 import * as React from "react";
 import Fuse from "fuse.js";
-import en from "@brianhung/emoji-picker/data/en.json?url";
+import en from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type EmojiSearch, type EmojiSelection, type SearchResultsMode } from "@brianhung/emoji-picker";
-import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker/search";
+import { fallback, fuse, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker-core/search";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Chips } from "@/components/site/chips";
 

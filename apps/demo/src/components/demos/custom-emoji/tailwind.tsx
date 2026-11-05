@@ -1,4 +1,4 @@
-import en from "@brianhung/emoji-picker/data/en.json?url";
+import en from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type CategoryOption, type EmojiSelection } from "@brianhung/emoji-picker";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 

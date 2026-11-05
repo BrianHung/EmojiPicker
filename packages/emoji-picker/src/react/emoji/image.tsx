@@ -1,5 +1,6 @@
 import * as React from "react";
-import type { EmojiRecord } from "../../core/dataset";
+import type { EmojiRecord } from "@brianhung/emoji-picker-core";
+import { useStore } from "../utils/store";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -10,13 +11,9 @@ function subscribeReducedMotion(onChange: () => void) {
   return () => query.removeEventListener("change", onChange);
 }
 
-function usePrefersReducedMotion(): boolean {
-  return React.useSyncExternalStore(
-    subscribeReducedMotion,
-    () => typeof matchMedia === "function" && matchMedia(REDUCED_MOTION).matches,
-    () => false,
-  );
-}
+const reducedMotion = { subscribe: subscribeReducedMotion, getSnapshot: () => typeof matchMedia === "function" && matchMedia(REDUCED_MOTION).matches, getServerSnapshot: () => false };
+
+const usePrefersReducedMotion = (): boolean => useStore(reducedMotion);
 
 const DEFAULT_SIZE = 64;
 
