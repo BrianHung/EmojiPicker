@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { needsTwemoji } from "./native";
+import { needsImageFallback } from "./native";
 import { localeData, twemojiUrl } from "./platform";
 
 describe("platform", () => {
@@ -14,6 +14,6 @@ describe("platform", () => {
   });
 
   it("is false on the server", () => {
-    expect(needsTwemoji()).toBe(false);
+    expect(needsImageFallback()).toBe(false);
   });
 });

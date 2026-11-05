@@ -18,7 +18,7 @@ export type Style = {
   tokens: Tokens;
   Picker: React.ComponentType<StylePickerProps>;
   ReactionPicker?: React.ComponentType<StylePickerProps>;
-  renderer?: "native" | "twemoji";
+  renderer?: "native" | "image";
   size: { width: number; height: number };
   tapback: {
     className: string;

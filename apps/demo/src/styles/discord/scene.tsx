@@ -58,7 +58,7 @@ export function DiscordScene() {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap");
   const { ref, compact } = useCompact();
   return (
-    <EmojiProvider data={enUrl} renderer="twemoji">
+    <EmojiProvider data={enUrl} renderer="image">
       <div ref={ref} className="w-full">
         {compact ? (
           <MobileFrame label="Discord style channel" appStyle={discord} style={{ background: C.chat, color: C.text, fontFamily: FONT }}>

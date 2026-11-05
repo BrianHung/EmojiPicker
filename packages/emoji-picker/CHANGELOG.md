@@ -53,6 +53,8 @@ The React layer runs on React Aria (`react-aria-components` and its hooks) inste
 - `useTextFieldEmojiTypeahead` opens on a field that starts with a `:query` (caret taken at the end while unfocused), until focus first lands elsewhere.
 - The package ships one module per source file: a bundler loads only what you import (`Emoji` alone is ~8 KB gzipped over React; the popover and tapback load only when used).
 
+- One image path: `Renderer` is `"native" | "image"`, and the provider's `renderer` also takes `"auto"` (images only where the system can't draw emoji). Image emoji come from the provider's `imageUrl(unified)`, `twemojiUrl` by default, capped at emoji version `imageVersion` (17 by default). Replaced: the `"twemoji"` renderer (`"image"`), `twemojiBaseUrl` (`imageUrl={(u) => twemojiUrl(u, base)}`), `twemojiVersion` (`imageVersion`), and core's `needsTwemoji` (`needsImageFallback`).
+
 ### Removed
 
 - `fuse()` from `@brianhung/emoji-picker-core/search`: core holds no adapters for libraries it doesn't depend on. The core README has a self-contained Fuse.js recipe, beside MiniSearch and FlexSearch.

@@ -299,7 +299,7 @@ The picker state owns its highlight unless you control it: pass `highlighted` an
 
 `<Emoji emoji={…} />` draws one emoji the way the pickers do. It accepts a native emoji, a shortcode with or without colons, a unified code, a custom emoji id, an `EmojiSelection`, an `EmojiRecord`, or a `CustomEmoji`. Unknown input renders as text with `data-emoji-missing`. `useEmoji(input)` returns the resolved emoji, and `resolveEmoji(store, input)` does the same without React. The `unified` prop is a deprecated alias of `emoji`.
 
-`renderer="image"` draws every emoji from the provider's `imageUrl(unified)`, for example a vendor set from [emoji-datasource](https://github.com/iamcal/emoji-data) (check the set's license): `` imageUrl={(u) => `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/${u}.png`} ``; swap `apple` for `google` or `facebook`.
+The provider's `renderer` is `"native"`, `"image"` or `"auto"` (the default: images only where `needsImageFallback()` finds the system can't draw emoji, such as flags). Images come from `imageUrl(unified)`, Twemoji's `twemojiUrl` by default, capped at emoji version `imageVersion`. For a vendor set from [emoji-datasource](https://github.com/iamcal/emoji-data) (check the set's license): `` imageUrl={(u) => `https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/${u}.png`} ``; swap `apple` for `google` or `facebook`.
 
 ### Artwork overrides
 

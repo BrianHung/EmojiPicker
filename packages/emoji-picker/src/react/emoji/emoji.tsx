@@ -54,7 +54,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
       </span>
     );
   }
-  const src = resolved.imageUrl ?? (renderer !== "native" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
+  const src = resolved.imageUrl ?? (renderer === "image" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
   if (src) {
     const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
     return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;

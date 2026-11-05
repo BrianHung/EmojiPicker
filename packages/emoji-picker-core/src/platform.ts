@@ -1,6 +1,6 @@
 import { withoutFe0f } from "./dataset";
 
-export type Renderer = "native" | "twemoji" | "image";
+export type Renderer = "native" | "image";
 
 declare const __CORE_VERSION__: string | undefined;
 declare const __DATA_VERSION__: string | undefined;

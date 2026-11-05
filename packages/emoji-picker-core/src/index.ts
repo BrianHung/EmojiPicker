@@ -24,7 +24,7 @@ export type { EmojiSuggestionsMachine, EmojiTrigger, KeyLike, SuggestionsMove, S
 export { createPickerState, moveHighlight } from "./picker";
 export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, SearchResultsMode } from "./picker";
 export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
-export { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, needsTwemoji, onNativeSupportChange, PROBE_BATCH } from "./native";
+export { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, needsImageFallback, onNativeSupportChange, PROBE_BATCH } from "./native";
 export type { NativeSupport } from "./native";
 export { createStore } from "./reactive";
 export type { Store } from "./reactive";
