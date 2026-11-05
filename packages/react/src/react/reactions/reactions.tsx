@@ -7,7 +7,6 @@ import { Toolbar } from "react-aria-components/Toolbar";
 import { nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
-import { useKeyRegion } from "../root/keyboard";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap } from "../emoji/overrides";
 import { ReactionsContext, isPressed } from "./reactions-context";
@@ -83,14 +82,6 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
-  const edges = useKeyRegion((action) => {
-    if (action !== "first" && action !== "last") return "pass";
-    const buttons = buttonsIn(row.current).filter((el) => !el.hidden && el.getAttribute("aria-hidden") !== "true");
-    const button = action === "first" ? buttons[0] : buttons[buttons.length - 1];
-    if (!button) return "pass";
-    button.focus();
-    return "handled";
-  });
   const row = React.useRef<HTMLDivElement | null>(null);
   const { drawable, request } = useDrawable(row);
   const shown = (state?.reactions ?? [])
@@ -132,7 +123,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     );
   return (
     <RowContext.Provider value={{ shown, expanding }}>
-      <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
+      <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
     </RowContext.Provider>

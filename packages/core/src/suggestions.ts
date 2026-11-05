@@ -111,10 +111,10 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       highlight(columns ? Math.max(0, Math.min(n - 1, i + step)) : (i + step + n) % n);
       return true;
     },
-    choose(index = getSnapshot().highlightedIndex) {
+    choose(index = getSnapshot().highlightedIndex, { record = true } = {}) {
       const suggestion = getSnapshot().suggestions[index];
       if (!suggestion) return;
-      store.frequents.record(suggestion.record.unified);
+      if (record) store.frequents.record(suggestion.record.unified);
       opts().onChoose?.(suggestion);
     },
     dismiss() {

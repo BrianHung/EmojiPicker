@@ -17,7 +17,7 @@ export type Surface = {
 };
 
 const layer = (page: Page) => page.locator('[data-slot="emoji-picker-popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
-export const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=emoji-picker-list])")).last();
+export const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=emoji-picker-list]), [data-slot=emoji-picker-suggestions-popover] [data-slot=emoji-picker-list]")).last();
 const pickerIn = (scope: Locator) => scope.locator('xpath=descendant-or-self::*[@data-slot="emoji-picker" or @data-epr-part="root"]').first();
 const button = (scope: Page | Locator, name: string) => scope.getByRole("button", { name, exact: true });
 

@@ -41,7 +41,7 @@ picker.choose();
 | Export | Description |
 |---|---|
 | `createEmojiStore(options)` | Data, search, frequents, skin tone, and labels. Options match the React provider's |
-| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Pass `highlighted` and `onHighlightedChange` to control the highlight |
+| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Pass `highlight` and `onHighlightChange(id, { reason })` to control the highlight |
 | `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, and IME-safe `keydown` |
 | `createEmojiGrid`, `moveInGrid`, `rowsPerPage` | Grid rows and keyboard movement for a custom virtualizer |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |

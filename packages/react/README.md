@@ -56,16 +56,16 @@ Root
 └ Panel
 ```
 
-Each part renders a default when it has no children, and takes `render` (an element or `(props, state) => element`), `className`, and `style` (values or functions of state). Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Hooks inside `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`.
+Each part renders a default when it has no children, and takes `render` (an element or `(props, state) => element`), `className`, and `style` (values or functions of state). Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Hooks inside `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useEmojiPickerActions`, `useSearchState`.
 
 | `Root` prop | Description |
 |---|---|
 | `onSelect` | Receives an `EmojiSelection` (`emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `shortcodes`, `skinTone`, `isCustom`, `imageUrl`) |
-| `query`, `value`, `highlighted`, `reactionsOpen`, `collapsedCategories` | Controllable as `x` / `defaultX` / `onXChange` |
+| `query`, `value`, `highlight`, `reactionsOpen`, `collapsedCategories` | Controllable as `x` / `defaultX` / `onXChange`; `onHighlightChange(emoji, { reason, event })` reports `"keyboard"`, `"pointer"` or `"none"` |
 | `categories`, `frequent`, `suggested`, `emojiVersion` | Section order, names, icons (`nav: false` hides a tab), frequents, and filtering |
 | `columns`, `fitColumns` | Fixed column count; `fitColumns={false}` keeps it when the width is short |
 | `searchResults`, `searchLimit` | `"ranked"` (one list) or `"grouped"` (sections in rank order) |
-| `keymap`, `focusModel`, `pointerModel` | See [Keyboard](#keyboard) |
+| `onKeyDown`, `actionsRef`, `keyboardTarget` | See [Keyboard](#keyboard) |
 | `disableVariations` | Disables the long-press skin-tone menu |
 
 `List.SectionActions` renders controls over a sticky title, outside the listbox; its `toggle` and `toggleProps` collapse the section. `<List orientation="horizontal" rows={5} />` lays sections side by side; `searchRows` sets rows for results.
@@ -148,9 +148,21 @@ Tiptap, Lexical and ProseMirror adapters are registry items (`emoji-tiptap.json`
 
 ## Keyboard
 
-Actions: `move-up`, `move-down`, `move-left`, `move-right` (arrows), `page-up`, `page-down`, `first`, `last` (Home, End), `select` (Enter, Space), `close` (Escape), `focus-search` (/), `toggle-skin-tone` (unbound); defaults are in `DEFAULT_KEYMAP`. `keymap={{ select: ["Enter", "Mod+Enter"] }}` replaces an action's keys; `[]` unbinds it. Escape closes the skin-tone menu, then clears the query, then closes the popover.
+Parts handle their keys with React Aria: arrows, Page Up/Down, Home/End and Enter in the grid, Shift+Space for skin tones, `/` to search. Escape closes the skin-tone menu, then clears the query, then closes the popover. Keyboard and pointer move one highlight; with a search field focus stays in it (`aria-activedescendant`), otherwise it moves through the cells. Direction follows React Aria's locale, not CSS `direction`.
 
-`focusModel="input"` (default) keeps focus in the search field and moves `aria-activedescendant`; `"grid"` focuses cells. `pointerModel="follows"` (default) makes the hovered emoji the keyboard position; `"independent"` does not. `event.preventEmojiPickerHandler()` in a part's `onKeyDown` skips the picker's handling. Direction follows React Aria's locale, not CSS `direction`.
+| Prop | Description |
+|---|---|
+| `onKeyDown` (Root, `Search`, `Search.Input`, `Viewport`, `List`, `CategoryNav`) | Runs before the picker's handler; `event.preventEmojiPickerHandler()` skips it |
+| `actionsRef` | `move("up" \| "down" \| "left" \| "right" \| "page-up" \| "page-down" \| "first" \| "last")`, `pick()`, `highlight(emoji)`, `focusSearch()`, `clearSearch()`, `close()`, `toggleSkinTone()`; `useEmojiPickerActions()` inside Root |
+| `keyboardTarget` | An element that keeps focus, such as an editor; its arrows, Page Up/Down and Enter drive the picker |
+
+```tsx
+<EmojiPicker.Root keyboardTarget={editor.view.dom} actionsRef={actions} onKeyDown={(e) => e.key === "Escape" && e.preventEmojiPickerHandler()}>
+  …
+</EmojiPicker.Root>
+```
+
+See [Keyboard](https://emoji.brianhung.me/#api-root).
 
 ## Styling
 

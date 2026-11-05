@@ -10,7 +10,7 @@ export const list = rowsOf<ListProps>()([
   { name: "onLoadMore", type: "() => void", description: "Called as the end of the list scrolls into view (a paged custom pack)." },
   { name: "loadingMore", type: "boolean", description: "A page is loading: the end of the list shows loadingIndicator." },
   { name: "loadingIndicator", type: "ReactNode" },
-  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker handles a key." },
+  { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
 ]);
 
 export const listParts: PropRow[] = [

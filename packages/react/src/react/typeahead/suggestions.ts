@@ -14,7 +14,7 @@ export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> &
 
 export type EmojiSuggestionsState = SuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
-  choose(index?: number): void;
+  choose(index?: number, options?: { record?: boolean }): void;
   dismiss(): void;
   textFor(suggestion: ShortcodeSuggestion, insert?: "emoji" | "shortcode"): string;
   onKeyDown(event: KeyLike): boolean;

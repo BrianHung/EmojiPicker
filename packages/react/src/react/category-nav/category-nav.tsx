@@ -9,7 +9,7 @@ import { useHover } from "react-aria/useHover";
 import { usePress } from "react-aria/usePress";
 import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
-import { useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
+import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { useCategoryNavigation } from "../root/picker";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
@@ -38,12 +38,22 @@ const TabContext = React.createContext<NavCategory | null>(null);
 const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", onKeyDown, className, style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
   const id = React.useId();
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
   const { direction } = useLocale();
   const [tabs] = React.useState(() => new Map<string, HTMLElement>());
+  const keys = usePickerKeyDown(onKeyDown, (e) => {
+    const key = [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0];
+    if (key == null || picker.searching || hasModifier(e)) return false;
+    const ids = categories.map((c) => c.id);
+    const i = ids.indexOf(key);
+    const rtl = orientation === "horizontal" && direction === "rtl";
+    const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
+    const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
+    if (to == null) return false;
+    tabs.get(to)?.focus();
+    return true;
+  });
   if (categories.length <= 1) return null;
 
   const ids = categories.map((c) => c.id);
@@ -58,18 +68,6 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
     picker.list.current?.jump(key, { instant, afterRender: true });
   };
   const keyOf = (e: React.SyntheticEvent) => [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0] ?? null;
-  const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const key = keyOf(e);
-    if (key == null || disabled || e.altKey || e.ctrlKey || e.metaKey) return;
-    const i = ids.indexOf(key);
-    const rtl = orientation === "horizontal" && direction === "rtl";
-    const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
-    const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
-    if (to == null) return;
-    tabs.get(to)?.focus();
-    e.preventDefault();
-    e.stopPropagation();
-  };
 
   const nav: Nav = { id, selected, stop, disabled, tabs, choose };
   return (
@@ -78,7 +76,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
         "div",
         {
           ...props,
-          ref: merged,
+          ref,
           id,
           role: "tablist",
           "aria-label": picker.labels.categoryNavigation,
@@ -88,7 +86,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
           "data-orientation": orientation,
           "data-disabled": disabled || undefined,
           style: (s: CategoryNavState) => ({ pointerEvents: s.disabled ? "none" : undefined, ...resolve(style, s) }),
-          onKeyDown: onKey,
+          onKeyDown: keys,
           onFocus: (e: React.FocusEvent) => {
             const key = keyOf(e);
             if (key != null) setFocus({ key, within: true });

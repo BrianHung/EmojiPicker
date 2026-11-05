@@ -1,30 +1,39 @@
 import * as React from "react";
-import type { Category, EmojiLabels, EmojiRecord, EmojiSection, EmojiSelection, EmojiStore, FocusModel, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
+import type { Category, EmojiGridMove, EmojiLabels, EmojiRecord, EmojiSection, EmojiSelection, EmojiStore, HighlightChangeDetails, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
-import type { KeyboardAction } from "./keymap";
 
-export type PointerModel = "follows" | "independent";
-export type { FocusModel, SearchResultsMode };
+export type { HighlightChangeDetails, SearchResultsMode };
+
+export type EmojiPickerActions = {
+  move(to: EmojiGridMove): boolean;
+  pick(): boolean;
+  highlight(emoji: string | null): void;
+  focusSearch(): boolean;
+  clearSearch(): void;
+  close(): boolean;
+  toggleSkinTone(): boolean;
+};
 
 export type SelectDetails = {
   collapse?: () => void;
 };
 
 export type ListHandle = {
-  key(action: KeyboardAction, from: "input" | "list", event: KeyboardEvent | React.KeyboardEvent): boolean;
+  move(to: EmojiGridMove, details?: HighlightChangeDetails, cell?: Element | null): boolean;
+  pick(): boolean;
+  highlight(emoji: string | null): void;
+  ids(): { list: string; active: string | undefined };
   clear(): boolean;
   focus(): boolean;
   jump(section: string, options?: { instant?: boolean; afterRender?: boolean }): void;
   atStart(): boolean;
-  variations(target: Element): boolean;
+  variations(target: Element | null): boolean;
 };
 
 export type PickerContextValue = {
   store: EmojiStore;
   state: PickerState<React.ReactNode>;
   labels: EmojiLabels;
-  focusModel: FocusModel;
-  pointer: PointerModel;
   inPopover: boolean;
   disableVariations: boolean;
   columns?: number;
@@ -44,11 +53,14 @@ export type PickerContextValue = {
   value: string | null | undefined;
   virtual: boolean;
   pick(unified: string, details?: SelectDetails): EmojiSelection | undefined;
-  close(): boolean;
+  actions: EmojiPickerActions;
+  ownsFocus(el: Element | null): boolean;
+  target(): HTMLElement | null;
+  skinTone: React.MutableRefObject<(() => void) | null>;
   list: React.MutableRefObject<ListHandle | null>;
   root: React.RefObject<HTMLElement | null>;
   searchInput: React.RefObject<HTMLInputElement | null>;
-  registerSearch(): () => void;
+  registerInput(): () => void;
   listId: string;
 };
 
@@ -61,3 +73,5 @@ export function usePicker(part = "This part"): PickerContextValue {
   if (!value) throw new Error(`${part} must be inside <EmojiPicker.Root>.`);
   return value;
 }
+
+export const useEmojiPickerActions = (): EmojiPickerActions => usePicker("useEmojiPickerActions").actions;

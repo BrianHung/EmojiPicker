@@ -13,7 +13,8 @@ import type { ToggleGroupState } from "react-stately/useToggleGroupState";
 import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
-import { moveFocus, useKeyRegion, useSkinToneToggle } from "../root/keyboard";
+import { PickerContext } from "../root/context";
+import { moveFocus, usePickerKeyDown } from "../utils/keyboard";
 import { useEmojiContext } from "../provider/provider";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
@@ -71,14 +72,24 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     if (inside) triggerRef.current?.focus();
   }, [state.close]);
   const toggle = () => (open ? close() : state.open());
-  useSkinToneToggle(toggle);
-  const region = useKeyRegion((action) => {
-    if (!open || action !== "close") return "pass";
+  const toggles = React.useContext(PickerContext)?.skinTone;
+  const latest = React.useRef(toggle);
+  latest.current = toggle;
+  React.useEffect(() => {
+    if (!toggles) return;
+    const fn = () => latest.current();
+    toggles.current = fn;
+    return () => {
+      if (toggles.current === fn) toggles.current = null;
+    };
+  }, [toggles]);
+  const keys = usePickerKeyDown(undefined, (e) => {
+    if (!open || e.key !== "Escape") return false;
     close();
-    return "handled";
+    return true;
   });
 
-  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, rootRef, region), [ref, region]);
+  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, rootRef), [ref]);
   const context: SkinToneContextValue = {
     tone,
     selection,
@@ -99,7 +110,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
       {renderElement(
         "div",
         {
-          ...props,
+          ...mergeProps(props, { onKeyDown: keys }),
           ref: merged,
           "data-slot": SLOTS.skinTone,
           "data-state": open ? "open" : "closed",
@@ -162,12 +173,12 @@ const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(fun
   const focus = useFocusManager();
   const { groupProps } = useToggleButtonGroup({ orientation, "aria-label": group }, selection, optionsRef);
   const rtl = useLocale().direction === "rtl" && orientation === "horizontal";
-  const region = useKeyRegion((action) => (moveFocus(focus, action, rtl, orientation === "vertical") ? "handled" : "pass"));
-  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, optionsRef, region), [ref, optionsRef, region]);
+  const keys = usePickerKeyDown(undefined, (e) => !e.altKey && !e.metaKey && moveFocus(focus, e.key, rtl, orientation === "vertical"));
+  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, optionsRef), [ref, optionsRef]);
   return renderElement(
     "div",
     {
-      ...mergeProps(props, groupProps),
+      ...mergeProps(props, groupProps, { onKeyDown: keys }),
       ref: refs,
       "data-slot": SLOTS.skinToneOptions,
       "data-orientation": orientation,

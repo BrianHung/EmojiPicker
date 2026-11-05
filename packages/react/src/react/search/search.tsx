@@ -5,7 +5,7 @@ import { Button } from "react-aria-components/Button";
 import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "../root/context";
-import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "../root/keyboard";
+import { usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { racParts, racState, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
@@ -17,9 +17,8 @@ export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" |
 
 const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
   const { query } = usePicker("EmojiPicker.Search");
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
-  return renderElement("div", { "data-slot": SLOTS.search, "data-empty": query === "" || undefined, ...props, ref: merged, children: children ?? <SearchInput /> }, { empty: query === "" });
+  const keys = usePickerKeyDown(onKeyDown, () => false);
+  return renderElement("div", { "data-slot": SLOTS.search, "data-empty": query === "" || undefined, ...props, ref, onKeyDown: keys, children: children ?? <SearchInput /> }, { empty: query === "" });
 });
 
 export type SearchInputState = Omit<InteractionState, "pressed">;
@@ -38,40 +37,37 @@ const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", ali
 
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
-  const { labels, focusModel } = picker;
-  React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
+  const { labels } = picker;
+  React.useLayoutEffect(picker.registerInput, [picker.registerInput]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
   const clear = React.useMemo(() => <SearchClear />, []);
   const rtl = useLocale().direction === "rtl";
 
-  const region = useKeyRegion((action, event) => {
-    const field = event.target;
-    if (!(field instanceof HTMLInputElement) || !action) return "pass";
-    const back = rtl ? "move-right" : "move-left";
-    if ((action === "move-left" || action === "move-right") && !caretAtEnd(field)) return "native";
-    const list = picker.list.current;
-    if (!list) return "pass";
-    if (focusModel === "grid") {
-      const forward = rtl ? "move-left" : "move-right";
-      return (action === "move-down" || (picker.searching && action === forward)) && list.focus() ? "handled" : "pass";
-    }
-    if (action === back && list.atStart()) return "native";
-    return list.key(action, "input", event) ? "handled" : "pass";
-  });
-  const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
+  // Capture: React Aria's Autocomplete forwards keys to the list from the input's own keydown
+  const keys = usePickerKeyDown<HTMLInputElement>(
+    onKeyDown,
+    (e) => {
+      const field = e.target as HTMLInputElement;
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") return !caretAtEnd(field) || (e.key === (rtl ? "ArrowRight" : "ArrowLeft") && Boolean(picker.list.current?.atStart())) ? "native" : false;
+      if (e.key === "Home" || e.key === "End") return field.value !== "" && !e.ctrlKey && !e.metaKey ? "native" : false;
+      return e.key === " " && e.shiftKey && Boolean(picker.list.current?.variations(null));
+    },
+    { stopSkipped: true },
+  );
 
   React.useEffect(() => {
     if (focusOnMount && !picker.inPopover) own.current?.focus({ preventScroll: true });
   }, []);
 
   return (
-    <SearchField ref={region} data-slot={SLOTS.searchField} aria-label={labels.searchLabel} className="" style={FIELD} {...(focusModel === "grid" ? { value: picker.query, onChange: picker.setQuery } : {})}>
+    <SearchField data-slot={SLOTS.searchField} aria-label={labels.searchLabel} className="" style={FIELD}>
       {({ isEmpty }) => (
         <EmptyContext.Provider value={isEmpty}>
           <Input
             {...props}
-            ref={mergeRefs<HTMLInputElement>(own, picker.searchInput, ref, userKeys)}
+            ref={mergeRefs<HTMLInputElement>(own, picker.searchInput, ref)}
+            onKeyDownCapture={keys}
             type="text"
             role="searchbox"
             {...racParts<InteractionState, HTMLInputElement>({ className, style, render })}

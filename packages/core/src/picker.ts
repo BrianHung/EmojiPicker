@@ -6,8 +6,9 @@ import { createSearch, type SearchState } from "./search/query";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
 import type { EmojiData, EmojiSelection, EmojiStore } from "./store";
 
-export type FocusModel = "input" | "grid";
 export type SearchResultsMode = "ranked" | "grouped";
+
+export type HighlightChangeDetails = { reason: "keyboard" | "pointer" | "none"; event?: Event };
 
 export type PickerStateOptions<Icon = unknown> = {
   labels?: EmojiLabels;
@@ -23,10 +24,9 @@ export type PickerStateOptions<Icon = unknown> = {
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
   onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
-  highlighted?: string | null;
-  defaultHighlighted?: string | null;
-  onHighlightedChange?: (id: string | null) => void;
-  focusModel?: FocusModel;
+  highlight?: string | null;
+  defaultHighlight?: string | null;
+  onHighlightChange?: (id: string | null, details: HighlightChangeDetails) => void;
   disableVariations?: boolean;
   reactions?: readonly string[];
 };
@@ -72,7 +72,7 @@ type Ui = {
   hovered: string | null;
   activeSection: string | null;
   variations: string | null;
-  searchFields: number;
+  inputs: number;
   mounted: boolean;
   domFocus: boolean;
   held: Held | null;
@@ -91,9 +91,9 @@ type InputAction<Icon> = { type: "options"; options: PickerStateOptions<Icon> } 
 
 const reduceInput = <Icon>(input: Input<Icon>, action: InputAction<Icon>): Input<Icon> => (action.type === "options" ? { options: action.options, draft: null } : { ...input, draft: action.ids });
 
-type Controlled = Pick<PickerStateOptions, "query" | "highlighted" | "collapsedCategories">;
+type Controlled = Pick<PickerStateOptions, "query" | "highlight" | "collapsedCategories">;
 const queryOf = (ui: Ui, options: Controlled) => options.query ?? ui.query;
-const highlightedOf = (ui: Ui, options: Controlled) => (options.highlighted === undefined ? ui.highlighted : options.highlighted);
+const highlightedOf = (ui: Ui, options: Controlled) => (options.highlight === undefined ? ui.highlighted : options.highlight);
 const collapsedOf = (ui: Ui, options: Controlled) => options.collapsedCategories ?? ui.collapsed;
 
 export function createPickerState<Icon = unknown>(store: EmojiStore, options: PickerStateOptions<Icon> = {}) {
@@ -101,11 +101,11 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     {
       query: options.defaultQuery ?? "",
       collapsed: options.defaultCollapsedCategories ?? NO_IDS,
-      highlighted: options.defaultHighlighted ?? null,
+      highlighted: options.defaultHighlight ?? null,
       hovered: null,
       activeSection: null,
       variations: null,
-      searchFields: 0,
+      inputs: 0,
       mounted: false,
       domFocus: false,
       held: null,
@@ -163,7 +163,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     const categorySections = sectionsOf(ready, categories, suggested, collapsed, opts.emojiVersion, tone, item);
     const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, labels, ready ? data.groupNames : NO_IDS, tone, item) : categorySections;
     const highlighted = highlightedOf(state, opts);
-    const virtual = (opts.focusModel ?? "input") === "input" && (state.searchFields > 0 || !state.mounted) && !state.domFocus;
+    const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
     return keep({
       query,
       searching,
@@ -177,7 +177,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       focus: virtual ? "virtual" : "roving",
       highlighted,
       hovered: state.hovered,
-      active: activeOf(sections, state.hovered ?? highlighted),
+      active: activeOf(sections, highlighted ?? state.hovered),
       activeSection: state.activeSection,
       variations: state.variations,
       reactions: state.held ? state.held.reactions : opts.reactions,
@@ -217,10 +217,10 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     },
     toggleCollapsed: (id: string) => setCollapsed(id),
     setCollapsed: (id: string, value: boolean) => setCollapsed(id, value),
-    highlight(id: string | null) {
+    highlight(id: string | null, details: HighlightChangeDetails = { reason: "none" }) {
       if (id === highlightedOf(ui.getSnapshot(), opts())) return;
-      if (opts().highlighted === undefined) set({ highlighted: id });
-      opts().onHighlightedChange?.(id);
+      if (opts().highlight === undefined) set({ highlighted: id });
+      opts().onHighlightChange?.(id, details);
     },
     hover: (id: string | null) => set({ hovered: id }),
     setActiveSection: (id: string | null) => set({ activeSection: id }),
@@ -233,9 +233,9 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       return true;
     },
     closeVariations: () => set({ variations: null }),
-    registerSearch() {
-      set({ searchFields: ui.getSnapshot().searchFields + 1 });
-      return () => set({ searchFields: ui.getSnapshot().searchFields - 1 });
+    registerInput() {
+      set({ inputs: ui.getSnapshot().inputs + 1 });
+      return () => set({ inputs: ui.getSnapshot().inputs - 1 });
     },
     mount: () => set({ mounted: true }),
     setDomFocus: (value: boolean) => set({ domFocus: value }),
@@ -255,6 +255,6 @@ export function moveHighlight(state: PickerState, direction: EmojiGridMove, { co
   const from = grid.indexOf(highlighted ?? "");
   const to = from < 0 ? (direction === "last" ? grid.count - 1 : 0) : moveInGrid(grid, from, direction, pageRows);
   const id = to == null ? null : (grid.at(to)?.id ?? null);
-  if (id != null) state.highlight(id);
+  if (id != null) state.highlight(id, { reason: "keyboard" });
   return id;
 }

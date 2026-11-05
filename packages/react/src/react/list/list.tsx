@@ -9,7 +9,7 @@ import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker, ViewportContext } from "../root/context";
 import { useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
-import type { PickerKeyboardEventHandler } from "../root/keyboard";
+import type { PickerKeyboardEventHandler } from "../utils/keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";

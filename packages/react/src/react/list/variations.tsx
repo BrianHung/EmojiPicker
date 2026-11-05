@@ -4,9 +4,8 @@ import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
 import { useLocale } from "react-aria/I18nProvider";
-import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
-import { moveFocus, useKeyRegion } from "../root/keyboard";
+import { hasModifier, moveFocus, usePickerKeyDown } from "../utils/keyboard";
 import { SLOTS } from "../utils/slots";
 
 type VariationsProps = {
@@ -37,18 +36,19 @@ function VariationsRow({ record, style, onPick, onClose }: VariationsProps) {
   const dismiss = () => onClose(false);
   useInteractOutside({ ref: row, onInteractOutsideStart: dismiss, onInteractOutside: dismiss });
 
-  const region = useKeyRegion((action, event) => {
-    const unified = event.target instanceof HTMLElement ? event.target.dataset.unified : undefined;
-    if (unified === undefined || !variants.includes(unified)) return "pass";
-    if (action === "close") onClose(true);
-    else if (action === "select") onPick(unified);
-    else if (!moveFocus(focus, action, rtl) && action !== "move-up" && action !== "move-down") return "pass";
-    return "handled";
+  const keys = usePickerKeyDown(undefined, (e) => {
+    const unified = e.target instanceof HTMLElement ? e.target.dataset.unified : undefined;
+    if (unified === undefined || !variants.includes(unified) || hasModifier(e)) return false;
+    if (e.key === "Escape") onClose(true);
+    else if (e.key === "Enter" || (e.key === " " && !e.shiftKey)) onPick(unified);
+    else return moveFocus(focus, e.key, rtl) || e.key === "ArrowUp" || e.key === "ArrowDown";
+    return true;
   });
 
   return (
     <div
-      ref={mergeRefs<HTMLDivElement>(row, region)}
+      ref={row}
+      onKeyDown={keys}
       role="listbox"
       aria-label={labels.skinTone}
       aria-orientation="horizontal"

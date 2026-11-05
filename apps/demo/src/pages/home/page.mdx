@@ -273,6 +273,23 @@ Contains the parts of a picker.
 
 <PropsTable rows={api.root} />
 
+#### Keyboard
+
+Each part handles its own keys with React Aria. A part's `onKeyDown` runs before the picker's handler; `event.preventEmojiPickerHandler()` skips it for that key, and `event.preventDefault()` keeps its usual meaning. Keyboard and pointer move one highlight. With a search field focus stays in it (`aria-activedescendant`); without one, focus moves through the cells.
+
+To drive the picker from an editor that keeps focus, pass it as `keyboardTarget`, or call the actions from `actionsRef` (`useEmojiPickerActions()` inside Root).
+
+```tsx title="editor-menu.tsx"
+const actions = React.useRef<EmojiPickerActions>(null);
+
+<EmojiPicker.Root query={query} keyboardTarget={editor.view.dom} actionsRef={actions} onKeyDown={(e) => e.key === "Escape" && e.preventEmojiPickerHandler()}>
+  …
+</EmojiPicker.Root>;
+
+actions.current?.move("down");
+actions.current?.pick();
+```
+
 ### Search {#api-search}
 
 The search row. Search.Input is the field; Search.Clear clears it, shown only with a query.

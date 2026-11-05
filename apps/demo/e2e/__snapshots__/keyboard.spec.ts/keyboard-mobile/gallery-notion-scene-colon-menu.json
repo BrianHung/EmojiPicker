@@ -1,43 +1,43 @@
 {
   "opened": {
     "focus": "combobox \"Page content\"",
-    "highlight": "option \"grinning face with big eyes\""
+    "highlight": "option \"grinning face with big eyes\" 1f603"
   },
   "keys": [
     {
       "key": "ArrowDown",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"slightly smiling face\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"upside-down face\"",
+      "highlight": "option \"upside-down face\" 1f643",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"slightly smiling face\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"grinning face with big eyes\"",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
       "scrolled": 0
     },
     {
       "key": "ArrowUp",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"grinning face with big eyes\"",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
       "scrolled": 0
     },
     {
       "key": "ArrowDown",
       "focus": "combobox \"Page content\"",
-      "highlight": "option \"slightly smiling face\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
       "scrolled": 0
     }
   ],
