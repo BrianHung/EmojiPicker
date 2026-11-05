@@ -420,6 +420,8 @@ Set sizes with CSS variables on `Root` or an ancestor:
 | `--emoji-font-family` | System emoji fonts | Font for native emoji |
 | `--emoji-skin-tone-size` | `15px` | Default skin-tone swatch |
 
+The List sets `--emoji-picker-content-width` on Root to the grid's measured width, so a footer can cap at it with `max-width: var(--emoji-picker-content-width)`.
+
 `tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The library injects no CSS: the layout a part needs (a cell's size from `--emoji-cell-size`, the viewport's scroll axis, sticky titles) is inline and driven by the size variables, and everything visual (the Root's column, the emoji font via `--emoji-font-family`, forced-colors outlines, reduced motion) is your classes, as in the registry item.
 
 ## Data
