@@ -1,3 +1,5 @@
+import { isApplePlatform } from "../utils/utils";
+
 export type KeyboardAction = "move-up" | "move-down" | "move-left" | "move-right" | "page-up" | "page-down" | "first" | "last" | "select" | "close" | "focus-search" | "toggle-skin-tone";
 
 export type Keymap = Readonly<Record<KeyboardAction, readonly string[]>>;
@@ -32,12 +34,6 @@ type KeyChordEvent = {
 type Chord = { key: string; ctrl: boolean; meta: boolean; alt: boolean; shift: boolean | null };
 
 const MODIFIERS = new Set(["ctrl", "control", "meta", "cmd", "command", "alt", "option", "shift", "mod"]);
-
-function isApplePlatform(): boolean {
-  if (typeof navigator === "undefined") return false;
-  const platform = (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? navigator.platform ?? "";
-  return /mac|iphone|ipad|ipod/i.test(platform);
-}
 
 export function parseChord(chord: string, apple = isApplePlatform()): Chord {
   const parts = chord.split("+");

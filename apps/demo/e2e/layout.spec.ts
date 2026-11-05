@@ -11,18 +11,21 @@ async function focusSearch(page: Page) {
   await page.keyboard.press("ArrowDown");
 }
 
-test("right-to-left: the grid mirrors and ArrowLeft moves to the next emoji", async ({ page }) => {
-  await page.addInitScript(() => document.addEventListener("DOMContentLoaded", () => (document.documentElement.dir = "rtl")));
-  await visit(page, "/");
-  await focusSearch(page);
-  const first = (await highlighted(page).boundingBox())!;
-  const firstName = await highlighted(page).getAttribute("aria-label");
-  await page.keyboard.press("ArrowLeft");
-  const next = (await highlighted(page).boundingBox())!;
-  expect(next.x).toBeLessThan(first.x);
-  expect(await highlighted(page).getAttribute("aria-label")).not.toBe(firstName);
-  await page.keyboard.press("ArrowRight");
-  expect(await highlighted(page).getAttribute("aria-label")).toBe(firstName);
+test.describe("right-to-left", () => {
+  test.use({ locale: "ar" });
+  test("the grid mirrors and ArrowLeft moves to the next emoji", async ({ page }) => {
+    await page.addInitScript(() => document.addEventListener("DOMContentLoaded", () => (document.documentElement.dir = "rtl")));
+    await visit(page, "/");
+    await focusSearch(page);
+    const first = (await highlighted(page).boundingBox())!;
+    const firstName = await highlighted(page).getAttribute("aria-label");
+    await page.keyboard.press("ArrowLeft");
+    const next = (await highlighted(page).boundingBox())!;
+    expect(next.x).toBeLessThan(first.x);
+    expect(await highlighted(page).getAttribute("aria-label")).not.toBe(firstName);
+    await page.keyboard.press("ArrowRight");
+    expect(await highlighted(page).getAttribute("aria-label")).toBe(firstName);
+  });
 });
 
 test("moving up never hides the highlighted emoji under a sticky section title", async ({ page }) => {

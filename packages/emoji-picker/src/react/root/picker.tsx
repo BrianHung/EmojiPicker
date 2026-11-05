@@ -1,7 +1,7 @@
 import * as React from "react";
 import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiRecord, type EmojiSelection, type PickerStateOptions } from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
-import { CollapseContext, useCollapse } from "./collapse";
+import { useCollapse } from "./collapse";
 import { PickerContext, usePicker, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "../utils/hold";
 import { mergeProps } from "react-aria/mergeProps";
@@ -212,11 +212,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const count = !searching || pending ? "" : labels.resultCount(results.length);
   const body = (
     <PickerContext.Provider value={context}>
-      <CollapseContext.Provider value={collapse}>
-        <ReactionsContext.Provider value={reactionsState}>
-          <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
-        </ReactionsContext.Provider>
-      </CollapseContext.Provider>
+      <ReactionsContext.Provider value={reactionsState}>
+        <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
+      </ReactionsContext.Provider>
     </PickerContext.Provider>
   );
 

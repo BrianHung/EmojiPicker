@@ -2,17 +2,19 @@
 import * as React from "react";
 import type { Node as CollectionNode } from "@react-types/shared";
 import { mergeProps } from "react-aria/mergeProps";
+import { useLocale } from "react-aria/I18nProvider";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker, ViewportContext } from "../root/context";
-import { isRtl, useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
+import { useCell, useGridController, useGridSections, type CellState, type Cells, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../root/keyboard";
 import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { nextTabbable, TABBABLE } from "../utils/utils";
 import { useEmptyState } from "../root/viewport";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
@@ -116,13 +118,15 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   }, [horizontal, results]);
   React.useLayoutEffect(measure);
 
+  const rtlRef = React.useRef(false);
+  rtlRef.current = useLocale().direction === "rtl";
   const virtualizer = React.useRef<VirtualizerState<CollectionNode<unknown>, React.ReactNode> | null>(null);
   const jumping = React.useRef<{ x: number; y: number } | null>(null);
   // The Viewport's ref isn't attached yet when the list's first layout effects run
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
   const geometry = React.useMemo<GridGeometry>(() => {
     const visibleRect = () => virtualizer.current?.virtualizer.visibleRect ?? null;
-    const rtl = () => isRtl(listRef.current);
+    const rtl = () => rtlRef.current;
     const horizontal = () => layout.orientation === "horizontal";
     return {
       grid: () => layout.grid,
@@ -515,16 +519,6 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
       })}
     </div>
   );
-}
-
-const TABBABLE = 'button:not([disabled]), a[href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
-
-function nextTabbable(after: Element): HTMLElement | null {
-  for (const el of after.ownerDocument.querySelectorAll<HTMLElement>(TABBABLE)) {
-    if (after.contains(el) || el.tabIndex < 0 || !(after.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)) continue;
-    if (el.getClientRects().length && getComputedStyle(el).visibility !== "hidden") return el;
-  }
-  return null;
 }
 
 export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell });

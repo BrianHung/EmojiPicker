@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useLocale } from "react-aria/I18nProvider";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
 import { Input } from "react-aria-components/Input";
@@ -42,11 +43,11 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
   const clear = React.useMemo(() => <SearchClear />, []);
+  const rtl = useLocale().direction === "rtl";
 
   const region = useKeyRegion((action, event) => {
     const field = event.target;
     if (!(field instanceof HTMLInputElement) || !action) return "pass";
-    const rtl = getComputedStyle(field).direction === "rtl";
     const back = rtl ? "move-right" : "move-left";
     if ((action === "move-left" || action === "move-right") && !caretAtEnd(field)) return "native";
     const list = picker.list.current;

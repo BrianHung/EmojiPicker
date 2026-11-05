@@ -2,11 +2,12 @@ import * as React from "react";
 import type { Key, LayoutDelegate } from "@react-types/shared";
 import { useFocusRing } from "react-aria/useFocusRing";
 import { useFocusVisible } from "react-aria/useFocusVisible";
+import { useLocale } from "react-aria/I18nProvider";
 import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
 import { usePicker, type ListHandle } from "../root/context";
@@ -22,7 +23,7 @@ import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { Variations } from "./variations";
-import { moveVirtualFocus } from "./virtual-focus";
+import { moveVirtualFocus, scrollParent } from "../utils/utils";
 
 // Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
 const pointer = { x: NaN, y: NaN, moved: false, tracking: false, list: null as Element | null, within: false };
@@ -86,8 +87,6 @@ export type GridGeometry = {
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
 const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
-const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
-export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
 // Handlers are delegated from the list: one set for every mounted cell
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
 
@@ -125,7 +124,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const { labels, searching, focusModel, value } = picker;
   const { navigation } = geometry;
   const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
-  const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => baseOf(i.unified) === baseOf(value)).map((i) => i.id))), [value, sections]);
+  const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
   const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? NO_KEYS, disallowEmptySelection: value !== undefined, layoutDelegate: geometry.layoutDelegate });
   const stateRef = React.useRef(state);
   stateRef.current = state;
@@ -138,8 +137,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const lastFocused = React.useRef<Key | null>(null);
   // After a key move, hover takes over only once the pointer moves: VoiceOver moves the pointer to what it reads, lagging focus
   const keyed = React.useRef(false);
-  const latest = React.useRef({ collection, virtual, geometry, searching });
-  latest.current = { collection, virtual, geometry, searching };
+  const rtl = useLocale().direction === "rtl";
+  const latest = React.useRef({ collection, virtual, geometry, searching, rtl });
+  latest.current = { collection, virtual, geometry, searching, rtl };
 
   const highlight = (): string | null => core.getSnapshot().highlighted;
   const position = React.useRef<Key | null>(null);
@@ -197,7 +197,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         return true;
       }
       let move = action;
-      if (isRtl(listRef.current) && (move === "move-left" || move === "move-right")) move = move === "move-left" ? "move-right" : "move-left";
+      if (latest.current.rtl && (move === "move-left" || move === "move-right")) move = move === "move-left" ? "move-right" : "move-left";
       const current = (dom ? cellOf(event?.target ?? null)?.getAttribute("data-key") : null) ?? highlight();
       if (current == null) {
         const start = move === "first" ? navigation.getFirstKey() : move === "last" ? navigation.getLastKey() : move === "move-down" || move === "move-right" || move === "page-down" ? geometry.firstVisible() : null;
@@ -339,6 +339,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     } else if (virtual && active instanceof HTMLInputElement && root?.contains(active)) setHighlight(key);
   };
   const keyOf = (e: React.SyntheticEvent) => cellOf(e.target)?.getAttribute("data-key") ?? null;
+  // Not useLongPress: its press focuses the target and stops the click, and cells delegate from the list; it also has no move threshold
   const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
   const endPress = () => {
     marks.dispatch({ pressed: null });
@@ -571,8 +572,7 @@ export type UseEmojiGridOptions = {
 };
 
 function windowOf(list: HTMLElement | null) {
-  let el = list?.parentElement;
-  while (el && !/auto|scroll/.test(getComputedStyle(el).overflowY)) el = el.parentElement;
+  const el = scrollParent(list);
   return list && el ? { el, top: el.getBoundingClientRect().top + el.clientTop - list.getBoundingClientRect().top, height: el.clientHeight } : null;
 }
 

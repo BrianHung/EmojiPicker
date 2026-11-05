@@ -1,4 +1,4 @@
-import { isUnified, unifiedToNative, type EmojiRecord } from "./dataset";
+import { isUnified, nativeToUnified, unifiedToNative, withoutFe0f, type EmojiRecord } from "./dataset";
 import type { CustomEmoji, EmojiSelection } from "./store";
 
 export type EmojiInput = string | CustomEmoji | EmojiRecord | EmojiSelection;
@@ -20,10 +20,6 @@ const NATIVE = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[#*0-9]️?
 const COLON_CODE = /^:([a-z0-9_+\-']+):(?::skin-tone-([2-6]):)?$/i;
 const BARE_CODE = /^[a-z0-9_+\-']+$/i;
 
-export function nativeToUnified(text: string): string {
-  return [...text].map((c) => c.codePointAt(0)!.toString(16)).join("-");
-}
-
 const isSelection = (v: object): v is EmojiSelection => "baseUnified" in v;
 const isRecord = (v: object): v is EmojiRecord => "unified" in v && "tones" in v;
 const isCustom = (v: object): v is CustomEmoji => "id" in v && "imageUrl" in v;
@@ -33,7 +29,7 @@ function fromRecord(record: EmojiRecord, unified = record.unified): ResolvedEmoj
 }
 
 function lookupUnified(store: EmojiLookup, unified: string): EmojiRecord | undefined {
-  const bare = unified.replace(/-fe0f/gi, "");
+  const bare = withoutFe0f(unified);
   return store.get(unified) ?? store.get(bare) ?? (bare.includes("-") ? undefined : store.get(`${bare}-fe0f`));
 }
 

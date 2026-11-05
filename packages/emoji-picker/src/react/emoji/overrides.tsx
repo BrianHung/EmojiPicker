@@ -1,11 +1,9 @@
 import * as React from "react";
-import { withoutTone } from "@brianhung/emoji-picker-core";
+import { withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiImage } from "./image";
 
 export type Artwork = string | React.ReactNode;
 export type ArtworkMap = Readonly<Record<string, Artwork>>;
-
-const withoutFe0f = (unified: string) => unified.replace(/-fe0f/gi, "");
 
 export function findArtwork(map: ArtworkMap, unified: string): Artwork | undefined {
   const code = unified.toLowerCase();

@@ -4,7 +4,7 @@ import type { ShortcodeCompletion } from "./search/search-index";
 import { findShortcodeTrigger, isComposingKey } from "./shortcodes";
 import type { EmojiStore } from "./store";
 import { createStore } from "./reactive";
-import { createEmojiSuggestions, type KeyLike, type SuggestionsOptions } from "./suggestions";
+import { createEmojiSuggestions, syncCombobox, type KeyLike, type SuggestionsOptions } from "./suggestions";
 
 type Node = EditorState["doc"];
 
@@ -49,21 +49,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
     view(editor) {
       mounted.dispatch(editor);
       store.load().catch(() => {});
-      let saved: { role: string | null } | null = null;
-      const combobox = () => {
-        const { dom } = editor;
-        const { open } = suggestions.getSnapshot();
-        if (!open && !saved) return;
-        saved ??= { role: dom.getAttribute("role") };
-        for (const [name, value] of Object.entries(suggestions.getInputProps())) {
-          if (open && value !== undefined) dom.setAttribute(name, String(value));
-          else dom.removeAttribute(name);
-        }
-        if (open) return;
-        if (saved.role) dom.setAttribute("role", saved.role);
-        saved = null;
-      };
-      const off = suggestions.subscribe(combobox);
+      const unsync = syncCombobox(editor.dom, suggestions);
       const sync = (state: EditorState, prev: EditorState | null) => {
         const match = matchIn(state);
         if (keyOf(match) !== (prev ? keyOf(matchIn(prev)) : "")) suggestions.setQuery(match?.query ?? "", keyOf(match));
@@ -74,7 +60,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
         destroy() {
           mounted.dispatch(null);
           suggestions.setQuery("");
-          off();
+          unsync();
         },
       };
     },

@@ -3,10 +3,10 @@ import { type EmojiRecord, nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
+import { useLocale } from "react-aria/I18nProvider";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
-import { useKeyRegion } from "../root/keyboard";
-import type { KeyboardAction } from "../root/keymap";
+import { moveFocus, useKeyRegion } from "../root/keyboard";
 import { SLOTS } from "../utils/slots";
 
 type VariationsProps = {
@@ -31,6 +31,7 @@ function VariationsRow({ record, style, onPick, onClose }: VariationsProps) {
   const { store, labels } = usePicker("EmojiPicker.List");
   const row = React.useRef<HTMLDivElement | null>(null);
   const focus = useFocusManager();
+  const rtl = useLocale().direction === "rtl";
   const variants = [record.unified, ...record.tones];
   const current = Math.max(0, variants.indexOf(store.withSkinTone(record.unified)));
   const dismiss = () => onClose(false);
@@ -39,15 +40,9 @@ function VariationsRow({ record, style, onPick, onClose }: VariationsProps) {
   const region = useKeyRegion((action, event) => {
     const unified = event.target instanceof HTMLElement ? event.target.dataset.unified : undefined;
     if (unified === undefined || !variants.includes(unified)) return "pass";
-    const rtl = getComputedStyle(row.current!).direction === "rtl";
-    const steps: Partial<Record<KeyboardAction, number>> = { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
-    const step = action ? steps[action] : undefined;
     if (action === "close") onClose(true);
     else if (action === "select") onPick(unified);
-    else if (action === "first") focus?.focusFirst();
-    else if (action === "last") focus?.focusLast();
-    else if (step) step > 0 ? focus?.focusNext({ wrap: true }) : focus?.focusPrevious({ wrap: true });
-    else if (action !== "move-up" && action !== "move-down") return "pass";
+    else if (!moveFocus(focus, action, rtl) && action !== "move-up" && action !== "move-down") return "pass";
     return "handled";
   });
 

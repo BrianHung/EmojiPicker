@@ -110,17 +110,4 @@ export async function probe(page: Page, root: Locator): Promise<Probe> {
   }, el);
 }
 
-export function matchFixture(info: TestInfo, name: string, actual: unknown) {
-  const file = `${DIR}fixtures/${info.project.name}/${name}.json`;
-  const json = `${JSON.stringify(actual, null, 2)}\n`;
-  const update = info.config.updateSnapshots;
-  if (!existsSync(file) || update === "all" || (update === "changed" && readFileSync(file, "utf8") !== json)) {
-    mkdirSync(file.slice(0, file.lastIndexOf("/")), { recursive: true });
-    writeFileSync(file, json);
-    info.annotations.push({ type: "fixture", description: `wrote ${file.slice(DIR.length)}` });
-    return;
-  }
-  expect(actual, `fixtures/${info.project.name}/${name}.json`).toEqual(JSON.parse(readFileSync(file, "utf8")));
-}
-
 export const fileName = (id: string) => id.replaceAll("/", "-");

@@ -1,7 +1,19 @@
 import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
 import { useStore } from "../utils/store";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, localizeLabels, needsTwemoji, type Renderer, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
+import {
+  createEmojiStore,
+  type EmojiLabels,
+  type EmojiStore,
+  type EmojiStoreOptions,
+  localizeLabels,
+  needsTwemoji,
+  onNativeSupportChange,
+  type Renderer,
+  TWEMOJI_BASE_URL,
+  TWEMOJI_EMOJI_VERSION,
+  twemojiUrl,
+} from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 
@@ -32,8 +44,10 @@ export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE
   const [detected, setDetected] = React.useState<Renderer>("native");
 
   React.useEffect(() => {
-    if (renderer === "auto") setDetected(needsTwemoji() ? "twemoji" : "native");
+    const detect = () => setDetected(needsTwemoji() ? "twemoji" : "native");
+    if (renderer === "auto") detect();
     if (prepare) store.prepare();
+    return renderer === "auto" ? onNativeSupportChange(detect) : undefined;
   }, [renderer, prepare, store]);
 
   const resolved = renderer === "auto" ? detected : renderer;

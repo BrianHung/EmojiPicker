@@ -25,13 +25,15 @@ export type EmojiSuggestionsState = SuggestionsSnapshot & {
   };
 };
 
-export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSuggestionsState {
+export function useSuggestionsMachine(options: EmojiSuggestionsOptions): EmojiSuggestionsMachine {
   const { store } = useEmojiContext();
   const id = React.useId();
   const [machine] = React.useState(() => createEmojiSuggestions(store, { ...options, id }));
   machine.setOptions({ ...options, id });
-  return useSuggestionsStore(machine);
+  return machine;
 }
+
+export const useEmojiSuggestions = (options: EmojiSuggestionsOptions): EmojiSuggestionsState => useSuggestionsStore(useSuggestionsMachine(options));
 
 export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestionsState {
   useEmojiStatus();

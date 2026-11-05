@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { PickerState } from "@brianhung/emoji-picker-core";
+import { PickerContext } from "./context";
 
 export type CollapsedCategories = {
   collapsed: readonly string[];
@@ -11,12 +12,10 @@ export type CollapsedCategories = {
 const noop = () => {};
 const EMPTY: CollapsedCategories = { collapsed: [], isCollapsed: () => false, toggle: noop, setCollapsed: noop };
 
-export const CollapseContext = React.createContext<CollapsedCategories>(EMPTY);
-
 export function useCollapse(state: PickerState<React.ReactNode>, collapsed: readonly string[]): CollapsedCategories {
   return React.useMemo(() => ({ collapsed, isCollapsed: (id) => collapsed.includes(id), toggle: state.toggleCollapsed, setCollapsed: state.setCollapsed }), [state, collapsed]);
 }
 
 export function useCollapsedCategories(): CollapsedCategories {
-  return React.useContext(CollapseContext);
+  return React.useContext(PickerContext)?.collapse ?? EMPTY;
 }

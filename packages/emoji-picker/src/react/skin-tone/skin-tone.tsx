@@ -1,25 +1,31 @@
-// Not React Aria's RadioGroup: arrows there change the tone; here they move focus and a press picks
+// A single-select toggle group, not RadioGroup: arrows there change the tone; here they move focus and a press picks
 import * as React from "react";
+import type { Orientation } from "@react-types/shared";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
+import { useLocale } from "react-aria/I18nProvider";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
+import { useObjectRef } from "react-aria/useObjectRef";
+import { useToggleButtonGroup, useToggleButtonGroupItem } from "react-aria/useToggleButtonGroup";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
+import type { ToggleGroupState } from "react-stately/useToggleGroupState";
 import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
-import { useKeyRegion, useSkinToneToggle } from "../root/keyboard";
-import type { KeyboardAction } from "../root/keymap";
+import { moveFocus, useKeyRegion, useSkinToneToggle } from "../root/keyboard";
 import { useEmojiContext } from "../provider/provider";
 import { renderElement, resolve, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 const TONES = [0, 1, 2, 3, 4, 5] as const;
+const noop = () => {};
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];
 const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[tone] });
 
-type Orientation = "horizontal" | "vertical";
 type SkinToneContextValue = {
   tone: SkinToneValue;
+  selection: ToggleGroupState;
   open: boolean;
   orientation: Orientation;
   toggle(): void;
@@ -49,6 +55,8 @@ export type SkinToneProps = PartElementProps<SkinToneState> & {
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
+  // The store owns the tone and a press picks it, so the group only reads it
+  const selection: ToggleGroupState = { selectionMode: "single", isDisabled: false, selectedKeys: new Set([tone]), toggleKey: noop, setSelected: noop, setSelectedKeys: noop };
   const state = useOverlayTriggerState({ isOpen: openProp, defaultOpen, onOpenChange });
   const open = state.isOpen;
   const rootRef = React.useRef<HTMLDivElement | null>(null);
@@ -73,6 +81,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, rootRef, region), [ref, region]);
   const context: SkinToneContextValue = {
     tone,
+    selection,
     open,
     orientation,
     toggle,
@@ -149,26 +158,17 @@ const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(f
 });
 
 const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneGroup({ style, children, ...props }, ref) {
-  const { orientation, group, tone, optionsRef } = useSkinToneContext("Options");
+  const { orientation, group, tone, selection, optionsRef } = useSkinToneContext("Options");
   const focus = useFocusManager();
-  const region = useKeyRegion((action) => {
-    const rtl = orientation === "horizontal" && optionsRef.current != null && getComputedStyle(optionsRef.current).direction === "rtl";
-    const steps: Partial<Record<KeyboardAction, number>> = orientation === "vertical" ? { "move-down": 1, "move-up": -1 } : { "move-right": rtl ? -1 : 1, "move-left": rtl ? 1 : -1 };
-    const step = action ? steps[action] : undefined;
-    if (action === "first") focus?.focusFirst();
-    else if (action === "last") focus?.focusLast();
-    else if (step) step > 0 ? focus?.focusNext({ wrap: true }) : focus?.focusPrevious({ wrap: true });
-    else return "pass";
-    return "handled";
-  });
+  const { groupProps } = useToggleButtonGroup({ orientation, "aria-label": group }, selection, optionsRef);
+  const rtl = useLocale().direction === "rtl" && orientation === "horizontal";
+  const region = useKeyRegion((action) => (moveFocus(focus, action, rtl, orientation === "vertical") ? "handled" : "pass"));
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, optionsRef, region), [ref, optionsRef, region]);
   return renderElement(
     "div",
     {
-      ...props,
+      ...mergeProps(props, groupProps),
       ref: refs,
-      role: "radiogroup",
-      "aria-label": group,
       "data-slot": SLOTS.skinToneOptions,
       "data-orientation": orientation,
       style: (s: SkinToneOptionsState) => ({ position: "absolute", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
@@ -188,24 +188,21 @@ export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButt
   tone: SkinToneValue;
 };
 
-const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone, style, children, ...props }, ref) {
-  const { tone: current, choose, label } = useSkinToneContext("Option");
+const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone, style, children, ...props }, forwarded) {
+  const { tone: current, selection, choose, label } = useSkinToneContext("Option");
+  const ref = useObjectRef(forwarded);
+  const { buttonProps } = useToggleButtonGroupItem({ id: tone, "aria-label": label(tone), onPress: () => choose(tone) }, selection, ref);
   const selected = tone === current;
   return (
     <OptionContext.Provider value={tone}>
       {renderElement(
         "button",
         {
-          type: "button",
-          ...props,
+          ...mergeProps(props, buttonProps),
           ref,
-          role: "radio",
-          "aria-checked": selected,
-          "aria-label": label(tone),
           tabIndex: selected ? 0 : -1,
           "data-slot": SLOTS.skinToneOption,
           "data-selected": selected || undefined,
-          onClick: () => choose(tone),
           style: (s: SkinToneOptionState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
           children,
         },

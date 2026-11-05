@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type EmojiRecord, isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, PROBE_BATCH, withoutTone } from "@brianhung/emoji-picker-core";
+import { type EmojiRecord, isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
 type Drawable = (record: EmojiRecord, unified: string) => boolean;
@@ -18,11 +18,17 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
   React.useLayoutEffect(() => {
     if (!native || typeof window === "undefined") return setSupport(null);
     const font = (root.current && getComputedStyle(root.current).getPropertyValue("--emoji-font-family").trim()) || undefined;
-    const probe = nativeProbe(font);
-    if (!probe) return setSupport(null);
     const samples = new Map<number, string>();
     for (const r of store.records()) if (!r.imageUrl && !samples.has(r.version)) samples.set(r.version, r.unified);
-    setSupport(nativeSupport(probe, samples));
+    let current: NativeSupport | null = null;
+    const update = () => {
+      const probe = nativeProbe(font);
+      if (current && current.probe === probe) return;
+      current = probe && nativeSupport(probe, samples);
+      setSupport(current);
+    };
+    update();
+    return onNativeSupportChange(update);
   }, [native, store, root]);
 
   const request = React.useCallback(
@@ -34,8 +40,10 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
         timer.current = null;
         const batch = [...pending.current].slice(0, PROBE_BATCH);
         batch.forEach((u) => pending.current.delete(u));
+        const verdict = (u: string) => isNativeSupported(support, u, store.get(u)?.version ?? 0);
+        const predicted = batch.map(verdict);
         support.probe.prime(batch);
-        if (batch.some((u) => support.probe.result(u) === false)) setVersion((v) => v + 1);
+        if (batch.some((u, i) => verdict(u) !== predicted[i])) setVersion((v) => v + 1);
         if (pending.current.size) schedule();
       };
       const schedule = () => {
@@ -43,7 +51,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
       };
       schedule();
     },
-    [support],
+    [support, store],
   );
   React.useEffect(
     () => () => {
@@ -56,7 +64,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
 
   const drawable = React.useMemo<Drawable>(() => {
     if (!native) return always;
-    return (record, unified) => record.imageUrl != null || (!KNOWN_FAILING.has(withoutTone(record.unified).replace(/-fe0f/g, "")) && isNativeSupported(support, unified, record.version));
+    return (record, unified) => record.imageUrl != null || (!KNOWN_FAILING.has(withoutFe0f(withoutTone(record.unified))) && isNativeSupported(support, unified, record.version));
   }, [native, support, version]);
   return { drawable, request };
 }

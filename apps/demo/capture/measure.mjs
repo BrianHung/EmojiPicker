@@ -1,4 +1,4 @@
-import { chromium } from "playwright";
+import { chromium } from "@playwright/test";
 const [style = "slack", theme = "light"] = process.argv.slice(2);
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const page = await browser.newPage({ deviceScaleFactor: 2, viewport: { width: 800, height: 900 } });

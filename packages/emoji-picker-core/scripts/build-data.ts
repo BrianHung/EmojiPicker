@@ -1,22 +1,23 @@
 import fs from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
-import { GROUPS, withTone, type Dataset, type DatasetEmoji } from "../src/dataset";
+import {
+  GROUP_KEY_ACTIVITIES,
+  GROUP_KEY_ANIMALS_NATURE,
+  GROUP_KEY_FLAGS,
+  GROUP_KEY_FOOD_DRINK,
+  GROUP_KEY_OBJECTS,
+  GROUP_KEY_PEOPLE_BODY,
+  GROUP_KEY_SYMBOLS,
+  GROUP_KEY_TRAVEL_PLACES,
+  joinShortcodesToEmoji,
+  type Emoji,
+  type GroupKey,
+  type MessagesDataset,
+  type ShortcodesDataset,
+} from "emojibase";
+import { GROUPS, nativeToUnified, withTone, type Dataset, type DatasetEmoji } from "../src/dataset";
 
-type Skin = { hexcode: string; emoji: string; tone?: number | number[] };
-type EmojibaseEmoji = {
-  hexcode: string;
-  emoji: string;
-  label: string;
-  tags?: string[];
-  group?: number;
-  order?: number;
-  version: number;
-  emoticon?: string | string[];
-  skins?: Skin[];
-};
-type Messages = { groups: { key: string; message: string }[] };
-type ShortcodeSet = Record<string, string | string[]>;
 type Load = <T>(file: string) => T;
 
 export type BuildDataOptions = {
@@ -52,39 +53,26 @@ const isEnglish = (locale: string) => locale.split("-")[0] === "en";
 export const defaultShortcodeSets = (locale: string) => (isEnglish(locale) ? ["iamcal"] : ["iamcal", "cldr"]);
 
 const GROUP_OF: Record<number, number> = { 0: 0, 1: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7 };
-const MESSAGE_KEY: Record<(typeof GROUPS)[number], string> = {
-  smileys_people: "people-body",
-  animals_nature: "animals-nature",
-  food_drink: "food-drink",
-  travel_places: "travel-places",
-  activities: "activities",
-  objects: "objects",
-  symbols: "symbols",
-  flags: "flags",
+const MESSAGE_KEY: Record<(typeof GROUPS)[number], GroupKey> = {
+  smileys_people: GROUP_KEY_PEOPLE_BODY,
+  animals_nature: GROUP_KEY_ANIMALS_NATURE,
+  food_drink: GROUP_KEY_FOOD_DRINK,
+  travel_places: GROUP_KEY_TRAVEL_PLACES,
+  activities: GROUP_KEY_ACTIVITIES,
+  objects: GROUP_KEY_OBJECTS,
+  symbols: GROUP_KEY_SYMBOLS,
+  flags: GROUP_KEY_FLAGS,
 };
 const ENGLISH_GROUPS = ["Smileys & People", "Animals & Nature", "Food & Drink", "Travel & Places", "Activities", "Objects", "Symbols", "Flags"];
 
 const toArray = <T>(v: T | T[] | undefined): T[] => (v === undefined ? [] : Array.isArray(v) ? v : [v]);
-const stripFE0F = (hex: string) =>
-  hex
-    .toLowerCase()
-    .split("-")
-    .filter((c) => c !== "fe0f")
-    .join("-");
-const qualified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
-function loadShortcodes(load: Load, locale: string, sets: readonly string[]): Map<string, string[]> {
-  const byHex = new Map<string, string[]>();
-  for (const set of sets) {
-    const codes = tryLoad<ShortcodeSet>(load, `${locale}/shortcodes/${set}.json`) ?? tryLoad<ShortcodeSet>(load, `en/shortcodes/${set}.json`);
+const loadShortcodes = (load: Load, locale: string, sets: readonly string[]) =>
+  sets.map((set) => {
+    const codes = tryLoad<ShortcodesDataset>(load, `${locale}/shortcodes/${set}.json`) ?? tryLoad<ShortcodesDataset>(load, `en/shortcodes/${set}.json`);
     if (!codes) throw new Error(`emojibase-data has no "${set}" shortcodes`);
-    for (const [hex, value] of Object.entries(codes)) {
-      const key = stripFE0F(hex);
-      byHex.set(key, [...new Set([...(byHex.get(key) ?? []), ...toArray(value)])]);
-    }
-  }
-  return byHex;
-}
+    return codes;
+  });
 
 function tryLoad<T>(load: Load, file: string): T | undefined {
   try {
@@ -96,11 +84,11 @@ function tryLoad<T>(load: Load, file: string): T | undefined {
 
 export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(locale), load = findEmojibase()?.load }: BuildDataOptions): BuildDataResult {
   if (!load) throw new Error("emojibase-data is not installed");
-  const records = tryLoad<EmojibaseEmoji[]>(load, `${locale}/data.json`);
+  const records = tryLoad<Emoji[]>(load, `${locale}/data.json`);
   if (!records) throw new Error(`emojibase-data has no locale "${locale}"`);
-  const messages = load<Messages>(`${locale}/messages.json`);
+  const messages = load<MessagesDataset>(`${locale}/messages.json`);
   const { version } = load<{ version: string }>("package.json");
-  const shortcodesByHex = loadShortcodes(load, locale, sets);
+  const shortcodes = loadShortcodes(load, locale, sets);
   const lower = (s: string) => s.toLocaleLowerCase(locale);
 
   let computedTones = 0;
@@ -110,13 +98,13 @@ export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(l
   for (const r of [...records].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))) {
     const group = GROUP_OF[r.group ?? -1];
     if (group === undefined) continue;
-    const unified = qualified(r.emoji);
+    const unified = nativeToUnified(r.emoji);
 
     const tones = (r.skins ?? [])
       .filter((s) => toArray(s.tone).length > 0 && new Set(toArray(s.tone)).size === 1)
       .sort((a, b) => toArray(a.tone)[0]! - toArray(b.tone)[0]!)
       .filter((s, i, all) => all.findIndex((x) => toArray(x.tone)[0] === toArray(s.tone)[0]) === i)
-      .map((s) => qualified(s.emoji));
+      .map((s) => nativeToUnified(s.emoji));
 
     let hasTones: 0 | 1 = 0;
     if (tones.length === 5) {
@@ -128,7 +116,7 @@ export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(l
     }
 
     const tags = [...toArray(r.tags).map(lower), ...toArray(r.emoticon)];
-    emojis.push([unified, lower(r.label), [...new Set(tags)], shortcodesByHex.get(stripFE0F(r.hexcode)) ?? [], group, r.version, hasTones]);
+    emojis.push([unified, lower(r.label), [...new Set(tags)], joinShortcodesToEmoji({ ...r, skins: undefined }, shortcodes).shortcodes ?? [], group, r.version, hasTones]);
   }
 
   const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase(locale) + s.slice(1);
