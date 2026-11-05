@@ -1,11 +1,10 @@
 import * as React from "react";
-import { type Category, type EmojiLabels, type EmojiRecord, type EmojiSection, type EmojiSelection, type EmojiStore, type PickerState, same, type SearchResultsMode } from "@brianhung/emoji-picker-core";
+import type { Category, EmojiLabels, EmojiRecord, EmojiSection, EmojiSelection, EmojiStore, FocusModel, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
 import type { KeyboardAction } from "./keymap";
 
-export type FocusModel = "input" | "grid";
 export type PointerModel = "follows" | "independent";
-export type { SearchResultsMode };
+export type { FocusModel, SearchResultsMode };
 
 export type SelectDetails = {
   collapse?: () => void;
@@ -19,40 +18,6 @@ export type ListHandle = {
   atStart(): boolean;
   variations(target: Element): boolean;
 };
-
-export type Signal<T> = { get(): T; set(value: T): void; subscribe(listener: () => void): () => void };
-export function signal<T>(initial: T): Signal<T> {
-  let value = initial;
-  const listeners = new Set<() => void>();
-  return {
-    get: () => value,
-    set(next) {
-      if (Object.is(next, value)) return;
-      value = next;
-      listeners.forEach((l) => l());
-    },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => void listeners.delete(listener);
-    },
-  };
-}
-
-export const useSignal = <T>(s: Signal<T>) => React.useSyncExternalStore(s.subscribe, s.get, s.get);
-
-export function useSelector<S, T>(store: { subscribe(listener: () => void): () => void; getSnapshot(): S }, select: (snapshot: S) => T): T {
-  const last = React.useRef<[S, T] | null>(null);
-  const read = () => {
-    const snapshot = store.getSnapshot();
-    const prev = last.current;
-    if (prev?.[0] !== snapshot) {
-      const value = select(snapshot);
-      last.current = [snapshot, prev && value && typeof value === "object" ? (same(prev[1] as object, value) as T) : value];
-    }
-    return last.current![1];
-  };
-  return React.useSyncExternalStore(store.subscribe, read, read);
-}
 
 export type PickerContextValue = {
   store: EmojiStore;

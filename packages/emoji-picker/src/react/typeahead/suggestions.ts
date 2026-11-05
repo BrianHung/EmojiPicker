@@ -1,6 +1,7 @@
 import * as React from "react";
 import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions, type SuggestionsSnapshot } from "@brianhung/emoji-picker-core";
 import { useEmojiStatus } from "../provider/hooks";
+import { useStore } from "../utils/store";
 import { useEmojiContext } from "../provider/provider";
 
 export type ShortcodeSuggestion = ShortcodeCompletion;
@@ -34,7 +35,7 @@ export function useEmojiSuggestions(options: EmojiSuggestionsOptions): EmojiSugg
 
 export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSuggestionsState {
   useEmojiStatus();
-  const snapshot = React.useSyncExternalStore(machine.subscribe, machine.getSnapshot, machine.getSnapshot);
+  const snapshot = useStore(machine);
   return {
     ...snapshot,
     setHighlightedIndex: machine.highlight,

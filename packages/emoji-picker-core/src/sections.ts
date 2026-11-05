@@ -1,5 +1,6 @@
 import { GROUPS, type EmojiRecord, type Group } from "./dataset";
 import type { EmojiLabels } from "./labels";
+import { cached } from "./reactive";
 import { nameWithTone } from "./shortcodes";
 
 export type CategoryId = Group | "suggested" | "custom" | `custom:${string}`;
@@ -80,18 +81,22 @@ type ItemCache = Map<string, EmojiItem>;
 const caches = new WeakMap<object, ItemCache>();
 
 export function itemFactory(labels: EmojiLabels) {
-  let cache = caches.get(labels);
-  if (!cache) caches.set(labels, (cache = new Map()));
+  const cache = cached(caches, labels, (): ItemCache => new Map());
   return (section: string, record: EmojiRecord, unified: string): EmojiItem => {
     const id = `${section}:${unified}`;
-    let item = cache.get(id);
-    if (!item || item.record !== record) {
-      item = new EmojiItem(id, section, record, unified, nameWithTone(record.name, unified, labels.withSkinTone));
-      cache.set(id, item);
-    }
+    const hit = cache.get(id);
+    if (hit?.record === record) return hit;
+    const item = new EmojiItem(id, section, record, unified, nameWithTone(record.name, unified, labels.withSkinTone));
+    cache.set(id, item);
     return item;
   };
 }
+
+const groupBy = <T>(values: Iterable<T>, keyOf: (value: T) => string) => {
+  const groups = new Map<string, T[]>();
+  for (const value of values) cached(groups, keyOf(value), (): T[] => []).push(value);
+  return groups;
+};
 
 type CategorySectionsInput = {
   categories: readonly Category<unknown>[];
@@ -106,41 +111,30 @@ type CategorySectionsInput = {
 };
 
 export function categorySections({ categories, records, suggested, customGroup, collapsed, emojiVersion, get, withSkinTone, item }: CategorySectionsInput): EmojiSection[] {
-  const byGroup = new Map<string, EmojiRecord[]>();
-  for (const r of records) {
-    if (emojiVersion != null && !r.imageUrl && r.version > emojiVersion) continue;
+  const shown = (r: EmojiRecord) => emojiVersion == null || Boolean(r.imageUrl) || r.version <= emojiVersion;
+  const byGroup = groupBy(records.filter(shown), (r) => {
     const group = r.group === "custom" ? customGroup(r.unified) : undefined;
-    const key = r.group === "custom" ? (group ? `custom:${group}` : "custom") : r.group;
-    let list = byGroup.get(key);
-    if (!list) byGroup.set(key, (list = []));
-    list.push(r);
-  }
-  const out: EmojiSection[] = [];
-  for (const { id, name } of categories) {
-    let items: EmojiItem[];
-    if (id === "suggested") {
-      items = [];
-      for (const unified of suggested) {
-        const record = get(unified);
-        if (record && (emojiVersion == null || record.imageUrl || record.version <= emojiVersion)) items.push(item(id, record, unified));
-      }
-    } else items = (byGroup.get(id) ?? []).map((r) => item(id, r, r.imageUrl ? r.unified : withSkinTone(r.unified)));
-    if (!items.length) continue;
+    return r.group === "custom" ? (group ? `custom:${group}` : "custom") : r.group;
+  });
+  const itemsOf = (id: string): EmojiItem[] =>
+    id === "suggested"
+      ? suggested.flatMap((unified) => {
+          const record = get(unified);
+          return record && shown(record) ? [item(id, record, unified)] : [];
+        })
+      : (byGroup.get(id) ?? []).map((r) => item(id, r, r.imageUrl ? r.unified : withSkinTone(r.unified)));
+  return categories.flatMap(({ id, name }) => {
+    const items = itemsOf(id);
+    if (!items.length) return [];
     const isCollapsed = collapsed(id);
-    out.push({ id, category: id, name, items: isCollapsed ? [] : items, header: true, collapsed: isCollapsed });
-  }
-  return out;
+    return [{ id, category: id, name, items: isCollapsed ? [] : items, header: true, collapsed: isCollapsed }];
+  });
 }
 
 export function resultSections(results: readonly EmojiRecord[], mode: "ranked" | "grouped", name: (group: string) => string, withSkinTone: (unified: string) => string, item: ReturnType<typeof itemFactory>, label: string): EmojiSection[] {
   const toItem = (section: string, r: EmojiRecord) => item(section, r, r.imageUrl ? r.unified : withSkinTone(r.unified));
   if (mode === "ranked") return results.length ? [{ id: "results", category: "results", name: label, items: results.map((r) => toItem("results", r)), header: false, collapsed: false }] : [];
-  const groups = new Map<string, EmojiRecord[]>();
-  for (const r of results) {
-    let list = groups.get(r.group);
-    if (!list) groups.set(r.group, (list = []));
-    list.push(r);
-  }
+  const groups = groupBy(results, (r) => r.group);
   return [...groups.keys()]
     .sort((a, b) => RESULT_ORDER.indexOf(a) - RESULT_ORDER.indexOf(b))
     .map((group) => ({ id: `results:${group}`, category: group, name: name(group), items: groups.get(group)!.map((r) => toItem(`results:${group}`, r)), header: true, collapsed: false }));

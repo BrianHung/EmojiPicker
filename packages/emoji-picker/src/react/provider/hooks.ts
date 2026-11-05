@@ -1,14 +1,11 @@
 import * as React from "react";
-import { createSearch, emitter, type EmojiRecord, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiRecord, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
 export function useFrequentEmoji(n = 5): readonly string[] {
   const { store } = useEmojiContext();
-  return React.useSyncExternalStore(
-    store.frequents.subscribe,
-    () => store.frequents.top(n),
-    () => store.frequents.top(n),
-  );
+  return useStore({ subscribe: store.frequents.subscribe, getSnapshot: () => store.frequents.top(n) });
 }
 
 export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {
@@ -34,11 +31,6 @@ export type EmojiSearchState = SearchState;
 export function useEmojiSearchState(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
   const { store } = useEmojiContext();
   useEmojiStatus();
-  const [search] = React.useState(() => {
-    const events = emitter(() => () => runner.abort());
-    const runner = createSearch(store, events.emit);
-    return { runner, subscribe: events.subscribe };
-  });
-  const read = () => search.runner.run(query, limit);
-  return React.useSyncExternalStore(search.subscribe, read, read);
+  const [search] = React.useState(() => createSearch(store));
+  return useStore({ subscribe: search.subscribe, getSnapshot: () => search.run(query, limit) });
 }

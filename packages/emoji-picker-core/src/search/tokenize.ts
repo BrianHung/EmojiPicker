@@ -1,3 +1,5 @@
+import { cached } from "../reactive";
+
 export type Tokenizer = (text: string) => string[];
 
 export type WordSegmenter = { segment(text: string): Iterable<{ segment: string; isWordLike?: boolean }> };
@@ -50,7 +52,5 @@ const shared = new Map<string, Tokenizer>();
 
 export function tokenizerFor(locale?: string): Tokenizer {
   const key = canonicalLocale(locale) ?? "";
-  let tokenizer = shared.get(key);
-  if (!tokenizer) shared.set(key, (tokenizer = createTokenizer({ locale: key || undefined })));
-  return tokenizer;
+  return cached(shared, key, () => createTokenizer({ locale: key || undefined }));
 }

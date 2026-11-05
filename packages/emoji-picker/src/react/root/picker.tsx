@@ -2,7 +2,7 @@ import * as React from "react";
 import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiRecord, type EmojiSelection, type PickerStateOptions } from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
-import { PickerContext, usePicker, useSelector, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
+import { PickerContext, usePicker, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
 import { useControllable } from "../utils/controllable";
 import { useActiveWithin } from "../utils/hold";
 import { mergeRefs } from "react-aria/mergeRefs";
@@ -13,6 +13,7 @@ import { useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
+import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
 import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
@@ -113,18 +114,11 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
-  const view = useSelector(state, ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({
-    query,
-    searching,
-    results,
-    pending,
-    categories,
-    categorySections,
-    sections,
-    collapsed,
-    focus,
-    reactions,
-  }));
+  const view = useStore(
+    state,
+    ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }),
+    shallowEqual,
+  );
   React.useEffect(() => void state.mount(), [state]);
   useActiveWithin(rootRef, state.hold);
   useClippedScrollGuard(rootRef);
@@ -274,12 +268,12 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
 export const Root = PickerRoot as React.ForwardRefExoticComponent<RootProps & React.RefAttributes<HTMLElement>>;
 
 export function useActiveEmoji(): EmojiRecord | null {
-  return useSelector(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
+  return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
 }
 
 export function useCategoryNavigation() {
   const picker = usePicker("useCategoryNavigation");
-  const activeCategory = useSelector(picker.state, (s) => s.activeSection);
+  const activeCategory = useStore(picker.state, (s) => s.activeSection);
   const categories = React.useMemo(() => {
     const shown = new Set(picker.categorySections.map((s) => s.id));
     return picker.categories.filter((c) => c.nav && shown.has(c.id)).map(({ id, name, icon }) => ({ id, name, icon }));

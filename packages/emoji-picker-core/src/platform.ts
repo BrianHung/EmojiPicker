@@ -1,3 +1,5 @@
+import { memo } from "./reactive";
+
 export type Renderer = "native" | "twemoji";
 
 export const TWEMOJI_BASE_URL = "https://cdn.jsdelivr.net/gh/jdecked/twemoji@17.0.3/assets/svg/";
@@ -13,20 +15,17 @@ export function twemojiUrl(unified: string, baseUrl = TWEMOJI_BASE_URL): string 
   return `${baseUrl}${code}.svg`;
 }
 
-let cached: boolean | undefined;
-
-export function needsTwemoji(): boolean {
-  if (cached !== undefined) return cached;
-  if (typeof document === "undefined") return false;
+const drawsFlagsAsLetters = memo((): boolean => {
   try {
     const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
-    if (!ctx) return (cached = false);
+    if (!ctx) return false;
     ctx.font = "16px sans-serif";
     const flag = ctx.measureText("\u{1F1FA}\u{1F1F8}").width;
     const letters = ctx.measureText("\u{1F1FA}").width * 2;
-    cached = flag >= letters * 0.9;
+    return flag >= letters * 0.9;
   } catch {
-    cached = false;
+    return false;
   }
-  return cached;
-}
+});
+
+export const needsTwemoji = (): boolean => typeof document !== "undefined" && drawsFlagsAsLetters();

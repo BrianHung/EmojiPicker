@@ -3,54 +3,54 @@ import { usePicker } from "./context";
 import { useEmojiStore, useStoreSnapshot } from "../provider/provider";
 import { renderElement, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
-import { signal, useSignal, type Signal } from "./context";
+import { cell, useStore, type Cell } from "../utils/store";
 
 type Kind = "empty" | "loading" | "error";
 type Slots = Partial<Record<Kind, React.ReactElement>>;
-type Registry = { slots: Signal<Slots>; lists: Signal<number> };
+type Registry = { slots: Cell<Slots>; lists: Cell<number> };
 
 export const EmptyStateContext = React.createContext<Registry | null>(null);
 
 export function useEmptyStateSlots(): Registry {
-  const [state] = React.useState(() => ({ slots: signal<Slots>({}), lists: signal(0) }));
+  const [state] = React.useState(() => ({ slots: cell<Slots>({}), lists: cell(0) }));
   return state;
 }
 
 export function useEmptyState(): React.ReactNode {
   const ctx = React.useContext(EmptyStateContext);
-  const slots = useSignal(ctx?.slots ?? NO_SLOTS);
+  const slots = useStore(ctx?.slots ?? NO_SLOTS);
   const picker = usePicker();
   const status = useStoreSnapshot((s) => s.status());
   React.useLayoutEffect(() => {
     if (!ctx) return;
-    ctx.lists.set(ctx.lists.get() + 1);
-    return () => ctx.lists.set(ctx.lists.get() - 1);
+    ctx.lists.dispatch(ctx.lists.getSnapshot() + 1);
+    return () => ctx.lists.dispatch(ctx.lists.getSnapshot() - 1);
   }, [ctx]);
   if (status === "error") return slots.error ?? null;
   if (status !== "ready") return slots.loading ?? null;
   if (picker.searching && !picker.pending && !picker.results.length) return slots.empty ?? null;
   return null;
 }
-const NO_SLOTS = signal<Slots>({});
+const NO_SLOTS = cell<Slots>({});
 
 function useSlot(kind: Kind, element: React.ReactElement, visible: boolean): React.ReactElement | null {
   const ctx = React.useContext(EmptyStateContext);
-  const lists = useSignal(ctx?.lists ?? NO_LISTS);
+  const lists = useStore(ctx?.lists ?? NO_LISTS);
   React.useLayoutEffect(() => {
     if (!ctx) return;
-    ctx.slots.set({ ...ctx.slots.get(), [kind]: element });
+    ctx.slots.dispatch({ ...ctx.slots.getSnapshot(), [kind]: element });
   });
   React.useLayoutEffect(
     () => () => {
       if (!ctx) return;
-      const { [kind]: _, ...rest } = ctx.slots.get();
-      ctx.slots.set(rest);
+      const { [kind]: _, ...rest } = ctx.slots.getSnapshot();
+      ctx.slots.dispatch(rest);
     },
     [ctx, kind],
   );
   return lists > 0 || !visible ? null : element;
 }
-const NO_LISTS = signal(0);
+const NO_LISTS = cell(0);
 
 export type EmptyState = { search: string };
 export type EmptyProps = PartElementProps<EmptyState, HTMLDivElement, "role">;

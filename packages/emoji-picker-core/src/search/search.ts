@@ -1,4 +1,5 @@
 import type { EmojiRecord } from "../dataset";
+import { cached } from "../reactive";
 import { createSearchIndex, type SearchIndex, type SearchIndexOptions } from "./search-index";
 import { canonicalLocale, createTokenizer, tokenizerFor, type Tokenizer, type WordSegmenter } from "./tokenize";
 
@@ -37,17 +38,10 @@ const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike
 };
 const all = <T>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
-const cached = <K, V>(map: Map<K, V>, key: K, create: () => V): V => {
-  let value = map.get(key);
-  if (value === undefined) map.set(key, (value = create()));
-  return value;
-};
-
 const indexes = new WeakMap<readonly EmojiRecord[], Map<Tokenizer, Map<string, SearchIndex>>>();
 export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale), collator }: SearchIndexOptions = {}): SearchIndex {
   if (collator) return createSearchIndex(records, { locale, tokenize, collator });
-  let byTokenizer = indexes.get(records);
-  if (!byTokenizer) indexes.set(records, (byTokenizer = new Map()));
+  const byTokenizer = cached(indexes, records, () => new Map<Tokenizer, Map<string, SearchIndex>>());
   const byLocale = cached(byTokenizer, tokenize, () => new Map<string, SearchIndex>());
   return cached(byLocale, canonicalLocale(locale) ?? "", () => createSearchIndex(records, { locale, tokenize }));
 }
@@ -124,8 +118,7 @@ function correctQuery(query: string, index: SearchIndex): string[] {
     found.sort((a, b) => a[1] - b[1] || b[2] - a[2]);
     return found.length ? found.slice(0, 3).map((f) => f[0]) : [word];
   });
-  let variants: string[][] = [[]];
-  for (const choices of options) variants = variants.flatMap((v) => choices.map((c) => [...v, c])).slice(0, 9);
+  const variants = options.reduce<string[][]>((acc, choices) => acc.flatMap((v) => choices.map((c) => [...v, c])).slice(0, 9), [[]]);
   const original = words.join(" ");
   return variants.map((v) => v.join(" ")).filter((q) => q !== original);
 }
@@ -186,10 +179,9 @@ type FuseDoc = { unified: string; name: string; shortcodes: string; tags: string
 export function fuse(Fuse: FuseConstructor<FuseDoc>, options: object = {}): EmojiSearch {
   const instances = new WeakMap<readonly EmojiRecord[], FuseLike<FuseDoc>>();
   return (query, { records, limit }) => {
-    let instance = instances.get(records);
-    if (!instance) {
+    const instance = cached(instances, records, () => {
       const docs = records.map((r) => ({ unified: r.unified, name: r.name, shortcodes: r.shortcodes.join(" ").replace(/_/g, " "), tags: r.tags.join(" ") }));
-      instance = new Fuse(docs, {
+      return new Fuse(docs, {
         keys: [
           { name: "shortcodes", weight: 1 },
           { name: "name", weight: 3 },
@@ -200,8 +192,7 @@ export function fuse(Fuse: FuseConstructor<FuseDoc>, options: object = {}): Emoj
         includeScore: true,
         ...options,
       });
-      instances.set(records, instance);
-    }
+    });
     return instance.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
   };
 }

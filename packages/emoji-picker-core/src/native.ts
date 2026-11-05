@@ -82,25 +82,25 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
 
 const probes = new Map<string, NativeProbe | null>();
 
-export function nativeProbe(fontFamily = DEFAULT_EMOJI_FONT): NativeProbe | null {
-  if (typeof document === "undefined") return null;
-  if (probes.has(fontFamily)) return probes.get(fontFamily)!;
-  let probe: NativeProbe | null = null;
+function probeFor(fontFamily: string): NativeProbe | null {
   try {
     const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
-    if (ctx && !/jsdom/i.test(navigator.userAgent)) {
-      ctx.font = `24px ${fontFamily}`;
-      ctx.textBaseline = "top";
-      const baseline = ctx.measureText("😀").width;
-      const candidate = createProbe(ctx, baseline);
-      candidate.prime(["1f600"]);
-      if (baseline && candidate.result("1f600") === true) probe = candidate;
-    }
+    if (!ctx || /jsdom/i.test(navigator.userAgent)) return null;
+    ctx.font = `24px ${fontFamily}`;
+    ctx.textBaseline = "top";
+    const baseline = ctx.measureText("😀").width;
+    const candidate = createProbe(ctx, baseline);
+    candidate.prime(["1f600"]);
+    return baseline && candidate.result("1f600") === true ? candidate : null;
   } catch {
-    probe = null;
+    return null;
   }
-  probes.set(fontFamily, probe);
-  return probe;
+}
+
+export function nativeProbe(fontFamily = DEFAULT_EMOJI_FONT): NativeProbe | null {
+  if (typeof document === "undefined") return null;
+  if (!probes.has(fontFamily)) probes.set(fontFamily, probeFor(fontFamily));
+  return probes.get(fontFamily)!;
 }
 
 export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, string>): NativeSupport {

@@ -1,4 +1,5 @@
 import type { EmojiRecord } from "../dataset";
+import { memo } from "../reactive";
 import { canonicalLocale, normalizer, tokenizerFor, type Tokenizer } from "./tokenize";
 
 const SHORTCODE = 0;
@@ -69,23 +70,16 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
   const codeWordKeys = codeWords.map((w) => w[0]);
 
   const idOf = new Map(records.map((r, i) => [r, i] as const));
-  let vocabulary: Map<string, number> | undefined;
+  const vocabulary = memo(() => keys.reduce((counts, key) => counts.set(key, (counts.get(key) ?? 0) + 1), new Map<string, number>()));
   const api: SearchIndex = {
     tokenize,
 
-    vocabulary() {
-      if (!vocabulary) {
-        vocabulary = new Map();
-        for (const key of keys) vocabulary.set(key, (vocabulary.get(key) ?? 0) + 1);
-      }
-      return vocabulary;
-    },
+    vocabulary,
 
     search(query, limit = Infinity) {
       const words = tokenize(query);
       if (!words.length) return [];
-      let scores: Map<number, number> | null = null;
-      words.forEach((word, n) => {
+      const matches = words.map((word, n) => {
         const prefix = n === words.length - 1;
         const next = new Map<number, number>();
         for (let j = lowerBound(keys, word); j < keys.length; j++) {
@@ -96,17 +90,10 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
           const prev = next.get(id);
           if (prev === undefined || score < prev) next.set(id, score);
         }
-        if (scores === null) scores = next;
-        else {
-          const merged = new Map<number, number>();
-          for (const [id, s] of next) {
-            const prev = scores.get(id);
-            if (prev !== undefined) merged.set(id, prev + s);
-          }
-          scores = merged;
-        }
+        return next;
       });
-      const ranked = [...scores!].sort((a, b) => a[1] - b[1] || records[a[0]]!.order - records[b[0]]!.order);
+      const scores = matches.reduce((all, next) => new Map([...next].flatMap(([id, s]) => (all.has(id) ? [[id, all.get(id)! + s] as const] : []))));
+      const ranked = [...scores].sort((a, b) => a[1] - b[1] || records[a[0]]!.order - records[b[0]]!.order);
       return ranked.slice(0, limit).map(([id]) => records[id]!);
     },
 

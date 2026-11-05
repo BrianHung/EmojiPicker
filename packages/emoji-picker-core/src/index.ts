@@ -1,5 +1,5 @@
 export { createEmojiStore } from "./store";
-export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreStatus } from "./store";
+export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiData, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreState, EmojiStoreStatus } from "./store";
 export { createFrequencyStore, localStorageAdapter, memoryStorage, DEFAULT_FREQUENT } from "./frequents";
 export type { EmojiStorage, FrequencyStore, FrequencyStoreOptions } from "./frequents";
 export { needsTwemoji, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
@@ -10,7 +10,7 @@ export type { CompletionOrder, EmojiSearch, SearchContext, SearchHit, SearchInde
 export { createTokenizer, normalizer } from "./search";
 export type { Tokenizer, TokenizerOptions, WordSegmenter } from "./search";
 export { createSearch } from "./search/query";
-export type { SearchState } from "./search/query";
+export type { Search, SearchState } from "./search/query";
 export { defaultLabels, localizeLabels, plural } from "./labels";
 export type { EmojiLabels, PluralForms, SkinToneNames } from "./labels";
 export { missingEmojiText, nativeToUnified, resolveEmoji } from "./resolve";
@@ -26,4 +26,5 @@ export type { FocusModel, PickerSnapshot, PickerState, PickerStateOptions, Searc
 export type { Category, CategoryId, CategoryOption, EmojiItem, EmojiSection } from "./sections";
 export { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, PROBE_BATCH } from "./native";
 export type { NativeSupport } from "./native";
-export { emitter, same } from "./reactive";
+export { createStore } from "./reactive";
+export type { Store } from "./reactive";

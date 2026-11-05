@@ -1,4 +1,5 @@
 import type { EmojiRecord } from "./dataset";
+import { cached } from "./reactive";
 import { tokenizerFor } from "./search/tokenize";
 
 export type CustomEmoji = {
@@ -31,16 +32,14 @@ export function splitWords(text: string): string[] {
 const byUrl = new Map<string, Promise<readonly CustomEmoji[]>>();
 
 function fetchPack(url: string): Promise<readonly CustomEmoji[]> {
-  let pending = byUrl.get(url);
-  if (!pending) {
-    pending = fetch(url, { priority: "low" } as RequestInit).then((response) => {
+  return cached(byUrl, url, () => {
+    const pending = fetch(url, { priority: "low" } as RequestInit).then((response) => {
       if (!response.ok) throw new Error(`custom emoji ${url}: ${response.status} ${response.statusText}`);
       return response.json() as Promise<readonly CustomEmoji[]>;
     });
     pending.catch(() => byUrl.delete(url));
-    byUrl.set(url, pending);
-  }
-  return pending;
+    return pending;
+  });
 }
 
 const isSourceList = (value: CustomEmojiSource | readonly CustomEmojiSource[]): value is readonly CustomEmojiSource[] => Array.isArray(value);

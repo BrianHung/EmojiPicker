@@ -41,4 +41,16 @@ describe("suggestions", () => {
     expect(renders).toBeGreaterThan(3);
     off();
   });
+
+  it("resets the highlight whenever the reset key changes, even back to an earlier one", async () => {
+    const store = createEmojiStore({ data: data as unknown as Dataset, frequents: createFrequencyStore({ storage: memoryStorage() }) });
+    await store.load();
+    const typeahead = createEmojiSuggestions(store, { query: "heart" });
+    typeahead.highlight(2);
+    typeahead.setOptions({ query: "heart" });
+    expect(typeahead.getSnapshot().highlightedIndex).toBe(2);
+    typeahead.setOptions({ query: "hear" });
+    typeahead.setOptions({ query: "heart" });
+    expect(typeahead.getSnapshot().highlightedIndex).toBe(0);
+  });
 });

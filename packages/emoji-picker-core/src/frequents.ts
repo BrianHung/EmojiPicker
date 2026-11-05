@@ -1,3 +1,5 @@
+import { createStore } from "./reactive";
+
 export type EmojiStorage = {
   read(): string | null;
   write(value: string): void;
@@ -22,62 +24,53 @@ export type FrequencyStoreOptions = {
 
 export const DEFAULT_FREQUENT = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
 
-type Entry = [score: number, updatedAt: number];
+type Entry = readonly [score: number, updatedAt: number];
+type Entries = Readonly<Record<string, Entry>>;
+type FrequencyState = { entries: Entries; version: number };
+type FrequencyAction = { type: "record"; unified: string; now: number } | { type: "clear" };
 
 export function createFrequencyStore({ storage = localStorageAdapter("emoji-picker:frequents"), halfLifeDays = 14, defaults = DEFAULT_FREQUENT, max = 64 }: FrequencyStoreOptions = {}): FrequencyStore {
   const halfLife = halfLifeDays * 864e5;
-  const listeners = new Set<() => void>();
-  let entries: Record<string, Entry> = parse(storage.read());
-  let version = 0;
-  let cache = new Map<number, readonly string[]>();
-
   const decayed = ([score, at]: Entry, now: number) => score * 0.5 ** ((now - at) / halfLife);
+  const ranked = (entries: Entries, now: number) => Object.entries(entries).sort((a, b) => decayed(b[1], now) - decayed(a[1], now));
 
-  const emit = () => {
-    version++;
-    cache = new Map();
-    listeners.forEach((l) => l());
+  const reduce = (state: FrequencyState, action: FrequencyAction): FrequencyState => {
+    if (action.type === "clear") return { entries: {}, version: state.version + 1 };
+    const { unified, now } = action;
+    const prev = state.entries[unified];
+    const entries = { ...state.entries, [unified]: [(prev ? decayed(prev, now) : 0) + 1, now] as const };
+    return { entries: Object.fromEntries(ranked(entries, now).slice(0, max)), version: state.version + 1 };
+  };
+  const store = createStore<FrequencyState, FrequencyAction>({ entries: parse(storage.read()), version: 0 }, reduce);
+  const tops = new WeakMap<FrequencyState, Map<number, readonly string[]>>();
+
+  const top = (n: number) => {
+    const state = store.getSnapshot();
+    const byCount = tops.get(state) ?? new Map<number, readonly string[]>();
+    tops.set(state, byCount);
+    const list = byCount.get(n) ?? [...new Set([...ranked(state.entries, Date.now()).map(([u]) => u), ...defaults])].slice(0, n);
+    byCount.set(n, list);
+    return list;
+  };
+  const commit = (action: FrequencyAction) => {
+    store.dispatch(action);
+    storage.write(JSON.stringify(store.getSnapshot().entries));
   };
 
   return {
-    record(unified) {
-      const now = Date.now();
-      const prev = entries[unified];
-      entries[unified] = [(prev ? decayed(prev, now) : 0) + 1, now];
-      const sorted = Object.entries(entries).sort((a, b) => decayed(b[1], now) - decayed(a[1], now));
-      entries = Object.fromEntries(sorted.slice(0, max));
-      storage.write(JSON.stringify(entries));
-      emit();
-    },
-    top(n) {
-      const hit = cache.get(n);
-      if (hit) return hit;
-      const now = Date.now();
-      const used = Object.entries(entries)
-        .sort((a, b) => decayed(b[1], now) - decayed(a[1], now))
-        .map(([u]) => u);
-      const list = [...new Set([...used, ...defaults])].slice(0, n);
-      cache.set(n, list);
-      return list;
-    },
+    record: (unified) => commit({ type: "record", unified, now: Date.now() }),
+    top,
     score(unified) {
-      const entry = entries[unified];
+      const entry = store.getSnapshot().entries[unified];
       return entry ? decayed(entry, Date.now()) : 0;
     },
-    subscribe(listener) {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    version: () => version,
-    clear() {
-      entries = {};
-      storage.write("{}");
-      emit();
-    },
+    subscribe: store.subscribe,
+    version: () => store.getSnapshot().version,
+    clear: () => commit({ type: "clear" }),
   };
 }
 
-function parse(raw: string | null): Record<string, Entry> {
+function parse(raw: string | null): Entries {
   try {
     const value = raw ? JSON.parse(raw) : {};
     return value && typeof value === "object" ? value : {};
@@ -87,17 +80,17 @@ function parse(raw: string | null): Record<string, Entry> {
 }
 
 export function localStorageAdapter(key: string): EmojiStorage {
-  let memory: string | null = null;
+  const memory = memoryStorage();
   return {
     read() {
       try {
-        return globalThis.localStorage?.getItem(key) ?? memory;
+        return globalThis.localStorage?.getItem(key) ?? memory.read();
       } catch {
-        return memory;
+        return memory.read();
       }
     },
     write(value) {
-      memory = value;
+      memory.write(value);
       try {
         globalThis.localStorage?.setItem(key, value);
       } catch {}
@@ -106,6 +99,6 @@ export function localStorageAdapter(key: string): EmojiStorage {
 }
 
 export const memoryStorage = (): EmojiStorage => {
-  let value: string | null = null;
-  return { read: () => value, write: (v) => void (value = v) };
+  const box = createStore<string | null, string>(null, (_, value) => value);
+  return { read: box.getSnapshot, write: box.dispatch };
 };
