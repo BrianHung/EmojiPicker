@@ -24,9 +24,11 @@ function useFitScale(width: number) {
   return { ref, scale };
 }
 
+export const SITE_FRAME = { width: 1000, height: 720 } as const;
+
 export type SceneFrameProps = {
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
   label: string;
   appStyle?: Style;
   className?: string;
@@ -34,7 +36,7 @@ export type SceneFrameProps = {
   children: React.ReactNode;
 };
 
-export function SceneFrame({ width, height, label, appStyle, className, style, children }: SceneFrameProps) {
+export function SceneFrame({ width = SITE_FRAME.width, height = SITE_FRAME.height, label, appStyle, className, style, children }: SceneFrameProps) {
   const { ref, scale } = useFitScale(width);
   return (
     <div ref={ref} className="mx-auto w-full" style={{ maxWidth: width }}>
@@ -43,7 +45,7 @@ export function SceneFrame({ width, height, label, appStyle, className, style, c
           role="region"
           aria-label={label}
           data-style={appStyle?.id}
-          className={cn("relative overflow-hidden", className)}
+          className={cn("relative overflow-hidden rounded-xl border shadow-2xl", className)}
           style={{ ...tokensOf(appStyle), width, height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: "0 0", ...style }}
         >
           {children}

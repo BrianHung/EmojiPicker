@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
 import { ld, MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
 import { copyEmoji } from "@/components/site/picked";
 
-const W = 760;
-const H = 600;
 
 const INK = ld("#2c2c2b", "#f0efed");
 const MUTED = "#7d7a75";
@@ -89,11 +87,9 @@ export function NotionScene() {
         </MobileFrame>
       ) : (
         <SceneFrame
-          width={W}
-          height={H}
           label="Notion style page"
           appStyle={notion}
-          className="flex flex-col rounded-[12px] bg-white shadow-2xl ring-1 ring-[rgba(55,53,47,0.16)] dark:bg-[#191919] dark:ring-white/10"
+          className="flex flex-col border-[rgba(55,53,47,0.16)] bg-white dark:border-white/10 dark:bg-[#191919]"
           style={{ color: INK, fontFamily: FONT }}
         >
           {page}

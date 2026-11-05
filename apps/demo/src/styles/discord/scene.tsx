@@ -13,8 +13,6 @@ import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-n
 import { DiscordEmojiMenu, discordEmojiOptions } from "@/experiences/discord";
 import { Avatar, EmojiText, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
 
-const W = 760;
-const H = 600;
 
 const C = {
   chat: ld("#fbfbfb", "oklab(0.2195 0.0021 -0.0074)"),
@@ -67,11 +65,9 @@ export function DiscordScene() {
           </MobileFrame>
         ) : (
           <SceneFrame
-            width={W}
-            height={H}
             label="Discord style channel"
             appStyle={discord}
-            className="flex flex-col rounded-[8px] shadow-2xl ring-1 ring-black/10 dark:ring-black/40"
+            className="flex flex-col rounded-[8px] border-black/10 dark:border-black/40"
             style={{ background: C.chat, color: C.text, fontFamily: FONT }}
           >
             <Channel />
