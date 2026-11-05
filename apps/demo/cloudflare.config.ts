@@ -15,6 +15,8 @@ export default defineConfig({
       ALLOWED_ORIGINS: bindings.text("http://localhost:*"),
       AI_GATEWAY_ID: bindings.text("default"),
       ADMIN_TOKEN: bindings.secret(),
+      SEARCH_LIMIT: bindings.rateLimit({ namespace: "1001", simple: { limit: 300, period: 60 } }),
+      DECIDE_LIMIT: bindings.rateLimit({ namespace: "1002", simple: { limit: 120, period: 60 } }),
     },
   },
 });

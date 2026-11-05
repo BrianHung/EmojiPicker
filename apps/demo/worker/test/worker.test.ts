@@ -216,3 +216,17 @@ describe("routing", () => {
     });
   });
 });
+
+describe("rate limits", () => {
+  it("answers 429 with Retry-After once a caller is over the limit", async () => {
+    const deny = { limit: async () => ({ success: false }) } as RateLimit;
+    for (const [path, overrides] of [
+      ["/api/embed-search", { SEARCH_LIMIT: deny }],
+      ["/api/decide", { DECIDE_LIMIT: deny }],
+    ] as const) {
+      const res = await fetch(post(path, { query: "cat" }), mockEnv(overrides).env);
+      expect(res.status, path).toBe(429);
+      expect(res.headers.get("retry-after")).toBe("60");
+    }
+  });
+});

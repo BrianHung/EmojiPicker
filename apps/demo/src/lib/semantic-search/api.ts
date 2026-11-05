@@ -26,6 +26,7 @@ function api(backend: Backend, path: string, body: Record<string, unknown> = {})
         body: JSON.stringify({ query, limit: Math.min(limit, 50), custom: records.some((r) => r.group === "custom"), ...body }),
         signal,
       });
+      if (response.status === 429) return [];
       if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) throw new Error(`${response.status}`);
       const { hits } = (await response.json()) as { hits: { unified: string; score: number }[] };
       setStatus(backend, "ok");

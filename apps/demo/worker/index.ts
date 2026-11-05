@@ -24,6 +24,8 @@ function parseSearch(body: unknown): SearchBody {
 
 const readJson = (request: Request) => request.json().catch(() => null);
 
+const limited = async (limiter: RateLimit, request: Request) => !(await limiter.limit({ key: request.headers.get("cf-connecting-ip") ?? "anonymous" })).success;
+
 export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
@@ -46,10 +48,12 @@ export default {
           });
         }
         case "POST /api/embed-search": {
+          if (await limited(env.SEARCH_LIMIT, request)) return json({ error: "rate limited" }, 429, { "retry-after": "60" });
           const result = await embedSearch(env, parseSearch(await readJson(request)));
           return json(result, 200, { "server-timing": `embed;dur=${result.timings.embedMs}, vectorize;dur=${result.timings.queryMs}` });
         }
         case "POST /api/decide": {
+          if (await limited(env.DECIDE_LIMIT, request)) return json({ error: "rate limited" }, 429, { "retry-after": "60" });
           const result = await decisionSearch(env, parseSearch(await readJson(request)), request.signal);
           return json(result, 200, { "server-timing": `round1;dur=${result.timings.round1Ms}, round2;dur=${result.timings.round2Ms}` });
         }

@@ -4,4 +4,6 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   AI_GATEWAY_ID: string;
   ADMIN_TOKEN?: string;
+  SEARCH_LIMIT: RateLimit;
+  DECIDE_LIMIT: RateLimit;
 }

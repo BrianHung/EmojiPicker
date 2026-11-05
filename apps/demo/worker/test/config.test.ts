@@ -17,6 +17,7 @@ describe("config", () => {
     expect(cf).toContain(`import * as entrypoint from "./${wrangler.main}"`);
     expect(cf).toContain(`runWorkerFirst: ${JSON.stringify(wrangler.assets.run_worker_first)}`);
     for (const [key, value] of Object.entries(wrangler.vars)) expect(text(key), key).toBe(value);
+    for (const r of wrangler.ratelimits) expect(cf).toContain(`${r.name}: bindings.rateLimit({ namespace: "${r.namespace_id}", simple: { limit: ${r.simple.limit}, period: ${r.simple.period} } })`);
   });
   it("declares every secret in .dev.vars.example", () => {
     const secrets = [...cf.matchAll(/(\w+): bindings\.secret\(\)/g)].map((m) => m[1]);

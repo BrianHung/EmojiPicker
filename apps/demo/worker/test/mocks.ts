@@ -45,9 +45,12 @@ export function mockEnv(overrides: Partial<Env> = {}) {
     },
   } as unknown as Vectorize;
 
+  const allow = { limit: async () => ({ success: true }) } as RateLimit;
   const env: Env = {
     AI,
     EMOJI_INDEX,
+    SEARCH_LIMIT: allow,
+    DECIDE_LIMIT: allow,
     ALLOWED_ORIGINS: "http://localhost:*,https://emoji.example.com",
     AI_GATEWAY_ID: "default",
     ADMIN_TOKEN: "admin",
