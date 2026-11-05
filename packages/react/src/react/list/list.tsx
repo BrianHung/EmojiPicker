@@ -5,13 +5,13 @@ import { mergeProps } from "react-aria/mergeProps";
 import { useLocale } from "react-aria/I18nProvider";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
-import { Rect, type VirtualizerState } from "react-stately/useVirtualizerState";
+import type { Rect, VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import { usePicker, ViewportContext } from "../root/context";
 import { useCell, type CellState, type Cells } from "./cell";
 import { useGridController, useGridSections, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../utils/keyboard";
-import { EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
+import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
@@ -88,15 +88,15 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
 
   const { sections, request, probeRoot } = useGridSections(horizontal);
 
-  const [layout] = React.useState(() => new EmojiGridLayout());
-  const [navigation] = React.useState(() => new EmojiGridNavigation(() => layout));
+  const layout = React.useMemo<EmojiGridLayout>(() => (horizontal ? new HorizontalLayout() : new VerticalLayout()), [horizontal]);
+  const navigation = React.useMemo(() => new EmojiGridNavigation(() => layout), [layout]);
   const [metrics, setMetrics] = React.useState<GridMetrics>(layout.metrics);
   const probeRef = React.useRef<HTMLDivElement | null>(null);
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const results = searching ? picker.searchResults : undefined;
   const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(
-    () => ({ orientation, metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
-    [orientation, metrics, picker.columns, horizontal, results, searching, searchRows, rows],
+    () => ({ metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
+    [metrics, picker.columns, horizontal, results, searching, searchRows, rows],
   );
   const measure = React.useCallback(() => {
     const probe = probeRef.current;
@@ -121,59 +121,40 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const rtlRef = React.useRef(false);
   rtlRef.current = useLocale().direction === "rtl";
   const virtualizer = React.useRef<VirtualizerState<CollectionNode<unknown>, React.ReactNode> | null>(null);
-  const jumping = React.useRef<{ x: number; y: number } | null>(null);
+  const jumping = React.useRef<Rect | null>(null);
   // The Viewport's ref isn't attached yet when the list's first layout effects run
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
   const geometry = React.useMemo<GridGeometry>(() => {
     const visibleRect = () => virtualizer.current?.virtualizer.visibleRect ?? null;
-    const rtl = () => rtlRef.current;
-    const horizontal = () => layout.orientation === "horizontal";
+    const { axis } = layout;
+    const sign = () => (axis.horizontal && rtlRef.current ? -1 : 1);
     return {
       grid: () => layout.grid,
       navigation,
       layoutDelegate: layout,
       isVisible(key) {
-        const r = layout.getLayoutInfo(key)?.rect;
         const rect = visibleRect();
-        return Boolean(r && rect && (horizontal() ? r.maxX > rect.x && r.x < rect.maxX : r.maxY > rect.y && r.y < rect.maxY));
+        return Boolean(rect && layout.isVisible(key, rect));
       },
       firstVisible() {
         const rect = visibleRect();
-        const { grid, metrics } = layout;
-        if (rect && !horizontal()) {
-          for (const row of grid.rows) if (row.type === "emojis" && row.offset + row.size > rect.y + (row.section.header ? metrics.headerHeight : 0) + 1 && row.offset < rect.maxY) return row.items[0]!.id;
-        } else if (rect)
-          for (let i = 0; i < grid.count; i++) {
-            const r = layout.getLayoutInfo(grid.at(i)!.id)!.rect;
-            if (r.maxX > rect.x + 1 && r.x < rect.maxX) return grid.at(i)!.id;
-          }
-        return navigation.getFirstKey();
+        return rect ? layout.firstVisible(rect) : navigation.getFirstKey();
       },
       reveal(key, from) {
         const el = scroller();
         const seen = visibleRect();
         const info = layout.getLayoutInfo(key);
         if (!el || !seen || !info) return;
+        const s = sign();
         const a = from != null ? layout.getLayoutInfo(from)?.rect : null;
-        const sign = horizontal() && rtl() ? -1 : 1;
-        const before = horizontal() ? el.scrollLeft : el.scrollTop;
-        if (a && horizontal()) el.scrollLeft += (info.rect.x - a.x) * sign;
-        else if (a) el.scrollTop += info.rect.y - a.y;
-        const moved = ((horizontal() ? el.scrollLeft : el.scrollTop) - before) * sign;
-        const rect = horizontal() ? new Rect(seen.x + moved, seen.y, seen.width, seen.height) : new Rect(seen.x, seen.y + moved, seen.width, seen.height);
-        if (horizontal()) {
-          const pad = layout.metrics.padding;
-          if (info.rect.x < rect.x) el.scrollLeft += sign * (info.rect.x - pad - rect.x);
-          else if (info.rect.maxX > rect.maxX) el.scrollLeft += sign * (info.rect.maxX + pad - rect.maxX);
-          return;
-        }
-        const inset = layout.grid.locate(layout.grid.indexOf(String(key)))?.section.header ? layout.metrics.headerHeight : 0;
-        if (info.rect.y < rect.y + inset) el.scrollTop -= rect.y + inset - info.rect.y;
-        else if (info.rect.maxY > rect.maxY) el.scrollTop += info.rect.maxY - rect.maxY;
+        const before = el[axis.scroll];
+        if (a) el[axis.scroll] += (layout.start(info.rect) - layout.start(a)) * s;
+        const by = layout.revealBy(key, info.rect, layout.shift(seen, (el[axis.scroll] - before) * s));
+        if (by != null) el[axis.scroll] += s * by;
       },
       viewport() {
         const el = scroller();
-        return el ? (horizontal() ? el.clientWidth : el.clientHeight) : 0;
+        return el ? el[axis.client] : 0;
       },
       jump(id, instant) {
         const el = scroller();
@@ -182,12 +163,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
         if (!el || !rect || !info) return false;
         jumping.current = info.rect;
         const reduce = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const behavior = instant || reduce ? "auto" : "smooth";
-        if (horizontal()) {
-          const max = Math.max(0, layout.getContentSize().width - el.clientWidth);
-          const target = Math.max(0, Math.min(info.rect.x - layout.metrics.padding, max));
-          el.scrollBy({ left: (target - rect.x) * (rtl() ? -1 : 1), behavior });
-        } else el.scrollBy({ top: info.rect.y - rect.y, behavior });
+        el.scrollBy({ [axis.by]: (layout.jumpTarget(info.rect, el[axis.client]) - layout.start(rect)) * sign(), behavior: instant || reduce ? "auto" : "smooth" });
         return true;
       },
       overlay(key) {
@@ -226,16 +202,13 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     if (shown && !horizontal) request([...shown.keys()].flatMap((key) => latest.current.collection.emoji(key)?.unified ?? []));
     const rect = virtualizer.current?.virtualizer.visibleRect;
     if (!rect) return;
-    const offset = horizontal ? rect.x : rect.y;
     if (jumping.current) {
-      const target = horizontal ? jumping.current.x - layout.metrics.padding : jumping.current.y;
-      const max = horizontal ? layout.getContentSize().width - rect.width : layout.getContentSize().height - rect.height;
-      if (Math.abs(offset - Math.max(0, Math.min(target, max))) > 1) return;
+      const max = layout.extent(layout.getContentSize()) - layout.extent(rect);
+      if (Math.abs(layout.start(rect) - Math.max(0, Math.min(layout.jumpTarget(jumping.current, layout.extent(rect)), max))) > 1) return;
       jumping.current = null;
     }
     if (!searching) {
-      const end = horizontal ? layout.getContentSize().width - rect.width : layout.getContentSize().height - rect.height;
-      const key = end > 0 && offset >= end - 1 && horizontal ? (layout.sections[layout.sections.length - 1]?.key ?? null) : layout.sectionAt(horizontal ? offset + layout.metrics.padding + layout.metrics.cellWidth / 2 : offset);
+      const key = layout.activeSection(rect);
       picker.state.setActiveSection(key == null ? null : String(key));
     }
     latest.current.syncStop();
