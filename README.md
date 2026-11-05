@@ -6,7 +6,7 @@
     </picture>
   </a>
   <h1>EmojiPicker</h1>
-  <p>Accessible, virtualized emoji picker parts for React, built on React Aria.<br>Unstyled, with copy-in shadcn/ui components and app styles to start from.</p>
+  <p>A virtualized, unstyled, and composable emoji picker for React.</p>
   <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>
 
