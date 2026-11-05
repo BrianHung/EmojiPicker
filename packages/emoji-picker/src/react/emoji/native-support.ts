@@ -6,7 +6,7 @@ import { withoutTone, type EmojiRecord } from "../../core/dataset";
 import { KNOWN_FAILING, PROBE_BATCH, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport } from "../../core/native";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
-export type Drawable = (record: EmojiRecord, unified: string) => boolean;
+type Drawable = (record: EmojiRecord, unified: string) => boolean;
 
 const always: Drawable = () => true;
 

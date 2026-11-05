@@ -98,7 +98,7 @@ export const initialFocusTarget = (initialFocus: PopoverInitialFocus | undefined
 
 export const finalFocusTarget = (finalFocus: PopoverFinalFocus) => (typeof finalFocus === "function" ? finalFocus() : finalFocus instanceof HTMLElement ? finalFocus : finalFocus.current) ?? null;
 
-export type TransitionStatus = "starting" | "open" | "ending";
+type TransitionStatus = "starting" | "open" | "ending";
 
 /** The attributes every adapter puts on the content, so styles and tests don't depend on the adapter. */
 export const contentAttributes = ({ open, side, align, status, props }: { open: boolean; side: string; align: Align; status: TransitionStatus; props: React.AriaAttributes }) => ({

@@ -2,7 +2,7 @@
 // (the app in context, inline picker, popovers, tapback, reactions, autocomplete, sheet).
 import * as React from "react";
 import { usePickedEmoji } from "@/components/site/picked";
-import { Emoji, useTextFieldEmojiTypeahead, type EmojiSelection } from "@brianhung/emoji-picker";
+import { Emoji, useTextFieldEmojiTypeahead } from "@brianhung/emoji-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
@@ -83,7 +83,7 @@ function PillsDemo({ appStyle }: { appStyle: Style }) {
 }
 
 function TapbackDemo({ appStyle }: { appStyle: Style }) {
-  const [last, setLast] = usePickedEmoji();
+  const [, setLast] = usePickedEmoji();
   return (
     <div className="flex flex-col items-center gap-3">
       <StyleTapback appStyle={appStyle} onSelect={setLast} />
@@ -103,7 +103,7 @@ function DropdownDemo({ appStyle, search }: { appStyle: Style; search: boolean }
 }
 
 function InlineDemo({ appStyle }: { appStyle: Style }) {
-  const [picked, setPicked] = usePickedEmoji();
+  const [, setPicked] = usePickedEmoji();
   return (
     <div className="flex w-full flex-col items-center gap-3">
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>

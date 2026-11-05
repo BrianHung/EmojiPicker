@@ -46,7 +46,7 @@ export function resolveKeymap(overrides?: Partial<Record<KeyboardAction, readonl
 }
 
 /** The fields of a keyboard event the matcher reads (React, DOM, or a plain object in tests). */
-export type KeyChordEvent = {
+type KeyChordEvent = {
   key: string;
   ctrlKey?: boolean;
   metaKey?: boolean;

@@ -11,7 +11,7 @@ import { useKeyRegion } from "../root/keyboard";
 import type { KeyboardAction } from "../root/keymap";
 import { SLOTS } from "../utils/slots";
 
-export type VariationsProps = {
+type VariationsProps = {
   record: EmojiRecord;
   /** Where it sits, in the Viewport's content box. */
   style: React.CSSProperties;

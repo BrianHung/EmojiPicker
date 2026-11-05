@@ -3,7 +3,7 @@
 // probed one by one, on a canvas, in batches. Browser-only; on the server, everything
 // counts as supported. From emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md).
 
-export const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
+const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 
 /** Emoji with a text presentation that the system fonts draw as plain symbols (♀ ♂ ⚕). */
 export const KNOWN_FAILING = new Set(["2640", "2642", "2695"]);
@@ -15,7 +15,7 @@ const FLAG_SAMPLE = "1f1fa-1f1f8";
 const toText = (unified: string) => String.fromCodePoint(...unified.split("-").map((h) => parseInt(h, 16)));
 const isCountryFlag = (unified: string) => /^(1f1[ef][\da-f]-1f1[ef][\da-f]$|1f3f4-e00)/i.test(unified);
 
-export type NativeProbe = {
+type NativeProbe = {
   prime(unifieds: Iterable<string>): void;
   /** true / false once probed; null when the probe couldn't tell; undefined before. */
   result(unified: string): boolean | null | undefined;

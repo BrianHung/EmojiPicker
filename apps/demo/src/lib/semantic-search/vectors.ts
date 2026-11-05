@@ -66,7 +66,7 @@ const popcount = (x: number) => {
   return (((x + (x >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24;
 };
 
-export type RankOptions = {
+type RankOptions = {
   limit: number;
   /** Rerank only the `shortlist` nearest by Hamming distance on sign bits. 0 scores every vector. */
   shortlist?: number;

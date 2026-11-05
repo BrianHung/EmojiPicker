@@ -50,11 +50,11 @@ function trackPointer() {
 }
 
 /** Per-cell state each cell reads as one number (one subscription per cell): the tab stop and press here, the highlight, hover and the active emoji from the picker's state. */
-export const STOP = 1;
-export const ACTIVE = 2;
-export const HOVERED = 4;
-export const PRESSED = 8;
-export const FOCUSED = 16;
+const STOP = 1;
+const ACTIVE = 2;
+const HOVERED = 4;
+const PRESSED = 8;
+const FOCUSED = 16;
 function cellMarks(state: PickerState<React.ReactNode>) {
   const marks = { stop: signal<Key | null>(null), pressed: signal<Key | null>(null) };
   return {
@@ -534,7 +534,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
 export type CellState = { emoji: EmojiItem; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
 /** A cell's props (its glyph as children) and state for its marks. */
-export function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
+function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
   const { selection: m } = cells;
   const { record, unified } = item;
   const position = cells.position(item.id);

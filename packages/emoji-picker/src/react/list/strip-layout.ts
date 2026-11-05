@@ -68,7 +68,7 @@ export function sectionOf(layout: StripLayout, index: number): number {
   return -1;
 }
 
-export type CellPlace = { section: number; column: number; row: number; x: number; y: number };
+type CellPlace = { section: number; column: number; row: number; x: number; y: number };
 
 /** Position of a global item index (x, y relative to the list), or null when out of range. */
 export function placeCell(layout: StripLayout, index: number): CellPlace | null {

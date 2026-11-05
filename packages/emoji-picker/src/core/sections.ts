@@ -74,7 +74,7 @@ export type EmojiSection = {
 
 export type Category<Icon = unknown> = { id: string; name: string; icon?: Icon; nav: boolean };
 
-export const DEFAULT_ORDER = ["suggested", "custom", ...GROUPS] as const;
+const DEFAULT_ORDER = ["suggested", "custom", ...GROUPS] as const;
 const RESULT_ORDER = [...GROUPS, "custom"] as string[];
 
 /** Sections in order with names: `categories`, or every group, then custom groups no option lists. */
@@ -105,7 +105,7 @@ export function itemFactory(labels: EmojiLabels) {
   };
 }
 
-export type CategorySectionsInput = {
+type CategorySectionsInput = {
   categories: readonly Category<unknown>[];
   records: readonly EmojiRecord[];
   /** The suggested section's emoji (unified codes, skin tone applied). */

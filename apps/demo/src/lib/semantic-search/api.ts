@@ -1,6 +1,5 @@
 // The server-side searches, served by this site's Worker (worker/index.ts) on the same
 // origin. VITE_SEARCH_API_URL points them at an API hosted elsewhere.
-import type { EmojiSearch } from "@brianhung/emoji-picker";
 import { remote } from "@brianhung/emoji-picker/search";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");

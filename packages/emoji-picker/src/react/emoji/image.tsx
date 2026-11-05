@@ -24,7 +24,7 @@ function usePrefersReducedMotion(): boolean {
 /** Intrinsic size when none is known: square, at a common pack resolution. */
 const DEFAULT_SIZE = 64;
 
-export type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "width" | "height"> & {
+type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "width" | "height"> & {
   src: string;
   /** Accessible name (the emoji's name). */
   alt: string;

@@ -29,7 +29,7 @@ export type Surface = {
 /* ------------------------------------------------------------------ locators */
 
 /** The topmost open popover or sheet. */
-export const layer = (page: Page) => page.locator('[data-slot="popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
+const layer = (page: Page) => page.locator('[data-slot="popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
 /** A `:` menu (the pickers are listboxes too: `data-slot="list"`). */
 const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=list])")).last();
 /** The picker root: the scope itself (a page whose frame is the picker) or the first one inside it. */
@@ -42,7 +42,7 @@ export const card = (page: Page, title?: string) =>
 /** A home-page example section (by its h3 id) and its live preview. */
 const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
 export const preview = (page: Page, id: string) => example(page, id).locator("div.relative").first();
-export const hero = (page: Page) => page.getByRole("tablist", { name: "App" }).locator("xpath=../following-sibling::div[1]");
+const hero = (page: Page) => page.getByRole("tablist", { name: "App" }).locator("xpath=../following-sibling::div[1]");
 
 /* ------------------------------------------------------------------ builders */
 
@@ -131,7 +131,7 @@ const tab = (name: string) => async (p: Page) => {
 /* ------------------------------------------------------------------ gallery */
 
 export const STYLES = ["apple", "slack", "discord", "notion", "linear", "instagram"] as const;
-export type StyleId = (typeof STYLES)[number];
+type StyleId = (typeof STYLES)[number];
 const LABEL: Record<StyleId, string> = { apple: "Apple", slack: "Slack", discord: "Discord", notion: "Notion", linear: "Linear", instagram: "Instagram" };
 
 /** iMessage opens the tapback on the last message by itself; a press on its layer (outside the pill) closes it. */

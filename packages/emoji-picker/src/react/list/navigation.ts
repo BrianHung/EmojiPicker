@@ -6,7 +6,7 @@ import { moveInGrid, rowsPerPage, type EmojiGrid, type EmojiGridMove } from "../
 import type { EmojiSection } from "../../core/sections";
 import { columnsPerPage, moveInStrip, pageInStrip, type StripKey, type StripLayout } from "./strip-layout";
 
-export type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };
+type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };
 
 const STRIP: Partial<Record<EmojiGridMove, StripKey>> = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" };
 

@@ -24,9 +24,9 @@ export type PickerKeyboardEvent<T extends Element = Element> = React.KeyboardEve
 export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerKeyboardEvent<T>) => void;
 
 /** What a region did with a key. "pass" lets an outer region try; "native" leaves it to the browser alone (a caret move). */
-export type RegionResult = "handled" | "pass" | "native";
+type RegionResult = "handled" | "pass" | "native";
 /** A region's action handler. `action` is null for keys with no binding. */
-export type RegionHandler = (action: KeyboardAction | null, event: PickerKeyboardEvent) => RegionResult;
+type RegionHandler = (action: KeyboardAction | null, event: PickerKeyboardEvent) => RegionResult;
 
 type Registry<T> = Map<Element, React.MutableRefObject<T | undefined>>;
 
@@ -38,7 +38,6 @@ type KeyboardContextValue = {
 };
 
 const KeyboardContext = React.createContext<KeyboardContextValue | null>(null);
-export const useKeymap = () => React.useContext(KeyboardContext)?.keymap ?? resolveKeymap();
 
 /** Keeps the latest value in a ref, registered under the element the returned ref callback receives. */
 function useRegistered<T>(registry: Registry<T> | null, value: T | undefined): React.RefCallback<Element> {
@@ -80,7 +79,7 @@ export function useSkinToneToggle(toggle: () => void) {
   }, [ctx]);
 }
 
-export function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
+function isTextField(el: EventTarget | null): el is HTMLInputElement | HTMLTextAreaElement {
   return el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "checkbox", "radio", "submit", "reset"].includes(el.type));
 }
 
@@ -93,7 +92,7 @@ function augment(event: React.KeyboardEvent): PickerKeyboardEvent {
 }
 
 /** Calls `fn` with `event.currentTarget` set to `el`, as React does per listener. */
-export function withCurrentTarget(event: React.SyntheticEvent, el: Element, fn: () => void) {
+function withCurrentTarget(event: React.SyntheticEvent, el: Element, fn: () => void) {
   const e = event as unknown as { currentTarget: EventTarget | null };
   const previous = e.currentTarget;
   e.currentTarget = el;
@@ -119,7 +118,7 @@ function ancestors(from: Element, root: Element): Element[] {
  */
 const NATIVE_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Enter", " "]);
 
-export type KeyboardProviderProps = {
+type KeyboardProviderProps = {
   keymap?: Partial<Record<KeyboardAction, readonly string[]>>;
   /** Root's own onKeyDown: runs after the parts' handlers, before the picker's. */
   onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
