@@ -41,7 +41,7 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
-          <EmojiPicker.Search.Input placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle">
+          <EmojiPicker.Search.Input placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-muted">
             <SearchClear />
           </EmojiPicker.Search.Input>
         </EmojiPicker.Search>

@@ -61,7 +61,7 @@ export type Cells = {
   listId: string;
   collectionId?: string;
   focusVisible: boolean;
-  position: (id: Key) => readonly [number, number, number] | undefined;
+  position: (id: Key) => readonly [posinset: number, setsize: number, index: number, row: number, column: number] | undefined;
   virtual: boolean;
   elements: Map<Key, HTMLElement>;
   headers: Set<HTMLElement>;
@@ -441,7 +441,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         const grid = latest.current.geometry.grid();
         const index = grid.indexOf(String(id));
         const at = grid.locate(index);
-        return at ? [at.index + 1, at.section.items.length, index] : undefined;
+        if (!at) return undefined;
+        const line = at.row - grid.stickyIndexes.filter((r) => r < at.row).length;
+        return orientation === "horizontal" ? [at.index + 1, at.section.items.length, index, at.column, line] : [at.index + 1, at.section.items.length, index, line, at.column];
       },
       virtual,
       elements,
@@ -452,7 +454,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
       toggle: (id) => picker.collapse.toggle(id),
     }),
-    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, core, marks, picker.listId, picker.collapse],
+    [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, core, marks, picker.listId, picker.collapse, orientation],
   );
 
   const varied = variations != null ? collection.emoji(variations) : undefined;
@@ -493,7 +495,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   };
 }
 
-export type CellState = { emoji: EmojiItem; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
+export type CellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
 function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
   const { selection: m } = cells;
@@ -516,6 +518,8 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
     "data-collection": cells.collectionId,
     "data-unified": unified,
     "data-index": position?.[2],
+    "data-row": position?.[3],
+    "data-column": position?.[4],
     "data-selected": isSelected || undefined,
     "data-hovered": flags & HOVERED ? true : undefined,
     "data-focused": isFocused || undefined,
@@ -528,7 +532,18 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
     children: <Glyph unified={unified} record={record} animate={isActive && Boolean(record.animated)} />,
   };
-  const state: CellState = { emoji: item, highlighted, active: isActive, hovered: Boolean(flags & HOVERED), focused: isFocused, focusVisible: isFocused && cells.focusVisible, pressed: Boolean(flags & PRESSED), selected: isSelected };
+  const state: CellState = {
+    emoji: item,
+    row: position?.[3] ?? 0,
+    column: position?.[4] ?? 0,
+    highlighted,
+    active: isActive,
+    hovered: Boolean(flags & HOVERED),
+    focused: isFocused,
+    focusVisible: isFocused && cells.focusVisible,
+    pressed: Boolean(flags & PRESSED),
+    selected: isSelected,
+  };
   return { props, state };
 }
 

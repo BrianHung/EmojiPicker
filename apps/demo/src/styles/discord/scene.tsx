@@ -18,12 +18,12 @@ const H = 600;
 const C = {
   chat: ld("#fbfbfb", "oklab(0.2195 0.0021 -0.0074)"),
   composer: ld("#ffffff", "oklab(0.2568 0.0006 -0.0076)"),
-  header: ld("#28282d", "oklab(0.9527 0.0006 -0.0054)"),
-  name: ld("#28282d", "oklab(0.9527 0.0006 -0.0054)"),
+  header: ld("#28282d", "oklab(0.988 0 0)"),
+  name: ld("#28282d", "oklab(0.988 0 0)"),
   text: ld("#2e2e34", "oklab(0.9527 0.0006 -0.0054)"),
   muted: ld("#70717a", "oklab(0.608 0.0013 -0.0123)"),
   placeholder: ld("#84858d", "#6c6d76"),
-  icon: ld("#595a63", "oklab(0.7 0.0016 -0.0115)"),
+  icon: ld("#595a63", "oklab(0.745 0.001 -0.008)"),
   search: ld("#f3f3f4", "oklab(0.18 0.0015 -0.006)"),
   searchText: ld("#6c6d76", "oklab(0.608 0.0013 -0.0123)"),
   rule: ld("color-mix(in oklab, #97979f 28%, transparent)", "color-mix(in oklab, #97979f 12%, transparent)"),
@@ -174,7 +174,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
           : {})}
         className={cn(
           "group relative mt-[17px] min-h-11 py-0.5 pl-[72px] outline-none focus-within:bg-(--hover) hover:bg-(--hover) focus-visible:shadow-[inset_2px_0_0_#5865f2]",
-          compact ? "pr-4 select-none [-webkit-touch-callout:none]" : "pr-12",
+          compact ? "pr-4 select-none [-webkit-touch-callout:none]" : "pr-6",
           pickerOpen && "bg-(--hover)",
         )}
         style={{ "--hover": C.hover } as React.CSSProperties}
@@ -207,7 +207,7 @@ function DiscordMessage({ message, onToggle, compact = false }: { message: Messa
                   className={cn("flex cursor-pointer items-center gap-1.5 tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-[#5865f2]", discord.pill.base, discord.pill.mine)}
                 >
                   <Emoji emoji={r.unified} size={discord.pill.emoji} className="size-5" />
-                  <span>{r.count}</span>
+                  <span className={discord.pill.count}>{r.count}</span>
                 </button>
               );
             })}
@@ -270,7 +270,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
         "aria-label": "Message #general",
         "aria-multiline": "false",
         class: cn(
-          "max-h-[50vh] overflow-y-auto text-[16px] leading-[22px] outline-none [&_p]:m-0 [&_[data-emoji-node]]:align-bottom [&_[data-emoji-node]>*]:size-[1.375em]",
+          "text-[16px] leading-[22px] outline-none [&_p]:m-0 [&_[data-emoji-node]]:align-bottom [&_[data-emoji-node]>*]:size-[1.375em]",
           "[&>p:only-child:has(>br:only-child)]:before:pointer-events-none [&>p:only-child:has(>br:only-child)]:before:float-left [&>p:only-child:has(>br:only-child)]:before:h-0 [&>p:only-child:has(>br:only-child)]:before:text-(--ph) [&>p:only-child:has(>br:only-child)]:before:content-['Message_#general']",
         ),
       },
@@ -318,7 +318,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
           <Plus />
         </span>
         <div className="flex h-10 min-w-0 flex-1 items-center rounded-full pr-1 pl-4" style={{ background: C.composer }}>
-          <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
+          <EditorContent editor={editor} className="max-h-[50vh] min-w-0 flex-1 overflow-y-auto" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
           {emoji}
         </div>
       </div>
@@ -326,12 +326,12 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   return (
     <div className="relative mx-2 mb-4 shrink-0">
       <DiscordEmojiMenu {...typeahead} />
-      <div className="flex h-14 items-center rounded-[8px]" style={{ background: C.composer }}>
-        <span className="flex h-full w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
+      <div className="flex items-start rounded-[8px]" style={{ background: C.composer }}>
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
           <PlusCircle />
         </span>
-        <EditorContent editor={editor} className="min-w-0 flex-1" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
-        <div className="flex shrink-0 items-center gap-1 pr-3 pl-2" style={{ color: C.icon }}>
+        <EditorContent editor={editor} className="max-h-[345.2px] min-w-0 flex-1 overflow-y-auto py-[17px]" style={{ color: C.text, "--ph": C.placeholder } as React.CSSProperties} />
+        <div className="flex h-14 shrink-0 items-center gap-2 pr-3 pl-2" style={{ color: C.icon }}>
           <span className="flex size-8 items-center justify-center" aria-hidden>
             <Gift />
           </span>
