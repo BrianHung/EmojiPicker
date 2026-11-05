@@ -41,6 +41,17 @@ describe("server rendering", () => {
     expect(html).toContain('src="/apple/2764-fe0f.png"');
   });
 
+  it("draws particular emoji from imageUrl under the native renderer", () => {
+    const html = renderToString(
+      <EmojiProvider data={en as unknown as Dataset} prepare={false} renderer="native" imageUrl={(u) => (u === "2764-fe0f" ? "/heart.png" : undefined)}>
+        <Emoji emoji="❤️" />
+        <Emoji emoji="👍" />
+      </EmojiProvider>,
+    );
+    expect(html).toContain('src="/heart.png"');
+    expect(html).toContain("👍");
+  });
+
   it("gives a Root without a provider its own, loading the default data", () => {
     const html = renderToString(
       <EmojiPicker.Root>

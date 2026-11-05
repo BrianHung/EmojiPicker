@@ -7,7 +7,12 @@ export const provider = rowsOf<EmojiProviderProps>()([
   { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji from the picker and search." },
   { name: "searchEngine", type: "EmojiSearch", default: "lexical()", description: "(query, context) => hits | Promise<hits>" },
   { name: "renderer", type: '"auto" | "native" | "image"', default: '"auto"', description: "auto draws images where the system can't draw emoji natively." },
-  { name: "imageUrl", type: "(unified: string) => string", default: "twemojiUrl", description: "Image URL per emoji for the image renderer." },
+  {
+    name: "imageUrl",
+    type: "(unified, { renderer }) => string | undefined",
+    default: "Twemoji when renderer is image",
+    description: "Image URL per emoji; undefined draws it natively. Return a URL under the native renderer to replace particular emoji.",
+  },
   { name: "imageVersion", type: "number", default: "17", description: "Newest emoji version your image set draws." },
   { name: "frequents", type: "FrequencyStore", default: "createFrequencyStore()", description: "createFrequencyStore({ storage })" },
   { name: "skinTone", type: "SkinToneValue", description: "The skin tone, controlled: 0 (none) or 1–5, the Fitzpatrick tones." },

@@ -17,7 +17,7 @@ export {
 } from "./react/parts";
 
 export { EmojiProvider, useEmojiSearch, useEmojiSearchState, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
-export type { EmojiLabels, EmojiProviderProps, EmojiSearchState } from "./react/provider";
+export type { EmojiLabels, EmojiProviderProps, EmojiSearchState, ImageUrl } from "./react/provider";
 export type {
   CategoryOption,
   CollapsedCategories,
@@ -46,8 +46,8 @@ export { Tapback } from "./react/tapback";
 export type { TapbackProps } from "./react/tapback";
 export { pickerInitialFocus } from "./react/popover";
 export type { PopoverAnchor, PopoverFinalFocus, PopoverInitialFocus, PopoverPlacementProps, PopoverRootProps, PopoverTriggerProps, PopoverTriggerState, SuggestionsPopoverProps } from "./react/popover";
-export { Emoji, EmojiOverrides, findArtwork, useEmoji } from "./react/emoji";
-export type { Artwork, ArtworkMap, EmojiOverridesProps, EmojiProps } from "./react/emoji";
+export { Emoji, useEmoji } from "./react/emoji";
+export type { EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";
 export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
 

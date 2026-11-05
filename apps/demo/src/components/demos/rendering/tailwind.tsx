@@ -1,13 +1,13 @@
 import * as React from "react";
 import en from "@brianhung/emoji-picker-core/data/en.json?url";
-import { EmojiOverrides, EmojiProvider, type EmojiSelection, type Renderer } from "@brianhung/emoji-picker-react";
-import { twemojiUrl } from "@brianhung/emoji-picker-core";
+import { EmojiProvider, type EmojiSelection, type ImageUrl, type Renderer } from "@brianhung/emoji-picker-react";
+import { twemojiUrl, withoutTone } from "@brianhung/emoji-picker-core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
 import { Label } from "@/components/ui/label";
 import { Chips } from "@/components/site/chips";
 
-const artwork = {
+const artwork: Record<string, string> = {
   "2764-fe0f": "/reactions/heart.webp",
   "1f44d": "/reactions/thumbs-up.webp",
   "1f44e": "/reactions/thumbs-down.webp",
@@ -15,6 +15,9 @@ const artwork = {
   "203c-fe0f": "/reactions/exclamation.webp",
   "2753": "/reactions/question.webp",
 };
+
+const twemoji: ImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
+const tapbacks: ImageUrl = (unified, context) => artwork[withoutTone(unified)] ?? twemoji(unified, context);
 
 export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   const [renderer, setRenderer] = React.useState<Renderer | "auto">("auto");
@@ -34,8 +37,8 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
           Custom tapbacks
         </Label>
       </div>
-      <EmojiProvider data={en} renderer={renderer} imageUrl={twemojiUrl}>
-        {custom ? <EmojiOverrides artwork={artwork}>{pickers}</EmojiOverrides> : pickers}
+      <EmojiProvider data={en} renderer={renderer} imageUrl={custom ? tapbacks : twemoji}>
+        {pickers}
       </EmojiProvider>
     </>
   );

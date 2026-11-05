@@ -14,6 +14,7 @@ import {
   type EmojiGridMove,
   type EmojiGridRow,
   type EmojiItem,
+  type EmojiRecord,
   type EmojiSection,
   type HighlightChangeDetails,
   type PickerSnapshot,
@@ -29,7 +30,7 @@ import { usePickerKeyDown, type KeyResult } from "../utils/keyboard";
 import type { ListProps } from "./list";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
-import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
+import { useEmojiContext } from "../provider/provider";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
@@ -525,7 +526,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
 
 export type CellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
-function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
+function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boolean) {
   const { selection: m } = cells;
   const { record, unified } = item;
   const position = cells.position(item.id);
@@ -555,7 +556,7 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
     "data-pressed": flags & PRESSED ? true : undefined,
     "data-highlighted": highlighted ? "" : undefined,
     "data-active": isActive ? "" : undefined,
-    "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
+    "data-overridden": overridden ? "" : undefined,
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
     children: <Glyph unified={unified} record={record} animate={isActive && Boolean(record.animated)} />,
   };
@@ -574,11 +575,16 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
   return { props, state };
 }
 
+export function useOverridden(unified: string, record: EmojiRecord | undefined) {
+  const { renderer, image } = useEmojiContext();
+  return renderer === "native" && !record?.imageUrl && image(unified) !== undefined;
+}
+
 declare const gridState: unique symbol;
 export type EmojiGridState = { readonly [gridState]: true };
 
 export function useCell(grid: Cells, item: EmojiItem) {
-  const artwork = useArtworkMap();
+  const overridden = useOverridden(item.unified, item.record);
   const picked = useStore(grid.picker, (s) => pickerFlags(s, item.id));
   const marked = useStore(grid.marks, (m) => markFlags(m, item.id));
   const flags = picked | marked;
@@ -601,7 +607,7 @@ export function useCell(grid: Cells, item: EmojiItem) {
     if (grid.virtual) moveVirtualFocus(el, grid.target());
     else if (el.ownerDocument.activeElement !== el) el.focus({ preventScroll: true });
   }, [focused, grid.virtual]);
-  const { props, state } = cellProps(grid, item, flags, artwork);
+  const { props, state } = cellProps(grid, item, flags, overridden);
   return { cellProps: { ...props, ref }, state };
 }
 

@@ -8,7 +8,7 @@ import { nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { useDrawable } from "../emoji/native-support";
-import { findArtwork, useArtworkMap } from "../emoji/overrides";
+import { useOverridden } from "../list/grid";
 import { ReactionsContext, isPressed } from "./reactions-context";
 import { racClassName, racParts, racState, renderElement, resolve, toRenderFunction, type ElementProps, type InteractionState, type PartElementProps, type PartProps, type RacState } from "../utils/render";
 import { SLOTS } from "../utils/slots";
@@ -144,8 +144,8 @@ export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButton
 const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
   const state = React.useContext(ReactionsContext);
-  const artwork = useArtworkMap();
   const record = picker.store.get(unified);
+  const overridden = useOverridden(unified, record);
   const on = state?.pressed ? isPressed(state.pressed, unified) : undefined;
   const attrs = {
     ...(props as object),
@@ -153,7 +153,7 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
     "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
     "data-slot": SLOTS.emoji,
     "data-unified": unified,
-    "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
+    "data-overridden": overridden ? "" : undefined,
     "data-selected": on ? "" : undefined,
     ...racParts<ReactionsItemState, HTMLButtonElement>({ className, style: (s) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }), render }),
     children: typeof children === "function" ? (r: RacState) => children(racState(r)) : (children ?? <Glyph unified={unified} record={record} />),

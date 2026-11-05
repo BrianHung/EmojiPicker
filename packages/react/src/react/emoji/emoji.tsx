@@ -1,7 +1,6 @@
 import * as React from "react";
-import { type EmojiInput, isUnified, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
+import { type EmojiInput, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
 import { EmojiImage } from "./image";
-import { ArtworkGlyph, useArtwork } from "./overrides";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
@@ -29,7 +28,6 @@ export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
 export function Emoji({ emoji: input, size, renderer: override, animate = true, decorative = false, ...props }: EmojiProps) {
   const context = useEmojiContext();
   const resolved = useEmoji(input);
-  const art = useArtwork(resolved?.unified);
   const status = useStoreSnapshot((s) => s.status());
   const renderer = override ?? context.renderer;
 
@@ -46,18 +44,23 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
 
   const name = nameWithTone(resolved.name, resolved.unified, context.labels.withSkinTone);
   const a11y = decorative ? { "aria-hidden": true } : {};
-  if (art !== undefined) {
-    if (typeof art === "string") return <ArtworkGlyph {...props} {...a11y} art={art} alt={decorative ? "" : name} size={size ?? "1em"} data-emoji="" data-overridden="" />;
-    return (
-      <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" data-overridden="" style={{ display: "inline-flex", ...props.style }}>
-        <ArtworkGlyph art={art} alt="" size={size ?? "1em"} />
-      </span>
-    );
-  }
-  const src = resolved.imageUrl ?? (renderer === "image" && isUnified(resolved.unified) ? context.imageUrl(resolved.unified) : undefined);
+  const src = resolved.imageUrl ?? context.image(resolved.unified, renderer);
   if (src) {
     const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
-    return <EmojiImage {...props} {...a11y} src={src} alt={decorative ? "" : name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-emoji="" />;
+    return (
+      <EmojiImage
+        {...props}
+        {...a11y}
+        src={src}
+        alt={decorative ? "" : name}
+        record={record}
+        size={size ?? "1em"}
+        animate={animate}
+        fallback={resolved.native || undefined}
+        data-emoji=""
+        data-overridden={!resolved.imageUrl && renderer === "native" ? "" : undefined}
+      />
+    );
   }
   return (
     <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
