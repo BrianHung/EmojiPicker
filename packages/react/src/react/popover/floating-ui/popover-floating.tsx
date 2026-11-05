@@ -20,9 +20,12 @@ import {
   useTransitionStatus,
   type FloatingRootContext,
   type Middleware,
+  type OpenChangeReason,
   type UseFloatingOptions,
 } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
+import { createChangeDetails } from "@brianhung/emoji-picker-core";
+import type { PopoverOpenChangeReason } from "../popover-context";
 import { resolve } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
@@ -55,6 +58,16 @@ type Internals = PopoverInternals & {
   floatingProps: (props: React.HTMLAttributes<HTMLElement>) => Record<string, unknown>;
 };
 
+const REASONS: Partial<Record<OpenChangeReason, PopoverOpenChangeReason>> = {
+  "outside-press": "outside-press",
+  "escape-key": "escape-key",
+  "focus-out": "focus-out",
+  "ancestor-scroll": "scroll",
+  "reference-press": "trigger-press",
+  click: "trigger-press",
+};
+const reasonOf = (reason: OpenChangeReason | undefined) => (reason && REASONS[reason]) || "none";
+
 function Root(props: PopoverRootProps) {
   const node = <RootNode {...props} />;
   return useFloatingParentNodeId() === null ? <FloatingTree>{node}</FloatingTree> : node;
@@ -65,7 +78,7 @@ function RootNode({ children, ...props }: PopoverRootProps) {
   const nodeId = useFloatingNodeId();
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
   const [floating, setFloating] = React.useState<HTMLElement | null>(null);
-  const context = useFloatingRootContext({ open: state.open, onOpenChange: state.setOpen, elements: { reference: trigger, floating } });
+  const context = useFloatingRootContext({ open: state.open, onOpenChange: (open, event, reason) => state.setOpen(open, reasonOf(reason), event), elements: { reference: trigger, floating } });
   const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context), useRole(context)]);
   const value: Internals = { state, trigger, setTrigger, triggerProps: getReferenceProps, context, nodeId, setFloating, floatingProps: getFloatingProps };
   return (
@@ -163,7 +176,12 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
 });
 
 function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, style, children, ...props }: SuggestionsPopoverProps) {
-  const { refs, context, side: placed, style: position } = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { open, onOpenChange: (next) => onOpenChange?.(next) });
+  const {
+    refs,
+    context,
+    side: placed,
+    style: position,
+  } = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason), event)) });
   const { getFloatingProps } = useInteractions([useDismiss(context, { escapeKey: false })]);
   if (!open) return null;
   return portal(

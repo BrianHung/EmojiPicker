@@ -8,6 +8,7 @@ export type StylePickerProps = {
   search?: boolean;
   autoFocus?: boolean;
   fluid?: boolean;
+  columns?: "fit" | number;
   searchResults?: SearchResultsMode;
   className?: string;
 };
@@ -20,6 +21,7 @@ export type Style = {
   ReactionPicker?: React.ComponentType<StylePickerProps>;
   renderer?: "native" | "image";
   size: { width: number; height: number };
+  sheetColumns?: number;
   tapback: {
     className: string;
     reactions: string;

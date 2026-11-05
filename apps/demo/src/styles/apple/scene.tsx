@@ -445,7 +445,7 @@ function Composer({
   erase: React.RefObject<() => void>;
 }) {
   const store = useEmojiStore();
-  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6 });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLInputElement>({ limit: 6, onSelect: copyEmoji });
   insert.current = insertAtCaret;
   erase.current = () => setText(segment(value).slice(0, -1).join(""));
   const submit = () => {
@@ -634,7 +634,7 @@ const PILL = { w: 375, h: 64, inset: 16.3, gap: 68.4 };
 const tapbackTop = (rect: Rect) => Math.max(rect.top, 100 + PILL.gap);
 
 function useReactionItems(message: Message, recentCount: number) {
-  const recents = useFrequentEmoji(16).slice(0, recentCount);
+  const recents = useFrequentEmoji({ limit: 16 }).items.slice(0, recentCount);
   const mine = (message.reactedBy ?? "me") === "me" ? message.reactions.at(-1) : undefined;
   return [
     ...TAPBACKS.map((t) => ({ key: `t${t.unified}`, unified: t.unified, label: t.label, tapback: true })),
@@ -1074,7 +1074,7 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
           <SFMagnifyingglass size={17} className="pointer-events-none absolute top-[11.7px] left-[19.7px] text-[#838589] dark:text-[#98989f]" />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="absolute inset-x-0 [scrollbar-width:none]" style={{ top: K.label, height: K.grid - K.label + K.rows * K.row }}>
-          <EmojiPicker.List orientation="horizontal" rows={K.rows}>
+          <EmojiPicker.List orientation="horizontal" rows={K.rows} renderEmptyState={({ status }) => status === "empty" && <div className="absolute top-[60px] w-[396px] text-center text-[15px] text-[#8e8e93] dark:text-[#8d8d93]">No Emoji Found</div>}>
             {() => (
               <EmojiPicker.List.Section>
                 <EmojiPicker.List.SectionTitle className="pl-[9.8px] text-[12.25px] leading-[16px] font-semibold tracking-[-0.015em] whitespace-nowrap text-[#8b8d92] uppercase dark:text-[#8d8d93]" />
@@ -1082,7 +1082,6 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
               </EmojiPicker.List.Section>
             )}
           </EmojiPicker.List>
-          <EmojiPicker.Empty className="absolute top-[60px] w-[396px] text-center text-[15px] text-[#8e8e93] dark:text-[#8d8d93]">No Emoji Found</EmojiPicker.Empty>
         </EmojiPicker.Viewport>
         <EmojiPicker.CategoryNav className="absolute top-[278.7px] flex h-[30px]" style={{ left: TAB.first, gap: TAB.pitch - 30, color: C.icon }}>
           {() => <EmojiPicker.CategoryNav.Tab className="relative flex size-[30px] shrink-0 items-center justify-center rounded-full data-active:bg-[#bfc1c8] data-active:text-[#3c3c41] dark:data-active:bg-[#5a5a5e] dark:data-active:text-white" />}

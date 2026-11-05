@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmojiPicker, Tapback, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useFrequentEmoji, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -59,7 +59,18 @@ export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = tr
       <EmojiPickerSearch autoFocus={autoFocus} />
       {rows}
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List
+          className="outline-none"
+          renderEmptyState={({ status, retry }) => (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              {status === "empty" ? empty : status === "loading" ? "Loading…" : (
+                <button type="button" className="underline" onClick={retry}>
+                  Could not load emoji. Try again
+                </button>
+              )}
+            </div>
+          )}
+        >
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex items-center bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
@@ -67,8 +78,6 @@ export function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = tr
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-6 text-center text-sm text-muted-foreground">{empty}</EmojiPicker.Empty>
-        <EmojiPicker.Loading className="py-6 text-center text-sm text-muted-foreground">Loading…</EmojiPicker.Loading>
       </EmojiPicker.Viewport>
       {footer ? <EmojiPickerFooter /> : null}
     </>
@@ -111,11 +120,14 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
   );
 });
 
-export function EmojiTapback({ onSelect, count, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
+export function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
-    <Tapback
-      onSelect={onSelect}
-      count={count}
+    <EmojiPicker.Root
+      reactions={useFrequentEmoji({ limit: count }).items}
+      onSelect={(selection, { collapse }) => {
+        onSelect(selection);
+        collapse?.();
+      }}
       className={cn(
         root,
         "w-fit max-w-[352px] rounded-full border border-border bg-popover text-foreground shadow-lg",
@@ -134,6 +146,6 @@ export function EmojiTapback({ onSelect, count, className }: { onSelect: (select
       <EmojiPicker.Panel className="flex min-h-0 min-w-0 flex-1 flex-col">
         <EmojiPickerBody footer={false} />
       </EmojiPicker.Panel>
-    </Tapback>
+    </EmojiPicker.Root>
   );
 }

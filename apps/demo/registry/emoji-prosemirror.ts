@@ -4,7 +4,7 @@ import { createEmojiSuggestions, createStore, findShortcodeTrigger, isComposingK
 
 type Node = EditorState["doc"];
 
-export type ProseMirrorEmojiTypeaheadOptions = Pick<SuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns"> & {
+export type ProseMirrorEmojiTypeaheadOptions = Pick<SuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
   insert?: "emoji" | "shortcode";
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
   handleKeyDown?: (event: KeyLike) => boolean;

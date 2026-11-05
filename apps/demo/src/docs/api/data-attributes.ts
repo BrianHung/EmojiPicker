@@ -6,7 +6,7 @@ export const slots: [string, string][] = [
   ['data-slot="emoji-picker-section-title" · "emoji-picker-emoji"', "Section titles and cells"],
   ['data-slot="emoji-picker-skin-tone" · "emoji-picker-skin-tone-trigger" · "emoji-picker-skin-tone-options" · "emoji-picker-skin-tone-option"', "Skin tone, its trigger, the options and each option"],
   ['data-slot="emoji-picker-reactions" · "emoji-picker-reactions-expand" · "emoji-picker-panel"', "Tapback row, its “+”, and the expanded picker"],
-  ['data-slot="emoji-picker-preview" · "emoji-picker-empty" · "emoji-picker-loading"', "Preview, no results, loading"],
+  ['data-slot="emoji-picker-preview"', "Preview"],
 ];
 
 export const stateAttributes: [string, string][] = [

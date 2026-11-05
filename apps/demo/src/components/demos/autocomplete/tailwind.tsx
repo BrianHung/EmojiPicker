@@ -29,7 +29,7 @@ function Composer() {
 
 function CommandPalette() {
   const [query, setQuery] = React.useState("party");
-  const results = useEmojiSearch(query, { limit: 24 });
+  const { results } = useEmojiSearch(query, { limit: 24 });
   const [copied, setCopied] = React.useState<string | null>(null);
   const store = useEmojiStore();
   return (

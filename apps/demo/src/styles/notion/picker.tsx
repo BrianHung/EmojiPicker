@@ -1,7 +1,7 @@
 import { EmojiPicker, useEmojiStore, type CategoryOption, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { HandTone, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
+import { HandTone, noEmoji, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
 import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
@@ -64,8 +64,7 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
   const nav = useActiveTabInView();
   return (
     <EmojiPicker.Root
-      columns={fluid ? undefined : 12}
-      fitColumns={false}
+      columns={fluid ? "fit" : 12}
       categories={CATEGORIES}
       searchResults={searchResults}
       onSelect={onSelect}
@@ -109,7 +108,7 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
-        <EmojiPicker.List className="outline-none">
+        <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
@@ -117,7 +116,6 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <div className="flex h-[51px] shrink-0 items-center border-t border-(--notion-bar-rule) px-3 pt-2 pb-2.5">
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-start gap-[3.2px] overflow-x-auto [scrollbar-width:none]">

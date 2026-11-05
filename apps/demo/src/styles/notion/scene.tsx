@@ -7,6 +7,7 @@ import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { NotionEmojiMenu, notionEmojiOptions } from "@/experiences/notion";
 import { cn } from "@/lib/utils";
 import { ld, MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
+import { copyEmoji } from "@/components/site/picked";
 
 const W = 760;
 const H = 600;
@@ -44,7 +45,7 @@ export function NotionScene() {
       },
     },
   });
-  const emoji = useTiptapEmojiTypeahead(editor, notionEmojiOptions);
+  const emoji = useTiptapEmojiTypeahead(editor, { ...notionEmojiOptions, onSelect: copyEmoji });
   const page = (
     <>
       {compact ? <MobileTopBar icon={icon} title={title} /> : <TopBar icon={icon} title={title} />}

@@ -79,6 +79,12 @@ describe("Root keyboard", () => {
     expect(highlighted(host)).toBe("1f600");
   });
 
+  it("keeps the highlight where it is when onHighlightChange cancels", () => {
+    const { input, host } = mount({ onHighlightChange: (_, details) => details.cancel() });
+    press(input, "ArrowRight");
+    expect(highlighted(host)).toBeUndefined();
+  });
+
   it("runs onKeyDown first, and preventEmojiPickerHandler skips the picker's handler", () => {
     const onQueryChange = vi.fn();
     const { host } = mount({ defaultQuery: "smile", onQueryChange, onKeyDown: (e) => e.shiftKey || e.preventEmojiPickerHandler() });
@@ -86,6 +92,6 @@ describe("Root keyboard", () => {
     press(root, "Escape");
     expect(onQueryChange).not.toHaveBeenCalled();
     press(root, "Escape", { shiftKey: true });
-    expect(onQueryChange).toHaveBeenCalledWith("");
+    expect(onQueryChange).toHaveBeenCalledWith("", expect.objectContaining({ reason: "escape-key" }));
   });
 });

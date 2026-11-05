@@ -6,7 +6,7 @@ export const skinTone = [
     { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
     { name: "open", type: "boolean", description: "The options show. Controlled." },
     { name: "defaultOpen", type: "boolean", default: "false" },
-    { name: "onOpenChange", type: "(open: boolean) => void" },
+    { name: "onOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "none", event?, cancel() }) => void' },
     { name: "children", type: "ReactNode | ({ open, tone }) => ReactNode", default: "Trigger, Options" },
   ]),
   ...rowsOfParts<{ Trigger: SkinToneTriggerProps; Options: SkinToneOptionsProps; Option: SkinToneOptionProps; Glyph: SkinToneGlyphProps }>()([

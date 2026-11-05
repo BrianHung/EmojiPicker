@@ -1,71 +1,17 @@
 import * as React from "react";
-import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
 import { ToggleButton } from "react-aria-components/ToggleButton";
-import { Toolbar } from "react-aria-components/Toolbar";
-import { nameWithTone } from "@brianhung/emoji-picker-core";
+import { nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
-import { Glyph } from "../emoji/glyph";
 import { useDrawable } from "../emoji/native-support";
-import { findArtwork, useArtworkMap } from "../emoji/overrides";
+import { Glyph, useOverridden } from "../emoji/glyph";
 import { ReactionsContext, isPressed } from "./reactions-context";
-import { racClassName, racParts, racState, renderElement, resolve, toRenderFunction, type ElementProps, type InteractionState, type PartElementProps, type PartProps, type RacState } from "../utils/render";
+import { racParts, racState, renderElement, resolve, type InteractionState, type PartElementProps, type RacState } from "../utils/render";
 import { SLOTS } from "../utils/slots";
+import { BUTTONS, ReactionBar, type ReactionBarProps } from "./reaction-bar";
 
-const BUTTONS = "button:not([disabled])";
-
-// ReactionBar takes any buttons as children, so it finds them in its own row
-const buttonsIn = (row: Element | null) => [...(row?.querySelectorAll<HTMLElement>(BUTTONS) ?? [])];
-
-function useRovingRow(row: React.RefObject<HTMLElement | null>, orientation: "horizontal" | "vertical"): React.HTMLAttributes<HTMLElement> {
-  const current = React.useRef(0);
-  const rove = (stop: number) => buttonsIn(row.current).forEach((b, i) => (b.tabIndex = i === stop ? 0 : -1));
-  React.useLayoutEffect(() => rove(Math.min(current.current, buttonsIn(row.current).length - 1)));
-  return {
-    onFocus(event) {
-      const i = buttonsIn(row.current).indexOf(event.target as HTMLElement);
-      if (i < 0) return;
-      current.current = i;
-      rove(i);
-    },
-    onPointerOver(event) {
-      const button = event.target instanceof Element ? event.target.closest<HTMLElement>(BUTTONS) : null;
-      const active = document.activeElement;
-      const el = row.current;
-      if (button && el && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
-    },
-    onKeyDown(event) {
-      if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
-      const across = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
-      if (across.includes(event.key)) return event.preventDefault();
-      if (event.key !== "Home" && event.key !== "End") return;
-      const buttons = buttonsIn(row.current);
-      const target = event.key === "Home" ? buttons[0] : buttons[buttons.length - 1];
-      if (!target) return;
-      event.preventDefault();
-      target.focus();
-    },
-  };
-}
-
-export type ReactionBarState = { orientation: "horizontal" | "vertical" };
-
-export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
-  PartProps<ReactionBarState, HTMLDivElement> & {
-    orientation?: "horizontal" | "vertical";
-  };
-
-const div = (props: ElementProps<HTMLDivElement>) => <div {...props} />;
-
-export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, render, ...props }, ref) {
-  const row = React.useRef<HTMLDivElement | null>(null);
-  const roving = useRovingRow(row, orientation);
-  const custom = toRenderFunction(render) ?? div;
-  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={racClassName(className)} render={(dom, state) => custom(mergeProps(dom, roving) as ElementProps<HTMLDivElement>, state)} />;
-});
-
-type Row = { shown: readonly string[]; expanding: React.MutableRefObject<boolean> };
+type Row = { shown: readonly string[]; selected: ReadonlySet<string> | null; expanding: React.MutableRefObject<boolean> };
 const RowContext = React.createContext<Row | null>(null);
 
 function useRow(part: string) {
@@ -75,10 +21,11 @@ function useRow(part: string) {
 }
 
 export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation"> & {
+  selected?: readonly string[];
   children?: React.ReactNode | ((emoji: string) => React.ReactNode);
 };
 
-const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ children, ...props }, ref) {
+const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ selected, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
@@ -91,6 +38,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       return record != null && drawable(record, unified);
     });
   React.useEffect(() => request(shown));
+  const pressed = React.useMemo(() => (selected ? new Set(selected.map(withoutTone)) : null), [selected]);
   const expanding = React.useRef(false);
   React.useEffect(() => {
     if (!expanding.current || state?.open) return;
@@ -107,9 +55,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     if (!reopened || !el) return;
     const active = document.activeElement;
     if (active && active !== document.body && !state?.panel.current?.contains(active)) return;
-    buttonsIn(el)
-      .find((b) => b.tabIndex !== -1)
-      ?.focus({ preventScroll: true });
+    el.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
   }, [state?.open]);
   if (!state?.open) return null;
   const content =
@@ -122,7 +68,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       children
     );
   return (
-    <RowContext.Provider value={{ shown, expanding }}>
+    <RowContext.Provider value={{ shown, selected: pressed, expanding }}>
       <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
@@ -143,17 +89,17 @@ export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButton
 
 const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
-  const state = React.useContext(ReactionsContext);
-  const artwork = useArtworkMap();
+  const { selected } = useRow("Item");
   const record = picker.store.get(unified);
-  const on = state?.pressed ? isPressed(state.pressed, unified) : undefined;
+  const overridden = useOverridden(unified, record);
+  const on = selected ? isPressed(selected, unified) : undefined;
   const attrs = {
     ...(props as object),
     ref,
     "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
     "data-slot": SLOTS.emoji,
     "data-unified": unified,
-    "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
+    "data-overridden": overridden ? "" : undefined,
     "data-selected": on ? "" : undefined,
     ...racParts<ReactionsItemState, HTMLButtonElement>({ className, style: (s) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }), render }),
     children: typeof children === "function" ? (r: RacState) => children(racState(r)) : (children ?? <Glyph unified={unified} record={record} />),
@@ -199,6 +145,8 @@ export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 
 export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);
+  const register = state?.registerPanel;
+  React.useLayoutEffect(() => register?.(), [register]);
   const hidden = Boolean(state?.open);
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
   return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });

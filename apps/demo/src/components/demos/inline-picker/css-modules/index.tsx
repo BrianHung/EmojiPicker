@@ -20,7 +20,7 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
         </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className={styles.viewport}>
-        <EmojiPicker.List>
+        <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && <div className={styles.empty}>No emoji found.</div>}>
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className={styles.header} />
@@ -28,7 +28,6 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>
-        <EmojiPicker.Empty className={styles.empty}>No emoji found.</EmojiPicker.Empty>
       </EmojiPicker.Viewport>
       <EmojiPicker.CategoryNav className={styles.nav}>{() => <EmojiPicker.CategoryNav.Tab className={styles.tab} />}</EmojiPicker.CategoryNav>
     </EmojiPicker.Root>

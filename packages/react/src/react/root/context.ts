@@ -4,6 +4,8 @@ import type { CollapsedCategories } from "./collapse";
 
 export type { HighlightChangeDetails, SearchResultsMode };
 
+export type HighlightSource = { reason?: HighlightChangeDetails["reason"]; event?: Event };
+
 export type EmojiPickerActions = {
   move(to: EmojiGridMove): boolean;
   pick(): boolean;
@@ -19,7 +21,7 @@ export type SelectDetails = {
 };
 
 export type ListHandle = {
-  move(to: EmojiGridMove, details?: HighlightChangeDetails, cell?: Element | null): boolean;
+  move(to: EmojiGridMove, source?: HighlightSource, cell?: Element | null): boolean;
   pick(): boolean;
   highlight(emoji: string | null): void;
   ids(): { list: string; active: string | undefined };
@@ -37,14 +39,12 @@ export type PickerContextValue = {
   inPopover: boolean;
   disableVariations: boolean;
   columns?: number;
-  fitColumns: boolean;
   emojiVersion?: number;
   categories: readonly Category<React.ReactNode>[];
   categorySections: readonly EmojiSection[];
   sections: readonly EmojiSection[];
   collapse: CollapsedCategories;
   query: string;
-  setQuery(value: string): void;
   searching: boolean;
   searchResults: SearchResultsMode;
   searchLimit: number;

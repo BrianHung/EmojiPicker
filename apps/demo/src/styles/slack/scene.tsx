@@ -109,7 +109,7 @@ export function SlackScene() {
 function SlackMessage({ message, onToggle, compact }: { message: Message; onToggle: (unified: string) => void; compact: boolean }) {
   const store = useEmojiStore();
   useEmojiStatus();
-  const quick = useFrequentEmoji(3);
+  const quick = useFrequentEmoji({ limit: 3 }).items;
   const avatar = avatarFor(message.author);
   return (
     <div className="group relative flex gap-2 px-5 py-2 hover:bg-[#f8f8f8] dark:hover:bg-[#222529]">
@@ -147,7 +147,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
 const FORMATS = [[BoldIcon, ItalicIcon, StrikethroughIcon], [LinkIcon], [ListOrderedIcon, ListIcon], [CodeIcon, SquareCodeIcon]];
 
 function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
-  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insert: "shortcode" });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insert: "shortcode", onSelect: copyEmoji });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);

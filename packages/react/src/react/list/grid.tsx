@@ -7,29 +7,16 @@ import { useListBox } from "react-aria/useListBox";
 import { mergeProps } from "react-aria/mergeProps";
 import { useListState, type ListState } from "react-stately/useListState";
 import { AutocompleteStateContext, SelectableCollectionContext } from "react-aria-components/Autocomplete";
-import {
-  createEmojiGrid,
-  createStore,
-  type EmojiGrid,
-  type EmojiGridMove,
-  type EmojiGridRow,
-  type EmojiItem,
-  type EmojiSection,
-  type HighlightChangeDetails,
-  type PickerSnapshot,
-  type PickerState,
-  withoutTone,
-} from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, createStore, type EmojiGrid, type EmojiGridMove, type EmojiGridRow, type EmojiItem, type EmojiSection, type PickerSnapshot, type PickerState, withoutTone } from "@brianhung/emoji-picker-core";
 import { EmojiCollection } from "./collection";
 
-import { usePicker, type ListHandle } from "../root/context";
-import { Glyph } from "../emoji/glyph";
+import { usePicker, type HighlightSource, type ListHandle } from "../root/context";
+import { Glyph, useOverridden } from "../emoji/glyph";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { usePickerKeyDown, type KeyResult } from "../utils/keyboard";
 import type { ListProps } from "./list";
 import { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
-import { findArtwork, useArtworkMap, type ArtworkMap } from "../emoji/overrides";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
@@ -97,7 +84,7 @@ export type GridGeometry = {
 };
 
 const MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down", Home: "first", End: "last" };
-const NONE: HighlightChangeDetails = { reason: "none" };
+const NONE: HighlightSource = {};
 const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
 // Handlers are delegated from the list: one set for every mounted cell
@@ -129,14 +116,13 @@ type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labe
   listRef: React.RefObject<HTMLElement | null>;
   ref?: React.Ref<HTMLElement>;
   probeRoot?: React.Ref<HTMLElement>;
-  loader?: boolean;
 };
 
-export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, loader = false, onKeyDown, ...aria }: ControllerOptions) {
+export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, onKeyDown, ...aria }: ControllerOptions) {
   const picker = usePicker("EmojiPicker.List");
   const { labels, searching, value } = picker;
   const { navigation } = geometry;
-  const collection = React.useMemo(() => new EmojiCollection(sections, loader), [sections, loader]);
+  const collection = React.useMemo(() => new EmojiCollection(sections), [sections]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
   const state = useListState<unknown>({ collection, selectionMode: value === undefined ? "none" : "single", selectedKeys: selected ?? NO_KEYS, disallowEmptySelection: value !== undefined, layoutDelegate: geometry.layoutDelegate });
   const stateRef = React.useRef(state);
@@ -478,7 +464,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       target: picker.target,
       reveal: (id) => latest.current.geometry.reveal(id),
       sectionDomId: (id) => `${picker.listId}-section-${id}`,
-      toggle: (id) => picker.collapse.toggle(id),
+      toggle: (id) => picker.state.toggleCollapsed(id, { reason: "trigger-press" }),
     }),
     [selection.selectedKeys, selection.selectionMode, listId, collectionId, focusVisible, virtual, core, marks, picker.target, picker.listId, picker.collapse, orientation],
   );
@@ -503,7 +489,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       tabIndex: fieldRef ? undefined : -1,
       "data-slot": SLOTS.list,
       "data-orientation": orientation,
-      "data-layout": "grid",
       "data-empty": isEmpty || undefined,
       "data-focused": isFocused || undefined,
       "data-focus-visible": isFocusVisible || undefined,
@@ -527,7 +512,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
 
 export type CellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
-function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: ArtworkMap | null) {
+function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boolean) {
   const { selection: m } = cells;
   const { record, unified } = item;
   const position = cells.position(item.id);
@@ -555,10 +540,9 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, artwork: Artwor
     "data-focused": isFocused || undefined,
     "data-focus-visible": (isFocused && cells.focusVisible) || undefined,
     "data-pressed": flags & PRESSED ? true : undefined,
-    "data-selection-mode": m.selectionMode === "none" ? undefined : m.selectionMode,
     "data-highlighted": highlighted ? "" : undefined,
     "data-active": isActive ? "" : undefined,
-    "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
+    "data-overridden": overridden ? "" : undefined,
     "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
     children: <Glyph unified={unified} record={record} animate={isActive && Boolean(record.animated)} />,
   };
@@ -581,7 +565,7 @@ declare const gridState: unique symbol;
 export type EmojiGridState = { readonly [gridState]: true };
 
 export function useCell(grid: Cells, item: EmojiItem) {
-  const artwork = useArtworkMap();
+  const overridden = useOverridden(item.unified, item.record);
   const picked = useStore(grid.picker, (s) => pickerFlags(s, item.id));
   const marked = useStore(grid.marks, (m) => markFlags(m, item.id));
   const flags = picked | marked;
@@ -604,7 +588,7 @@ export function useCell(grid: Cells, item: EmojiItem) {
     if (grid.virtual) moveVirtualFocus(el, grid.target());
     else if (el.ownerDocument.activeElement !== el) el.focus({ preventScroll: true });
   }, [focused, grid.virtual]);
-  const { props, state } = cellProps(grid, item, flags, artwork);
+  const { props, state } = cellProps(grid, item, flags, overridden);
   return { cellProps: { ...props, ref }, state };
 }
 

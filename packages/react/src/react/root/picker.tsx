@@ -1,23 +1,37 @@
 import * as React from "react";
-import { type CategoryOption as CoreCategoryOption, createPickerState, type EmojiGridMove, type EmojiRecord, type EmojiSelection, isComposingKey, type PickerState, type PickerStateOptions } from "@brianhung/emoji-picker-core";
+import {
+  type CategoryOption as CoreCategoryOption,
+  type ChangeDetails,
+  type CollapsedCategoriesChangeDetails,
+  createPickerState,
+  type QueryChangeDetails,
+  type EmojiGridMove,
+  type EmojiRecord,
+  type EmojiSelection,
+  isComposingKey,
+  type PickerState,
+  type PickerStateOptions,
+} from "@brianhung/emoji-picker-core";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { useCollapse } from "./collapse";
 import { PickerContext, usePicker, ViewportContext, type EmojiPickerActions, type HighlightChangeDetails, type ListHandle, type PickerContextValue, type SearchResultsMode, type SelectDetails } from "./context";
 import { useActiveWithin } from "../utils/hold";
 import { mergeProps } from "react-aria/mergeProps";
-import { useControlledState } from "react-stately/useControlledState";
+import { useChangeState } from "../utils/state";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { hasModifier, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
-import { PopoverContext } from "../popover/popover-context";
+import { PopoverContext, type PopoverOpenChangeReason } from "../popover/popover-context";
 import { EmojiContext, EmojiProvider, useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
 import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
-import { EmptyStateContext, useEmptyStateSlots } from "./viewport";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
+
+export type ValueChangeDetails = ChangeDetails<"item-press">;
+export type ReactionsOpenChangeDetails = ChangeDetails<"trigger-press" | "item-press" | "none">;
 
 export type RootState = { searching: boolean; reactionsOpen: boolean };
 
@@ -27,38 +41,32 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
     actionsRef?: React.Ref<EmojiPickerActions>;
     keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;
-    columns?: number;
-    fitColumns?: boolean;
+    columns?: "fit" | number;
     categories?: readonly CategoryOption[];
     frequent?: number | false;
     collapsedCategories?: readonly string[];
     defaultCollapsedCategories?: readonly string[];
-    onCollapsedCategoriesChange?: (ids: readonly string[]) => void;
+    onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
     suggested?: readonly string[];
     searchResults?: SearchResultsMode;
     searchLimit?: number;
     query?: string;
     defaultQuery?: string;
-    onQueryChange?: (query: string) => void;
+    onQueryChange?: (query: string, details: QueryChangeDetails) => void;
     value?: string | null;
     defaultValue?: string | null;
-    onValueChange?: (unified: string) => void;
+    onValueChange?: (unified: string, details: ValueChangeDetails) => void;
     highlight?: string | null;
     defaultHighlight?: string | null;
     onHighlightChange?: (emoji: string | null, details: HighlightChangeDetails) => void;
     reactions?: readonly string[];
     reactionsOpen?: boolean;
     defaultReactionsOpen?: boolean;
-    onReactionsOpenChange?: (open: boolean) => void;
+    onReactionsOpenChange?: (open: boolean, details: ReactionsOpenChangeDetails) => void;
     emojiVersion?: number;
     disableVariations?: boolean;
     children: React.ReactNode;
   };
-
-type InternalRootProps = RootProps & {
-  allowExpandReactions?: boolean;
-  pressed?: ReadonlySet<string> | null;
-};
 
 const VARIABLES = {
   "--ep-size": "var(--emoji-size, 30px)",
@@ -68,7 +76,7 @@ const VARIABLES = {
   "--ep-glyph-pad": "calc((var(--ep-cell) - var(--ep-size)) / 2)",
 } as React.CSSProperties;
 
-export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(function PickerRoot(props, ref) {
+const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(props, ref) {
   const {
     onSelect,
     frequent,
@@ -89,12 +97,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     reactionsOpen: reactionsOpenProp,
     defaultReactionsOpen = true,
     onReactionsOpenChange,
-    allowExpandReactions = true,
-    pressed = null,
     searchResults = "ranked",
     searchLimit = 200,
-    columns,
-    fitColumns = true,
+    columns: columnsProp = "fit",
     className,
     style,
     render,
@@ -105,6 +110,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     ...rest
   } = props;
   const { store, labels, maxVersion } = useEmojiContext();
+  const columns = columnsProp === "fit" ? undefined : columnsProp;
   const popover = React.useContext(PopoverContext);
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = React.useRef<HTMLElement | null>(null);
@@ -125,12 +131,17 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   const list = React.useRef<ListHandle | null>(null);
   const searchInput = React.useRef<HTMLInputElement | null>(null);
   const panel = React.useRef<HTMLDivElement | null>(null);
+  const [panels, setPanels] = React.useState(0);
+  const registerPanel = React.useCallback(() => {
+    setPanels((n) => n + 1);
+    return () => setPanels((n) => n - 1);
+  }, []);
   const listId = React.useId();
 
-  const [value, setValue] = useControlledState<string | null | undefined, string>(valueProp as string | null, defaultValue, onValueChange);
-  const [open, setReactionsOpen] = useControlledState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
+  const [value, setValue] = useChangeState<string | null | undefined, ValueChangeDetails["reason"]>(valueProp, defaultValue, onValueChange as (value: string | null | undefined, details: ValueChangeDetails) => void);
+  const [open, setReactionsOpen] = useChangeState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
-  const collapseToReactions = React.useCallback(() => setReactionsOpen(true), [setReactionsOpen]);
+  const collapseToReactions = React.useCallback(() => setReactionsOpen(true, "item-press"), [setReactionsOpen]);
   const latest = React.useRef({ onSelect, popover, selects: value !== undefined });
   latest.current = { onSelect, popover, selects: value !== undefined };
   const pick = React.useCallback(
@@ -138,13 +149,18 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       const selection = state.choose(unified);
       if (!selection) return undefined;
       const { onSelect, popover, selects } = latest.current;
-      if (selects) setValue(selection.unified);
+      if (selects) setValue(selection.unified, "item-press");
       onSelect?.(selection, { collapse: reactions ? collapseToReactions : undefined, ...details });
-      if (popover?.closeOnSelect) popover.close("select");
+      if (popover?.closeOnSelect) popover.close("item-press");
       return selection;
     },
     [state, reactions, collapseToReactions, setValue],
   );
+  const closePopover = React.useCallback((reason: PopoverOpenChangeReason, event?: Event) => {
+    const { popover } = latest.current;
+    popover?.close(reason, event);
+    return Boolean(popover);
+  }, []);
   const skinTone = React.useRef<(() => void) | null>(null);
   const actions = React.useMemo<EmojiPickerActions>(
     () => ({
@@ -159,17 +175,13 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
         state.setQuery("");
         list.current?.clear();
       },
-      close() {
-        const { popover } = latest.current;
-        popover?.close();
-        return Boolean(popover);
-      },
+      close: () => closePopover("none"),
       toggleSkinTone() {
         skinTone.current?.();
         return Boolean(skinTone.current);
       },
     }),
-    [state],
+    [state, closePopover],
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => (keyboardTarget && "current" in keyboardTarget ? keyboardTarget.current : keyboardTarget) ?? null, [keyboardTarget]);
@@ -183,14 +195,12 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       inPopover: Boolean(popover),
       disableVariations,
       columns,
-      fitColumns,
       emojiVersion,
       categories: view.categories,
       categorySections: view.categorySections,
       sections: view.sections,
       collapse,
       query,
-      setQuery: state.setQuery,
       searching,
       searchResults,
       searchLimit,
@@ -209,22 +219,22 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       registerInput: state.registerInput,
       listId,
     }),
-    [store, state, labels, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
+    [store, state, labels, popover, disableVariations, columns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, actions, target, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
-    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed, panel } : null),
-    [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
+    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: panels ? () => setReactionsOpen(false, "trigger-press") : undefined, panel, registerPanel } : null),
+    [reactions, view.reactions, reactionsOpen, panels, setReactionsOpen, registerPanel],
   );
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
-      if (!query) return Boolean(list.current?.clear()) || actions.close();
-      actions.clearSearch();
+      if (!query) return Boolean(list.current?.clear()) || closePopover("escape-key", e.nativeEvent);
+      state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
+      list.current?.clear();
       return true;
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });
-  const emptyState = useEmptyStateSlots();
   const count = !searching || pending ? "" : labels.resultCount(results.length);
 
   return renderElement(
@@ -243,11 +253,9 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       render,
       children: (
         <>
-          <Autocomplete inputValue={query} onInputChange={state.setQuery}>
+          <Autocomplete inputValue={query} onInputChange={(text) => state.setQuery(text, { reason: "input-change" })}>
             <PickerContext.Provider value={context}>
-              <ReactionsContext.Provider value={reactionsState}>
-                <EmptyStateContext.Provider value={emptyState}>{children}</EmptyStateContext.Provider>
-              </ReactionsContext.Provider>
+              <ReactionsContext.Provider value={reactionsState}>{children}</ReactionsContext.Provider>
             </PickerContext.Provider>
           </Autocomplete>
           <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>

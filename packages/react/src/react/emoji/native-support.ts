@@ -1,5 +1,6 @@
 import * as React from "react";
-import { type EmojiRecord, isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
+import { type EmojiRecord, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
+import { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "./native";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
 type Drawable = (record: EmojiRecord, unified: string) => boolean;
@@ -7,7 +8,7 @@ type Drawable = (record: EmojiRecord, unified: string) => boolean;
 const always: Drawable = () => true;
 
 export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawable: Drawable; request: (unifieds: Iterable<string>) => void } {
-  const { store, renderer } = useEmojiContext();
+  const { store, renderer, image } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
   const native = renderer === "native" && status === "ready";
   const records = useStoreSnapshot((s) => s.records());
@@ -65,7 +66,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
 
   const drawable = React.useMemo<Drawable>(() => {
     if (!native) return always;
-    return (record, unified) => record.imageUrl != null || (!KNOWN_FAILING.has(withoutFe0f(withoutTone(record.unified))) && isNativeSupported(support, unified, record.version));
-  }, [native, support, version]);
+    return (record, unified) => record.imageUrl != null || image(unified) !== undefined || (!KNOWN_FAILING.has(withoutFe0f(withoutTone(record.unified))) && isNativeSupported(support, unified, record.version));
+  }, [native, support, version, image]);
   return { drawable, request };
 }

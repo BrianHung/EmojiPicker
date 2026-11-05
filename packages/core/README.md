@@ -17,7 +17,7 @@ import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighli
 
 const store = createEmojiStore({ data: "/emoji/en.json" });
 
-const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)) });
+const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)), onSelect: (selection) => track(selection) });
 typeahead.subscribe(render);
 typeahead.setQuery("tada");
 input.addEventListener("keydown", (e) => typeahead.keydown(e));
@@ -32,7 +32,7 @@ picker.choose();
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-core` | Stores, emoji resolution, frequency storage, labels, tokenizers, Twemoji helpers, grid model, and every public type |
+| `@brianhung/emoji-picker-core` | Stores, emoji resolution, frequently used emoji, labels, tokenizers, Twemoji helpers, grid model, and every public type |
 | `/search` | `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
 | `/data/en.json` | The English dataset |
 
@@ -41,15 +41,18 @@ picker.choose();
 | Export | Description |
 |---|---|
 | `createEmojiStore(options)` | Data, search, frequents, skin tone, and labels. Options match the React provider's |
-| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Pass `highlight` and `onHighlightChange(id, { reason })` to control the highlight |
-| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, and IME-safe `keydown` |
+| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Controlled state takes `x` / `defaultX` / `onXChange(value, details)`; `details` has `reason`, `event` and `cancel()` |
+| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, and `onSelect(selection)` on choose |
 | `createEmojiGrid`, `moveInGrid`, `rowsPerPage` | Grid rows and keyboard movement for a custom virtualizer |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
-| `createFrequencyStore`, `localStorageAdapter`, `memoryStorage` | Frequently used emoji and `EmojiStorage` adapters |
+| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`: `Record<unified, { count, lastUsed }>`, `count` halving every 14 days. Store options `frequents`, `defaultFrequents`, `onFrequentsChange`, `frequentsStorage` |
+| `mergeFrequents(a, b)` | Merges two histories, such as a server's and this device's |
+| `localStorageAdapter`, `memoryStorage` | `EmojiStorage` adapters; `localStorageAdapter` syncs across tabs |
+| `createChangeDetails(reason, event)` | The `{ reason, event, cancel() }` every `onXChange` receives |
 | `localeData(locale, { shortcodes, baseUrl })` | URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
 | `defaultLabels`, `localizeLabels`, `plural` | `EmojiLabels` and CLDR plural formatting |
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
-| `twemojiUrl`, `needsImageFallback` | Image URLs and native-support detection |
+| `twemojiUrl` | Twemoji image URLs |
 
 A ProseMirror plugin on `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey` and `syncCombobox` is a registry item: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 

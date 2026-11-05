@@ -9,9 +9,9 @@ export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
   content?: (text: string, suggestion: ShortcodeSuggestion) => Content;
 };
 
-export function useTiptapEmojiTypeahead(editor: Editor | null, { content, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {
-  const latest = React.useRef(content);
-  latest.current = content;
+export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {
+  const latest = React.useRef({ content, onSelect });
+  latest.current = { content, onSelect };
   const { plugin, ...typeahead } = useEmojiTypeaheadStore(
     (store, options) =>
       emojiTypeahead(store, {
@@ -21,8 +21,9 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, insert
         matchBy,
         order,
         columns,
+        onSelect: (selection) => latest.current.onSelect?.(selection),
         content(text, suggestion, schema) {
-          const replacement = latest.current?.(text, suggestion) ?? `${text} `;
+          const replacement = latest.current.content?.(text, suggestion) ?? `${text} `;
           return typeof replacement === "string" ? replacement : createNodeFromContent(replacement, schema);
         },
       }),

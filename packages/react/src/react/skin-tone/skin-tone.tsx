@@ -8,9 +8,9 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { useToggleButtonGroup, useToggleButtonGroupItem } from "react-aria/useToggleButtonGroup";
-import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import type { ToggleGroupState } from "react-stately/useToggleGroupState";
-import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { useChangeState } from "../utils/state";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
 import { PickerContext } from "../root/context";
@@ -29,8 +29,8 @@ type SkinToneContextValue = {
   selection: ToggleGroupState;
   open: boolean;
   orientation: Orientation;
-  toggle(): void;
-  choose(tone: SkinToneValue): void;
+  toggle(event?: Event): void;
+  choose(tone: SkinToneValue, event?: Event): void;
   label(tone: SkinToneValue): string;
   group: string;
   triggerRef: React.RefObject<HTMLButtonElement | null>;
@@ -51,27 +51,30 @@ export type SkinToneProps = PartElementProps<SkinToneState> & {
   orientation?: Orientation;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onOpenChange?: (open: boolean, details: SkinToneOpenChangeDetails) => void;
 };
+
+export type SkinToneOpenChangeDetails = ChangeDetails<"trigger-press" | "outside-press" | "escape-key" | "item-press" | "none">;
+type OpenReason = SkinToneOpenChangeDetails["reason"];
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
   // The store owns the tone and a press picks it, so the group only reads it
   const selection: ToggleGroupState = { selectionMode: "single", isDisabled: false, selectedKeys: new Set([tone]), toggleKey: noop, setSelected: noop, setSelectedKeys: noop };
-  const state = useOverlayTriggerState({ isOpen: openProp, defaultOpen, onOpenChange });
-  const open = state.isOpen;
+  const [open, setOpen] = useChangeState(openProp, defaultOpen, onOpenChange);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
-  useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutsideStart: state.close, onInteractOutside: state.close });
+  const outside = (event: PointerEvent) => setOpen(false, "outside-press", event);
+  useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutsideStart: outside, onInteractOutside: outside });
 
   const { labels } = useEmojiContext();
-  const close = React.useCallback(() => {
+  const close = (reason: OpenReason, event?: Event) => {
     const inside = optionsRef.current?.contains(document.activeElement);
-    state.close();
+    setOpen(false, reason, event);
     if (inside) triggerRef.current?.focus();
-  }, [state.close]);
-  const toggle = () => (open ? close() : state.open());
+  };
+  const toggle = (event?: Event) => (open ? close(event ? "trigger-press" : "none", event) : setOpen(true, event ? "trigger-press" : "none", event));
   const toggles = React.useContext(PickerContext)?.skinTone;
   const latest = React.useRef(toggle);
   latest.current = toggle;
@@ -85,7 +88,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   }, [toggles]);
   const keys = usePickerKeyDown(undefined, (e) => {
     if (!open || e.key !== "Escape") return false;
-    close();
+    close("escape-key", e.nativeEvent);
     return true;
   });
 
@@ -96,9 +99,9 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     open,
     orientation,
     toggle,
-    choose(next) {
-      setTone(next);
-      close();
+    choose(next, event) {
+      setTone(next, { reason: "option-press", event });
+      close("item-press", event);
     },
     label: (i) => labels.skinTones[i]!,
     group: labels.skinTone,
@@ -144,7 +147,7 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
       "aria-haspopup": "true",
       "aria-expanded": open,
       "data-state": open ? "open" : "closed",
-      onClick: toggle,
+      onClick: (e: React.MouseEvent) => toggle(e.nativeEvent),
       style: (s: SkinToneState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
       children,
     },

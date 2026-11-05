@@ -1,10 +1,9 @@
 // Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
-import { unifiedToNative } from "./dataset";
-import { createStore } from "./reactive";
+import { createStore, unifiedToNative } from "@brianhung/emoji-picker-core";
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 
-export const KNOWN_FAILING = new Set(["2640", "2642", "2695"]);
+export const KNOWN_FAILING = /* @__PURE__ */ new Set(["2640", "2642", "2695"]);
 
 const CELL = 32;
 export const PROBE_BATCH = 16;
@@ -117,7 +116,7 @@ const sameVerdicts = (before: NativeProbe | null, after: NativeProbe | null) => 
   return [...before.probed()].every((unified) => before.result(unified) === after.result(unified));
 };
 
-const verdicts = createStore(0, (generation: number) => generation + 1);
+const verdicts = /* @__PURE__ */ createStore(0, (generation: number) => generation + 1);
 let watching = false;
 function recheck() {
   let changed = false;

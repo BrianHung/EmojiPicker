@@ -17,7 +17,6 @@ export type EmojiGridLayoutOptions = {
   orientation: "vertical" | "horizontal";
   metrics: GridMetrics;
   columns?: number;
-  fitColumns?: boolean;
   results?: "ranked" | "grouped";
   rows?: number;
 };
@@ -37,10 +36,9 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
   private infos = new Map<Key, LayoutInfo>();
   private cellInfos = new Map<Key, LayoutInfo>();
   private size = new Size();
-  private loader: LayoutInfo | null = null;
 
   shouldInvalidateLayoutOptions(next: EmojiGridLayoutOptions, prev: EmojiGridLayoutOptions) {
-    return next.orientation !== prev.orientation || next.columns !== prev.columns || next.fitColumns !== prev.fitColumns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
+    return next.orientation !== prev.orientation || next.columns !== prev.columns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
   }
 
   update({ layoutOptions }: { layoutOptions?: EmojiGridLayoutOptions }) {
@@ -53,18 +51,9 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     this.strip = null;
     const collection = this.virtualizer!.collection;
     const sections: EmojiSection[] = [];
-    let loader: Node<unknown> | null = null;
-    for (const n of collection) {
-      if (n.type === "loader") loader = n;
-      if (n.type === "section") sections.push(n.value as EmojiSection);
-    }
+    for (const n of collection) if (n.type === "section") sections.push(n.value as EmojiSection);
     if (options.orientation === "horizontal") this.horizontal(sections, options.rows ?? 5);
     else this.vertical(sections, options);
-    if (loader) {
-      const horizontal = options.orientation === "horizontal";
-      this.loader = new LayoutInfo("loader", loader.key, horizontal ? new Rect(this.size.width, 0, 1, this.size.height) : new Rect(0, this.size.height, this.size.width, 1));
-      this.infos.set(loader.key, this.loader);
-    } else this.loader = null;
   }
 
   private section(s: EmojiSection, rect: Rect, results?: string) {
@@ -84,12 +73,12 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
     return box;
   }
 
-  private vertical(sections: EmojiSection[], { columns, results, fitColumns = true }: EmojiGridLayoutOptions) {
+  private vertical(sections: EmojiSection[], { columns, results }: EmojiGridLayoutOptions) {
     const { cellWidth, cellHeight, headerHeight, padding, paddingEnd } = this.metrics;
     const width = this.virtualizer!.size.width;
-    const rowWidth = Math.max(0, Math.round(columns ? Math.max(fitColumns ? 0 : columns * cellWidth, width - 2 * padding) : width - padding - paddingEnd));
+    const rowWidth = Math.max(0, Math.round(columns ? Math.max(columns * cellWidth, width - 2 * padding) : width - padding - paddingEnd));
     const fit = Math.max(1, Math.floor(rowWidth / cellWidth));
-    const lanes = results && columns ? columns : columns ? Math.min(columns, fit) : fit;
+    const lanes = columns ?? fit;
     const gap = lanes > 1 ? Math.max(0, rowWidth - lanes * cellWidth) / (lanes - 1) : 0;
     this.x = (lane) => padding + (results ? lane * (cellWidth + gap) : Math.round(lane * (cellWidth + gap)));
     this.lanes = lanes;
@@ -158,7 +147,6 @@ export class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOption
           if (row.type === "emojis" && row.offset + row.size > rect.y && row.offset <= rect.maxY) for (const item of row.items) add(this.getLayoutInfo(item.id));
         }
     }
-    add(this.loader);
     for (const key of this.virtualizer!.persistedKeys) {
       const cell = this.getLayoutInfo(key);
       const box = cell?.parentKey == null ? undefined : this.sections.find((b) => b.key === cell.parentKey);

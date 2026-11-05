@@ -1,9 +1,16 @@
 import * as React from "react";
-import { createSearch, type EmojiRecord, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiStore, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
-export function useFrequentEmoji(n = 5): readonly string[] {
+export type FrequentEmoji = {
+  items: readonly string[];
+  record(unified: string): void;
+  remove(unified: string): void;
+  clear(): void;
+};
+
+export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): FrequentEmoji {
   const { store } = useEmojiContext();
   const subscribe = React.useCallback(
     (listener: () => void) => {
@@ -12,10 +19,12 @@ export function useFrequentEmoji(n = 5): readonly string[] {
     },
     [store],
   );
-  return useStore({ subscribe, getSnapshot: () => store.frequent(n) });
+  const items = useStore({ subscribe, getSnapshot: () => store.frequent(limit) });
+  const { record, remove, clear } = store.frequents;
+  return React.useMemo(() => ({ items, record, remove, clear }), [items, record, remove, clear]);
 }
 
-export function useSkinTone(): [tone: SkinToneValue, setTone: (tone: SkinToneValue) => void] {
+export function useSkinTone(): [tone: SkinToneValue, setTone: EmojiStore["setSkinTone"]] {
   const { store } = useEmojiContext();
   return [useStoreSnapshot((s) => s.skinTone()), store.setSkinTone];
 }
@@ -29,13 +38,9 @@ export function useEmojiStatus() {
   return status;
 }
 
-export function useEmojiSearch(query: string, { limit = 50 }: { limit?: number } = {}): readonly EmojiRecord[] {
-  return useEmojiSearchState(query, { limit }).results;
-}
-
 export type EmojiSearchState = SearchState;
 
-export function useEmojiSearchState(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
+export function useEmojiSearch(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
   const { store } = useEmojiContext();
   useEmojiStatus();
   const [search] = React.useState(() => createSearch(store));

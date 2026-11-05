@@ -1,6 +1,10 @@
 # Third-Party Notices
 
-The emoji data and the native-emoji support probe ship in `@brianhung/emoji-picker-core`; see its notices.
+The emoji data ships in `@brianhung/emoji-picker-core`; see its notices.
+
+## emoji-picker-react
+
+The native-emoji support probe in `src/react/emoji/native.ts` is adapted from [emoji-picker-react](https://github.com/ealush/emoji-picker-react), MIT License, Copyright (c) 2022 ealush.
 
 ## Twemoji
 

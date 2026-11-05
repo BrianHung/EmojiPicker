@@ -3,7 +3,7 @@ import { EmojiPickerCard, EmojiPickerCell } from "@/components/ui/emoji-picker";
 
 function QuickRow({ onPick }: { onPick: (selection: EmojiSelection) => void }) {
   const store = useEmojiStore();
-  const top = useFrequentEmoji(8);
+  const top = useFrequentEmoji({ limit: 8 }).items;
   return (
     <div className="flex flex-col gap-1 border-b border-border px-2 pb-2">
       <div className="px-1 text-xs font-medium text-muted-foreground">Quick reactions</div>
@@ -35,7 +35,7 @@ export function CellsAndRowsPicker({ onSelect }: { onSelect: (selection: EmojiSe
       onSelect={onSelect}
       rows={<QuickRow onPick={onSelect} />}
       cell={roundCell}
-      columns={7}
+      columns={6}
       frequent={false}
       className="h-[420px] [--emoji-cell-size:44px] [--emoji-size:26px]"
     />

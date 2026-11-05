@@ -48,7 +48,7 @@ export function StyleDropdown({
 
 export function StyleTapback({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
   const store = useEmojiStore();
-  const frequent = useFrequentEmoji(count);
+  const frequent = useFrequentEmoji({ limit: count }).items;
   const top = appStyle.tapback.pinned ?? frequent;
   return (
     <ReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">

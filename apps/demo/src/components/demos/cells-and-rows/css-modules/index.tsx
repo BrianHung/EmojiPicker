@@ -4,7 +4,7 @@ import styles from "./index.module.css";
 
 function QuickRow({ onPick }: { onPick: (selection: EmojiSelection) => void }) {
   const store = useEmojiStore();
-  const top = useFrequentEmoji(8);
+  const top = useFrequentEmoji({ limit: 8 }).items;
   return (
     <div className={styles.row}>
       <div className={styles.label}>Quick reactions</div>
@@ -30,5 +30,5 @@ function QuickRow({ onPick }: { onPick: (selection: EmojiSelection) => void }) {
 const roundCell = (emoji: EmojiItem) => <EmojiPickerCell render={<button title={`:${emoji.record.shortcodes[0] ?? emoji.record.name}:`} />} className={styles.cell} />;
 
 export function CellsAndRowsPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
-  return <EmojiPickerCard onSelect={onSelect} rows={<QuickRow onPick={onSelect} />} cell={roundCell} columns={7} frequent={false} className={styles.root} />;
+  return <EmojiPickerCard onSelect={onSelect} rows={<QuickRow onPick={onSelect} />} cell={roundCell} columns={6} frequent={false} className={styles.root} />;
 }

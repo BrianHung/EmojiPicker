@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import data from "../data/en.json";
 import type { Dataset } from "./dataset";
-import { createFrequencyStore, memoryStorage } from "./frequents";
 import { createPickerState, moveHighlight, setCategoryCollapsed } from "./picker";
 import { createEmojiStore } from "./store";
 
 const ready = async () => {
-  const store = createEmojiStore({ data: data as unknown as Dataset, frequents: createFrequencyStore({ storage: memoryStorage() }) });
+  const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
   await store.load();
   return store;
 };

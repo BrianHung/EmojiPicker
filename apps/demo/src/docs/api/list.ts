@@ -7,9 +7,7 @@ export const list = rowsOf<ListProps>()([
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
-  { name: "onLoadMore", type: "() => void", description: "Called as the end of the list scrolls into view (a paged custom pack)." },
-  { name: "loadingMore", type: "boolean", description: "A page is loading: the end of the list shows loadingIndicator." },
-  { name: "loadingIndicator", type: "ReactNode" },
+  { name: "renderEmptyState", type: "(state: EmptyState) => ReactNode", description: "Shown in the list while data loads, after it fails, and when a search has no results." },
   { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
 ]);
 

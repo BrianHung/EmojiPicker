@@ -5,6 +5,9 @@ import { mergeProps } from "react-aria/mergeProps";
 import { resolve } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
+import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
+import { createChangeDetails } from "@brianhung/emoji-picker-core";
+import type { PopoverOpenChangeReason } from "../popover-context";
 import {
   anchorRect,
   ContentFocus,
@@ -30,7 +33,9 @@ type Internals = PopoverInternals & { id?: string };
 function Root({ children, ...props }: PopoverRootProps) {
   const state = usePopoverState(props);
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
-  const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, state.overlay, { current: trigger });
+  // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself
+  const overlay = useOverlayTriggerState({ isOpen: state.open, onOpenChange: (open) => state.setOpen(open, open ? "trigger-press" : "scroll") });
+  const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, overlay, { current: trigger });
   const { onPress: _, ...aria } = triggerProps;
   const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => mergeProps(props, aria), id: overlayProps.id };
   return <PopoverProvider value={value}>{children}</PopoverProvider>;
@@ -49,6 +54,21 @@ function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | nul
 
 const placementOf = (side: Side, align: Align) => (align === "center" ? side : (`${side} ${align}` as const));
 
+// React Aria's onOpenChange carries no reason: the outside press and Escape that start a close leave one
+function useDismissReason() {
+  const reason = React.useRef<PopoverOpenChangeReason | null>(null);
+  const take = () => {
+    const taken = reason.current ?? "none";
+    reason.current = null;
+    return taken;
+  };
+  return {
+    take,
+    shouldCloseOnInteractOutside: () => Boolean((reason.current = "outside-press")),
+    onKeyDown: (e: React.KeyboardEvent) => void (e.key === "Escape" && (reason.current = "escape-key")),
+  };
+}
+
 function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitialFocus; content: React.RefObject<HTMLElement | null> }) {
   React.useEffect(() => void initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true }), []);
   return null;
@@ -66,6 +86,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     wasOpen.current = p.state.open;
   }, [p.state.open]);
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
+  const dismiss = useDismissReason();
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);
   return (
@@ -75,7 +96,8 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         ref={node}
         triggerRef={triggerRef}
         isOpen={p.state.open}
-        onOpenChange={p.state.setOpen}
+        onOpenChange={(open) => p.state.setOpen(open, dismiss.take())}
+        shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
@@ -84,7 +106,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         style={(values) => resolve(style, stateOf(values, p.state.open, side, align))}
         render={(dom, values) => (
           <div
-            {...mergeProps(props, contentAttributes({ ...stateOf(values, p.state.open, side, align), status: statusOf(values), props }), dom, { id: p.id })}
+            {...mergeProps(props, { onKeyDown: dismiss.onKeyDown }, contentAttributes({ ...stateOf(values, p.state.open, side, align), status: statusOf(values), props }), dom, { id: p.id })}
             style={{ "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style } as React.CSSProperties}
           />
         )}
@@ -102,6 +124,7 @@ const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.m
 
 function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, children, ...props }: SuggestionsPopoverProps) {
   const [anchorElement, triggerRef] = useAnchorRef(anchor, null);
+  const dismiss = useDismissReason();
   return (
     <>
       {anchorElement}
@@ -109,7 +132,8 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
         isNonModal
         triggerRef={triggerRef}
         isOpen={open}
-        onOpenChange={(next) => onOpenChange?.(next)}
+        onOpenChange={(next) => onOpenChange?.(next, createChangeDetails(dismiss.take()))}
+        shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}

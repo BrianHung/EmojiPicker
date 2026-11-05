@@ -15,7 +15,7 @@ import { EmojiGridNavigation } from "./navigation";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { nextTabbable, TABBABLE } from "../utils/utils";
-import { useEmptyState } from "../root/viewport";
+import { useStoreSnapshot } from "../provider/provider";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
 export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
@@ -27,10 +27,10 @@ export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "chi
     orientation?: "vertical" | "horizontal";
     rows?: number;
     searchRows?: number;
-    onLoadMore?: () => void;
-    loadingMore?: boolean;
-    loadingIndicator?: React.ReactNode;
+    renderEmptyState?: (state: EmptyState) => React.ReactNode;
   };
+
+export type EmptyState = { status: "loading" | "error" | "empty"; query: string; error: Error | null; retry: () => void };
 
 const CellsContext = React.createContext<Cells | null>(null);
 const HorizontalContext = React.createContext(false);
@@ -78,7 +78,7 @@ function readProbe(probe: HTMLElement): GridMetrics {
 
 const sameMetrics = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => Math.abs(a[k] - b[k]) < 0.01);
 
-const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, onLoadMore, loadingMore, loadingIndicator, className, style, render, ...rest }, ref) {
+const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = 5, searchRows, onKeyDown, renderEmptyState, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
   const { searching } = picker;
   const horizontal = orientation === "horizontal";
@@ -86,7 +86,6 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   React.useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
 
   const { sections, request, probeRoot } = useGridSections(horizontal);
-  const loader = Boolean(onLoadMore && !searching);
 
   const [layout] = React.useState(() => new EmojiGridLayout());
   const [navigation] = React.useState(() => new EmojiGridNavigation(() => layout));
@@ -95,8 +94,8 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const listRef = React.useRef<HTMLDivElement | null>(null);
   const results = searching ? picker.searchResults : undefined;
   const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(
-    () => ({ orientation, metrics, columns: picker.columns, fitColumns: picker.fitColumns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
-    [orientation, metrics, picker.columns, picker.fitColumns, horizontal, results, searching, searchRows, rows],
+    () => ({ orientation, metrics, columns: picker.columns, results: horizontal ? undefined : results, rows: searching ? (searchRows ?? rows) : rows }),
+    [orientation, metrics, picker.columns, horizontal, results, searching, searchRows, rows],
   );
   const measure = React.useCallback(() => {
     const probe = probeRef.current;
@@ -204,7 +203,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, loader, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 
@@ -241,12 +240,10 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     latest.current.syncStop();
   }, [measure, layout, picker.state, picker.root, searching, horizontal, request]);
 
-  const empty = useEmptyState();
   const { collection, persisted } = grid;
   const renderNode = React.useCallback((node: CollectionNode<unknown>) => {
     if (node.type === "section") return <SectionView section={node.value as EmojiSection} />;
     if (node.type === "header") return <SectionHeader />;
-    if (node.type === "loader") return <LoadMore />;
     return <ItemView item={node as unknown as EmojiItem} />;
   }, []);
   const template = children ?? defaultSection;
@@ -257,32 +254,26 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     <CellsContext.Provider value={grid.cells}>
       <HorizontalContext.Provider value={horizontal}>
         <TemplateContext.Provider value={template}>
-          <LoadMoreContext.Provider value={loader ? { onLoadMore: onLoadMore!, isLoading: loadingMore, children: loadingIndicator, collection } : null}>
-            {renderElement(
-              "div",
-              {
-                ...rest,
-                ...grid.gridProps,
-                onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
-                className,
-                style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
-                render,
-                children: (
-                  <>
-                    {picker.columns && !horizontal ? <div aria-hidden style={COLUMNS} /> : null}
-                    <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
-                    <div ref={probeRef} aria-hidden style={PROBE} />
-                    {collection.size === 0 ? (
-                      <div role="option" style={{ display: "contents" }}>
-                        {empty}
-                      </div>
-                    ) : null}
-                  </>
-                ),
-              },
-              { orientation, searching, empty: collection.size === 0 },
-            )}
-          </LoadMoreContext.Provider>
+          {renderElement(
+            "div",
+            {
+              ...rest,
+              ...grid.gridProps,
+              onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
+              className,
+              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(horizontal || results ? UNPADDED : null), ...resolve(style, s) }),
+              render,
+              children: (
+                <>
+                  {picker.columns && !horizontal ? <div aria-hidden style={COLUMNS} /> : null}
+                  <VirtualCollection collection={collection} layout={layout} layoutOptions={layoutOptions} scroller={scroller} renderNode={renderNode} persistedKeys={persisted} onState={onState} onRendered={onRendered} />
+                  <div ref={probeRef} aria-hidden style={PROBE} />
+                  {collection.size === 0 && renderEmptyState ? <EmptyOption render={renderEmptyState} /> : null}
+                </>
+              ),
+            },
+            { orientation, searching, empty: collection.size === 0 },
+          )}
           {grid.variations}
           {actions ? <ActionsLayer layout={layout} list={listRef} sections={sections} actions={tab.actions} /> : null}
         </TemplateContext.Provider>
@@ -424,34 +415,17 @@ const Cell = React.forwardRef<HTMLDivElement, CellProps>(function Cell({ classNa
 const CELL: React.CSSProperties = { width: "var(--ep-cell)", height: "var(--ep-cell)", maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)" };
 const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 
-type LoadMoreState = { onLoadMore: () => void; isLoading?: boolean; children: React.ReactNode; collection: object };
-const LoadMoreContext = React.createContext<LoadMoreState | null>(null);
+const CONTENTS: React.CSSProperties = { display: "contents" };
 
-function LoadMore() {
-  const more = React.useContext(LoadMoreContext);
-  const sentinel = React.useRef<HTMLDivElement | null>(null);
-  const latest = React.useRef(more?.onLoadMore);
-  latest.current = more?.onLoadMore;
-  React.useLayoutEffect(() => {
-    const el = sentinel.current;
-    const root = el?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`);
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    const observer = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && latest.current?.(), { root, rootMargin: "0px 100% 100% 100%" });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [more?.collection]);
-  if (!more) return null;
+function EmptyOption({ render }: { render: (state: EmptyState) => React.ReactNode }) {
+  const { store, query, pending } = usePicker();
+  const status = useStoreSnapshot((s) => s.status());
+  if (status === "ready" && pending) return null;
+  const state: EmptyState = { status: status === "error" ? "error" : status === "ready" ? "empty" : "loading", query, error: store.error(), retry: () => void store.load().catch(() => {}) };
   return (
-    <>
-      <div style={{ position: "relative", width: 0, height: 0 }} inert>
-        <div ref={sentinel} style={{ position: "absolute", height: 1, width: 1 }} />
-      </div>
-      {more.isLoading && more.children ? (
-        <div role="option" tabIndex={-1}>
-          {more.children}
-        </div>
-      ) : null}
-    </>
+    <div role="option" style={CONTENTS}>
+      {render(state)}
+    </div>
   );
 }
 

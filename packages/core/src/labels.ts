@@ -19,16 +19,12 @@ export type EmojiLabels = {
   searchResults: string;
   emojiList: string;
   resultCount: (count: number) => string;
-  noResults: string;
   categoryNavigation: string;
   suggested: string;
   custom: string;
   reactions: string;
   expandReactions: string;
   previewCaption: string;
-  loading: string;
-  loadingError: string;
-  retryLoading: string;
   skinTone: string;
   skinTones: SkinToneNames;
   withSkinTone: (name: string, tone: number) => string;
@@ -50,16 +46,12 @@ export const defaultLabels: EmojiLabels = {
   searchResults: "Search results",
   emojiList: "Emoji",
   resultCount: plural("en", COUNT),
-  noResults: "No results found",
   categoryNavigation: "Category navigation",
   suggested: "Frequently used",
   custom: "Custom",
   reactions: "Reactions",
   expandReactions: "More emoji",
   previewCaption: "What's your mood?",
-  loading: "Loading…",
-  loadingError: "Could not load emojis.",
-  retryLoading: "Try again",
   skinTone: "Skin tone",
   skinTones: ["Default skin tone", "Light skin tone", "Medium-light skin tone", "Medium skin tone", "Medium-dark skin tone", "Dark skin tone"],
   withSkinTone: (name, tone) => `${name}: ${TONE_SUFFIXES[tone - 1]}`,

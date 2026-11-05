@@ -144,7 +144,7 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url";
 Import the parts and assemble them.
 
 ```tsx title="anatomy.tsx"
-import { EmojiProvider, EmojiPicker, Tapback, Emoji } from "@brianhung/emoji-picker-react";
+import { EmojiProvider, EmojiPicker, Emoji, useFrequentEmoji } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 <EmojiProvider data={en}>
@@ -158,10 +158,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
       </EmojiPicker.SkinTone>
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
-      <EmojiPicker.List />
-      <EmojiPicker.Empty />
-      <EmojiPicker.Loading />
-      <EmojiPicker.LoadError />
+      <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && "No emoji found"} />
     </EmojiPicker.Viewport>
     <EmojiPicker.Preview />
   </EmojiPicker.Root>
@@ -171,10 +168,10 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
     <EmojiPopover.Content>…</EmojiPopover.Content>
   </EmojiPopover.Root>
 
-  <Tapback>
+  <EmojiPicker.Root reactions={useFrequentEmoji({ limit: 5 }).items}>
     <EmojiPicker.Reactions />
     <EmojiPicker.Panel>…</EmojiPicker.Panel>
-  </Tapback>
+  </EmojiPicker.Root>
 
   <Emoji emoji="1f44d-1f3fd" />
 </EmojiProvider>
@@ -225,7 +222,7 @@ type EmojiSearch = (query: string, context: {
 
 ### Rendering<span id="renderers" className="scroll-mt-20" />
 
-The provider draws emoji with the system font or Twemoji. Artwork replaces particular emoji with your own images; they keep their name, shortcode and selection.
+The provider draws emoji with the system font or Twemoji. `imageUrl` can also replace particular emoji with your own images; they keep their name, shortcode and selection.
 
 <Demo name="rendering" className="flex-col gap-4" />
 
@@ -326,19 +323,15 @@ The shared skin tone: a trigger, and the six tones it opens as a radio group.
 
 <PropsTable rows={api.skinTone} />
 
-### Empty, Loading, LoadError {#api-states}
+### Empty state {#api-states}
 
-Content for the empty, loading and error states.
+The state `List renderEmptyState` receives.
 
 <PropsTable rows={api.states} />
 
-### Tapback {#api-tapback}
+### Reactions {#api-tapback}
 
-A row of the most-used emoji that expands into a picker.
-
-<PropsTable rows={api.tapback} />
-
-#### Reactions
+A Root with `reactions` shows a reaction row that expands into the picker in `Panel`. `onSelect`'s `details.collapse()` shows the row again.
 
 <PropsTable rows={api.reactions} />
 
