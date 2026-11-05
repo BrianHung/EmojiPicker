@@ -24,6 +24,7 @@ import {
 } from "@floating-ui/react";
 import { mergeProps } from "react-aria/mergeProps";
 import { resolve } from "../../utils/render";
+import { SLOTS } from "../../utils/slots";
 import {
   anchorRect,
   ContentFocus,
@@ -169,7 +170,7 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
     <div
       {...getFloatingProps(mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }))}
       ref={refs.setFloating}
-      data-slot="suggestions-popover"
+      data-slot={SLOTS.suggestions}
       data-side={placed}
       data-align={align}
       style={{ ...position, zIndex: 50, ...style }}

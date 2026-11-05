@@ -4,6 +4,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { PopoverContext, type PopoverState } from "./popover-context";
 import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
+import { SLOTS } from "../utils/slots";
 import { TABBABLE } from "../utils/utils";
 
 export type Side = "top" | "bottom";
@@ -59,9 +60,9 @@ export type SuggestionsPopoverProps = React.HTMLAttributes<HTMLDivElement> &
 // For popovers this package doesn't render, so all it has is their content element
 export function pickerInitialFocus(root: Element | null | undefined): HTMLElement | null {
   if (!root) return null;
-  const target = root.querySelector<HTMLElement>("[data-autofocus]") ?? root.querySelector<HTMLElement>('[data-slot="emoji-picker"] [data-slot="list"] [data-slot="emoji"][tabindex="0"]');
+  const target = root.querySelector<HTMLElement>("[data-autofocus]") ?? root.querySelector<HTMLElement>(`[data-slot="${SLOTS.root}"] [data-slot="${SLOTS.list}"] [data-slot="${SLOTS.emoji}"][tabindex="0"]`);
   if (target) return target;
-  if (root.querySelector('[data-slot="emoji-picker"] [data-slot="list"]') || root.matches('[data-slot="emoji-picker"]')) return null;
+  if (root.querySelector(`[data-slot="${SLOTS.root}"] [data-slot="${SLOTS.list}"]`) || root.matches(`[data-slot="${SLOTS.root}"]`)) return null;
   return [...root.querySelectorAll<HTMLElement>(TABBABLE)].find((el) => el.tabIndex >= 0) ?? null;
 }
 
@@ -75,7 +76,7 @@ type TransitionStatus = "starting" | "open" | "ending";
 export const contentAttributes = ({ open, side, align, status, props }: PopoverContentState & { status: TransitionStatus; props: React.AriaAttributes }) => ({
   role: "dialog",
   "aria-label": props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Emoji picker"),
-  "data-slot": "popover-content",
+  "data-slot": SLOTS.popoverContent,
   "data-state": open ? "open" : "closed",
   "data-side": side,
   "data-align": align,
@@ -140,7 +141,7 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open);
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
   const merged = triggerProps(
-    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": "popover-trigger", "data-state": state.open ? "open" : "closed", onClick: toggle }),
+    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-state": state.open ? "open" : "closed", onClick: toggle }),
   );
   return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
 });

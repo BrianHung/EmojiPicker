@@ -92,8 +92,8 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
       {search ? (
         <EmojiPicker.Search
           className={cn(
-            "relative flex shrink-0 items-center gap-2 px-2 [--search-icon-x:14px] [&_[data-slot=skin-tone]]:order-last",
-            reaction ? "pt-2 pb-[14.5px]" : "mt-1 mb-2.5 py-1 [&_[data-slot=skin-tone]]:-ml-0.5",
+            "relative flex shrink-0 items-center gap-2 px-2 [--search-icon-x:14px] [&_[data-slot=emoji-picker-skin-tone]]:order-last",
+            reaction ? "pt-2 pb-[14.5px]" : "mt-1 mb-2.5 py-1 [&_[data-slot=emoji-picker-skin-tone]]:-ml-0.5",
           )}
         >
           <EmojiPicker.Search.Input

@@ -118,7 +118,7 @@ export function EmojiTapback({ onSelect, className }: { onSelect: (selection: Em
       className={cn(
         root,
         "w-fit max-w-[352px] rounded-full border border-border bg-popover text-foreground shadow-lg",
-        "has-[[data-slot=panel]:not([hidden])]:h-[360px] has-[[data-slot=panel]:not([hidden])]:w-[328px] has-[[data-slot=panel]:not([hidden])]:rounded-xl [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
+        "has-[[data-slot=emoji-picker-panel]:not([hidden])]:h-[360px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:w-[328px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:rounded-xl [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
         className,
       )}
     >

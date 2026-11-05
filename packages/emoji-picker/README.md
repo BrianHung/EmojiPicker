@@ -399,10 +399,10 @@ The library animates nothing itself and honors `prefers-reduced-motion`.
 
 ## Styling
 
-Parts are unstyled. Every part and cell has a stable `data-slot`, such as `emoji-picker`, `search-input`, `category-tab`, `list`, `category-header`, and `emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-searching`, `data-empty`, `data-disabled`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). A part's state uses the same names (`{ hovered, focused, focusVisible, pressed, disabled }` on its buttons and field). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
+Parts are unstyled. Every part and cell has a stable `data-slot`, prefixed `emoji-picker-` (the root's is `emoji-picker`), such as `emoji-picker-search-input`, `emoji-picker-category-tab`, `emoji-picker-list`, `emoji-picker-section-title`, and `emoji-picker-emoji`. State appears as `data-highlighted` (the search field's highlight), `data-active`, `data-collapsed`, `data-searching`, `data-empty`, `data-disabled`, `data-has-variations`, and `data-state`, plus `data-focused`, `data-focus-visible`, `data-hovered`, `data-pressed`, and `data-selected` (as React Aria names them). A part's state uses the same names (`{ hovered, focused, focusVisible, pressed, disabled }` on its buttons and field). Repeated elements are parts in children functions (`List.Cell`, `List.SectionTitle`, `CategoryNav.Tab`, `SkinTone.Option`, `Reactions.Item`), each taking `className` as a string or a function of its state.
 
 ```css
-[data-slot="emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
+[data-slot="emoji-picker-emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
 ```
 
 Set sizes with CSS variables on `Root` or an ancestor:

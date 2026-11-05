@@ -81,8 +81,8 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
 async function steps(page: Page, root: Locator) {
   await root.scrollIntoViewIfNeeded();
   const cells = await root.evaluate((el) => {
-    const view = el.querySelector('[data-slot="viewport"]')!.getBoundingClientRect();
-    return [...el.querySelectorAll('[data-slot="list"] [data-slot="emoji"]')]
+    const view = el.querySelector('[data-slot="emoji-picker-viewport"]')!.getBoundingClientRect();
+    return [...el.querySelectorAll('[data-slot="emoji-picker-list"] [data-slot="emoji-picker-emoji"]')]
       .map((c) => c.getBoundingClientRect())
       .filter((r) => r.width > 0 && r.top >= view.top + 48 && r.bottom <= view.bottom)
       .map((r) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 }));
@@ -91,10 +91,10 @@ async function steps(page: Page, root: Locator) {
   await frames(page);
   const hover = await perStep(page, async (i) => page.mouse.move(cells[(i % (cells.length - 1)) + 1]!.x, cells[(i % (cells.length - 1)) + 1]!.y));
   await page.mouse.move(0, 0);
-  await root.locator('[data-slot="list"] [data-slot="emoji"][tabindex="0"]').focus();
+  await root.locator('[data-slot="emoji-picker-list"] [data-slot="emoji-picker-emoji"][tabindex="0"]').focus();
   await frames(page);
   const focus = await perStep(page, () => page.keyboard.press("ArrowRight"));
-  await root.locator('[data-slot="search-input"]').click();
+  await root.locator('[data-slot="emoji-picker-search-input"]').click();
   await page.keyboard.press("ArrowDown");
   await frames(page);
   const key = await perStep(page, () => page.keyboard.press("ArrowRight"));
@@ -126,7 +126,7 @@ test("home: popover picker heap on open", async ({ page }) => {
   await trigger.scrollIntoViewIfNeeded();
   const delta = await openDelta(page, async () => {
     await trigger.click();
-    await page.locator('[data-slot="popover-content"] [data-slot="emoji"]').first().waitFor();
+    await page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker-emoji"]').first().waitFor();
   });
   record("home-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
@@ -141,7 +141,7 @@ test("gallery: Slack picker renders per step, and heap on open", async ({ page }
   await trigger.scrollIntoViewIfNeeded();
   const delta = await openDelta(page, async () => {
     await trigger.click();
-    await page.locator('[data-slot="popover-content"] [data-slot="emoji"]').first().waitFor();
+    await page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker-emoji"]').first().waitFor();
   });
   record("gallery-slack-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);

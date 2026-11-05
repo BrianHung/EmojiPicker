@@ -13,7 +13,7 @@
   box-shadow: var(--emoji-picker-shadow);
   font-family: var(--emoji-picker-font);
 }
-.root:has([data-slot="panel"]:not([hidden])) {
+.root:has([data-slot="emoji-picker-panel"]:not([hidden])) {
   width: 352px;
   height: 380px;
   border-radius: var(--emoji-picker-radius);

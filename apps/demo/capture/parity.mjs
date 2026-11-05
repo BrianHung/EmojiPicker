@@ -7,13 +7,13 @@ const REAL = {
 };
 const SEL = {
   root: "[data-slot=emoji-picker]",
-  tab: "[data-slot=category-tab]",
-  input: "[data-slot=search-input]",
-  viewport: "[data-slot=viewport]",
-  emoji: "[data-slot=emoji]",
-  tone: "[data-slot=skin-tone] > button",
-  header: "[data-slot=category-header]",
-  glyph: "[data-slot=emoji] > *",
+  tab: "[data-slot=emoji-picker-category-tab]",
+  input: "[data-slot=emoji-picker-search-input]",
+  viewport: "[data-slot=emoji-picker-viewport]",
+  emoji: "[data-slot=emoji-picker-emoji]",
+  tone: "[data-slot=emoji-picker-skin-tone] > button",
+  header: "[data-slot=emoji-picker-section-title]",
+  glyph: "[data-slot=emoji-picker-emoji] > *",
 };
 const b = await chromium.launch({ channel: "chrome", headless: true });
 for (const [style, { theme, parts }] of Object.entries(REAL)) {

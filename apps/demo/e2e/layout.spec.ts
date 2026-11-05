@@ -3,7 +3,7 @@ import { clearTextField, SURFACES } from "./surfaces";
 import { expect, frames, quiet, test, visit } from "./support";
 
 const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
-const highlighted = (page: Page) => picker(page).locator('[data-slot="emoji"][data-highlighted]');
+const highlighted = (page: Page) => picker(page).locator('[data-slot="emoji-picker-emoji"][data-highlighted]');
 
 async function focusSearch(page: Page) {
   await picker(page).scrollIntoViewIfNeeded();
@@ -36,12 +36,12 @@ test("moving up never hides the highlighted emoji under a sticky section title",
     await page.keyboard.press("ArrowUp");
     await frames(page);
     const hidden = await picker(page).evaluate((root) => {
-      const cell = root.querySelector('[data-slot="emoji"][data-highlighted]')?.getBoundingClientRect();
+      const cell = root.querySelector('[data-slot="emoji-picker-emoji"][data-highlighted]')?.getBoundingClientRect();
       if (!cell) return null;
-      const top = root.querySelector('[data-slot="viewport"]')!.getBoundingClientRect().top;
+      const top = root.querySelector('[data-slot="emoji-picker-viewport"]')!.getBoundingClientRect().top;
       return Math.max(
         0,
-        ...[...root.querySelectorAll('[data-slot="category-header"]')]
+        ...[...root.querySelectorAll('[data-slot="emoji-picker-section-title"]')]
           .map((h) => h.getBoundingClientRect())
           .filter((h) => Math.abs(h.top - top) < 2)
           .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
@@ -75,13 +75,13 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover"])
     await quiet(page);
     const gap = await surface
       .root(page)
-      .locator('[data-slot="viewport"]')
+      .locator('[data-slot="emoji-picker-viewport"]')
       .first()
       .evaluate(async (viewport) => {
         viewport.scrollBy(0, 330);
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
         const top = viewport.getBoundingClientRect().top;
-        const pinned = [...viewport.querySelectorAll('[data-slot="category-header"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
+        const pinned = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
         return pinned ? pinned.top - top : null;
       });
     expect(gap).toBe(0);
@@ -91,8 +91,8 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
   await visit(page, "/examples/lexical/");
   await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
-  const root = page.locator('[data-slot="popover-content"] [data-slot="emoji-picker"]');
-  await root.locator('[data-slot="emoji"]').first().waitFor();
+  const root = page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker"]');
+  await root.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
   expect(
