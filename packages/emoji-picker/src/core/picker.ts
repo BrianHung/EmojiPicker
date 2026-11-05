@@ -25,15 +25,16 @@ export type PickerStateOptions<Icon = unknown> = {
   /** Most results for a query. Default 200. */
   searchLimit?: number;
   /** Controlled query. */
-  search?: string;
-  defaultSearch?: string;
-  onSearchChange?: (query: string) => void;
+  query?: string;
+  defaultQuery?: string;
+  onQueryChange?: (query: string) => void;
   /** Controlled collapsed sections (category ids). */
   collapsedCategories?: readonly string[];
   defaultCollapsedCategories?: readonly string[];
   onCollapsedCategoriesChange?: (ids: string[]) => void;
   /** Controlled highlight (an item id, or null): the state then keeps none of its own. */
   highlighted?: string | null;
+  defaultHighlighted?: string | null;
   onHighlightChange?: (id: string | null) => void;
   focusModel?: FocusModel;
   disableVariations?: boolean;
@@ -89,9 +90,9 @@ type Ui = { highlighted: string | null; hovered: string | null; activeSection: s
  */
 export function createPickerState<Icon = unknown>(store: EmojiStore, options: PickerStateOptions<Icon> = {}) {
   let opts = options;
-  let ownQuery = options.defaultSearch ?? "";
+  let ownQuery = options.defaultQuery ?? "";
   let ownCollapsed = options.defaultCollapsedCategories ?? NO_IDS;
-  const ui: Ui = { highlighted: null, hovered: null, activeSection: null, variations: null, searchFields: 0, mounted: false, domFocus: false, held: false };
+  const ui: Ui = { highlighted: options.defaultHighlighted ?? null, hovered: null, activeSection: null, variations: null, searchFields: 0, mounted: false, domFocus: false, held: false };
   let top: { n: number; list: readonly string[] } | null = null;
   let reactions = options.reactions;
   let cached: PickerSnapshot<Icon> | null = null;
@@ -122,7 +123,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
 
   const labels = () => opts.labels ?? store.labels();
   const highlighted = () => (opts.highlighted === undefined ? ui.highlighted : opts.highlighted);
-  const query = () => opts.search ?? ownQuery;
+  const query = () => opts.query ?? ownQuery;
   const collapsed = () => opts.collapsedCategories ?? ownCollapsed;
   // Frequents change with every pick; held while the user is in the picker so nothing moves under them.
   const frequents = () => {
@@ -207,9 +208,9 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       else cached = null;
     },
     setQuery(value: string) {
-      if (opts.search === undefined) ownQuery = value;
+      if (opts.query === undefined) ownQuery = value;
       changed();
-      opts.onSearchChange?.(value);
+      opts.onQueryChange?.(value);
     },
     toggleCollapsed: (id: string) => setCollapsed(id),
     setCollapsed: (id: string, value: boolean) => setCollapsed(id, value),

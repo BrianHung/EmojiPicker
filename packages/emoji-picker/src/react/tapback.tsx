@@ -33,7 +33,6 @@ export const Tapback = React.forwardRef<HTMLElement, TapbackProps>(function Tapb
       ref={ref}
       {...root}
       reactions={reactions ?? top}
-      reactionsDefaultOpen
       allowExpandReactions={expandable && Boolean(children)}
       pressed={pressed}
       onSelect={(selection, { collapse }) => {

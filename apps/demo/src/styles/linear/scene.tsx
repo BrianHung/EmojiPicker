@@ -1,13 +1,14 @@
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
+import { Emoji, EmojiPicker, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker";
 import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { cn } from "@/lib/utils";
-import { linear } from "./picker";
+import { LINEAR_CATEGORIES, linear } from "./picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { LinearEmojiMenu, linearEmojiOptions } from "@/experiences/linear";
-import { StylePicker, type PickerLayout } from "@/styles/style-picker";
+import { SearchClear } from "@/styles/parts";
+import { CELL, ROOT, tokensOf, type StylePickerProps } from "@/styles/style";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 import { Avatar, EmojiText, FitViewport, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
 
@@ -511,16 +512,38 @@ function Description({ compact = false }: { compact?: boolean }) {
   );
 }
 
-const TEAM_PICKER: PickerLayout = {
-  ...linear.layout,
-  root: "h-[379.5px] w-[412px] bg-transparent font-picker text-picker-foreground [--emoji-size:20px] [--emoji-cell-size:28px] [--emoji-image-size:20px] [--emoji-header-height:28px] [--emoji-list-padding:10.5px]",
-  columns: 14,
-  header: "h-7 bg-picker-background pt-1.5 pr-1.5 pl-[10.5px] text-[12px] leading-[22px] font-medium text-picker-muted",
-  searchRow: "border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1",
-  input: "h-7 w-full rounded-[8px] bg-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle",
-  scrollbar: "[scrollbar-width:thin]",
-  fixedColumns: false,
-};
+/** Linear's team-icon picker: 14 columns of 28px, inside its own popup with tabs. */
+function TeamPicker({ onSelect, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+  return (
+    <EmojiPicker.Root
+      columns={fluid ? undefined : 14}
+      frequent={18}
+      categories={LINEAR_CATEGORIES}
+      searchResults={searchResults}
+      onSelect={onSelect}
+      data-style="linear"
+      style={tokensOf(linear)}
+      className={cn(ROOT, "h-[379.5px] w-[412px] bg-transparent font-picker text-picker-foreground [--emoji-cell-size:28px] [--emoji-header-height:28px] [--emoji-image-size:20px] [--emoji-list-padding:10.5px] [--emoji-size:20px]", className)}
+    >
+      <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1">
+        <EmojiPicker.Search.Input placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle">
+          <SearchClear />
+        </EmojiPicker.Search.Input>
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport className="relative min-h-0 flex-1 [scrollbar-width:thin]">
+        <EmojiPicker.List className="outline-none">
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-[10.5px] text-[12px] leading-[22px] font-medium text-picker-muted" />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[highlighted]:bg-picker-selected")} />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
+        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
 
 const ACCENT = "lch(52.418 61.103 288.421)";
 
@@ -542,7 +565,7 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
     return (
       <PickerSheet
         appStyle={linear}
-        layout={TEAM_PICKER}
+        Picker={TeamPicker}
         top={TEAM_TABS}
         label="Change team icon"
         title="Change icon"
@@ -565,10 +588,9 @@ function TeamIconPopover({ value, onChange, sheet = false }: { value: string; on
       </EmojiPopover.Trigger>
       <EmojiPopover.Content side="bottom" align="start" aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
         <FitViewport width={412}>
-          <div data-style="linear" className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
+          <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
             {TEAM_TABS}
-            <StylePicker
-              layout={TEAM_PICKER}
+            <TeamPicker
               onSelect={(s) => {
                 onChange(s.unified);
                 setOpen(false);

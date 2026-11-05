@@ -1,7 +1,7 @@
 // The grid in modes the other specs don't cover: right-to-left, sticky section titles while
 // moving up, and Windows high contrast (forced colors), where backgrounds are dropped.
 import type { Page } from "@playwright/test";
-import { SURFACES } from "./surfaces";
+import { clearTextField, SURFACES } from "./surfaces";
 import { expect, frames, quiet, test, visit } from "./support";
 
 const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
@@ -53,7 +53,9 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
   expect(await highlighted(page).evaluate(outline)).toBe("solid 2px");
 
   await visit(page, "/gallery/#slack");
-  await page.locator('[data-slot="card"]').first().getByLabel("Message #general", { exact: true }).click();
+  const composer = page.locator('[data-slot="card"]').first().getByLabel("Message #general", { exact: true });
+  await composer.click();
+  await clearTextField(composer);
   await page.keyboard.type(":smi", { delay: 40 });
   expect(await page.getByRole("listbox", { name: "Emoji suggestions" }).locator("[data-highlighted]").evaluate(outline)).toBe("solid 2px");
 });

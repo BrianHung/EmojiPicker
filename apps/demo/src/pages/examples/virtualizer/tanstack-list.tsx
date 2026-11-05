@@ -5,7 +5,7 @@ import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type Emoj
 /** One emoji: it re-renders only when its own highlight, hover or press changes. */
 const Cell = React.memo(function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
   const { cellProps } = useEmojiCell(state, item);
-  return <div {...cellProps} className="rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />;
+  return <div {...cellProps} className="flex size-9 cursor-default items-center justify-center rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />;
 });
 
 /** EmojiPicker.List's grid, virtualized by TanStack Virtual. */
@@ -33,7 +33,7 @@ export function TanStackList() {
           return (
             <div key={v.key} role="presentation" className="absolute inset-x-0 grid grid-cols-8 justify-items-center px-1.5" style={{ top: v.start, height: v.size }}>
               {row.type === "header" ? (
-                <div {...grid.getHeaderProps(row.section)} className="col-span-full w-full bg-popover px-1 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
+                <div {...grid.getHeaderProps(row.section)} className="col-span-full flex h-7 w-full items-center bg-popover px-1 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
               ) : (
                 row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />)
               )}

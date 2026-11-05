@@ -22,4 +22,6 @@
   --emoji-picker-radius: var(--border-radius-lg, 10px);
   --emoji-picker-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
   --emoji-picker-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  /* Native emoji glyphs: a color emoji font first, so text-default symbols (keycaps, ‼) draw as emoji. */
+  --emoji-font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji";
 }

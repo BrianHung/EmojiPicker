@@ -3,7 +3,7 @@
 import * as React from "react";
 import { createRoot, type Root as ReactRoot } from "react-dom/client";
 import enUrl from "../../data/en.json?url";
-import { Emoji, EmojiPicker, EmojiPopover, EmojiProvider, Tapback, type CustomEmoji, type CustomEmojiSource, type KeyboardAction } from "../../src/index";
+import { Emoji, EmojiOverrides, EmojiPicker, EmojiPopover, EmojiProvider, Tapback, type ArtworkMap, type CustomEmoji, type CustomEmojiSource, type KeyboardAction } from "../../src/index";
 // The demo's shadcn registry item and autocomplete: the markup apps actually ship.
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SuggestionMenu } from "@/components/suggestion-menu";
@@ -28,6 +28,8 @@ export type Fixture = {
   selected?: string[];
   /** Leave out the Search part. */
   noSearch?: boolean;
+  /** Artwork for everything inside (EmojiOverrides). */
+  artwork?: ArtworkMap;
   /** Extra Root props (focusModel, pointer, …). */
   root?: Partial<React.ComponentProps<typeof EmojiPicker.Root>>;
   /** Root's onKeyDown calls preventEmojiPickerHandler() for this key. */
@@ -80,6 +82,16 @@ const CSS = `
 #harness { position: fixed; inset: 16px auto auto 16px; z-index: 9999; background: white; color: black; padding: 8px; font: 13px system-ui; }
 #harness .hx-picker { display: flex; flex-direction: column; width: 352px; height: 380px; border: 1px solid #ccc; }
 #harness .hx-picker [data-slot="viewport"] { flex: 1; position: relative; }
+#harness [data-slot="search-input"] { height: 40px; width: 100%; padding: 0 30px; }
+#harness [data-slot="search-clear"] { position: absolute; inset-inline-end: 10px; width: 30px; height: 30px; }
+#harness [data-slot="category-nav"] { display: flex; }
+#harness [data-slot="category-tab"] { width: 30px; height: 30px; }
+#harness [data-slot="category-header"] { display: flex; align-items: center; padding: 0 10px; }
+#harness [data-slot="emoji"] { display: flex; align-items: center; justify-content: center; }
+#harness [data-slot="skin-tone"] { position: relative; display: inline-flex; }
+#harness [data-slot="skin-tone-options"] { inset-block-start: 0; inset-inline-end: 0; z-index: 3; display: flex; }
+#harness [data-slot="panel"] { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#harness [data-slot="reactions"] { display: flex; align-items: center; }
 #harness [data-slot="emoji"][data-highlighted], #harness [data-slot="emoji"]:focus { background: #ddd; outline: 2px solid #36c; }
 #harness .footer { height: 28px; display: flex; gap: 8px; align-items: center; min-width: 0; overflow: hidden; white-space: nowrap; }
 #harness .footer .name { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -191,7 +203,7 @@ function App({ f }: { f: Fixture }) {
   else body = <Picker f={f} horizontal={f.kind === "horizontal"} />;
   return (
     <EmojiProvider data={enUrl} customEmojis={customs} renderer={f.renderer}>
-      <div dir={f.dir}>{body}</div>
+      <div dir={f.dir}>{f.artwork ? <EmojiOverrides artwork={f.artwork}>{body}</EmojiOverrides> : body}</div>
     </EmojiProvider>
   );
 }

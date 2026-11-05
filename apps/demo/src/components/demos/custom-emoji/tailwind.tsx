@@ -16,7 +16,7 @@ const categories: CategoryOption[] = [
 export function CustomEmojiPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiProvider data={en} customEmojis="/packs/bufo/pack.json">
-      <EmojiPickerCard autoFocusSearch={false} onSelect={onSelect} categories={categories} />
+      <EmojiPickerCard onSelect={onSelect} categories={categories} />
     </EmojiProvider>
   );
 }

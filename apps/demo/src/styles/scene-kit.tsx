@@ -4,7 +4,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker/floating-ui";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { StylePicker, useStyleTokens, type PickerLayout, type Style } from "./style-picker";
+import { tokensOf, type Style, type StylePickerProps } from "./style";
 
 /** A color for the site's light and dark themes. */
 export const ld = (light: string, dark: string) => `light-dark(${light}, ${dark})`;
@@ -39,7 +39,6 @@ export type SceneFrameProps = {
 /** An app window at its real pixel size, scaled down (not reflowed) to fit narrow containers. */
 export function SceneFrame({ width, height, label, appStyle, className, style, children }: SceneFrameProps) {
   const { ref, scale } = useFitScale(width);
-  useStyleTokens(appStyle?.id, appStyle?.layout.tokens);
   return (
     <div ref={ref} className="mx-auto w-full" style={{ maxWidth: width }}>
       <div style={{ width: width * scale, height: height * scale }}>
@@ -48,7 +47,7 @@ export function SceneFrame({ width, height, label, appStyle, className, style, c
           aria-label={label}
           data-style={appStyle?.id}
           className={cn("relative overflow-hidden", className)}
-          style={{ width, height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: "0 0", ...style }}
+          style={{ ...tokensOf(appStyle), width, height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: "0 0", ...style }}
         >
           {children}
         </div>
@@ -76,14 +75,13 @@ export function useCompact(breakpoint = 640) {
 export type MobileFrameProps = Omit<SceneFrameProps, "width" | "height"> & { height?: number };
 
 export function MobileFrame({ height = 640, label, appStyle, className, style, children }: MobileFrameProps) {
-  useStyleTokens(appStyle?.id, appStyle?.layout.tokens);
   return (
     <div
       role="region"
       aria-label={label}
       data-style={appStyle?.id}
       className={cn("relative mx-auto flex w-full max-w-[430px] flex-col overflow-hidden", className)}
-      style={{ height, ...style }}
+      style={{ ...tokensOf(appStyle), height, ...style }}
     >
       {children}
     </div>
@@ -153,7 +151,7 @@ export function ScenePicker({ appStyle: style, onSelect, children, label, trigge
       </EmojiPopover.Trigger>
       <EmojiPopover.Content side={side} align={align} aria-label={`${style.label} style emoji picker`} style={{ fontFamily: font }}>
         <FitViewport width={style.size.width}>
-          <StylePicker layout={style.layout} onSelect={onSelect} autoFocus className={pickerClassName} />
+          <style.Picker onSelect={onSelect} autoFocus className={pickerClassName} />
         </FitViewport>
       </EmojiPopover.Content>
     </EmojiPopover.Root>
@@ -171,12 +169,13 @@ export type PickerSheetProps = {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   font?: string;
-  layout?: PickerLayout;
+  /** A picker other than the style's own. */
+  Picker?: React.ComponentType<StylePickerProps>;
   top?: React.ReactNode;
 };
 
 /** The app style's picker in a full-width bottom sheet. Picking closes it. */
-export function PickerSheet({ appStyle: style, onSelect, label, children, title, triggerClassName, open, onOpenChange, font, layout = style.layout, top }: PickerSheetProps) {
+export function PickerSheet({ appStyle: style, onSelect, label, children, title, triggerClassName, open, onOpenChange, font, Picker = style.Picker, top }: PickerSheetProps) {
   const [uncontrolled, setUncontrolled] = React.useState(false);
   const isOpen = open ?? uncontrolled;
   const setOpen = (next: boolean) => {
@@ -194,15 +193,14 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
       <DrawerContent
         data-style={style.id}
         className="border-picker-border bg-picker-background font-picker text-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-picker-muted/40"
-        style={{ fontFamily: font }}
+        style={{ ...tokensOf(style), fontFamily: font }}
         // Keyboard opens into search; a tap doesn't raise the phone's keyboard.
         initialFocus={(type) => (type === "touch" ? true : (body.current?.querySelector("input") ?? true))}
       >
         <DrawerTitle className="sr-only">{label}</DrawerTitle>
         <div ref={body} className="flex min-h-0 flex-col">
           {top}
-          <StylePicker
-            layout={layout}
+          <Picker
             fluid
             onSelect={(s) => {
               onSelect(s);

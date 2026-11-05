@@ -11,9 +11,9 @@ import { notion } from "./notion/picker";
 import { NotionScene } from "./notion/scene";
 import { slack } from "./slack/picker";
 import { SlackScene } from "./slack/scene";
-import type { Style } from "./style-picker";
+import type { Style } from "./style";
 
-export { StylePicker, type Style } from "./style-picker";
+export type { Style } from "./style";
 
 export const STYLES: Style[] = [apple, slack, discord, notion, linear, instagram];
 

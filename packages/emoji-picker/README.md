@@ -87,7 +87,9 @@ Root
 └ Panel
 ```
 
-Every part takes `render` (an element, whose props and ref merge with the part's, or `(props, state) => element`), and `className` and `style` as values or functions of its state; state is also on data attributes. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useSearchState`, and `useSearchActions`.
+Every part takes `render` (an element, whose props and ref merge with the part's, or `(props, state) => element`), and `className` and `style` as values or functions of its state; state is also on data attributes. Hooks inside a `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories` and `useSearchState`.
+
+Root's state is controllable, Base UI style (`x`, `defaultX`, `onXChange`): `query`, `value` (a value picker's chosen emoji), `highlightedEmoji` (an item id), `reactionsOpen`, and `collapsedCategories`. The provider's `skinTone`, `defaultSkinTone` and `onSkinToneChange` do the same for the shared skin tone, which `skinToneStorage` persists (localStorage by default; `null` for memory only).
 
 ```tsx
 <EmojiPicker.List>
@@ -159,7 +161,7 @@ Nothing animates by default. Content carries `data-starting-style` on its first 
 
 ### With your own popover
 
-A picker drops into any popover. Give it `autoFocusSearch`, and let the popover focus `pickerInitialFocus(content)` on open: the search field, else the grid's current emoji. Close it from `onSelect`.
+A picker drops into any popover. Give its `Search.Input` `autoFocus`, and let the popover focus `pickerInitialFocus(content)` on open: the search field, else the grid's current emoji. Close it from `onSelect`.
 
 ```tsx
 import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker";
@@ -171,7 +173,7 @@ import { Popover } from "@base-ui-components/react/popover"; // or shadcn/ui's P
   <Popover.Portal>
     <Popover.Positioner sideOffset={8}>
       <Popover.Popup ref={popup} initialFocus={() => pickerInitialFocus(popup.current)}>
-        <EmojiPicker.Root autoFocusSearch onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
+        <EmojiPicker.Root onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
       </Popover.Popup>
     </Popover.Positioner>
   </Popover.Portal>
@@ -179,7 +181,7 @@ import { Popover } from "@base-ui-components/react/popover"; // or shadcn/ui's P
 
 // Radix / shadcn/ui
 <PopoverContent onOpenAutoFocus={(e) => { e.preventDefault(); pickerInitialFocus(e.currentTarget as HTMLElement)?.focus(); }}>
-  <EmojiPicker.Root autoFocusSearch onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
+  <EmojiPicker.Root onSelect={(e) => (insert(e), setOpen(false))}>…</EmojiPicker.Root>
 </PopoverContent>
 ```
 
@@ -187,7 +189,7 @@ Escape clears the query first, and the picker keeps that key; with no query it r
 
 ## Autocomplete
 
-`useShortcodeAutocomplete({ value, caret })` adds `:tada` → 🎉 to a text input. It owns matching, the highlight, keys, and ARIA; you render the list. In a rich-text editor, let the editor find the trigger and pass the query to `useEmojiSuggestions`:
+`useTextFieldEmojiTypeahead(ref)` adds `:tada` → 🎉 to an `<input>` or `<textarea>`. It owns matching, the highlight, keys, and ARIA; you render the list. In a rich-text editor, let the editor find the trigger and pass the query to `useEmojiSuggestions`:
 
 ```tsx
 const menu = useEmojiSuggestions({
@@ -197,7 +199,7 @@ const menu = useEmojiSuggestions({
 // In the editor's suggestion plugin: onKeyDown: ({ event }) => menu.onKeyDown(event)
 ```
 
-Both hooks take `matchBy` (`"shortcode"` or `"search"`), `order` (`"relevance"` or `"alphabetical"`), `columns`, and `limit`. The demo has complete [Tiptap](../../apps/demo/src/components/tiptap) and [Lexical](../../apps/demo/src/components/lexical) integrations.
+Both take `matchBy` (`"shortcode"` or `"search"`), `order` (`"relevance"` or `"alphabetical"`), `columns`, and `limit`. The demo has complete [Tiptap](../../apps/demo/src/components/tiptap) and [Lexical](../../apps/demo/src/components/lexical) integrations.
 
 ### Your own editor
 
@@ -281,7 +283,7 @@ moveHighlight(picker, "right", { columns: 9 });
 picker.choose(); // EmojiSelection of the highlighted emoji
 ```
 
-The picker state owns its highlight unless you control it: pass `highlighted` and `onHighlightChange` (as with `search` and `onSearchChange`), and `setOptions(next, { notify: true })` when your value changes.
+The picker state owns its highlight unless you control it: pass `highlighted` and `onHighlightChange` (as with `query` and `onQueryChange`), and `setOptions(next, { notify: true })` when your value changes.
 
 ## Rendering emoji
 
@@ -314,7 +316,7 @@ Only visible rows render, so only their images load.
 
 ## Search
 
-A search is a function, `(query, context) => hits | Promise<hits>`. Set it with the provider's `search`; the picker, `useEmojiSearch`, and `useEmojiSearchState` call it.
+A search is a function, `(query, context) => hits | Promise<hits>`. Set it with the provider's `searchEngine`; the picker, `useEmojiSearch`, and `useEmojiSearchState` call it.
 
 ```tsx
 import Fuse from "fuse.js";
@@ -324,7 +326,7 @@ const typoTolerant = fallback(lexical(), fuse(Fuse));
 const personal = rerank(lexical(), preferFrequent());
 const semantic = progressive(lexical(), remote((query, { signal }) => fetchEmoji(query, signal)));
 
-<EmojiProvider data={en} search={semantic}>…</EmojiProvider>
+<EmojiProvider data={en} searchEngine={semantic}>…</EmojiProvider>
 ```
 
 `context` provides `records`, `limit`, `signal` (aborted when the query changes), and `frequency(unified)`. Return `{ unified, score? }[]`, best first.
@@ -406,7 +408,7 @@ Set sizes with CSS variables on `Root` or an ancestor:
 | `--emoji-font-family` | System emoji fonts | Font for native emoji |
 | `--emoji-skin-tone-size` | `15px` | Default skin-tone swatch |
 
-`tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The structural CSS is in the `base` cascade layer, so classes and unlayered CSS override it; `cssLayer` on `Root` changes the layer.
+`tokens.css` defines `--emoji-picker-*` color and shape tokens with `light-dark()` defaults. `theme.css` exposes them as Tailwind v4 utilities (`bg-picker-background`, `rounded-picker`). `shadcn.css` maps them to a shadcn/ui theme. The library injects no CSS: the layout a part needs (a cell's size from `--emoji-cell-size`, the viewport's scroll axis, sticky titles) is inline and driven by the size variables, and everything visual (the Root's column, the emoji font via `--emoji-font-family`, forced-colors outlines, reduced motion) is your classes, as in the registry item.
 
 ## Data
 
@@ -447,7 +449,7 @@ import { lexical } from "@brianhung/emoji-picker/search";
 
 const bigrams = (text: string) => Array.from({ length: Math.max(1, text.length - 1) }, (_, i) => text.slice(i, i + 2));
 
-<EmojiProvider data="/emoji/zh.json" search={lexical({ tokenize: bigrams })}>…</EmojiProvider>
+<EmojiProvider data="/emoji/zh.json" searchEngine={lexical({ tokenize: bigrams })}>…</EmojiProvider>
 ```
 
 Interface strings are defined in `EmojiLabels`, exported from `@brianhung/emoji-picker/core` with English defaults in `defaultLabels`. Pass any of them as the provider's `labels`; its `locale` also sets React Aria's locale (text direction) and formats the default result count. Counts are functions; `plural()` builds one from CLDR plural forms and formats the number for the locale:

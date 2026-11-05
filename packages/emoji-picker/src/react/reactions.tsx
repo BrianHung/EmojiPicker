@@ -13,7 +13,7 @@ import { useEdgeKeys } from "./keyboard";
 import { useDrawable } from "./native-support";
 import { findArtwork, useArtworkMap } from "./overrides";
 import { ReactionsContext, isPressed } from "./reactions-context";
-import { racClassName, renderElement, toRenderFunction, type PartElementProps, type PartProps } from "./render";
+import { racClassName, renderElement, resolve, toRenderFunction, type PartElementProps, type PartProps } from "./render";
 import { SLOTS } from "./slots";
 
 const BUTTONS = "button:not([disabled])";
@@ -174,7 +174,7 @@ export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButton
 };
 
 /** A reaction: picks it; a toggle (`aria-pressed`) when the Tapback has `selected`. Without children, its glyph. */
-const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, render, children, ...props }, ref) {
+const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
   const state = React.useContext(ReactionsContext);
   const artwork = useArtworkMap();
@@ -189,6 +189,8 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
     "data-overridden": artwork && findArtwork(artwork, unified) !== undefined ? "" : undefined,
     "data-selected": on ? "" : undefined,
     className: racClassName(className),
+    // An emoji cell: never larger than `--emoji-cell-size`.
+    style: (s: ReactionsItemState) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }),
     render: toRenderFunction(render) as never,
     children: children ?? <Glyph unified={unified} record={record} />,
   };
@@ -232,8 +234,8 @@ export type PanelState = { hidden: boolean };
 export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 
 /** The full picker inside a Tapback: hidden while the reaction row shows. */
-export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel(props, ref) {
+export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);
   const hidden = Boolean(state?.open);
-  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref, hidden, inert: hidden || undefined }, { hidden });
+  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });
 });

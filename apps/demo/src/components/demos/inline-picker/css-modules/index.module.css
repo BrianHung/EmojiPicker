@@ -90,6 +90,8 @@
 }
 
 .header {
+  display: flex;
+  align-items: center;
   padding: 12px 12px 6px;
   font-size: 12px;
   line-height: 16px;
@@ -128,4 +130,11 @@
 .tab[data-active] {
   color: var(--emoji-picker-foreground);
   background: var(--emoji-picker-selected);
+}
+
+@media (forced-colors: active) {
+  .cell[data-highlighted] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }

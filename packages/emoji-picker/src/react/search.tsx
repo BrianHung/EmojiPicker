@@ -8,7 +8,6 @@ import { Input, type InputRenderProps } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "./context";
 import { useKeyRegion, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
-import { useEmojiPopover } from "./popover-context";
 import { racClassName, renderElement, toRenderFunction, type PartElementProps, type PartProps } from "./render";
 import { SLOTS } from "./slots";
 
@@ -41,13 +40,15 @@ const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.v
 
 const EmptyContext = React.createContext(true);
 
-/** The search field: the picker's query and its keys. Placeholder and focus on mount default to Root's. */
+const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
+
+/** The search field: the picker's query and its keys. `placeholder` defaults to the labels'; `autoFocus` to being in an EmojiPopover. */
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels, focusModel } = picker;
   React.useLayoutEffect(picker.registerSearch, [picker.registerSearch]);
   const own = React.useRef<HTMLInputElement | null>(null);
-  const focusOnMount = autoFocus ?? picker.autoFocusSearch;
+  const focusOnMount = autoFocus ?? picker.inPopover;
   // Stable, so the field re-rendering with each highlight move (aria-activedescendant) skips it.
   const clear = React.useMemo(() => <SearchClear />, []);
 
@@ -70,13 +71,12 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
   });
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
 
-  const inEmojiPopover = useEmojiPopover() !== null;
   React.useEffect(() => {
-    if (focusOnMount && !inEmojiPopover) own.current?.focus({ preventScroll: true });
+    if (focusOnMount && !picker.inPopover) own.current?.focus({ preventScroll: true });
   }, []);
 
   return (
-    <SearchField ref={region} data-slot={SLOTS.searchField} aria-label={labels.searchLabel} className="" {...(focusModel === "grid" ? { value: picker.query, onChange: picker.setQuery } : {})}>
+    <SearchField ref={region} data-slot={SLOTS.searchField} aria-label={labels.searchLabel} className="" style={FIELD} {...(focusModel === "grid" ? { value: picker.query, onChange: picker.setQuery } : {})}>
       {({ isEmpty }) => (
         <EmptyContext.Provider value={isEmpty}>
           <Input

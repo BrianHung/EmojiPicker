@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { MotionGlobalConfig } from "motion/react";
 import enUrl from "@brianhung/emoji-picker/data/en.json?url";
 import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker";
-import { SCENES, StylePicker, styleById } from "@/styles";
+import { SCENES, styleById } from "@/styles";
 import { StyleTapback } from "@/styles/variants";
 import { AppleScene, IMessageScreen, type IMessageMode, type Message } from "@/styles/apple/scene";
 import { OgImage } from "./og-image";
@@ -141,7 +141,7 @@ function Shot() {
       <div style={{ padding: 24, display: "inline-block" }}>
         <div data-shot={appStyle.id} style={{ display: "inline-block" }}>
           <Seeded>
-            <StylePicker layout={appStyle.layout} search={params.get("search") !== "0"} searchResults={params.get("results") === "grouped" ? "grouped" : "ranked"} onSelect={(s) => ((window as unknown as { picked: unknown[] }).picked ??= []).push(s)} autoFocus />
+            <appStyle.Picker search={params.get("search") !== "0"} searchResults={params.get("results") === "grouped" ? "grouped" : "ranked"} onSelect={(s) => ((window as unknown as { picked: unknown[] }).picked ??= []).push(s)} autoFocus />
           </Seeded>
         </div>
       </div>

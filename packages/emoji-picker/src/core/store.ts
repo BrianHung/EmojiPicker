@@ -1,6 +1,6 @@
 import { expandDataset, SKIN_TONES, unifiedToNative, type Dataset, type EmojiRecord } from "./dataset";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
-import { createFrequencyStore, localStorageAdapter, type FrequencyStore } from "./frequents";
+import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import type { CompletionOrder, SearchIndex } from "./search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search";
@@ -21,18 +21,23 @@ export type EmojiStoreOptions = {
   /** Drop emoji from the picker and search. */
   filter?: (record: EmojiRecord) => boolean;
   frequents?: FrequencyStore;
-  /** Default 0 (none). 1-5 are the Fitzpatrick tones. */
+  /** Controlled skin tone: 0 (none) or 1-5, the Fitzpatrick tones. */
+  skinTone?: number;
+  /** Skin tone until one is stored or chosen. Default 0. */
   defaultSkinTone?: number;
+  onSkinToneChange?: (tone: number) => void;
+  /** Where the uncontrolled skin tone persists. Default: localStorage `emoji-picker:skin-tone`; `null` keeps it in memory. */
+  skinToneStorage?: EmojiStorage | null;
   /**
    * How queries become results, for the picker and useEmojiSearch. Any function
    * `(query, context) => hits | Promise<hits>`; default `lexical()`. Compose with
    * the helpers in `@brianhung/emoji-picker/search`.
    */
-  search?: EmojiSearch;
+  searchEngine?: EmojiSearch;
   /**
    * BCP 47 tag for everything language-specific: case folding, word segmentation and A–Z order
    * in search, and the labels' counts. Default: the dataset's `locale`. Each piece replaces only
-   * itself: `labels`, `collator`, a `search` engine (`lexical({ segmenter, tokenize })`), or `data`.
+   * itself: `labels`, `collator`, a `searchEngine` (`lexical({ segmenter, tokenize })`), or `data`.
    */
   locale?: string;
   /** Interface strings over the English defaults (`localizeLabels(locale, labels)`). */
@@ -60,13 +65,13 @@ export type EmojiSelection = {
 
 export type EmojiStore = ReturnType<typeof createEmojiStore>;
 
-const defaultSearch = lexical();
+const defaultEngine = lexical();
 
-export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), defaultSkinTone = 0, search = defaultSearch, locale: localeOption, labels: labelOverrides, collator }: EmojiStoreOptions) {
+export function createEmojiStore({ data, customEmojis, filter, frequents = createFrequencyStore(), skinTone: controlledTone, defaultSkinTone = 0, onSkinToneChange, skinToneStorage = localStorageAdapter("emoji-picker:skin-tone"), searchEngine = defaultEngine, locale: localeOption, labels: labelOverrides, collator }: EmojiStoreOptions) {
   const sources = customSources(customEmojis);
   const listeners = new Set<() => void>();
   const emit = () => listeners.forEach((l) => l());
-  const toneStorage = localStorageAdapter("emoji-picker:skin-tone");
+  let toneControl = { value: controlledTone, onChange: onSkinToneChange };
 
   let status: EmojiStoreStatus = "idle";
   let error: Error | null = null;
@@ -79,7 +84,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
   let customs: readonly CustomEmoji[] = [];
   let customGroups = new Map<string, string | undefined>();
   let packErrors: readonly Error[] = [];
-  let skinTone = clampTone(Number(toneStorage.read() ?? defaultSkinTone));
+  let ownTone = clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
   let labels: EmojiLabels | null = null;
 
   function ingest(dataset: Dataset, loaded: readonly CustomEmoji[]) {
@@ -177,7 +182,7 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
         }
         return [...seen];
       };
-      const result = search(text, { records, limit, signal, frequency: (u) => frequents.score(u), locale });
+      const result = searchEngine(text, { records, limit, signal, frequency: (u) => frequents.score(u), locale });
       if (!isThenable(result)) return resolve(result);
       const settled = Promise.resolve(result).then(resolve);
       const interim = interimOf(result);
@@ -186,11 +191,21 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     completeShortcode: (prefix: string, limit?: number, order?: CompletionOrder) => (status === "ready" ? store.index().completeShortcode(prefix, limit, order) : []),
     replaceShortcodes: (text: string) => (status === "ready" ? replaceShortcodes(text, store.index()) : text),
 
-    skinTone: () => skinTone,
-    setSkinTone(tone: number) {
-      skinTone = clampTone(tone);
-      toneStorage.write(String(skinTone));
-      emit();
+    skinTone: () => (toneControl.value === undefined ? ownTone : clampTone(toneControl.value)),
+    setSkinTone(next: number) {
+      const value = clampTone(next);
+      if (toneControl.value === undefined && value !== ownTone) {
+        ownTone = value;
+        skinToneStorage?.write(String(value));
+        emit();
+      }
+      toneControl.onChange?.(value);
+    },
+    /** Takes the controlled skin tone and its handler (a framework syncing them from a render). */
+    controlSkinTone(value: number | undefined, onChange?: (tone: number) => void) {
+      const changed = value !== toneControl.value;
+      toneControl = { value, onChange };
+      if (changed) emit();
     },
 
     /** Build the selection for an emoji (or variation) and count it as used. */
@@ -216,7 +231,8 @@ export function createEmojiStore({ data, customEmojis, filter, frequents = creat
     /** Applies the current skin tone to a base emoji when it has variations. */
     withSkinTone(unified: string): string {
       const record = store.get(unified);
-      return record && skinTone && record.tones[skinTone - 1] ? record.tones[skinTone - 1]! : unified;
+      const current = store.skinTone();
+      return record && current && record.tones[current - 1] ? record.tones[current - 1]! : unified;
     },
 
     subscribe(listener: () => void) {

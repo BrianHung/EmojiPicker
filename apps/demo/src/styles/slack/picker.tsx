@@ -1,11 +1,32 @@
+import { EmojiPicker } from "@brianhung/emoji-picker";
+import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { type Style, type Tokens } from "@/styles/style-picker";
+import { HandTone, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
+import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 /** Slack's first section, pinned rather than learned. */
 const GETTING_WORK_DONE = [
   "2705", "1f440", "1f64c", "1f64f", "2795", "1f44f", "1f4a1", "1f3af", "1f44b",
   "1f44d", "1f389", "31-fe0f-20e3", "32-fe0f-20e3", "33-fe0f-20e3", "1f4e3", "26aa", "1f535", "1f534",
 ];
+
+const CATEGORIES = withIcons(I.ICONS.slack, {
+  categories: [
+    { id: "suggested", name: "Getting Work Done" },
+    { id: "smileys_people" },
+    { id: "animals_nature" },
+    { id: "food_drink" },
+    { id: "travel_places" },
+    { id: "activities" },
+    { id: "objects" },
+    { id: "symbols" },
+    { id: "flags" },
+    { id: "custom" },
+  ],
+  size: 22,
+  strokeWidth: 1.7,
+  hide: ["suggested", "custom"],
+});
 
 /** The four-pill mark on Slack's "Custom" tab, drawn at its 20px size. */
 function CustomTabIcon() {
@@ -53,66 +74,91 @@ const tokens: Tokens = {
   "--slack-pill-hover-border": "#bdbdbd",
 };
 
-const DIVIDER = "shadow-[inset_0_-1px_0_var(--emoji-picker-border)]";
+const TAB = "flex h-[38px] w-[34.3px] shrink-0 items-start justify-center rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-picker-subtle hover:text-picker-foreground";
+
+export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+  const nav = useActiveTabInView();
+  return (
+    <EmojiPicker.Root
+      columns={fluid ? undefined : 9}
+      categories={CATEGORIES}
+      suggested={GETTING_WORK_DONE}
+      searchResults={searchResults}
+      onSelect={onSelect}
+      data-style="slack"
+      style={tokens}
+      className={cn(
+        ROOT,
+        "group h-[454px] w-[361px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:33px] [--emoji-header-height:28px] [--emoji-image-size:22px] [--emoji-list-padding:9px] [--emoji-size:22px]",
+        className,
+      )}
+    >
+      <div className="mt-1 flex h-[38px] shrink-0 items-center pr-[10px] pl-2 shadow-[inset_0_-1px_0_var(--emoji-picker-border)]">
+        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-picker-subtle group-has-[input:focus]:text-picker-foreground group-has-[input:focus]:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)]">
+          <I.Search size={22} strokeWidth={2} />
+        </span>
+        <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-between gap-0 overflow-x-auto [scrollbar-width:none]">
+          {() => (
+            <EmojiPicker.CategoryNav.Tab
+              className={cn(TAB, "relative data-active:text-picker-foreground data-active:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)] data-active:group-has-[input:focus]:text-picker-subtle data-active:group-has-[input:focus]:shadow-none")}
+            />
+          )}
+        </EmojiPicker.CategoryNav>
+        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start pt-1 pl-[5.8px] text-picker-subtle">
+          <CustomTabIcon />
+        </span>
+      </div>
+      {search ? (
+        <EmojiPicker.Search className="relative flex shrink-0 items-center px-[17.5px] pt-3.5 pb-[7px]">
+          <EmojiPicker.Search.Input
+            placeholder="Search all emoji"
+            autoFocus={autoFocus}
+            className="h-9 w-full rounded-[8px] border border-picker-input-border bg-picker-background px-3 py-1 text-[15px] outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
+          >
+            <SearchClear />
+          </EmojiPicker.Search.Input>
+        </EmojiPicker.Search>
+      ) : null}
+      <EmojiPicker.Viewport
+        className={cn(
+          "relative ml-[7px] min-h-0 flex-1 [&::-webkit-scrollbar]:w-[15px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:bg-(--slack-thumb) [&::-webkit-scrollbar-thumb]:bg-clip-padding [&::-webkit-scrollbar-thumb]:[border-width:2px_3px_2px_4px] [&::-webkit-scrollbar-track]:bg-(--slack-track) [&::-webkit-scrollbar-track]:shadow-[inset_1px_0_var(--slack-track-rule)]",
+          !search && "pt-[var(--emoji-list-padding,8px)]",
+        )}
+      >
+        <EmojiPicker.List className="outline-none">
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="block h-7 bg-picker-background/95 pt-px pr-3.5 pl-3.5 text-[13px] leading-6 font-bold text-picker-foreground" />
+              <EmojiPicker.List.Items>
+                {() => (
+                  // The 35×32 hover box sits 1px left of the 33px cell and stops 1px above the next row.
+                  <EmojiPicker.List.Cell className={cn(CELL, "isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-focus-visible:before:bg-picker-selected data-[highlighted]:before:bg-picker-selected")} />
+                )}
+              </EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
+        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
+      </EmojiPicker.Viewport>
+      <div className="flex h-[60px] shrink-0 items-center border-t border-(--slack-divider) bg-picker-panel pt-0.5 pr-[26px] pl-3.5">
+        <button type="button" className="h-7 rounded border border-(--slack-button-border,var(--emoji-picker-input-border)) bg-picker-background px-3 pt-[0.5px] text-[13px] font-bold hover:bg-picker-hover">
+          Add Emoji
+        </button>
+        <div className="ml-auto flex items-center gap-[3px] text-[14.4px] font-bold text-picker-muted">
+          <HandTone className="flex h-[26px] w-[22px] items-center justify-center text-[22px] leading-none" />
+          Skin Tone
+        </div>
+      </div>
+    </EmojiPicker.Root>
+  );
+}
 
 export const slack: Style = {
   id: "slack",
   label: "Slack",
+  tokens,
+  Picker: SlackPicker,
   size: { width: 361, height: 454 },
-  layout: {
-    id: "slack",
-    tokens,
-    root: "group h-[454px] w-[361px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-size:22px] [--emoji-cell-size:33px] [--emoji-image-size:22px] [--emoji-header-height:28px] [--emoji-list-padding:9px]",
-    columns: 9,
-    placeholder: "Search all emoji",
-    categories: [
-      { id: "suggested", name: "Getting Work Done" },
-      { id: "smileys_people" },
-      { id: "animals_nature" },
-      { id: "food_drink" },
-      { id: "travel_places" },
-      { id: "activities" },
-      { id: "objects" },
-      { id: "symbols" },
-      { id: "flags" },
-      { id: "custom" },
-    ],
-    suggested: GETTING_WORK_DONE,
-    // The 35×32 hover box sits 1px left of the 33px cell and stops 1px above the next row.
-    cell: "relative isolate before:absolute before:inset-[0_1px_1px_-1px] before:-z-10 before:rounded-[6px] hover:before:bg-picker-hover data-[highlighted]:before:bg-picker-selected data-focus-visible:before:bg-picker-selected",
-    header: "block h-7 bg-picker-background/95 pt-px pr-3.5 pl-3.5 text-[13px] leading-6 font-bold text-picker-foreground",
-    searchRow: "px-[17.5px] pt-3.5 pb-[7px]",
-    input:
-      "h-9 w-full rounded-[8px] border border-picker-input-border bg-picker-background px-3 py-1 text-[15px] outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]",
-    nav: {
-      placement: "top",
-      className: `mt-1 h-[38px] pr-[10px] pl-2 ${DIVIDER}`,
-      leading: (
-        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-picker-subtle group-has-[input:focus]:text-picker-foreground group-has-[input:focus]:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)]">
-          <I.Search size={22} strokeWidth={2} />
-        </span>
-      ),
-      trailing: (
-        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start pt-1 pl-[5.8px] text-picker-subtle">
-          <CustomTabIcon />
-        </span>
-      ),
-      button: "flex h-[38px] w-[34.3px] items-start rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-picker-subtle hover:text-picker-foreground",
-      active: `data-active:text-picker-foreground data-active:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)] data-active:group-has-[input:focus]:text-picker-subtle data-active:group-has-[input:focus]:shadow-none`,
-      icons: I.ICONS.slack,
-      iconSize: 22,
-      strokeWidth: 1.7,
-      hide: ["suggested", "custom"],
-    },
-    viewport: "ml-[7px]",
-    scrollbar:
-      "[&::-webkit-scrollbar]:w-[15px] [&::-webkit-scrollbar-track]:bg-(--slack-track) [&::-webkit-scrollbar-track]:shadow-[inset_1px_0_var(--slack-track-rule)] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:[border-width:2px_3px_2px_4px] [&::-webkit-scrollbar-thumb]:bg-(--slack-thumb) [&::-webkit-scrollbar-thumb]:bg-clip-padding",
-    skinTone: "hand",
-    skinTonePlacement: "footer",
-    toneButton: "h-[26px] w-[22px] text-[22px]",
-    footer: "slack",
-    footerClass: "flex h-[60px] shrink-0 items-center border-t border-(--slack-divider) bg-picker-panel pt-0.5 pr-[26px] pl-3.5",
-  },
   tapback: {
     className: "flex w-fit flex-col overflow-hidden rounded-[12px] bg-picker-background shadow-[0_0_0_1px_light-dark(rgb(29_28_29/0.13),rgb(232_232_232/0.13)),0_1px_3px_rgb(0_0_0/0.08)]",
     reactions: "flex items-center p-1 [--emoji-image-size:16px] [&_button]:flex [&_button]:size-8 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[8px] [&_button]:text-[16px] [&_button:hover]:bg-picker-hover",

@@ -30,5 +30,5 @@ function QuickRow({ onPick }: { onPick: (selection: EmojiSelection) => void }) {
 const roundCell = (emoji: EmojiItem) => <EmojiPickerCell render={<button title={`:${emoji.record.shortcodes[0] ?? emoji.record.name}:`} />} className={styles.cell} />;
 
 export function CellsAndRowsPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
-  return <EmojiPickerCard autoFocusSearch={false} onSelect={onSelect} rows={<QuickRow onPick={onSelect} />} cell={roundCell} columns={7} frequent={false} className={styles.root} />;
+  return <EmojiPickerCard onSelect={onSelect} rows={<QuickRow onPick={onSelect} />} cell={roundCell} columns={7} frequent={false} className={styles.root} />;
 }

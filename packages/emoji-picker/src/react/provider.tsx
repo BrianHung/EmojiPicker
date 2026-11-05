@@ -38,8 +38,10 @@ const EmojiContext = React.createContext<ContextValue | null>(null);
  * locale (text direction, number formatting) for everything inside.
  */
 export function EmojiProvider({ renderer = "auto", twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
-  // Options are read once, like a store; remount the provider to change data.
+  // Options are read once, like a store; remount the provider to change data. The skin tone stays controllable.
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
+  const { skinTone, onSkinToneChange } = options;
+  React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
   const [detected, setDetected] = React.useState<Renderer>("native");
 
   React.useEffect(() => {

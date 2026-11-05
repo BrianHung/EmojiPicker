@@ -5,7 +5,6 @@ export const list: PropRow[] = [
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
-  { name: "value", type: "string | null", description: "A value picker: the emoji shown as chosen (aria-selected)." },
 ];
 
 export const listParts: PropRow[] = [

@@ -33,7 +33,7 @@ function EmojiPickerPopover({
       </PopoverTrigger>
       <PopoverContent side={side} align={align} finalFocus={finalFocus} aria-label="Emoji picker" className="w-auto overflow-hidden p-0">
         <EmojiPickerCard
-          autoFocusSearch
+          autoFocus
           onSelect={(selection) => {
             onSelect(selection);
             setOpen(false);

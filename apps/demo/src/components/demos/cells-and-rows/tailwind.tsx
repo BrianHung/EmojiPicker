@@ -31,7 +31,7 @@ const roundCell = (emoji: EmojiItem) => <EmojiPickerCell render={<button title={
 export function CellsAndRowsPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPickerCard
-      autoFocusSearch={false}
+     
       onSelect={onSelect}
       rows={<QuickRow onPick={onSelect} />}
       cell={roundCell}

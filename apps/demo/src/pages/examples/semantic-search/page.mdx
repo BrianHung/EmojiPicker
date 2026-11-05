@@ -49,7 +49,7 @@ const onDeviceSearch: EmojiSearch = (query, { limit }) =>
     worker.postMessage({ id, query, limit });
   });
 
-<EmojiProvider data={en} search={fallback(onDeviceSearch, lexical())}>
+<EmojiProvider data={en} searchEngine={fallback(onDeviceSearch, lexical())}>
 ```
 
 ```bash title="Terminal"
@@ -78,7 +78,7 @@ const embeddings = remote((query, { limit, signal }) =>
     .then((r) => r.hits),
 );
 
-<EmojiProvider data={en} search={fallback(embeddings, lexical())}>
+<EmojiProvider data={en} searchEngine={fallback(embeddings, lexical())}>
 ```
 
 ```bash title="Terminal"
@@ -117,7 +117,7 @@ const decision = remote((query, { limit, signal }) =>
     .then((r) => r.hits),
 );
 
-<EmojiProvider data={en} search={fallback(decision, lexical())}>
+<EmojiProvider data={en} searchEngine={fallback(decision, lexical())}>
 ```
 
 ### Your own emoji

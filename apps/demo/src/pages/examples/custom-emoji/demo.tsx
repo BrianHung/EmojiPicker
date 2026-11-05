@@ -68,7 +68,7 @@ export function BufoPicker() {
           {bufo ? (
             // Provider options are read once: remount when the set of packs changes.
             <EmojiProvider key={packs.map((p) => p.key).join()} data={enUrl} customEmojis={customEmojis}>
-              <EmojiPickerCard autoFocusSearch={false} onSelect={setPicked} categories={categories} />
+              <EmojiPickerCard onSelect={setPicked} categories={categories} />
             </EmojiProvider>
           ) : (
             <div className="h-[420px] w-[352px] animate-pulse rounded-xl bg-muted" />

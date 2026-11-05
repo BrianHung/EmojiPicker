@@ -6,7 +6,7 @@ import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker";
 import { CodeBlock, CopyButton } from "@/components/site/code";
 import { useRenderer } from "@/components/site/shell";
 import { Collapsible, FitBox, Tabs } from "@/components/site/docs";
-import { STYLES, StylePicker, sourceOf, styleById, type Style } from "@/styles";
+import { STYLES, sourceOf, styleById, type Style } from "@/styles";
 import { AppleScene } from "@/styles/apple/scene";
 
 /** One style's live picker, sized to fit its card. */
@@ -14,7 +14,7 @@ function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: Rende
   return (
     <EmojiProvider key={renderer} data={enUrl} renderer={appStyle.renderer ?? renderer}>
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>
-        <StylePicker layout={appStyle.layout} />
+        <appStyle.Picker />
       </FitBox>
     </EmojiProvider>
   );

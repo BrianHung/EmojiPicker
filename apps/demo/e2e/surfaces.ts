@@ -82,6 +82,11 @@ export const caretToEnd = (field: Locator) =>
     getSelection()!.addRange(range);
   });
 
+/** Empties a text field, which in the gallery starts on `:smi`; an editor keeps its content. */
+export async function clearTextField(field: Locator) {
+  if (await field.evaluate((el) => el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) await field.fill("");
+}
+
 function menu(id: string, path: string, field: (p: Page) => Locator, text: string, extra: Extra = {}): Surface {
   return {
     id,
@@ -90,6 +95,7 @@ function menu(id: string, path: string, field: (p: Page) => Locator, text: strin
     root: listbox,
     open: async (p) => {
       await field(p).click();
+      await clearTextField(field(p));
       await caretToEnd(field(p));
       await p.keyboard.type(text, { delay: 40 });
       await listbox(p).getByRole("option").first().waitFor();

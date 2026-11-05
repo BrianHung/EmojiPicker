@@ -8,7 +8,7 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
         <EmojiPicker.Reactions.Items>{(emoji) => <EmojiPicker.Reactions.Item emoji={emoji} className={styles.reaction} />}</EmojiPicker.Reactions.Items>
         <EmojiPicker.Reactions.Expand className={styles.reaction} />
       </EmojiPicker.Reactions>
-      <EmojiPicker.Panel>
+      <EmojiPicker.Panel className={styles.panel}>
         <EmojiPicker.Search className={styles.search}>
           <EmojiPicker.Search.Input className={styles.input} />
         </EmojiPicker.Search>

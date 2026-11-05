@@ -17,7 +17,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   const pickers = (
     <div className="flex flex-col items-center gap-4">
       <EmojiTapback onSelect={onSelect} />
-      <EmojiPickerCard autoFocusSearch={false} footer={false} onSelect={onSelect} className="h-[300px]" />
+      <EmojiPickerCard footer={false} onSelect={onSelect} className="h-[300px]" />
     </div>
   );
   return (

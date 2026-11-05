@@ -500,7 +500,7 @@ await page.unroute("**/twemoji@*/assets/svg/**");
 const art = (color) => `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="${color}"/></svg>`)}`;
 const artwork = { "1f44d": art("blue"), "2764-fe0f": art("red") };
 const overridden = (sel) => page.evaluate((sel) => { const cell = document.querySelector(sel); return cell ? { flag: cell.hasAttribute("data-overridden"), src: cell.querySelector("img")?.getAttribute("src")?.slice(0, 30) ?? null } : null; }, sel);
-await mount(page, { kind: "vertical", root: { artwork } });
+await mount(page, { kind: "vertical", artwork });
 const thumbsCell = await overridden('#harness [data-slot="emoji"][data-unified="1f44d"]');
 const solo = await page.evaluate(() => { const el = document.querySelector('#harness [data-testid="solo"]'); return { flag: el?.hasAttribute("data-overridden"), label: el?.getAttribute("alt") ?? el?.getAttribute("aria-label") }; });
 check("artwork: list cells draw the override (data-overridden), <Emoji> too, any skin tone", thumbsCell?.flag && thumbsCell.src?.startsWith("data:image/svg") && solo.flag && solo.label === "thumbs up: medium skin tone", JSON.stringify({ thumbsCell, solo }));
@@ -509,9 +509,9 @@ check("artwork: picking an overridden emoji selects the standard one", (await pa
 await search().fill("thumbs up");
 await page.waitForTimeout(200);
 check("artwork: search results draw it too", (await overridden('#harness [data-results] [data-slot="emoji"][data-index="0"]'))?.flag === true);
-await mount(page, { kind: "horizontal", root: { artwork } });
+await mount(page, { kind: "horizontal", artwork });
 check("artwork: the horizontal list draws it", (await overridden('#harness [data-slot="emoji"][data-overridden]')) != null);
-await mount(page, { kind: "tapback", root: { artwork } });
+await mount(page, { kind: "tapback", artwork });
 const reaction = await page.evaluate(() => [...document.querySelectorAll('#harness [data-slot="reactions"] button')].filter((b) => b.hasAttribute("data-overridden")).map((b) => b.getAttribute("aria-label")));
 check("artwork: tapback reactions draw it", reaction.length >= 1, reaction.join());
 

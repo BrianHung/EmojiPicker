@@ -6,7 +6,6 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
   return (
     <EmojiPicker.Root
       onSelect={onSelect}
-      autoFocusSearch={false}
       className="flex h-[380px] w-[352px] max-w-full flex-col overflow-hidden rounded-picker border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:36px] [--emoji-header-height:32px] [--emoji-list-padding:8px] [--emoji-size:24px]"
     >
       <EmojiPicker.Search className="flex items-center gap-2 p-3">
@@ -28,8 +27,8 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
         <EmojiPicker.List>
           {() => (
             <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected" />}</EmojiPicker.List.Items>
+              <EmojiPicker.List.SectionTitle className="flex items-center bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected forced-colors:data-[highlighted]:[outline:2px_solid_Highlight] forced-colors:data-[highlighted]:[outline-offset:-2px]" />}</EmojiPicker.List.Items>
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>

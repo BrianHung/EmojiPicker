@@ -4,7 +4,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
 import { isKnown } from "./a11y/known";
-import { card, caretToEnd } from "./surfaces";
+import { card, caretToEnd, clearTextField } from "./surfaces";
 import { expect, frames, test, visit } from "./support";
 
 /** `gap`: how far from the caret the menu may open (Notion's grid menu sits below the line). */
@@ -32,6 +32,7 @@ async function open(page: Page, e: Editor, trigger = e.trigger) {
   await visit(page, e.path);
   const field = e.field(page);
   await field.click();
+  await clearTextField(field);
   await caretToEnd(field);
   await page.keyboard.type(trigger, { delay: 40 });
   await menu(page).getByRole("option").first().waitFor();

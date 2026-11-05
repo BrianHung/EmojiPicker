@@ -1,5 +1,8 @@
+import { EmojiPicker } from "@brianhung/emoji-picker";
+import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
-import { type Style, type Tokens } from "@/styles/style-picker";
+import { SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";
+import { CELL, ROOT, type Style, type StylePickerProps, type Tokens } from "@/styles/style";
 
 const tokens: Tokens = {
   "--emoji-picker-background": "light-dark(#ffffff, #262626)",
@@ -23,41 +26,71 @@ const tokens: Tokens = {
 /** Instagram's default reactions: ❤️ 😂 😮 😢 😡 👍. */
 const REACTIONS = ["2764-fe0f", "1f602", "1f62e", "1f622", "1f621", "1f44d"];
 
+// Instagram's 16px glyphs fill their box; ours have a 24px grid's padding.
+const CATEGORIES = withIcons(I.ICONS.instagram, {
+  categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "activities" }, { id: "travel_places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
+  size: 18,
+  strokeWidth: 2,
+  hide: ["suggested", "custom"],
+});
+
+export function InstagramPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
+  const nav = useActiveTabInView();
+  return (
+    <EmojiPicker.Root
+      columns={fluid ? undefined : 8}
+      suggested={REACTIONS}
+      categories={CATEGORIES}
+      searchResults={searchResults}
+      onSelect={onSelect}
+      data-style="instagram"
+      style={tokens}
+      className={cn(
+        ROOT,
+        "h-[316px] w-[340px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:40px] [--emoji-header-height:34px] [--emoji-image-size:32px] [--emoji-list-padding:10px] [--emoji-size:32px]",
+        className,
+      )}
+    >
+      {search ? (
+        // The list starts at the field's bottom edge, so a scrolled sticky title never covers its border.
+        <EmojiPicker.Search className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
+          <EmojiPicker.Search.Input
+            placeholder="Search emoji"
+            autoFocus={autoFocus}
+            className="h-10 w-full rounded-full border border-picker-input-border bg-picker-input pr-4 pl-[33.3px] text-[14px] text-picker-foreground outline-none placeholder:text-(--instagram-placeholder)"
+          >
+            <SearchClear />
+          </EmojiPicker.Search.Input>
+          {/* Centered on the field, not the row (which has 12px of top padding). */}
+          <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-[calc(50%+6px)] left-[var(--search-icon-x,12px)] size-[14px] -translate-y-1/2 text-picker-subtle" />
+        </EmojiPicker.Search>
+      ) : null}
+      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-width:none]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
+        <EmojiPicker.List className="outline-none">
+          {() => (
+            <EmojiPicker.List.Section>
+              <EmojiPicker.List.SectionTitle className="flex h-[34px] items-center bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-lg hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[highlighted]:bg-picker-selected")} />}</EmojiPicker.List.Items>
+            </EmojiPicker.List.Section>
+          )}
+        </EmojiPicker.List>
+        <EmojiPicker.Empty className="py-10 text-center text-sm opacity-60">No emoji found</EmojiPicker.Empty>
+      </EmojiPicker.Viewport>
+      <div className="flex h-[42px] shrink-0 items-center border-t border-picker-border px-[10.5px]">
+        <EmojiPicker.CategoryNav ref={nav} className="flex w-full min-w-0 flex-1 items-center justify-between overflow-x-auto [scrollbar-width:none]">
+          {() => <EmojiPicker.CategoryNav.Tab className="relative flex size-8 shrink-0 items-center justify-center rounded-full text-picker-subtle hover:text-picker-foreground data-active:text-picker-foreground" />}
+        </EmojiPicker.CategoryNav>
+      </div>
+    </EmojiPicker.Root>
+  );
+}
+
 export const instagram: Style = {
   id: "instagram",
   label: "Instagram",
+  tokens,
+  Picker: InstagramPicker,
   size: { width: 340, height: 316 },
-  layout: {
-    id: "instagram",
-    tokens,
-    root: "h-[316px] w-[340px] rounded-picker bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-size:32px] [--emoji-cell-size:40px] [--emoji-image-size:32px] [--emoji-header-height:34px] [--emoji-list-padding:10px]",
-    columns: 8,
-    placeholder: "Search emoji",
-    suggested: REACTIONS,
-    categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "activities" }, { id: "travel_places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
-    cell: "rounded-lg hover:bg-picker-hover data-[highlighted]:bg-picker-selected data-focus-visible:bg-picker-selected",
-    header:
-      "flex h-[34px] bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']",
-    // The list starts at the field's bottom edge, so a scrolled sticky title never covers its border.
-    searchRow: "px-2 pt-3 pb-0 [--search-icon-x:20px]",
-    input: "h-10 w-full rounded-full border border-picker-input-border bg-picker-input pr-4 pl-[33.3px] text-[14px] text-picker-foreground outline-none placeholder:text-(--instagram-placeholder)",
-    searchIcon: "left",
-    // Centered on the field, not the row (which has 12px of top padding).
-    searchIconClass: "top-[calc(50%+6px)] size-[14px] text-picker-subtle",
-    scrollbar: "[scrollbar-width:none]",
-    nav: {
-      placement: "bottom",
-      className: "h-[42px] border-t border-picker-border px-[10.5px]",
-      listClassName: "flex w-full justify-between",
-      button: "flex size-8 items-center justify-center rounded-full text-picker-subtle hover:text-picker-foreground",
-      active: "data-active:text-picker-foreground",
-      icons: I.ICONS.instagram,
-      // Instagram's 16px glyphs fill their box; ours have a 24px grid's padding.
-      iconSize: 18,
-      strokeWidth: 2,
-      hide: ["suggested", "custom"],
-    },
-  },
   tapback: {
     className: "flex w-fit items-center rounded-[26px] bg-picker-background shadow-picker",
     reactions:

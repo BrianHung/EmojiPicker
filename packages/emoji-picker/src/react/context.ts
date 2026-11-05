@@ -88,7 +88,8 @@ export type PickerContextValue = {
   labels: EmojiLabels;
   focusModel: FocusModel;
   pointer: PointerModel;
-  autoFocusSearch: boolean;
+  /** Inside an EmojiPopover, which focuses the search field once it shows. */
+  inPopover: boolean;
   disableVariations: boolean;
   columns?: number;
   fitColumns: boolean;
@@ -107,6 +108,8 @@ export type PickerContextValue = {
   searchLimit: number;
   results: readonly EmojiRecord[];
   pending: boolean;
+  /** Root's `value`: the emoji shown as chosen; undefined when the picker has none. */
+  value: string | null | undefined;
   /** The highlight is virtual (focus stays in the search field), else focus roves the cells. */
   virtual: boolean;
   /** Pick an item or a unified code (skin tone already applied). */
@@ -122,6 +125,9 @@ export type PickerContextValue = {
 export type { PickerSnapshot };
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);
+
+/** The List tells its Viewport which axis scrolls. */
+export const ViewportContext = React.createContext<((orientation: "vertical" | "horizontal") => void) | null>(null);
 
 export function usePicker(part = "This part"): PickerContextValue {
   const value = React.useContext(PickerContext);
