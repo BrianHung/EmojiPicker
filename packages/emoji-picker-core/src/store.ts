@@ -2,6 +2,7 @@ import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, ty
 import { customRecords, customSources, inlineCustomEmojis, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, type EmojiStorage, type FrequencyStore } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
+import { DEFAULT_DATA_URL } from "./platform";
 import { createStore, memo } from "./reactive";
 import type { CompletionOrder, SearchIndex } from "./search/search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
@@ -12,7 +13,7 @@ export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { s
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
 export type EmojiStoreOptions = {
-  data: EmojiDataSource;
+  data?: EmojiDataSource;
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   filter?: (record: EmojiRecord) => boolean;
   frequents?: FrequencyStore;
@@ -61,20 +62,12 @@ export type EmojiStoreState = {
   controlledTone: SkinToneValue | undefined;
 };
 
-type EmojiStoreAction =
-  | { type: "load"; loading: Promise<void> }
-  | { type: "reset" }
-  | { type: "loaded"; data: EmojiData }
-  | { type: "failed"; error: Error }
-  | { type: "tone"; tone: SkinToneValue }
-  | { type: "control"; tone: SkinToneValue | undefined };
+type EmojiStoreAction = { type: "load"; loading: Promise<void> | null } | { type: "loaded"; data: EmojiData } | { type: "failed"; error: Error } | { type: "tone"; tone: SkinToneValue } | { type: "control"; tone: SkinToneValue | undefined };
 
 const reduce = (state: EmojiStoreState, action: EmojiStoreAction): EmojiStoreState => {
   switch (action.type) {
     case "load":
-      return { ...state, status: state.status === "ready" ? "ready" : "loading", loading: action.loading };
-    case "reset":
-      return { ...state, status: state.status === "ready" ? "ready" : "idle", error: null, loading: null };
+      return { ...state, status: state.status === "ready" ? "ready" : action.loading ? "loading" : "idle", loading: action.loading };
     case "loaded":
       return { ...state, status: "ready", data: action.data };
     case "failed":
@@ -91,18 +84,11 @@ export type EmojiStore = ReturnType<typeof createEmojiStore>;
 const defaultEngine = lexical();
 const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customs: [], customGroups: new Map(), packErrors: [] };
 
-type Loaded = { dataset: Dataset | EmojiDataInput; packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] } };
+type Raw = [dataset: Dataset, packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] }];
 
-function ingest(dataset: Dataset, { packs }: Loaded, all: readonly EmojiRecord[], base: readonly EmojiRecord[], locale: string | undefined): EmojiData {
-  const byCode = new Map(all.map((r) => [r.unified, r]));
-  const records = [...base, ...customRecords(packs.emojis, base.length, (u) => byCode.get(u.toLowerCase()))];
-  const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
-  return { records, byUnified, groupNames: dataset.groups, locale: locale ?? dataset.locale, customs: packs.emojis, customGroups: new Map(packs.emojis.map((c) => [c.id, c.group])), packErrors: packs.errors };
-}
-
-function inline({ data, customEmojis }: EmojiSourceOptions): Loaded | null {
+function inline({ data, customEmojis }: EmojiSourceOptions): Raw | null {
   const packs = inlineCustomEmojis(customSources(customEmojis));
-  return packs && typeof data === "object" ? { dataset: data, packs } : null;
+  return packs && typeof data === "object" ? [toDataset(data), packs] : null;
 }
 
 const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
@@ -117,19 +103,21 @@ export function createEmojiStore({
   labels: labelOverrides,
   collator,
   ...source
-}: EmojiStoreOptions) {
+}: EmojiStoreOptions = {}) {
   let config: EmojiSourceOptions = source;
   let raw = inline(config);
   let base: readonly EmojiRecord[] = [];
-  let controller: AbortController | null = null;
-  const normalize = memo(toDataset);
+  let controller: AbortController | undefined;
   const expand = memo(expandDataset);
-  const build = (next: Loaded) => {
+  const build = (next: Raw): EmojiData => {
     raw = next;
-    const dataset = normalize(next.dataset);
+    const [dataset, { emojis, errors }] = next;
     const all = expand(dataset);
     base = config.filter ? all.filter(config.filter) : all;
-    return ingest(dataset, next, all, base, config.locale);
+    const byCode = new Map(all.map((r) => [r.unified, r]));
+    const records = [...base, ...customRecords(emojis, base.length, (u) => byCode.get(u.toLowerCase()))];
+    const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
+    return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customs: emojis, customGroups: new Map(emojis.map((c) => [c.id, c.group])), packErrors: errors };
   };
   const state = createStore<EmojiStoreState, EmojiStoreAction>(
     {
@@ -145,7 +133,7 @@ export function createEmojiStore({
   const callbacks = { onSkinToneChange };
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
-  const publish = (next: Loaded) => state.dispatch({ type: "loaded", data: build(next) });
+  const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
   const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale, collator }));
 
@@ -158,14 +146,12 @@ export function createEmojiStore({
 
     load(): Promise<void> {
       const { loading } = state.getSnapshot();
-      if (loading) return loading;
-      if (raw) return Promise.resolve();
+      if (loading || raw) return loading ?? Promise.resolve();
       const current = new AbortController();
-      controller = current;
-      const { data, customEmojis } = config;
-      const pending = Promise.all([resolve(data, current.signal), loadCustomEmojis(customSources(customEmojis), current.signal)]).then(
-        ([dataset, packs]) => {
-          if (controller === current) publish({ dataset, packs });
+      const { signal } = (controller = current);
+      const pending = Promise.all([resolve(config.data ?? DEFAULT_DATA_URL, signal).then(toDataset), loadCustomEmojis(customSources(config.customEmojis), signal)]).then(
+        (next) => {
+          if (controller === current) publish(next);
         },
         (e: unknown) => {
           if (controller !== current) return;
@@ -182,20 +168,20 @@ export function createEmojiStore({
       const previous = config;
       config = next;
       if (!sameSource(previous, next)) {
+        const { status } = state.getSnapshot();
         controller?.abort();
-        controller = null;
-        const wanted = state.getSnapshot().status !== "idle";
+        controller = undefined;
         raw = inline(next);
-        state.dispatch({ type: "reset" });
+        state.dispatch({ type: "load", loading: null });
         if (raw) publish(raw);
-        else if (wanted) store.load().catch(() => {});
+        else if (status !== "idle") store.load().catch(() => {});
         return;
       }
-      if (!raw) return;
+      if (!raw || (next.filter === previous.filter && next.locale === previous.locale && next.searchEngine === previous.searchEngine)) return;
       const kept = base;
       const data = build(raw);
-      if (next.locale !== previous.locale || !sameItems(kept, base)) state.dispatch({ type: "loaded", data });
-      else if (next.searchEngine !== previous.searchEngine) state.dispatch({ type: "loaded", data: { ...loaded() } });
+      const fresh = next.locale !== previous.locale || !sameItems(kept, base);
+      if (fresh || next.searchEngine !== previous.searchEngine) state.dispatch({ type: "loaded", data: fresh ? data : { ...loaded() } });
     },
 
     prepare() {

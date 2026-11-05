@@ -10,7 +10,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { KeyboardProvider, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
 import { PopoverContext } from "../popover/popover-context";
-import { useEmojiContext } from "../provider/provider";
+import { EmojiContext, EmojiProvider, useEmojiContext } from "../provider/provider";
 import { ReactionsContext, type ReactionsState } from "../reactions/reactions-context";
 import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
@@ -268,7 +268,10 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
   );
 });
 
-export const Root = PickerRoot as React.ForwardRefExoticComponent<RootProps & React.RefAttributes<HTMLElement>>;
+export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props, ref) {
+  const root = <PickerRoot {...props} ref={ref} />;
+  return React.useContext(EmojiContext) ? root : <EmojiProvider>{root}</EmojiProvider>;
+});
 
 export function useActiveEmoji(): EmojiRecord | null {
   return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);

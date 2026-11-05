@@ -28,4 +28,15 @@ describe("server rendering", () => {
     );
     expect(html).toContain('src="/apple/2764-fe0f.png"');
   });
+
+  it("gives a Root without a provider its own, loading the default data", () => {
+    const html = renderToString(
+      <EmojiPicker.Root>
+        <EmojiPicker.Viewport>
+          <EmojiPicker.Loading>Loading</EmojiPicker.Loading>
+        </EmojiPicker.Viewport>
+      </EmojiPicker.Root>,
+    );
+    expect(html).toContain("Loading");
+  });
 });

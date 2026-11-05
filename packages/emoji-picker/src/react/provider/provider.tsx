@@ -36,7 +36,7 @@ type ContextValue = {
   maxVersion?: number;
 };
 
-const EmojiContext = React.createContext<ContextValue | null>(null);
+export const EmojiContext = React.createContext<ContextValue | null>(null);
 
 export function EmojiProvider({ renderer = "auto", imageUrl, twemojiBaseUrl = TWEMOJI_BASE_URL, twemojiVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
   const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));

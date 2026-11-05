@@ -44,6 +44,10 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url"; // Vite; other b
 
 Pass the dataset as a URL so it loads as a separate, cacheable asset. `data` also takes a dataset object or a loader, `({ signal }) => Promise<Dataset>`.
 
+Without `data`, the provider loads `data/en.json` from jsDelivr, pinned to the installed core version.
+
+`EmojiPicker.Root` creates a provider with these defaults when none is above it.
+
 To copy a styled shadcn/ui version into your project:
 
 ```bash
