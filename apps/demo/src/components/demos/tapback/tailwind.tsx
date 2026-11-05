@@ -6,7 +6,7 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
   return (
     <Tapback
       onSelect={onSelect}
-      className="flex w-fit max-w-full flex-col overflow-hidden rounded-full border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:36px] [--emoji-size:24px] has-[[data-slot=panel]:not([hidden])]:h-[380px] has-[[data-slot=panel]:not([hidden])]:w-[352px] has-[[data-slot=panel]:not([hidden])]:rounded-picker"
+      className="flex w-fit max-w-full flex-col overflow-hidden rounded-full border border-picker-border bg-picker-background font-picker text-picker-foreground shadow-picker [--emoji-cell-size:36px] [--emoji-size:24px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:h-[380px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:w-[352px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:rounded-picker"
     >
       <EmojiPicker.Reactions className="flex items-center gap-0.5 p-1.5 [--emoji-image-size:28px]">
         <EmojiPicker.Reactions.Items>{(emoji) => <EmojiPicker.Reactions.Item emoji={emoji} className={reaction} />}</EmojiPicker.Reactions.Items>

@@ -42,7 +42,7 @@ test("picker search: arrows, Enter and Escape during a composition stay with the
   await picker.scrollIntoViewIfNeeded();
   const search = picker.locator("input").first();
   await search.click();
-  const highlighted = () => picker.evaluate((p) => p.querySelector('[data-slot="emoji"][data-highlighted]')?.getAttribute("aria-label") ?? null);
+  const highlighted = () => picker.evaluate((p) => p.querySelector('[data-slot="emoji-picker-emoji"][data-highlighted]')?.getAttribute("aria-label") ?? null);
   const keys = await ime(page);
   await keys.compose("smile");
   await quiet(page);

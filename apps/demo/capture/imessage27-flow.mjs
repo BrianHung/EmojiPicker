@@ -21,10 +21,10 @@ const watch = (page, tag) => {
   await page.waitForSelector('[role="toolbar"]');
   await page.screenshot({ path: out("1-pill") });
   await page.locator('[aria-label="More emoji"]').first().click();
-  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji]");
+  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji-picker-emoji]");
   await page.waitForTimeout(700);
   await page.screenshot({ path: out("2-sheet") });
-  await page.locator("[data-emoji-keyboard] [data-slot=emoji]").nth(3).click();
+  await page.locator("[data-emoji-keyboard] [data-slot=emoji-picker-emoji]").nth(3).click();
   await page.waitForTimeout(900);
   await page.screenshot({ path: out("3-reacted") });
   const sheetGone = (await page.locator("[data-emoji-keyboard]").count()) === 0;
@@ -46,9 +46,9 @@ const watch = (page, tag) => {
   await page.waitForTimeout(500);
   const plus = page.getByRole("button", { name: "Emoji", exact: true });
   await plus.click();
-  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji]");
+  await page.waitForSelector("[data-emoji-keyboard] [data-slot=emoji-picker-emoji]");
   await page.waitForTimeout(600);
-  const keys = page.locator("[data-emoji-keyboard] [data-slot=emoji]");
+  const keys = page.locator("[data-emoji-keyboard] [data-slot=emoji-picker-emoji]");
   await keys.nth(0).click();
   await keys.nth(1).click();
   await keys.nth(2).click();

@@ -1,12 +1,12 @@
 export const slots: [string, string][] = [
   ['data-slot="emoji-picker"', "Root"],
-  ['data-slot="search" · "search-input" · "search-clear"', "Search row, its input and clear button"],
-  ['data-slot="category-nav" · "category-tab"', "Category bar and each tab"],
-  ['data-slot="viewport" · "list"', "Scroll container and the virtualized list"],
-  ['data-slot="category-header" · "emoji"', "Section titles and cells"],
-  ['data-slot="skin-tone" · "skin-tone-trigger" · "skin-tone-options" · "skin-tone-option"', "Skin tone, its trigger, the options and each option"],
-  ['data-slot="reactions" · "reactions-expand" · "panel"', "Tapback row, its “+”, and the expanded picker"],
-  ['data-slot="preview" · "empty" · "loading"', "Preview, no results, loading"],
+  ['data-slot="emoji-picker-search" · "emoji-picker-search-input" · "emoji-picker-search-clear"', "Search row, its input and clear button"],
+  ['data-slot="emoji-picker-category-nav" · "emoji-picker-category-tab"', "Category bar and each tab"],
+  ['data-slot="emoji-picker-viewport" · "emoji-picker-list"', "Scroll container and the virtualized list"],
+  ['data-slot="emoji-picker-section-title" · "emoji-picker-emoji"', "Section titles and cells"],
+  ['data-slot="emoji-picker-skin-tone" · "emoji-picker-skin-tone-trigger" · "emoji-picker-skin-tone-options" · "emoji-picker-skin-tone-option"', "Skin tone, its trigger, the options and each option"],
+  ['data-slot="emoji-picker-reactions" · "emoji-picker-reactions-expand" · "emoji-picker-panel"', "Tapback row, its “+”, and the expanded picker"],
+  ['data-slot="emoji-picker-preview" · "emoji-picker-empty" · "emoji-picker-loading"', "Preview, no results, loading"],
 ];
 
 export const stateAttributes: [string, string][] = [

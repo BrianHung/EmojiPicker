@@ -16,8 +16,8 @@ export type Surface = {
   inline?: boolean;
 };
 
-const layer = (page: Page) => page.locator('[data-slot="popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
-export const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=list])")).last();
+const layer = (page: Page) => page.locator('[data-slot="emoji-picker-popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
+export const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=emoji-picker-list])")).last();
 const pickerIn = (scope: Locator) => scope.locator('xpath=descendant-or-self::*[@data-slot="emoji-picker" or @data-epr-part="root"]').first();
 const button = (scope: Page | Locator, name: string) => scope.getByRole("button", { name, exact: true });
 
@@ -38,7 +38,7 @@ function popover(id: string, path: string, trigger: (p: Page) => Locator, extra:
     open: async (p) => {
       await trigger(p).click();
       if (extra.root) await extra.root(p).waitFor();
-      else await layer(p).locator('[data-slot="emoji"], [data-slot="search-input"]').first().waitFor();
+      else await layer(p).locator('[data-slot="emoji-picker-emoji"], [data-slot="emoji-picker-search-input"]').first().waitFor();
       await p.mouse.move(0, 0);
       await quiet(p);
       await p.evaluate(() => window.dispatchEvent(new Event("resize")));
@@ -113,8 +113,8 @@ function inline(id: string, path: string, scope: (p: Page) => Locator, extra: Ex
     frame: scope,
     open: async (p) => {
       const root = pickerIn(scope(p));
-      const search = root.locator('[data-slot="search-input"]');
-      const target = (await search.count()) ? search.first() : root.locator('[data-slot="emoji"]').first();
+      const search = root.locator('[data-slot="emoji-picker-search-input"]');
+      const target = (await search.count()) ? search.first() : root.locator('[data-slot="emoji-picker-emoji"]').first();
       await target.click();
       return target;
     },
@@ -171,7 +171,7 @@ function scene(s: StyleId): Surface[] {
         menu(id("comment-autocomplete"), path, (p) => sc(p).getByLabel("Leave a comment", { exact: true }), ":smi", shotCard),
       ];
     case "instagram": {
-      const bar = (p: Page) => p.locator('[data-slot="popover-content"][aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])').filter({ visible: true }).last();
+      const bar = (p: Page) => p.locator('[data-slot="emoji-picker-popover-content"][aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])').filter({ visible: true }).last();
       const openBar = async (p: Page) => {
         const message = sc(p).getByRole("button", { name: /^Maya: ok who's in/ });
         if (await message.count()) await hold(p, message);
@@ -216,7 +216,7 @@ const home: Surface[] = [
     trigger: (p) => button(preview(p, "tapback"), "More emoji"),
     open: async (p) => {
       await button(preview(p, "tapback"), "More emoji").click();
-      await preview(p, "tapback").locator('[data-slot="search-input"]').waitFor();
+      await preview(p, "tapback").locator('[data-slot="emoji-picker-search-input"]').waitFor();
       return button(preview(p, "tapback"), "More emoji");
     },
   },
@@ -251,8 +251,8 @@ const searchFor =
       await ex.getByRole("tab", { name, exact: true }).focus();
       await p.keyboard.press("Enter");
     }
-    await preview(p, "search").locator('[data-slot="search-input"]').fill("smile");
-    await preview(p, "search").locator('[data-slot="emoji"]').first().waitFor();
+    await preview(p, "search").locator('[data-slot="emoji-picker-search-input"]').fill("smile");
+    await preview(p, "search").locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
   };
 
 export const SHOTS: Shot[] = [

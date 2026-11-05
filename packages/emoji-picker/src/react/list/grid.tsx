@@ -667,7 +667,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
   return {
     ...grid,
     getGridProps: (props: React.HTMLAttributes<HTMLElement> = {}) => mergeProps(props, controller.gridProps) as typeof controller.gridProps,
-    getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.categoryHeader, children: section.name }),
+    getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.sectionTitle, children: section.name }),
     state: controller.cells as unknown as EmojiGridState,
     variations: controller.variations,
   };

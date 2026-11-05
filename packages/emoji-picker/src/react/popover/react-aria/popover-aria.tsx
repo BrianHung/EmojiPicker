@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Popover, type PopoverRenderProps } from "react-aria-components/Popover";
 import { mergeProps } from "react-aria/mergeProps";
 import { resolve } from "../../utils/render";
+import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import {
   anchorRect,
@@ -115,7 +116,7 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
         UNSTABLE_portalContainer={container || undefined}
         className={className}
         style={style}
-        render={(dom, { placement }) => <div {...mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom)} data-slot="suggestions-popover" data-side={placement ?? side} data-align={align} />}
+        render={(dom, { placement }) => <div {...mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom)} data-slot={SLOTS.suggestions} data-side={placement ?? side} data-align={align} />}
       >
         {children}
       </Popover>

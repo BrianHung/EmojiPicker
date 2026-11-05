@@ -6,7 +6,14 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const states = process.argv.slice(2).length ? process.argv.slice(2) : ["reacted", "pill", "keyboard", "menu", "selected", "incoming"];
-const ready = { reacted: '[data-imessage] [role="button"]', pill: '[role="toolbar"]', selected: '[role="toolbar"]', menu: '[role="menu"]', incoming: '[aria-label="Reaction received"]', keyboard: "[data-emoji-keyboard] [data-slot=emoji]" };
+const ready = {
+  reacted: '[data-imessage] [role="button"]',
+  pill: '[role="toolbar"]',
+  selected: '[role="toolbar"]',
+  menu: '[role="menu"]',
+  incoming: '[aria-label="Reaction received"]',
+  keyboard: "[data-emoji-keyboard] [data-slot=emoji-picker-emoji]",
+};
 const noRef = new Set(["selected", "incoming"]);
 
 const browser = await chromium.launch({ channel: "chrome", headless: true });

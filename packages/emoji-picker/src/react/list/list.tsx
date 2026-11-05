@@ -346,7 +346,7 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
         {
           ...groupProps,
           id: cells.sectionDomId(section.id),
-          "data-slot": SLOTS.category,
+          "data-slot": SLOTS.section,
           "data-category": section.category,
           "data-collapsed": section.collapsed || undefined,
           ...props,
@@ -380,7 +380,7 @@ const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function S
     {
       ...headingProps,
       className: props.className,
-      "data-slot": SLOTS.categoryHeader,
+      "data-slot": SLOTS.sectionTitle,
       "data-collapsed": section.collapsed || undefined,
       ...props,
       style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),
@@ -512,7 +512,7 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
               {
                 ...props,
                 ref: mergeRefs<HTMLDivElement>((props as { ref?: React.Ref<HTMLDivElement> }).ref, block(s.id)),
-                "data-slot": SLOTS.headerActions,
+                "data-slot": SLOTS.sectionActions,
                 "data-section": s.id,
                 "data-collapsed": s.collapsed || undefined,
                 style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
