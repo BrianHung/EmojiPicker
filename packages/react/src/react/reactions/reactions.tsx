@@ -142,6 +142,17 @@ const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps
 
 export const Reactions = /* @__PURE__ */ Object.assign(ReactionsRoot, { Items: ReactionsItems, Item: ReactionsItem, Expand: ReactionsExpand });
 
+export declare namespace Reactions {
+  type Props = ReactionsProps;
+  namespace Item {
+    type Props = ReactionsItemProps;
+    type State = ReactionsItemState;
+  }
+  namespace Expand {
+    type Props = ReactionsExpandProps;
+  }
+}
+
 export type PanelState = { hidden: boolean };
 export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 
@@ -153,3 +164,8 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
   return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });
 });
+
+export declare namespace Panel {
+  type Props = PanelProps;
+  type State = PanelState;
+}

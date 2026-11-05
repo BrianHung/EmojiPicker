@@ -1,11 +1,11 @@
 # @brianhung/emoji-picker-core
 
-Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies.
+Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies. React apps install only `@brianhung/emoji-picker-react`, which depends on this package.
 
 ## Installation
 
 ```bash
-npm install @brianhung/emoji-picker-core
+npm i @brianhung/emoji-picker-core
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ Every store has `subscribe(listener)`, `getSnapshot()`, and actions.
 ```ts
 import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker-core";
 
-const store = createEmojiStore({ data: "/emoji/en.json" });
+const store = createEmojiStore();
 
 const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)), onSelect: (selection) => track(selection) });
 typeahead.subscribe(render);
@@ -40,15 +40,15 @@ picker.choose();
 
 | Export | Description |
 |---|---|
-| `createEmojiStore(options)` | Data, search, frequents, skin tone, and labels. Options match the React provider's |
+| `createEmojiStore(options)` | Data, search, frequents, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }` and `frequentsTuning: { halfLifeDays?, max? }`; `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
 | `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Controlled state takes `x` / `defaultX` / `onXChange(value, details)`; `details` has `reason`, `event` and `cancel()` |
-| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, and `onSelect(selection)` on choose |
+| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, and IME-safe `keydown`. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
 | `createEmojiGrid`, `moveInGrid`, `rowsPerPage` | Grid rows and keyboard movement for a custom virtualizer |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
-| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`: `Record<unified, { count, lastUsed }>`, `count` halving every 14 days. Store options `frequents`, `defaultFrequents`, `onFrequentsChange`, `frequentsStorage` |
-| `mergeFrequents(a, b)` | Merges two histories, such as a server's and this device's |
-| `localStorageAdapter`, `memoryStorage` | `EmojiStorage` adapters; `localStorageAdapter` syncs across tabs |
-| `createChangeDetails(reason, event)` | The `{ reason, event, cancel() }` every `onXChange` receives |
+| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`: `Record<unified, { count, lastUsed }>`, `count` halving every `frequentsTuning.halfLifeDays` (14) |
+| `mergeFrequents(a, b, tuning?)` | Merges two histories, such as a server's and this device's |
+| `localStorageAdapter(key)`, `memoryStorageAdapter()` | `EmojiStorage` adapters for `storage`; `localStorageAdapter` syncs across tabs |
+| `createChangeDetails(reason, event)` | The `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` every `onXChange` receives |
 | `localeData(locale, { shortcodes, baseUrl })` | URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
 | `defaultLabels`, `localizeLabels`, `plural` | `EmojiLabels` and CLDR plural formatting |
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
@@ -58,7 +58,7 @@ A ProseMirror plugin on `createEmojiSuggestions`, `findShortcodeTrigger`, `isCom
 
 ## Data
 
-Build a dataset for any [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales). Every locale keeps the iamcal shortcodes; `--shortcodes iamcal,cldr-native` selects other sets.
+This package ships the English dataset (`/data/en.json`); [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has every other locale, and `localeData(locale)` returns its URL. Build a dataset for any [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales). Every locale keeps the iamcal shortcodes; `--shortcodes iamcal,cldr-native` selects other sets.
 
 ```bash
 npm install --save-dev emojibase-data

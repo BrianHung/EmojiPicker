@@ -360,7 +360,7 @@ function AddReaction({ onSelect, sheet = false }: { onSelect: (unified: string) 
       sheet={sheet}
       onSelect={(s) => onSelect(s.unified)}
       pickerClassName={POPUP_SHADOW}
-      triggerClassName="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-[0.5px] border-transparent text-(--text) outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-[state=open]:bg-(--hover)"
+      triggerClassName="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full border-[0.5px] border-transparent text-(--text) outline-none hover:bg-(--hover) focus-visible:ring-2 focus-visible:ring-[#5e6ad2] data-popup-open:bg-(--hover)"
     >
       <SmilePlus />
     </ScenePicker>

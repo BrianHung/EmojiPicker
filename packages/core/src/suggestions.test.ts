@@ -14,7 +14,7 @@ const key = (key: string) => ({
 
 describe("suggestions", () => {
   it("matches a query, moves, and chooses with keys", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
+    const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
     await store.load();
     const chosen: string[] = [];
     const selected: string[] = [];
@@ -36,6 +36,11 @@ describe("suggestions", () => {
     expect(selected).toEqual(["1f44e"]);
     expect(store.frequents.top(1)).toEqual(["1f44e"]);
 
+    typeahead.insert(store.select("1f389", { record: false })!);
+    expect(chosen).toEqual(["👎", "🎉"]);
+    expect(selected).toEqual(["1f44e", "1f389"]);
+    expect(store.frequents.score("1f389")).toBe(0);
+
     expect(typeahead.keydown(key("Escape"))).toBe(true);
     expect(typeahead.getSnapshot().open).toBe(false);
     typeahead.setQuery("tada");
@@ -45,7 +50,7 @@ describe("suggestions", () => {
   });
 
   it("resets the highlight whenever the reset key changes, even back to an earlier one", async () => {
-    const store = createEmojiStore({ data: data as unknown as Dataset, frequentsStorage: null });
+    const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
     await store.load();
     const typeahead = createEmojiSuggestions(store, { query: "heart" });
     typeahead.highlight(2);

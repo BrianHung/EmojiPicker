@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createEmojiSuggestions, type EmojiSuggestionsMachine, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions, type SuggestionsSnapshot } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsMachine, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions, type SuggestionsSnapshot } from "@brianhung/emoji-picker-core";
 import { useEmojiStatus } from "../provider/hooks";
 import { useStore } from "../utils/store";
 import { useEmojiContext } from "../provider/provider";
@@ -14,7 +14,8 @@ export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> &
 
 export type EmojiSuggestionsState = SuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
-  choose(index?: number, options?: { record?: boolean }): void;
+  choose(index?: number): void;
+  insert(selection: EmojiSelection): void;
   dismiss(): void;
   textFor(suggestion: ShortcodeSuggestion, insert?: "emoji" | "shortcode"): string;
   onKeyDown(event: KeyLike): boolean;
@@ -42,6 +43,7 @@ export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSugg
     ...snapshot,
     setHighlightedIndex: machine.highlight,
     choose: machine.choose,
+    insert: machine.insert,
     dismiss: machine.dismiss,
     textFor: machine.textFor,
     onKeyDown: machine.keydown,

@@ -8,10 +8,11 @@ export function useChangeState<T, Reason extends string>(value: T | undefined, d
   latest.current = { current, onChange };
   const set = React.useCallback(
     (next: T, reason: Reason, event?: Event) => {
-      if (Object.is(next, latest.current.current)) return;
+      if (Object.is(next, latest.current.current)) return undefined;
       const details = createChangeDetails(reason, event);
       latest.current.onChange?.(next, details);
       if (!details.isCanceled) setCurrent(next);
+      return details;
     },
     [setCurrent],
   );

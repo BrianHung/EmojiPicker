@@ -44,7 +44,6 @@ export type { CategoryNavProps, CategoryNavState, CategoryTabProps, CategoryTabS
 export type { SkinToneGlyphProps, SkinToneOpenChangeDetails, SkinToneOptionProps, SkinToneOptionState, SkinToneOptionsProps, SkinToneOptionsState, SkinToneProps, SkinToneState, SkinToneTriggerProps } from "./react/skin-tone";
 export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
-export { pickerInitialFocus } from "./react/popover";
 export type {
   PopoverAnchor,
   PopoverFinalFocus,
@@ -59,10 +58,10 @@ export type {
 } from "./react/popover";
 export { Emoji, useEmoji } from "./react/emoji";
 export type { EmojiProps } from "./react/emoji";
-export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadStore, useTextFieldEmojiTypeahead } from "./react/typeahead";
-export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadOptions, EmojiTypeaheadStore, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
+export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadAdapter, useTextFieldEmojiTypeahead } from "./react/typeahead";
+export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadAdapter, EmojiTypeaheadOptions, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
 
-export { findShortcodeTrigger, isComposingKey, memoryStorage } from "@brianhung/emoji-picker-core";
+export { findShortcodeTrigger, isComposingKey, localStorageAdapter, memoryStorageAdapter } from "@brianhung/emoji-picker-core";
 export type {
   CategoryId,
   ChangeDetails,
@@ -84,6 +83,7 @@ export type {
   FrequentEntry,
   Frequents,
   FrequentsChangeDetails,
+  FrequentsTuning,
   Renderer,
   SkinToneChangeDetails,
   SkinToneValue,

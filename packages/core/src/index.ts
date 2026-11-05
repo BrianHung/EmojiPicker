@@ -1,6 +1,6 @@
 export { createEmojiStore } from "./store";
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource, EmojiData, EmojiDataSource, EmojiSelection, EmojiStore, EmojiStoreOptions, EmojiStoreState, EmojiStoreStatus, SkinToneChangeDetails } from "./store";
-export { localStorageAdapter, memoryStorage, mergeFrequents } from "./frequents";
+export { localStorageAdapter, memoryStorageAdapter, mergeFrequents } from "./frequents";
 export type { EmojiStorage, FrequencyStore, FrequentEntry, Frequents, FrequentsChangeDetails, FrequentsTuning } from "./frequents";
 export { localeData, twemojiUrl, TWEMOJI_BASE_URL, TWEMOJI_EMOJI_VERSION } from "./platform";
 export type { Renderer, ShortcodeSet } from "./platform";

@@ -306,7 +306,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
       sheet={compact}
       font={compact ? FONT : undefined}
       onSelect={(s) => insert(s.unified)}
-      triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded outline-none grayscale hover:grayscale-0 focus-visible:ring-2 focus-visible:ring-[#5865f2] data-[state=open]:grayscale-0"
+      triggerClassName="flex size-8 cursor-pointer items-center justify-center rounded outline-none grayscale hover:grayscale-0 focus-visible:ring-2 focus-visible:ring-[#5865f2] data-popup-open:grayscale-0"
     >
       <Emoji emoji="1f642" size={22} className="size-[22px]" />
     </ScenePicker>

@@ -99,3 +99,16 @@ const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(functi
 });
 
 export const Search = Object.assign(SearchRoot, { Input: SearchInput, Clear: SearchClear });
+
+export declare namespace Search {
+  type Props = SearchProps;
+  type State = SearchState;
+  namespace Input {
+    type Props = SearchInputProps;
+    type State = SearchInputState;
+  }
+  namespace Clear {
+    type Props = SearchClearProps;
+    type State = SearchClearState;
+  }
+}

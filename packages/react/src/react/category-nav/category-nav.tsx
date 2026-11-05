@@ -152,7 +152,6 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
       ...mergeProps(props, hoverProps, pressProps, focusProps),
       ref: refs,
       "data-key": c.id,
-      "data-selected": selected || undefined,
       "data-disabled": disabled || undefined,
       "data-focused": state.focused || undefined,
       "data-focus-visible": state.focusVisible || undefined,
@@ -166,3 +165,12 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
 });
 
 export const CategoryNav = /* @__PURE__ */ Object.assign(CategoryNavRoot, { Tab: CategoryTab });
+
+export declare namespace CategoryNav {
+  type Props = CategoryNavProps;
+  type State = CategoryNavState;
+  namespace Tab {
+    type Props = CategoryTabProps;
+    type State = CategoryTabState;
+  }
+}

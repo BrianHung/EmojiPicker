@@ -23,7 +23,7 @@ export type SelectDetails = {
 export type ListHandle = {
   move(to: EmojiGridMove, source?: HighlightSource, cell?: Element | null): boolean;
   pick(): boolean;
-  highlight(emoji: string | null): void;
+  highlight(emoji: string | null, source?: HighlightSource): void;
   ids(): { list: string; active: string | undefined };
   clear(): boolean;
   focus(): boolean;

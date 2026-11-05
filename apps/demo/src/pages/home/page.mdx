@@ -29,7 +29,7 @@ Adds `components/ui/emoji-picker.tsx` and installs `@brianhung/emoji-picker-reac
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
 
-Uses your own shadcn/ui popover (Base UI or Radix; with React Aria, add `emoji-picker-popover-aria.json` instead).
+Uses your own `components/ui/popover`, for the Base UI (default) and Radix bases. A project made with `--base aria` adds `emoji-picker-popover-aria.json` instead.
 
 </Step>
 
@@ -351,7 +351,7 @@ A popover that positions a picker next to its trigger.
 
 #### Floating UI or React Aria
 
-The root export is built on Floating UI. The same `EmojiPopover` and `EmojiSuggestions.Popover` (a `:shortcode` menu at a text field's caret that never takes focus) also come from either subpath; an app bundles only the one it imports. React Aria's popover is modal: focus stays inside and the page doesn't scroll until it closes. Its non-modal popover closes when the page scrolls and stays open on a press outside, so editor menus should use the Floating UI `EmojiSuggestions.Popover`.
+`EmojiPopover`, `EmojiSuggestions.Popover` (a `:shortcode` menu at a text field's caret that never takes focus) and `pickerInitialFocus` come from either subpath; an app bundles only the one it imports. React Aria's popover is modal: focus stays inside and the page doesn't scroll until it closes. Its non-modal popover closes when the page scrolls and stays open on a press outside, so editor menus should use the Floating UI `EmojiSuggestions.Popover`.
 
 ```tsx title="imports.tsx"
 import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui"; // the default
@@ -360,16 +360,21 @@ import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/re
 
 #### Your own popover
 
-A picker works in any popover. In Base UI or shadcn/ui, close it from `onSelect` and focus the picker with `pickerInitialFocus`.
+A picker works in any popover. Close it from `onSelect`, and give the search field `autoFocus`. A picker without a search field takes `pickerInitialFocus` (from either popover subpath) as the popover's initial focus.
 
 ```tsx title="emoji-button.tsx"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { EmojiPicker, pickerInitialFocus } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 <Popover open={open} onOpenChange={setOpen}>
   <PopoverTrigger>😀</PopoverTrigger>
-  <PopoverContent initialFocus={() => pickerInitialFocus(document.querySelector("[data-slot=emoji-picker]"))}>
-    <EmojiPicker.Root onSelect={({ emoji }) => { insert(emoji); setOpen(false); }}>…</EmojiPicker.Root>
+  <PopoverContent>
+    <EmojiPicker.Root onSelect={({ emoji }) => { insert(emoji); setOpen(false); }}>
+      <EmojiPicker.Search>
+        <EmojiPicker.Search.Input autoFocus />
+      </EmojiPicker.Search>
+      …
+    </EmojiPicker.Root>
   </PopoverContent>
 </Popover>
 ```

@@ -9,8 +9,8 @@ import { toned, type EmojiData, type EmojiSelection, type EmojiStore } from "./s
 
 export type SearchResultsMode = "ranked" | "grouped";
 
-export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "none">;
-export type QueryChangeDetails = ChangeDetails<"input-change" | "escape-key" | "none">;
+export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "imperative-action" | "none">;
+export type QueryChangeDetails = ChangeDetails<"input-change" | "escape-key" | "imperative-action" | "none">;
 export type CollapsedCategoriesChangeDetails = ChangeDetails<"trigger-press" | "none">;
 
 type Source<D extends ChangeDetails> = { reason?: D["reason"]; event?: Event };
@@ -228,11 +228,12 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       unpublished = false;
       ui.dispatch({ type: "refresh" });
     },
-    setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}) {
+    setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}): QueryChangeDetails | undefined {
       if (value === queryOf(ui.getSnapshot(), opts())) return;
       const details = createChangeDetails(reason, event);
       opts().onQueryChange?.(value, details);
       if (!details.isCanceled && opts().query === undefined) set({ query: value });
+      return details;
     },
     toggleCollapsed: (id: string, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, undefined, source),
     setCollapsed: (id: string, value: boolean, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, value, source),

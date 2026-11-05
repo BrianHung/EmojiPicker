@@ -10,7 +10,19 @@
   <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>
 
-## Install
+## shadcn/ui
+
+```bash
+npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
+```
+
+```tsx
+import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+
+<EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
+```
+
+## npm
 
 ```bash
 npm i @brianhung/emoji-picker-react
@@ -27,21 +39,15 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Every part is unstyled: style it with Tailwind or CSS modules through `className` and its `data-*` state attributes.
-
-Or copy a styled shadcn/ui component into your project:
-
-```bash
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker
-```
+Parts are unstyled; style them through `className` and `data-*` attributes. English data loads from jsDelivr, pinned to the installed version. See the [React README](packages/react/README.md) for providers, typeahead, and popovers.
 
 ## Packages
 
 | Package | |
 |---|---|
-| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
-| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search and state, with no dependencies |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale |
+| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks; depends on core |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies; ships English data |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every other Emojibase locale |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.
 

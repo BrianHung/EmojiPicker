@@ -7,7 +7,7 @@ export const popoverRoot = rowsOf<PopoverRootProps>()([
   { name: "defaultOpen", type: "boolean", default: "false" },
   {
     name: "onOpenChange",
-    type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "scroll" | "none", event?, cancel() }) => void',
+    type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "scroll" | "imperative-action" | "none", event?, cancel() }) => void',
     description: "details.cancel() keeps it as it is. The suggestions popover takes the same callback.",
   },
   { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },

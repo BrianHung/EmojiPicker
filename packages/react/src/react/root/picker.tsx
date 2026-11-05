@@ -68,6 +68,8 @@ export type RootProps = Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "ch
     children: React.ReactNode;
   };
 
+const IMPERATIVE = { reason: "imperative-action" } as const;
+
 const VARIABLES = {
   "--ep-size": "var(--emoji-size, 30px)",
   "--ep-cell": "var(--emoji-cell-size, calc(var(--ep-size) + 10px))",
@@ -168,18 +170,18 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const skinTone = React.useRef<(() => void) | null>(null);
   const actions = React.useMemo<EmojiPickerActions>(
     () => ({
-      move: (to) => Boolean(list.current?.move(to)),
+      move: (to) => Boolean(list.current?.move(to, IMPERATIVE)),
       pick: () => Boolean(list.current?.pick()),
-      highlight: (emoji) => (list.current ? list.current.highlight(emoji) : state.highlight(emoji)),
+      highlight: (emoji) => (list.current ? list.current.highlight(emoji, IMPERATIVE) : state.highlight(emoji, IMPERATIVE)),
       focusSearch() {
         searchInput.current?.focus();
         return Boolean(searchInput.current);
       },
       clearSearch() {
-        state.setQuery("");
+        state.setQuery("", IMPERATIVE);
         list.current?.clear();
       },
-      close: () => closePopover("none"),
+      close: () => closePopover("imperative-action"),
       toggleSkinTone() {
         skinTone.current?.();
         return Boolean(skinTone.current);
@@ -221,9 +223,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
       if (!query) return Boolean(list.current?.clear()) || closePopover("escape-key", e.nativeEvent);
-      state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
+      const details = state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
       list.current?.clear();
-      return true;
+      return !details?.isPropagationAllowed;
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });
@@ -265,6 +267,9 @@ const isTextField = (el: EventTarget | null) =>
 
 const TARGET_MOVES: Record<string, EmojiGridMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", PageUp: "page-up", PageDown: "page-down" };
 
+// A combobox with its popup open accepts on Tab, as the typeahead's own menus do
+const accepts = (el: HTMLElement) => el.getAttribute("aria-expanded") === "true";
+
 function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
   React.useEffect(() => {
     const el = target();
@@ -273,7 +278,7 @@ function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<
     const onKeyDown = (event: KeyboardEvent) => {
       if (isComposingKey(event) || hasModifier(event)) return;
       const to = TARGET_MOVES[event.key];
-      const handled = to ? list.current?.move(to, { reason: "keyboard", event }) : event.key === "Enter" && !event.shiftKey && list.current?.pick();
+      const handled = to ? list.current?.move(to, { reason: "keyboard", event }) : !event.shiftKey && (event.key === "Enter" || (event.key === "Tab" && accepts(el))) && list.current?.pick();
       if (!handled) return;
       event.preventDefault();
       // The editor's own keydown listeners on this element would move the caret too
@@ -302,6 +307,27 @@ export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props
   const root = <PickerRoot {...props} ref={ref} />;
   return React.useContext(EmojiContext) ? root : <EmojiProvider>{root}</EmojiProvider>;
 });
+
+type RootDetails = {
+  query: QueryChangeDetails;
+  highlight: HighlightChangeDetails;
+  value: ValueChangeDetails;
+  collapsed: CollapsedCategoriesChangeDetails;
+  reactionsOpen: ReactionsOpenChangeDetails;
+  select: SelectDetails;
+};
+
+export declare namespace Root {
+  type Props = RootProps;
+  type State = RootState;
+  type Actions = EmojiPickerActions;
+  type QueryChangeDetails = RootDetails["query"];
+  type HighlightChangeDetails = RootDetails["highlight"];
+  type ValueChangeDetails = RootDetails["value"];
+  type CollapsedCategoriesChangeDetails = RootDetails["collapsed"];
+  type ReactionsOpenChangeDetails = RootDetails["reactionsOpen"];
+  type SelectDetails = RootDetails["select"];
+}
 
 export function useActiveEmoji(): EmojiRecord | null {
   return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
@@ -361,6 +387,11 @@ export const Viewport = React.forwardRef<HTMLDivElement, ViewportProps>(function
   );
 });
 
+export declare namespace Viewport {
+  type Props = ViewportProps;
+  type State = ViewportState;
+}
+
 export type PreviewState = { emoji: EmojiRecord | null };
 
 export type PreviewProps = PartElementProps<PreviewState>;
@@ -371,3 +402,8 @@ export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function P
   const caption = active ? `${active.imageUrl ? "" : active.emoji} ${active.name}`.trim() : labels.previewCaption;
   return renderElement("div", { "data-slot": SLOTS.preview, ...props, ref, children: children ?? caption }, { emoji: active });
 });
+
+export declare namespace Preview {
+  type Props = PreviewProps;
+  type State = PreviewState;
+}

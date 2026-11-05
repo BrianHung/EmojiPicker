@@ -25,7 +25,7 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
       <EmojiPopover.Trigger
         aria-label={label}
         className={cn(
-          "inline-flex items-center gap-2 text-sm transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[state=open]:bg-accent",
+          "inline-flex items-center gap-2 text-sm transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background data-popup-open:bg-accent",
           triggerClassName ?? "rounded-md border border-border px-3 py-2",
         )}
       >

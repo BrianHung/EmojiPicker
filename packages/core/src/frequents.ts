@@ -7,7 +7,7 @@ export type EmojiStorage = {
   subscribe?(listener: () => void): () => void;
 };
 
-// count is the use count decayed by half every frequentsHalfLifeDays (14 by default), as of lastUsed
+// count is the use count decayed by half every halfLifeDays (14 by default), as of lastUsed
 export type FrequentEntry = { count: number; lastUsed: number };
 export type Frequents = Readonly<Record<string, FrequentEntry>>;
 export type FrequentsChangeDetails = ChangeDetails<"pick" | "remove" | "clear"> & { emoji?: string };
@@ -26,17 +26,17 @@ export type FrequencyStoreOptions = {
   frequents?: Frequents;
   defaultFrequents?: Frequents;
   onFrequentsChange?: (frequents: Frequents, details: FrequentsChangeDetails) => void;
-  frequentsStorage?: EmojiStorage | null;
-  frequentsHalfLifeDays?: number;
-  frequentsMax?: number;
+  storage?: EmojiStorage | null;
+  tuning?: FrequentsTuning;
 };
+
+export type FrequentsTuning = { halfLifeDays?: number; max?: number };
 
 const DEFAULTS = ["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"];
 const NONE: Frequents = {};
 
-type Tuning = { halfLifeDays: number; max: number };
-export type FrequentsTuning = Pick<FrequencyStoreOptions, "frequentsHalfLifeDays" | "frequentsMax">;
-const tuningOf = ({ frequentsHalfLifeDays = 14, frequentsMax = 64 }: FrequentsTuning = {}): Tuning => ({ halfLifeDays: frequentsHalfLifeDays, max: frequentsMax });
+type Tuning = Required<FrequentsTuning>;
+const tuningOf = ({ halfLifeDays = 14, max = 64 }: FrequentsTuning = {}): Tuning => ({ halfLifeDays, max });
 
 const decayed = ({ count, lastUsed }: FrequentEntry, now: number, { halfLifeDays }: Tuning) => count * 0.5 ** ((now - lastUsed) / (halfLifeDays * 864e5));
 const ranked = (entries: Frequents, now: number, tuning: Tuning) => Object.entries(entries).sort((a, b) => decayed(b[1], now, tuning) - decayed(a[1], now, tuning));
@@ -81,14 +81,14 @@ export function createFrequencyStore({
   frequents,
   defaultFrequents = NONE,
   onFrequentsChange,
-  frequentsStorage = localStorageAdapter("emoji-picker:frequents"),
-  ...options
+  storage = localStorageAdapter("emoji-picker:frequents"),
+  tuning: tuningOptions,
 }: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {
-  const read = () => parse(frequentsStorage?.read() ?? null) ?? defaultFrequents;
+  const read = () => parse(storage?.read() ?? null) ?? defaultFrequents;
   const store = createStore<FrequencyState, FrequencyAction>({ own: read(), controlled: frequents }, reduce);
   const callbacks = { onFrequentsChange };
   const entries = () => store.getSnapshot().controlled ?? store.getSnapshot().own;
-  const tuning = tuningOf(options);
+  const tuning = tuningOf(tuningOptions);
   const tops = new WeakMap<Frequents, Map<number, readonly string[]>>();
 
   const change = (action: FrequentsAction) => {
@@ -97,7 +97,7 @@ export function createFrequencyStore({
     const details = Object.assign(createChangeDetails(action.type), { emoji: "emoji" in action ? action.emoji : undefined });
     callbacks.onFrequentsChange?.(next, details);
     if (details.isCanceled || store.getSnapshot().controlled !== undefined) return;
-    frequentsStorage?.write(JSON.stringify(next));
+    storage?.write(JSON.stringify(next));
     store.dispatch({ type: "own", entries: next });
   };
 
@@ -118,7 +118,7 @@ export function createFrequencyStore({
       return entry ? decayed(entry, Date.now(), tuning) : 0;
     },
     entries,
-    subscribe: syncWith(frequentsStorage, store.subscribe, () => store.dispatch({ type: "own", entries: read() })),
+    subscribe: syncWith(storage, store.subscribe, () => store.dispatch({ type: "own", entries: read() })),
     control(value, onChange) {
       callbacks.onFrequentsChange = onChange;
       store.dispatch({ type: "control", entries: value });
@@ -155,7 +155,7 @@ function parse(raw: string | null): Frequents | undefined {
 }
 
 export function localStorageAdapter(key: string): EmojiStorage {
-  const memory = memoryStorage();
+  const memory = memoryStorageAdapter();
   return {
     read() {
       try {
@@ -180,7 +180,7 @@ export function localStorageAdapter(key: string): EmojiStorage {
   };
 }
 
-export const memoryStorage = (): EmojiStorage => {
+export const memoryStorageAdapter = (): EmojiStorage => {
   const box = createStore<string | null, string>(null, (_, value) => value);
   return { read: box.getSnapshot, write: box.dispatch };
 };

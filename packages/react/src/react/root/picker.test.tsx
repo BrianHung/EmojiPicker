@@ -56,10 +56,27 @@ describe("Root keyboard", () => {
     expect(input.getAttribute("aria-activedescendant")).toBe(host.querySelector("[data-highlighted]")!.id);
     press(input, "Enter");
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f603" }), expect.anything());
+    press(input, "Tab");
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    input.setAttribute("aria-expanded", "true");
+    press(input, "Tab");
+    expect(onSelect).toHaveBeenCalledTimes(2);
     React.act(() => void actions.move("left"));
     React.act(() => void actions.pick());
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f600" }), expect.anything());
     expect(document.activeElement).toBe(input);
+  });
+
+  it("stops the Escape that clears the query unless onQueryChange allows propagation", () => {
+    let allow = false;
+    const { host } = mount({ query: "smile", onQueryChange: (_, details) => allow && details.allowPropagation() });
+    const reached = vi.fn();
+    document.addEventListener("keydown", reached);
+    press(host.querySelector("aside")!, "Escape");
+    allow = true;
+    press(host.querySelector("aside")!, "Escape");
+    document.removeEventListener("keydown", reached);
+    expect(reached).toHaveBeenCalledTimes(1);
   });
 
   it("reports whether the keyboard or the pointer moved the highlight", () => {

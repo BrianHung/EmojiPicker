@@ -480,3 +480,26 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
 }
 
 export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell });
+
+export declare namespace List {
+  type Props = ListProps;
+  type State = ListState;
+  namespace Section {
+    type Props = SectionProps;
+    type State = SectionState;
+  }
+  namespace SectionTitle {
+    type Props = SectionTitleProps;
+  }
+  namespace SectionActions {
+    type Props = SectionActionsProps;
+    type State = SectionActionsState;
+  }
+  namespace Items {
+    type Props = ItemsProps;
+  }
+  namespace Cell {
+    type Props = CellProps;
+    type State = CellState;
+  }
+}

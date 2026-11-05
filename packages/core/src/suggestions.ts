@@ -61,6 +61,8 @@ const reduceUi = (ui: Ui, action: UiAction): Ui => {
   }
 };
 
+const completionOf = (record: EmojiRecord): ShortcodeCompletion => ({ record, shortcode: record.shortcodes[0] ?? record.name.replace(/\s+/g, "_"), match: null });
+
 const highlightOf = (input: Input, ui: Ui) => (ui.highlight.generation === input.generation ? ui.highlight.index : 0);
 
 export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOptions = {}) {
@@ -71,7 +73,7 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
   const opts = () => input.getSnapshot().options;
   const id = (suffix: string) => `${opts().id ?? "emoji-suggestions"}-${suffix}`;
   const suggestionsOf = memo((status: string, q: string, n: number, matchBy: string | undefined, order: CompletionOrder | undefined, searched: readonly EmojiRecord[]) =>
-    status !== "ready" || !q ? NONE : matchBy === "search" ? searched.map((record) => ({ record, shortcode: record.shortcodes[0] ?? record.name.replace(/\s+/g, "_"), match: null })) : store.completeShortcode(q, n, order),
+    status !== "ready" || !q ? NONE : matchBy === "search" ? searched.map(completionOf) : store.completeShortcode(q, n, order),
   );
   const keep = stable<SuggestionsSnapshot>();
   const select = memo((current: Input, state: Ui, status: string, searched: readonly EmojiRecord[]): SuggestionsSnapshot => {
@@ -112,13 +114,20 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       highlight(columns ? Math.max(0, Math.min(n - 1, i + step)) : (i + step + n) % n);
       return true;
     },
-    choose(index = getSnapshot().highlightedIndex, { record = true } = {}) {
+    choose(index = getSnapshot().highlightedIndex) {
       const suggestion = getSnapshot().suggestions[index];
       if (!suggestion) return;
       const { unified, imageUrl } = suggestion.record;
-      const selection = store.select(imageUrl ? unified : store.withSkinTone(unified), { record });
+      const selection = store.select(imageUrl ? unified : store.withSkinTone(unified));
       opts().onChoose?.(suggestion);
       if (selection) opts().onSelect?.(selection);
+    },
+    // For a selection another UI made and already recorded, such as a picker in the menu
+    insert(selection: EmojiSelection) {
+      const record = store.get(selection.baseUnified);
+      if (!record) return;
+      opts().onChoose?.(completionOf(record));
+      opts().onSelect?.(selection);
     },
     dismiss() {
       ui.dispatch({ type: "dismiss", key: input.getSnapshot().resetKey });

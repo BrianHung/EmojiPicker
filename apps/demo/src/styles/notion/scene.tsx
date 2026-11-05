@@ -59,7 +59,7 @@ export function NotionScene() {
               onSelect={(s) => setIcon(s.unified)}
               font={FONT}
               sheet={compact}
-              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(33,27,23,0.051)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-[state=open]:bg-[rgba(33,27,23,0.051)] dark:hover:bg-white/[0.054] dark:data-[state=open]:bg-white/[0.054]"
+              triggerClassName="flex size-[78px] cursor-pointer items-center justify-center rounded-[4px] outline-none hover:bg-[rgba(33,27,23,0.051)] focus-visible:ring-2 focus-visible:ring-[#2383e2] data-popup-open:bg-[rgba(33,27,23,0.051)] dark:hover:bg-white/[0.054] dark:data-popup-open:bg-white/[0.054]"
             >
               <Emoji emoji={icon} size={78} className="text-[78px] leading-[1.1]" />
             </ScenePicker>

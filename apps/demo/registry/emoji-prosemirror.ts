@@ -1,13 +1,12 @@
 import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import { createEmojiSuggestions, createStore, findShortcodeTrigger, isComposingKey, syncCombobox, type EmojiStore, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, createStore, findShortcodeTrigger, syncCombobox, type EmojiStore, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
 
 type Node = EditorState["doc"];
 
 export type ProseMirrorEmojiTypeaheadOptions = Pick<SuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
   insert?: "emoji" | "shortcode";
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
-  handleKeyDown?: (event: KeyLike) => boolean;
 };
 
 type Match = { query: string; from: number; to: number };
@@ -19,7 +18,7 @@ function matchIn({ selection: { $from, empty } }: EditorState): Match | null {
 
 const keyOf = (match: Match | null) => (match ? `${match.from}:${match.query}` : "");
 
-export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, handleKeyDown, ...options }: ProseMirrorEmojiTypeaheadOptions = {}) {
+export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiTypeaheadOptions = {}) {
   const mounted = createStore<EditorView | null, EditorView | null>(null, (_, view) => view);
   const current = () => {
     const view = mounted.getSnapshot();
@@ -38,8 +37,6 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       view.focus();
     },
   });
-  const keydown = (event: KeyLike) => (!isComposingKey(event) && suggestions.getSnapshot().open && !!handleKeyDown?.(event)) || suggestions.keydown(event);
-
   const plugin = new Plugin({
     key: new PluginKey("emojiTypeahead"),
     view(editor) {
@@ -61,7 +58,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       };
     },
     props: {
-      handleKeyDown: (_, event) => keydown(event),
+      handleKeyDown: (_, event) => suggestions.keydown(event),
       handleDOMEvents: { blur: () => void (suggestions.getSnapshot().open && suggestions.dismiss()) },
     },
   });
@@ -77,7 +74,6 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       const end = view.coordsAtPos(match.to);
       return new DOMRect(start.left, start.top, end.right - start.left, start.bottom - start.top);
     },
-    keydown,
   };
 }
 
