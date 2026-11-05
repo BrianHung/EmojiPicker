@@ -19,6 +19,7 @@ npm install
 npm run dev          # the demo at http://localhost:5199
 npm test             # library unit tests
 npm run typecheck    # every workspace
+npm run lint         # Biome lint; `npm run format` formats
 npm run build        # the library, then the site and registry
 ```
 
