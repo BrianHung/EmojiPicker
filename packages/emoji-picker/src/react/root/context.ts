@@ -14,7 +14,7 @@ export type ListHandle = {
   key(action: KeyboardAction, from: "input" | "list", event: KeyboardEvent | React.KeyboardEvent): boolean;
   clear(): boolean;
   focus(): boolean;
-  jump(section: string, options?: { instant?: boolean }): void;
+  jump(section: string, options?: { instant?: boolean; afterRender?: boolean }): void;
   atStart(): boolean;
   variations(target: Element): boolean;
 };
@@ -46,6 +46,8 @@ export type PickerContextValue = {
   pick(unified: string, details?: SelectDetails): EmojiSelection | undefined;
   close(): boolean;
   list: React.MutableRefObject<ListHandle | null>;
+  root: React.RefObject<HTMLElement | null>;
+  searchInput: React.RefObject<HTMLInputElement | null>;
   registerSearch(): () => void;
   listId: string;
 };

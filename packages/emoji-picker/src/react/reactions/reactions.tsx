@@ -1,4 +1,5 @@
 import * as React from "react";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Button } from "react-aria-components/Button";
 import { ToggleButton } from "react-aria-components/ToggleButton";
@@ -6,57 +7,47 @@ import { Toolbar } from "react-aria-components/Toolbar";
 import { nameWithTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { Glyph } from "../emoji/glyph";
-import { useEdgeKeys } from "../root/keyboard";
+import { useKeyRegion } from "../root/keyboard";
 import { useDrawable } from "../emoji/native-support";
 import { findArtwork, useArtworkMap } from "../emoji/overrides";
 import { ReactionsContext, isPressed } from "./reactions-context";
-import { racClassName, racParts, racState, renderElement, resolve, toRenderFunction, type InteractionState, type PartElementProps, type PartProps, type RacState } from "../utils/render";
+import { racClassName, racParts, racState, renderElement, resolve, toRenderFunction, type ElementProps, type InteractionState, type PartElementProps, type PartProps, type RacState } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 const BUTTONS = "button:not([disabled])";
 
-function useRovingRow(row: React.RefObject<HTMLElement | null>) {
+// ReactionBar takes any buttons as children, so it finds them in its own row
+const buttonsIn = (row: Element | null) => [...(row?.querySelectorAll<HTMLElement>(BUTTONS) ?? [])];
+
+function useRovingRow(row: React.RefObject<HTMLElement | null>, orientation: "horizontal" | "vertical"): React.HTMLAttributes<HTMLElement> {
   const current = React.useRef(0);
-  React.useLayoutEffect(() => {
-    const buttons = [...(row.current?.querySelectorAll<HTMLElement>(BUTTONS) ?? [])];
-    const stop = Math.min(current.current, buttons.length - 1);
-    buttons.forEach((b, i) => (b.tabIndex = i === stop ? 0 : -1));
-  });
-  React.useEffect(() => {
-    const el = row.current;
-    if (!el) return;
-    const onFocus = (event: FocusEvent) => {
-      const buttons = [...el.querySelectorAll<HTMLElement>(BUTTONS)];
-      const i = buttons.indexOf(event.target as HTMLElement);
+  const rove = (stop: number) => buttonsIn(row.current).forEach((b, i) => (b.tabIndex = i === stop ? 0 : -1));
+  React.useLayoutEffect(() => rove(Math.min(current.current, buttonsIn(row.current).length - 1)));
+  return {
+    onFocus(event) {
+      const i = buttonsIn(row.current).indexOf(event.target as HTMLElement);
       if (i < 0) return;
       current.current = i;
-      buttons.forEach((b, j) => (b.tabIndex = j === i ? 0 : -1));
-    };
-    const onHover = (event: PointerEvent) => {
+      rove(i);
+    },
+    onPointerOver(event) {
       const button = event.target instanceof Element ? event.target.closest<HTMLElement>(BUTTONS) : null;
       const active = document.activeElement;
-      if (button && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
-    };
-    const onKey = (event: KeyboardEvent) => {
+      const el = row.current;
+      if (button && el && button !== active && el.contains(button) && active instanceof HTMLElement && el.contains(active)) button.focus({ preventScroll: true });
+    },
+    onKeyDown(event) {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
-      const across = el.getAttribute("aria-orientation") === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
+      const across = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
       if (across.includes(event.key)) return event.preventDefault();
       if (event.key !== "Home" && event.key !== "End") return;
-      const buttons = [...el.querySelectorAll<HTMLElement>(BUTTONS)];
+      const buttons = buttonsIn(row.current);
       const target = event.key === "Home" ? buttons[0] : buttons[buttons.length - 1];
       if (!target) return;
       event.preventDefault();
       target.focus();
-    };
-    el.addEventListener("focusin", onFocus);
-    el.addEventListener("pointerover", onHover);
-    el.addEventListener("keydown", onKey);
-    return () => {
-      el.removeEventListener("focusin", onFocus);
-      el.removeEventListener("pointerover", onHover);
-      el.removeEventListener("keydown", onKey);
-    };
-  }, [row]);
+    },
+  };
 }
 
 export type ReactionBarState = { orientation: "horizontal" | "vertical" };
@@ -66,13 +57,16 @@ export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role"
     orientation?: "horizontal" | "vertical";
   };
 
+const div = (props: ElementProps<HTMLDivElement>) => <div {...props} />;
+
 export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, render, ...props }, ref) {
   const row = React.useRef<HTMLDivElement | null>(null);
-  useRovingRow(row);
-  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={racClassName(className)} render={toRenderFunction(render)} />;
+  const roving = useRovingRow(row, orientation);
+  const custom = toRenderFunction(render) ?? div;
+  return <Toolbar {...(props as object)} ref={mergeRefs(ref, row)} orientation={orientation} className={racClassName(className)} render={(dom, state) => custom(mergeProps(dom, roving) as ElementProps<HTMLDivElement>, state)} />;
 });
 
-type Row = { shown: readonly string[]; expandFocus: React.MutableRefObject<Element | null>; row: React.RefObject<HTMLDivElement | null> };
+type Row = { shown: readonly string[]; expanding: React.MutableRefObject<boolean> };
 const RowContext = React.createContext<Row | null>(null);
 
 function useRow(part: string) {
@@ -89,7 +83,14 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
-  const edges = useEdgeKeys(BUTTONS);
+  const edges = useKeyRegion((action) => {
+    if (action !== "first" && action !== "last") return "pass";
+    const buttons = buttonsIn(row.current).filter((el) => !el.hidden && el.getAttribute("aria-hidden") !== "true");
+    const button = action === "first" ? buttons[0] : buttons[buttons.length - 1];
+    if (!button) return "pass";
+    button.focus();
+    return "handled";
+  });
   const row = React.useRef<HTMLDivElement | null>(null);
   const { drawable, request } = useDrawable(row);
   const shown = (state?.reactions ?? [])
@@ -99,18 +100,13 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       return record != null && drawable(record, unified);
     });
   React.useEffect(() => request(shown));
-  const expandFocus = React.useRef<Element | null>(null);
+  const expanding = React.useRef(false);
   React.useEffect(() => {
-    const root = expandFocus.current;
-    if (!root || state?.open) return;
-    expandFocus.current = null;
-    let tries = 20;
-    const land = () => {
-      const target = root.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? root.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"]`);
-      if (target?.getClientRects().length) target.focus({ preventScroll: true });
-      else if (--tries > 0) requestAnimationFrame(land);
-    };
-    requestAnimationFrame(land);
+    if (!expanding.current || state?.open) return;
+    expanding.current = false;
+    const search = picker.searchInput.current;
+    if (search) search.focus({ preventScroll: true });
+    else picker.list.current?.focus();
   }, [state?.open]);
   const wasOpen = React.useRef(state?.open);
   React.useEffect(() => {
@@ -119,9 +115,10 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
     const el = row.current;
     if (!reopened || !el) return;
     const active = document.activeElement;
-    const root = el.closest(`[data-slot="${SLOTS.root}"]`);
-    if (active && active !== document.body && !(root?.contains(active) && active.closest("[inert],[hidden]"))) return;
-    el.querySelector<HTMLElement>(`${BUTTONS}:not([tabindex="-1"])`)?.focus({ preventScroll: true });
+    if (active && active !== document.body && !state?.panel.current?.contains(active)) return;
+    buttonsIn(el)
+      .find((b) => b.tabIndex !== -1)
+      ?.focus({ preventScroll: true });
   }, [state?.open]);
   if (!state?.open) return null;
   const content =
@@ -134,7 +131,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       children
     );
   return (
-    <RowContext.Provider value={{ shown, expandFocus, row }}>
+    <RowContext.Provider value={{ shown, expanding }}>
       <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row, edges)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
@@ -178,7 +175,7 @@ export type ReactionsExpandProps = PartElementProps<InteractionState, HTMLButton
 const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
-  const { expandFocus, row } = useRow("Expand");
+  const { expanding } = useRow("Expand");
   if (!state?.expand) return null;
   return (
     <Button
@@ -189,7 +186,7 @@ const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps
       {...racParts({ className, style, render })}
       {...{ title: labels.expandReactions }}
       onPress={() => {
-        expandFocus.current = row.current?.closest(`[data-slot="${SLOTS.root}"]`) ?? null;
+        expanding.current = true;
         state.expand!();
       }}
     >
@@ -212,5 +209,6 @@ export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);
   const hidden = Boolean(state?.open);
-  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });
+  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
+  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });
 });

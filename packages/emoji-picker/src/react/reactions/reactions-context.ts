@@ -6,6 +6,7 @@ export type ReactionsState = {
   open: boolean;
   expand?: () => void;
   pressed: ReadonlySet<string> | null;
+  panel: React.RefObject<HTMLDivElement | null>;
 };
 export const ReactionsContext = React.createContext<ReactionsState | null>(null);
 

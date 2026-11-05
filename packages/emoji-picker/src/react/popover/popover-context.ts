@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { OverlayTriggerState } from "react-stately/useOverlayTriggerState";
 
 export type PopoverState = {
   open: boolean;
@@ -7,6 +8,7 @@ export type PopoverState = {
   selected: React.RefObject<boolean>;
   closeOnSelect: boolean;
   focusGrid?: boolean;
+  overlay: OverlayTriggerState;
 };
 
 export const PopoverContext = React.createContext<PopoverState | null>(null);

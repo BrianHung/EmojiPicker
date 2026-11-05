@@ -3,8 +3,9 @@ import { type CategoryOption as CoreCategoryOption, createPickerState, type Emoj
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import { CollapseContext, useCollapse } from "./collapse";
 import { PickerContext, usePicker, ViewportContext, type FocusModel, type ListHandle, type PickerContextValue, type PointerModel, type SearchResultsMode, type SelectDetails } from "./context";
-import { useControllable } from "../utils/controllable";
 import { useActiveWithin } from "../utils/hold";
+import { mergeProps } from "react-aria/mergeProps";
+import { useControlledState } from "react-stately/useControlledState";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { KeyboardProvider, useUserKeyDown, type PickerKeyboardEventHandler } from "./keyboard";
 import type { KeyboardAction } from "./keymap";
@@ -120,16 +121,18 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     shallowEqual,
   );
   React.useEffect(() => void state.mount(), [state]);
-  useActiveWithin(rootRef, state.hold);
+  const activeWithin = useActiveWithin(state.hold);
   useClippedScrollGuard(rootRef);
 
   const collapse = useCollapse(state, view.collapsed);
   const { query, searching, results, pending } = view;
   const list = React.useRef<ListHandle | null>(null);
+  const searchInput = React.useRef<HTMLInputElement | null>(null);
+  const panel = React.useRef<HTMLDivElement | null>(null);
   const listId = React.useId();
 
-  const [value, setValue] = useControllable<string | null | undefined, string>(valueProp, defaultValue, onValueChange);
-  const [open, setReactionsOpen] = useControllable(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
+  const [value, setValue] = useControlledState<string | null | undefined, string>(valueProp as string | null, defaultValue, onValueChange);
+  const [open, setReactionsOpen] = useControlledState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
   const collapseToReactions = React.useCallback(() => setReactionsOpen(true), [setReactionsOpen]);
   const latest = React.useRef({ onSelect, popover, selects: value !== undefined });
@@ -181,13 +184,15 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       pick,
       close,
       list,
+      root: rootRef,
+      searchInput,
       registerSearch: state.registerSearch,
       listId,
     }),
     [store, state, labels, focusModel, pointerModel, popover, disableVariations, columns, fitColumns, emojiVersion, view, collapse, query, searching, searchResults, searchLimit, results, pending, value, pick, close, listId],
   );
   const reactionsState = React.useMemo<ReactionsState | null>(
-    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed } : null),
+    () => (reactions ? { reactions: view.reactions ?? reactions, open: reactionsOpen, expand: allowExpandReactions ? () => setReactionsOpen(false) : undefined, pressed, panel } : null),
     [reactions, view.reactions, reactionsOpen, allowExpandReactions, pressed, setReactionsOpen],
   );
 
@@ -200,9 +205,8 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
     return Boolean(list.current?.clear()) || close();
   };
   const focusSearch = () => {
-    const input = rootRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`);
-    input?.focus();
-    return Boolean(input);
+    searchInput.current?.focus();
+    return Boolean(searchInput.current);
   };
   const emptyState = useEmptyStateSlots();
   const count = !searching || pending ? "" : labels.resultCount(results.length);
@@ -223,6 +227,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
       close={onEscape}
       focusSearch={focusSearch}
       variations={(target) => Boolean(list.current?.variations(target))}
+      // Composite widgets own their arrow keys, including ones the app renders inside the picker
       ownsKeys={(el) => Boolean(el.closest(`[role="tablist"], [role="toolbar"], [data-slot="${SLOTS.skinTone}"]`))}
     >
       {(keyboard) =>
@@ -232,7 +237,7 @@ export const PickerRoot = React.forwardRef<HTMLElement, InternalRootProps>(funct
             ref: mergeRefs(ref, rootRef, keyboard.ref),
             "data-slot": SLOTS.root,
             "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
-            ...rest,
+            ...mergeProps(rest, activeWithin),
             "data-columns": columns ?? undefined,
             "data-searching": searching ? "" : undefined,
             "data-reactions-open": reactionsOpen ? "" : undefined,

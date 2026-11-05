@@ -54,6 +54,7 @@ function useComboboxAttributes(element: (() => HTMLElement | null | undefined) |
   React.useEffect(() => {
     const el = open ? element?.() : null;
     if (!el) return;
+    // The editor element is the app's: the combobox attributes and the blur go on it directly
     const role = el.getAttribute("role");
     const attrs = { role: "combobox", "aria-autocomplete": "list", "aria-expanded": "true", "aria-controls": listId };
     for (const [name, value] of Object.entries(attrs)) el.setAttribute(name, value);

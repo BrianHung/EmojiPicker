@@ -1,6 +1,7 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
+import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { PopoverContext, type PopoverState } from "./popover-context";
 import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
 
@@ -56,6 +57,7 @@ export type SuggestionsPopoverProps = React.HTMLAttributes<HTMLDivElement> &
 
 const TABBABLE = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
+// For popovers this package doesn't render, so all it has is their content element
 export function pickerInitialFocus(root: Element | null | undefined): HTMLElement | null {
   if (!root) return null;
   const target = root.querySelector<HTMLElement>("[data-autofocus]") ?? root.querySelector<HTMLElement>('[data-slot="emoji-picker"] [data-slot="list"] [data-slot="emoji"][tabindex="0"]');
@@ -98,16 +100,16 @@ export function usePopoverInternals<T extends PopoverInternals>(part: string): T
 }
 
 export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, closeOnSelect = true }: Omit<PopoverRootProps, "children">) {
-  const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
-  const open = controlled ?? uncontrolled;
-  const latest = React.useRef({ controlled, onOpenChange });
-  latest.current = { controlled, onOpenChange };
+  const overlay = useOverlayTriggerState({ isOpen: controlled, defaultOpen, onOpenChange });
+  const { isOpen: open, setOpen: setOverlayOpen } = overlay;
   const selected = React.useRef(false);
-  const setOpen = React.useCallback((next: boolean) => {
-    if (next) selected.current = false;
-    if (latest.current.controlled === undefined) setUncontrolled(next);
-    latest.current.onOpenChange?.(next);
-  }, []);
+  const setOpen = React.useCallback(
+    (next: boolean) => {
+      if (next) selected.current = false;
+      setOverlayOpen(next);
+    },
+    [setOverlayOpen],
+  );
   // After the task's microtasks, so an editor focused in onSelect (Lexical updates in a microtask) keeps focus
   const close = React.useCallback(
     (reason?: "select") => {
@@ -116,7 +118,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
     },
     [setOpen],
   );
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected }), [open, setOpen, close, closeOnSelect]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, overlay }), [open, setOpen, close, closeOnSelect]);
 }
 
 export function ContentFocus({ initialFocus, children }: { initialFocus?: PopoverInitialFocus; children: React.ReactNode }) {

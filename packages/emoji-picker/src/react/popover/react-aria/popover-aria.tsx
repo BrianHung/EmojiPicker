@@ -4,7 +4,6 @@ import { Popover, type PopoverRenderProps } from "react-aria-components/Popover"
 import { mergeProps } from "react-aria/mergeProps";
 import { resolve } from "../../utils/render";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
-import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import {
   anchorRect,
   ContentFocus,
@@ -30,8 +29,7 @@ type Internals = PopoverInternals & { id?: string };
 function Root({ children, ...props }: PopoverRootProps) {
   const state = usePopoverState(props);
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
-  const overlay = useOverlayTriggerState({ isOpen: state.open, onOpenChange: state.setOpen });
-  const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, overlay, { current: trigger });
+  const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, state.overlay, { current: trigger });
   const { onPress: _, ...aria } = triggerProps;
   const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => mergeProps(props, aria), id: overlayProps.id };
   return <PopoverProvider value={value}>{children}</PopoverProvider>;

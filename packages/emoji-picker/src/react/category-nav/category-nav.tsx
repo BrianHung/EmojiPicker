@@ -21,7 +21,16 @@ export type CategoryNavProps = Omit<PartElementProps<CategoryNavState, HTMLDivEl
   children?: (category: NavCategory) => React.ReactNode;
 };
 
-type Nav = { id: string; selected: string; stop: string; disabled: boolean; focus: { key: string | null; within: boolean }; pointer: { hovered: string | null; pressed: string | null }; focusVisible: boolean };
+type Nav = {
+  id: string;
+  selected: string;
+  stop: string;
+  disabled: boolean;
+  focus: { key: string | null; within: boolean };
+  pointer: { hovered: string | null; pressed: string | null };
+  focusVisible: boolean;
+  tabs: Map<string, HTMLElement>;
+};
 const NavContext = React.createContext<Nav | null>(null);
 const TabContext = React.createContext<NavCategory | null>(null);
 
@@ -29,12 +38,12 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const picker = usePicker("EmojiPicker.CategoryNav");
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
   const userKeys = useUserKeyDown(onKeyDown as PickerKeyboardEventHandler | undefined);
-  const list = React.useRef<HTMLDivElement | null>(null);
-  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys, list), [ref, userKeys]);
+  const merged = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, userKeys), [ref, userKeys]);
   const id = React.useId();
   const [focus, setFocus] = React.useState<{ key: string | null; within: boolean }>({ key: null, within: false });
   const [pointer, setPointer] = React.useState<{ hovered: string | null; pressed: string | null }>({ hovered: null, pressed: null });
   const { isFocusVisible } = useFocusVisible();
+  const [tabs] = React.useState(() => new Map<string, HTMLElement>());
   if (categories.length <= 1) return null;
 
   const ids = categories.map((c) => c.id);
@@ -42,14 +51,13 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const disabled = picker.searching;
   const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
   const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
-  const tab = (key: string) => list.current?.querySelector<HTMLElement>(`[data-key="${CSS.escape(key)}"]`);
+
   const choose = (key: string, instant: boolean) => {
-    if (picker.collapse.isCollapsed(key)) {
-      picker.collapse.setCollapsed(key, false);
-      requestAnimationFrame(() => requestAnimationFrame(() => jumpToCategory(key, { instant })));
-    } else jumpToCategory(key, { instant });
+    if (!picker.collapse.isCollapsed(key)) return jumpToCategory(key, { instant });
+    picker.collapse.setCollapsed(key, false);
+    picker.list.current?.jump(key, { instant, afterRender: true });
   };
-  const keyOf = (e: React.SyntheticEvent) => (e.target as Element).closest?.('[role="tab"]')?.getAttribute("data-key") ?? null;
+  const keyOf = (e: React.SyntheticEvent) => [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0] ?? null;
   const onKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const key = keyOf(e);
     if (key == null || disabled || e.altKey || e.ctrlKey || e.metaKey) return;
@@ -57,14 +65,14 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
     const rtl = orientation === "horizontal" && getComputedStyle(e.currentTarget).direction === "rtl";
     const [back, forward] = orientation === "vertical" ? ["ArrowUp", "ArrowDown"] : rtl ? ["ArrowRight", "ArrowLeft"] : ["ArrowLeft", "ArrowRight"];
     const to = e.key === forward ? ids[(i + 1) % ids.length] : e.key === back ? ids[(i - 1 + ids.length) % ids.length] : e.key === "Home" ? ids[0] : e.key === "End" ? ids[ids.length - 1] : undefined;
-    if (to != null) tab(to)?.focus();
+    if (to != null) tabs.get(to)?.focus();
     else if (e.key === "Enter" || e.key === " ") choose(key, true);
     else return;
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const nav: Nav = { id, selected, stop, disabled, focus, pointer, focusVisible: isFocusVisible };
+  const nav: Nav = { id, selected, stop, disabled, focus, pointer, focusVisible: isFocusVisible, tabs };
   return (
     <NavContext.Provider value={nav}>
       {renderElement(
@@ -118,7 +126,15 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
   const nav = React.useContext(NavContext);
   const c = React.useContext(TabContext);
   if (!nav || !c) throw new Error("EmojiPicker.CategoryNav.Tab must be inside EmojiPicker.CategoryNav.");
-  const { disabled } = nav;
+  const { disabled, tabs } = nav;
+  const register = React.useCallback(
+    (el: HTMLElement | null) => {
+      if (el) tabs.set(c.id, el);
+      else tabs.delete(c.id);
+    },
+    [tabs, c.id],
+  );
+  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(register, ref), [register, ref]);
   const selected = c.id === nav.selected;
   const focused = nav.focus.within && nav.focus.key === c.id;
   const state: CategoryTabState = {
@@ -144,7 +160,7 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
       tabIndex: disabled ? undefined : c.id === nav.stop ? 0 : -1,
       className: "",
       ...props,
-      ref,
+      ref: refs,
       "data-key": c.id,
       "data-selected": selected || undefined,
       "data-disabled": disabled || undefined,

@@ -62,6 +62,8 @@ export type Cells = {
   focusVisible: boolean;
   position: (id: Key) => readonly [number, number, number] | undefined;
   virtual: boolean;
+  elements: Map<Key, HTMLElement>;
+  headers: Set<HTMLElement>;
   picker: PickerState<React.ReactNode>;
   marks: ReturnType<typeof createMarks>;
   reveal(id: Key): void;
@@ -78,7 +80,7 @@ export type GridGeometry = {
   reveal(key: Key, from?: Key): void;
   viewport(): number;
   jump(section: string, instant: boolean): boolean;
-  overlay(key: Key): React.CSSProperties;
+  overlay(key: Key, cell: Element | null): React.CSSProperties;
 };
 
 const MOVES: Partial<Record<KeyboardAction, EmojiGridMove>> = { "move-up": "up", "move-down": "down", "move-left": "left", "move-right": "right", "page-up": "page-up", "page-down": "page-down", first: "first", last: "last" };
@@ -86,6 +88,7 @@ const LONG_PRESS_MS = 500;
 const NO_KEYS: Key[] = [];
 const baseOf = (unified: string) => unified.toLowerCase().replace(/-1f3f[b-f]/g, "");
 export const isRtl = (el: Element | null | undefined) => (el ? getComputedStyle(el).direction === "rtl" : false);
+// Handlers are delegated from the list: one set for every mounted cell
 const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
 
 export function useGridSections(horizontal: boolean) {
@@ -161,8 +164,10 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (it) picker.pick(it.unified);
   };
 
-  const focusInput = () => listRef.current?.closest(`[data-slot="${SLOTS.root}"]`)?.querySelector<HTMLElement>(`[data-slot="${SLOTS.searchInput}"]`) ?? null;
-  const cellElement = (key: Key | null | undefined) => (key == null ? null : (listRef.current?.querySelector<HTMLElement>(`[data-slot="${SLOTS.emoji}"][data-key="${CSS.escape(String(key))}"]`) ?? null));
+  const focusInput = () => picker.searchInput.current;
+  const [elements] = React.useState(() => new Map<Key, HTMLElement>());
+  const [headers] = React.useState(() => new Set<HTMLElement>());
+  const cellElement = (key: Key | null | undefined) => (key == null ? null : (elements.get(key) ?? null));
 
   const variations = useStore(core, (s) => s.variations);
   const back = React.useRef<HTMLElement | null>(null);
@@ -227,7 +232,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       moveTo(key, true);
       return true;
     },
-    jump(id, { instant = false } = {}) {
+    jump(id, { instant = false, afterRender = false } = {}) {
+      if (afterRender) return void (pendingJump.current = { id, instant });
       if (!geometry.jump(id, instant)) return;
       core.setActiveSection(id);
       const first = sections.find((s) => s.id === id)?.items[0]?.id;
@@ -249,6 +255,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (picker.list.current === handle) picker.list.current = null;
     };
   });
+
+  const pendingJump = React.useRef<{ id: string; instant: boolean } | null>(null);
+  const flushJump = () => {
+    const jump = pendingJump.current;
+    pendingJump.current = null;
+    if (jump) handle.jump(jump.id, { instant: jump.instant });
+  };
 
   const kept = React.useRef<{ query: string; unified?: string }>({ query: "" });
   const pendingHighlight = React.useRef<{ key: Key | null } | null>(null);
@@ -287,23 +300,18 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     const cell = focusGrid.current ? cellElement(marks.getSnapshot().stop) : null;
     if (!cell) return;
     focusGrid.current = false;
+    // On mount this runs before the root's ref attaches and maybe before the search field mounts, so it asks the DOM
     const root = cell.closest(`[data-slot="${SLOTS.root}"]`);
     if (root && !root.contains(document.activeElement) && !root.querySelector("[data-autofocus]")) cell.focus({ preventScroll: true });
   };
 
   // Set the focused key before React Aria sees DOM focus, or it treats focus as entering with no key and jumps to the first cell
-  React.useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    const onFocusIn = (e: FocusEvent) => {
-      const id = cellOf(e.target)?.getAttribute("data-key");
-      const manager = stateRef.current.selectionManager;
-      if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
-      manager.setFocusedKey(id);
-    };
-    el.addEventListener("focusin", onFocusIn);
-    return () => el.removeEventListener("focusin", onFocusIn);
-  }, []);
+  const onFocusCapture = (e: React.FocusEvent) => {
+    const id = cellOf(e.target)?.getAttribute("data-key");
+    const manager = stateRef.current.selectionManager;
+    if (id == null || e.target !== document.activeElement || manager.isFocused || manager.focusedKey === id) return;
+    manager.setFocusedKey(id);
+  };
 
   const region = useKeyRegion((action, event) => {
     const cell = cellOf(event.target);
@@ -322,7 +330,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     if (!pointer.moved || picker.pointer !== "follows" || lastKey() === key) return;
     const active = document.activeElement;
     const list = listRef.current;
-    const root = list?.closest(`[data-slot="${SLOTS.root}"]`);
+    const root = picker.root.current;
     if (list?.contains(active) && active !== list) {
       if (keyed.current && !pointer.within) return;
       keyed.current = false;
@@ -435,6 +443,8 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         return at ? [at.index + 1, at.section.items.length, index] : undefined;
       },
       virtual,
+      elements,
+      headers,
       picker: core,
       marks,
       reveal: (id) => latest.current.geometry.reveal(id),
@@ -453,8 +463,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     persisted,
     applyHighlight,
     syncStop,
+    flushJump,
     gridProps: {
-      ...mergeProps(listBoxProps, focusProps, cellHandlers),
+      ...mergeProps(listBoxProps, focusProps, cellHandlers, { onFocusCapture }),
       ref: merged,
       tabIndex: fieldRef ? undefined : -1,
       "data-slot": SLOTS.list,
@@ -470,7 +481,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     variations: varied ? (
       <Variations
         record={varied.record}
-        style={geometry.overlay(variations!)}
+        style={geometry.overlay(variations!, cellElement(variations))}
         onPick={(unified) => {
           closeVariations(true);
           picker.pick(unified);
@@ -531,9 +542,12 @@ export function useCell(grid: Cells, item: EmojiItem) {
   const element = React.useRef<HTMLElement | null>(null);
   const ref = React.useCallback(
     (el: HTMLElement | null) => {
+      if (element.current && grid.elements.get(item.id) === element.current) grid.elements.delete(item.id);
       element.current = el;
+      if (!el) return;
       // React Aria's scrollIntoViewport would scroll the page too; the keyboard moves already scrolled the scroller
-      if (el) el.scrollIntoView = () => grid.reveal(item.id);
+      el.scrollIntoView = () => grid.reveal(item.id);
+      grid.elements.set(item.id, el);
     },
     [grid, item.id],
   );
@@ -604,9 +618,8 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
         if (index >= 0) scroll(index, "start");
         return index >= 0;
       },
-      overlay(key) {
+      overlay(_, cell) {
         const list = listRef.current;
-        const cell = list?.querySelector(`[data-key="${CSS.escape(String(key))}"]`);
         if (!list || !cell) return { position: "absolute", visibility: "hidden" };
         const [l, c] = [list.getBoundingClientRect(), cell.getBoundingClientRect()];
         const above = c.top - l.top - c.height;
@@ -625,8 +638,10 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     const shown = v ? grid.rows.filter((r) => r.offset + r.size > v.top && r.offset < v.top + v.height) : [];
     request(shown.flatMap((r) => (r.type === "emojis" ? r.items.map((i) => i.unified) : [])));
     if (!picker.searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
+    controller.flushJump();
   };
   React.useLayoutEffect(() => sync.current());
+  // The app's virtualizer owns the scroller
   React.useEffect(() => {
     const el = windowOf(listRef.current)?.el;
     const onScroll = () => sync.current();
