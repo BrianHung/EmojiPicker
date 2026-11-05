@@ -4,6 +4,7 @@ description: The picker's grid on TanStack Virtual, react-window, Virtuoso, or t
 ---
 
 import { TanStackPicker } from "./demo";
+import tanstackList from "./tanstack-list.tsx?raw";
 
 <TanStackPicker />
 
@@ -13,55 +14,7 @@ import { TanStackPicker } from "./demo";
 
 ## TanStack Virtual
 
-```tsx title="tanstack-list.tsx"
-import * as React from "react";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "@brianhung/emoji-picker";
-
-/** One emoji: it re-renders only when its own highlight, hover or press changes. */
-const Cell = React.memo(function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
-  const { cellProps } = useEmojiCell(state, item);
-  return <div {...cellProps} className="rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />;
-});
-
-/** EmojiPicker.List's grid, virtualized by TanStack Virtual. */
-export function TanStackList() {
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const grid = useEmojiGrid({
-    columns: 8,
-    rowHeight: 36,
-    headerHeight: 28,
-    scrollToIndex: (index, options) => virtualizer.scrollToIndex(index, options),
-  });
-  const virtualizer = useVirtualizer({
-    count: grid.rows.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: (i) => grid.rows[i]!.size,
-    getItemKey: React.useCallback((i: number) => grid.rows[i]!.key, [grid.rows]),
-    overscan: 4,
-  });
-
-  return (
-    <EmojiPicker.Viewport ref={scrollRef} className="relative flex-1">
-      <div {...grid.getGridProps({ style: { position: "relative", height: virtualizer.getTotalSize() } })}>
-        {virtualizer.getVirtualItems().map((v) => {
-          const row = grid.rows[v.index]!;
-          return (
-            <div key={v.key} role="presentation" className="absolute inset-x-0 grid grid-cols-8 justify-items-center px-1.5" style={{ top: v.start, height: v.size }}>
-              {row.type === "header" ? (
-                <div {...grid.getHeaderProps(row.section)} className="col-span-full w-full bg-popover px-1 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
-              ) : (
-                row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />)
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {grid.variations}
-    </EmojiPicker.Viewport>
-  );
-}
-```
+<Code title="tanstack-list.tsx" code={tanstackList} />
 
 Put it inside `EmojiPicker.Root` where `EmojiPicker.List` would go. `grid.stickyIndexes` lists the title rows, for TanStack's sticky-item pattern.
 

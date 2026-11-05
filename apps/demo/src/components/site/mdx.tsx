@@ -3,28 +3,30 @@ import { createRoot } from "react-dom/client";
 import type { MDXComponents, MDXContent } from "mdx/types";
 import { Code } from "./code";
 import { PageHeader } from "./copy-page";
-import { C, H2, H3, P } from "./docs";
+import { C, CodeBlockTabs, H2, H3, P, type CodeProps } from "./docs";
 import { DocsLayout } from "./docs-layout";
 import { SiteShell } from "./shell";
 
 const text = (node: React.ReactNode): string =>
   typeof node === "string" || typeof node === "number" ? String(node) : Array.isArray(node) ? node.map(text).join("") : React.isValidElement<{ children?: React.ReactNode }>(node) ? text(node.props.children) : "";
 
-const slug = (node: React.ReactNode) =>
+export const slug = (node: React.ReactNode) =>
   text(node)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+export type HeadingProps = { id?: string; children: React.ReactNode };
+
 /** Markdown elements as the docs primitives. Fenced code arrives as <Code> (plugins/mdx.ts). */
-const components: MDXComponents = {
-  h2: ({ children }) => (
-    <H2 id={slug(children)} className="mt-8 text-xl">
+export const components: MDXComponents = {
+  h2: ({ id, children }: HeadingProps) => (
+    <H2 id={id ?? slug(children)} className="mt-8 text-xl">
       {children}
     </H2>
   ),
-  h3: ({ children }) => (
-    <H3 id={slug(children)} className="mt-4">
+  h3: ({ id, children }: HeadingProps) => (
+    <H3 id={id ?? slug(children)} className="mt-4">
       {children}
     </H3>
   ),
@@ -32,7 +34,8 @@ const components: MDXComponents = {
   code: ({ children }) => <C>{children}</C>,
   ul: ({ children }) => <ul className="ml-5 list-disc space-y-1.5 text-[15px] leading-7 text-muted-foreground [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground">{children}</ul>,
   hr: () => <hr className="mt-8 border-border" />,
-  Code: ({ code, ...props }: React.ComponentProps<typeof Code> & { code: string }) => <Code {...props}>{code}</Code>,
+  Code: ({ code, label: _, ...props }: CodeProps) => <Code {...props}>{code}</Code>,
+  CodeTabs: CodeBlockTabs,
 };
 
 type Frontmatter = { title: string; description: string; toc?: boolean };

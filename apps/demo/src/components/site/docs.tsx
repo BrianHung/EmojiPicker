@@ -103,6 +103,22 @@ export function Tabs<T extends string>({
   );
 }
 
+type PanelProps = { label: string; children: React.ReactNode };
+
+export const TabPanel = ({ children }: PanelProps) => <>{children}</>;
+
+/** Page-level tabs over `<TabPanel label>` children, showing the selected one. */
+export function TabPanels({ label, children }: { label: string; children: React.ReactNode }) {
+  const panels = React.Children.toArray(children).filter((child): child is React.ReactElement<PanelProps> => React.isValidElement(child));
+  const [value, setValue] = React.useState(panels[0]!.props.label);
+  return (
+    <>
+      <Tabs label={label} value={value} onChange={setValue} items={panels.map(({ props }) => ({ value: props.label, label: props.label }))} />
+      {panels.find(({ props }) => props.label === value)}
+    </>
+  );
+}
+
 /* ------------------------------------------------------------- code panels */
 
 export type CodeFile = { name: string; code: string; lang?: Lang };
@@ -165,6 +181,30 @@ export function CodeTabs({
   );
 }
 
+/** A fenced code block in MDX (`<Code lang code title label />`, plugins/mdx.ts) as a code tab: `label` names the tab, `title` is its file. */
+export type CodeProps = { code: string; lang?: Lang; title?: string; label?: string };
+
+export const codeTabsOf = (children: React.ReactNode): CodeTab[] =>
+  React.Children.toArray(children)
+    .filter((child): child is React.ReactElement<CodeProps> => React.isValidElement(child))
+    .map(({ props: { code, lang, title, label } }) => ({ label: label ?? title ?? "", file: label ? title : undefined, code, lang }));
+
+/** MDX's `<CodeTabs>`: one tab per fenced code block inside it. */
+export const CodeBlockTabs = ({ children, ...props }: Omit<React.ComponentProps<typeof CodeTabs>, "tabs"> & { children: React.ReactNode }) => <CodeTabs tabs={codeTabsOf(children)} {...props} />;
+
+const PACKAGE_MANAGERS = {
+  pnpm: { install: "pnpm add", dlx: "pnpm dlx" },
+  npm: { install: "npm install", dlx: "npx" },
+  yarn: { install: "yarn add", dlx: "yarn dlx" },
+  bun: { install: "bun add", dlx: "bunx --bun" },
+};
+
+/** A command in each package manager: `install` adds a package, `dlx` runs one. */
+export function PackageManagers(command: { install: string } | { dlx: string }) {
+  const tabs = Object.entries(PACKAGE_MANAGERS).map(([label, pm]) => ({ label, lang: "bash" as const, code: "install" in command ? `${pm.install} ${command.install}` : `${pm.dlx} ${command.dlx}` }));
+  return <CodeTabs tabs={tabs} defaultTab="npm" />;
+}
+
 /** shadcn's collapsed code: a few faded lines and a "View code" button. */
 export function Collapsible({ lines, collapse, resetKey, children }: { lines: number; collapse: number; resetKey?: unknown; children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
@@ -196,48 +236,8 @@ export function Collapsible({ lines, collapse, resetKey, children }: { lines: nu
 /* ------------------------------------------------------------ preview card */
 
 /** The live preview surface: a bordered, rounded card that centers its content. */
-function Preview({ children, className }: { children: React.ReactNode; className?: string }) {
+export function Preview({ children, className }: { children: React.ReactNode; className?: string }) {
   return <div className={cn("flex min-h-[320px] items-center justify-center rounded-xl border border-border bg-background p-6 sm:p-10", className)}>{children}</div>;
-}
-
-/**
- * An example (Base UI): h3, one sentence, a live preview and its code. With
- * `variants` (keyed by code tab label), the preview renders the implementation
- * whose code tab is selected, and a switch in the corner picks between them.
- */
-export function Example({
-  id,
-  title,
-  description,
-  children,
-  code,
-  variants,
-  previewClassName,
-  collapse = 14,
-}: {
-  id: string;
-  title: string;
-  description: React.ReactNode;
-  children?: React.ReactNode;
-  code: CodeTab[];
-  variants?: Record<string, React.ReactNode>;
-  previewClassName?: string;
-  collapse?: number;
-}) {
-  const [tab, setTab] = React.useState(code[0]!.label);
-  const names = variants ? Object.keys(variants) : [];
-  return (
-    <section className="flex flex-col gap-4">
-      <H3 id={id}>{title}</H3>
-      <P className="-mt-1">{description}</P>
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <Preview className={previewClassName}>{variants ? (variants[tab] ?? variants[names[0]!]) : children}</Preview>
-        </div>
-        <CodeTabs tabs={code} collapse={collapse} value={tab} onChange={setTab} />
-      </div>
-    </section>
-  );
 }
 
 /* ------------------------------------------------------------------ fitting */

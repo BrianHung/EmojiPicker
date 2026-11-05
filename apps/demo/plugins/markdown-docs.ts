@@ -19,9 +19,19 @@ function readme(text: string) {
 
 type Page = { title: string; description: string; body: string };
 
+/** `<Code title code={file} />` with `import file from "./file.tsx?raw"` as the fenced block it shows. */
+function inlineSources(dir: string, mdx: string) {
+  const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "(\.[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, path!]));
+  return mdx.replace(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/gm, (line, title: string, id: string) => {
+    const path = files[id];
+    return path ? `\`\`\`${posix.extname(path).slice(1)} title="${title}"\n${read(posix.join(dir, path)).trim()}\n\`\`\`` : line;
+  });
+}
+
 /** An MDX page as Markdown: frontmatter, then the body without its imports and JSX-only lines (the live demos). */
 function page(name: string): Page {
-  const source = read(`src/pages/examples/${name}/page.mdx`);
+  const dir = `src/pages/examples/${name}`;
+  const source = inlineSources(dir, read(`${dir}/page.mdx`));
   const [, yaml = "", rest = source] = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
   const meta = Object.fromEntries(yaml.split("\n").map((line) => line.split(/:\s*(.*)/s).slice(0, 2)));
   let fenced = false;

@@ -1,0 +1,47 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: var(--emoji-picker-foreground);
+  border: 1px solid var(--emoji-picker-border);
+  border-radius: 9999px;
+  outline: none;
+  transition: transform 150ms;
+}
+.trigger:hover,
+.trigger[data-state="open"] {
+  background: var(--emoji-picker-hover);
+}
+.trigger:active {
+  transform: scale(0.97);
+}
+.trigger:focus-visible {
+  box-shadow: 0 0 0 2px var(--emoji-picker-background), 0 0 0 4px var(--emoji-picker-ring);
+}
+
+.emoji {
+  font-size: 16px;
+}
+
+.content {
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    scale 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.content[data-starting-style],
+.content[data-ending-style] {
+  opacity: 0;
+}
+.content[data-ending-style] {
+  transition-duration: 100ms;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .content[data-starting-style],
+  .content[data-ending-style] {
+    scale: 0.95;
+  }
+}
