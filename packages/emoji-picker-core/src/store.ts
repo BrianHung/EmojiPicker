@@ -200,7 +200,8 @@ export function createEmojiStore({
 
     get: (unified: string) => loaded().byUnified.get(unified.toLowerCase()) ?? loaded().byUnified.get(unified),
 
-    frequent: (n: number) => cached(frequentOf, n, () => memo((ranked: readonly string[], _data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? store.get(u) : CODEPOINTS.test(u))).slice(0, n)))(frequents.top(Infinity), loaded(), ready()),
+    frequent: (n: number) =>
+      cached(frequentOf, n, () => memo((ranked: readonly string[], _data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? store.get(u) : CODEPOINTS.test(u))).slice(0, n)))(frequents.top(Infinity), loaded(), ready()),
 
     index(): SearchIndex {
       if (!ready()) throw new Error("emoji data is not loaded; await store.load() first");
