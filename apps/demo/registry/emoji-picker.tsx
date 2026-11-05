@@ -29,7 +29,7 @@ function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
         <EmojiPicker.SkinTone.Trigger className={tone}>
           <EmojiPicker.SkinTone.Glyph />
         </EmojiPicker.SkinTone.Trigger>
-        <EmojiPicker.SkinTone.Options className="end-0 top-0 z-3 flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
+        <EmojiPicker.SkinTone.Options className="end-0 top-1/2 -translate-y-1/2 z-3 flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
           {(t) => (
             <EmojiPicker.SkinTone.Option tone={t} className={tone}>
               <EmojiPicker.SkinTone.Glyph />
