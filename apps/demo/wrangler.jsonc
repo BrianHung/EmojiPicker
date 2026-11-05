@@ -6,10 +6,7 @@
   "observability": { "enabled": true },
   "ai": { "binding": "AI" },
   "vectorize": [{ "binding": "EMOJI_INDEX", "index_name": "emoji-bge-large" }],
-  "ratelimits": [
-    { "name": "SEARCH_LIMIT", "namespace_id": "1001", "simple": { "limit": 300, "period": 60 } },
-    { "name": "DECIDE_LIMIT", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }
-  ],
+  "ratelimits": [{ "name": "SEARCH_LIMIT", "namespace_id": "1001", "simple": { "limit": 300, "period": 60 } }, { "name": "DECIDE_LIMIT", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }],
   "vars": {
     "ALLOWED_ORIGINS": "http://localhost:*",
     "AI_GATEWAY_ID": "default"
