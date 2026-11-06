@@ -41,7 +41,7 @@ export const test = base.extend({
       },
       colorScheme === "dark" ? "dark" : "light",
     );
-    await page.route("https://all-the.bufo.zone/**", (route) => route.fulfill({ contentType: "image/png", body: REMOTE_IMAGE }));
+    await page.route(/^https:\/\/all-the\.bufo\.zone\/|\/api\/bufo-still\//, (route) => route.fulfill({ contentType: "image/png", body: REMOTE_IMAGE }));
     await page.route(/^https:\/\/(cdn\.jsdelivr\.net|fonts\.googleapis\.com|fonts\.gstatic\.com)\//, fromCache);
     await use(page);
   },

@@ -269,8 +269,11 @@ export const SHOTS: Shot[] = [
     only: "desktop",
     prepare: async (p) => {
       await card(p).scrollIntoViewIfNeeded();
-      await card(p).getByText(/^yep/).hover();
-      await card(p)
+      const message = card(p)
+        .locator("div.group")
+        .filter({ has: p.getByText(/^yep/) });
+      await message.hover();
+      await message
         .getByRole("button", { name: /^React with/ })
         .first()
         .hover();
