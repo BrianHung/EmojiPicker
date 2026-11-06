@@ -47,6 +47,7 @@ export function Demo() {
   const [timing, setTiming] = React.useState<{ query: string; count: number; ms: number } | null>(null);
   const device = useStore(onDeviceStatus);
   const api = useStore(apiStatus);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new search once the on-device model's state changes
   const search = React.useMemo(() => timed(SEARCHES[tab], setTiming), [tab, device.state]);
 
   const backend = tab === "vector" ? "embeddings" : tab === "decision" ? "decision" : null;

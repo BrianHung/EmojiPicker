@@ -24,6 +24,7 @@ export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | 
   const active = useActiveHeading(ids);
 
   const list = React.useRef<HTMLDivElement>(null);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrolls the newly active link into view
   React.useEffect(() => {
     const box = list.current;
     const link = box?.querySelector<HTMLElement>(`[data-active]`);

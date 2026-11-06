@@ -180,6 +180,7 @@ export function PackageManagers(command: { install: string } | { dlx: string }) 
 
 export function Collapsible({ lines, collapse, resetKey, children }: { lines: number; collapse: number; resetKey?: unknown; children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a new resetKey collapses it again
   React.useEffect(() => setOpen(false), [resetKey]);
   const collapsible = collapse > 0 && lines > collapse + 2;
   if (!collapsible) return <>{children}</>;

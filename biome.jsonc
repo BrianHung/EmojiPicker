@@ -33,7 +33,7 @@
         "noCommaOperator": "off"
       },
       "correctness": {
-        "useExhaustiveDependencies": "off",
+        "useExhaustiveDependencies": { "level": "error", "options": { "hooks": [{ "name": "useLayoutEffect", "closureIndex": 0, "dependenciesIndex": 1 }] } },
         "noComponentHookFactories": "off",
         "usePlaywrightValidDescribeCallback": "off"
       },
@@ -70,10 +70,6 @@
     {
       "includes": ["**/*.md"],
       "formatter": { "enabled": false }
-    },
-    {
-      "includes": ["packages/react/src/react/utils/render.tsx"],
-      "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
     }
   ]
 }
