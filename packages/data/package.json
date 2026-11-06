@@ -1,6 +1,6 @@
 {
   "name": "@brianhung/emoji-picker-data",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "Emoji datasets for @brianhung/emoji-picker-react in every emojibase locale and shortcode set.",
   "keywords": [
     "emoji",
@@ -21,10 +21,14 @@
   },
   "files": [
     "data",
+    "dataset.d.cts",
     "THIRD_PARTY_NOTICES.md"
   ],
   "exports": {
-    "./*.json": "./data/*.json",
+    "./*.json": {
+      "types": "./data/*.json.d.cts",
+      "default": "./data/*.json"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -34,7 +38,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@brianhung/emoji-picker-core": "*",
+    "@brianhung/emoji-picker-core": "^1.0.0-alpha.0",
     "emojibase": "18.0.0",
     "emojibase-data": "18.0.0",
     "tsx": "^4.23.15",
