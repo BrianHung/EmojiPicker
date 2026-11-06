@@ -10,7 +10,7 @@ import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
 import { SceneSlot, toggleReaction, type Reaction } from "@/styles/scene-kit";
 import { StyleTypeahead, StyleDropdown, StylePills, StyleReactionRow } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
-import { discordEmojiOptions } from "@/experiences/discord";
+import { discordAutocompleteOptions } from "@/styles/discord/picker";
 
 function extract(source: string, name: string) {
   const lines = source.split("\n");
@@ -69,7 +69,7 @@ const DRAFT = ":smi";
 
 function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
-  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}), onSelect: copyEmoji });
+  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}), onSelect: copyEmoji });
   return (
     <div className="relative w-full max-w-[380px]">
       <StyleTypeahead appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />

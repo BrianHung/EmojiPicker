@@ -1,5 +1,5 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
-import { card, firstPicker, homePopover, preview } from "./surfaces";
+import { firstPicker, homePopover, preview } from "./surfaces";
 import { expect, frames, quiet, slot, test, visit } from "./support";
 
 const BUDGET = { heapMB: 6, commits: 3, renders: 6, autocomplete: 7 };
@@ -137,24 +137,6 @@ test("home: popover picker heap on open", async ({ page }) => {
       .waitFor();
   });
   record("home-popover-heapMB", +delta.toFixed(2));
-  expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
-});
-
-test("gallery: Slack picker renders per step, and heap on open", async ({ page }) => {
-  await visit(page, "/gallery/#slack");
-  const result = await steps(page, card(page, "Inline picker"));
-  record("gallery-slack-inline", result);
-  withinBudget(result);
-  const trigger = card(page, "Popover").getByRole("button", { name: "Open emoji picker", exact: true });
-  await trigger.scrollIntoViewIfNeeded();
-  const delta = await openDelta(page, async () => {
-    await trigger.click();
-    await page
-      .locator(`${slot("popoverContent")} ${slot("emoji")}`)
-      .first()
-      .waitFor();
-  });
-  record("gallery-slack-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
 });
 

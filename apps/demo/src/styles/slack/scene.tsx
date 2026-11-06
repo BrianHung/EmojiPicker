@@ -4,7 +4,7 @@ import { UNSAFE_PortalProvider } from "react-aria";
 import { Focusable, OverlayArrow, Tooltip, TooltipTrigger } from "react-aria-components";
 import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { useEmojiTextField } from "@/components/emoji-text-field";
-import { SlackEmojiMenu, slackEmojiOptions } from "@/experiences/slack";
+import { SlackEmojiMenu, slackEmojiOptions } from "./menu";
 import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";

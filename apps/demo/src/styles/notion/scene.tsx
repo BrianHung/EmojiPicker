@@ -4,7 +4,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { Emoji } from "@brianhung/emoji-picker-react";
 import { notion } from "./picker";
 import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
-import { NotionEmojiMenu, notionEmojiOptions } from "@/experiences/notion";
+import { NotionEmojiMenu, notionEmojiOptions } from "./menu";
 import { cn } from "@/lib/utils";
 import { ld, MobileFrame, SceneFrame, ScenePicker, useCompact } from "@/styles/scene-kit";
 import { copyEmoji } from "@/components/site/picked";

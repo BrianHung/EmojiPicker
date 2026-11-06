@@ -11,7 +11,7 @@ npm install
 npm run dev -w demo   # http://localhost:5199
 ```
 
-Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/decide` return `503` in development and the page falls back to lexical search. To use the real bindings, sign in with Wrangler and set `CLOUDFLARE_REMOTE_BINDINGS=1`.
+Workers AI and Vectorize have no local mode, so `.env.development` points the dev pages at the deployed API (`VITE_SEARCH_API_URL`). To run the local Worker against the real bindings instead, unset it, sign in with Wrangler, and set `CLOUDFLARE_REMOTE_BINDINGS=1`.
 
 ## Project layout
 
@@ -54,7 +54,7 @@ The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `
 
 `limit` is 1–50 and defaults to 24. `custom: true` includes custom emoji. An unreachable binding or an empty index returns `503`.
 
-`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks Jev (`typesafe/jev`) in two rounds because a question takes at most 255 options: first the emoji names in groups of 250, then one question over each group's top picks. Cloudflare's Clef models take the same request, with the model's short name as `model` in the body. Per-search measurements on this site:
+`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks Jev (`typesafe/jev`) in two rounds because a question takes at most 255 options: first the emoji names in groups of 250, then one question over each group's top picks. Per-search measurements on this site, with the Clef models swapped in for comparison (the API always uses Jev):
 
 | Model | Latency | Cost |
 |---|---|---|
@@ -81,7 +81,7 @@ npm run test:e2e    # Playwright, one spec per concern: keyboard, editors, layou
 npm run test:keyboard   # the keyboard contract on one surface per kind of picker, desktop and phone
 ```
 
-`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local (light and dark on desktop, light on a phone). Capture them with `npm run test:baseline`.
+`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/__snapshots__/keyboard.spec.ts/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local (light and dark on desktop, light on a phone). Capture them with `npm run test:baseline`.
 
 ### Accessibility
 

@@ -53,7 +53,6 @@ document.head.append(link);`;
   resolve: {
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
     alias: [
-      ...(process.env.E2E_POPOVER === "react-aria" ? [{ find: /^@brianhung\/emoji-picker-react\/floating-ui$/, replacement: "@brianhung/emoji-picker-react/react-aria" }] : []),
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\/components\/ui\/emoji-picker$/, replacement: fileURLToPath(new URL("./registry/emoji-picker.tsx", import.meta.url)) },
       { find: /^@\/(?:hooks|lib)\/(emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },
