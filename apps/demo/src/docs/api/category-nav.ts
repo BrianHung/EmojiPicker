@@ -1,5 +1,5 @@
 import type { EmojiPicker } from "@brianhung/emoji-picker-react";
-import { rowsOf } from "./rows";
+import { inPart, rowsOf } from "./rows";
 
 export const categoryNav = rowsOf<EmojiPicker.CategoryNav.Props>()([
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
@@ -12,3 +12,5 @@ export const categoryNavTab = rowsOf<EmojiPicker.CategoryNav.Tab.Props>()([
   { name: "className", type: "string | ({ category, selected, active, focused, focusVisible, hovered, pressed, disabled }) => string | undefined" },
   { name: "children", type: "ReactNode | (state) => ReactNode", default: "the category's icon", description: "DefaultCategoryIcon draws the built-in icons." },
 ]);
+
+export const categoryNavParts = [...categoryNav, ...inPart("Tab", categoryNavTab)];

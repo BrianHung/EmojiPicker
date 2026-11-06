@@ -1,5 +1,5 @@
 import type { EmojiPicker } from "@brianhung/emoji-picker-react";
-import { rowsOf } from "./rows";
+import { inPart, rowsOf } from "./rows";
 
 export const search = rowsOf<EmojiPicker.Search.Props>()([
   { name: "children", type: "ReactNode | ({ empty }) => ReactNode", default: "<Search.Input />", description: "The row's contents. Search.Clear works anywhere inside Root." },
@@ -18,3 +18,5 @@ export const searchInput = rowsOf<EmojiPicker.Search.Input.Props>()([
   { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
   { name: "children", type: "ReactNode", default: "<Search.Clear />", description: "In the field, after the input." },
 ]);
+
+export const searchParts = [...search, ...inPart("Field", searchField), ...inPart("Input", searchInput)];

@@ -28,7 +28,7 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   { name: "defaultReactionsOpen", type: "boolean", default: "true" },
   { name: "onReactionsOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "escape-key" | "none", cancel() }) => void' },
   { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it. Every handler a part composes takes the same method." },
-  { name: "actionsRef", type: "Ref<EmojiPickerActions>", description: "move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone. Inside Root, use useEmojiPickerActions()." },
+  { name: "actionsRef", type: "Ref<EmojiPicker.Root.Actions>", description: "move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone. Inside Root, use useEmojiPickerActions()." },
   {
     name: "keyboardTarget",
     type: "HTMLElement | RefObject<HTMLElement | null> | null",

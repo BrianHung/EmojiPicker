@@ -10,3 +10,5 @@ export const rowsOf =
 export const rowsOfParts =
   <M>() =>
   (rows: readonly (PropRow & { name: PartName<M> })[]): PropRow[] => [...rows];
+
+export const inPart = (part: string, rows: readonly PropRow[]): PropRow[] => rows.map((r) => ({ ...r, name: `${part} › ${r.name}` }));

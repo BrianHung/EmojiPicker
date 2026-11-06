@@ -7,7 +7,7 @@ export const list = rowsOf<EmojiPicker.List.Props>()([
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "searchRows", type: "number", default: "rows", description: "Horizontal only: rows while search results show." },
-  { name: "renderEmptyState", type: "(state: EmptyState) => ReactNode", description: "Shown in the list while data loads, after it fails, and when nothing matches. See renderEmptyState." },
+  { name: "renderEmptyState", type: "(state: EmojiPicker.List.EmptyState) => ReactNode", description: "Shown in the list while data loads, after it fails, and when nothing matches." },
   { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
 ]);
 

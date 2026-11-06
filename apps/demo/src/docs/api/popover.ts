@@ -1,5 +1,5 @@
 import type { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
-import { rowsOf } from "./rows";
+import { inPart, rowsOf } from "./rows";
 
 export const popoverRoot = rowsOf<EmojiPopover.Root.Props>()([
   { name: "open", type: "boolean" },
@@ -29,3 +29,5 @@ export const popoverContent = rowsOf<EmojiPopover.Content.Props>()([
   { name: "render", type: "ReactElement | (props, { open, side, align }) => ReactElement", description: "Merges props onto this element." },
   { name: "className", type: "string | ({ open, side, align }) => string | undefined" },
 ]);
+
+export const popoverParts = [...popoverRoot, ...inPart("Content", popoverContent)];
