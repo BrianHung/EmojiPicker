@@ -231,4 +231,29 @@ describe("Root keyboard", () => {
     expect(onQueryChange).toHaveBeenCalledWith("", expect.objectContaining({ reason: "clear-press" }));
     expect(document.querySelector('[data-slot="emoji-picker-search-clear"]')).toBeNull();
   });
+
+  it("renders a List.Variations placed in Root in place of the default, styled by its state", () => {
+    const actions = React.createRef<EmojiPickerActions>();
+    const root = createRoot(document.body.appendChild(document.createElement("div")));
+    React.act(() =>
+      root.render(
+        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ frequents: null, skinTone: null }}>
+          <EmojiPicker.Root frequent={false} actionsRef={actions}>
+            <EmojiPicker.Search />
+            <EmojiPicker.Viewport>
+              <EmojiPicker.List />
+              <EmojiPicker.List.Variations className={({ emoji }) => `tones-${emoji.unified}`} />
+            </EmojiPicker.Viewport>
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    unmount = () => React.act(() => root.unmount());
+    const search = document.querySelector<HTMLInputElement>('[data-slot="emoji-picker-search-input"]')!;
+    React.act(() => search.focus());
+    React.act(() => actions.current!.highlight("1f44d"));
+    press(search, " ", { shiftKey: true });
+    const popups = document.querySelectorAll('[data-slot="emoji-picker-variations"]');
+    expect([popups.length, popups[0]?.className, popups[0]?.querySelectorAll('[data-slot="emoji-picker-variation"]').length]).toEqual([1, "tones-1f44d", 6]);
+  });
 });
