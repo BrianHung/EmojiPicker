@@ -1,5 +1,7 @@
 import * as React from "react";
 import { BoldIcon, CodeIcon, ItalicIcon, LinkIcon, ListIcon, ListOrderedIcon, PlusIcon, SquareCodeIcon, StrikethroughIcon } from "lucide-react";
+import { UNSAFE_PortalProvider } from "react-aria";
+import { Focusable, OverlayArrow, Tooltip, TooltipTrigger } from "react-aria-components";
 import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SlackEmojiMenu, slackEmojiOptions } from "@/experiences/slack";
@@ -59,7 +61,27 @@ function SlackText({ text }: { text: string }) {
   return <>{nodes}</>;
 }
 
-function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, children }: { sheet: boolean; label: string; onSelect: (s: EmojiSelection) => void; triggerClassName: string; side?: "top"; align?: "end"; children: React.ReactNode }) {
+const LABELS: Record<string, string> = { "2705": "Completed", "1f440": "Taking a look…", "1f64c": "Nicely done" };
+
+type TipChild = React.ComponentProps<typeof Focusable>["children"];
+
+function SlackTip({ label, children }: { label: string; children: TipChild }) {
+  return (
+    <TooltipTrigger delay={80} closeDelay={0}>
+      <Focusable>{children}</Focusable>
+      <Tooltip offset={8} className="max-w-[200px] rounded-[8px] bg-[#1d1c1d] px-3 py-2 font-[Lato,system-ui,sans-serif] text-[13px] leading-[18px] font-bold text-white dark:bg-[#212428] dark:text-[#f8f8f8] dark:drop-shadow-[0_0_1px_#797c81]">
+        <OverlayArrow>
+          <svg width={16} height={8} viewBox="0 0 16 8" className="block fill-[#1d1c1d] dark:fill-[#212428]" aria-hidden>
+            <path d="M0 0L8 8L16 0Z" />
+          </svg>
+        </OverlayArrow>
+        {label}
+      </Tooltip>
+    </TooltipTrigger>
+  );
+}
+
+function EmojiMenu({ sheet, label, tooltip, onSelect, triggerClassName, side, align, children }: { sheet: boolean; label: string; tooltip?: string; onSelect: (s: EmojiSelection) => void; triggerClassName: string; side?: "top"; align?: "end"; children: React.ReactNode }) {
   if (sheet)
     return (
       <PickerSheet appStyle={slack} label={label} onSelect={onSelect} triggerClassName={triggerClassName}>
@@ -67,7 +89,7 @@ function EmojiMenu({ sheet, label, onSelect, triggerClassName, side, align, chil
       </PickerSheet>
     );
   return (
-    <StyleDropdown appStyle={slack} side={side} align={align} label={label} onSelect={(s) => (onSelect(s), copyEmoji(s))} triggerClassName={triggerClassName}>
+    <StyleDropdown appStyle={slack} side={side} align={align} label={label} onSelect={(s) => (onSelect(s), copyEmoji(s))} triggerClassName={triggerClassName} renderTrigger={tooltip ? (t) => <SlackTip label={tooltip}>{t as TipChild}</SlackTip> : undefined}>
       {children}
     </StyleDropdown>
   );
@@ -85,18 +107,20 @@ export function SlackScene() {
 
   return (
     <div ref={ref} className="w-full">
-      <Frame compact={compact}>
-        <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
-          <span className="text-[18px] leading-6 font-black"># general</span>
-          <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
-        </div>
-        <div ref={list} className="flex flex-1 flex-col justify-end overflow-y-auto py-2">
-          {messages.map((m) => (
-            <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
-          ))}
-        </div>
-        <SlackComposer onSend={send} compact={compact} />
-      </Frame>
+      <UNSAFE_PortalProvider getContainer={() => ref.current}>
+        <Frame compact={compact}>
+          <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
+            <span className="text-[18px] leading-6 font-black"># general</span>
+            <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
+          </div>
+          <div ref={list} className="flex flex-1 flex-col justify-end overflow-y-auto py-2">
+            {messages.map((m) => (
+              <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
+            ))}
+          </div>
+          <SlackComposer onSend={send} compact={compact} />
+        </Frame>
+      </UNSAFE_PortalProvider>
     </div>
   );
 }
@@ -111,6 +135,8 @@ function Frame({ compact, children }: { compact: boolean; children: React.ReactN
     </SceneFrame>
   );
 }
+
+const BUTTON = "flex size-8 items-center justify-center rounded-[8px] hover:bg-[rgba(29,28,29,0.04)] dark:hover:bg-[rgba(232,232,232,0.04)]";
 
 function SlackMessage({ message, onToggle, compact }: { message: Message; onToggle: (unified: string) => void; compact: boolean }) {
   const store = useEmojiStore();
@@ -137,12 +163,17 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
         ) : null}
       </div>
       <div className="absolute -top-4 right-5 hidden items-center rounded-[12px] bg-white p-1 shadow-[0_0_0_1px_rgba(29,28,29,0.13),0_1px_3px_rgba(0,0,0,0.08)] group-focus-within:flex group-hover:flex has-[[aria-expanded=true]]:flex dark:bg-[#1a1d21] dark:shadow-[0_0_0_1px_rgba(232,232,232,0.13),0_1px_3px_rgba(0,0,0,0.08)]">
-        {quick.map((u) => (
-          <button key={u} type="button" aria-label={`React with ${store.get(u)?.name ?? u}`} onClick={() => onToggle(store.withSkinTone(u))} className="flex size-8 items-center justify-center rounded-[8px] hover:bg-[#f4f4f4] dark:hover:bg-[#2c2d30]">
-            <Emoji emoji={store.withSkinTone(u)} size={16} className="text-[16px] leading-none" />
-          </button>
-        ))}
-        <EmojiMenu sheet={compact} label="Add reaction" align="end" onSelect={(s) => onToggle(s.unified)} triggerClassName="flex size-8 items-center justify-center rounded-[8px] text-[#616061] hover:bg-[#f4f4f4] dark:text-[#ababad] dark:hover:bg-[#2c2d30]">
+        {quick.map((u) => {
+          const record = store.get(u);
+          return (
+            <SlackTip key={u} label={LABELS[u] ?? record?.shortcodes.find((c) => /^[a-z]/i.test(c)) ?? record?.shortcodes[0] ?? u}>
+              <button type="button" aria-label={`React with ${record?.name ?? u}`} onClick={() => onToggle(store.withSkinTone(u))} className={cn(BUTTON, "group/react")}>
+                <Emoji emoji={store.withSkinTone(u)} size={16} className="text-[16px] leading-none transition-transform duration-[80ms] ease-[cubic-bezier(0.36,0.19,0.29,1)] group-hover/react:scale-120 group-hover/react:rotate-4" />
+              </button>
+            </SlackTip>
+          );
+        })}
+        <EmojiMenu sheet={compact} label="Add reaction" tooltip="Find another reaction" align="end" onSelect={(s) => onToggle(s.unified)} triggerClassName={cn(BUTTON, "text-[#616061] hover:text-[#1d1c1d] dark:text-[#ababad] dark:hover:text-[#d1d2d3]")}>
           <SmilePlus size={18} />
         </EmojiMenu>
       </div>

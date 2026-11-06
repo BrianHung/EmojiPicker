@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Emoji, ReactionBar, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
-import { PickerPopover } from "@/components/picker-popover";
+import { PickerPopover, type PickerPopoverProps } from "@/components/picker-popover";
 import { SmilePlus } from "./icons";
 import { FitViewport, type Reaction } from "./scene-kit";
 import { OPTION, tokensOf, type Style } from "./style";
@@ -16,6 +16,7 @@ export function StyleDropdown({
   align,
   label,
   triggerClassName,
+  renderTrigger,
 }: {
   appStyle: Style;
   reaction?: boolean;
@@ -26,6 +27,7 @@ export function StyleDropdown({
   align?: "start" | "end";
   label?: string;
   triggerClassName?: string;
+  renderTrigger?: PickerPopoverProps["renderTrigger"];
 }) {
   const Picker = (reaction && appStyle.ReactionPicker) || appStyle.Picker;
   return (
@@ -35,6 +37,7 @@ export function StyleDropdown({
       align={align}
       label={label}
       triggerClassName={triggerClassName}
+      renderTrigger={renderTrigger}
       picker={
         <FitViewport width={appStyle.size.width}>
           <Picker onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />

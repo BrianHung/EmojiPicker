@@ -16,21 +16,36 @@ export type PickerPopoverProps = {
   adapter?: "floating-ui" | "react-aria";
   onOpenChange?: (open: boolean) => void;
   finalFocus?: PopoverFinalFocus;
+  renderTrigger?: (trigger: React.ReactElement) => React.ReactNode;
 };
 
-export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, adapter = "floating-ui", onOpenChange, finalFocus }: PickerPopoverProps) {
+export function PickerPopover({
+  onSelect,
+  children,
+  side = "bottom",
+  align = "start",
+  triggerClassName,
+  label = "Open emoji picker",
+  picker,
+  adapter = "floating-ui",
+  onOpenChange,
+  finalFocus,
+  renderTrigger = (t) => t,
+}: PickerPopoverProps) {
   const EmojiPopover = adapter === "react-aria" ? AriaPopover : FloatingPopover;
   return (
     <EmojiPopover.Root onOpenChange={onOpenChange}>
-      <EmojiPopover.Trigger
-        aria-label={label}
-        className={cn(
-          "inline-flex items-center gap-2 text-sm transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background data-popup-open:bg-accent",
-          triggerClassName ?? "rounded-md border border-border px-3 py-2",
-        )}
-      >
-        {children}
-      </EmojiPopover.Trigger>
+      {renderTrigger(
+        <EmojiPopover.Trigger
+          aria-label={label}
+          className={cn(
+            "inline-flex items-center gap-2 text-sm transition-colors outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background data-popup-open:bg-accent",
+            triggerClassName ?? "rounded-md border border-border px-3 py-2",
+          )}
+        >
+          {children}
+        </EmojiPopover.Trigger>,
+      )}
       <EmojiPopover.Content
         side={side}
         align={align}
