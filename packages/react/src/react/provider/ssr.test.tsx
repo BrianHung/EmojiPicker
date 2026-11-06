@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToString } from "react-dom/server";
-import en from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { en } from "../../../test/en";
 import { Emoji, EmojiPicker, EmojiProvider, useEmojiLabels } from "../../index";
 
 function Labels() {
@@ -12,16 +11,16 @@ function Labels() {
 describe("server rendering", () => {
   it("gives custom parts the provider's localized labels", () => {
     const html = renderToString(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false} locale="de" labels={{ searchClear: "Leeren" }}>
+      <EmojiProvider data={en} prepare={false} locale="de" labels={{ searchClear: "Leeren" }}>
         <Labels />
       </EmojiProvider>,
     );
-    expect(html).toBe("Leeren, 1.234 results");
+    expect(html).toBe("Leeren, 1,234 results");
   });
 
   it("renders the grid, not the loading state, for an in-memory dataset", () => {
     const html = renderToString(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root>
           <EmojiPicker.Viewport>
             <EmojiPicker.List renderEmptyState={({ status }) => status} />
@@ -35,7 +34,7 @@ describe("server rendering", () => {
 
   it("renders the empty state for a search with no results", () => {
     const html = renderToString(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root defaultQuery="qqzzxx">
           <EmojiPicker.Viewport>
             <EmojiPicker.List renderEmptyState={({ status, query }) => `${status}: ${query}`} />
@@ -48,7 +47,7 @@ describe("server rendering", () => {
 
   it("draws every emoji from imageUrl with the image renderer", () => {
     const html = renderToString(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false} renderer="image" imageUrl={(u) => `/apple/${u}.png`}>
+      <EmojiProvider data={en} prepare={false} renderer="image" imageUrl={(u) => `/apple/${u}.png`}>
         <Emoji emoji="❤️" />
       </EmojiProvider>,
     );
@@ -57,7 +56,7 @@ describe("server rendering", () => {
 
   it("draws particular emoji from imageUrl under the native renderer", () => {
     const html = renderToString(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false} renderer="native" imageUrl={(u) => (u === "2764-fe0f" ? "/heart.png" : undefined)}>
+      <EmojiProvider data={en} prepare={false} renderer="native" imageUrl={(u) => (u === "2764-fe0f" ? "/heart.png" : undefined)}>
         <Emoji emoji="❤️" />
         <Emoji emoji="👍" />
       </EmojiProvider>,
