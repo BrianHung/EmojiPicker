@@ -7,7 +7,7 @@ export const reactions = [
     { name: "defaultValue", type: "readonly string[]" },
     {
       name: "onValueChange",
-      type: '(value: readonly string[], details: { reason: "item-press", emoji, pressed, event?, cancel() }) => void',
+      type: '(value: readonly string[], details: { reason: "item-press", emoji, pressed, event, cancel() }) => void',
       description: "details.pressed is whether the press added the reaction. Only an added reaction calls onSelect.",
     },
     { name: "children", type: "ReactNode | (emoji: string) => ReactNode", default: "Items, then Expand", description: "Each reaction, or Reactions.Items and Reactions.Expand." },

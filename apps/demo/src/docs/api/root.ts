@@ -2,7 +2,7 @@ import type { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const root = rowsOf<EmojiPicker.Root.Props>()([
-  { name: "onSelect", type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event?, cancel(), collapse? }) => void', description: "cancel() keeps the value and the popover open." },
+  { name: "onSelect", type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), collapse? }) => void', description: "cancel() keeps the value and the popover open." },
   { name: "columns", type: '"fit" | number', default: '"fit"', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
     name: "categories",
@@ -16,13 +16,13 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   { name: "searchLimit", type: "number", default: "200" },
   { name: "query", type: "string", description: "The search text. Controlled." },
   { name: "defaultQuery", type: "string" },
-  { name: "onQueryChange", type: '(query: string, details: { reason: "input-change" | "clear-press" | "escape-key" | "imperative-action" | "none", event?, cancel(), allowPropagation() }) => void' },
+  { name: "onQueryChange", type: '(query: string, details: { reason: "input-change" | "clear-press" | "escape-key" | "imperative-action" | "none", event, cancel(), allowPropagation() }) => void' },
   { name: "value", type: "string | null", description: "The selected emoji, for a single-value picker such as a page icon. Compared without skin tone. Controlled." },
   { name: "defaultValue", type: "string | null" },
-  { name: "onValueChange", type: '(unified: string | null, details: { reason: "item-press" | "imperative-action", event?, cancel() }) => void', description: "Fires with or without value; passing only onValueChange tracks the value." },
+  { name: "onValueChange", type: '(unified: string | null, details: { reason: "item-press" | "imperative-action", event, cancel() }) => void', description: "Fires with or without value; passing only onValueChange tracks the value." },
   { name: "highlight", type: "string | null", description: 'The highlighted emoji, shared by keyboard and pointer: a unified code, or an item key ("smileys_people:1f600") for one section. Controlled.' },
   { name: "defaultHighlight", type: "string | null" },
-  { name: "onHighlightChange", type: '(unified: string | null, details: { reason: "keyboard" | "pointer" | "imperative-action" | "none", key, event?, cancel() }) => void', description: "details.key is the section-scoped item key." },
+  { name: "onHighlightChange", type: '(unified: string | null, details: { reason: "keyboard" | "pointer" | "imperative-action" | "none", key, event, cancel() }) => void', description: "details.key is the section-scoped item key." },
   { name: "reactions", type: "readonly string[] | number", description: "Unified codes shown in EmojiPicker.Reactions. A number shows that many frequently used emoji." },
   { name: "reactionsOpen", type: "boolean", description: "Whether the reaction row shows instead of Panel. Controlled." },
   { name: "defaultReactionsOpen", type: "boolean", default: "true" },

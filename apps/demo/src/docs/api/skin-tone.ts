@@ -6,7 +6,7 @@ export const skinTone = [
     { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
     { name: "open", type: "boolean", description: "Whether the options are open. Controlled." },
     { name: "defaultOpen", type: "boolean", default: "false" },
-    { name: "onOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none", event?, cancel(), allowPropagation() }) => void' },
+    { name: "onOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none", event, trigger, cancel(), allowPropagation() }) => void' },
     { name: "children", type: "ReactNode | ({ open, tone }) => ReactNode", default: "Trigger, Options" },
   ]),
   ...rowsOfParts<{ Trigger: EmojiPicker.SkinTone.Trigger.Props; Options: EmojiPicker.SkinTone.Options.Props; Option: EmojiPicker.SkinTone.Option.Props; Glyph: EmojiPicker.SkinTone.Glyph.Props }>()([

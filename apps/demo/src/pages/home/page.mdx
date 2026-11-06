@@ -219,7 +219,7 @@ Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Vir
 
 ## API reference
 
-Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's.
+Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. A Server Component can't reach into a client module's objects, so it renders the flat exports instead: `EmojiPickerRoot`, `EmojiPickerSearchInput`, `EmojiPopoverTrigger`, and so on.
 
 <PropsTable rows={api.part} />
 
@@ -229,11 +229,11 @@ The dataset, search, frequently used emoji, and skin tone for the parts and hook
 
 <PropsTable rows={api.provider} />
 
-Types: `EmojiProvider.Props`, `EmojiProvider.SkinToneChangeEventDetails`, `EmojiProvider.FrequentsChangeEventDetails`.
+Types: `EmojiProvider.Props`, `EmojiProvider.SkinToneChangeEventDetails`, `EmojiProvider.FrequentsChangeEventDetails`, each with its `…EventReason`.
 
 ### Root {#api-root}
 
-Contains a picker. Each controllable state takes `x`, `defaultX`, and `onXChange(value, details)`; `details.cancel()` keeps the current state, and `details.allowPropagation()` lets an Escape reach the page. To drive the picker from an editor that keeps focus, pass it as `keyboardTarget`, or call `actionsRef`.
+Contains a picker. Each controllable state takes `x`, `defaultX`, and `onXChange(value, details)`; `details.event` is the native event, or a synthetic one; `details.cancel()` keeps the current state, and `details.allowPropagation()` lets an Escape reach the page. To drive the picker from an editor that keeps focus, pass it as `keyboardTarget`, or call `actionsRef`.
 
 <PropsTable rows={api.root} />
 
@@ -241,7 +241,7 @@ Contains a picker. Each controllable state takes `x`, `defaultX`, and `onXChange
 
 <AttrTable head={["CSS variable", "Default", "Description"]} rows={api.rootVariables} />
 
-Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.ValueChangeEventDetails`, `.HighlightChangeEventDetails`, `.CollapsedCategoriesChangeEventDetails`, `.ReactionsOpenChangeEventDetails`.
+Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.HighlightChangeEventDetails`, `.CollapsedCategoriesChangeEventDetails`, `.ReactionsOpenChangeEventDetails`, each with its `…EventReason`.
 
 ### Search {#api-search}
 
@@ -289,7 +289,7 @@ A disclosure button for a toolbar of `aria-pressed` tones. Focus leaving closes 
 
 <AttrTable head={["CSS variable", "Default", "Description"]} rows={api.skinToneVariables} />
 
-Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.Glyph.Props`, and `.Trigger`, `.Options`, `.Option` with `.Props` and `.State`.
+Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `.Glyph.Props`, and `.Trigger`, `.Options`, `.Option` with `.Props` and `.State`.
 
 ### Preview {#api-preview}
 
@@ -305,7 +305,7 @@ A toolbar of reactions, toggle buttons when the row has a value. `onSelect`'s `d
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.reactionsAttributes} />
 
-Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.Items.Props`, `.Item` and `.Expand` with `.Props` and `.State`, `EmojiPicker.Panel.Props`, `.State`.
+Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `.Items.Props`, `.Item` and `.Expand` with `.Props` and `.State`, `EmojiPicker.Panel.Props`, `.State`.
 
 ### EmojiPopover {#api-popover}
 
@@ -315,7 +315,9 @@ A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.popoverAttributes} />
 
-Types: `EmojiPopover.Root.Props`, `.Root.Actions`, `.Root.ChangeEventDetails`, `.Trigger.Props`, `.Trigger.State`, `.Content.Props`, `.Content.State`, `EmojiSuggestions.Popover.Props`, `.State`.
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={api.popoverVariables} />
+
+Types: `EmojiPopover.Root.Props`, `.Root.Actions`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Trigger.Props`, `.Trigger.State`, `.Content.Props`, `.Content.State`, `EmojiSuggestions.Popover.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`.
 
 ### Emoji {#api-emoji}
 

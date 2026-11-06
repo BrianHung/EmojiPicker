@@ -3,7 +3,7 @@ import { inPart, rowsOf } from "./rows";
 
 export const categoryNav = rowsOf<EmojiPicker.CategoryNav.Props>()([
   { name: "orientation", type: '"horizontal" | "vertical"', default: '"horizontal"' },
-  { name: "children", type: "(category: NavCategory) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab, from { id, name, icon }." },
+  { name: "children", type: "(category: EmojiPickerNavCategory) => ReactNode", default: "<CategoryNav.Tab />", description: "Each section's tab, from { id, name, icon }." },
   { name: "className", type: "string | ({ orientation, disabled }) => string | undefined" },
   { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
 ]);
