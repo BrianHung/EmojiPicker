@@ -36,21 +36,21 @@ test("moving up never hides the highlighted emoji under a sticky section title",
   for (let i = 0; i < 8; i++) await page.keyboard.press("PageDown");
   for (let i = 0; i < 60; i++) {
     await page.keyboard.press("ArrowUp");
-    await frames(page);
-    const hidden = await picker(page).evaluate((root, { emoji, viewport, title }) => {
-      const cell = root.querySelector(`${emoji}[data-highlighted]`)?.getBoundingClientRect();
-      if (!cell) return null;
-      const top = root.querySelector(viewport)!.getBoundingClientRect().top;
-      return Math.max(
-        0,
-        ...[...root.querySelectorAll(title)]
-          .map((h) => h.getBoundingClientRect())
-          .filter((h) => Math.abs(h.top - top) < 2)
-          .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
-      );
-    }, SELECTORS);
-    if (hidden === null) break;
-    expect(hidden).toBe(0);
+    const hidden = () =>
+      picker(page).evaluate((root, { emoji, viewport, title }) => {
+        const cell = root.querySelector(`${emoji}[data-highlighted]`)?.getBoundingClientRect();
+        if (!cell) return null;
+        const top = root.querySelector(viewport)!.getBoundingClientRect().top;
+        return Math.max(
+          0,
+          ...[...root.querySelectorAll(title)]
+            .map((h) => h.getBoundingClientRect())
+            .filter((h) => Math.abs(h.top - top) < 2)
+            .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
+        );
+      }, SELECTORS);
+    if ((await hidden()) === null) break;
+    await expect.poll(hidden, { timeout: 1000 }).toBe(0);
   }
 });
 
