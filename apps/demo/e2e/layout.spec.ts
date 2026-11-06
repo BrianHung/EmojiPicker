@@ -94,7 +94,7 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
   await visit(page, "/examples/lexical/");
   await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
-  const root = page.locator(`${slot("popoverContent")} ${slot("root")}`);
+  const root = page.locator(`${slot("popoverPopup")} ${slot("root")}`);
   await root.locator(slot("emoji")).first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
@@ -188,11 +188,11 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
   await scene.scrollIntoViewIfNeeded();
   await scene.getByText(/^yep/).hover();
   await scene.getByRole("button", { name: "Add reaction" }).last().click();
-  const content = page.locator(slot("popoverContent"));
-  await content.locator(slot("emoji")).first().waitFor();
+  const positioner = page.locator(slot("popoverPositioner"));
+  await positioner.locator(slot("emoji")).first().waitFor();
   await settle(page);
   // The placed offsets, not the rect: the exit animation's own transform is fine
-  const sampling = content.evaluate(async (el) => {
+  const sampling = positioner.evaluate(async (el) => {
     const seen = new Set<string>();
     for (let i = 0; i < 60 && el.isConnected; i++) {
       const { left, top } = getComputedStyle(el);
@@ -201,8 +201,8 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
     }
     return [...seen];
   });
-  const at = await content.evaluate((el) => `${getComputedStyle(el).left} ${getComputedStyle(el).top}`);
-  await content.locator(slot("emoji")).nth(5).click();
+  const at = await positioner.evaluate((el) => `${getComputedStyle(el).left} ${getComputedStyle(el).top}`);
+  await positioner.locator(slot("emoji")).nth(5).click();
   expect(await sampling).toEqual([at]);
 });
 

@@ -13,17 +13,21 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
       >
         <span className="text-base">{picked?.emoji || "🙂"}</span> Add reaction
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content
-        aria-label="Emoji picker"
-        className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
-      >
-        <EmojiPickerCard
-          onSelect={(selection) => {
-            setPicked(selection);
-            onSelect(selection);
-          }}
-        />
-      </EmojiPopover.Content>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner>
+          <EmojiPopover.Popup
+            aria-label="Emoji picker"
+            className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
+          >
+            <EmojiPickerCard
+              onSelect={(selection) => {
+                setPicked(selection);
+                onSelect(selection);
+              }}
+            />
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }

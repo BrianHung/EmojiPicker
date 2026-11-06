@@ -18,7 +18,7 @@ export const listVariables: Rows = [
 
 export const skinToneVariables: Rows = [["--emoji-skin-tone-size", "15px", "Swatch size."]];
 
-export const popoverVariables: Rows = [
+export const popoverPositionerVariables: Rows = [
   ["--anchor-width · --anchor-height", "—", "Output: the Trigger's or anchor's size."],
   ["--available-width · --available-height", "—", "Output: the room left between the anchor and the viewport's edge, less collisionPadding."],
   ["--transform-origin", "—", "Output: the anchor's position, for animations."],

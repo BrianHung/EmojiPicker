@@ -19,14 +19,14 @@ export type Surface = {
 
 const layer = (page: Page) =>
   page
-    .locator(`${slot("popoverContent")}, [data-slot="drawer-popup"]`)
+    .locator(`${slot("popoverPopup")}, [data-slot="drawer-popup"]`)
     .filter({ visible: true })
     .last();
 export const listbox = (page: Page) =>
   page
     .getByRole("listbox")
     .filter({ visible: true })
-    .and(page.locator(`:not(${slot("list")}), ${slot("suggestions")} ${slot("list")}`))
+    .and(page.locator(`:not(${slot("list")}), ${slot("suggestionsPopup")} ${slot("list")}`))
     .last();
 export const pickerIn = (scope: Locator) => scope.locator(`xpath=descendant-or-self::*[@data-slot="${SLOTS.root}" or @data-epr-part="root"]`).first();
 export const firstPicker = (page: Page) => page.locator(slot("root")).first();
@@ -194,7 +194,7 @@ function scene(s: StyleId): Surface[] {
     case "instagram": {
       const bar = (p: Page) =>
         p
-          .locator(`${slot("popoverContent")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
+          .locator(`${slot("popoverPopup")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
           .filter({ visible: true })
           .last();
       const react = (p: Page) => button(sc(p).locator("div.group").filter({ hasText: "ok who's in for the lake" }), "React");

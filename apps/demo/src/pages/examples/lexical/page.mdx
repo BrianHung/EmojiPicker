@@ -44,7 +44,7 @@ export function Editor() {
 
 ## How it works
 
-`useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system. `EmojiSuggestions.Popover` positions the menu at the typed `:query`.
+`useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
 
 ```tsx title="emoji-typeahead-plugin.tsx (excerpt)"
 import { useLexicalEmojiTypeahead } from "@/hooks/emoji-lexical";
@@ -53,11 +53,17 @@ const emoji = useLexicalEmojiTypeahead({
   node: (text, { record, shortcode }) => (record.imageUrl ? $createEmojiNode({ unified: record.unified, shortcode, text: null }) : $createTextNode(`${text} `)),
 });
 
-<EmojiSuggestions.Popover open={emoji.open} anchor={emoji.anchor} onOpenChange={(open) => !open && emoji.dismiss()}>
-  <ul {...emoji.suggestions.getListProps()}>
-    {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
-  </ul>
-</EmojiSuggestions.Popover>
+<EmojiSuggestions.Root open={emoji.open} onOpenChange={(open) => !open && emoji.dismiss()}>
+  <EmojiSuggestions.Portal>
+    <EmojiSuggestions.Positioner anchor={emoji.anchor}>
+      <EmojiSuggestions.Popup>
+        <ul {...emoji.suggestions.getListProps()}>
+          {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
+        </ul>
+      </EmojiSuggestions.Popup>
+    </EmojiSuggestions.Positioner>
+  </EmojiSuggestions.Portal>
+</EmojiSuggestions.Root>
 ```
 
 ## Source

@@ -11,32 +11,38 @@ const CATEGORIES = NOTION_SECTIONS.filter((c) => c.id !== "suggested");
 
 export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, editor, className, container }: EmojiTypeahead & { className?: string } & { editor: HTMLElement; container?: EmojiPopoverContainer }) {
   return (
-    <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={container} className={className}>
-      <EmojiPicker.Root
-        query={query}
-        searchResults="grouped"
-        searchLimit={notionEmojiOptions.limit}
-        categories={CATEGORIES}
-        columns={12}
-        keyboardTarget={editor}
-        onSelect={menu.insert}
-        data-style={notion.id}
-        style={tokensOf(notion)}
-        className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [--emoji-cell-size:32px] [--emoji-header-height:34px] [--emoji-list-padding:12px] [--emoji-size:24px] [--emoji-image-size:24px] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
-      >
-        <EmojiPicker.Viewport className="relative min-h-0 flex-1 pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]">
-          <EmojiPicker.List aria-label="Emoji suggestions" className="outline-none">
-            {() => (
-              <EmojiPicker.List.Section>
-                <EmojiPicker.List.SectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
-                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={`${CELL} ${OPTION} cursor-pointer rounded-[4px] data-[focused]:bg-picker-selected`} />}</EmojiPicker.List.Items>
-              </EmojiPicker.List.Section>
-            )}
-          </EmojiPicker.List>
-        </EmojiPicker.Viewport>
-        <Sections suggestions={menu.suggestions} />
-      </EmojiPicker.Root>
-    </EmojiSuggestions.Popover>
+    <EmojiSuggestions.Root open={open} onOpenChange={(next) => !next && dismiss()}>
+      <EmojiSuggestions.Portal container={container}>
+        <EmojiSuggestions.Positioner anchor={anchor} sideOffset={4}>
+          <EmojiSuggestions.Popup className={className}>
+            <EmojiPicker.Root
+              query={query}
+              searchResults="grouped"
+              searchLimit={notionEmojiOptions.limit}
+              categories={CATEGORIES}
+              columns={12}
+              keyboardTarget={editor}
+              onSelect={menu.insert}
+              data-style={notion.id}
+              style={tokensOf(notion)}
+              className="flex h-[356px] w-[min(408px,calc(100vw-16px))] flex-col overflow-hidden rounded-[10px] bg-picker-background text-picker-foreground shadow-picker [--emoji-cell-size:32px] [--emoji-header-height:34px] [--emoji-list-padding:12px] [--emoji-size:24px] [--emoji-image-size:24px] [font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe_UI',Helvetica,'Apple_Color_Emoji',Arial,sans-serif]"
+            >
+              <EmojiPicker.Viewport className="relative min-h-0 flex-1 pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]">
+                <EmojiPicker.List aria-label="Emoji suggestions" className="outline-none">
+                  {() => (
+                    <EmojiPicker.List.Section>
+                      <EmojiPicker.List.SectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
+                      <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={`${CELL} ${OPTION} cursor-pointer rounded-[4px] data-[focused]:bg-picker-selected`} />}</EmojiPicker.List.Items>
+                    </EmojiPicker.List.Section>
+                  )}
+                </EmojiPicker.List>
+              </EmojiPicker.Viewport>
+              <Sections suggestions={menu.suggestions} />
+            </EmojiPicker.Root>
+          </EmojiSuggestions.Popup>
+        </EmojiSuggestions.Positioner>
+      </EmojiSuggestions.Portal>
+    </EmojiSuggestions.Root>
   );
 }
 

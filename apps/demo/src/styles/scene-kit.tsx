@@ -146,11 +146,15 @@ export function ScenePicker({ appStyle: style, onSelect, children, label, trigge
       <EmojiPopover.Trigger aria-label={label} title={title} className={triggerClassName}>
         {children}
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content side={side} align={align} aria-label={`${style.label} style emoji picker`} style={{ fontFamily: font }}>
-        <FitViewport width={style.size.width}>
-          <style.Picker onSelect={(s) => (onSelect(s), copyEmoji(s))} autoFocus className={pickerClassName} />
-        </FitViewport>
-      </EmojiPopover.Content>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner side={side} align={align}>
+          <EmojiPopover.Popup aria-label={`${style.label} style emoji picker`} style={{ fontFamily: font }}>
+            <FitViewport width={style.size.width}>
+              <style.Picker onSelect={(s) => (onSelect(s), copyEmoji(s))} autoFocus className={pickerClassName} />
+            </FitViewport>
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }

@@ -23,6 +23,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "registry", "scripts", "plugins", "e2e", "playwright.config.ts", "vite.config.ts"],
-  "exclude": ["registry/aria"]
+  "include": ["src", "registry", "scripts", "plugins", "e2e", "playwright.config.ts", "vite.config.ts"]
 }

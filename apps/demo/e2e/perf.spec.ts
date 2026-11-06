@@ -132,7 +132,7 @@ test("home: popover picker heap on open", async ({ page }) => {
   const delta = await openDelta(page, async () => {
     await trigger.click();
     await page
-      .locator(`${slot("popoverContent")} ${slot("emoji")}`)
+      .locator(`${slot("popoverPopup")} ${slot("emoji")}`)
       .first()
       .waitFor();
   });

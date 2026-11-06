@@ -291,50 +291,51 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
           <SmileIcon size={16} />
         </EmojiPopover.Trigger>
       )}
-      <EmojiPopover.Content
-        side="top"
-        align={align}
-        sideOffset={6}
-        anchor={anchor ? () => anchor.current?.getBoundingClientRect() : undefined}
-        initialFocus={anchor ? first : undefined}
-        aria-label="Reactions"
-      >
-        <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={tb.className} aria-label="Reactions">
-          <div className={tb.reactions}>
-            {tb.pinned!.map((u, i) => (
-              <button
-                key={u}
-                ref={i === 0 ? first : undefined}
-                type="button"
-                aria-label={store.get(u)?.name ?? u}
-                onClick={() => {
-                  const s = store.select(store.withSkinTone(u));
-                  if (s) onSelect(s);
-                }}
-                className="cursor-pointer outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[#708dff]"
-              >
-                <Emoji emoji={store.withSkinTone(u)} />
-              </button>
-            ))}
-            {onMore ? (
-              <button type="button" aria-label="More reactions" onClick={onMore} className={moreClass}>
-                {tb.more!.icon}
-              </button>
-            ) : (
-              <EmojiPopover.Root>
-                <EmojiPopover.Trigger aria-label="More reactions" className={moreClass}>
-                  {tb.more!.icon}
-                </EmojiPopover.Trigger>
-                <EmojiPopover.Content side="top" align="center" aria-label="Instagram style emoji picker">
-                  <FitViewport width={instagram.size.width}>
-                    <instagram.Picker onSelect={onSelect} autoFocus />
-                  </FitViewport>
-                </EmojiPopover.Content>
-              </EmojiPopover.Root>
-            )}
-          </div>
-        </ReactionRow>
-      </EmojiPopover.Content>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner side="top" align={align} sideOffset={6} anchor={anchor ? () => anchor.current?.getBoundingClientRect() : undefined}>
+          <EmojiPopover.Popup initialFocus={anchor ? first : undefined} aria-label="Reactions">
+            <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={tb.className} aria-label="Reactions">
+              <div className={tb.reactions}>
+                {tb.pinned!.map((u, i) => (
+                  <button
+                    key={u}
+                    ref={i === 0 ? first : undefined}
+                    type="button"
+                    aria-label={store.get(u)?.name ?? u}
+                    onClick={() => {
+                      const s = store.select(store.withSkinTone(u));
+                      if (s) onSelect(s);
+                    }}
+                    className="cursor-pointer outline-none focus-visible:rounded-full focus-visible:ring-2 focus-visible:ring-[#708dff]"
+                  >
+                    <Emoji emoji={store.withSkinTone(u)} />
+                  </button>
+                ))}
+                {onMore ? (
+                  <button type="button" aria-label="More reactions" onClick={onMore} className={moreClass}>
+                    {tb.more!.icon}
+                  </button>
+                ) : (
+                  <EmojiPopover.Root>
+                    <EmojiPopover.Trigger aria-label="More reactions" className={moreClass}>
+                      {tb.more!.icon}
+                    </EmojiPopover.Trigger>
+                    <EmojiPopover.Portal>
+                      <EmojiPopover.Positioner side="top" align="center">
+                        <EmojiPopover.Popup aria-label="Instagram style emoji picker">
+                          <FitViewport width={instagram.size.width}>
+                            <instagram.Picker onSelect={onSelect} autoFocus />
+                          </FitViewport>
+                        </EmojiPopover.Popup>
+                      </EmojiPopover.Positioner>
+                    </EmojiPopover.Portal>
+                  </EmojiPopover.Root>
+                )}
+              </div>
+            </ReactionRow>
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }

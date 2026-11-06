@@ -55,11 +55,18 @@ export const reactionsAttributes: Rows = [
   interaction,
 ];
 
-export const popoverAttributes: Rows = [
-  ["data-slot", "emoji-picker-popover-trigger, emoji-picker-popover-content, emoji-picker-suggestions-popover: EmojiPopover.Trigger, EmojiPopover.Content, and EmojiSuggestions.Popover."],
-  ["data-open · data-closed", "Content and EmojiSuggestions.Popover."],
-  ["data-popup-open", "The trigger while the popover is open."],
-  ["data-starting-style · data-ending-style", "While the popover enters and exits."],
+export const popoverTriggerAttributes: Rows = [["data-slot", "emoji-picker-popover-trigger."], ["data-popup-open", "While the popover is open."], interaction];
+
+export const popoverPositionerAttributes: Rows = [
+  ["data-slot", "emoji-picker-popover-positioner, emoji-picker-suggestions-positioner."],
+  ["data-open · data-closed", "Whether the popup is open."],
+  ["data-side · data-align", "The resolved placement."],
+];
+
+export const popoverPopupAttributes: Rows = [
+  ["data-slot", "emoji-picker-popover-popup, emoji-picker-suggestions-popup."],
+  ["data-open · data-closed", "Whether the popup is open."],
+  ["data-starting-style · data-ending-style", "While the popup enters and exits."],
   ["data-side · data-align", "The resolved placement."],
 ];
 

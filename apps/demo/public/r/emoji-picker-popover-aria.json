@@ -2,16 +2,19 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-picker-popover-aria",
   "title": "Emoji Picker Popover (React Aria)",
-  "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
+  "description": "The emoji picker in a modal React Aria popover, for any shadcn/ui base: EmojiPickerPopover, and EmojiPickerPopoverContent composing EmojiPopover's Portal, Positioner and Popup. A pick closes it.",
+  "dependencies": [
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0"
+  ],
   "registryDependencies": [
     "button",
-    "popover",
+    "utils",
     "https://emoji.brianhung.me/r/emoji-picker.json"
   ],
   "files": [
     {
       "path": "registry/aria/emoji-picker-popover.tsx",
-      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport type { EmojiSelection } from \"@brianhung/emoji-picker-react\";\nimport { Button } from \"@/components/ui/button\";\nimport { EmojiPickerCard } from \"@/components/ui/emoji-picker\";\nimport { Popover, PopoverTrigger } from \"@/components/ui/popover\";\n\nfunction EmojiPickerPopover({\n  onSelect,\n  side = \"bottom\",\n  align = \"start\",\n  className,\n  children,\n  \"aria-label\": ariaLabel,\n}: {\n  onSelect: (selection: EmojiSelection) => void;\n  side?: \"top\" | \"bottom\";\n  align?: \"start\" | \"center\" | \"end\";\n  className?: string;\n  children: React.ReactNode;\n  \"aria-label\"?: string;\n}) {\n  const [open, setOpen] = React.useState(false);\n  return (\n    <PopoverTrigger isOpen={open} onOpenChange={setOpen}>\n      <Button variant=\"outline\" aria-label={ariaLabel} className={className}>\n        {children}\n      </Button>\n      <Popover placement={align === \"center\" ? side : `${side} ${align}`} aria-label=\"Emoji picker\" className=\"w-auto overflow-hidden p-0\">\n        <EmojiPickerCard\n          autoFocus\n          onSelect={(selection) => {\n            onSelect(selection);\n            setOpen(false);\n          }}\n          className=\"rounded-none border-0 shadow-none\"\n        />\n      </Popover>\n    </PopoverTrigger>\n  );\n}\n\nexport { EmojiPickerPopover };\n",
+      "content": "\"use client\";\n\nimport type * as React from \"react\";\nimport type { EmojiSelection } from \"@brianhung/emoji-picker-react\";\nimport { EmojiPopover } from \"@brianhung/emoji-picker-react/react-aria\";\nimport { buttonVariants } from \"@/components/ui/button\";\nimport { EmojiPickerCard } from \"@/components/ui/emoji-picker\";\nimport { cn } from \"@/lib/utils\";\n\nfunction EmojiPickerPopoverContent({\n  className,\n  side = \"bottom\",\n  align = \"start\",\n  sideOffset = 8,\n  alignOffset = 0,\n  container,\n  ...props\n}: Omit<EmojiPopover.Popup.Props, \"className\"> & Pick<EmojiPopover.Positioner.Props, \"side\" | \"align\" | \"sideOffset\" | \"alignOffset\"> & Pick<EmojiPopover.Portal.Props, \"container\"> & { className?: string }) {\n  return (\n    <EmojiPopover.Portal container={container}>\n      <EmojiPopover.Positioner side={side} align={align} sideOffset={sideOffset} alignOffset={alignOffset}>\n        <EmojiPopover.Popup\n          className={cn(\n            \"origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95\",\n            className,\n          )}\n          {...props}\n        />\n      </EmojiPopover.Positioner>\n    </EmojiPopover.Portal>\n  );\n}\n\nfunction EmojiPickerPopover({\n  onSelect,\n  side,\n  align,\n  className,\n  children,\n  \"aria-label\": ariaLabel,\n}: {\n  onSelect: (selection: EmojiSelection) => void;\n  side?: EmojiPopover.Positioner.Props[\"side\"];\n  align?: EmojiPopover.Positioner.Props[\"align\"];\n  className?: string;\n  children: React.ReactNode;\n  \"aria-label\"?: string;\n}) {\n  return (\n    <EmojiPopover.Root>\n      <EmojiPopover.Trigger aria-label={ariaLabel} className={cn(buttonVariants({ variant: \"outline\" }), className)}>\n        {children}\n      </EmojiPopover.Trigger>\n      <EmojiPickerPopoverContent side={side} align={align} aria-label=\"Emoji picker\">\n        <EmojiPickerCard onSelect={onSelect} />\n      </EmojiPickerPopoverContent>\n    </EmojiPopover.Root>\n  );\n}\n\nexport { EmojiPickerPopover, EmojiPickerPopoverContent };\n",
       "type": "registry:ui"
     }
   ],

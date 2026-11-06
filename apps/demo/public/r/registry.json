@@ -38,8 +38,9 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-aria.",
-      "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
+      "description": "The emoji picker in a non-modal Floating UI popover, for any shadcn/ui base: EmojiPickerPopover, and EmojiPickerPopoverContent composing EmojiPopover's Portal, Positioner and Popup. A pick closes it. For a modal React Aria popover, use emoji-picker-popover-aria.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
+      "registryDependencies": ["button", "utils", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [
         {
           "path": "registry/emoji-picker-popover.tsx",
@@ -51,8 +52,9 @@
       "name": "emoji-picker-popover-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
-      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
-      "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
+      "description": "The emoji picker in a modal React Aria popover, for any shadcn/ui base: EmojiPickerPopover, and EmojiPickerPopoverContent composing EmojiPopover's Portal, Positioner and Popup. A pick closes it.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
+      "registryDependencies": ["button", "utils", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [
         {
           "path": "registry/aria/emoji-picker-popover.tsx",
@@ -90,7 +92,7 @@
       "name": "emoji-suggestion-menu",
       "type": "registry:component",
       "title": "Emoji Suggestion Menu",
-      "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions.Popover. The Tiptap and Lexical items render it.",
+      "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
       "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
       "registryDependencies": ["utils"],
       "files": [

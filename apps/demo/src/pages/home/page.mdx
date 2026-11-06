@@ -21,7 +21,7 @@ The packages are in prerelease (`1.0.0-alpha`). The API can change between alpha
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS. For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
+Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS. For a popover, add `emoji-picker-popover.json` (Floating UI) or `emoji-picker-popover-aria.json` (React Aria).
 
 </TabPanel>
 
@@ -67,7 +67,11 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
   <EmojiPopover.Root>
     <EmojiPopover.Trigger />
-    <EmojiPopover.Content>…</EmojiPopover.Content>
+    <EmojiPopover.Portal>
+      <EmojiPopover.Positioner>
+        <EmojiPopover.Popup>…</EmojiPopover.Popup>
+      </EmojiPopover.Positioner>
+    </EmojiPopover.Portal>
   </EmojiPopover.Root>
 
   <Emoji emoji="1f44d-1f3fd" />
@@ -111,7 +115,7 @@ Import `@brianhung/emoji-picker-react/theme.css` for Tailwind utilities on the t
 
 ### In a popover
 
-The registry component takes your shadcn/ui theme, and its popover item uses your `components/ui/popover`.
+The registry component takes your shadcn/ui theme. Its popover item adds `EmojiPickerPopover`, and `EmojiPickerPopoverContent` for your own trigger.
 
 ```tsx title="message.tsx"
 import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
@@ -309,15 +313,51 @@ Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeE
 
 ### EmojiPopover {#api-popover}
 
-A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-aria`. `EmojiSuggestions.Popover` places a typeahead menu at the caret and never takes focus.
+A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-aria`. `Portal`, `Positioner`, and `Popup` follow Base UI's Popover.
 
-<PropsTable rows={api.popoverParts} />
+<PropsTable rows={api.popoverRootParts} />
 
-<AttrTable head={["Data attribute", "Description"]} rows={api.popoverAttributes} />
+<AttrTable head={["Data attribute", "Description"]} rows={api.popoverTriggerAttributes} />
 
-<AttrTable head={["CSS variable", "Default", "Description"]} rows={api.popoverVariables} />
+Types: `EmojiPopover.Root.Props`, `.Root.Actions`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Trigger.Props`, `.Trigger.State`.
 
-Types: `EmojiPopover.Root.Props`, `.Root.Actions`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Trigger.Props`, `.Trigger.State`, `.Content.Props`, `.Content.State`, `EmojiSuggestions.Popover.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`.
+### EmojiPopover.Portal {#api-popover-portal}
+
+Renders the positioner into `<body>` or `container` while the popup is mounted.
+
+<PropsTable rows={api.popoverPortal} />
+
+Types: `EmojiPopover.Portal.Props`.
+
+### EmojiPopover.Positioner {#api-popover-positioner}
+
+Places the popup against the Trigger or `anchor`. Renders a `<div>`.
+
+<PropsTable rows={api.popoverPositioner} />
+
+<AttrTable head={["Data attribute", "Description"]} rows={api.popoverPositionerAttributes} />
+
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={api.popoverPositionerVariables} />
+
+Types: `EmojiPopover.Positioner.Props`, `.State`.
+
+### EmojiPopover.Popup {#api-popover-popup}
+
+The dialog. Renders a `<div>`.
+
+<PropsTable rows={api.popoverPopup} />
+
+<AttrTable head={["Data attribute", "Description"]} rows={api.popoverPopupAttributes} />
+
+Types: `EmojiPopover.Popup.Props`, `.State`.
+
+### EmojiSuggestions {#api-suggestions}
+
+A typeahead menu at the caret that never takes focus, with the parts of Base UI's Combobox popup: `Root`, `Portal`, `Positioner`, and a `Popup` without the focus props.
+
+<PropsTable rows={api.suggestionsParts} />
+
+Types: `EmojiSuggestions.Root.Props`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Portal.Props`, and `.Positioner`, `.Popup` with `.Props` and `.State`.
 
 ### Emoji {#api-emoji}
 

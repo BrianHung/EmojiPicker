@@ -576,21 +576,25 @@ function IconPopover({ value, onChange, sheet = false }: { value: string; onChan
       >
         {tile}
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content side="bottom" align="start" aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
-        <FitViewport width={412}>
-          <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
-            {ICON_TABS}
-            <IconPicker
-              onSelect={(s) => {
-                onChange(s.unified);
-                copyEmoji(s);
-                setOpen(false);
-              }}
-              autoFocus
-            />
-          </div>
-        </FitViewport>
-      </EmojiPopover.Content>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner side="bottom" align="start">
+          <EmojiPopover.Popup aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
+            <FitViewport width={412}>
+              <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
+                {ICON_TABS}
+                <IconPicker
+                  onSelect={(s) => {
+                    onChange(s.unified);
+                    copyEmoji(s);
+                    setOpen(false);
+                  }}
+                  autoFocus
+                />
+              </div>
+            </FitViewport>
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }

@@ -11,14 +11,18 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
       <EmojiPopover.Trigger aria-label="Open emoji picker" className={styles.trigger}>
         <span className={styles.emoji}>{picked?.emoji || "🙂"}</span> Add reaction
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content aria-label="Emoji picker" className={styles.content}>
-        <EmojiPickerCard
-          onSelect={(selection) => {
-            setPicked(selection);
-            onSelect(selection);
-          }}
-        />
-      </EmojiPopover.Content>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner>
+          <EmojiPopover.Popup aria-label="Emoji picker" className={styles.popup}>
+            <EmojiPickerCard
+              onSelect={(selection) => {
+                setPicked(selection);
+                onSelect(selection);
+              }}
+            />
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }
