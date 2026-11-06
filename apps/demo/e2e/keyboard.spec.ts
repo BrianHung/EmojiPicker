@@ -77,13 +77,16 @@ async function outcome(page: Page, root: Locator, back: Locator) {
 }
 
 const mark = (root: Locator, name: string) =>
-  root.evaluate((el, name) => {
-    const active = document.activeElement;
-    const id = active?.getAttribute("aria-activedescendant");
-    const item = (id && document.getElementById(id)) || (active !== el && el.contains(active) && active?.matches(`${slot("emoji")}, [role="option"]`) ? active : el.querySelector("[data-highlighted]"));
-    item?.setAttribute("data-e2e", name);
-    return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
-  }, name);
+  root.evaluate(
+    (el, [name, cell]) => {
+      const active = document.activeElement;
+      const id = active?.getAttribute("aria-activedescendant");
+      const item = (id && document.getElementById(id)) || (active !== el && el.contains(active) && active?.matches(`${cell}, [role="option"]`) ? active : el.querySelector("[data-highlighted]"));
+      item?.setAttribute("data-e2e", name);
+      return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
+    },
+    [name, slot("emoji")] as const,
+  );
 
 const highlightLook = (page: Page) =>
   page.evaluate(() => {
