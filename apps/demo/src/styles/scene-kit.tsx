@@ -55,6 +55,15 @@ export function SceneFrame({ width = SITE_FRAME.width, height = SITE_FRAME.heigh
   );
 }
 
+export function SceneSlot({ children }: { children: React.ReactNode }) {
+  const { ref, scale } = useFitScale(SITE_FRAME.width);
+  return (
+    <div ref={ref} className="mx-auto flex w-full items-center justify-center" style={{ maxWidth: SITE_FRAME.width, minHeight: SITE_FRAME.height * scale }}>
+      {children}
+    </div>
+  );
+}
+
 export function useCompact(breakpoint = 640) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [compact, setCompact] = React.useState(false);

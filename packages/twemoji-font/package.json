@@ -1,13 +1,14 @@
 {
   "name": "@brianhung/emoji-picker-twemoji-font",
   "version": "1.0.0-alpha.0",
-  "description": "Twemoji as a color emoji web font, split into unicode-range subsets.",
+  "description": "Twemoji as a color emoji font: unicode-range web font subsets and a TrueType file.",
   "keywords": [
     "emoji",
     "twemoji",
     "font",
     "colr",
-    "woff2"
+    "woff2",
+    "ttf"
   ],
   "license": "CC-BY-4.0",
   "author": "Brian Hung",
@@ -28,15 +29,18 @@
   "files": [
     "dist/twemoji.css",
     "dist/*.woff2",
+    "dist/Twemoji.ttf",
     "LICENSE",
     "NOTICE"
   ],
   "exports": {
     "./twemoji.css": "./dist/twemoji.css",
+    "./Twemoji.ttf": "./dist/Twemoji.ttf",
     "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsx scripts/build.ts",
+    "check": "tsx scripts/build.ts --check",
     "prepack": "npm run build",
     "test": "playwright test",
     "typecheck": "tsc --noEmit"

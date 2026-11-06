@@ -7,7 +7,7 @@ import { CodeBlock, CopyButton } from "@/components/site/code";
 import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
 import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
-import { toggleReaction, type Reaction } from "@/styles/scene-kit";
+import { SceneSlot, toggleReaction, type Reaction } from "@/styles/scene-kit";
 import { StyleTypeahead, StyleDropdown, StylePills, StyleReactionRow } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
 import { discordEmojiOptions } from "@/experiences/discord";
@@ -148,13 +148,14 @@ export function GalleryPage() {
     <div className="flex flex-col gap-8">
       <Tabs label="App" value={styleId} onChange={select} items={STYLES.map((s) => ({ value: s.id, label: s.label }))} />
       <div key={appStyle.id} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <GalleryCard
-          code={sourceOf(appStyle.id, "scene")}
-          file={`styles/${appStyle.id}/scene.tsx`}
-          className="overflow-hidden md:col-span-2 xl:col-span-3"
-          previewClassName={cn("overflow-x-auto sm:p-8", appStyle.id === "apple" ? "p-4" : "p-0")}
-        >
-          <Scene />
+        <GalleryCard code={sourceOf(appStyle.id, "scene")} file={`styles/${appStyle.id}/scene.tsx`} className="overflow-hidden md:col-span-2 xl:col-span-3" previewClassName="overflow-x-auto p-0 sm:p-8">
+          {appStyle.id === "apple" ? (
+            <SceneSlot>
+              <Scene />
+            </SceneSlot>
+          ) : (
+            <Scene />
+          )}
         </GalleryCard>
         <GalleryCard title="Inline picker" description="A picker placed in the page." code={sourceOf(appStyle.id, "picker")} file={file} className="md:row-span-2" previewClassName="md:min-h-[560px]">
           <InlineDemo appStyle={appStyle} />

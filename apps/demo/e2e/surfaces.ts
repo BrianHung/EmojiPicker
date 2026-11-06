@@ -221,7 +221,7 @@ const home: Surface[] = [
   },
   inline("home/search", "/", (p) => preview(p, "search")),
   inline("home/custom-emoji", "/", (p) => preview(p, "custom-emoji")),
-  inline("home/custom-cells-and-rows", "/", (p) => preview(p, "custom-cells-and-rows")),
+  inline("home/custom-cells", "/", (p) => preview(p, "custom-cells")),
   menu("home/autocomplete", "/", (p) => example(p, "headless").getByLabel("Message", { exact: true }), ":smi", { frame: (p) => preview(p, "headless") }),
 ];
 
