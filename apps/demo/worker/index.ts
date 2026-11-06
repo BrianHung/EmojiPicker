@@ -5,6 +5,7 @@ import { embedSearch, EMBEDDING_MODEL } from "./embed-search";
 import type { Env } from "./env";
 import { BadRequest, Unavailable, UpstreamError } from "./errors";
 import { authorized, parseSeed, seed } from "./seed";
+import { bufoStill } from "./still";
 
 export type { Env };
 
@@ -37,6 +38,8 @@ export default {
       return Response.redirect(url.href, 301);
     }
     if (!url.pathname.startsWith("/api/")) return env.ASSETS.fetch(request);
+    const still = url.pathname.match(/^\/api\/bufo-still\/([\w-]+)\.gif$/);
+    if (still && request.method === "GET") return bufoStill(still[1]!);
     const origin = allowedOrigin(request, env.ALLOWED_ORIGINS ?? "");
     const cors = corsHeaders(origin);
     const json = (data: unknown, status = 200, headers: Record<string, string> = {}) => Response.json(data, { status, headers: { ...cors, ...headers } });

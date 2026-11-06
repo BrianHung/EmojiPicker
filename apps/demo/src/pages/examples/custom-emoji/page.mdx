@@ -14,7 +14,7 @@ Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes` and
 ```tsx title="app.tsx"
 const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
 
-<EmojiProvider data="/emoji/en.json" customEmojis={bufo}>
+<EmojiProvider customEmojis={bufo}>
   <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys_people" }]}>
     …
   </EmojiPicker.Root>
@@ -37,7 +37,8 @@ A pack is a `pack.json` served as a static file and fetched at runtime, so it st
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-party.gif"
   }
 ]
 ```
