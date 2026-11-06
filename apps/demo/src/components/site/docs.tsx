@@ -279,7 +279,14 @@ export function PropsTable({ rows }: { rows: PropRow[] }) {
             {r.description ? <div className="mt-1 font-sans sm:max-w-[260px] text-[13px] font-normal whitespace-normal text-muted-foreground">{r.description}</div> : null}
           </TableCell>
           <TableCell className={typeCell}>{r.type}</TableCell>
-          <TableCell className={cn("px-4 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3 max-sm:before:font-sans max-sm:before:content-['Default:_']", !r.default && "max-sm:!hidden")}>{r.default ?? "—"}</TableCell>
+          <TableCell
+            className={cn(
+              "px-4 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3 max-sm:before:font-sans max-sm:before:content-['Default:_']",
+              !r.default && "max-sm:!hidden",
+            )}
+          >
+            {r.default ?? "—"}
+          </TableCell>
         </TableRow>
       ))}
     </TableShell>
