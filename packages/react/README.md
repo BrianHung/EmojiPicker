@@ -16,7 +16,7 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 <EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
 ```
 
-The item also adds `EmojiTapback`, `EmojiPickerBody`, and `EmojiPickerFooter`. For `EmojiPickerPopover` in your `components/ui/popover`, add `emoji-picker-popover.json` (Base UI and Radix bases) or `emoji-picker-popover-aria.json` (`--base aria`).
+The item also adds `EmojiTapback`, `EmojiPickerBody`, and `EmojiPickerFooter`, and writes `--emoji-font-family` and the skin-tone row's surface tokens to your CSS file. For `EmojiPickerPopover` in your `components/ui/popover`, add `emoji-picker-popover.json` (Base UI and Radix bases) or `emoji-picker-popover-aria.json` (`--base aria`).
 
 ### npm
 

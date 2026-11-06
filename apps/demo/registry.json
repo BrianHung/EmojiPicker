@@ -10,7 +10,17 @@
       "description": "Emoji picker and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker-react.",
       "dependencies": ["@brianhung/emoji-picker-react"],
       "registryDependencies": ["utils"],
-      "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }]
+      "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }],
+      "css": {
+        "@layer base": {
+          ":root": {
+            "--emoji-font-family": "\"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Segoe UI\", \"Apple Color Emoji\", \"Twemoji Mozilla\", \"Noto Color Emoji\", \"EmojiOne Color\", \"Android Emoji\"",
+            "--emoji-picker-background": "var(--popover)",
+            "--emoji-picker-radius": "var(--radius)",
+            "--emoji-picker-shadow": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+          }
+        }
+      }
     },
     {
       "name": "emoji-picker-popover",
