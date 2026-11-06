@@ -5,9 +5,7 @@ import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { memoryStorageAdapter } from "./frequents";
 import { defaultLabels } from "./labels";
 import { interimOf, lexical, progressive, remote } from "./search/search";
-import { createEmojiStore, type EmojiStoreOptions, type InternalEmojiStore } from "./store";
-
-const internal = (options: EmojiStoreOptions) => createEmojiStore(options) as InternalEmojiStore;
+import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
 const dataset = data as unknown as Dataset;
 const frog = (id: string, extra: Partial<CustomEmoji> = {}): CustomEmoji => ({ id, name: id, imageUrl: `/frogs/${id}.png`, ...extra });
@@ -43,7 +41,7 @@ describe("store", () => {
     const defaultFrequents = Object.fromEntries(["parrot", "1f44d", "1f525"].map((u) => [u, { count: 1, lastUsed: Date.now() }]));
     const store = createEmojiStore({ data: dataset, defaultFrequents, storage: { frequents: null } });
     expect(store.frequent(3)).not.toContain("parrot");
-    expect(store.frequent(3)).toHaveLength(3);
+    expect(store.frequent(3)).toEqual(["1f44d", "1f525"]);
     expect(store.frequent(3)).toBe(store.frequent(3));
   });
 
@@ -54,11 +52,11 @@ describe("store", () => {
     expect(createEmojiStore({ data: dataset, storage: { skinTone } }).skinTone()).toBe(3);
 
     const onSkinToneChange = vi.fn();
-    const controlled = internal({ data: dataset, skinTone: 2, onSkinToneChange, storage: { skinTone } });
+    const controlled = createEmojiStore({ data: dataset, skinTone: 2, onSkinToneChange, storage: { skinTone } });
     controlled.setSkinTone(5);
     expect(controlled.skinTone()).toBe(2);
     expect(onSkinToneChange).toHaveBeenCalledWith(5, expect.objectContaining({ reason: "none" }));
-    controlled.controlSkinTone(5, onSkinToneChange);
+    controlled.setOptions({ data: dataset, skinTone: 5, onSkinToneChange });
     expect(controlled.skinTone()).toBe(5);
     expect(skinTone.read()).toBe("3");
   });
@@ -168,7 +166,7 @@ describe("store options", () => {
   });
 
   it("swaps data in place, keeping skin tone and frequents, and the old data while new data loads", async () => {
-    const store = internal({ data: tiny("en", [["1f600", "grinning"]]), storage: { frequents: null, skinTone: memoryStorageAdapter() } });
+    const store = createEmojiStore({ data: tiny("en", [["1f600", "grinning"]]), storage: { frequents: null, skinTone: memoryStorageAdapter() } });
     store.setSkinTone(2);
     store.select("1f600");
     store.setOptions({ data: tiny("fr", [["1f600", "souriant"]]) });
@@ -180,11 +178,39 @@ describe("store options", () => {
   });
 
   it("re-filters without reloading, and ignores an equivalent filter", () => {
-    const store = internal({ data: dataset, storage: { frequents: null } });
-    const before = store.getSnapshot().data;
+    const store = createEmojiStore({ data: dataset, storage: { frequents: null } });
+    const before = store.records();
     store.setOptions({ data: dataset, filter: () => true });
-    expect(store.getSnapshot().data).toBe(before);
+    expect(store.records()).toBe(before);
     store.setOptions({ data: dataset, filter: (r) => r.group !== "flags" });
     expect(store.records().some((r) => r.group === "flags")).toBe(false);
+  });
+});
+
+describe("store recovery", () => {
+  it("clears the error after a successful retry", async () => {
+    let fail = true;
+    const store = createEmojiStore({
+      data: async () => {
+        if (fail) throw new Error("offline");
+        return dataset;
+      },
+      storage: { frequents: null, skinTone: null },
+    });
+    await store.load().catch(() => {});
+    expect(store.status()).toBe("error");
+    fail = false;
+    await store.load();
+    expect(store.status()).toBe("ready");
+    expect(store.error()).toBeNull();
+  });
+
+  it("remove() takes an emoji out of the frequent list", () => {
+    const store = createEmojiStore({ data: dataset, storage: { frequents: null, skinTone: null } });
+    store.frequents.pick("1f600");
+    store.frequents.pick("1f44d");
+    expect(store.frequent(16)).toContain("1f44d");
+    store.frequents.remove("1f44d");
+    expect(store.frequent(16)).not.toContain("1f44d");
   });
 });

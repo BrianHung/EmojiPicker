@@ -4,7 +4,7 @@ import type { SearchIndex } from "./search/search-index";
 
 const SHORTCODE = /:([\p{L}\p{M}\p{N}_+\-']+):(?::skin-tone-([2-6]):)?/giu;
 
-const TRIGGER = /(?:^|[\s([{>]|(?<=[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}]))([:：]([\p{L}\p{M}\p{N}_+\-']+))$/u;
+const TRIGGER = /(?:^|[\s([{>]|(?<=[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Hangul}]))([:：]([\p{L}\p{M}\p{N}_+\-']+))$/u;
 const ASCII = /^[\x00-\x7f]*$/;
 
 export function findShortcodeTrigger(text: string): { query: string; offset: number } | null {

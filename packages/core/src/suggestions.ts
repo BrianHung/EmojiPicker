@@ -154,32 +154,32 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       const { open, activeDescendant } = getSnapshot();
       return { role: "combobox" as const, "aria-autocomplete": "list" as const, "aria-expanded": open, "aria-controls": open ? id("listbox") : undefined, "aria-activedescendant": activeDescendant };
     },
+    // For an editor element the app doesn't render: writes getInputProps() while open and restores its role after
+    syncCombobox(el: Element): () => void {
+      let role: string | null | undefined;
+      const restore = () => {
+        if (role === undefined) return;
+        for (const name of Object.keys(machine.getInputProps())) el.removeAttribute(name);
+        if (role) el.setAttribute("role", role);
+        role = undefined;
+      };
+      const sync = () => {
+        if (!getSnapshot().open) return restore();
+        if (role === undefined) role = el.getAttribute("role");
+        for (const [name, value] of Object.entries(machine.getInputProps())) {
+          if (value === undefined) el.removeAttribute(name);
+          else el.setAttribute(name, String(value));
+        }
+      };
+      sync();
+      const off = machine.subscribe(sync);
+      return () => {
+        off();
+        restore();
+      };
+    },
   };
   return machine;
 }
 
 export type EmojiSuggestionsMachine = ReturnType<typeof createEmojiSuggestions>;
-
-export function syncCombobox(el: Element, machine: EmojiSuggestionsMachine): () => void {
-  let role: string | null | undefined;
-  const restore = () => {
-    if (role === undefined) return;
-    for (const name of Object.keys(machine.getInputProps())) el.removeAttribute(name);
-    if (role) el.setAttribute("role", role);
-    role = undefined;
-  };
-  const sync = () => {
-    if (!machine.getSnapshot().open) return restore();
-    if (role === undefined) role = el.getAttribute("role");
-    for (const [name, value] of Object.entries(machine.getInputProps())) {
-      if (value === undefined) el.removeAttribute(name);
-      else el.setAttribute(name, String(value));
-    }
-  };
-  sync();
-  const off = machine.subscribe(sync);
-  return () => {
-    off();
-    restore();
-  };
-}

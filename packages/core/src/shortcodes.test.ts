@@ -7,6 +7,10 @@ import { findShortcodeTrigger, isComposingKey, nameWithTone, replaceShortcodes, 
 const index = createSearchIndex(expandDataset(data as unknown as Dataset));
 
 describe("shortcodes", () => {
+  it("triggers on a full-width colon after Hangul", () => {
+    expect(findShortcodeTrigger("안녕：웃음")).not.toBeNull();
+  });
+
   it("replaces shortcodes, including :skin-tone-N:, dropping a tone the emoji doesn't take", () => {
     expect(replaceShortcodes(":thumbsup::skin-tone-3: ok :nope: :heart:", index)).toBe("👍🏼 ok :nope: ❤️");
     expect(replaceShortcodes(":heart::skin-tone-4:", index)).toBe("❤️");

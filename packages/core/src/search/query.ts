@@ -1,6 +1,6 @@
 import type { EmojiRecord } from "../dataset";
 import { createStore } from "../reactive";
-import type { EmojiData, EmojiStore } from "../store";
+import type { EmojiData, EmojiStore, InternalStore } from "../store";
 import type { ProgressiveHits } from "./search";
 
 export type EmojiSearchState = {
@@ -36,7 +36,7 @@ export function createSearch(store: EmojiStore) {
   };
   return {
     run(query: string, limit: number): EmojiSearchState {
-      const { status, data } = store.getSnapshot();
+      const { status, data } = (store as InternalStore).getSnapshot();
       const key = status === "ready" && query.trim() ? `${limit}:${query}` : "";
       const current = run.getSnapshot();
       if (key === current.key && (!key || data === current.data)) return current.state;
@@ -66,7 +66,7 @@ export function createSearch(store: EmojiStore) {
   };
 
   function start(key: string, state: EmojiSearchState, controller: AbortController | null) {
-    run.dispatch({ type: "start", key, data: store.getSnapshot().data, state, controller });
+    run.dispatch({ type: "start", key, data: (store as InternalStore).getSnapshot().data, state, controller });
     return state;
   }
 }
