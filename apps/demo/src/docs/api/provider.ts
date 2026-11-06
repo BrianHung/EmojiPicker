@@ -3,7 +3,11 @@ import { rowsOf } from "./rows";
 
 export const provider = rowsOf<EmojiProvider.Props>()([
   { name: "data", type: "Dataset | EmojiDataInput | string | (({ signal }) => Promise<Dataset | EmojiDataInput>)", default: 'localeData("en") on jsDelivr', description: "A URL, a loader, or a dataset object." },
-  { name: "customEmojis", type: "CustomEmoji[] | (({ signal }) => Promise<CustomEmoji[]>)", description: "Custom emoji, or a loader for them: { id, name, imageUrl, shortcodes?, tags?, group? }." },
+  {
+    name: "customEmojis",
+    type: "CustomEmoji[] | (({ signal }) => Promise<CustomEmoji[]>)",
+    description: "Custom emoji, or a loader for them: { id, name, imageUrl, shortcodes?, tags?, group?, base?, width?, height?, animated?, stillUrl? }.",
+  },
   { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji, custom emoji included, from the picker and search." },
   { name: "search", type: "EmojiSearch", default: "lexical()", description: "The search function. See Search." },
   { name: "renderer", type: '"auto" | "native" | "image"', default: '"auto"', description: "auto draws images where the system cannot draw an emoji natively." },
