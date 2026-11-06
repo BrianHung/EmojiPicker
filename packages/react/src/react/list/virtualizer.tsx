@@ -4,6 +4,7 @@ import type { Collection, Key, Node } from "@react-types/shared";
 import { useLocale } from "react-aria/I18nProvider";
 import { Rect, Size, useVirtualizerState, type LayoutInfo, type ReusableView, type VirtualizerState } from "react-stately/useVirtualizerState";
 import type { EmojiGridLayout, EmojiGridLayoutOptions } from "./layout";
+import { useLayoutEffect } from "../utils/utils";
 
 type View = ReusableView<Node<unknown>, React.ReactNode>;
 type Options = {
@@ -92,7 +93,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     [scroller, scrollRef, horizontal, dir],
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const list = scrollRef.current;
     const el = list && scroller(list);
     if (!el || !list) return;
@@ -108,7 +109,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     };
   }, [sync, scroller, scrollRef]);
 
-  React.useLayoutEffect(() => options.onRendered?.());
+  useLayoutEffect(() => options.onRendered?.());
   const size = state.contentSize;
   return (
     <div ref={content} role="presentation" style={{ position: "relative", width: horizontal ? size.width : undefined, height: size.height }}>

@@ -192,7 +192,7 @@ async function main() {
   console.error(`${picks.length} picks (${picks.filter((p) => p.animated).length} animated); sheet → ${SHEET}`);
   const pack = picks.map(({ file, width, height, animated }) => {
     const id = file.replace(/\.\w+$/, "");
-    return { id, name: id.replace(/[-_]+/g, " "), imageUrl: `https://all-the.bufo.zone/${file}`, shortcodes: [id], group: "Bufo", width, height, ...(animated ? { animated: true } : {}) };
+    return { id, name: id.replace(/[-_]+/g, " "), imageUrl: `https://all-the.bufo.zone/${file}`, shortcodes: [id], group: "Bufo", width, height, ...(animated ? { animated: true, stillUrl: `/api/bufo-still/${id}.gif` } : {}) };
   });
   writeFileSync(PACK, `${JSON.stringify(pack, null, 2)}\n`);
 }

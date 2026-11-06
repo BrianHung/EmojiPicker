@@ -6,7 +6,7 @@ import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { useEmojiTextField } from "@/components/emoji-text-field";
-import { StyleAutocomplete } from "@/styles/variants";
+import { StyleTypeahead } from "@/styles/variants";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import * as I from "@/styles/icons";
 import { EmojiText, ld } from "@/styles/scene-kit";
@@ -462,7 +462,7 @@ function Composer({
     >
       <div className="absolute inset-x-[16px] bottom-[77px] drop-shadow-[0_8px_24px_rgb(0_0_0/0.16)]">
         <Squircle radius={22}>
-          <StyleAutocomplete appStyle={apple} {...emoji} className="rounded-none! border-0! shadow-none!" />
+          <StyleTypeahead appStyle={apple} {...emoji} className="rounded-none! border-0! shadow-none!" />
         </Squircle>
       </div>
       <button

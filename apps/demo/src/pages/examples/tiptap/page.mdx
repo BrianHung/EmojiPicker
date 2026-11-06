@@ -6,6 +6,9 @@ description: Shortcode suggestions and an emoji picker for the Tiptap editor.
 import { Editor } from "./editor";
 import tiptap from "@/registry/emoji-tiptap.ts?raw";
 import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
+import suggestion from "@/components/tiptap/emoji-suggestion.tsx?raw";
+import node from "@/components/tiptap/emoji-node.tsx?raw";
+import menu from "@/components/suggestion-menu.tsx?raw";
 
 <Editor />
 
@@ -17,19 +20,13 @@ import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-tiptap.json" />
 
-Adds `hooks/emoji-tiptap.ts` and `lib/emoji-prosemirror.ts`, and installs `@brianhung/emoji-picker-react`, `@tiptap/core`, and `@tiptap/pm`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/suggestion-menu.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `@brianhung/emoji-picker-react`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
 </Step>
 
-<Step title="Copy the menu component.">
+<Step title="Install the starter kit.">
 
-Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
-
-</Step>
-
-<Step title="Install the editor packages.">
-
-<PackageManagers install="@tiptap/react @tiptap/starter-kit" />
+<PackageManagers install="@tiptap/starter-kit" />
 
 </Step>
 
@@ -37,18 +34,30 @@ Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main
 
 ## Usage
 
+`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out.
+
 ```tsx title="editor.tsx"
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { EmojiProvider } from "@brianhung/emoji-picker-react";
-import { EmojiSuggestionMenu } from "./emoji-suggestion";
+import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker-react";
+import { EmojiNode } from "@/components/tiptap/emoji-node";
+import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 
-function Editor() {
-  const editor = useEditor({ extensions: [StarterKit] });
+function TiptapEditor() {
+  const store = useEmojiStore();
+  const editor = useEditor({ extensions: [StarterKit, EmojiNode.configure({ store })] });
   return (
-    <EmojiProvider data="/emoji/en.json">
+    <>
       <EditorContent editor={editor} />
       <EmojiSuggestionMenu editor={editor} />
+    </>
+  );
+}
+
+export function Editor() {
+  return (
+    <EmojiProvider>
+      <TiptapEditor />
     </EmojiProvider>
   );
 }
@@ -77,3 +86,9 @@ const emoji = useTiptapEmojiTypeahead(editor, {
 <Code title="hooks/emoji-tiptap.ts" code={tiptap} />
 
 <Code title="lib/emoji-prosemirror.ts" code={prosemirror} />
+
+<Code title="components/tiptap/emoji-suggestion.tsx" code={suggestion} />
+
+<Code title="components/tiptap/emoji-node.tsx" code={node} />
+
+<Code title="components/suggestion-menu.tsx" code={menu} />

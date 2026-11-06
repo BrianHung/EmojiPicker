@@ -67,7 +67,7 @@ type TipChild = React.ComponentProps<typeof Focusable>["children"];
 
 function SlackTip({ label, children }: { label: string; children: TipChild }) {
   return (
-    <TooltipTrigger delay={80} closeDelay={0}>
+    <TooltipTrigger delay={80} closeDelay={150}>
       <Focusable>{children}</Focusable>
       <Tooltip offset={8} className="max-w-[200px] rounded-[8px] bg-[#1d1c1d] px-3 py-2 font-[Lato,system-ui,sans-serif] text-[13px] leading-[18px] font-bold text-white dark:bg-[#212428] dark:text-[#f8f8f8] dark:drop-shadow-[0_0_1px_#797c81]">
         <OverlayArrow>
@@ -162,7 +162,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
           </div>
         ) : null}
       </div>
-      <div className="absolute -top-4 right-5 hidden items-center rounded-[12px] bg-white p-1 shadow-[0_0_0_1px_rgba(29,28,29,0.13),0_1px_3px_rgba(0,0,0,0.08)] group-focus-within:flex group-hover:flex has-[[aria-expanded=true]]:flex dark:bg-[#1a1d21] dark:shadow-[0_0_0_1px_rgba(232,232,232,0.13),0_1px_3px_rgba(0,0,0,0.08)]">
+      <div className="pointer-events-none absolute -top-4 right-5 flex items-center rounded-[12px] bg-white p-1 opacity-0 shadow-[0_0_0_1px_rgba(29,28,29,0.13),0_1px_3px_rgba(0,0,0,0.08)] group-focus-within:pointer-events-auto group-focus-within:opacity-100 group-hover:pointer-events-auto group-hover:opacity-100 has-[[aria-expanded=true]]:pointer-events-auto has-[[aria-expanded=true]]:opacity-100 dark:bg-[#1a1d21] dark:shadow-[0_0_0_1px_rgba(232,232,232,0.13),0_1px_3px_rgba(0,0,0,0.08)]">
         {quick.map((u) => {
           const record = store.get(u);
           return (

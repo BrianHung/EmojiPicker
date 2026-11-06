@@ -1,20 +1,16 @@
 # @brianhung/emoji-picker-data
 
-Prebuilt [Emojibase](https://emojibase.dev) datasets for [`@brianhung/emoji-picker-core`](https://www.npmjs.com/package/@brianhung/emoji-picker-core) and [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), one file per locale and shortcode set at `data/<locale>/<shortcodes>.json`.
+Prebuilt [Emojibase](https://emojibase.dev) datasets, one per locale and shortcode set, at `data/<locale>/<shortcodes>.json`.
 
 ## Installation
 
-To load the datasets from jsDelivr, no installation is needed. To self-host them or import them with a bundler, install the package:
-
 ```bash
-npm i @brianhung/emoji-picker-data@alpha
+npm i @brianhung/emoji-picker-data
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+Only needed to self-host or bundle; `localeData` loads from jsDelivr otherwise.
 
 ## Usage
-
-`localeData` from core returns a file's jsDelivr URL, pinned to the matching version of this package.
 
 ```tsx
 import { localeData } from "@brianhung/emoji-picker-core";
@@ -22,13 +18,20 @@ import { localeData } from "@brianhung/emoji-picker-core";
 <EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">…</EmojiProvider>
 ```
 
-To self-host, copy `data/` and pass `baseUrl`: `localeData("ja", { baseUrl: "/emoji" })` resolves to `/emoji/ja/iamcal.json`. With a bundler, import a file directly, such as `@brianhung/emoji-picker-data/ja/cldr.json`. Each file is typed as core's `Dataset`.
+| Source | `data` |
+|---|---|
+| jsDelivr, pinned to the matching version | `localeData("ja", { shortcodes: "cldr" })` |
+| Self-hosted copy of `data/` | `localeData("ja", { baseUrl: "/emoji" })` → `/emoji/ja/iamcal.json` |
+| Bundler | `import ja from "@brianhung/emoji-picker-data/ja/cldr.json"` (typed as core's `Dataset`) |
 
 ## Shortcode sets
 
-`iamcal`, `cldr`, `cldr-native`, `emojibase`, `emojibase-legacy`, `github`, and `joypixels` exist for every locale, and `emojibase-native` exists where Emojibase provides it. English-only sets keep their English shortcodes in other locales.
+| Set | Locales |
+|---|---|
+| `iamcal`, `cldr`, `cldr-native`, `emojibase`, `emojibase-legacy`, `github`, `joypixels` | Every locale; English-only sets stay English |
+| `emojibase-native` | Where Emojibase provides it |
 
-Files use the same format as core's `en.json`. They are built from `emojibase-data` with core's `build-data` when the package is packed.
+Files use the format of core's `en.json`, built from `emojibase-data` with core's `build-data` on pack.
 
 ## License
 

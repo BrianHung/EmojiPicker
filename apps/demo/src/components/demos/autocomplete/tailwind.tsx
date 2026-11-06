@@ -66,7 +66,7 @@ function CommandPalette() {
   );
 }
 
-export function Autocomplete() {
+export function ShortcodeTypeahead() {
   return (
     <>
       <Composer />

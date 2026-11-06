@@ -5,13 +5,14 @@ description: Virtualized, unstyled React components for emoji pickers, reaction 
 
 import * as api from "@/docs/api";
 import providers from "@/docs/snippets/providers.tsx?raw";
+import localization from "@/docs/snippets/localization.tsx?raw";
 import registry from "@/registry/emoji-picker.tsx?raw";
 
 <Section>
 
 ## Installation
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
 <TabPanels label="Installation">
 
@@ -55,28 +56,26 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <Steps>
 
-<Step title="Install the following dependency.">
+<Step title="Set up shadcn/ui.">
 
-<PackageManagers install="@brianhung/emoji-picker-react@alpha" />
+The component uses your shadcn/ui theme colors, such as `bg-popover`, `bg-accent`, `border-border`, and `text-muted-foreground`, and `cn` from `@/lib/utils`. In a project without shadcn/ui, run `npx shadcn@latest init` first.
 
 </Step>
 
-<Step title="Import the color tokens and Tailwind utilities.">
+<Step title="Install the following dependency.">
+
+<PackageManagers install="@brianhung/emoji-picker-react" />
+
+</Step>
+
+<Step title="Import the emoji font stack.">
 
 ```css title="app/globals.css"
 @import "tailwindcss";
 @import "@brianhung/emoji-picker-react/tokens.css";
-@import "@brianhung/emoji-picker-react/theme.css";
 ```
 
-</Step>
-
-<Step title="Optional: map the tokens to your shadcn/ui theme.">
-
-```css title="app/globals.css"
-@import "@brianhung/emoji-picker-react/tokens.css";
-@import "@brianhung/emoji-picker-react/shadcn.css";
-```
+`tokens.css` sets `--emoji-font-family` and the picker's default tokens. The component takes its colors from your theme.
 
 </Step>
 
@@ -98,7 +97,7 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <Step title="Install the following dependency.">
 
-<PackageManagers install="@brianhung/emoji-picker-react@alpha" />
+<PackageManagers install="@brianhung/emoji-picker-react" />
 
 This also installs `@brianhung/emoji-picker-core`.
 
@@ -130,7 +129,10 @@ Parts need no provider and no CSS. `Root` loads the English dataset from jsDeliv
 @import "tailwindcss";
 @import "@brianhung/emoji-picker-react/tokens.css";
 @import "@brianhung/emoji-picker-react/theme.css";
+@import "@brianhung/emoji-picker-react/shadcn.css"; /* in a shadcn/ui project */
 ```
+
+`theme.css` adds utilities such as `bg-picker-background`. `shadcn.css`, imported after the other two, takes the colors from your shadcn/ui theme.
 
 </Step>
 
@@ -216,6 +218,46 @@ Every part and hook uses the nearest `EmojiProvider`. Without one, they share a 
 
 </CodeTabs>
 
+### Localization {#localization}
+
+`@brianhung/emoji-picker-data` has a dataset for every Emojibase locale and shortcode set. `localeData(locale, { shortcodes, baseUrl })`, from `@brianhung/emoji-picker-core`, returns a dataset's jsDelivr URL. The dataset localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale; `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding, A–Z order, result-count formatting, and text direction.
+
+The picker's strings and accessible names come from `labels`, a partial `EmojiLabels` that defaults to English. This example sets every key:
+
+<Code title="app/providers.tsx" code={localization} />
+
+To self-host, copy `node_modules/@brianhung/emoji-picker-data/data/` to `public/emoji/` and pass `baseUrl`: `localeData("ja", { baseUrl: "/emoji" })` resolves to `/emoji/ja/iamcal.json`. Under a strict package manager such as pnpm, add `@brianhung/emoji-picker-core` to your dependencies to import `localeData`.
+
+### Emoji fonts {#fonts}
+
+Native emoji draw in `--emoji-font-family`, so any color emoji font works. `@brianhung/emoji-picker-twemoji-font` is Twemoji as a color font, split into subsets that load as they are drawn.
+
+<PackageManagers install="@brianhung/emoji-picker-twemoji-font" />
+
+<CodeTabs>
+
+```css title="app/globals.css" label="Twemoji"
+@import "@brianhung/emoji-picker-twemoji-font/twemoji.css";
+
+[data-slot="emoji-picker"] { --emoji-font-family: Twemoji; }
+```
+
+```css title="app/globals.css" label="Noto Color Emoji"
+@import url("https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap");
+
+[data-slot="emoji-picker"] { --emoji-font-family: "Noto Color Emoji"; }
+```
+
+</CodeTabs>
+
+Twemoji is licensed under CC-BY 4.0. Apps that show it should credit Twemoji, for example on an About page.
+
+### Hooks {#hooks}
+
+Hooks work with or without an `EmojiProvider`. Without one, they share a single store with the default options. Hooks marked "Inside Root" throw outside a `Root`.
+
+<AttrTable head={["Hook", "Description"]} rows={api.hooks} />
+
 </Section>
 
 <Section className="gap-14">
@@ -278,9 +320,9 @@ Replace the cell component to change how each emoji renders.
 
 <Demo name="cells-and-rows" className="flex-col gap-3" />
 
-### Typeahead {#headless}
+### Shortcode typeahead {#headless}
 
-Shortcode typeahead and search without a picker.
+A `:shortcode` menu in a text field, and search without a picker. See [Hooks](#hooks) for the typeahead hooks.
 
 <Demo name="autocomplete" className="flex-col items-center gap-10 pt-48" />
 
@@ -440,26 +482,76 @@ import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/fl
 import { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/react-aria";
 ```
 
-### Custom popover
+### Custom popover {#custom-popover}
 
-A picker works in any popover. Close it from `onSelect`, and give the search field `autoFocus`. A picker without a search field takes `pickerInitialFocus` (from either popover subpath) as the popover's initial focus.
+A picker works in any popover. Close it from `onSelect`, and give the search field `autoFocus`. A picker without a search field takes `pickerInitialFocus` (from either popover subpath) as the popover's initial focus. A shadcn/ui project made with `--base aria` has React Aria's `PopoverTrigger` and `Popover` in place of `PopoverContent`.
 
-```tsx title="emoji-button.tsx"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+<CodeTabs>
+
+```tsx title="emoji-button.tsx" label="Base UI and Radix"
+import * as React from "react";
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-<Popover open={open} onOpenChange={setOpen}>
-  <PopoverTrigger>😀</PopoverTrigger>
-  <PopoverContent>
-    <EmojiPicker.Root onSelect={({ emoji }) => { insert(emoji); setOpen(false); }}>
-      <EmojiPicker.Search>
-        <EmojiPicker.Search.Input autoFocus />
-      </EmojiPicker.Search>
-      …
-    </EmojiPicker.Root>
-  </PopoverContent>
-</Popover>
+export function EmojiButton({ onEmoji }: { onEmoji: (emoji: string) => void }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger aria-label="Add emoji">😀</PopoverTrigger>
+      <PopoverContent aria-label="Emoji picker" className="w-80 p-0">
+        <EmojiPicker.Root
+          onSelect={({ emoji }) => {
+            onEmoji(emoji);
+            setOpen(false);
+          }}
+        >
+          <EmojiPicker.Search>
+            <EmojiPicker.Search.Input autoFocus />
+          </EmojiPicker.Search>
+          <EmojiPicker.Viewport className="h-72">
+            <EmojiPicker.List />
+          </EmojiPicker.Viewport>
+        </EmojiPicker.Root>
+      </PopoverContent>
+    </Popover>
+  );
+}
 ```
+
+```tsx title="emoji-button.tsx" label="React Aria"
+import * as React from "react";
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverTrigger } from "@/components/ui/popover";
+
+export function EmojiButton({ onEmoji }: { onEmoji: (emoji: string) => void }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <PopoverTrigger isOpen={open} onOpenChange={setOpen}>
+      <Button variant="ghost" aria-label="Add emoji">
+        😀
+      </Button>
+      <Popover aria-label="Emoji picker" className="w-80 p-0">
+        <EmojiPicker.Root
+          onSelect={({ emoji }) => {
+            onEmoji(emoji);
+            setOpen(false);
+          }}
+        >
+          <EmojiPicker.Search>
+            <EmojiPicker.Search.Input autoFocus />
+          </EmojiPicker.Search>
+          <EmojiPicker.Viewport className="h-72">
+            <EmojiPicker.List />
+          </EmojiPicker.Viewport>
+        </EmojiPicker.Root>
+      </Popover>
+    </PopoverTrigger>
+  );
+}
+```
+
+</CodeTabs>
 
 ### Custom virtualizer
 

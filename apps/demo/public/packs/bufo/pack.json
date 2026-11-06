@@ -20,7 +20,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-no.gif"
   },
   {
     "id": "bufo-lgtm",
@@ -43,7 +44,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wave.gif"
   },
   {
     "id": "bufo-heart",
@@ -165,7 +167,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hello.gif"
   },
   {
     "id": "bufo-thanks",
@@ -243,7 +246,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-excited.gif"
   },
   {
     "id": "bufo-shy",
@@ -255,7 +259,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shy.gif"
   },
   {
     "id": "bufo-worried",
@@ -344,7 +349,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-nervous.gif"
   },
   {
     "id": "bufo-confused",
@@ -356,7 +362,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-confused.gif"
   },
   {
     "id": "bufo-uwu",
@@ -401,7 +408,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-innocent.gif"
   },
   {
     "id": "bufo-pog",
@@ -468,7 +476,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shaking-head.gif"
   },
   {
     "id": "bufo-tips-hat",
@@ -568,7 +577,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-yay.gif"
   },
   {
     "id": "bufo-starstruck",
@@ -624,7 +634,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-popcorn.gif"
   },
   {
     "id": "bufo-ramen",
@@ -636,7 +647,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-ramen.gif"
   },
   {
     "id": "bufo-shipping",
@@ -648,7 +660,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shipping.gif"
   },
   {
     "id": "bufo-offers-a-deploy-lock",
@@ -726,7 +739,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-offers-a-loading-spinner.gif"
   },
   {
     "id": "bufo-hackerman",
@@ -738,7 +752,8 @@
     "group": "Bufo",
     "width": 112,
     "height": 112,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hackerman.gif"
   },
   {
     "id": "bufo-raised-hand",
@@ -783,7 +798,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-deep-hmm.gif"
   },
   {
     "id": "bufo-wink",
@@ -795,7 +811,8 @@
     "group": "Bufo",
     "width": 123,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wink.gif"
   },
   {
     "id": "bufo-extra-cool",
@@ -807,7 +824,8 @@
     "group": "Bufo",
     "width": 112,
     "height": 112,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-extra-cool.gif"
   },
   {
     "id": "bufo-ok",
@@ -841,7 +859,8 @@
     "group": "Bufo",
     "width": 127,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-clap-hd.gif"
   },
   {
     "id": "bufo-salute",
@@ -864,7 +883,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 123,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-angry.gif"
   },
   {
     "id": "bufo-shifty",
@@ -876,7 +896,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shifty.gif"
   },
   {
     "id": "bufo-what-have-i-done",
@@ -899,7 +920,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-sad-rain.gif"
   },
   {
     "id": "bufo-headphones",
@@ -988,7 +1010,8 @@
     "group": "Bufo",
     "width": 112,
     "height": 112,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hype.gif"
   },
   {
     "id": "bufo-magician",
@@ -1055,7 +1078,8 @@
     "group": "Bufo",
     "width": 128,
     "height": 128,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-make-it-rain.gif"
   },
   {
     "id": "bufo-offers-chart-with-upwards-trend",
@@ -1089,7 +1113,8 @@
     "group": "Bufo",
     "width": 112,
     "height": 112,
-    "animated": true
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wizard.gif"
   },
   {
     "id": "bufo-offers-coffee",

@@ -55,6 +55,7 @@ import {
   type SuggestionsPopoverProps,
   type SuggestionsPopoverState,
 } from "../popover-shared";
+import { useLayoutEffect } from "../../utils/utils";
 
 type Internals = PopoverInternals & {
   context: FloatingRootContext;
@@ -137,7 +138,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   latest.current = anchor;
   const { setPositionReference, domReference } = floating.refs;
   const key = anchor instanceof Element ? anchor : anchor ? "virtual" : null;
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference]);
   const live = { placement: floating.placement, style: { position: floating.strategy, top: floating.y, left: floating.x, zIndex: 50, "--transform-origin": floating.middlewareData.transformOrigin?.origin } as React.CSSProperties };

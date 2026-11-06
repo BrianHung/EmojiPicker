@@ -39,6 +39,7 @@ import {
   type SuggestionsPopoverState,
   type TransitionStatus,
 } from "../popover-shared";
+import { useLayoutEffect } from "../../utils/utils";
 
 type Internals = PopoverInternals & { id?: string; modal: boolean };
 
@@ -56,7 +57,7 @@ function Root({ children, modal = true, ...props }: PopoverRootProps) {
 function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
   const virtual = !!anchor && !(anchor instanceof Element);
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const r = virtual ? anchorRect(anchor) : undefined;
     if (r && box.current) Object.assign(box.current.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
   });

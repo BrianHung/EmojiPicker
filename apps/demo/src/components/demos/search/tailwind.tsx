@@ -4,7 +4,7 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type EmojiRecord, type EmojiSearch, type EmojiSelection, type SearchResultsMode } from "@brianhung/emoji-picker-react";
 import { fallback, lexical, preferFrequent, remote, rerank } from "@brianhung/emoji-picker-core/search";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
-import { Chips } from "@/components/site/chips";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fuses = new WeakMap<readonly EmojiRecord[], Fuse<EmojiRecord>>();
 const fuse: EmojiSearch = (query, { records, limit }) => {
@@ -42,8 +42,21 @@ export function SearchPicker({ onSelect }: { onSelect: (selection: EmojiSelectio
   const [query, setQuery] = React.useState("");
   return (
     <>
-      <Chips label="Search engine" value={engine} onChange={setEngine} options={Object.entries(ENGINES).map(([id, e]) => [id as Engine, e.label])} />
-      <Chips label="Results" value={mode} onChange={setMode} options={[["ranked", "Ranked"], ["grouped", "Grouped"]]} />
+      <Tabs value={engine} onValueChange={setEngine}>
+        <TabsList aria-label="Search engine" className="max-w-full flex-wrap">
+          {Object.entries(ENGINES).map(([id, e]) => (
+            <TabsTrigger key={id} value={id}>
+              {e.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      <Tabs value={mode} onValueChange={setMode}>
+        <TabsList aria-label="Results" className="max-w-full flex-wrap">
+          <TabsTrigger value="ranked">Ranked</TabsTrigger>
+          <TabsTrigger value="grouped">Grouped</TabsTrigger>
+        </TabsList>
+      </Tabs>
       <EmojiProvider data={en} searchEngine={ENGINES[engine].search}>
         <EmojiPickerCard onSelect={onSelect} searchResults={mode} query={query} onQueryChange={setQuery} />
       </EmojiProvider>
