@@ -235,10 +235,11 @@ test("search: aria-activedescendant names an option in the list after Escape and
   await visit(page, "/");
   const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);
   const search = root.locator('[data-slot="emoji-picker-search-input"]');
-  const active = () => search.evaluate((el) => {
-    const id = el.getAttribute("aria-activedescendant");
-    return id ? (document.getElementById(id)?.getAttribute("aria-label") ?? "missing") : null;
-  });
+  const active = () =>
+    search.evaluate((el) => {
+      const id = el.getAttribute("aria-activedescendant");
+      return id ? (document.getElementById(id)?.getAttribute("aria-label") ?? "missing") : null;
+    });
   await search.fill("smile");
   await expect.poll(active).not.toBeNull();
   await page.keyboard.press("ArrowDown");

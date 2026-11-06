@@ -7,7 +7,8 @@ export const root = rowsOf<RootProps>()([
   {
     name: "categories",
     type: "readonly CategoryOption[]",
-    description: 'Sections in order: { id, name?, icon?, nav? }. Ids are "suggested" (frequently used), a group id such as "smileys_people", "custom" (custom emoji without a group), and "custom:<group>". Custom sections not listed follow the listed ones.',
+    description:
+      'Sections in order: { id, name?, icon?, nav? }. Ids are "suggested" (frequently used), a group id such as "smileys_people", "custom" (custom emoji without a group), and "custom:<group>". Custom sections not listed follow the listed ones.',
   },
   { name: "frequent", type: "number | false", default: "16", description: "Number of frequently used emoji. false hides the section." },
   { name: "suggested", type: "readonly string[]", description: "Fixed emoji shown in place of frequently used emoji." },

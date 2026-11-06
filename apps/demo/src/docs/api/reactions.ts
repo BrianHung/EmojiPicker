@@ -5,7 +5,11 @@ export const reactions = [
   ...rowsOf<ReactionsProps>()([
     { name: "value", type: "readonly string[]", description: "The user's reactions. With value, defaultValue, or onValueChange, items are toggle buttons, pressed when their emoji is listed in any skin tone. Controlled." },
     { name: "defaultValue", type: "readonly string[]" },
-    { name: "onValueChange", type: '(value: readonly string[], details: { reason: "item-press", emoji, pressed, event?, cancel() }) => void', description: "details.pressed is whether the press added the reaction. Only an added reaction calls onSelect." },
+    {
+      name: "onValueChange",
+      type: '(value: readonly string[], details: { reason: "item-press", emoji, pressed, event?, cancel() }) => void',
+      description: "details.pressed is whether the press added the reaction. Only an added reaction calls onSelect.",
+    },
     { name: "children", type: "ReactNode | (emoji: string) => ReactNode", default: "Items, then Expand", description: "Each reaction, or Reactions.Items and Reactions.Expand." },
   ]),
   ...rowsOfParts<{ Item: ReactionsItemProps; Expand: ReactionsExpandProps; Panel: PanelProps }>()([
