@@ -8,11 +8,7 @@ Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](
 npm i @brianhung/emoji-picker-core
 ```
 
-The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
-
 ## Usage
-
-`createEmojiStore`, `createEmojiSuggestions`, and `createSearch` return stores with `subscribe(listener)` and methods to read and act on them.
 
 ```ts
 import { createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
@@ -28,8 +24,6 @@ typeahead.setQuery("tada");
 input.addEventListener("keydown", (e) => typeahead.keydown(e));
 const stop = typeahead.syncCombobox(input);
 ```
-
-The picker's own state is part of the React package.
 
 ## Entry points
 
@@ -90,8 +84,6 @@ export const fuzzy: EmojiSearch = (query, { records, limit }) => {
   return index.search(query, { limit }).map((r) => ({ unified: r.item.unified, score: 1 - (r.score ?? 0) }));
 };
 ```
-
-MiniSearch and FlexSearch follow the same pattern, indexing `name`, `shortcodes`, and `tags` with `unified` as the id.
 
 ## License
 

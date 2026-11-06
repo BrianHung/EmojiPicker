@@ -10,8 +10,6 @@ To load the datasets from jsDelivr, no installation is needed. To self-host them
 npm i @brianhung/emoji-picker-data
 ```
 
-The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
-
 ## Usage
 
 `localeData` from core returns a file's jsDelivr URL, pinned to the matching version of this package.
