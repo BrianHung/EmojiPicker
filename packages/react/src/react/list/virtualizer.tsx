@@ -114,7 +114,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     };
   }, [sync, scroller, scrollRef]);
 
-  // React Aria renders a new set of views whenever what's on screen changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: React Aria renders a new set of views whenever what's on screen changes, and that is when the list syncs
   useLayoutEffect(() => onRendered?.(), [onRendered, state.visibleViews]);
   const size = state.contentSize;
   return (

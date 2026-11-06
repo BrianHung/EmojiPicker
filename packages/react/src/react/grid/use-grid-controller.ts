@@ -168,13 +168,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     },
   };
   const { list } = picker;
-  // The Root and its parts reach the grid through this ref, current as of the last commit
+  // The Root and its parts reach the grid through this ref, current as of the last commit: a ref write after every render, as useLatest does
   useLayoutEffect(() => {
     list.current = handle;
     return () => {
       if (list.current === handle) list.current = null;
     };
-  }, [list, handle]);
+  });
 
   // After each render the cells on screen settle the highlight, the tab stop, the active section, and a pending jump
   const afterRender = ({ unifieds, section, settled }: Rendered) => {
