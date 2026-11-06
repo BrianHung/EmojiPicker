@@ -51,7 +51,7 @@ const INITIAL: Message[] = [
   { id: 3, author: "Bufo", color: "#8b5cf6", nameColor: "var(--discord-role-blue)", time: "Today at 9:47 AM", lines: ["try typing :smi in the box below"], reactions: [] },
 ];
 
-const FONT = "'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
+const FONT = "var(--site-text-emoji,) 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif";
 
 export function DiscordScene() {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap");

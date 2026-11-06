@@ -36,7 +36,7 @@ export default defineConfig({
         if (id !== "\0twemoji-cdn") return;
         const { name, version } = JSON.parse(readFileSync(new URL("package.json", twemojiFont), "utf8"));
         const href = `https://cdn.jsdelivr.net/npm/${name}@${version}/dist/twemoji.css`;
-        return `const link = Object.assign(document.createElement("link"), { rel: "stylesheet", href: ${JSON.stringify(href)} });
+        return `const link = Object.assign(document.createElement("link"), { rel: "stylesheet", crossOrigin: "anonymous", href: ${JSON.stringify(href)} });
 link.onerror = () => link.remove();
 document.head.append(link);`;
       },

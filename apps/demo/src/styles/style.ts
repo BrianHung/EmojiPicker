@@ -46,7 +46,7 @@ export type Style = {
 export const tokensOf = (style: Pick<Style, "tokens"> | undefined): React.CSSProperties | undefined => style?.tokens;
 
 export const ROOT =
-  "relative flex max-h-(--available-height) max-w-full flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0 [&_input::-webkit-search-cancel-button]:appearance-none [--emoji-font-family:'Segoe_UI_Emoji','Segoe_UI_Symbol','Segoe_UI','Apple_Color_Emoji','Twemoji_Mozilla','Noto_Color_Emoji','EmojiOne_Color','Android_Emoji']";
+  "relative flex max-h-(--available-height) max-w-full flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0 [&_input::-webkit-search-cancel-button]:appearance-none [--emoji-font-family:var(--site-emoji-font,)'Segoe_UI_Emoji','Segoe_UI_Symbol','Segoe_UI','Apple_Color_Emoji','Twemoji_Mozilla','Noto_Color_Emoji','EmojiOne_Color','Android_Emoji']";
 
 export const CELL =
   "relative flex cursor-default items-center justify-center overflow-hidden leading-none outline-none forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px]";

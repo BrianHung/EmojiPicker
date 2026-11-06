@@ -36,7 +36,7 @@ const INITIAL: Message[] = [
   { id: 7, from: MAYA, text: "perfect, leaving at 9 ☀️" },
 ];
 
-const FONT = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+const FONT = "var(--site-text-emoji,) -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
 export function InstagramScene() {
   const { ref, compact } = useCompact();

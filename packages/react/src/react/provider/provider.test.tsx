@@ -5,7 +5,10 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { render, trackRoot } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "../../index";
+import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "../../index";
+
+const fallback = vi.hoisted(() => ({ images: false }));
+vi.mock("@brianhung/emoji-picker-core/native", async (original) => ({ ...(await original<typeof import("@brianhung/emoji-picker-core/native")>()), needsImageFallback: () => fallback.images }));
 
 function mount(node: React.ReactNode) {
   render(node);
@@ -109,5 +112,12 @@ describe("EmojiProvider", () => {
     );
     React.act(() => document.querySelector("button")!.click());
     expect(document.querySelector('[data-slot="emoji-picker-skin-tone-trigger"]')?.getAttribute("aria-label")).toBe("Medium-dark skin tone");
+  });
+
+  it("draws images outside every provider where the system cannot draw emoji, as a Root does", () => {
+    fallback.images = true;
+    mount(<Emoji emoji="🇺🇸" />);
+    fallback.images = false;
+    expect(document.querySelector("img[data-emoji]")?.getAttribute("src")).toContain("1f1fa-1f1f8");
   });
 });

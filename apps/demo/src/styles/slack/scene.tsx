@@ -125,7 +125,7 @@ export function SlackScene() {
   );
 }
 
-const SURFACE = "flex flex-col bg-white font-[Lato,system-ui,sans-serif] text-[#1d1c1d] dark:bg-[#1a1d21] dark:text-[#d1d2d3]";
+const SURFACE = "flex flex-col bg-white [font-family:var(--site-text-emoji,)_Lato,system-ui,sans-serif] text-[#1d1c1d] dark:bg-[#1a1d21] dark:text-[#d1d2d3]";
 
 function Frame({ compact, children }: { compact: boolean; children: React.ReactNode }) {
   if (compact) return <div className={cn(SURFACE, "h-[640px] w-full overflow-hidden")}>{children}</div>;

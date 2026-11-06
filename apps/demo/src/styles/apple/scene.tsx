@@ -247,7 +247,7 @@ export function IMessageScreen({
         width: W,
         height: H,
         background: C.page,
-        fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
+        fontFamily: "var(--site-text-emoji,) -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif",
         contain: "layout paint",
       }}
     >
@@ -1035,7 +1035,7 @@ const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequen
 
 const KEYBOARD_SIZES = {
   "--emoji-size": `${K.emoji}px`,
-  "--emoji-font-family": '-apple-system, system-ui, "SF Pro Text", sans-serif',
+  "--emoji-font-family": 'var(--site-emoji-font,) -apple-system, system-ui, "SF Pro Text", sans-serif',
   "--emoji-cell-width": `${K.col}px`,
   "--emoji-cell-height": `${K.row}px`,
   "--emoji-header-height": `${K.grid - K.label}px`,

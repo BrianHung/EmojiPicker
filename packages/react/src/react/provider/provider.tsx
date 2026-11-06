@@ -90,15 +90,17 @@ function useLabels(labels: Partial<EmojiLabels> | undefined): EmojiLabels {
   return React.useMemo(() => localizeLabels(labels), [key, resultCount, withSkinTone]);
 }
 
-let shared: ContextValue | undefined;
+let sharedStore: EmojiStore | undefined;
+const shared: Partial<Record<Renderer, ContextValue>> = {};
 
 // Everything outside an EmojiProvider shares one store, created on first use with the provider's defaults, so frequents and the skin tone agree
-const sharedValue = (deferStorage: boolean) => (shared ??= contextValue(createEmojiStore({ deferStorage }), "native", twemoji, TWEMOJI_EMOJI_VERSION, localizeLabels()));
+const sharedValue = (deferStorage: boolean, renderer: Renderer) => (shared[renderer] ??= contextValue((sharedStore ??= createEmojiStore({ deferStorage })), renderer, twemoji, TWEMOJI_EMOJI_VERSION, localizeLabels()));
 
 export function useEmojiContext(): ContextValue {
   const context = React.useContext(EmojiContext);
   const hydrating = useHydrating();
-  return context ?? sharedValue(hydrating);
+  const renderer = useRenderer(context ? "native" : "auto");
+  return context ?? sharedValue(hydrating, renderer);
 }
 
 // A Root without a provider gets one around the shared store
