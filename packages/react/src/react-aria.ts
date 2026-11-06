@@ -1,22 +1,42 @@
 "use client";
 
-export { EmojiPopover, EmojiPopoverContent, EmojiPopoverRoot, EmojiPopoverTrigger, EmojiSuggestions, EmojiSuggestionsPopover } from "./react/popover/react-aria";
+export {
+  EmojiPopover,
+  EmojiPopoverPopup,
+  EmojiPopoverPortal,
+  EmojiPopoverPositioner,
+  EmojiPopoverRoot,
+  EmojiPopoverTrigger,
+  EmojiSuggestions,
+  EmojiSuggestionsPopup,
+  EmojiSuggestionsPortal,
+  EmojiSuggestionsPositioner,
+  EmojiSuggestionsRoot,
+} from "./react/popover/react-aria";
 export { pickerInitialFocus } from "./react/popover";
 export type {
+  EmojiPopoverAlign,
   EmojiPopoverAnchor,
   EmojiPopoverContainer,
-  EmojiPopoverContentProps,
-  EmojiPopoverContentState,
   EmojiPopoverFinalFocus,
   EmojiPopoverInitialFocus,
   EmojiPopoverInteractionType,
-  EmojiPopoverPlacementProps,
+  EmojiPopoverPopupProps,
+  EmojiPopoverPopupState,
+  EmojiPopoverPortalProps,
+  EmojiPopoverPositionerProps,
+  EmojiPopoverPositionerState,
   EmojiPopoverRootActions,
   EmojiPopoverRootChangeEventDetails,
   EmojiPopoverRootChangeEventReason,
   EmojiPopoverRootProps,
+  EmojiPopoverSide,
   EmojiPopoverTriggerProps,
   EmojiPopoverTriggerState,
-  EmojiSuggestionsPopoverProps,
-  EmojiSuggestionsPopoverState,
+  EmojiSuggestionsPopupProps,
+  EmojiSuggestionsPopupState,
+  EmojiSuggestionsPortalProps,
+  EmojiSuggestionsPositionerProps,
+  EmojiSuggestionsPositionerState,
+  EmojiSuggestionsRootProps,
 } from "./react/popover/popover-shared";

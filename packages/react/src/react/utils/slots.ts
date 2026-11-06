@@ -26,8 +26,10 @@ export const SLOTS = {
   variations: "emoji-picker-variations",
   variation: "emoji-picker-variation",
   popoverTrigger: "emoji-picker-popover-trigger",
-  popoverContent: "emoji-picker-popover-content",
-  suggestions: "emoji-picker-suggestions-popover",
+  popoverPositioner: "emoji-picker-popover-positioner",
+  popoverPopup: "emoji-picker-popover-popup",
+  suggestionsPositioner: "emoji-picker-suggestions-positioner",
+  suggestionsPopup: "emoji-picker-suggestions-popup",
 } as const;
 
 export const VISUALLY_HIDDEN: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap", border: 0 };

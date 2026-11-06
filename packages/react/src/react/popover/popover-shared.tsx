@@ -4,23 +4,23 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import { PopoverContext, type EmojiPopoverInteractionType, type EmojiPopoverRootChangeEventDetails, type EmojiPopoverRootChangeEventReason, type PopoverState } from "./popover-context";
 import { useEmojiLabels } from "../provider/provider";
-import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
+import { mergePartProps } from "../utils/events";
 import { useLatest } from "../utils/latest";
 import { useChangeState } from "../utils/state";
-import { flag, renderElement, type EmojiPickerInteractionState, type EmojiPickerPartElementProps, type EmojiPickerPartProps } from "../utils/render";
+import { flag, renderElement, type EmojiPickerInteractionState, type EmojiPickerPartElementProps } from "../utils/render";
 import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { TABBABLE, useLayoutEffect } from "../utils/utils";
 
-export type PopoverSide = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";
-export type PopoverAlign = "start" | "center" | "end";
+export type EmojiPopoverSide = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";
+export type EmojiPopoverAlign = "start" | "center" | "end";
 
 type Physical = "top" | "bottom" | "left" | "right";
 
-export const physicalSide = (side: PopoverSide, rtl: boolean): Physical => (side === "inline-start" ? (rtl ? "right" : "left") : side === "inline-end" ? (rtl ? "left" : "right") : side);
+export const physicalSide = (side: EmojiPopoverSide, rtl: boolean): Physical => (side === "inline-start" ? (rtl ? "right" : "left") : side === "inline-end" ? (rtl ? "left" : "right") : side);
 
 // The side the positioner placed the content on, in the terms it was asked for: a flipped inline-start reports inline-end
-export const placedSide = (side: PopoverSide, placed: string | null | undefined, rtl: boolean): PopoverSide =>
+export const placedSide = (side: EmojiPopoverSide, placed: string | null | undefined, rtl: boolean): EmojiPopoverSide =>
   !placed || placed === physicalSide(side, rtl) ? side : side === "inline-start" ? "inline-end" : side === "inline-end" ? "inline-start" : (placed as Physical);
 export type PopoverAnchorRect = { top: number; left: number; width: number; height: number };
 export type EmojiPopoverAnchor = { getBoundingClientRect(): PopoverAnchorRect } | (() => PopoverAnchorRect | null | undefined);
@@ -53,33 +53,47 @@ export type EmojiPopoverInitialFocus = boolean | React.RefObject<HTMLElement | n
 export type EmojiPopoverFinalFocus = boolean | React.RefObject<HTMLElement | null> | ((closeType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
 export type EmojiPopoverContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | null;
 
-export type EmojiPopoverPlacementProps = {
-  side?: PopoverSide;
-  align?: PopoverAlign;
-  sideOffset?: number;
-  collisionPadding?: number;
+export type EmojiPopoverPortalProps = {
   container?: EmojiPopoverContainer;
+  children?: React.ReactNode;
 };
 
-export type EmojiPopoverContentState = { open: boolean; side: PopoverSide; align: PopoverAlign };
+export type EmojiPopoverPositionerState = { open: boolean; side: EmojiPopoverSide; align: EmojiPopoverAlign };
 
-export type EmojiPopoverContentProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "style">> &
-  EmojiPickerPartProps<EmojiPopoverContentState, HTMLDivElement> &
-  EmojiPopoverPlacementProps & {
-    anchor?: EmojiPopoverAnchor;
-    initialFocus?: EmojiPopoverInitialFocus;
-    finalFocus?: EmojiPopoverFinalFocus;
-  };
+export type EmojiPopoverPositionerProps = EmojiPickerPartElementProps<EmojiPopoverPositionerState> & {
+  side?: EmojiPopoverSide;
+  align?: EmojiPopoverAlign;
+  sideOffset?: number;
+  alignOffset?: number;
+  collisionPadding?: number;
+  anchor?: EmojiPopoverAnchor;
+};
 
-export type EmojiSuggestionsPopoverState = EmojiPopoverContentState;
+export type Placement = Required<Pick<EmojiPopoverPositionerProps, "side" | "align" | "sideOffset" | "alignOffset" | "collisionPadding">>;
 
-export type EmojiSuggestionsPopoverProps = EmojiPickerPartElementProps<EmojiSuggestionsPopoverState> &
-  EmojiPopoverPlacementProps & {
-    open: boolean;
-    onOpenChange?: (open: boolean, details: EmojiPopoverRootChangeEventDetails) => void;
-    onOpenChangeComplete?: (open: boolean) => void;
-    anchor: EmojiPopoverAnchor;
-  };
+export type EmojiPopoverPopupState = EmojiPopoverPositionerState & { transitionStatus: "starting" | "ending" | "idle" | undefined };
+
+export type EmojiPopoverPopupProps = EmojiPickerPartElementProps<EmojiPopoverPopupState> & {
+  initialFocus?: EmojiPopoverInitialFocus;
+  finalFocus?: EmojiPopoverFinalFocus;
+};
+
+export type EmojiSuggestionsRootProps = {
+  open: boolean;
+  onOpenChange?: (open: boolean, details: EmojiPopoverRootChangeEventDetails) => void;
+  onOpenChangeComplete?: (open: boolean) => void;
+  children: React.ReactNode;
+};
+
+export type EmojiSuggestionsPortalProps = EmojiPopoverPortalProps;
+
+export type EmojiSuggestionsPositionerState = EmojiPopoverPositionerState;
+
+export type EmojiSuggestionsPositionerProps = Omit<EmojiPopoverPositionerProps, "anchor"> & { anchor: EmojiPopoverAnchor };
+
+export type EmojiSuggestionsPopupState = EmojiPopoverPopupState;
+
+export type EmojiSuggestionsPopupProps = EmojiPickerPartElementProps<EmojiSuggestionsPopupState>;
 
 // For popovers this package doesn't render, so all it has is their content element
 export function pickerInitialFocus(root: Element | null | undefined): HTMLElement | null {
@@ -114,20 +128,31 @@ export function initialFocusTarget(state: PopoverState, initialFocus: EmojiPopov
 
 export const finalFocusTarget = (state: PopoverState, finalFocus: EmojiPopoverFinalFocus | undefined) => resolveFocus(finalFocus, state.interaction.current);
 
-export type TransitionStatus = "starting" | "open" | "ending";
+export type TransitionStatus = NonNullable<EmojiPopoverPopupState["transitionStatus"]>;
 
-export const stateAttributes = ({ open, side, align }: EmojiPopoverContentState, status: TransitionStatus) => ({
-  "data-open": flag(open),
-  "data-closed": flag(!open),
+const openAttributes = (open: boolean) => ({ "data-open": flag(open), "data-closed": flag(!open) });
+
+export const positionerAttributes = ({ open, side, align }: EmojiPopoverPositionerState, slot: string) => ({
+  role: "presentation",
+  "data-slot": slot,
+  ...openAttributes(open),
   "data-side": side,
   "data-align": align,
-  "data-starting-style": flag(status === "starting"),
-  "data-ending-style": flag(status === "ending"),
 });
 
-export function useContentAttributes(props: React.AriaAttributes) {
+export const popupAttributes = ({ open, side, align, transitionStatus }: EmojiPopoverPopupState) => ({
+  ...openAttributes(open),
+  "data-side": side,
+  "data-align": align,
+  "data-starting-style": flag(transitionStatus === "starting"),
+  "data-ending-style": flag(transitionStatus === "ending"),
+});
+
+export const closedPointerEvents = (open: boolean): React.CSSProperties | undefined => (open ? undefined : { pointerEvents: "none" });
+
+export function usePopupAttributes(props: React.AriaAttributes) {
   const { picker } = useEmojiLabels();
-  return { role: "dialog", "aria-label": props["aria-label"] ?? (props["aria-labelledby"] ? undefined : picker), "data-slot": SLOTS.popoverContent };
+  return { role: "dialog", "aria-label": props["aria-label"] ?? (props["aria-labelledby"] ? undefined : picker), "data-slot": SLOTS.popoverPopup };
 }
 
 export type PopoverInternals = {
@@ -164,7 +189,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
 
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish
 export function useTransition(open: boolean, node: React.RefObject<HTMLElement | null>, complete?: (open: boolean) => void) {
-  const [status, setStatus] = React.useState<TransitionStatus | null>(open ? "open" : null);
+  const [status, setStatus] = React.useState<TransitionStatus | null>(open ? "idle" : null);
   const latest = useLatest(complete);
   // biome-ignore lint/correctness/useExhaustiveDependencies: a transition starts on each change of open; status and the node are read as of that change
   useLayoutEffect(() => {
@@ -184,8 +209,8 @@ export function useTransition(open: boolean, node: React.RefObject<HTMLElement |
       setStatus("starting");
       const frame = requestAnimationFrame(() => {
         if (!live) return;
-        setStatus("open");
-        settle("open");
+        setStatus("idle");
+        settle("idle");
       });
       return () => {
         live = false;

@@ -32,7 +32,7 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker-react` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks |
-| `/floating-ui`, `/react-aria` | `EmojiPopover`, `EmojiSuggestions.Popover`, `pickerInitialFocus` on either positioning library |
+| `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`), `pickerInitialFocus` on either positioning library |
 
 Server Components can't reach into a client module's objects, so every part is also a flat export: `EmojiPickerRoot`, `EmojiPickerSearchInput`, `EmojiPickerListCell`, `EmojiPopoverTrigger`, and so on.
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind utilities for them, and a mapping to a shadcn/ui theme |

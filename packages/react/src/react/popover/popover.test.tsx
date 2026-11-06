@@ -23,9 +23,13 @@ describe.each([
       root.render(
         <EmojiPopover.Root defaultOpen onOpenChange={onOpenChange}>
           <EmojiPopover.Trigger>Open</EmojiPopover.Trigger>
-          <EmojiPopover.Content aria-label="Emoji">
-            <button type="button">Inside</button>
-          </EmojiPopover.Content>
+          <EmojiPopover.Portal>
+            <EmojiPopover.Positioner>
+              <EmojiPopover.Popup aria-label="Emoji">
+                <button type="button">Inside</button>
+              </EmojiPopover.Popup>
+            </EmojiPopover.Positioner>
+          </EmojiPopover.Portal>
         </EmojiPopover.Root>,
       ),
     );
@@ -44,12 +48,16 @@ describe.each([
       root.render(
         <EmojiPopover.Root onOpenChange={onOpenChange}>
           <EmojiPopover.Trigger>Open</EmojiPopover.Trigger>
-          <EmojiPopover.Content aria-label="Emoji" initialFocus={initialFocus}>
-            <button type="button">First</button>
-            <button type="button" ref={target}>
-              Second
-            </button>
-          </EmojiPopover.Content>
+          <EmojiPopover.Portal>
+            <EmojiPopover.Positioner>
+              <EmojiPopover.Popup aria-label="Emoji" initialFocus={initialFocus}>
+                <button type="button">First</button>
+                <button type="button" ref={target}>
+                  Second
+                </button>
+              </EmojiPopover.Popup>
+            </EmojiPopover.Positioner>
+          </EmojiPopover.Portal>
         </EmojiPopover.Root>,
       ),
     );
@@ -61,18 +69,30 @@ describe.each([
     expect(document.activeElement).toBe(target.current);
   });
 
-  it("renders EmojiSuggestions.Popover as a part, with state attributes and className as a function of state", async () => {
+  it("renders EmojiSuggestions' Positioner and Popup as parts, with state attributes and className as a function of state", async () => {
     const host = document.body.appendChild(document.createElement("div"));
     const root = createTestRoot(host);
     const anchor = { getBoundingClientRect: () => ({ top: 10, left: 10, width: 0, height: 10 }) };
     await React.act(async () =>
       root.render(
-        <EmojiSuggestions.Popover open anchor={anchor} side="inline-end" className={({ side }) => `on-${side}`}>
-          <ul />
-        </EmojiSuggestions.Popover>,
+        <EmojiSuggestions.Root open>
+          <EmojiSuggestions.Portal>
+            <EmojiSuggestions.Positioner anchor={anchor} side="inline-end">
+              <EmojiSuggestions.Popup className={({ side }) => `on-${side}`}>
+                <ul />
+              </EmojiSuggestions.Popup>
+            </EmojiSuggestions.Positioner>
+          </EmojiSuggestions.Portal>
+        </EmojiSuggestions.Root>,
       ),
     );
-    const popup = document.querySelector('[data-slot="emoji-picker-suggestions-popover"]')!;
-    expect([popup.getAttribute("data-open"), popup.getAttribute("data-side"), popup.className]).toEqual(["", "inline-end", "on-inline-end"]);
+    const popup = document.querySelector('[data-slot="emoji-picker-suggestions-popup"]')!;
+    expect([popup.parentElement?.getAttribute("data-slot"), popup.parentElement?.getAttribute("data-side"), popup.getAttribute("data-open"), popup.getAttribute("data-side"), popup.className]).toEqual([
+      "emoji-picker-suggestions-positioner",
+      "inline-end",
+      "",
+      "inline-end",
+      "on-inline-end",
+    ]);
   });
 });

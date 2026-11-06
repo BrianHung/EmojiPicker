@@ -17,6 +17,7 @@ import {
   useInteractions,
   useMergeRefs,
   useRole,
+  type FloatingContext,
   type FloatingRootContext,
   type Middleware,
   type OpenChangeReason,
@@ -27,47 +28,71 @@ import { createChangeDetails, shallowEqual } from "@brianhung/emoji-picker-core/
 import { mergePartProps } from "../../utils/events";
 import { useLatest } from "../../utils/latest";
 import { useLayoutEffect } from "../../utils/utils";
-import { renderElement, resolve } from "../../utils/render";
+import { renderElement, resolve, type EmojiPickerPartElementProps } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
   anchorRect,
+  closedPointerEvents,
   containerOf,
   finalFocusTarget,
   initialFocusTarget,
   physicalSide,
   placedSide,
   PopoverProvider,
-  stateAttributes,
+  popupAttributes,
+  positionerAttributes,
   Trigger,
-  useContentAttributes,
   usePopoverInternals,
   usePopoverState,
+  usePopupAttributes,
   useTransition,
-  type EmojiPopoverRootActions,
-  type EmojiPopoverAnchor,
   type EmojiPopoverContainer,
-  type EmojiPopoverContentProps,
-  type EmojiPopoverContentState,
-  type PopoverInternals,
+  type EmojiPopoverPopupProps,
+  type EmojiPopoverPopupState,
+  type EmojiPopoverPortalProps,
+  type EmojiPopoverPositionerProps,
+  type EmojiPopoverPositionerState,
+  type EmojiPopoverRootActions,
   type EmojiPopoverRootChangeEventDetails,
   type EmojiPopoverRootChangeEventReason,
-  type EmojiPopoverPlacementProps,
   type EmojiPopoverRootProps,
   type EmojiPopoverTriggerProps,
   type EmojiPopoverTriggerState,
-  type EmojiSuggestionsPopoverProps,
-  type EmojiSuggestionsPopoverState,
+  type EmojiSuggestionsPopupProps,
+  type EmojiSuggestionsPopupState,
+  type EmojiSuggestionsPortalProps,
+  type EmojiSuggestionsPositionerProps,
+  type EmojiSuggestionsPositionerState,
+  type EmojiSuggestionsRootProps,
+  type Placement,
+  type PopoverInternals,
+  type TransitionStatus,
 } from "../popover-shared";
 
 type Placed = { placement: string; position: React.CSSProperties["position"]; top: number; left: number; origin: string | undefined };
 
-type Internals = PopoverInternals & {
-  context: FloatingRootContext;
-  nodeId?: string;
-  modal: boolean;
-  setFloating: (el: HTMLElement | null) => void;
-  floatingProps: (props: React.HTMLAttributes<HTMLElement>) => Record<string, unknown>;
-};
+type FloatingProps = (props: React.HTMLAttributes<HTMLElement>) => Record<string, unknown>;
+
+type Mount = { status: TransitionStatus | null; popup: React.RefObject<HTMLElement | null> };
+
+type Internals = PopoverInternals &
+  Mount & {
+    context: FloatingRootContext;
+    nodeId?: string;
+    modal: boolean;
+    setFloating: (el: HTMLElement | null) => void;
+    floatingProps: FloatingProps;
+  };
+
+type Positioned = { context: FloatingContext; state: EmojiPopoverPositionerState; status: TransitionStatus; floatingProps: FloatingProps };
+
+const PositionerContext = React.createContext<Positioned | null>(null);
+
+function usePositioned(component: string) {
+  const positioned = React.useContext(PositionerContext);
+  if (!positioned) throw new Error(`${component}.Popup must be inside ${component}.Positioner`);
+  return positioned;
+}
 
 const REASONS: Partial<Record<OpenChangeReason, EmojiPopoverRootChangeEventReason>> = {
   "outside-press": "outside-press",
@@ -89,9 +114,11 @@ function RootNode({ children, modal = false, ...props }: EmojiPopoverRootProps) 
   const state = usePopoverState(props, trigger);
   const nodeId = useFloatingNodeId();
   const [floating, setFloating] = React.useState<HTMLElement | null>(null);
+  const popup = React.useRef<HTMLElement | null>(null);
+  const status = useTransition(state.open, popup, state.complete);
   const context = useFloatingRootContext({ open: state.open, onOpenChange: (open, event, reason) => state.setOpen(open, reasonOf(reason), event), elements: { reference: trigger, floating } });
   const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context), useRole(context)]);
-  const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => getReferenceProps(props as React.HTMLProps<Element>), context, nodeId, modal, setFloating, floatingProps: getFloatingProps };
+  const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => getReferenceProps(props as React.HTMLProps<Element>), context, nodeId, modal, setFloating, floatingProps: getFloatingProps, status, popup };
   return (
     <PopoverProvider value={value}>
       <FloatingNode id={nodeId}>{children}</FloatingNode>
@@ -114,7 +141,7 @@ const transformOrigin: Middleware = {
   },
 };
 
-function usePlacement({ side = "bottom", align = "start", sideOffset, collisionPadding = 8, anchor }: EmojiPopoverPlacementProps & { anchor?: EmojiPopoverAnchor }, options: UseFloatingOptions) {
+function usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, anchor }: Placement & Pick<EmojiPopoverPositionerProps, "anchor">, options: UseFloatingOptions) {
   const rtl = useLocale().direction === "rtl";
   const physical = physicalSide(side, rtl);
   const floating = useFloating({
@@ -124,7 +151,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
     transform: false,
     whileElementsMounted: (reference, floating, update) => autoUpdate(reference, floating, update, { layoutShift: false }),
     middleware: [
-      offset(sideOffset),
+      offset({ mainAxis: sideOffset, crossAxis: alignOffset, alignmentAxis: alignOffset }),
       flip({ padding: collisionPadding, fallbackStrategy: "initialPlacement", crossAxis: false }),
       shift({ padding: collisionPadding, crossAxis: true }),
       size({
@@ -154,21 +181,46 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   const fresh = options.open && !floating.middlewareData.transformOrigin?.detached;
   if (fresh && !shallowEqual(held, live)) setHeld(live);
   const shown = fresh ? live : held;
-  const state = (open: boolean): EmojiPopoverContentState => ({ open, side: placedSide(side, shown.placement.split("-")[0], rtl), align });
-  return { ...floating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
+  const state: EmojiPopoverPositionerState = { open: !!options.open, side: placedSide(side, shown.placement.split("-")[0], rtl), align };
+  return { context: floating.context, setFloating: floating.refs.setFloating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
 }
 
-const portal = (content: React.ReactElement, container: EmojiPopoverContainer | undefined) => <FloatingPortal root={containerOf(container)}>{content}</FloatingPortal>;
+const portal = (status: TransitionStatus | null, container: EmojiPopoverContainer | undefined, children: React.ReactNode) => (status ? <FloatingPortal root={containerOf(container)}>{children}</FloatingPortal> : null);
 
-const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
-  ref,
+function positioned(
+  { context, state, style }: ReturnType<typeof usePlacement>,
+  status: TransitionStatus,
+  floatingProps: FloatingProps,
+  slot: string,
+  { className, style: own, render, children, ...props }: EmojiPickerPartElementProps<EmojiPopoverPositionerState>,
+  ref: React.Ref<HTMLDivElement>,
 ) {
-  const p = usePopoverInternals<Internals>("Content");
-  const { context, state: stateOf, style: position } = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { rootContext: p.context, nodeId: p.nodeId, open: p.state.open });
-  const node = React.useRef<HTMLDivElement | null>(null);
-  const status = useTransition(p.state.open, node, p.state.complete);
-  const mergedRef = useMergeRefs([node, p.setFloating, ref]);
+  return (
+    <PositionerContext.Provider value={{ context, state, status, floatingProps }}>
+      {renderElement(
+        "div",
+        { ...mergePartProps(props), ...positionerAttributes(state, slot), ref, className, style: (s: EmojiPopoverPositionerState) => ({ ...style, ...closedPointerEvents(state.open), ...resolve(own, s) }), render, children },
+        state,
+      )}
+    </PositionerContext.Provider>
+  );
+}
+
+function Portal({ container, children }: EmojiPopoverPortalProps) {
+  return portal(usePopoverInternals<Internals>("Portal").status, container, children);
+}
+
+const Positioner = React.forwardRef<HTMLDivElement, EmojiPopoverPositionerProps>(function Positioner({ side = "bottom", align = "start", sideOffset = 8, alignOffset = 0, collisionPadding = 8, anchor, ...props }, ref) {
+  const p = usePopoverInternals<Internals>("Positioner");
+  const placement = usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, anchor }, { rootContext: p.context, nodeId: p.nodeId, open: p.state.open });
+  const refs = useMergeRefs([p.setFloating, ref]);
+  return p.status && positioned(placement, p.status, p.floatingProps, SLOTS.popoverPositioner, props, refs);
+});
+
+const Popup = React.forwardRef<HTMLDivElement, EmojiPopoverPopupProps>(function Popup({ initialFocus, finalFocus, className, style, render, children, ...props }, ref) {
+  const p = usePopoverInternals<Internals>("Popup");
+  const { context, state: placed, status, floatingProps } = usePositioned("EmojiPopover");
+  const mergedRef = useMergeRefs([p.popup, ref]);
   const latest = useLatest({ initialFocus, finalFocus, p });
   // Read by FloatingFocusManager as it moves focus; leaving focus in place is focusing what already has it
   const [focusTarget] = React.useState(
@@ -176,8 +228,8 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
       ({
         get current() {
           const { initialFocus, p } = latest.current;
-          const target = initialFocusTarget(p.state, initialFocus, node.current);
-          return target === false ? (node.current?.ownerDocument.activeElement as HTMLElement | null) : target;
+          const target = initialFocusTarget(p.state, initialFocus, p.popup.current);
+          return target === false ? (p.popup.current?.ownerDocument.activeElement as HTMLElement | null) : target;
         },
       }) as React.MutableRefObject<HTMLElement | null>,
   );
@@ -191,75 +243,81 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
         },
       }) as React.MutableRefObject<HTMLElement | null>,
   );
-  const state = stateOf(p.state.open);
-  const attributes = useContentAttributes(props);
-  if (!status) return null;
-  return portal(
+  const state: EmojiPopoverPopupState = { ...placed, transitionStatus: status };
+  const attributes = usePopupAttributes(props);
+  return (
     <FloatingFocusManager context={context} modal={p.modal} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus === undefined ? true : returnTarget}>
-      {renderElement(
-        "div",
-        {
-          ...p.floatingProps(mergePartProps(props)),
-          ...attributes,
-          ...stateAttributes(state, status),
-          ref: mergedRef,
-          className,
-          style: (s: EmojiPopoverContentState) => ({ ...position, ...resolve(style, s) }),
-          render,
-          children,
-        },
-        state,
-      )}
-    </FloatingFocusManager>,
-    container,
+      {renderElement("div", { ...floatingProps(mergePartProps(props)), ...attributes, ...popupAttributes(state), ref: mergedRef, className, style, render, children }, state)}
+    </FloatingFocusManager>
   );
 });
 
-function SuggestionsPopover({
-  open,
-  onOpenChange,
-  onOpenChangeComplete,
-  anchor,
-  side = "bottom",
-  align = "start",
-  sideOffset = 4,
-  collisionPadding = 8,
-  container,
-  className,
-  style,
-  render,
-  children,
-  ...props
-}: EmojiSuggestionsPopoverProps) {
-  const placement = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason), event)) });
-  const { getFloatingProps } = useInteractions([useDismiss(placement.context, { escapeKey: false })]);
-  const node = React.useRef<HTMLDivElement | null>(null);
-  const status = useTransition(open, node, onOpenChangeComplete);
-  const refs = useMergeRefs([node, placement.refs.setFloating]);
-  if (!status) return null;
-  const state = placement.state(open);
-  return portal(
-    renderElement(
-      "div",
-      {
-        ...getFloatingProps(mergePartProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() })),
-        ...stateAttributes(state, status),
-        ref: refs,
-        "data-slot": SLOTS.suggestions,
-        className,
-        style: (s: EmojiSuggestionsPopoverState) => ({ ...placement.style, ...resolve(style, s) }),
-        render,
-        children,
-      },
-      state,
-    ),
-    container,
-  );
+type Suggestions = Mount & Pick<EmojiSuggestionsRootProps, "open" | "onOpenChange">;
+
+const SuggestionsContext = React.createContext<Suggestions | null>(null);
+
+function useSuggestions(part: string) {
+  const suggestions = React.useContext(SuggestionsContext);
+  if (!suggestions) throw new Error(`EmojiSuggestions.${part} must be inside EmojiSuggestions.Root`);
+  return suggestions;
 }
 
-export const EmojiPopover = { Root, Trigger, Content };
-export const EmojiSuggestions = { Popover: SuggestionsPopover };
-export { Content as EmojiPopoverContent, Root as EmojiPopoverRoot, SuggestionsPopover as EmojiSuggestionsPopover, Trigger as EmojiPopoverTrigger };
+function SuggestionsRoot({ open, onOpenChange, onOpenChangeComplete, children }: EmojiSuggestionsRootProps) {
+  const popup = React.useRef<HTMLElement | null>(null);
+  const status = useTransition(open, popup, onOpenChangeComplete);
+  const value = React.useMemo(() => ({ open, onOpenChange, status, popup }), [open, onOpenChange, status]);
+  return <SuggestionsContext.Provider value={value}>{children}</SuggestionsContext.Provider>;
+}
+
+function SuggestionsPortal({ container, children }: EmojiSuggestionsPortalProps) {
+  return portal(useSuggestions("Portal").status, container, children);
+}
+
+const SuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsPositionerProps>(function SuggestionsPositioner(
+  { anchor, side = "bottom", align = "start", sideOffset = 4, alignOffset = 0, collisionPadding = 8, ...props },
+  ref,
+) {
+  const { open, onOpenChange, status } = useSuggestions("Positioner");
+  const placement = usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, anchor }, { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason), event)) });
+  const { getFloatingProps } = useInteractions([useDismiss(placement.context, { escapeKey: false })]);
+  const refs = useMergeRefs([placement.setFloating, ref]);
+  return status && positioned(placement, status, getFloatingProps, SLOTS.suggestionsPositioner, props, refs);
+});
+
+const SuggestionsPopup = React.forwardRef<HTMLDivElement, EmojiSuggestionsPopupProps>(function SuggestionsPopup({ className, style, render, children, ...props }, ref) {
+  const { popup } = useSuggestions("Popup");
+  const { state: placed, status, floatingProps } = usePositioned("EmojiSuggestions");
+  const refs = useMergeRefs([popup, ref]);
+  const state: EmojiSuggestionsPopupState = { ...placed, transitionStatus: status };
+  return renderElement(
+    "div",
+    {
+      ...floatingProps(mergePartProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() })),
+      ...popupAttributes(state),
+      "data-slot": SLOTS.suggestionsPopup,
+      ref: refs,
+      className,
+      style,
+      render,
+      children,
+    },
+    state,
+  );
+});
+
+export const EmojiPopover = { Root, Trigger, Portal, Positioner, Popup };
+export const EmojiSuggestions = { Root: SuggestionsRoot, Portal: SuggestionsPortal, Positioner: SuggestionsPositioner, Popup: SuggestionsPopup };
+export {
+  Popup as EmojiPopoverPopup,
+  Portal as EmojiPopoverPortal,
+  Positioner as EmojiPopoverPositioner,
+  Root as EmojiPopoverRoot,
+  SuggestionsPopup as EmojiSuggestionsPopup,
+  SuggestionsPortal as EmojiSuggestionsPortal,
+  SuggestionsPositioner as EmojiSuggestionsPositioner,
+  SuggestionsRoot as EmojiSuggestionsRoot,
+  Trigger as EmojiPopoverTrigger,
+};
 
 export declare namespace EmojiPopover {
   namespace Root {
@@ -272,17 +330,34 @@ export declare namespace EmojiPopover {
     type Props = EmojiPopoverTriggerProps;
     type State = EmojiPopoverTriggerState;
   }
-  namespace Content {
-    type Props = EmojiPopoverContentProps;
-    type State = EmojiPopoverContentState;
+  namespace Portal {
+    type Props = EmojiPopoverPortalProps;
+  }
+  namespace Positioner {
+    type Props = EmojiPopoverPositionerProps;
+    type State = EmojiPopoverPositionerState;
+  }
+  namespace Popup {
+    type Props = EmojiPopoverPopupProps;
+    type State = EmojiPopoverPopupState;
   }
 }
 
 export declare namespace EmojiSuggestions {
-  namespace Popover {
-    type Props = EmojiSuggestionsPopoverProps;
-    type State = EmojiSuggestionsPopoverState;
+  namespace Root {
+    type Props = EmojiSuggestionsRootProps;
     type ChangeEventReason = EmojiPopoverRootChangeEventReason;
     type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
+  }
+  namespace Portal {
+    type Props = EmojiSuggestionsPortalProps;
+  }
+  namespace Positioner {
+    type Props = EmojiSuggestionsPositionerProps;
+    type State = EmojiSuggestionsPositionerState;
+  }
+  namespace Popup {
+    type Props = EmojiSuggestionsPopupProps;
+    type State = EmojiSuggestionsPopupState;
   }
 }

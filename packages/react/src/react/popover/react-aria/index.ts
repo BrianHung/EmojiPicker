@@ -1,1 +1,13 @@
-export { EmojiPopover, EmojiPopoverContent, EmojiPopoverRoot, EmojiPopoverTrigger, EmojiSuggestions, EmojiSuggestionsPopover } from "./popover-aria";
+export {
+  EmojiPopover,
+  EmojiPopoverPopup,
+  EmojiPopoverPortal,
+  EmojiPopoverPositioner,
+  EmojiPopoverRoot,
+  EmojiPopoverTrigger,
+  EmojiSuggestions,
+  EmojiSuggestionsPopup,
+  EmojiSuggestionsPortal,
+  EmojiSuggestionsPositioner,
+  EmojiSuggestionsRoot,
+} from "./popover-aria";
