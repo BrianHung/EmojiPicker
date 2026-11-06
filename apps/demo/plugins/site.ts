@@ -1,4 +1,6 @@
+import { readFileSync } from "node:fs";
 import type { HtmlTagDescriptor, Plugin } from "vite";
+import { EXAMPLES } from "../src/lib/examples";
 
 export const SITE = "https://emoji.brianhung.me";
 const NAME = "Emoji Picker";
@@ -7,43 +9,31 @@ const PACKAGE = "@brianhung/emoji-picker-react";
 
 type Page = { entry: string; heading: string; description: string; title?: string };
 
+const EXAMPLE_IDS = EXAMPLES.map((e) => e.id);
+
+function frontmatter(path: string): Record<string, string> {
+  const yaml = readFileSync(new URL(`../${path}`, import.meta.url), "utf8").match(/^---\n([\s\S]*?)\n---\n/)?.[1] ?? "";
+  return Object.fromEntries(yaml.split("\n").map((line) => line.split(/:\s*(.*)/s).slice(0, 2)));
+}
+
+function example(name: string): Page {
+  const { title = name, description = "" } = frontmatter(`src/pages/examples/${name}/page.mdx`);
+  return { entry: `examples/${name}/index.html`, heading: title, description };
+}
+
 export const PAGES = {
   main: { entry: "index.html", heading: NAME, title: `${NAME} · Virtualized, unstyled React emoji picker`, description: TAGLINE },
   gallery: {
     entry: "gallery/index.html",
     heading: "Gallery",
-    description: "The virtualized, unstyled, composable React emoji picker styled like Apple, Slack, Discord, Notion, Linear and Instagram: pickers, tapbacks and autocomplete.",
+    description: "React emoji pickers, tapbacks, and shortcode autocomplete styled like Apple, Slack, Discord, Notion, Linear, and Instagram.",
   },
   examples: {
     entry: "examples/index.html",
     heading: "Examples",
-    description: "Integrations of the virtualized, unstyled, composable React emoji picker to copy into your app: Tiptap, Lexical, semantic search, custom emoji and virtualizers.",
+    description: "React emoji picker integrations to copy into your app: Tiptap, Lexical, semantic search, custom emoji, and custom virtualizers.",
   },
-  tiptap: {
-    entry: "examples/tiptap/index.html",
-    heading: "Tiptap",
-    description: "Shortcode suggestions and a virtualized, unstyled emoji picker for the Tiptap editor, composed from React parts.",
-  },
-  lexical: {
-    entry: "examples/lexical/index.html",
-    heading: "Lexical",
-    description: "Shortcode autocomplete and a composable, unstyled React emoji picker for the Lexical editor.",
-  },
-  "semantic-search": {
-    entry: "examples/semantic-search/index.html",
-    heading: "Semantic search",
-    description: "Emoji search by meaning in a virtualized React emoji picker: on-device embeddings, a vector DB, or a decision model through the search prop.",
-  },
-  "custom-emoji": {
-    entry: "examples/custom-emoji/index.html",
-    heading: "Custom emoji",
-    description: "Custom image emoji from a hosted pack.json in a virtualized, composable React emoji picker, searchable by name and shortcode.",
-  },
-  virtualizer: {
-    entry: "examples/virtualizer/index.html",
-    heading: "Bring your own virtualizer",
-    description: "The composable React emoji picker's grid on TanStack Virtual, react-window, Virtuoso, or the virtual list you already ship.",
-  },
+  ...Object.fromEntries(EXAMPLE_IDS.map((name) => [name, example(name)])),
 } satisfies Record<string, Page>;
 
 export const entries = Object.fromEntries(Object.entries(PAGES).map(([name, page]) => [name, page.entry]));

@@ -66,13 +66,13 @@ export function BufoPicker() {
           <h2 className="text-base font-semibold">Bufo</h2>
           <p className="text-muted-foreground">
             {bufo ? `${bufo.length} emoji` : "Loading…"} from{" "}
-            <a className="underline underline-offset-4" href="https://bufo.zone/">
+            <a className="underline underline-offset-4" href="https://github.com/knobiknows/all-the-bufo">
               all-the-bufo
             </a>
-            . Loaded from all-the-bufo at view time; not redistributed.
+            , loaded from its site at view time and not redistributed.
           </p>
           <p className="text-muted-foreground">
-            Search by any word of the name: <code>party</code>, <code>lgtm</code>, <code>ice cream</code>. Shortcodes keep the Slack names, <code>:bufo-yes:</code>.
+            Search by any word of the name, such as <code>party</code>, <code>lgtm</code>, or <code>ice cream</code>. Shortcodes use the pack's names, such as <code>:bufo-yes:</code>.
           </p>
           {extra.length > 0 && <p className="text-muted-foreground">Also loaded: {extra.map((p) => `${p.label} (${p.emoji.length})`).join(", ")}.</p>}
         </div>

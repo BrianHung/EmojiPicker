@@ -11,9 +11,29 @@ import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
 
 ## Installation
 
+<Steps>
+
+<Step title="Add the registry item.">
+
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-tiptap.json" />
 
-Adds `hooks/emoji-tiptap.ts` and `lib/emoji-prosemirror.ts`, and installs `@brianhung/emoji-picker-react`, `@tiptap/core` and `@tiptap/pm`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/emoji-tiptap.ts` and `lib/emoji-prosemirror.ts`, and installs `@brianhung/emoji-picker-react`, `@tiptap/core`, and `@tiptap/pm`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+
+</Step>
+
+<Step title="Copy the menu component.">
+
+Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+
+</Step>
+
+<Step title="Install the editor packages.">
+
+<PackageManagers install="@tiptap/react @tiptap/starter-kit" />
+
+</Step>
+
+</Steps>
 
 ## Usage
 
@@ -36,7 +56,7 @@ function Editor() {
 
 ## How it works
 
-`useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor, which finds the `:query`, ranks the matches and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-suggestion.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/tiptap/emoji-suggestion.tsx) into your project.
+`useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
 import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";

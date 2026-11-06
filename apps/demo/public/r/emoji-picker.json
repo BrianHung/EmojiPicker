@@ -2,9 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-picker",
   "title": "Emoji Picker",
-  "description": "Emoji picker and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker-react.",
+  "description": "An emoji picker and reaction row with shortcodes, skin tones, custom emoji, and replaceable search, built on @brianhung/emoji-picker-react.",
   "dependencies": [
-    "@brianhung/emoji-picker-react"
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0"
   ],
   "registryDependencies": [
     "utils"

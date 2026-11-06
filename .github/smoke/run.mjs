@@ -43,10 +43,14 @@ run(
 const next = app("next", ["next@16", "react@19", "react-dom@19", "typescript", "@types/react", "@types/node"]);
 run("npx", ["next", "build"], next);
 
-// The packages are preinstalled from the tarballs, so shadcn only fetches its `utils` item
+// The packages are preinstalled from the tarballs. Without a version range, shadcn skips installed
+// dependencies, so it only fetches its `utils` item.
 run("npm", ["run", "build:registry", "-w", "demo"]);
 const shadcn = app("shadcn", ["react", "react-dom", "@types/react", "@types/react-dom", "typescript", "vite", "tailwindcss", "@tailwindcss/vite", "shadcn@4"]);
-run("npx", ["shadcn", "add", join(root, "apps/demo/public/r/emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
+const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker.json"), "utf8"));
+item.dependencies = item.dependencies.map((dep) => dep.replace(/^(@brianhung\/[^@]+)@.+$/, "$1"));
+writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
+run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
 // shadcn's css block has no top-level @font-face, so the item nests it in :root and shadcn hoists it into the layer
 if (!/@font-face\s*\{\s*font-family: "Emoji Picker Apple"/.test(readFileSync(join(shadcn, "src/index.css"), "utf8"))) throw new Error("shadcn add did not write the Apple emoji @font-face");
 run("npx", ["tsc", "-p", "."], shadcn);

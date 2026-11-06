@@ -7,8 +7,8 @@
       "name": "emoji-picker",
       "type": "registry:ui",
       "title": "Emoji Picker",
-      "description": "Emoji picker and iMessage-style tapback with Slack shortcodes, skin tones, custom emoji and replaceable search. Built on @brianhung/emoji-picker-react.",
-      "dependencies": ["@brianhung/emoji-picker-react"],
+      "description": "An emoji picker and reaction row with shortcodes, skin tones, custom emoji, and replaceable search, built on @brianhung/emoji-picker-react.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
       "registryDependencies": ["utils"],
       "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }],
       "css": {
@@ -33,7 +33,7 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases: a trigger that opens it, picking closes it. With --base aria, add emoji-picker-popover-aria instead.",
+      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-aria.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [{ "path": "registry/emoji-picker-popover.tsx", "type": "registry:ui" }]
     },
@@ -41,7 +41,7 @@
       "name": "emoji-picker-popover-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
-      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria): a trigger that opens it, picking closes it.",
+      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [{ "path": "registry/aria/emoji-picker-popover.tsx", "type": "registry:ui" }]
     },
@@ -49,16 +49,16 @@
       "name": "emoji-prosemirror",
       "type": "registry:lib",
       "title": "Emoji ProseMirror",
-      "description": "Shortcode suggestions as a ProseMirror plugin, without React: finds the :query, handles the keys and replaces the query with the chosen emoji.",
-      "dependencies": ["@brianhung/emoji-picker-core", "prosemirror-state", "prosemirror-view"],
+      "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
+      "dependencies": ["@brianhung/emoji-picker-core@^1.0.0-alpha.0", "prosemirror-state", "prosemirror-view"],
       "files": [{ "path": "registry/emoji-prosemirror.ts", "type": "registry:lib" }]
     },
     {
       "name": "emoji-tiptap",
       "type": "registry:hook",
       "title": "Emoji Tiptap",
-      "description": "useTiptapEmojiTypeahead: shortcode suggestions for a Tiptap 3 editor, on the ProseMirror plugin.",
-      "dependencies": ["@brianhung/emoji-picker-react", "@tiptap/core", "@tiptap/pm"],
+      "description": "useTiptapEmojiTypeahead adds shortcode suggestions to a Tiptap 3 editor, built on the ProseMirror plugin.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0", "@tiptap/core", "@tiptap/pm"],
       "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json"],
       "files": [{ "path": "registry/emoji-tiptap.ts", "type": "registry:hook" }]
     },
@@ -66,8 +66,8 @@
       "name": "emoji-lexical",
       "type": "registry:hook",
       "title": "Emoji Lexical",
-      "description": "useLexicalEmojiTypeahead: shortcode suggestions for a Lexical editor, inside LexicalComposer.",
-      "dependencies": ["@brianhung/emoji-picker-react", "lexical", "@lexical/react"],
+      "description": "useLexicalEmojiTypeahead adds shortcode suggestions to a Lexical editor, inside LexicalComposer.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0", "lexical", "@lexical/react"],
       "files": [{ "path": "registry/emoji-lexical.ts", "type": "registry:hook" }]
     }
   ]

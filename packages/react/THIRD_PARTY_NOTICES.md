@@ -8,7 +8,7 @@ The native-emoji support probe in `src/react/emoji/native.ts` is adapted from [e
 
 ## Twemoji
 
-With the default `imageUrl`, emoji images load from [jdecked/twemoji](https://github.com/jdecked/twemoji). The graphics are Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Apps that show them should include this attribution. This package doesn't redistribute the graphics.
+With the default `imageUrl`, emoji images load from [jdecked/twemoji](https://github.com/jdecked/twemoji). The graphics are Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Apps that show them should include this attribution. This package does not redistribute the graphics.
 
 ## React Aria
 
