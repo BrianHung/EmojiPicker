@@ -1,6 +1,6 @@
 {
   "name": "@brianhung/emoji-picker-react",
-  "version": "3.0.0-alpha.0",
+  "version": "1.0.0-alpha.0",
   "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
   "keywords": [
     "react",
@@ -72,7 +72,7 @@
     }
   },
   "dependencies": {
-    "@brianhung/emoji-picker-core": "^0.0.0",
+    "@brianhung/emoji-picker-core": "^1.0.0-alpha.0",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",

@@ -1,6 +1,6 @@
 {
   "name": "@brianhung/emoji-picker-twemoji-font",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "Twemoji as a color emoji web font, split into unicode-range subsets.",
   "keywords": [
     "emoji",
