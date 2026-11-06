@@ -72,7 +72,8 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
       const box = el.getBoundingClientRect();
       const scale = (horizontal ? box.width / el.offsetWidth : box.height / el.offsetHeight) || 1;
-      content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${1.5 / ((window.devicePixelRatio || 1) * scale)}px)`);
+      // On the scroller, so List.SectionActions, outside the list, pins with the titles
+      el.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${1.5 / ((window.devicePixelRatio || 1) * scale)}px)`);
       const offset = visibleOffset(el, list, horizontal, rtl);
       const width = list.clientWidth;
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);

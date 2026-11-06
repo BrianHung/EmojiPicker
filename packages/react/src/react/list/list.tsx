@@ -465,7 +465,7 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
                 "data-slot": SLOTS.sectionActions,
                 "data-section": s.id,
                 "data-collapsed": flag(s.collapsed),
-                style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
+                style: (st: SectionActionsState) => ({ position: "sticky", top: "var(--ep-sticky-offset, 0px)", height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
                 children,
               },
               state,
