@@ -12,7 +12,7 @@ The packages are in prerelease (`1.0.0-alpha`). The API can change between alpha
 
 ## Usage
 
-`createEmojiStore`, `createEmojiSuggestions`, and `createSearch` return stores with `subscribe(listener)` and methods to read and act on them.
+`createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, and `createSearch` return stores with `subscribe(listener)`, a pure `getSnapshot()`, and methods that act on them. A framework binding subscribes and renders; the React package is one.
 
 ```ts
 import { createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
@@ -27,9 +27,13 @@ typeahead.subscribe(render);
 typeahead.setQuery("tada");
 input.addEventListener("keydown", (e) => typeahead.keydown(e));
 const stop = typeahead.syncCombobox(input);
-```
 
-The picker's own state is part of the React package.
+const picker = createEmojiPicker(store, { frequent: 16 });
+picker.subscribe(() => render(picker.getSnapshot().sections));
+picker.setQuery("cat");
+picker.highlight(picker.getSnapshot().sections[0]?.items[0]?.id ?? null);
+picker.choose();
+```
 
 ## Entry points
 
@@ -37,6 +41,8 @@ The picker's own state is part of the React package.
 |---|---|
 | `@brianhung/emoji-picker-core` | The store, emoji resolution, frequently used emoji, search and typeahead state, labels, tokenizers, Twemoji helpers, and their types |
 | `/search` | `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
+| `/grid` | Grid and strip layout math and keyboard navigation: `createEmojiGrid`, `moveInGrid`, `layoutStrip`, `moveInStrip`, `createGridNavigation` |
+| `/native` | Whether the system font draws an emoji: `nativeProbe`, `nativeSupport`, `drawsNatively`, `needsImageFallback` |
 | `/data/en.json` | The English dataset |
 
 ## API
@@ -47,19 +53,25 @@ The picker's own state is part of the React package.
 | `store.setOptions(options)` | Replaces the options that change after creation: `data`, `customEmojis`, `filter`, `searchEngine`, `locale`, and controlled `skinTone` and `frequents` with their callbacks. A loader function counts as the same source until `locale` changes. |
 | `store.load()`, `store.prepare()`, `store.status()`, `store.error()` | Load the data now, or when the browser is idle along with the search index |
 | `store.query(text)`, `store.completeShortcode(prefix)`, `store.select(unified, { count? })` | Search, shortcode completion, and an `EmojiSelection` (`count: false` skips frequently used) |
-| `createSearch(store)` | Search-as-you-type state: `run(query, limit)` returns `{ results, pending }`, and `subscribe` hears when an async search settles |
+| `store.version()` | A number that changes with the records, locale, or search engine |
+| `createSearch(store, { query, limit }?)` | Search-as-you-type state: `setQuery(query, limit)` starts a search, `getSnapshot()` returns `{ results, pending }`, and `subscribe` hears when one settles |
+| `createEmojiPicker(store, options)` | The picker's headless state: sections, search, highlight, collapsed categories, variations, and reaction rows. `getSnapshot()` returns an `EmojiPickerSnapshot`; `setOptions` takes values that change, with `query`, `highlight`, and `collapsedCategories` controlled when given; `setQuery`, `highlight`, `toggleCollapsed`, and `choose` act and call the `onXChange` callbacks |
 | `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, and `syncCombobox(el)` for an editor element you don't render. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
+| `isDataset(data)`, `isCustomEmoji(value)` | Type guards for a prebuilt `Dataset` (against an `EmojiDataInput`) and a `CustomEmoji` input |
 | `store.frequents` | `pick`, `remove`, `clear`, `top(n)`, `score`, `entries()`. Entries are `Record<unified, { count, lastUsed }>`; `count` halves every `frequentsTuning.halfLifeDays` days (default 14). The six default entries can be removed. |
 | `mergeFrequents(a, b, tuning?)` | Merges two histories, such as a server's and this device's |
 | `localStorageAdapter(key)`, `memoryStorageAdapter()` | `EmojiStorage` adapters for `storage`; `localStorageAdapter` syncs across tabs |
 | `createChangeDetails(reason, event)` | The `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` every `onXChange` receives |
 | `localeData(locale, { shortcodes, baseUrl })` | The URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
-| `defaultLabels`, `localizeLabels`, `plural` | `EmojiLabels` and CLDR plural formatting |
+| `defaultLabels`, `localizeLabels(overrides)` | The English `EmojiLabels`, with overrides |
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
 | `twemojiUrl` | Twemoji image URLs |
 | `withTone`, `withoutTone`, `nativeToUnified`, `unifiedToNative` | Convert between native emoji and unified codes, and add or remove skin tones |
 | `isComposingKey` | The IME check for editor typeaheads |
+| `KEY_MOVES`, `flipForRtl` | Keyboard keys to `EmojiGridMove`s |
+| `syncAriaAttributes(el, read, subscribe)` | Writes attributes onto an element the app renders while `read()` returns them, and restores the element after |
+| `customRecord(custom)`, `SKIN_TONE_VALUES` | The `EmojiRecord` a `CustomEmoji` becomes, and the skin tone values `0` to `5` |
 
 A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, and `syncCombobox` is available from the registry: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 

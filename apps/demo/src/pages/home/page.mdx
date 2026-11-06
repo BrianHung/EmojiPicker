@@ -220,7 +220,7 @@ Every part and hook uses the nearest `EmojiProvider`. Without one, they share a 
 
 ### Localization {#localization}
 
-`@brianhung/emoji-picker-data` has a dataset for every Emojibase locale and shortcode set. `localeData(locale, { shortcodes, baseUrl })`, from `@brianhung/emoji-picker-core`, returns a dataset's jsDelivr URL. The dataset localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale; `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding, A–Z order, result-count formatting, and text direction.
+`@brianhung/emoji-picker-data` has a dataset for every Emojibase locale and shortcode set. `localeData(locale, { shortcodes, baseUrl })`, from `@brianhung/emoji-picker-core`, returns a dataset's jsDelivr URL. The dataset localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale; `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding, A–Z order, and text direction.
 
 The picker's strings and accessible names come from `labels`, a partial `EmojiLabels` that defaults to English. This example sets every key:
 

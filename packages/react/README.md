@@ -93,7 +93,7 @@ Root
 
 Each part renders a default when it has no children. Each takes `render` (an element or `(props, state) => element`), `className`, and `style`, as values or functions of state. Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Types are namespaced on each part, as in Base UI: `EmojiPicker.Root.Props`, `EmojiPicker.Root.State`, `EmojiPicker.Root.Actions`, `EmojiPicker.List.Cell.State`, and so on. Flat aliases (`RootProps`, `CellState`) are also exported.
 
-Hooks inside `Root`, which throw outside one: `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, and `useSearchState` (`SearchStateValue`). Hooks that work anywhere: `useEmojiLabels()` (the localized `EmojiLabels`), `useEmojiStore()`, `useEmojiStatus()`, `useSkinTone()`, `useFrequentEmoji()`, `useEmojiSearch()`, and `useEmoji()`.
+Hooks inside `Root`, which throw outside one: `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, and `useSearchState` (`SearchSummary`). Hooks that work anywhere: `useEmojiLabels()` (the localized `EmojiLabels`), `useEmojiStore()`, `useEmojiStatus()`, `useSkinTone()`, `useFrequentEmoji()`, `useEmojiSearch()`, and `useEmoji()`.
 
 ## API reference
 
@@ -123,7 +123,7 @@ Hooks inside `Root`, which throw outside one: `useActiveEmoji`, `useCategoryNavi
 | Prop | Description |
 |---|---|
 | `data` | A URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset \| EmojiDataInput>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version. |
-| `locale`, `labels` | Search folding and segmentation, A–Z order, result-count formatting, text direction, and `EmojiLabels` strings |
+| `locale`, `labels` | Search folding and segmentation, A–Z order, text direction, and `EmojiLabels` strings |
 | `searchEngine` | An `EmojiSearch`. See [Search](#search). |
 | `customEmojis` | A `CustomEmoji`, pack URL, or loader, or an array of them. See [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/). |
 | `filter` | `(record) => boolean`. Removes emoji, custom emoji included, from pickers and search. |
@@ -276,7 +276,7 @@ import { localeData } from "@brianhung/emoji-picker-core";
 </EmojiProvider>
 ```
 
-`localeData(locale, { shortcodes, baseUrl })` returns the jsDelivr URL of a dataset in `@brianhung/emoji-picker-data`, which localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding and segmentation, A–Z order, result-count formatting, and text direction.
+`localeData(locale, { shortcodes, baseUrl })` returns the jsDelivr URL of a dataset in `@brianhung/emoji-picker-data`, which localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding and segmentation, A–Z order, and text direction.
 
 The picker's strings and accessible names come from `labels`, a partial `EmojiLabels` that defaults to English:
 
@@ -285,7 +285,7 @@ The picker's strings and accessible names come from `labels`, a partial `EmojiLa
 | `picker` | `"Emoji picker"` |
 | `searchPlaceholder`, `searchLabel`, `searchClear`, `searchResults` | `"Search"`, `"Type to search for an emoji"`, `"Clear"`, `"Search results"` |
 | `emojiList`, `categoryNavigation` | `"Emoji"`, `"Category navigation"` |
-| `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`, with `locale`'s plural rules and digits |
+| `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`; with an i18n library, `resultCount: (n) => t("results", { count: n })` |
 | `suggested`, `custom` | `"Frequently used"`, `"Custom"`: section names |
 | `reactions`, `expandReactions` | `"Reactions"`, `"More emoji"` |
 | `previewCaption` | `"What's your mood?"` |
