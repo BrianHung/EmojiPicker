@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { clearTextField, SURFACES } from "./surfaces";
-import { expect, frames, quiet, test, visit } from "./support";
+import { expect, frames, quiet, settle, test, visit } from "./support";
 
 const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
 const highlighted = (page: Page) => picker(page).locator('[data-slot="emoji-picker-emoji"][data-highlighted]');
@@ -99,6 +99,22 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
     [box.y, box.y + box.height].every((y) => y >= 0 && y <= 500),
     JSON.stringify(box),
   ).toBe(true);
+});
+
+test("a native emoji takes the image's box whatever the font", async ({ page }) => {
+  await visit(page, "/");
+  const section = page.locator("section:has(> h3#rendering)");
+  const glyph = section.locator("[data-emoji]").filter({ visible: true }).first();
+  const box = async (renderer: string, font: string) => {
+    await section.getByRole("tablist", { name: "Renderer" }).getByRole("tab", { name: renderer }).click();
+    await section.getByRole("tablist", { name: "Font" }).getByRole("tab", { name: font }).click();
+    await settle(page);
+    const [b, p] = await Promise.all([glyph.boundingBox(), glyph.locator("xpath=..").boundingBox()]);
+    return { x: b!.x - p!.x, y: b!.y - p!.y, width: b!.width, height: b!.height };
+  };
+  const image = await box("Images", "System");
+  for (const font of ["System", "Twemoji", "Noto"]) expect(await box("Native", font), font).toEqual(image);
+  await page.unrouteAll({ behavior: "ignoreErrors" });
 });
 
 test.describe("phone", () => {

@@ -76,7 +76,7 @@ jobs:
           path: packages/twemoji-font/.cache/build
           key: twemoji-build-${{ runner.os }}-${{ hashFiles('packages/twemoji-font/package.json', 'packages/twemoji-font/requirements.txt', 'packages/twemoji-font/scripts/build.ts') }}
           restore-keys: twemoji-build-${{ runner.os }}-
-      - run: npm run build -w @brianhung/emoji-picker-twemoji-font
+      - run: npm run build:font
       - id: playwright
         uses: actions/cache@v4
         with:

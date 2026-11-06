@@ -1,6 +1,6 @@
 import * as React from "react";
 import { type EmojiInput, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
-import { EmojiImage } from "./image";
+import { EmojiImage, NATIVE } from "./image";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
@@ -63,7 +63,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
     );
   }
   return (
-    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={size === undefined ? props.style : { fontSize: size, lineHeight: 1, ...props.style }}>
+    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={{ ...NATIVE, width: "1em", height: "1em", fontSize: size, ...props.style }}>
       {resolved.native}
     </span>
   );

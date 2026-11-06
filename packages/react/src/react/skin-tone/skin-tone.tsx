@@ -231,11 +231,11 @@ export type SkinToneGlyphProps = Omit<EmojiProps, "emoji"> & {
   emoji?: string;
 };
 
-function SkinToneGlyph({ emoji = "✋", style, ...props }: SkinToneGlyphProps) {
+function SkinToneGlyph({ emoji = "✋", ...props }: SkinToneGlyphProps) {
   const { tone: current } = useSkinToneContext("Glyph");
   const tone = React.useContext(OptionContext) ?? current;
   const unified = nativeToUnified(emoji);
-  return <Emoji {...props} emoji={tone > 0 ? withTone(unified, tone) : unified} style={{ width: "1em", height: "1em", ...style }} />;
+  return <Emoji {...props} emoji={tone > 0 ? withTone(unified, tone) : unified} />;
 }
 
 export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: SkinToneTrigger, Options: SkinToneOptions, Option: SkinToneOption, Glyph: SkinToneGlyph });
