@@ -18,6 +18,7 @@
     "format": "biome format --write .",
     "check": "biome check .",
     "size": "size-limit",
+    "smoke": "node .github/smoke/run.mjs",
     "changeset": "changeset",
     "version-packages": "changeset version && npm install --package-lock-only"
   },
