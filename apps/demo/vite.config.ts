@@ -59,7 +59,7 @@ document.head.append(link);`;
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
   },
-  environments: { client: { build: { rollupOptions: { input: pages } } } },
+  environments: { client: { build: { rollupOptions: { input: process.env.E2E_BUILD === "1" ? { ...pages, seams: fileURLToPath(new URL("./e2e/pages/seams/index.html", import.meta.url)) } : pages } } } },
   optimizeDeps: { entries: Object.values(pages) },
   server: { port: 5199, strictPort: true },
 });
