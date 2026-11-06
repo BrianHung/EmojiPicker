@@ -1,18 +1,20 @@
 export interface ChangeDetails<Reason extends string = string> {
   reason: Reason;
-  event?: Event;
+  event: Event;
+  trigger: Element | undefined;
   cancel(): void;
   readonly isCanceled: boolean;
   allowPropagation(): void;
   readonly isPropagationAllowed: boolean;
 }
 
-export function createChangeDetails<Reason extends string>(reason: Reason, event?: Event): ChangeDetails<Reason> {
+export function createChangeDetails<Reason extends string>(reason: Reason, event?: Event, trigger?: Element): ChangeDetails<Reason> {
   let canceled = false;
   let propagates = false;
   return {
     reason,
-    event,
+    event: event ?? new Event("emoji-picker"),
+    trigger,
     cancel: () => void (canceled = true),
     get isCanceled() {
       return canceled;
