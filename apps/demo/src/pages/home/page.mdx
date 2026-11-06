@@ -190,7 +190,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 ### Shared provider {#provider}
 
-`Root` uses the nearest `EmojiProvider` and creates its own when there is none. Hoist one provider to share data, locale, custom emoji, skin tone, and frequently used emoji across every picker, reaction row, and typeahead below it. `Emoji`, the typeahead hooks, and `useSkinTone` or `useFrequentEmoji` outside a `Root` require one.
+Every part and hook uses the nearest `EmojiProvider`. Without one, they share a single store with the default options, so frequently used emoji and the skin tone agree across the page. Add a provider to set data, locale, custom emoji, or storage for everything below it.
 
 <Code title="app/providers.tsx" code={providers} />
 
@@ -206,7 +206,8 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 ```
 
 ```tsx title="app/providers.tsx" label="Loader"
-<EmojiProvider data={({ signal }) => fetch(`/emoji/${locale}.json`, { signal }).then((r) => r.json())}>
+// A loader runs once per locale, however often the provider renders
+<EmojiProvider locale={locale} data={({ signal }) => fetch(`/emoji/${locale}.json`, { signal }).then((r) => r.json())}>
 ```
 
 ```tsx title="app/providers.tsx" label="Filter"
@@ -332,9 +333,13 @@ actions.current?.pick();
 
 ### Search {#api-search}
 
-The search row. `Search.Input` is the field. `Search.Clear` clears it and renders only while there is a query.
+The search row. `Search.Input` is the field, inside React Aria's `SearchField` (`Search.Field`). `Search.Clear` clears the query from anywhere in `Root` and renders only while there is one.
 
 <PropsTable rows={api.search} />
+
+#### Search.Field
+
+<PropsTable rows={api.searchField} />
 
 #### Search.Input
 
@@ -342,7 +347,7 @@ The search row. `Search.Input` is the field. `Search.Clear` clears it and render
 
 ### CategoryNav {#api-category-nav}
 
-A tab for each section that scrolls the list to it.
+A button for each section that scrolls the list to it.
 
 <PropsTable rows={api.categoryNav} />
 
@@ -400,7 +405,7 @@ Renders a single emoji as the pickers do.
 
 ### Data attributes {#api-data-attributes}
 
-Each part has a `data-slot` attribute. Part state is exposed as data attributes.
+Each part has a `data-slot` attribute. Part state is exposed as data attributes, present as an empty string or absent, as in Base UI.
 
 <AttrTable head={["Slot", "Part"]} rows={api.slots} />
 

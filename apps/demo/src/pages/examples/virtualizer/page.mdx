@@ -23,7 +23,3 @@ Put it inside `EmojiPicker.Root` where `EmojiPicker.List` would go. `grid.sticky
 ## react-window and Virtuoso
 
 The same `rows` feed react-window's `rowComponent` and Virtuoso's `itemContent`. Render `grid.rows[index]` with the same props, and call their `scrollToRow` or `scrollToIndex` from `scrollToIndex`.
-
-## Without React
-
-`createEmojiGrid` and `moveInGrid` from `@brianhung/emoji-picker-core` provide the rows and keyboard movement without React: offsets, sizes, lookups, and where Up, Down, Page Up, and Page Down land, with short rows clamped.

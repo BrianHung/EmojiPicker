@@ -26,7 +26,7 @@ function app(name, deps) {
 }
 
 // Importing only the picker must leave Floating UI out of the bundle
-const vite = app("vite", ["react", "react-dom", "vite", "@floating-ui/react"]);
+const vite = app("vite", ["react", "react-dom", "vite"]);
 run("npx", ["vite", "build", "--sourcemap", "--logLevel", "error"], vite);
 run("node", ["check.mjs"], vite);
 

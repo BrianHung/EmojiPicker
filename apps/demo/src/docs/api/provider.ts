@@ -4,7 +4,7 @@ import { rowsOf } from "./rows";
 export const provider = rowsOf<EmojiProviderProps>()([
   { name: "data", type: "Dataset | EmojiDataInput | string | (({ signal }) => Promise<Dataset | EmojiDataInput>)", default: "core's en.json on jsDelivr", description: "A URL, a loader, or a dataset object." },
   { name: "customEmojis", type: "CustomEmojiSource | CustomEmojiSource[]", description: "Custom emoji, pack URLs, or loaders: { id, name, imageUrl, shortcodes?, tags?, group? }." },
-  { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji from the picker and search." },
+  { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji, custom emoji included, from the picker and search." },
   { name: "searchEngine", type: "EmojiSearch", default: "lexical()", description: "The search function. See Search." },
   { name: "renderer", type: '"auto" | "native" | "image"', default: '"auto"', description: "auto draws images where the system cannot draw an emoji natively." },
   {
@@ -15,7 +15,7 @@ export const provider = rowsOf<EmojiProviderProps>()([
   },
   { name: "imageVersion", type: "number", default: "17", description: "Newest emoji version your image set draws." },
   { name: "frequents", type: "Record<unified, { count, lastUsed }>", description: "Frequently used emoji. count halves every frequentsTuning.halfLifeDays days (default 14). Controlled." },
-  { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", description: "Used when storage.frequents holds nothing." },
+  { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", default: "six common emoji", description: "Used when storage.frequents holds nothing. Its entries can be removed like any other." },
   { name: "onFrequentsChange", type: '(frequents, details: { reason: "pick" | "remove" | "clear", emoji?, cancel() }) => void' },
   { name: "frequentsTuning", type: "{ halfLifeDays?, max? }", default: "{ halfLifeDays: 14, max: 64 }", description: "halfLifeDays: days until a use counts half. max: number of emoji the history keeps." },
   { name: "skinTone", type: "SkinToneValue", description: "The skin tone: 0 (none) or 1–5, light to dark. Controlled." },
@@ -29,5 +29,5 @@ export const provider = rowsOf<EmojiProviderProps>()([
   },
   { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order, and the labels' counts." },
   { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce." },
-  { name: "prepare", type: "boolean", default: "true", description: "Loads data and builds the index when idle." },
+  { name: "prepare", type: "boolean", default: "true", description: "Loads data and builds the search index when the browser is idle." },
 ]);

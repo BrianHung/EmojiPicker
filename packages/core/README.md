@@ -12,29 +12,30 @@ The packages are in prerelease and are published under the `alpha` tag.
 
 ## Usage
 
-`createEmojiStore`, `createPickerState`, and `createEmojiSuggestions` return stores with `subscribe(listener)`, `getSnapshot()`, and action methods.
+`createEmojiStore`, `createEmojiSuggestions`, and `createSearch` return stores with `subscribe(listener)` and methods to read and act on them.
 
 ```ts
-import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker-core";
+import { createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
 
 const store = createEmojiStore();
+store.subscribe(render);
+await store.load();
+store.query("heart");
 
 const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)), onSelect: (selection) => track(selection) });
 typeahead.subscribe(render);
 typeahead.setQuery("tada");
 input.addEventListener("keydown", (e) => typeahead.keydown(e));
-
-const picker = createPickerState(store, { searchResults: "ranked" });
-picker.setQuery("heart");
-moveHighlight(picker, "right", { columns: 9 });
-picker.choose();
+const stop = typeahead.syncCombobox(input);
 ```
+
+The picker's own state is part of the React package.
 
 ## Entry points
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-core` | Stores, emoji resolution, frequently used emoji, labels, tokenizers, Twemoji helpers, grid model, and every public type |
+| `@brianhung/emoji-picker-core` | The store, emoji resolution, frequently used emoji, search and typeahead state, labels, tokenizers, Twemoji helpers, and their types |
 | `/search` | `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
 | `/data/en.json` | The English dataset |
 
@@ -42,12 +43,14 @@ picker.choose();
 
 | Export | Description |
 |---|---|
-| `createEmojiStore(options)` | Data, search, frequently used emoji, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }` and `frequentsTuning: { halfLifeDays?, max? }`; `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
-| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Controlled state takes `x` / `defaultX` / `onXChange(value, details)`, where `details` is the object from `createChangeDetails` |
-| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, and IME-safe `keydown`. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
-| `createEmojiGrid`, `moveInGrid`, `rowsPerPage` | Grid rows and keyboard movement for a custom virtualizer |
+| `createEmojiStore(options)` | An `EmojiStore`: data, search, frequently used emoji, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }`, `frequentsTuning: { halfLifeDays?, max? }`, and `deferStorage` (read storage on the first `subscribe`, so a server-rendered page hydrates with the defaults); `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
+| `store.setOptions(options)` | Replaces the options that change after creation: `data`, `customEmojis`, `filter`, `searchEngine`, `locale`, and controlled `skinTone` and `frequents` with their callbacks. A loader function counts as the same source until `locale` changes. |
+| `store.load()`, `store.prepare()`, `store.status()`, `store.error()` | Load the data now, or when the browser is idle along with the search index |
+| `store.query(text)`, `store.completeShortcode(prefix)`, `store.select(unified, { count? })` | Search, shortcode completion, and an `EmojiSelection` (`count: false` skips frequently used) |
+| `createSearch(store)` | Search-as-you-type state: `run(query, limit)` returns `{ results, pending }`, and `subscribe` hears when an async search settles |
+| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, and `syncCombobox(el)` for an editor element you don't render. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
-| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`. Entries are `Record<unified, { count, lastUsed }>`; `count` halves every `frequentsTuning.halfLifeDays` days (default 14) |
+| `store.frequents` | `pick`, `remove`, `clear`, `top(n)`, `score`, `entries()`. Entries are `Record<unified, { count, lastUsed }>`; `count` halves every `frequentsTuning.halfLifeDays` days (default 14). The six default entries can be removed. |
 | `mergeFrequents(a, b, tuning?)` | Merges two histories, such as a server's and this device's |
 | `localStorageAdapter(key)`, `memoryStorageAdapter()` | `EmojiStorage` adapters for `storage`; `localStorageAdapter` syncs across tabs |
 | `createChangeDetails(reason, event)` | The `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` every `onXChange` receives |
@@ -56,9 +59,9 @@ picker.choose();
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
 | `twemojiUrl` | Twemoji image URLs |
 | `withTone`, `withoutTone`, `nativeToUnified`, `unifiedToNative` | Convert between native emoji and unified codes, and add or remove skin tones |
-| `isComposingKey`, `syncCombobox` | IME and combobox helpers for editor typeaheads |
+| `isComposingKey` | The IME check for editor typeaheads |
 
-A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey`, and `syncCombobox` is available from the registry: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
+A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, and `syncCombobox` is available from the registry: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 
 ## Data
 

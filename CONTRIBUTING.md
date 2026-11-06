@@ -49,15 +49,17 @@ The API shape follows Base UI. Behavior follows React Aria.
 | Parts compose (`EmojiPicker.Root`, `List.Cell`); types are namespaced on the part (`EmojiPicker.Root.Props`, `.State`, `.Actions`) beside flat aliases | Base UI |
 | Every part takes `render`, `className`, and `style`, each a value or a function of state | Base UI |
 | State is `x` / `defaultX` / `onXChange(value, details)`; `details` is `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` | Base UI |
-| Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `input-change`, `imperative-action`, `none`; a highlight moves by `keyboard`, `pointer`, or `none`, as in `onItemHighlighted` | Base UI |
+| Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `input-change`, `clear-press`, `imperative-action`, `none`; a highlight moves by `keyboard`, `pointer`, or `none`, as in `onItemHighlighted` | Base UI |
 | A popover that closes because the page scrolls reports `scroll`; frequently used emoji report `pick`, `remove`, and `clear`. Base UI has no counterpart for these. | This package |
-| Imperative calls go through `actionsRef`; `event.preventEmojiPickerHandler()` skips a part's own key handling | Base UI |
-| State attributes: `data-highlighted`, `data-selected`, `data-pressed`, `data-disabled`, `data-open` / `data-closed`, `data-popup-open`, `data-starting-style` / `data-ending-style` | Base UI |
+| Imperative calls go through `actionsRef`; `event.preventEmojiPickerHandler()`, on every handler a part composes with its own, skips the part's handler | Base UI |
+| State attributes: `data-highlighted` (keyboard or pointer), `data-selected`, `data-pressed`, `data-disabled`, `data-open` / `data-closed`, `data-popup-open`, `data-starting-style` / `data-ending-style`, present as `""` or absent | Base UI |
+| Emoji values are unified codes; a highlight's section-scoped key is `details.key` | Base UI (item values) |
 | ARIA patterns, focus management, virtual focus (`aria-activedescendant`), and keyboard delegates | React Aria |
 | Press, hover, and focus-ring state through `usePress`, `useHover`, and `useFocusRing` (`data-hovered`, `data-pressed`, `data-focus-visible`) on buttons, cells, and tabs | React Aria |
 | Locale, RTL, and collation through `I18nProvider` and `useLocale` | React Aria |
 | Collections take render-function children and `renderEmptyState`; layout and virtualization follow `Virtualizer` / `Layout` | React Aria |
-| Headless hooks return prop getters (`getListProps`, `getOptionProps`), as `useAutocomplete` returns `inputProps` and `collectionProps` | React Aria |
+| Headless hooks return prop getters (`getListProps`, `getOptionProps`) that merge the props you pass, as `useAutocomplete` returns `inputProps` and `collectionProps` | React Aria |
+| Core exports only what an app builds with: the store, data, search, frequently used emoji, and typeahead APIs and their types. React uses core's public API; React-only state (the picker state, sections, and grid) lives in the React package. | This package |
 
 ## Releasing
 
