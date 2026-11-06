@@ -11,10 +11,10 @@ export default defineConfig([
   {
     entry: modules,
     format: ["esm"],
-    dts: { entry: { index: "src/index.ts", "search/index": "src/search/index.ts", grid: "src/grid.ts", native: "src/native.ts", build: "scripts/build-data.ts" } },
+    dts: { entry: { index: "src/index.ts", grid: "src/grid.ts", native: "src/native.ts", internal: "src/internal.ts", build: "scripts/build-data.ts" } },
     sourcemap: true,
     clean: true,
-    define: { __CORE_VERSION__: versionOf("package.json"), __DATA_VERSION__: versionOf("../data/package.json") },
+    define: { __DATA_VERSION__: versionOf("../data/package.json") },
     esbuildPlugins: [
       {
         name: "sibling-modules",

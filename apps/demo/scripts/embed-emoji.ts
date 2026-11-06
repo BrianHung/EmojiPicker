@@ -22,7 +22,7 @@ if (values.custom) {
   items = list;
 } else {
   const require = createRequire(import.meta.url);
-  const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@brianhung/emoji-picker-core/data/en.json"), "utf8"));
+  const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@brianhung/emoji-picker-data/en/iamcal.json"), "utf8"));
   items = dataset.emojis.map(([id, name, tags, shortcodes]) => ({ id, name, tags, shortcodes }));
 }
 const out = resolve(values.out ?? resolve(here, "../public/embeddings", values.custom ? "custom.i8" : "emoji.i8"));

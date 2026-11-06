@@ -18,7 +18,7 @@ describe.each([
     const outside = document.body.appendChild(document.createElement("button"));
     const host = document.body.appendChild(document.createElement("div"));
     const root = createTestRoot(host);
-    const onOpenChange = vi.fn((_: boolean, details: floating.PopoverOpenChangeDetails) => details.cancel());
+    const onOpenChange = vi.fn((_: boolean, details: floating.EmojiPopover.Root.ChangeEventDetails) => details.cancel());
     await React.act(async () =>
       root.render(
         <EmojiPopover.Root defaultOpen onOpenChange={onOpenChange}>

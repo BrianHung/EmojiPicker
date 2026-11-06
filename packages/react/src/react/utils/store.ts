@@ -10,4 +10,4 @@ export function useStore<S, T>(store: Source<S>, select: (snapshot: S) => T = id
   return useSyncExternalStoreWithSelector(store.subscribe, store.getSnapshot, store.getServerSnapshot ?? store.getSnapshot, select, isEqual);
 }
 
-export { shallowEqual } from "@brianhung/emoji-picker-core";
+export { shallowEqual } from "@brianhung/emoji-picker-core/internal";

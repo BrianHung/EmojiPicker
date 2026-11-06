@@ -1,5 +1,7 @@
 import * as React from "react";
-import { type EmojiPicker, isComposingKey, KEY_MOVES, syncAriaAttributes } from "@brianhung/emoji-picker-core";
+import { type EmojiPicker, isComposingKey } from "@brianhung/emoji-picker-core";
+import { KEY_MOVES } from "@brianhung/emoji-picker-core/grid";
+import { syncAriaAttributes } from "@brianhung/emoji-picker-core/internal";
 import type { ListHandle } from "./context";
 import { hasModifier } from "../utils/keyboard";
 

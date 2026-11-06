@@ -67,6 +67,10 @@ const ICONS: Record<string, React.ReactNode> = {
 
 export type DefaultCategoryIconProps = React.SVGAttributes<SVGSVGElement> & { category: string };
 
+export declare namespace DefaultCategoryIcon {
+  type Props = DefaultCategoryIconProps;
+}
+
 export function DefaultCategoryIcon({ category, style, ...props }: DefaultCategoryIconProps) {
   return (
     <svg

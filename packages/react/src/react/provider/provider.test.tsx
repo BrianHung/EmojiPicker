@@ -56,7 +56,6 @@ describe("EmojiProvider", () => {
       return (
         <EmojiProvider
           prepare={false}
-          storage={{ frequents: null, skinTone: null }}
           data={async () => {
             calls();
             return en;
@@ -83,7 +82,7 @@ describe("EmojiProvider", () => {
       const [locale, set] = React.useState<string | undefined>(undefined);
       setLocale = set;
       return (
-        <EmojiProvider data={en} prepare={false} locale={locale} storage={{ frequents: null, skinTone: null }}>
+        <EmojiProvider data={en} prepare={false} locale={locale}>
           <Child />
         </EmojiProvider>
       );

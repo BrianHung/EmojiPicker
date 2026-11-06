@@ -3,7 +3,7 @@ import { InputRange } from "dom-input-range";
 import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";
 import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } from "./typeahead";
 
-export type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
+type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
 const EVENTS = ["selectionchange", "click", "keyup"];

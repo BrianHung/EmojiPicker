@@ -1,5 +1,5 @@
 import type { EmojiRecord } from "./dataset";
-import { fetchJson, toError } from "./reactive";
+import { toError } from "./reactive";
 import { tokenizerFor } from "./search/tokenize";
 
 export interface CustomEmoji {
@@ -18,48 +18,28 @@ export interface CustomEmoji {
 
 export type CustomEmojiLoader = (options: { signal: AbortSignal }) => Promise<readonly CustomEmoji[]>;
 
-export type CustomEmojiSource = CustomEmoji | readonly CustomEmoji[] | string | CustomEmojiLoader;
+export type CustomEmojiSource = readonly CustomEmoji[] | CustomEmojiLoader;
 
-export function splitWords(text: string): string[] {
-  return text
+export const uniqueById = (list: readonly CustomEmoji[]): readonly CustomEmoji[] => {
+  const seen = new Set<string>();
+  return list.filter((e) => !seen.has(e.id) && seen.add(e.id));
+};
+
+export async function loadCustomEmojis(source: CustomEmojiSource | undefined, signal: AbortSignal): Promise<{ emojis: readonly CustomEmoji[]; errors: Error[] }> {
+  try {
+    return { emojis: uniqueById(typeof source === "function" ? await source({ signal }) : (source ?? [])), errors: [] };
+  } catch (e) {
+    return { emojis: [], errors: [toError(e)] };
+  }
+}
+
+export const splitWords = (text: string): string[] =>
+  text
     .replace(/([a-z\d])([A-Z])/g, "$1 $2")
     .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean)
     .map((w) => w.toLowerCase());
-}
-
-const isSourceList = (value: CustomEmojiSource | readonly CustomEmojiSource[]): value is readonly CustomEmojiSource[] => Array.isArray(value);
-
-export function customSources(value: CustomEmojiSource | readonly CustomEmojiSource[] | undefined): CustomEmojiSource[] {
-  if (value == null) return [];
-  return isSourceList(value) ? [...value] : [value];
-}
-
-export async function loadCustomEmojis(sources: readonly CustomEmojiSource[], signal: AbortSignal): Promise<{ emojis: CustomEmoji[]; errors: Error[] }> {
-  const settled = await Promise.allSettled(
-    sources.map((source): Promise<readonly CustomEmoji[]> | readonly CustomEmoji[] => {
-      if (typeof source === "string") return fetchJson<readonly CustomEmoji[]>(source, `custom emoji ${source}`);
-      if (typeof source === "function") return source({ signal });
-      return Array.isArray(source) ? (source as readonly CustomEmoji[]) : [source as CustomEmoji];
-    }),
-  );
-  const seen = new Set<string>();
-  const emojis: CustomEmoji[] = [];
-  const errors: Error[] = [];
-  for (const result of settled) {
-    if (result.status === "rejected") {
-      errors.push(toError(result.reason));
-      continue;
-    }
-    for (const emoji of result.value) {
-      if (seen.has(emoji.id)) continue;
-      seen.add(emoji.id);
-      emojis.push(emoji);
-    }
-  }
-  return { emojis, errors };
-}
 
 // The record a custom emoji becomes: search words come from its id, shortcodes, tags, and the emoji it is based on
 export function customRecord(c: CustomEmoji, { order = 0, base }: { order?: number; base?: EmojiRecord } = {}): EmojiRecord {

@@ -23,7 +23,7 @@ import {
   type UseFloatingOptions,
 } from "@floating-ui/react";
 import { useLocale } from "react-aria/I18nProvider";
-import { createChangeDetails, shallowEqual } from "@brianhung/emoji-picker-core";
+import { createChangeDetails, shallowEqual } from "@brianhung/emoji-picker-core/internal";
 import type { PopoverOpenChangeReason } from "../popover-context";
 import { mergePartProps } from "../../utils/events";
 import { useLatest } from "../../utils/latest";
@@ -241,7 +241,7 @@ export declare namespace EmojiPopover {
   namespace Root {
     type Props = PopoverRootProps;
     type Actions = PopoverActions;
-    type OpenChangeDetails = PopoverOpenChangeDetails;
+    type ChangeEventDetails = PopoverOpenChangeDetails;
   }
   namespace Trigger {
     type Props = PopoverTriggerProps;

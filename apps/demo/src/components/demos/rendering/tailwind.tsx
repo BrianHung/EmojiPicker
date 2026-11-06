@@ -1,5 +1,5 @@
 import * as React from "react";
-import en from "@brianhung/emoji-picker-core/data/en.json?url";
+import en from "@brianhung/emoji-picker-data/en/iamcal.json?url";
 import { EmojiProvider, type EmojiSelection, type ImageUrl, type Renderer } from "@brianhung/emoji-picker-react";
 import { twemojiUrl, withoutTone } from "@brianhung/emoji-picker-core";
 import { Checkbox } from "@/components/ui/checkbox";

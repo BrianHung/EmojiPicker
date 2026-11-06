@@ -1,5 +1,5 @@
 import type { Key, KeyboardDelegate } from "@react-types/shared";
-import type { EmojiGridMove } from "@brianhung/emoji-picker-core";
+import type { EmojiGridMove } from "@brianhung/emoji-picker-core/grid";
 import { createGridNavigation, type NavigationSource } from "@brianhung/emoji-picker-core/grid";
 
 export interface GridKeyboardDelegate extends KeyboardDelegate {

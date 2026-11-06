@@ -95,7 +95,6 @@ To publish:
 5. Check the CDN and a fresh install.
 
    ```bash
-   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-core@<version>/data/en.json | head -1
-   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/ja/iamcal.json | head -1
+   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/en/iamcal.json | head -1
    npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json   # in a fresh Vite and Tailwind app
    ```

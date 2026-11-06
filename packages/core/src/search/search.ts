@@ -16,27 +16,7 @@ export type SearchContext = {
 export type SearchHits = readonly SearchHit[];
 export type EmojiSearch = (query: string, context: SearchContext) => SearchHits | PromiseLike<SearchHits>;
 
-export type ProgressiveHits<T = SearchHits> = PromiseLike<T> & { readonly interim: T };
-
 export const isThenable = <T>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
-
-export function withInterim<T>(promise: PromiseLike<T>, interim: T): ProgressiveHits<T> {
-  return Object.assign(Promise.resolve(promise), { interim });
-}
-
-export function interimOf<T>(value: T | PromiseLike<T>): T | undefined {
-  return isThenable(value) ? (value as Partial<ProgressiveHits<T>>).interim : undefined;
-}
-
-const then = <T, U>(value: T | PromiseLike<T>, fn: (value: T) => U | PromiseLike<U>): U | PromiseLike<U> => {
-  if (!isThenable(value)) return fn(value);
-  const next = value.then(fn);
-  const interim = interimOf(value);
-  if (interim === undefined) return next;
-  const early = fn(interim);
-  return isThenable(early) ? next : withInterim(next, early);
-};
-const all = <T>(values: (T | PromiseLike<T>)[]): T[] | PromiseLike<T[]> => (values.some(isThenable) ? Promise.all(values) : (values as T[]));
 
 const indexes = new WeakMap<readonly EmojiRecord[], Map<Tokenizer, Map<string, SearchIndex>>>();
 export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = tokenizerFor(locale) }: SearchIndexOptions = {}): SearchIndex {
@@ -120,56 +100,4 @@ function correctQuery(query: string, index: SearchIndex): string[] {
   const variants = options.reduce<string[][]>((acc, choices) => acc.flatMap((v) => choices.map((c) => [...v, c])).slice(0, 9), [[]]);
   const original = words.join(" ");
   return variants.map((v) => v.join(" ")).filter((q) => q !== original);
-}
-
-export function fallback(primary: EmojiSearch, secondary: EmojiSearch, { min = 8 }: { min?: number } = {}): EmojiSearch {
-  return (query, context) => then(primary(query, context), (first) => (first.length >= min ? first : then(secondary(query, context), (more) => dedupe([...first, ...more], context.limit))));
-}
-
-export function progressive(fast: EmojiSearch, slow: EmojiSearch): EmojiSearch {
-  return (query, context) => {
-    const later = slow(query, context);
-    if (!isThenable(later)) return later;
-    const now = fast(query, context);
-    const settled = Promise.resolve(later).catch((error: unknown) => {
-      if (context.signal.aborted) throw error;
-      return now;
-    });
-    return isThenable(now) ? settled : withInterim(settled, now);
-  };
-}
-
-// Reciprocal rank fusion's constant
-const RRF_K = 60;
-
-export function merge(...searches: EmojiSearch[]): EmojiSearch {
-  return (query, context) =>
-    then(all(searches.map((s) => s(query, context))), (lists) => {
-      const scores = new Map<string, number>();
-      for (const list of lists) list.forEach((hit, rank) => scores.set(hit.unified, (scores.get(hit.unified) ?? 0) + 1 / (RRF_K + rank)));
-      return [...scores]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, context.limit)
-        .map(([unified, score]) => ({ unified, score }));
-    });
-}
-
-export type Reranker = (hits: SearchHits, query: string, context: SearchContext) => SearchHits | PromiseLike<SearchHits>;
-
-export function rerank(search: EmojiSearch, ...rerankers: Reranker[]): EmojiSearch {
-  return (query, context) => rerankers.reduce<SearchHits | PromiseLike<SearchHits>>((hits, r) => then(hits, (h) => r(h, query, context)), search(query, context));
-}
-
-export function preferFrequent({ weight = 0.5 }: { weight?: number } = {}): Reranker {
-  return (hits, _query, { frequency }) => {
-    const top = Math.max(1, ...hits.map((h) => frequency(h.unified)));
-    return hits
-      .map((hit, rank) => ({ hit, key: (rank + 1) * (1 - weight * (frequency(hit.unified) / top)) }))
-      .sort((a, b) => a.key - b.key)
-      .map((x) => x.hit);
-  };
-}
-
-export function remote(fetcher: (query: string, context: SearchContext) => PromiseLike<readonly (string | SearchHit)[]>): EmojiSearch {
-  return (query, context) => then(fetcher(query, context), (list) => list.map((x) => (typeof x === "string" ? { unified: x } : x)));
 }

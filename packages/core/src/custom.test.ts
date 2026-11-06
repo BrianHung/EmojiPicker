@@ -20,18 +20,14 @@ describe("custom emoji", () => {
     expect(record!.tags).not.toContain("frog");
   });
 
-  it("loads packs from loaders and URLs in parallel, keeps the first of a repeated id, and skips a failed pack", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (url: string) => (url === "/good.json" ? new Response(JSON.stringify([frog("a"), frog("b")])) : new Response("nope", { status: 404, statusText: "Not Found" }))),
-    );
-    const { emojis, errors } = await loadCustomEmojis([frog("a", { name: "first a" }), "/good.json", "/missing.json", async () => [frog("c")]], new AbortController().signal);
+  it("keeps the first of a repeated id, and reports a failed loader", async () => {
+    const signal = new AbortController().signal;
+    const { emojis } = await loadCustomEmojis([frog("a", { name: "first a" }), frog("b"), frog("a")], signal);
     expect(emojis.map((e) => [e.id, e.name])).toEqual([
       ["a", "first a"],
       ["b", "b"],
-      ["c", "c"],
     ]);
-    expect(errors).toHaveLength(1);
-    expect(errors[0]!.message).toMatch(/404/);
+    const failed = await loadCustomEmojis(async () => Promise.reject(new Error("offline")), signal);
+    expect([failed.emojis, failed.errors[0]?.message]).toEqual([[], "offline"]);
   });
 });

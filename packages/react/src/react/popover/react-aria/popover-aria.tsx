@@ -11,7 +11,7 @@ import { resolve, toRenderFunction, type ElementProps } from "../../utils/render
 import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
-import { createChangeDetails } from "@brianhung/emoji-picker-core";
+import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import type { PopoverOpenChangeReason } from "../popover-context";
 import {
   anchorRect,
@@ -220,7 +220,7 @@ export declare namespace EmojiPopover {
   namespace Root {
     type Props = PopoverRootProps;
     type Actions = PopoverActions;
-    type OpenChangeDetails = PopoverOpenChangeDetails;
+    type ChangeEventDetails = PopoverOpenChangeDetails;
   }
   namespace Trigger {
     type Props = PopoverTriggerProps;

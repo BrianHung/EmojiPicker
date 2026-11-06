@@ -2,13 +2,8 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Autocomplete } from "react-aria-components/Autocomplete";
-import {
-  type CategoryOption as CoreCategoryOption,
-  type CollapsedCategoriesChangeDetails as CoreCollapsedCategoriesChangeDetails,
-  createChangeDetails,
-  type EmojiSelection,
-  type QueryChangeDetails as CoreQueryChangeDetails,
-} from "@brianhung/emoji-picker-core";
+import type { CategoryOption as CoreCategoryOption, EmojiSelection } from "@brianhung/emoji-picker-core";
+import { type CollapsedCategoriesChangeDetails as CoreCollapsedCategoriesChangeDetails, createChangeDetails, type QueryChangeDetails as CoreQueryChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import { useCollapse } from "./collapse";
 import {
   PickerContext,
@@ -339,10 +334,10 @@ export declare namespace Root {
   type Props = RootProps;
   type State = RootState;
   type Actions = EmojiPickerActions;
-  type QueryChangeDetails = QueryDetails;
-  type HighlightChangeDetails = HighlightDetails;
-  type ValueChangeDetails = ValueDetails;
-  type CollapsedCategoriesChangeDetails = CollapsedDetails;
-  type ReactionsOpenChangeDetails = ReactionsOpenDetails;
-  type SelectDetails = SelectionDetails;
+  type QueryChangeEventDetails = QueryDetails;
+  type HighlightChangeEventDetails = HighlightDetails;
+  type ValueChangeEventDetails = ValueDetails;
+  type CollapsedCategoriesChangeEventDetails = CollapsedDetails;
+  type ReactionsOpenChangeEventDetails = ReactionsOpenDetails;
+  type SelectEventDetails = SelectionDetails;
 }

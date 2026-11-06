@@ -1,5 +1,3 @@
-import data from "../data/en.json";
-import type { Dataset } from "../src/dataset";
+import { buildDataset, findEmojibase } from "../scripts/build-data";
 
-// JSON imports widen `format: 1` to number
-export const en = data as unknown as Dataset;
+export const en = buildDataset({ locale: "en", load: findEmojibase()!.load }).dataset;

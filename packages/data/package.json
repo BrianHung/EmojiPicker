@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "tsx --conditions=@brianhung/source scripts/build.ts",
-    "prepack": "npm run build",
+    "prepare": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

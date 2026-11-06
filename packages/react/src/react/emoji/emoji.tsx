@@ -1,5 +1,6 @@
 import * as React from "react";
-import { customRecord, type EmojiInput, isCustomEmoji, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
+import { resolveEmoji } from "@brianhung/emoji-picker-core";
+import { customRecord, type EmojiInput, isCustomEmoji, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji } from "@brianhung/emoji-picker-core/internal";
 import { EmojiImage, NATIVE } from "./image";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
@@ -13,6 +14,10 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
 export type EmojiProps = BaseProps & {
   emoji: EmojiInput;
 };
+
+export declare namespace Emoji {
+  type Props = EmojiProps;
+}
 
 export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   const { store } = useEmojiContext();

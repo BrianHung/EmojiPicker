@@ -7,7 +7,7 @@ import { EmojiPicker, EmojiProvider } from "../../index";
 
 function mount(children: React.ReactNode) {
   const host = render(
-    <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
+    <EmojiProvider data={en} prepare={false}>
       <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>{children}</EmojiPicker.Root>
     </EmojiProvider>,
   );
@@ -49,7 +49,7 @@ describe("Reactions", () => {
     const changes: [readonly string[], boolean][] = [];
     const picked: string[] = [];
     render(
-      <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} onSelect={(s) => picked.push(s.unified)}>
           <EmojiPicker.Reactions defaultValue={["1f44d"]} onValueChange={(value, details) => changes.push([value, details.pressed])} />
         </EmojiPicker.Root>

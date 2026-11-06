@@ -27,7 +27,7 @@ function interactions(node: React.ReactNode) {
 
 function SkinToneTrigger() {
   return (
-    <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
+    <EmojiProvider data={en} prepare={false}>
       <EmojiPicker.Root>
         <EmojiPicker.SkinTone />
       </EmojiPicker.Root>

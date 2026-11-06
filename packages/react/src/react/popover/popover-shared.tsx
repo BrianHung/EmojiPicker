@@ -1,7 +1,7 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { createChangeDetails } from "@brianhung/emoji-picker-core";
+import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import { PopoverContext, type PopoverOpenChangeDetails, type PopoverOpenChangeReason, type PopoverState } from "./popover-context";
 import { useEmojiLabels } from "../provider/provider";
 import { mergePartProps, type PickerHandlers } from "../utils/events";

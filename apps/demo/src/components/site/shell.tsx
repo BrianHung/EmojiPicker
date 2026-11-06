@@ -1,5 +1,5 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
+import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker-react";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
