@@ -31,7 +31,7 @@ import { renderElement, resolve } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
   anchorRect,
-  ContentFocus,
+  containerOf,
   finalFocusTarget,
   initialFocusTarget,
   physicalSide,
@@ -45,6 +45,7 @@ import {
   useTransition,
   type EmojiPopoverRootActions,
   type EmojiPopoverAnchor,
+  type EmojiPopoverContainer,
   type EmojiPopoverContentProps,
   type EmojiPopoverContentState,
   type PopoverInternals,
@@ -84,9 +85,9 @@ function Root(props: EmojiPopoverRootProps) {
 }
 
 function RootNode({ children, modal = false, ...props }: EmojiPopoverRootProps) {
-  const state = usePopoverState(props);
-  const nodeId = useFloatingNodeId();
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
+  const state = usePopoverState(props, trigger);
+  const nodeId = useFloatingNodeId();
   const [floating, setFloating] = React.useState<HTMLElement | null>(null);
   const context = useFloatingRootContext({ open: state.open, onOpenChange: (open, event, reason) => state.setOpen(open, reasonOf(reason), event), elements: { reference: trigger, floating } });
   const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context), useRole(context)]);
@@ -130,8 +131,11 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
         padding: collisionPadding,
         apply({ availableWidth, availableHeight, elements, rects }) {
           if (!hasBox(rects.reference)) return;
-          elements.floating.style.setProperty("--available-width", `${Math.round(availableWidth)}px`);
-          elements.floating.style.setProperty("--available-height", `${Math.round(availableHeight)}px`);
+          const { style } = elements.floating;
+          style.setProperty("--available-width", `${Math.round(availableWidth)}px`);
+          style.setProperty("--available-height", `${Math.round(availableHeight)}px`);
+          style.setProperty("--anchor-width", `${Math.round(rects.reference.width)}px`);
+          style.setProperty("--anchor-height", `${Math.round(rects.reference.height)}px`);
         },
       }),
       transformOrigin,
@@ -139,7 +143,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   });
   const latest = useLatest(anchor);
   const { setPositionReference, domReference } = floating.refs;
-  const key = anchor instanceof Element ? anchor : anchor ? "virtual" : null;
+  const key = !anchor ? null : anchor instanceof Element ? anchor : "virtual";
   useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference, latest]);
@@ -154,7 +158,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   return { ...floating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
 }
 
-const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
+const portal = (content: React.ReactElement, container: EmojiPopoverContainer | undefined) => (container === false ? content : <FloatingPortal root={containerOf(container)}>{content}</FloatingPortal>);
 
 const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
@@ -166,11 +170,14 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
   const status = useTransition(p.state.open, node, p.state.complete);
   const mergedRef = useMergeRefs([node, p.setFloating, ref]);
   const latest = useLatest({ initialFocus, finalFocus, p });
+  // Read by FloatingFocusManager as it moves focus; leaving focus in place is focusing what already has it
   const [focusTarget] = React.useState(
     () =>
       ({
         get current() {
-          return initialFocusTarget(latest.current.initialFocus, node.current);
+          const { initialFocus, p } = latest.current;
+          const target = initialFocusTarget(p.state, initialFocus, node.current);
+          return target === false ? (node.current?.ownerDocument.activeElement as HTMLElement | null) : target;
         },
       }) as React.MutableRefObject<HTMLElement | null>,
   );
@@ -179,7 +186,8 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
       ({
         get current() {
           const { finalFocus, p } = latest.current;
-          return finalFocus && p.state.selected.current ? finalFocusTarget(finalFocus) : p.trigger;
+          const target = finalFocusTarget(p.state, finalFocus);
+          return target === true ? p.trigger : target || null;
         },
       }) as React.MutableRefObject<HTMLElement | null>,
   );
@@ -187,7 +195,7 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
   const attributes = useContentAttributes(props);
   if (!status) return null;
   return portal(
-    <FloatingFocusManager context={context} modal={p.modal} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus ? returnTarget : true}>
+    <FloatingFocusManager context={context} modal={p.modal} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus === undefined ? true : returnTarget}>
       {renderElement(
         "div",
         {
@@ -198,7 +206,7 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
           className,
           style: (s: EmojiPopoverContentState) => ({ ...position, ...resolve(style, s) }),
           render,
-          children: <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>,
+          children,
         },
         state,
       )}

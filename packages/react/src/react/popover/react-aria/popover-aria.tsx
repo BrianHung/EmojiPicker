@@ -14,7 +14,7 @@ import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import {
   anchorRect,
-  ContentFocus,
+  containerOf,
   finalFocusTarget,
   initialFocusTarget,
   placedSide,
@@ -29,7 +29,6 @@ import {
   type EmojiPopoverAnchor,
   type EmojiPopoverContentProps,
   type EmojiPopoverContentState,
-  type EmojiPopoverInitialFocus,
   type PopoverInternals,
   type EmojiPopoverRootChangeEventDetails,
   type EmojiPopoverRootChangeEventReason,
@@ -45,8 +44,8 @@ import {
 type Internals = PopoverInternals & { id?: string; modal: boolean };
 
 function Root({ children, modal = true, ...props }: EmojiPopoverRootProps) {
-  const state = usePopoverState(props);
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
+  const state = usePopoverState(props, trigger);
   // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself
   const overlay = useOverlayTriggerState({ isOpen: state.open, onOpenChange: (open) => state.setOpen(open, open ? "trigger-press" : "scroll") });
   const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, overlay, { current: trigger });
@@ -94,12 +93,13 @@ function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element 
 }
 
 // React Aria unmounts the popover once its exit animation ends, and reports entering until the entry animation ends
-function Mounted({ entering, complete, initialFocus, content }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: EmojiPopoverInitialFocus; content?: React.RefObject<HTMLElement | null> }) {
+function Mounted({ entering, complete, initialFocus }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: () => HTMLElement | false | null }) {
   const latest = useLatest(complete);
   React.useEffect(() => void (!entering && latest.current?.(true)), [entering, latest]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: once, on mount: initial focus, and completion on unmount
   React.useEffect(() => {
-    if (content) initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true });
+    const target = initialFocus?.();
+    if (target) target.focus({ preventScroll: true });
     return () => latest.current?.(false);
   }, []);
   return null;
@@ -115,10 +115,28 @@ const anchorPoint = (style: React.CSSProperties | undefined) => {
   return typeof value === "string" ? value : undefined;
 };
 
-const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRenderProps, state: EmojiPopoverContentState, className: EmojiPopoverContentProps["className"], style: EmojiPopoverContentProps["style"]) => ({
+// React Aria measures the height left below or above; the width left beside the anchor and the anchor's size are measured here, as Floating UI's size()
+const anchorVariables = (anchor: Element | null, { placement }: PopoverRenderProps, offset: number, padding: number): Record<`--${string}`, string> => {
+  if (!anchor) return {};
+  const r = anchor.getBoundingClientRect();
+  const viewport = anchor.ownerDocument.documentElement.clientWidth;
+  const available = placement === "left" ? r.left - offset - padding : placement === "right" ? viewport - r.right - offset - padding : viewport - 2 * padding;
+  return { "--anchor-width": `${Math.round(r.width)}px`, "--anchor-height": `${Math.round(r.height)}px`, "--available-width": `${Math.max(0, Math.round(available))}px` };
+};
+
+type Measured = { anchor: Element | null; offset: number; padding: number };
+
+const partAttributes = (
+  dom: { style?: React.CSSProperties },
+  values: PopoverRenderProps,
+  state: EmojiPopoverContentState,
+  { anchor, offset, padding }: Measured,
+  className: EmojiPopoverContentProps["className"],
+  style: EmojiPopoverContentProps["style"],
+) => ({
   ...stateAttributes(state, statusOf(values)),
   className: resolve(className, state),
-  style: { "--transform-origin": anchorPoint(dom.style), "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
+  style: { "--transform-origin": anchorPoint(dom.style), "--available-height": maxHeightOf(dom.style), ...anchorVariables(anchor, values, offset, padding), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
 });
 
 const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
@@ -127,11 +145,13 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
 ) {
   const p = usePopoverInternals<Internals>("Content");
   const rtl = useLocale().direction === "rtl";
+  // React Aria's FocusScope returns focus to the Trigger unless it has moved out of the content
   const wasOpen = React.useRef(p.state.open);
   React.useEffect(() => {
-    if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });
+    const target = wasOpen.current && !p.state.open ? finalFocusTarget(p.state, finalFocus) : true;
+    if (target instanceof HTMLElement) target.focus({ preventScroll: true });
     wasOpen.current = p.state.open;
-  }, [p.state.open, finalFocus, p.state.selected]);
+  }, [p.state, finalFocus]);
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);
@@ -151,21 +171,21 @@ const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(funct
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
-        UNSTABLE_portalContainer={container || undefined}
+        UNSTABLE_portalContainer={containerOf(container) as Element | undefined}
         render={(dom, values) => {
           const state = stateOf(values, p.state.open, side, align, rtl);
           const merged = {
             ...mergePartProps(props, { onKeyDown: dismiss.onKeyDown }, dom, { id: p.id }),
             ...attributes,
-            ...partAttributes(dom, values, state, className, style),
+            ...partAttributes(dom, values, state, { anchor: triggerRef.current, offset: sideOffset, padding: collisionPadding }, className, style),
           };
           return custom ? custom(merged, state) : <div {...merged} />;
         }}
       >
         {(values) => (
           <>
-            <Mounted entering={values.isEntering} complete={p.state.complete} initialFocus={initialFocus} content={node} />
-            <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
+            <Mounted entering={values.isEntering} complete={p.state.complete} initialFocus={() => initialFocusTarget(p.state, initialFocus, node.current)} />
+            {children}
           </>
         )}
       </Popover>
@@ -206,13 +226,13 @@ function SuggestionsPopover({
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
-        UNSTABLE_portalContainer={container || undefined}
+        UNSTABLE_portalContainer={containerOf(container) as Element | undefined}
         render={(dom, values) => {
           const state: EmojiSuggestionsPopoverState = stateOf(values, open, side, align, rtl);
           const merged = {
             ...mergePartProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom),
             "data-slot": SLOTS.suggestions,
-            ...partAttributes(dom, values, state, className, style),
+            ...partAttributes(dom, values, state, { anchor: triggerRef.current, offset: sideOffset, padding: collisionPadding }, className, style),
           } as ElementProps<HTMLDivElement>;
           return custom ? custom(merged, state) : <div {...merged} />;
         }}

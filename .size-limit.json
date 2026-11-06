@@ -6,7 +6,7 @@
     "import": { "packages/react/dist/index.js": "{ EmojiPicker, EmojiProvider }", "packages/react/dist/floating-ui.js": "{ EmojiPopover }" },
     "gzip": true,
     "ignore": ["react", "react-dom"],
-    "limit": "93.1 kB"
+    "limit": "93.2 kB"
   },
   {
     "name": "picker in the react-aria popover",
@@ -14,7 +14,7 @@
     "import": { "packages/react/dist/index.js": "{ EmojiPicker, EmojiProvider }", "packages/react/dist/react-aria.js": "{ EmojiPopover }" },
     "gzip": true,
     "ignore": ["react", "react-dom"],
-    "limit": "85.3 kB"
+    "limit": "85.5 kB"
   },
   { "name": "core", "path": "packages/core/dist/index.js", "import": "*", "gzip": true, "limit": "11.7 kB" }
 ]

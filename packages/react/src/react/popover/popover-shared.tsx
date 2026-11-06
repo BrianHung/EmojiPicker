@@ -2,7 +2,7 @@ import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
-import { PopoverContext, type EmojiPopoverRootChangeEventDetails, type EmojiPopoverRootChangeEventReason, type PopoverState } from "./popover-context";
+import { PopoverContext, type EmojiPopoverInteractionType, type EmojiPopoverRootChangeEventDetails, type EmojiPopoverRootChangeEventReason, type PopoverState } from "./popover-context";
 import { useEmojiLabels } from "../provider/provider";
 import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { useLatest } from "../utils/latest";
@@ -30,7 +30,7 @@ export const anchorRect = (anchor: EmojiPopoverAnchor | undefined) => {
   return r ? new DOMRect(r.left, r.top, r.width, r.height) : undefined;
 };
 
-export type { EmojiPopoverRootChangeEventDetails, EmojiPopoverRootChangeEventReason };
+export type { EmojiPopoverInteractionType, EmojiPopoverRootChangeEventDetails, EmojiPopoverRootChangeEventReason };
 
 export type EmojiPopoverRootActions = { close(): void };
 
@@ -49,15 +49,16 @@ export type EmojiPopoverTriggerState = EmojiPickerInteractionState & { open: boo
 
 export type EmojiPopoverTriggerProps = EmojiPickerPartElementProps<EmojiPopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
 
-export type EmojiPopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | false;
-export type EmojiPopoverFinalFocus = HTMLElement | React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined);
+export type EmojiPopoverInitialFocus = boolean | React.RefObject<HTMLElement | null> | ((openType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
+export type EmojiPopoverFinalFocus = boolean | React.RefObject<HTMLElement | null> | ((closeType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
+export type EmojiPopoverContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | false | null;
 
 export type EmojiPopoverPlacementProps = {
   side?: PopoverSide;
   align?: PopoverAlign;
   sideOffset?: number;
   collisionPadding?: number;
-  container?: HTMLElement | false;
+  container?: EmojiPopoverContainer;
 };
 
 export type EmojiPopoverContentState = { open: boolean; side: PopoverSide; align: PopoverAlign };
@@ -89,10 +90,30 @@ export function pickerInitialFocus(root: Element | null | undefined): HTMLElemen
   return [...root.querySelectorAll<HTMLElement>(TABBABLE)].find((el) => el.tabIndex >= 0) ?? null;
 }
 
-export const initialFocusTarget = (initialFocus: EmojiPopoverInitialFocus | undefined, content: Element | null) =>
-  (initialFocus === false ? null : typeof initialFocus === "function" ? initialFocus() : initialFocus ? initialFocus.current : pickerInitialFocus(content)) ?? null;
+export const containerOf = (container: EmojiPopoverContainer | undefined) => (container ? ("current" in container ? container.current : container) : null) ?? undefined;
 
-export const finalFocusTarget = (finalFocus: EmojiPopoverFinalFocus) => (typeof finalFocus === "function" ? finalFocus() : finalFocus instanceof HTMLElement ? finalFocus : finalFocus.current) ?? null;
+const interactionOf = (event?: Event): EmojiPopoverInteractionType => {
+  if (event instanceof KeyboardEvent) return "keyboard";
+  if (!(event instanceof MouseEvent)) return "";
+  const pointer = (event as Partial<PointerEvent>).pointerType as EmojiPopoverInteractionType | undefined;
+  return pointer || (event.detail === 0 && event.type === "click" ? "keyboard" : "mouse");
+};
+
+// Base UI's focus props: true or null keeps the default, false or nothing leaves focus where it is
+const resolveFocus = (focus: EmojiPopoverInitialFocus | EmojiPopoverFinalFocus | undefined, type: EmojiPopoverInteractionType): HTMLElement | boolean => {
+  if (focus === undefined || typeof focus === "boolean") return focus ?? true;
+  const target = typeof focus === "function" ? focus(type) : focus.current;
+  return target === null || target === true ? true : target || false;
+};
+
+export function initialFocusTarget(state: PopoverState, initialFocus: EmojiPopoverInitialFocus | undefined, content: Element | null): HTMLElement | false | null {
+  const target = resolveFocus(initialFocus, state.interaction.current);
+  state.focusGrid.current = target === true;
+  return target === true ? pickerInitialFocus(content) : target;
+}
+
+// Only a pick moves focus to finalFocus; any other close returns it to the Trigger
+export const finalFocusTarget = (state: PopoverState, finalFocus: EmojiPopoverFinalFocus | undefined) => (state.selected.current ? resolveFocus(finalFocus, state.interaction.current) : true);
 
 export type TransitionStatus = "starting" | "open" | "ending";
 
@@ -125,15 +146,18 @@ export function usePopoverInternals<T extends PopoverInternals>(part: string): T
   return internals as T;
 }
 
-export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, closeOnSelect = true }: Omit<EmojiPopoverRootProps, "children" | "modal">) {
+export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, closeOnSelect = true }: Omit<EmojiPopoverRootProps, "children" | "modal">, trigger: HTMLElement | null) {
   const [open, setState] = useChangeState(controlled, defaultOpen, onOpenChange);
   const selected = React.useRef(false);
+  const interaction = React.useRef<EmojiPopoverInteractionType>("");
+  const focusGrid = React.useRef(false);
   const setOpen = React.useCallback(
     (next: boolean, reason: EmojiPopoverRootChangeEventReason, event?: Event) => {
       if (next) selected.current = false;
-      setState(next, createChangeDetails(reason, event));
+      interaction.current = interactionOf(event);
+      setState(next, createChangeDetails(reason, event, trigger?.isConnected ? trigger : undefined));
     },
-    [setState],
+    [setState, trigger],
   );
   // After the task's microtasks, so an editor focused in onSelect (Lexical updates in a microtask) keeps focus
   const close = React.useCallback(
@@ -144,7 +168,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
     [setOpen],
   );
   React.useImperativeHandle(actionsRef, () => ({ close: () => setOpen(false, "imperative-action") }), [setOpen]);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, interaction, focusGrid, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
 }
 
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish
@@ -182,13 +206,6 @@ export function useTransition(open: boolean, node: React.RefObject<HTMLElement |
     return () => void (live = false);
   }, [open]);
   return status;
-}
-
-export function ContentFocus({ initialFocus, children }: { initialFocus?: EmojiPopoverInitialFocus; children: React.ReactNode }) {
-  const { state } = usePopoverInternals("Content");
-  const focusGrid = initialFocus === undefined;
-  const value = React.useMemo(() => ({ ...state, focusGrid }), [state, focusGrid]);
-  return <PopoverContext.Provider value={value}>{children}</PopoverContext.Provider>;
 }
 
 export function PopoverProvider({ value, children }: { value: PopoverInternals; children: React.ReactNode }) {
