@@ -15,5 +15,6 @@ export type { CollapsedCategoriesChangeDetails, EmojiPickerSnapshot, HighlightCh
 export type { SearchResultsMode } from "./picker/sections";
 export { syncAriaAttributes } from "./sync-attributes";
 export { shallowEqual, subscribeAll } from "./reactive";
+export type { Subscribe } from "./reactive";
 export { createChangeDetails } from "./change";
 export type { ChangeDetails } from "./change";
