@@ -1,6 +1,6 @@
 {
   "name": "@brianhung/emoji-picker-core",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.0",
   "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state.",
   "keywords": [
     "emoji",

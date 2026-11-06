@@ -26,7 +26,7 @@ import {
 import { mergeProps } from "react-aria/mergeProps";
 import { createChangeDetails } from "@brianhung/emoji-picker-core";
 import type { PopoverOpenChangeReason } from "../popover-context";
-import { resolve } from "../../utils/render";
+import { renderElement, resolve } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
   anchorRect,
@@ -40,10 +40,14 @@ import {
   usePopoverState,
   type PopoverAnchor,
   type PopoverContentProps as SharedContentProps,
+  type PopoverContentState,
   type PopoverInternals,
+  type PopoverOpenChangeDetails,
   type PopoverPlacementProps,
-  type Side,
+  type PopoverSide,
   type PopoverRootProps,
+  type PopoverTriggerProps,
+  type PopoverTriggerState,
   type SuggestionsPopoverProps,
 } from "../popover-shared";
 
@@ -80,7 +84,7 @@ function RootNode({ children, ...props }: PopoverRootProps) {
   const [floating, setFloating] = React.useState<HTMLElement | null>(null);
   const context = useFloatingRootContext({ open: state.open, onOpenChange: (open, event, reason) => state.setOpen(open, reasonOf(reason), event), elements: { reference: trigger, floating } });
   const { getReferenceProps, getFloatingProps } = useInteractions([useDismiss(context), useRole(context)]);
-  const value: Internals = { state, trigger, setTrigger, triggerProps: getReferenceProps, context, nodeId, setFloating, floatingProps: getFloatingProps };
+  const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => getReferenceProps(props as React.HTMLProps<Element>), context, nodeId, setFloating, floatingProps: getFloatingProps };
   return (
     <PopoverProvider value={value}>
       <FloatingNode id={nodeId}>{children}</FloatingNode>
@@ -123,13 +127,13 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   React.useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference]);
-  return { ...floating, side: floating.placement.split("-")[0] as Side, style: { position: floating.strategy, top: floating.y, left: floating.x } as const };
+  return { ...floating, side: floating.placement.split("-")[0] as PopoverSide, style: { position: floating.strategy, top: floating.y, left: floating.x } as const };
 }
 
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, duration = 0, className, style, children, ...props },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, duration = 0, className, style, render, children, ...props },
   ref,
 ) {
   const p = usePopoverInternals<Internals>("Content");
@@ -158,18 +162,22 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   );
 
   if (!isMounted) return null;
-  const state = { open: p.state.open, side: placed, align };
+  const state: PopoverContentState = { open: p.state.open, side: placed, align };
   return portal(
     <FloatingFocusManager context={context} modal={false} disabled={!p.state.open} initialFocus={initialFocus === false ? -1 : focusTarget} returnFocus={finalFocus ? returnTarget : true}>
-      <div
-        {...p.floatingProps(props)}
-        {...contentAttributes({ ...state, status: status === "close" ? "ending" : status === "open" ? "open" : "starting", props })}
-        ref={mergedRef}
-        className={resolve(className, state)}
-        style={{ ...position, zIndex: 50, "--transform-origin": middlewareData.transformOrigin?.origin, ...resolve(style, state) } as React.CSSProperties}
-      >
-        <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
-      </div>
+      {renderElement(
+        "div",
+        {
+          ...p.floatingProps(props),
+          ...contentAttributes({ ...state, status: status === "close" ? "ending" : status === "open" ? "open" : "starting", props }),
+          ref: mergedRef,
+          className,
+          style: (s: PopoverContentState) => ({ ...position, zIndex: 50, "--transform-origin": middlewareData.transformOrigin?.origin, ...resolve(style, s) }) as React.CSSProperties,
+          render,
+          children: <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>,
+        },
+        state,
+      )}
     </FloatingFocusManager>,
     container,
   );
@@ -201,3 +209,24 @@ function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align
 
 export const EmojiPopover = { Root, Trigger, Content };
 export const EmojiSuggestions = { Popover: SuggestionsPopover };
+
+export declare namespace EmojiPopover {
+  namespace Root {
+    type Props = PopoverRootProps;
+    type OpenChangeDetails = PopoverOpenChangeDetails;
+  }
+  namespace Trigger {
+    type Props = PopoverTriggerProps;
+    type State = PopoverTriggerState;
+  }
+  namespace Content {
+    type Props = PopoverContentProps;
+    type State = PopoverContentState;
+  }
+}
+
+export declare namespace EmojiSuggestions {
+  namespace Popover {
+    type Props = SuggestionsPopoverProps;
+  }
+}

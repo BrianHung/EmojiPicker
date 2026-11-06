@@ -1,6 +1,7 @@
 import * as React from "react";
-import type { EmojiGridMove, EmojiLabels, EmojiSelection, EmojiStore, HighlightChangeDetails, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
+import type { ChangeDetails, EmojiGridMove, EmojiLabels, EmojiSelection, EmojiStore, HighlightChangeDetails, PickerState, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
+import type { Orientation } from "../utils/render";
 
 export type { HighlightChangeDetails, SearchResultsMode };
 
@@ -15,6 +16,9 @@ export type EmojiPickerActions = {
   close(): boolean;
   toggleSkinTone(): boolean;
 };
+
+export type ValueChangeDetails = ChangeDetails<"item-press">;
+export type ReactionsOpenChangeDetails = ChangeDetails<"trigger-press" | "item-press" | "none">;
 
 export type SelectDetails = {
   collapse?: () => void;
@@ -54,7 +58,7 @@ export type PickerContextValue = {
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);
 
-export const ViewportContext = React.createContext<((orientation: "vertical" | "horizontal") => void) | null>(null);
+export const ViewportContext = React.createContext<((orientation: Orientation) => void) | null>(null);
 
 export function usePicker(part = "This part"): PickerContextValue {
   const value = React.useContext(PickerContext);

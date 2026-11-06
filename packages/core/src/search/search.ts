@@ -13,10 +13,10 @@ export type SearchContext = {
   locale?: string;
 };
 
-type Hits = readonly SearchHit[];
-export type EmojiSearch = (query: string, context: SearchContext) => Hits | PromiseLike<Hits>;
+export type SearchHits = readonly SearchHit[];
+export type EmojiSearch = (query: string, context: SearchContext) => SearchHits | PromiseLike<SearchHits>;
 
-export type ProgressiveHits<T = Hits> = PromiseLike<T> & { readonly interim: T };
+export type ProgressiveHits<T = SearchHits> = PromiseLike<T> & { readonly interim: T };
 
 export const isThenable = <T>(value: T | PromiseLike<T>): value is PromiseLike<T> => typeof (value as PromiseLike<T>)?.then === "function";
 
@@ -45,8 +45,8 @@ export function indexFor(records: readonly EmojiRecord[], { locale, tokenize = t
   return cached(byLocale, canonicalLocale(locale) ?? "", () => createSearchIndex(records, { locale, tokenize }));
 }
 
-const toHits = (records: readonly EmojiRecord[]): Hits => records.map((r) => ({ unified: r.unified }));
-const dedupe = (hits: Hits, limit: number): Hits => {
+const toHits = (records: readonly EmojiRecord[]): SearchHits => records.map((r) => ({ unified: r.unified }));
+const dedupe = (hits: SearchHits, limit: number): SearchHits => {
   const seen = new Set<string>();
   const out: SearchHit[] = [];
   for (const hit of hits) {
@@ -151,10 +151,10 @@ export function merge(...searches: EmojiSearch[]): EmojiSearch {
     });
 }
 
-export type Reranker = (hits: Hits, query: string, context: SearchContext) => Hits | PromiseLike<Hits>;
+export type Reranker = (hits: SearchHits, query: string, context: SearchContext) => SearchHits | PromiseLike<SearchHits>;
 
 export function rerank(search: EmojiSearch, ...rerankers: Reranker[]): EmojiSearch {
-  return (query, context) => rerankers.reduce<Hits | PromiseLike<Hits>>((hits, r) => then(hits, (h) => r(h, query, context)), search(query, context));
+  return (query, context) => rerankers.reduce<SearchHits | PromiseLike<SearchHits>>((hits, r) => then(hits, (h) => r(h, query, context)), search(query, context));
 }
 
 export function preferFrequent({ weight = 0.5 }: { weight?: number } = {}): Reranker {

@@ -30,8 +30,7 @@ jobs:
       - run: npm run build -w @brianhung/emoji-picker-react
       - run: npm run size
       - run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
-      - run: npx publint packages/core && npx publint packages/react && npx publint packages/data
-      - run: npx @arethetypeswrong/cli --pack packages/core --profile esm-only && npx @arethetypeswrong/cli --pack packages/react --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css
+      - run: npm run lint:packages
 
   smoke:
     runs-on: ubuntu-latest
@@ -41,16 +40,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react
-      - run: npm pack -w @brianhung/emoji-picker-core -w @brianhung/emoji-picker-react --pack-destination "$RUNNER_TEMP"
-      # A fresh Vite + React app on the packed tarballs; importing only the picker must leave Floating UI out
-      - working-directory: ${{ runner.temp }}
-        run: |
-          cp -R "$GITHUB_WORKSPACE/.github/smoke" app && cd app
-          npm init -y > /dev/null
-          npm install --no-audit --no-fund ../brianhung-emoji-picker-core-*.tgz ../brianhung-emoji-picker-react-*.tgz react react-dom vite @floating-ui/react
-          npx vite build --sourcemap
-          node check.mjs
+      # Packed tarballs in fresh Vite, Next.js App Router and shadcn add apps
+      - run: npm run smoke
 
   twemoji-font:
     runs-on: ubuntu-latest

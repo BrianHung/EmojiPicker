@@ -3,7 +3,7 @@ import { GROUPS, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
 import type { EmojiLabels } from "./labels";
 import { createStore, memo, stable, subscribeAll } from "./reactive";
-import { createSearch, type SearchState } from "./search/query";
+import { createSearch, type EmojiSearchState } from "./search/query";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
 import { toned, type EmojiData, type EmojiSelection, type EmojiStore } from "./store";
 
@@ -13,7 +13,7 @@ export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "imp
 export type QueryChangeDetails = ChangeDetails<"input-change" | "escape-key" | "imperative-action" | "none">;
 export type CollapsedCategoriesChangeDetails = ChangeDetails<"trigger-press" | "none">;
 
-type Source<D extends ChangeDetails> = { reason?: D["reason"]; event?: Event };
+export type ChangeSource<D extends ChangeDetails> = { reason?: D["reason"]; event?: Event };
 
 export type PickerStateOptions<Icon = unknown> = {
   labels?: EmojiLabels;
@@ -33,7 +33,7 @@ export type PickerStateOptions<Icon = unknown> = {
   defaultHighlight?: string | null;
   onHighlightChange?: (id: string | null, details: HighlightChangeDetails) => void;
   disableVariations?: boolean;
-  reactions?: readonly string[];
+  reactions?: readonly string[] | number;
 };
 
 export type PickerSnapshot<Icon = unknown> = {
@@ -159,7 +159,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const activeOf = memo(findItem);
   const keep = stable<PickerSnapshot<Icon>>();
 
-  const select = memo((state: Ui, opts: PickerStateOptions<Icon>, ready: boolean, data: EmojiData, tone: SkinToneValue, frequent: readonly string[], found: SearchState): PickerSnapshot<Icon> => {
+  const select = memo((state: Ui, opts: PickerStateOptions<Icon>, ready: boolean, data: EmojiData, tone: SkinToneValue, frequent: readonly string[], found: EmojiSearchState): PickerSnapshot<Icon> => {
     const labels = opts.labels ?? store.labels();
     const item = items(labels);
     const query = queryOf(state, opts);
@@ -189,13 +189,14 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       active: activeOf(sections, highlighted ?? state.hovered),
       activeSection: state.activeSection,
       variations: state.variations,
-      reactions: state.held ? state.held.reactions : opts.reactions,
+      reactions: state.held ? state.held.reactions : reactionsOf(opts.reactions),
     });
   });
 
   // Options arrive during render, where subscribers can't be told; a later notify publishes what they changed
   let unpublished = false;
   const frequentCount = () => (opts().frequent ?? 16) || 1;
+  const reactionsOf = (reactions: PickerStateOptions<Icon>["reactions"]) => (typeof reactions === "number" ? store.frequent(reactions) : reactions);
 
   function getSnapshot(): PickerSnapshot<Icon> {
     const state = ui.getSnapshot();
@@ -205,7 +206,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     return select(state, options, status === "ready", data, store.skinTone(), frequent, search.run(queryOf(state, options), options.searchLimit ?? 200));
   }
 
-  const setCollapsed = (id: string, value: boolean | undefined, { reason = "none", event }: Source<CollapsedCategoriesChangeDetails>) => {
+  const setCollapsed = (id: string, value: boolean | undefined, { reason = "none", event }: ChangeSource<CollapsedCategoriesChangeDetails>) => {
     const { options, draft } = input.getSnapshot();
     const current = draft ?? collapsedOf(ui.getSnapshot(), options);
     const ids = setCategoryCollapsed(current, id, value);
@@ -228,16 +229,16 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
       unpublished = false;
       ui.dispatch({ type: "refresh" });
     },
-    setQuery(value: string, { reason = "none", event }: Source<QueryChangeDetails> = {}): QueryChangeDetails | undefined {
+    setQuery(value: string, { reason = "none", event }: ChangeSource<QueryChangeDetails> = {}): QueryChangeDetails | undefined {
       if (value === queryOf(ui.getSnapshot(), opts())) return;
       const details = createChangeDetails(reason, event);
       opts().onQueryChange?.(value, details);
       if (!details.isCanceled && opts().query === undefined) set({ query: value });
       return details;
     },
-    toggleCollapsed: (id: string, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, undefined, source),
-    setCollapsed: (id: string, value: boolean, source: Source<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, value, source),
-    highlight(id: string | null, { reason = "none", event }: Source<HighlightChangeDetails> = {}) {
+    toggleCollapsed: (id: string, source: ChangeSource<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, undefined, source),
+    setCollapsed: (id: string, value: boolean, source: ChangeSource<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, value, source),
+    highlight(id: string | null, { reason = "none", event }: ChangeSource<HighlightChangeDetails> = {}) {
       if (id === highlightedOf(ui.getSnapshot(), opts())) return;
       const details = createChangeDetails(reason, event);
       opts().onHighlightChange?.(id, details);
@@ -261,7 +262,7 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     setDomFocus: (value: boolean) => set({ domFocus: value }),
     hold(value: boolean) {
       if (Boolean(ui.getSnapshot().held) === value) return;
-      set({ held: value ? { suggested: store.frequent(frequentCount()), reactions: opts().reactions } : null });
+      set({ held: value ? { suggested: store.frequent(frequentCount()), reactions: reactionsOf(opts().reactions) } : null });
     },
   };
   return state;

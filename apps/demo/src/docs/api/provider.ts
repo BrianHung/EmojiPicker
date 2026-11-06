@@ -20,7 +20,7 @@ export const provider = rowsOf<EmojiProviderProps>()([
   { name: "frequentsTuning", type: "{ halfLifeDays?, max? }", default: "{ halfLifeDays: 14, max: 64 }", description: "Days for a use to count half; emoji the history keeps." },
   { name: "skinTone", type: "SkinToneValue", description: "The skin tone, controlled: 0 (none) or 1–5, the Fitzpatrick tones." },
   { name: "defaultSkinTone", type: "SkinToneValue", default: "0" },
-  { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "option-press" | "none", event?, cancel() }) => void' },
+  { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "item-press" | "none", event?, cancel() }) => void' },
   { name: "storage", type: "{ frequents?, skinTone?: EmojiStorage | null }", default: "localStorageAdapter(key)", description: "Where uncontrolled frequents and skin tone persist, synced across tabs; null keeps one in memory." },
   { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order and the labels' counts." },
   { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce." },

@@ -91,7 +91,12 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
 declare const gridState: unique symbol;
 export type EmojiGridState = { readonly [gridState]: true };
 
-export function useCell(grid: Cells, item: EmojiItem) {
+export type UseEmojiCellResult = {
+  cellProps: React.HTMLAttributes<HTMLElement> & { ref: (el: HTMLElement | null) => void; [data: `data-${string}`]: string | number | true | undefined };
+  state: CellState;
+};
+
+export function useCell(grid: Cells, item: EmojiItem): UseEmojiCellResult {
   const overridden = useOverridden(item.unified, item.record);
   const picked = useStore(grid.picker, (s) => pickerFlags(s, item.id));
   const marked = useStore(grid.marks, (m) => markFlags(m, item.id));
@@ -119,4 +124,4 @@ export function useCell(grid: Cells, item: EmojiItem) {
   return { cellProps: { ...props, ref }, state };
 }
 
-export const useEmojiCell = useCell as unknown as (state: EmojiGridState, item: EmojiItem) => ReturnType<typeof useCell>;
+export const useEmojiCell = useCell as unknown as (state: EmojiGridState, item: EmojiItem) => UseEmojiCellResult;

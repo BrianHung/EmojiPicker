@@ -1,13 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 import { createEmojiStore, type Dataset } from "@brianhung/emoji-picker-core";
+import type { Dataset as Published } from "../dataset.cjs";
 
 const root = fileURLToPath(new URL("../data/", import.meta.url));
 const files = fs.existsSync(root) ? fs.readdirSync(root, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".json")) : [];
 
 describe("datasets", () => {
+  it("are typed as core's Dataset", () => {
+    expectTypeOf<Published>().toEqualTypeOf<Dataset>();
+  });
+
   it("cover every locale with iamcal and cldr shortcodes", () => {
     const locales = new Set(files.map((f) => path.dirname(f)));
     expect(locales.size).toBeGreaterThan(25);

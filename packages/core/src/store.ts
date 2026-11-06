@@ -27,7 +27,7 @@ export type EmojiStoreOptions = Pick<FrequencyStoreOptions, "frequents" | "defau
   labels?: Partial<EmojiLabels>;
 };
 
-export type SkinToneChangeDetails = ChangeDetails<"option-press" | "none">;
+export type SkinToneChangeDetails = ChangeDetails<"item-press" | "none">;
 
 export type EmojiSourceOptions = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale">;
 
@@ -81,7 +81,8 @@ const reduce = (state: EmojiStoreState, action: EmojiStoreAction): EmojiStoreSta
   }
 };
 
-export type EmojiStore = ReturnType<typeof createEmojiStore>;
+export type InternalEmojiStore = ReturnType<typeof createInternalEmojiStore>;
+export type EmojiStore = Omit<InternalEmojiStore, "controlFrequents" | "controlSkinTone" | "prepare" | "setOptions" | "index">;
 
 const defaultEngine = lexical();
 const CODEPOINTS = /^[\da-f-]+$/i;
@@ -101,7 +102,9 @@ export function toned(data: EmojiData, tone: SkinToneValue, unified: string): st
   return record && tone && record.tones[tone - 1] ? record.tones[tone - 1]! : unified;
 }
 
-export function createEmojiStore({
+export const createEmojiStore: (options?: EmojiStoreOptions) => EmojiStore = createInternalEmojiStore;
+
+function createInternalEmojiStore({
   frequents: controlledFrequents,
   defaultFrequents,
   onFrequentsChange,

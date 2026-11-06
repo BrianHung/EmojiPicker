@@ -2,7 +2,7 @@ export const GROUPS = ["smileys_people", "animals_nature", "food_drink", "travel
 
 export type Group = (typeof GROUPS)[number];
 
-export type DatasetEmoji = [string, string, string[], string[], number, number, 0 | 1];
+export type DatasetEmoji = [unified: string, name: string, tags: string[], shortcodes: string[], group: number, version: number, hasTones: 0 | 1];
 
 export type Dataset = {
   format: 1;
@@ -13,7 +13,7 @@ export type Dataset = {
   toneExceptions: Record<string, string[]>;
 };
 
-type EmojiDataInputEntry = ({ emoji: string; unified?: never } | { unified: string; emoji?: never }) & {
+export type EmojiDataInputEntry = ({ emoji: string; unified?: never } | { unified: string; emoji?: never }) & {
   label: string;
   tags?: readonly string[];
   shortcodes?: readonly string[];

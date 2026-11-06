@@ -142,7 +142,7 @@ Parts need no provider and no CSS. `Root` loads the English dataset from jsDeliv
 
 ### Shared provider {#provider}
 
-`Root` uses the nearest `EmojiProvider` and creates its own when there is none. Hoist one provider to share data, locale, custom emoji, skin tone and frequently used emoji across every picker, reaction row and typeahead below it. `EmojiTapback`, `Emoji`, the typeahead hooks, and `useSkinTone` or `useFrequentEmoji` outside a `Root` require one.
+`Root` uses the nearest `EmojiProvider` and creates its own when there is none. Hoist one provider to share data, locale, custom emoji, skin tone and frequently used emoji across every picker, reaction row and typeahead below it. `Emoji`, the typeahead hooks, and `useSkinTone` or `useFrequentEmoji` outside a `Root` require one.
 
 <Code title="app/providers.tsx" code={providers} />
 
@@ -182,7 +182,7 @@ Parts need no provider and no CSS. `Root` loads the English dataset from jsDeliv
 Import the parts and assemble them.
 
 ```tsx title="anatomy.tsx"
-import { EmojiProvider, EmojiPicker, Emoji, useFrequentEmoji } from "@brianhung/emoji-picker-react";
+import { EmojiProvider, EmojiPicker, Emoji } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 <EmojiProvider>
@@ -206,7 +206,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
     <EmojiPopover.Content>…</EmojiPopover.Content>
   </EmojiPopover.Root>
 
-  <EmojiPicker.Root reactions={useFrequentEmoji({ limit: 5 }).items}>
+  <EmojiPicker.Root reactions={5}>
     <EmojiPicker.Reactions />
     <EmojiPicker.Panel>…</EmojiPicker.Panel>
   </EmojiPicker.Root>

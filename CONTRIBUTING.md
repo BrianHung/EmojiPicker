@@ -17,15 +17,17 @@ Run these from the repository root.
 
 ```bash
 npm install
-npm run dev          # the site at http://localhost:5199
-npm test             # core and React unit tests
-npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visual specs
-npm run test:a11y    # axe on every page and picker surface
-npm run typecheck    # every workspace
-npm run check        # Biome lint and format check; `npm run format` formats
-npm run build        # core, the React package, then the site and registry
-npm run size         # bundle-size budgets on the library build (.size-limit.json)
-npm run changeset    # describe a change for the next release
+npm run dev            # the site at http://localhost:5199
+npm test               # core and React unit tests
+npm run test:e2e       # Playwright: keyboard, editors, layout, IME, perf and visual specs
+npm run test:a11y      # axe on every page and picker surface
+npm run typecheck      # every workspace
+npm run check          # Biome lint and format check; `npm run format` formats
+npm run build          # core, the React package, then the site and registry
+npm run size           # bundle-size budgets on the library build (.size-limit.json)
+npm run smoke          # packed tarballs in fresh Vite, Next.js and shadcn apps
+npm run release:check  # everything above plus visual and axe on a production build
+npm run changeset      # describe a change for the next release
 ```
 
 In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
@@ -41,20 +43,27 @@ Base UI's surface, React Aria's engine. Base UI wins on API shape; React Aria wi
 | Parts compose (`EmojiPicker.Root`, `List.Cell`); types are namespaced on the part (`EmojiPicker.Root.Props`, `.State`, `.Actions`) beside flat aliases | Base UI |
 | Every part takes `render`, `className` and `style`, each a value or a function of state | Base UI |
 | State is `x` / `defaultX` / `onXChange(value, details)`; `details` is `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` | Base UI |
-| Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `imperative-action`, `none` | Base UI |
+| Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `input-change`, `imperative-action`, `none`; a highlight moves by `keyboard`, `pointer` or `none`, as in `onItemHighlighted` | Base UI |
+| Frequents report domain reasons, `pick`, `remove` and `clear`, which have no Base UI counterpart | This package |
 | Imperative calls go through `actionsRef`; `event.preventEmojiPickerHandler()` skips a part's own key handling | Base UI |
 | State attributes: `data-highlighted`, `data-selected`, `data-pressed`, `data-disabled`, `data-open` / `data-closed`, `data-popup-open`, `data-starting-style` / `data-ending-style` | Base UI |
 | ARIA patterns, focus management, virtual focus (`aria-activedescendant`) and keyboard delegates | React Aria |
-| Press, hover and focus-ring state through `usePress`, `useHover`, `useFocusRing` (`data-hovered`, `data-focus-visible`) | React Aria |
+| Press, hover and focus-ring state through `usePress`, `useHover`, `useFocusRing` (`data-hovered`, `data-pressed`, `data-focus-visible`) on buttons, cells and tabs | React Aria |
 | Locale, RTL and collation through `I18nProvider` and `useLocale` | React Aria |
 | Collections take render-function children and `renderEmptyState`; layout and virtualization follow `Virtualizer` / `Layout` | React Aria |
 | Headless hooks return prop getters (`getListProps`, `getOptionProps`), as `useAutocomplete` returns `inputProps` and `collectionProps` | React Aria |
 
 ## Releasing
 
-Changes to a published package come with a changeset (`npm run changeset`). The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account:
+Changes to a published package come with a changeset (`npm run changeset`). Changesets is in pre-release mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`. The Release workflow, run by hand, opens a "Version packages" PR that applies them (`npm run version-packages`). It never publishes; publishing needs the owner's npm account.
+
+Before publishing, on the release commit:
+
+1. `npm run release:check`. It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), the packed-install smoke test (`npm run smoke`: Vite, a Next.js App Router build, and `shadcn add` of the registry item), and every e2e spec, visual included, and axe against a production build. Visual baselines are local, so this is the only run that checks them; restore them first if they are not in `apps/demo/e2e/__snapshots__`.
+2. Publish:
 
 ```bash
-npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react
 npx changeset publish
 ```
+
+`prepublishOnly` builds core and the React package; data and the Twemoji font build when packed.

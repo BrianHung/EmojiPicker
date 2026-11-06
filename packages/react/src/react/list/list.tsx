@@ -13,20 +13,20 @@ import { useGridController, useGridSections, type GridGeometry } from "./grid";
 import type { PickerKeyboardEventHandler } from "../utils/keyboard";
 import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
-import { renderElement, resolve, type PartElementProps, type PartProps } from "../utils/render";
+import { renderElement, resolve, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { nextTabbable, TABBABLE } from "../utils/utils";
 import { useStoreSnapshot } from "../provider/provider";
 import { shallowEqual, useStore } from "../utils/store";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
-export type ListState = { orientation: "vertical" | "horizontal"; searching: boolean; empty: boolean };
+export type EmojiPickerListState = { orientation: Orientation; searching: boolean; empty: boolean };
 
 export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> &
-  PartProps<ListState, HTMLDivElement> & {
+  PartProps<EmojiPickerListState, HTMLDivElement> & {
     onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
     children?: (section: EmojiSection) => React.ReactNode;
-    orientation?: "vertical" | "horizontal";
+    orientation?: Orientation;
     rows?: number;
     searchRows?: number;
     renderEmptyState?: (state: EmptyState) => React.ReactNode;
@@ -238,7 +238,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
               ...grid.gridProps,
               onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
               className,
-              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(unpadded ? UNPADDED : null), ...resolve(style, s) }),
+              style: (s: EmojiPickerListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(unpadded ? UNPADDED : null), ...resolve(style, s) }),
               render,
               children: (
                 <>
@@ -483,7 +483,7 @@ export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTi
 
 export declare namespace List {
   type Props = ListProps;
-  type State = ListState;
+  type State = EmojiPickerListState;
   namespace Section {
     type Props = SectionProps;
     type State = SectionState;

@@ -1,6 +1,5 @@
 // Not React Aria's Tabs: they always select a tab, and "Frequently used" has none to select
 import * as React from "react";
-import type { Orientation } from "@react-types/shared";
 import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
@@ -11,7 +10,7 @@ import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
 import { hasModifier, rovingStep, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
 import { useCategoryNavigation } from "../root/picker";
-import { renderElement, resolve, type PartElementProps } from "../utils/render";
+import { renderElement, resolve, type Orientation, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 
@@ -62,14 +61,9 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   const focused = focus.key != null && ids.includes(focus.key) ? focus.key : null;
   const stop = (focus.within && focused) || (ids.includes(selected) ? selected : (focused ?? ids[0]!));
 
-  const choose = (key: string, instant: boolean) => {
-    if (!picker.collapse.isCollapsed(key)) return jumpToCategory(key, { instant });
-    picker.collapse.setCollapsed(key, false);
-    picker.list.current?.jump(key, { instant, afterRender: true });
-  };
   const keyOf = (e: React.SyntheticEvent) => [...tabs].find(([, el]) => el.contains(e.target as Node))?.[0] ?? null;
 
-  const nav: Nav = { id, selected, stop, disabled, tabs, choose };
+  const nav: Nav = { id, selected, stop, disabled, tabs, choose: (key, instant) => jumpToCategory(key, { instant }) };
   return (
     <NavContext.Provider value={nav}>
       {renderElement(
@@ -137,7 +131,7 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
     pressed: isPressed,
     disabled,
   };
-  const icon = c.icon ?? <DefaultCategoryIcon category={c.id.startsWith("custom:") ? "custom" : c.id} />;
+  const icon = c.icon ?? <DefaultCategoryIcon category={c.id} />;
   return renderElement(
     "div",
     {

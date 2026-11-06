@@ -3,16 +3,16 @@ import { createStore } from "../reactive";
 import type { EmojiData, EmojiStore } from "../store";
 import type { ProgressiveHits } from "./search";
 
-export type SearchState = {
+export type EmojiSearchState = {
   results: readonly EmojiRecord[];
   pending: boolean;
 };
 
 const NONE: readonly EmojiRecord[] = [];
-const IDLE: SearchState = { results: NONE, pending: false };
+const IDLE: EmojiSearchState = { results: NONE, pending: false };
 
-type Run = { key: string | null; data: EmojiData | null; state: SearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
-type RunAction = { type: "start"; key: string; data: EmojiData; state: SearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
+type Run = { key: string | null; data: EmojiData | null; state: EmojiSearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
+type RunAction = { type: "start"; key: string; data: EmojiData; state: EmojiSearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
 
 const reduce = (run: Run, action: RunAction): Run => {
   switch (action.type) {
@@ -35,7 +35,7 @@ export function createSearch(store: EmojiStore) {
     run.dispatch({ type: "abort" });
   };
   return {
-    run(query: string, limit: number): SearchState {
+    run(query: string, limit: number): EmojiSearchState {
       const { status, data } = store.getSnapshot();
       const key = status === "ready" && query.trim() ? `${limit}:${query}` : "";
       const current = run.getSnapshot();
@@ -65,7 +65,7 @@ export function createSearch(store: EmojiStore) {
     },
   };
 
-  function start(key: string, state: SearchState, controller: AbortController | null) {
+  function start(key: string, state: EmojiSearchState, controller: AbortController | null) {
     run.dispatch({ type: "start", key, data: store.getSnapshot().data, state, controller });
     return state;
   }

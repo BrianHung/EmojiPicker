@@ -18,8 +18,8 @@ export {
   useSearchState,
 } from "./react/parts";
 
-export { EmojiProvider, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
-export type { EmojiLabels, EmojiProviderProps, EmojiSearchState, FrequentEmoji, ImageUrl } from "./react/provider";
+export { EmojiProvider, useEmojiLabels, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
+export type { EmojiLabels, EmojiProviderProps, FrequentEmoji, ImageUrl } from "./react/provider";
 export type {
   CategoryOption,
   CollapsedCategories,
@@ -38,16 +38,45 @@ export type {
   ViewportProps,
   ViewportState,
 } from "./react/root";
-export type { ElementProps, InteractionState, PartElementProps, PartProps, RenderProp } from "./react/utils";
+export type { ElementProps, InteractionState, Orientation, PartElementProps, PartProps, RenderProp } from "./react/utils";
 export { useEmojiCell, useEmojiGrid } from "./react/list";
-export type { CellProps, CellState, EmptyState, EmojiGridState, ItemsProps, ListProps, ListState, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps, UseEmojiGridOptions } from "./react/list";
+export type {
+  CellProps,
+  CellState,
+  EmojiGridState,
+  EmojiPickerListState,
+  EmptyState,
+  ItemsProps,
+  ListProps,
+  SectionActionsProps,
+  SectionActionsState,
+  SectionProps,
+  SectionState,
+  SectionTitleProps,
+  UseEmojiCellResult,
+  UseEmojiGridOptions,
+} from "./react/list";
 export type { SearchClearProps, SearchClearState, SearchInputProps, SearchInputState, SearchProps, SearchState } from "./react/search";
-export type { CategoryNavProps, CategoryNavState, CategoryTabProps, CategoryTabState, NavCategory } from "./react/category-nav";
-export type { SkinToneGlyphProps, SkinToneOpenChangeDetails, SkinToneOptionProps, SkinToneOptionState, SkinToneOptionsProps, SkinToneOptionsState, SkinToneProps, SkinToneState, SkinToneTriggerProps } from "./react/skin-tone";
+export { DefaultCategoryIcon } from "./react/category-nav";
+export type { CategoryNavProps, CategoryNavState, CategoryTabProps, CategoryTabState, DefaultCategoryIconProps, NavCategory } from "./react/category-nav";
+export type {
+  SkinToneGlyphProps,
+  SkinToneOpenChangeDetails,
+  SkinToneOptionProps,
+  SkinToneOptionState,
+  SkinToneOptionsProps,
+  SkinToneOptionsState,
+  SkinToneProps,
+  SkinToneState,
+  SkinToneTriggerProps,
+  SkinToneTriggerState,
+} from "./react/skin-tone";
 export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
 export type {
+  PopoverAlign,
   PopoverAnchor,
+  PopoverAnchorRect,
   PopoverContentState,
   PopoverFinalFocus,
   PopoverInitialFocus,
@@ -55,6 +84,7 @@ export type {
   PopoverOpenChangeReason,
   PopoverPlacementProps,
   PopoverRootProps,
+  PopoverSide,
   PopoverTriggerProps,
   PopoverTriggerState,
   SuggestionsPopoverProps,
@@ -62,7 +92,7 @@ export type {
 export { Emoji, useEmoji } from "./react/emoji";
 export type { EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadAdapter, useTextFieldEmojiTypeahead } from "./react/typeahead";
-export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadAdapter, EmojiTypeaheadOptions, KeyLike, ShortcodeSuggestion } from "./react/typeahead";
+export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadAdapter, EmojiTypeaheadOptions, KeyLike, ShortcodeSuggestion, TextFieldElement } from "./react/typeahead";
 
 export { findShortcodeTrigger, isComposingKey, localStorageAdapter, memoryStorageAdapter } from "@brianhung/emoji-picker-core";
 export type {
@@ -77,6 +107,7 @@ export type {
   EmojiItem,
   EmojiRecord,
   EmojiSearch,
+  EmojiSearchState,
   EmojiSection,
   EmojiSelection,
   EmojiStorage,

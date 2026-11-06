@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createSearch, type EmojiStore, type SearchState, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiSearchState, type EmojiStore, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
@@ -37,8 +37,6 @@ export function useEmojiStatus() {
   }, [status, store]);
   return status;
 }
-
-export type EmojiSearchState = SearchState;
 
 export function useEmojiSearch(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
   const { store } = useEmojiContext();

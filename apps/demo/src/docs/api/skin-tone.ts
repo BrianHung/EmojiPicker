@@ -10,9 +10,9 @@ export const skinTone = [
     { name: "children", type: "ReactNode | ({ open, tone }) => ReactNode", default: "Trigger, Options" },
   ]),
   ...rowsOfParts<{ Trigger: SkinToneTriggerProps; Options: SkinToneOptionsProps; Option: SkinToneOptionProps; Glyph: SkinToneGlyphProps }>()([
-    { name: "Trigger › children", type: "ReactNode | ({ open, tone }) => ReactNode", default: "a swatch" },
+    { name: "Trigger › children", type: "ReactNode | ({ open, tone, hovered, pressed, focusVisible, … }) => ReactNode", default: "a swatch" },
     { name: "Options › children", type: "(tone: SkinToneValue) => ReactNode", default: "<SkinTone.Option />" },
-    { name: "Option › tone", type: "SkinToneValue", description: "0 (none) to 5. State: { tone, selected }." },
+    { name: "Option › tone", type: "SkinToneValue", description: "0 (none) to 5. State: { tone, selected, hovered, pressed, focusVisible, … }." },
     { name: "Glyph › emoji", type: "string", default: '"✋"', description: "In the tone of its Option, else the current one." },
   ]),
 ];
