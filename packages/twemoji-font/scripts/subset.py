@@ -28,7 +28,29 @@ def unicode_range(cps):
     return ", ".join(f"U+{a:X}" if a == b else f"U+{a:X}-{b:X}" for a, b in runs)
 
 
-def main(src, order_path, out, target):
+NAMES = {
+    0: "Copyright 2019 Twitter, Inc and other contributors",
+    3: "{version};Twemoji-Regular",
+    5: "Version {version}",
+    8: "Brian Hung",
+    9: "Twitter, Inc and other contributors",
+    10: "Twemoji {version} graphics as a COLRv0 color font. Twitter and the Twemoji contributors do not endorse this font.",
+    11: "https://github.com/BrianHung/EmojiPicker",
+    12: "https://github.com/jdecked/twemoji",
+    13: "The graphics are licensed under CC-BY 4.0.",
+    14: "https://creativecommons.org/licenses/by/4.0/",
+}
+
+
+def system_font(patched, version):
+    font = TTFont(patched)
+    for id, text in NAMES.items():
+        font["name"].setName(text.format(version=version), id, 3, 1, 0x409)
+    font["OS/2"].fsType = 0
+    return font
+
+
+def main(src, order_path, out, target, version):
     font = TTFont(src)
     cmap = font.getBestCmap()
     cp_of = {g: c for c, g in cmap.items()}
@@ -125,6 +147,7 @@ def main(src, order_path, out, target):
 
     patched = Path(src).with_suffix(".patched.ttf")
     font.save(patched)
+    system_font(patched, version).save(Path(out) / "Twemoji.ttf")
     subsets = []
     for i, chunk in enumerate(chunks):
         unicodes = chunk["unicodes"]
@@ -151,4 +174,4 @@ def main(src, order_path, out, target):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
+    main(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), sys.argv[5])

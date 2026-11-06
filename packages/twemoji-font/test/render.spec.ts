@@ -19,14 +19,19 @@ const SAMPLES: [name: string, file: string, text: string][] = [
   ["keycap without VS16", "23-20e3", "#⃣"],
 ];
 
-async function open(page: Page, body: string) {
+const STYLES = {
+  "web font": `<link rel="stylesheet" href="/twemoji.css">`,
+  TrueType: `<style>@font-face { font-family: Twemoji; src: url("/Twemoji.ttf") format("truetype"); }</style>`,
+};
+
+async function open(page: Page, body: string, head = STYLES["web font"]) {
   const fonts: string[] = [];
   await page.route(`${ORIGIN}/**`, (route) => {
     const file = new URL(route.request().url()).pathname.slice(1);
-    if (file === "") return route.fulfill({ contentType: "text/html; charset=utf-8", body: `<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="/twemoji.css"><body style="margin:0">${body}</body>` });
-    if (file.endsWith(".woff2")) fonts.push(file);
+    if (file === "") return route.fulfill({ contentType: "text/html; charset=utf-8", body: `<!doctype html><meta charset="utf-8">${head}<body style="margin:0">${body}</body>` });
+    if (/\.(woff2|ttf)$/.test(file)) fonts.push(file);
     const source = file.endsWith(".svg") ? new URL(file, svgs) : new URL(file, dist);
-    return route.fulfill({ body: fs.readFileSync(source), contentType: file.endsWith(".css") ? "text/css" : file.endsWith(".svg") ? "image/svg+xml" : "font/woff2" });
+    return route.fulfill({ body: fs.readFileSync(source), contentType: file.endsWith(".css") ? "text/css" : file.endsWith(".svg") ? "image/svg+xml" : `font/${file.split(".").pop()}` });
   });
   await page.goto(`${ORIGIN}/`);
   await page.evaluate(() => document.fonts.ready);
@@ -41,32 +46,34 @@ const pixels = (page: Page, png: Buffer) =>
     return { width: bitmap.width, data: Array.from(ctx.getImageData(0, 0, bitmap.width, bitmap.height).data) };
   }, png.toString("base64"));
 
-test("draws each sequence as one Twemoji glyph", async ({ page }) => {
-  const cell = (child: string) => `<div style="display:inline-flex;align-items:center;justify-content:center;width:${SIZE}px;height:${SIZE}px;background:#fff">${child}</div>`;
-  await open(
-    page,
-    SAMPLES.map(([, file, text]) => `<div style="display:flex;width:fit-content">${cell(`<span style="font:${SIZE}px/1 Twemoji">${text}</span>`)}${cell(`<img src="/${file}.svg" width="${SIZE}" height="${SIZE}">`)}</div>`).join(""),
-  );
-  for (const [i, [name]] of SAMPLES.entries()) {
-    const row = page.locator("body > div").nth(i);
-    const glyph = row.locator("span");
-    await expect.soft(glyph, name).toHaveJSProperty("offsetWidth", SIZE);
-    const shot = await row.screenshot({ path: test.info().outputPath(`${name}.png`) });
-    const { width, data } = await pixels(page, shot);
-    let colored = 0;
-    let diff = 0;
-    for (let p = 0; p < data.length; p += 4) {
-      if ((p / 4) % width >= width / 2) continue;
-      const q = p + (width / 2) * 4;
-      const [r, g, b] = [data[p]!, data[p + 1]!, data[p + 2]!];
-      if (Math.max(r, g, b) - Math.min(r, g, b) > 48) colored++;
-      diff += Math.abs(r - data[q]!) + Math.abs(g - data[q + 1]!) + Math.abs(b - data[q + 2]!);
+for (const [font, head] of Object.entries(STYLES))
+  test(`${font}: draws each sequence as one Twemoji glyph`, async ({ page }) => {
+    const cell = (child: string) => `<div style="display:inline-flex;align-items:center;justify-content:center;width:${SIZE}px;height:${SIZE}px;background:#fff">${child}</div>`;
+    await open(
+      page,
+      SAMPLES.map(([, file, text]) => `<div style="display:flex;width:fit-content">${cell(`<span style="font:${SIZE}px/1 Twemoji">${text}</span>`)}${cell(`<img src="/${file}.svg" width="${SIZE}" height="${SIZE}">`)}</div>`).join(""),
+      head,
+    );
+    for (const [i, [name]] of SAMPLES.entries()) {
+      const row = page.locator("body > div").nth(i);
+      const glyph = row.locator("span");
+      await expect.soft(glyph, name).toHaveJSProperty("offsetWidth", SIZE);
+      const shot = await row.screenshot({ path: test.info().outputPath(`${name}.png`) });
+      const { width, data } = await pixels(page, shot);
+      let colored = 0;
+      let diff = 0;
+      for (let p = 0; p < data.length; p += 4) {
+        if ((p / 4) % width >= width / 2) continue;
+        const q = p + (width / 2) * 4;
+        const [r, g, b] = [data[p]!, data[p + 1]!, data[p + 2]!];
+        if (Math.max(r, g, b) - Math.min(r, g, b) > 48) colored++;
+        diff += Math.abs(r - data[q]!) + Math.abs(g - data[q + 1]!) + Math.abs(b - data[q + 2]!);
+      }
+      const area = data.length / 8;
+      expect.soft(colored / area, `${name}: colored pixels`).toBeGreaterThan(0.05);
+      expect.soft(diff / (area * 3 * 255), `${name}: difference from the SVG`).toBeLessThan(0.02);
     }
-    const area = data.length / 8;
-    expect.soft(colored / area, `${name}: colored pixels`).toBeGreaterThan(0.05);
-    expect.soft(diff / (area * 3 * 255), `${name}: difference from the SVG`).toBeLessThan(0.02);
-  }
-});
+  });
 
 test("the first screen downloads only the smileys subset", async ({ page }) => {
   const fonts = await open(page, `<p style="font:32px Twemoji">😀😃😄😁😆😅🤣😂🙂🙃🫠😉😊😇🥰😍🤩😘☺️😮‍💨❤️❤️‍🔥</p>`);
