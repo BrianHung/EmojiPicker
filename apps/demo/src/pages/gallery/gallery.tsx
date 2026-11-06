@@ -7,7 +7,7 @@ import { CodeBlock, CopyButton } from "@/components/site/code";
 import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
 import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
-import { toggleReaction, type Reaction } from "@/styles/scene-kit";
+import { SceneSlot, toggleReaction, type Reaction } from "@/styles/scene-kit";
 import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
 import { discordEmojiOptions } from "@/experiences/discord";
@@ -152,9 +152,15 @@ export function GalleryPage() {
           code={sourceOf(appStyle.id, "scene")}
           file={`styles/${appStyle.id}/scene.tsx`}
           className="overflow-hidden md:col-span-2 xl:col-span-3"
-          previewClassName={cn("overflow-x-auto sm:p-8", appStyle.id === "apple" ? "p-4" : "p-0")}
+          previewClassName="overflow-x-auto p-0 sm:p-8"
         >
-          <Scene />
+          {appStyle.id === "apple" ? (
+            <SceneSlot>
+              <Scene />
+            </SceneSlot>
+          ) : (
+            <Scene />
+          )}
         </GalleryCard>
         <GalleryCard title="Inline picker" description="A picker placed in the page." code={sourceOf(appStyle.id, "picker")} file={file} className="md:row-span-2" previewClassName="md:min-h-[560px]">
           <InlineDemo appStyle={appStyle} />
