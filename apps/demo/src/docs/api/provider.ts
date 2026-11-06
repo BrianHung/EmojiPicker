@@ -20,7 +20,7 @@ export const provider = rowsOf<EmojiProvider.Props>()([
   { name: "skinTone", type: "SkinToneValue", description: "The skin tone: 0 (none) or 1–5, light to dark. Controlled; an uncontrolled one persists to localStorage." },
   { name: "defaultSkinTone", type: "SkinToneValue", default: "0" },
   { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "item-press" | "none", event?, cancel() }) => void' },
-  { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order, result counts, and text direction. See Localization." },
-  { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce. See Localization." },
+  { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order, result counts, and text direction. See Data and localization." },
+  { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce. See Data and localization." },
   { name: "prepare", type: "boolean", default: "true", description: "Loads data and builds the search index when the browser is idle." },
 ]);

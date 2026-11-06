@@ -65,13 +65,13 @@ export function Editor() {
 
 ## How it works
 
-`useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`.
+`useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. `EmojiSuggestions.Popover` positions the menu at the typed `:query`.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
 import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 
 const emoji = useTiptapEmojiTypeahead(editor, {
-  content: (text, s) => (s.record.imageUrl ? [{ type: "emoji", attrs }, { type: "text", text: " " }] : `${text} `),
+  content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),
 });
 
 <EmojiSuggestions.Popover open={emoji.open} anchor={emoji.anchor} onOpenChange={(open) => !open && emoji.dismiss()}>
