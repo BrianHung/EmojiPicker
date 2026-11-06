@@ -1,9 +1,38 @@
-import type { Locator, Page, TestType } from "@playwright/test";
-import type { VoiceOverPlaywright } from "@guidepup/playwright";
-import { card } from "../surfaces";
-import { expect, visit } from "../support";
+import { type Locator, mergeTests, type Page, type TestType } from "@playwright/test";
+import { nvdaTest, voiceOverTest, type VoiceOverPlaywright } from "@guidepup/playwright";
+import { homePopover, surface } from "../surfaces";
+import { expect, test as site, visit } from "../support";
+import { notReady } from "./ready";
 
 export type Reader = Pick<VoiceOverPlaywright, "capture" | "spokenPhraseLog" | "navigateToWebContent">;
+
+const READERS = {
+  voiceover: {
+    name: "VoiceOver",
+    test: () => {
+      const test = mergeTests(site, voiceOverTest).extend<{ sr: Reader }>({ sr: ({ voiceOver }, use) => use(voiceOver) });
+      test.use({ voiceOverStartOptions: { capture: true } });
+      return test;
+    },
+  },
+  nvda: {
+    name: "NVDA",
+    test: () => {
+      const test = mergeTests(site, nvdaTest).extend<{ sr: Reader }>({ sr: ({ nvda }, use) => use(nvda) });
+      test.use({ nvdaStartOptions: { capture: true } });
+      return test;
+    },
+  },
+};
+
+export function readerSuite(id: keyof typeof READERS) {
+  const { name, test } = READERS[id];
+  const suite = test();
+  const skip = process.env.CI ? null : notReady(id);
+  if (skip) console.warn(`Skipping the ${name} suite: ${skip}`);
+  suite.skip(!!skip, skip ?? "");
+  scenarios(suite);
+}
 
 const FIELD = /combo ?box|search ?(text )?field|search ?box|\bedit\b|text field/;
 const SEARCH = /search for an emoji/;
@@ -35,9 +64,8 @@ class Ear {
   }
 }
 
-const homePopover = (p: Page) => p.locator("section:has(> h3#popover)").getByRole("button", { name: "Open emoji picker", exact: true });
 const homeTapbackAnchor = (p: Page) => p.locator("section:has(> h3#tapback)").getByRole("link", { name: "Link to this section" });
-const discordNoSearch = (p: Page) => card(p, "Popover without search").getByRole("button", { name: "Open emoji picker", exact: true });
+const discordNoSearch = (p: Page) => surface("gallery/discord/popover-no-search").trigger!(p);
 const searchField = (p: Page) => p.getByRole("dialog", { name: "Emoji picker" }).getByLabel("Type to search for an emoji");
 
 async function start(page: Page, sr: Reader, path: string, focus: Locator) {
@@ -47,7 +75,7 @@ async function start(page: Page, sr: Reader, path: string, focus: Locator) {
   return new Ear(sr, page);
 }
 
-export function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
+function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
   test.afterEach(async ({ sr }, info) => {
     if (info.status === info.expectedStatus) return;
     const log = (await sr.spokenPhraseLog()).join("\n");
