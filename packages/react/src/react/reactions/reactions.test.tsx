@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import en from "@brianhung/emoji-picker-core/data/en.json";
 import type { Dataset } from "@brianhung/emoji-picker-core";
 import { EmojiPicker, EmojiProvider } from "../../index";
@@ -42,5 +42,21 @@ describe("Reactions", () => {
       </>,
     );
     expect(host.querySelector('[data-slot="emoji-picker-reactions-expand"]')).not.toBeNull();
+  });
+
+  it("shows the most frequently used emoji without a provider above Root", async () => {
+    vi.stubGlobal("fetch", async () => new Response(JSON.stringify(en)));
+    unmount();
+    const root = createRoot(document.body.appendChild(document.createElement("div")));
+    await React.act(async () =>
+      root.render(
+        <EmojiPicker.Root reactions={3}>
+          <EmojiPicker.Reactions />
+        </EmojiPicker.Root>,
+      ),
+    );
+    unmount = () => React.act(() => root.unmount());
+    await vi.waitFor(() => expect(document.querySelectorAll('[data-slot="emoji-picker-reactions"] [data-unified]')).toHaveLength(3));
+    vi.unstubAllGlobals();
   });
 });

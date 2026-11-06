@@ -2,9 +2,23 @@ import { describe, expect, it } from "vitest";
 import { renderToString } from "react-dom/server";
 import en from "@brianhung/emoji-picker-core/data/en.json";
 import type { Dataset } from "@brianhung/emoji-picker-core";
-import { Emoji, EmojiPicker, EmojiProvider } from "../../index";
+import { Emoji, EmojiPicker, EmojiProvider, useEmojiLabels } from "../../index";
+
+function Labels() {
+  const labels = useEmojiLabels();
+  return `${labels.searchClear}, ${labels.resultCount(1234)}`;
+}
 
 describe("server rendering", () => {
+  it("gives custom parts the provider's localized labels", () => {
+    const html = renderToString(
+      <EmojiProvider data={en as unknown as Dataset} prepare={false} locale="de" labels={{ searchClear: "Leeren" }}>
+        <Labels />
+      </EmojiProvider>,
+    );
+    expect(html).toBe("Leeren, 1.234 results");
+  });
+
   it("renders the grid, not the loading state, for an in-memory dataset", () => {
     const html = renderToString(
       <EmojiProvider data={en as unknown as Dataset} prepare={false}>

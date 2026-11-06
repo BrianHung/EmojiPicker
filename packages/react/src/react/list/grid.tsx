@@ -17,6 +17,7 @@ import type { EmojiGridNavigation } from "./navigation";
 import { useDrawable } from "../emoji/native-support";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
+import type { Orientation } from "../utils/render";
 import { shallowEqual, useStore } from "../utils/store";
 import { Variations } from "./variations";
 import { cellOf, createMarks, type Cells, type MarksStore } from "./cell";
@@ -148,7 +149,7 @@ function useVariations(core: PickerState<React.ReactNode>, cellElement: CellElem
 type ControllerOptions = Pick<ListProps, "onKeyDown" | "aria-label" | "aria-labelledby"> & {
   sections: readonly EmojiSection[];
   geometry: GridGeometry;
-  orientation: "vertical" | "horizontal";
+  orientation: Orientation;
   listRef: React.RefObject<HTMLElement | null>;
   ref?: React.Ref<HTMLElement>;
   probeRoot?: React.Ref<HTMLElement>;

@@ -2,7 +2,7 @@ import * as React from "react";
 import { I18nProvider } from "react-aria-components/I18nProvider";
 import { useStore } from "../utils/store";
 import { needsImageFallback, onNativeSupportChange } from "../emoji/native";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type InternalEmojiStore, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 
@@ -30,7 +30,7 @@ type ContextValue = {
 export const EmojiContext = React.createContext<ContextValue | null>(null);
 
 export function EmojiProvider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
-  const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }));
+  const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }) as InternalEmojiStore);
   const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
   React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
   React.useLayoutEffect(() => store.controlFrequents(frequents, onFrequentsChange), [store, frequents, onFrequentsChange]);
@@ -75,6 +75,8 @@ export function useEmojiContext(): ContextValue {
 }
 
 export const useEmojiStore = (): EmojiStore => useEmojiContext().store;
+
+export const useEmojiLabels = (): EmojiLabels => useEmojiContext().labels;
 
 export function useStoreSnapshot<T>(read: (store: EmojiStore) => T): T {
   const { store } = useEmojiContext();

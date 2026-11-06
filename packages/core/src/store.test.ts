@@ -5,7 +5,9 @@ import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { memoryStorageAdapter } from "./frequents";
 import { defaultLabels } from "./labels";
 import { interimOf, lexical, progressive, remote } from "./search/search";
-import { createEmojiStore, type EmojiStoreOptions } from "./store";
+import { createEmojiStore, type EmojiStoreOptions, type InternalEmojiStore } from "./store";
+
+const internal = (options: EmojiStoreOptions) => createEmojiStore(options) as InternalEmojiStore;
 
 const dataset = data as unknown as Dataset;
 const frog = (id: string, extra: Partial<CustomEmoji> = {}): CustomEmoji => ({ id, name: id, imageUrl: `/frogs/${id}.png`, ...extra });
@@ -52,7 +54,7 @@ describe("store", () => {
     expect(createEmojiStore({ data: dataset, storage: { skinTone } }).skinTone()).toBe(3);
 
     const onSkinToneChange = vi.fn();
-    const controlled = createEmojiStore({ data: dataset, skinTone: 2, onSkinToneChange, storage: { skinTone } });
+    const controlled = internal({ data: dataset, skinTone: 2, onSkinToneChange, storage: { skinTone } });
     controlled.setSkinTone(5);
     expect(controlled.skinTone()).toBe(2);
     expect(onSkinToneChange).toHaveBeenCalledWith(5, expect.objectContaining({ reason: "none" }));
@@ -166,7 +168,7 @@ describe("store options", () => {
   });
 
   it("swaps data in place, keeping skin tone and frequents, and the old data while new data loads", async () => {
-    const store = createEmojiStore({ data: tiny("en", [["1f600", "grinning"]]), storage: { frequents: null, skinTone: memoryStorageAdapter() } });
+    const store = internal({ data: tiny("en", [["1f600", "grinning"]]), storage: { frequents: null, skinTone: memoryStorageAdapter() } });
     store.setSkinTone(2);
     store.select("1f600");
     store.setOptions({ data: tiny("fr", [["1f600", "souriant"]]) });
@@ -178,7 +180,7 @@ describe("store options", () => {
   });
 
   it("re-filters without reloading, and ignores an equivalent filter", () => {
-    const store = createEmojiStore({ data: dataset, storage: { frequents: null } });
+    const store = internal({ data: dataset, storage: { frequents: null } });
     const before = store.getSnapshot().data;
     store.setOptions({ data: dataset, filter: () => true });
     expect(store.getSnapshot().data).toBe(before);

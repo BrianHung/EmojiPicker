@@ -3,12 +3,12 @@ import { InputRange } from "dom-input-range";
 import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";
 import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } from "./typeahead";
 
-type TextField = HTMLInputElement | HTMLTextAreaElement;
+export type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
 const EVENTS = ["selectionchange", "click", "keyup"];
 
-export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextField | null>, options?: EmojiTypeaheadOptions): EmojiTypeahead {
+export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement | null>, options?: EmojiTypeaheadOptions): EmojiTypeahead {
   const [match, setMatch] = React.useState<Match | null>(null);
   const typeahead = useEmojiTypeahead(
     match && {

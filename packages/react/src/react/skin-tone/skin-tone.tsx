@@ -1,6 +1,5 @@
 // A single-select toggle group, not RadioGroup: arrows there change the tone; here they move focus and a press picks
 import * as React from "react";
-import type { Orientation } from "@react-types/shared";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
 import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";
@@ -16,7 +15,8 @@ import { useSkinTone } from "../provider/hooks";
 import { PickerContext } from "../root/context";
 import { moveFocus, usePickerKeyDown } from "../utils/keyboard";
 import { useEmojiContext } from "../provider/provider";
-import { renderElement, resolve, type PartElementProps } from "../utils/render";
+import { renderElement, resolve, type InteractionState, type Orientation, type PartElementProps } from "../utils/render";
+import { useInteraction } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 
 const TONES = [0, 1, 2, 3, 4, 5] as const;
@@ -100,7 +100,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
     orientation,
     toggle,
     choose(next, event) {
-      setTone(next, { reason: "option-press", event });
+      setTone(next, { reason: "item-press", event });
       close("item-press", event);
     },
     label: (i) => labels.skinTones[i]!,
@@ -131,25 +131,27 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   );
 });
 
-export type SkinToneTriggerProps = PartElementProps<SkinToneState, HTMLButtonElement, "onClick">;
+export type SkinToneTriggerState = SkinToneState & InteractionState;
+
+export type SkinToneTriggerProps = PartElementProps<SkinToneTriggerState, HTMLButtonElement, "onClick">;
 
 const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
   const { tone, open, toggle, label, triggerRef } = useSkinToneContext("Trigger");
-  const state = { open, tone };
+  const interaction = useInteraction();
+  const state: SkinToneTriggerState = { open, tone, ...interaction.state };
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(ref, triggerRef), [ref, triggerRef]);
   return renderElement(
     "button",
     {
       type: "button",
-      ...props,
+      ...mergeProps(props, { onClick: (e: React.MouseEvent) => toggle(e.nativeEvent) }, interaction.props),
       ref: refs,
       "data-slot": SLOTS.skinToneTrigger,
       "aria-label": label(tone),
       "aria-haspopup": "true",
       "aria-expanded": open,
       "data-popup-open": open ? "" : undefined,
-      onClick: (e: React.MouseEvent) => toggle(e.nativeEvent),
-      style: (s: SkinToneState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
+      style: (s: SkinToneTriggerState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
       children,
     },
     state,
@@ -186,7 +188,7 @@ const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(fun
       ref: refs,
       "data-slot": SLOTS.skinToneOptions,
       "data-orientation": orientation,
-      style: (s: SkinToneOptionsState) => ({ position: "absolute", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
+      style: (s: SkinToneOptionsState) => ({ position: "absolute", zIndex: 4, background: "var(--emoji-picker-background, Canvas)", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
       children: TONES.map((t) => (
         <OptionContext.Provider key={t} value={t}>
           {children ? children(t) : <SkinToneOption tone={t} />}
@@ -197,7 +199,7 @@ const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(fun
   );
 });
 
-export type SkinToneOptionState = { tone: SkinToneValue; selected: boolean };
+export type SkinToneOptionState = InteractionState & { tone: SkinToneValue; selected: boolean };
 
 export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButtonElement, "onClick" | "role"> & {
   tone: SkinToneValue;
@@ -206,14 +208,15 @@ export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButt
 const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone, style, children, ...props }, forwarded) {
   const { tone: current, selection, choose, label } = useSkinToneContext("Option");
   const ref = useObjectRef(forwarded);
-  const { buttonProps } = useToggleButtonGroupItem({ id: tone, "aria-label": label(tone), onPress: () => choose(tone) }, selection, ref);
+  const { buttonProps, isPressed } = useToggleButtonGroupItem({ id: tone, "aria-label": label(tone), onPress: () => choose(tone) }, selection, ref);
+  const interaction = useInteraction(false, isPressed);
   const selected = tone === current;
   return (
     <OptionContext.Provider value={tone}>
       {renderElement(
         "button",
         {
-          ...mergeProps(props, buttonProps),
+          ...mergeProps(props, buttonProps, interaction.props),
           ref,
           tabIndex: selected ? 0 : -1,
           "data-slot": SLOTS.skinToneOption,
@@ -221,7 +224,7 @@ const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(
           style: (s: SkinToneOptionState) => (children === undefined ? { ...swatch(tone), ...resolve(style, s) } : resolve(style, s)),
           children,
         },
-        { tone, selected },
+        { ...interaction.state, tone, selected },
       )}
     </OptionContext.Provider>
   );
@@ -246,6 +249,7 @@ export declare namespace SkinTone {
   type OpenChangeDetails = SkinToneOpenChangeDetails;
   namespace Trigger {
     type Props = SkinToneTriggerProps;
+    type State = SkinToneTriggerState;
   }
   namespace Options {
     type Props = SkinToneOptionsProps;

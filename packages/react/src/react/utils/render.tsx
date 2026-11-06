@@ -3,6 +3,8 @@ import { composeRenderProps } from "react-aria-components/composeRenderProps";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 
+export type Orientation = "horizontal" | "vertical";
+
 export type ElementProps<E extends Element = HTMLElement> = React.HTMLAttributes<E> & { ref?: React.Ref<E> };
 
 export type RenderProp<S, E extends Element = HTMLElement> = React.ReactElement<Record<string, unknown>> | ((props: ElementProps<E>, state: S) => React.ReactElement);

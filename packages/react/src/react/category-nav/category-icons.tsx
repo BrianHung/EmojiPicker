@@ -65,7 +65,9 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export function DefaultCategoryIcon({ category }: { category: string }) {
+export type DefaultCategoryIconProps = React.SVGAttributes<SVGSVGElement> & { category: string };
+
+export function DefaultCategoryIcon({ category, style, ...props }: DefaultCategoryIconProps) {
   return (
     <svg
       data-default-icon=""
@@ -77,10 +79,11 @@ export function DefaultCategoryIcon({ category }: { category: string }) {
       strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ display: "block", width: "100%", height: "100%" }}
       aria-hidden="true"
+      {...props}
+      style={{ display: "block", ...(props.className ? null : { width: "100%", height: "100%" }), ...style }}
     >
-      {ICONS[category] ?? ICONS.smileys_people}
+      {ICONS[category.startsWith("custom:") ? "custom" : category] ?? ICONS.smileys_people}
     </svg>
   );
 }

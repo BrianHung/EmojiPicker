@@ -3,14 +3,15 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverOpenChangeDetails, type PopoverOpenChangeReason, type PopoverState } from "./popover-context";
 import { useChangeState } from "../utils/state";
-import { renderElement, type PartElementProps, type PartProps } from "../utils/render";
+import { renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
+import { useInteraction } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { TABBABLE } from "../utils/utils";
 
-export type Side = "top" | "bottom";
-export type Align = "start" | "center" | "end";
-type AnchorRect = { top: number; left: number; width: number; height: number };
-export type PopoverAnchor = { getBoundingClientRect(): AnchorRect } | (() => AnchorRect | null | undefined);
+export type PopoverSide = "top" | "bottom";
+export type PopoverAlign = "start" | "center" | "end";
+export type PopoverAnchorRect = { top: number; left: number; width: number; height: number };
+export type PopoverAnchor = { getBoundingClientRect(): PopoverAnchorRect } | (() => PopoverAnchorRect | null | undefined);
 
 export const anchorRect = (anchor: PopoverAnchor | undefined) => {
   const r = typeof anchor === "function" ? anchor() : anchor?.getBoundingClientRect();
@@ -27,7 +28,7 @@ export type PopoverRootProps = {
   children: React.ReactNode;
 };
 
-export type PopoverTriggerState = { open: boolean };
+export type PopoverTriggerState = InteractionState & { open: boolean };
 
 export type PopoverTriggerProps = PartElementProps<PopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
 
@@ -35,17 +36,17 @@ export type PopoverInitialFocus = React.RefObject<HTMLElement | null> | (() => H
 export type PopoverFinalFocus = HTMLElement | React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined);
 
 export type PopoverPlacementProps = {
-  side?: Side;
-  align?: Align;
+  side?: PopoverSide;
+  align?: PopoverAlign;
   sideOffset?: number;
   collisionPadding?: number;
   container?: HTMLElement | false;
 };
 
-export type PopoverContentState = { open: boolean; side: Side; align: Align };
+export type PopoverContentState = { open: boolean; side: PopoverSide; align: PopoverAlign };
 
 export type PopoverContentProps = Omit<React.HTMLAttributes<HTMLDivElement>, "className" | "style"> &
-  Omit<PartProps<PopoverContentState>, "render"> &
+  PartProps<PopoverContentState, HTMLDivElement> &
   PopoverPlacementProps & {
     anchor?: PopoverAnchor;
     initialFocus?: PopoverInitialFocus;
@@ -91,7 +92,7 @@ export type PopoverInternals = {
   state: PopoverState;
   trigger: HTMLElement | null;
   setTrigger: (el: HTMLElement | null) => void;
-  triggerProps: (props: Record<string, unknown>) => Record<string, unknown>;
+  triggerProps: (props: object) => Record<string, unknown>;
 };
 
 const InternalsContext = React.createContext<PopoverInternals | null>(null);
@@ -142,8 +143,14 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => !e.defaultPrevented && state.setOpen(!state.open, "trigger-press", e.nativeEvent);
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
+  const interaction = useInteraction(props.disabled);
   const merged = triggerProps(
-    mergeProps({ type: render ? undefined : "button" }, props, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-popup-open": state.open ? "" : undefined, onClick: toggle }),
+    mergeProps(
+      { type: render ? undefined : "button" },
+      props,
+      { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-popup-open": state.open ? "" : undefined, onClick: toggle },
+      interaction.props,
+    ),
   );
-  return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { open: state.open });
+  return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { ...interaction.state, open: state.open });
 });

@@ -3,15 +3,15 @@ import { mergeProps } from "react-aria/mergeProps";
 import { FocusScope, useFocusManager, type FocusManager } from "react-aria/FocusScope";
 import { Toolbar } from "react-aria-components/Toolbar";
 import { hasModifier } from "../utils/keyboard";
-import { racClassName, toRenderFunction, type ElementProps, type PartProps } from "../utils/render";
+import { racClassName, toRenderFunction, type ElementProps, type Orientation, type PartProps } from "../utils/render";
 
 export const BUTTONS = "button:not([disabled])";
 
-export type ReactionBarState = { orientation: "horizontal" | "vertical" };
+export type ReactionBarState = { orientation: Orientation };
 
 export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
   PartProps<ReactionBarState, HTMLDivElement> & {
-    orientation?: "horizontal" | "vertical";
+    orientation?: Orientation;
   };
 
 const div = (props: ElementProps<HTMLDivElement>) => <div {...props} />;
