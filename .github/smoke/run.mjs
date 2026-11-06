@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +12,11 @@ const install = (cwd, deps) => run("npm", ["install", "--no-audit", "--no-fund",
 const tmp = mkdtempSync(join(tmpdir(), "emoji-picker-smoke-"));
 run("npm", ["run", "build", "-w", "@brianhung/emoji-picker-core"]);
 run("npm", ["run", "build", "-w", "@brianhung/emoji-picker-react"]);
-run("npm", ["pack", "-w", "@brianhung/emoji-picker-core", "-w", "@brianhung/emoji-picker-react", "--pack-destination", tmp, "--silent"]);
+run("npm", ["pack", "-w", "@brianhung/emoji-picker-core", "-w", "@brianhung/emoji-picker-react", "-w", "@brianhung/emoji-picker-data", "--pack-destination", tmp, "--silent"]);
+// The font builds with Python when packed, so only a font built beforehand is tested
+const font = existsSync(join(root, "packages/twemoji-font/dist/twemoji.css"));
+if (font) run("npm", ["pack", "-w", "@brianhung/emoji-picker-twemoji-font", "--ignore-scripts", "--pack-destination", tmp, "--silent"]);
+else console.log("Skipped the Twemoji font package: run `npm run build:font` first to include it.");
 const tarballs = readdirSync(tmp)
   .filter((f) => f.endsWith(".tgz"))
   .map((f) => join(tmp, f));
@@ -27,18 +31,16 @@ function app(name, deps) {
 
 // Importing only the picker must leave Floating UI out of the bundle
 const vite = app("vite", ["react", "react-dom", "vite"]);
+if (font) appendFileSync(join(vite, "main.js"), 'import "@brianhung/emoji-picker-twemoji-font/twemoji.css";\n');
 run("npx", ["vite", "build", "--sourcemap", "--logLevel", "error"], vite);
-run("node", ["check.mjs"], vite);
+run("node", ["check.mjs", ...(font ? ["--font"] : [])], vite);
+run("node", ["-e", 'require("@brianhung/emoji-picker-core"); require("@brianhung/emoji-picker-react");'], vite);
 
 const react18 = app("react18", ["react@18", "react-dom@18", "@types/react@18", "@types/react-dom@18", "typescript", "vite"]);
 run("npx", ["tsc", "-p", "."], react18);
 run("npx", ["vite", "build", "--logLevel", "error"], react18);
 run("npx", ["vite", "build", "--ssr", "src/app.tsx", "--outDir", "ssr", "--logLevel", "error"], react18);
-run(
-  "node",
-  ["--input-type=module", "-e", 'import { createElement } from "react"; import { renderToString } from "react-dom/server"; import { App } from "./ssr/app.js"; if (!renderToString(createElement(App)).includes("<input")) process.exit(1);'],
-  react18,
-);
+run("node", ["ssr.mjs"], react18);
 
 const next = app("next", ["next@16", "react@19", "react-dom@19", "typescript", "@types/react", "@types/node"]);
 run("npx", ["next", "build"], next);
@@ -56,4 +58,5 @@ if (!/@font-face\s*\{\s*font-family: "Emoji Picker Apple"/.test(readFileSync(joi
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
 
-console.log(`smoke passed in ${tmp}`);
+rmSync(tmp, { recursive: true, force: true });
+console.log("smoke passed");

@@ -5,30 +5,21 @@ description: Shortcode suggestions and an emoji picker for the Lexical editor.
 
 import { Editor } from "./editor";
 import lexical from "@/registry/emoji-lexical.ts?raw";
+import plugin from "@/components/lexical/emoji-typeahead-plugin.tsx?raw";
+import node from "@/components/lexical/emoji-node.tsx?raw";
+import menu from "@/components/suggestion-menu.tsx?raw";
 
 <Editor />
 
 ## Installation
 
-<Steps>
-
-<Step title="Add the registry item.">
-
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
 
-Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker-react`, `lexical`, and `@lexical/react`.
-
-</Step>
-
-<Step title="Copy the menu component.">
-
-Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
-
-</Step>
-
-</Steps>
+Adds `hooks/emoji-lexical.ts`, `components/suggestion-menu.tsx`, `components/lexical/emoji-typeahead-plugin.tsx`, and `components/lexical/emoji-node.tsx`. Installs `@brianhung/emoji-picker-react`, `lexical`, and `@lexical/react`.
 
 ## Usage
+
+`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out of `nodes`.
 
 ```tsx title="editor.tsx"
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -36,12 +27,13 @@ import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { EmojiProvider } from "@brianhung/emoji-picker-react";
-import { EmojiTypeaheadPlugin } from "./emoji-typeahead-plugin";
+import { EmojiNode } from "@/components/lexical/emoji-node";
+import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
 
 export function Editor() {
   return (
-    <EmojiProvider data="/emoji/en.json">
-      <LexicalComposer initialConfig={{ namespace: "editor", onError: console.error }}>
+    <EmojiProvider>
+      <LexicalComposer initialConfig={{ namespace: "editor", nodes: [EmojiNode], onError: console.error }}>
         <RichTextPlugin contentEditable={<ContentEditable />} ErrorBoundary={LexicalErrorBoundary} />
         <EmojiTypeaheadPlugin />
       </LexicalComposer>
@@ -71,3 +63,9 @@ const emoji = useLexicalEmojiTypeahead({
 ## Source
 
 <Code title="hooks/emoji-lexical.ts" code={lexical} />
+
+<Code title="components/lexical/emoji-typeahead-plugin.tsx" code={plugin} />
+
+<Code title="components/lexical/emoji-node.tsx" code={node} />
+
+<Code title="components/suggestion-menu.tsx" code={menu} />

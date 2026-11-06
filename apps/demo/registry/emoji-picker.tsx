@@ -6,14 +6,15 @@ import { cn } from "@/lib/utils";
 
 const root =
   "relative flex max-h-(--available-height) flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0";
-const tone = "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent";
+const tone =
+  "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary data-[selected]:bg-accent";
 const cell =
-  "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";
+  "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[focus-visible]:outline-2 data-[focus-visible]:-outline-offset-2 data-[focus-visible]:outline-primary";
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
 
 function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
   return (
-    <EmojiPicker.Search className="relative flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3">
+    <EmojiPicker.Search className="relative flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3 has-[input:focus-visible]:border-primary forced-colors:has-[input:focus-visible]:outline-2 forced-colors:has-[input:focus-visible]:-outline-offset-2">
       <EmojiPicker.Search.Input autoFocus={autoFocus} className="h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none">
         <EmojiPicker.Search.Clear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 transform-none items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
           <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
@@ -110,7 +111,7 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
       ref={ref}
       className={cn(
         root,
-        "h-[360px] w-[328px] max-w-full rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
+        "h-[360px] w-[328px] max-w-full in-data-side:max-w-[var(--available-width,calc(100vw-24px))] in-data-placement:max-w-[calc(100vw-24px)] rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
         className,
       )}
       {...props}

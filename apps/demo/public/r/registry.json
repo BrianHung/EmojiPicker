@@ -10,7 +10,12 @@
       "description": "An emoji picker and reaction row with shortcodes, skin tones, custom emoji, and replaceable search, built on @brianhung/emoji-picker-react.",
       "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
       "registryDependencies": ["utils"],
-      "files": [{ "path": "registry/emoji-picker.tsx", "type": "registry:ui" }],
+      "files": [
+        {
+          "path": "registry/emoji-picker.tsx",
+          "type": "registry:ui"
+        }
+      ],
       "css": {
         "@layer base": {
           ":root": {
@@ -35,7 +40,12 @@
       "title": "Emoji Picker Popover",
       "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-aria.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
-      "files": [{ "path": "registry/emoji-picker-popover.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "registry/emoji-picker-popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "emoji-picker-popover-aria",
@@ -43,7 +53,12 @@
       "title": "Emoji Picker Popover (React Aria)",
       "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
-      "files": [{ "path": "registry/aria/emoji-picker-popover.tsx", "type": "registry:ui" }]
+      "files": [
+        {
+          "path": "registry/aria/emoji-picker-popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
     },
     {
       "name": "emoji-prosemirror",
@@ -51,24 +66,74 @@
       "title": "Emoji ProseMirror",
       "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
       "dependencies": ["@brianhung/emoji-picker-core@^1.0.0-alpha.0", "prosemirror-state", "prosemirror-view"],
-      "files": [{ "path": "registry/emoji-prosemirror.ts", "type": "registry:lib" }]
+      "files": [
+        {
+          "path": "registry/emoji-prosemirror.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "emoji-suggestion-menu",
+      "type": "registry:component",
+      "title": "Emoji Suggestion Menu",
+      "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions.Popover. The Tiptap and Lexical items render it.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0"],
+      "registryDependencies": ["utils"],
+      "files": [
+        {
+          "path": "src/components/suggestion-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
     },
     {
       "name": "emoji-tiptap",
       "type": "registry:hook",
       "title": "Emoji Tiptap",
-      "description": "useTiptapEmojiTypeahead adds shortcode suggestions to a Tiptap 3 editor, built on the ProseMirror plugin.",
-      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0", "@tiptap/core", "@tiptap/pm"],
-      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json"],
-      "files": [{ "path": "registry/emoji-tiptap.ts", "type": "registry:hook" }]
+      "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
+      "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0", "@tiptap/core", "@tiptap/pm", "@tiptap/react"],
+      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json", "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"],
+      "files": [
+        {
+          "path": "registry/emoji-tiptap.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/components/tiptap/emoji-suggestion.tsx",
+          "type": "registry:component",
+          "target": "components/tiptap/emoji-suggestion.tsx"
+        },
+        {
+          "path": "src/components/tiptap/emoji-node.tsx",
+          "type": "registry:component",
+          "target": "components/tiptap/emoji-node.tsx"
+        }
+      ]
     },
     {
       "name": "emoji-lexical",
       "type": "registry:hook",
       "title": "Emoji Lexical",
-      "description": "useLexicalEmojiTypeahead adds shortcode suggestions to a Lexical editor, inside LexicalComposer.",
+      "description": "Shortcode typeahead for a Lexical editor: the useLexicalEmojiTypeahead hook, the EmojiTypeaheadPlugin component, and an EmojiNode for custom emoji.",
       "dependencies": ["@brianhung/emoji-picker-react@^1.0.0-alpha.0", "lexical", "@lexical/react"],
-      "files": [{ "path": "registry/emoji-lexical.ts", "type": "registry:hook" }]
+      "files": [
+        {
+          "path": "registry/emoji-lexical.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/components/lexical/emoji-typeahead-plugin.tsx",
+          "type": "registry:component",
+          "target": "components/lexical/emoji-typeahead-plugin.tsx"
+        },
+        {
+          "path": "src/components/lexical/emoji-node.tsx",
+          "type": "registry:component",
+          "target": "components/lexical/emoji-node.tsx"
+        }
+      ],
+      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-suggestion-menu.json"]
     }
   ]
 }

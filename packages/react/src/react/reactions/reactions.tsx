@@ -13,6 +13,7 @@ import { flag, renderElement, resolve, type InteractionState, type PartElementPr
 import { SLOTS } from "../utils/slots";
 import { useChangeState } from "../utils/state";
 import { BUTTONS, ReactionBar, type ReactionBarProps, type ReactionBarState } from "./reaction-bar";
+import { useLayoutEffect } from "../utils/utils";
 
 export type ReactionsValueChangeDetails = ChangeDetails<"item-press"> & { emoji: string; pressed: boolean };
 
@@ -201,7 +202,7 @@ export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
 export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);
   const register = state?.registerPanel;
-  React.useLayoutEffect(() => register?.(), [register]);
+  useLayoutEffect(() => register?.(), [register]);
   const hidden = Boolean(state?.open);
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
   return renderElement(

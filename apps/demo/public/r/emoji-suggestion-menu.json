@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "emoji-suggestion-menu",
+  "title": "Emoji Suggestion Menu",
+  "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions.Popover. The Tiptap and Lexical items render it.",
+  "dependencies": [
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "src/components/suggestion-menu.tsx",
+      "content": "import { Emoji, useEmojiStore, type EmojiTypeahead } from \"@brianhung/emoji-picker-react\";\nimport { EmojiSuggestions } from \"@brianhung/emoji-picker-react/floating-ui\";\nimport { cn } from \"@/lib/utils\";\n\nexport type SuggestionMenuProps = { className?: string; side?: \"top\" | \"bottom\" };\n\nexport function SuggestionMenu({ open, anchor, dismiss, suggestions: menu, className, side }: EmojiTypeahead & SuggestionMenuProps) {\n  const store = useEmojiStore();\n  return (\n    <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} side={side} sideOffset={6}>\n      <ul {...menu.getListProps()} aria-label=\"Emoji suggestions\" className={cn(\"w-64 overflow-hidden rounded-lg border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg\", className)}>\n        {menu.suggestions.map((s, i) => {\n          const [start, end] = s.match ?? [0, 0];\n          return (\n            <li key={s.record.unified} {...menu.getOptionProps(i)} className=\"flex h-8 cursor-default items-center gap-2 rounded-md px-2 data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground\">\n              <Emoji emoji={store.withSkinTone(s.record.unified)} size={18} className=\"shrink-0 leading-none\" />\n              <span className=\"truncate font-mono text-[13px]\">\n                :{s.shortcode.slice(0, start)}\n                <b className=\"font-semibold\">{s.shortcode.slice(start, end)}</b>\n                {s.shortcode.slice(end)}:\n              </span>\n            </li>\n          );\n        })}\n      </ul>\n    </EmojiSuggestions.Popover>\n  );\n}\n",
+      "type": "registry:component"
+    }
+  ],
+  "type": "registry:component"
+}

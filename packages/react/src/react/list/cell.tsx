@@ -8,7 +8,7 @@ import { Glyph, useOverridden } from "../emoji/glyph";
 import { flag } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
-import { moveVirtualFocus } from "../utils/utils";
+import { moveVirtualFocus, useLayoutEffect } from "../utils/utils";
 
 const STOP = 1;
 const HIGHLIGHTED = 2;
@@ -119,7 +119,7 @@ export function useCell(grid: Cells, item: EmojiItem): UseEmojiCellResult {
     [grid, item.id],
   );
   const focused = Boolean(flags & FOCUSED);
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const el = element.current;
     if (!el || !focused) return;
     if (grid.virtual) moveVirtualFocus(el, grid.target());

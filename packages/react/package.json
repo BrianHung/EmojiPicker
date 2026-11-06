@@ -1,7 +1,7 @@
 {
   "name": "@brianhung/emoji-picker-react",
   "version": "1.0.0-alpha.0",
-  "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
+  "description": "Virtualized, unstyled React components for emoji pickers, reaction rows, and shortcode typeahead.",
   "keywords": [
     "react",
     "emoji",
@@ -38,17 +38,17 @@
     ".": {
       "@brianhung/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./floating-ui": {
       "@brianhung/source": "./src/floating-ui.ts",
       "types": "./dist/floating-ui.d.ts",
-      "import": "./dist/floating-ui.js"
+      "default": "./dist/floating-ui.js"
     },
     "./react-aria": {
       "@brianhung/source": "./src/react-aria.ts",
       "types": "./dist/react-aria.d.ts",
-      "import": "./dist/react-aria.js"
+      "default": "./dist/react-aria.js"
     },
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",

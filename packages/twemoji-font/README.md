@@ -5,10 +5,10 @@
 ## Installation
 
 ```sh
-npm i @brianhung/emoji-picker-twemoji-font@alpha
+npm i @brianhung/emoji-picker-twemoji-font
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
 ## Usage
 

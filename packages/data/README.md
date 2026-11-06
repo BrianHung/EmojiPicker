@@ -7,10 +7,10 @@ Prebuilt [Emojibase](https://emojibase.dev) datasets for [`@brianhung/emoji-pick
 To load the datasets from jsDelivr, no installation is needed. To self-host them or import them with a bundler, install the package:
 
 ```bash
-npm i @brianhung/emoji-picker-data@alpha
+npm i @brianhung/emoji-picker-data
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
 ## Usage
 

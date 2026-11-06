@@ -37,12 +37,12 @@
     ".": {
       "@brianhung/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "default": "./dist/index.js"
     },
     "./search": {
       "@brianhung/source": "./src/search/index.ts",
       "types": "./dist/search/index.d.ts",
-      "import": "./dist/search/index.js"
+      "default": "./dist/search/index.js"
     },
     "./data/en.json": {
       "types": "./data/en.json.d.cts",

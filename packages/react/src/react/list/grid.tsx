@@ -21,7 +21,7 @@ import { useDrawable } from "../emoji/native-support";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { flag, type Orientation } from "../utils/render";
-import { moveVirtualFocus } from "../utils/utils";
+import { moveVirtualFocus, useLayoutEffect } from "../utils/utils";
 import { shallowEqual, useStore } from "../utils/store";
 import { VariationsPopup } from "./variations";
 import { cellOf, createMarks, type Cells, type MarksStore } from "./cell";
@@ -165,7 +165,7 @@ function useActiveDescendant(core: PickerState<React.ReactNode>, latest: React.R
     const stale = state?.focusedNodeId != null && !document.getElementById(state.focusedNodeId);
     if (stale || (!valid && state?.focusedNodeId != null)) state!.setFocusedNodeId(null);
   }, [core, target, ownsFocus]);
-  React.useLayoutEffect(sync);
+  useLayoutEffect(sync);
   React.useEffect(() => core.subscribe(() => queueMicrotask(sync)), [core, sync]);
 }
 
@@ -300,13 +300,13 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       };
     },
   };
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     picker.list.current = handle;
     return () => {
       if (picker.list.current === handle) picker.list.current = null;
     };
   });
-  React.useLayoutEffect(() => retain(sections, query), [sections]);
+  useLayoutEffect(() => retain(sections, query), [sections]);
   const flushJump = () => {
     const jump = pendingJump.current;
     pendingJump.current = null;

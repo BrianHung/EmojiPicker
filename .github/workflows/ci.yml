@@ -39,6 +39,7 @@ jobs:
       - run: node .github/version-check.mjs
 
   smoke:
+    needs: twemoji-font
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -46,6 +47,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
       # Packed tarballs in fresh Vite, React 18, Next.js App Router and shadcn add apps
       - run: npm run smoke
 

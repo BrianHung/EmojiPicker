@@ -5,7 +5,7 @@ import { twemojiUrl, withoutTone } from "@brianhung/emoji-picker-core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
 import { Label } from "@/components/ui/label";
-import { Chips } from "@/components/site/chips";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const artwork: Record<string, string> = {
@@ -35,8 +35,20 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   return (
     <>
       <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
-        <Chips label="Renderer" value={renderer} onChange={setRenderer} options={[["auto", "Auto"], ["native", "Native"], ["image", "Images"]]} />
-        <Chips label="Font" value={font} onChange={setFont} options={[["system", "System"], ["twemoji", "Twemoji"], ["noto", "Noto"]]} />
+        <Tabs value={renderer} onValueChange={setRenderer}>
+          <TabsList aria-label="Renderer" className="max-w-full flex-wrap">
+            <TabsTrigger value="auto">Auto</TabsTrigger>
+            <TabsTrigger value="native">Native</TabsTrigger>
+            <TabsTrigger value="image">Images</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Tabs value={font} onValueChange={setFont}>
+          <TabsList aria-label="Font" className="max-w-full flex-wrap">
+            <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="twemoji">Twemoji</TabsTrigger>
+            <TabsTrigger value="noto">Noto</TabsTrigger>
+          </TabsList>
+        </Tabs>
         <Label className="flex items-center gap-2 text-sm font-normal">
           <Checkbox checked={custom} onCheckedChange={setCustom} />
           Custom tapbacks

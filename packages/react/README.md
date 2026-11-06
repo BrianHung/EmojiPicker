@@ -21,12 +21,12 @@ The item also exports `EmojiPickerBody`, `EmojiPickerCell`, `EmojiPickerFooter`,
 ### npm
 
 ```bash
-npm i @brianhung/emoji-picker-react@alpha
+npm i @brianhung/emoji-picker-react
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
-`@brianhung/emoji-picker-core` installs as a dependency. To import its helpers (`localeData`, `twemojiUrl`, `withoutTone`) under a strict package manager such as pnpm, add it to your own dependencies.
+`@brianhung/emoji-picker-core` installs as a dependency. To import its helpers (`localeData`, `twemojiUrl`, `withoutTone`, `mergeFrequents`) under a strict package manager such as pnpm, add it to your dependencies.
 
 ## Usage
 
@@ -48,7 +48,7 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Core includes the English dataset, and `Root` loads it from jsDelivr, pinned to the installed core version. `@brianhung/emoji-picker-data` has every other locale.
+Core includes the English dataset, and `Root` loads it from jsDelivr, pinned to the installed core version. `@brianhung/emoji-picker-data` has a dataset for every Emojibase locale and shortcode set. See [Localization](#localization).
 
 The entry points are client modules (`"use client"`). In a React Server Component framework such as the Next.js App Router, render the parts from a `"use client"` file. A Server Component can render flat exports such as `EmojiPickerRoot` and `EmojiProvider`. It cannot render namespaced parts such as `EmojiPicker.Search.Input` or pass function props such as `onSelect`.
 
@@ -59,7 +59,7 @@ Every part and hook uses the nearest `EmojiProvider`. Without one, they share a 
 ```tsx
 import { EmojiProvider } from "@brianhung/emoji-picker-react";
 
-<EmojiProvider data="/emoji/ja.json" locale="ja" customEmojis={pack}>
+<EmojiProvider customEmojis={pack} filter={(emoji) => emoji.group !== "flags"}>
   <App />
 </EmojiProvider>
 ```
@@ -266,7 +266,33 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
 `EmojiPopover.Content` and `EmojiSuggestions.Popover` take `render`, `className`, and `style` like the parts, as functions of `{ open, side, align }`. Their types are namespaced (`EmojiPopover.Root.Props`, `EmojiPopover.Trigger.State`, `EmojiPopover.Content.State`, `EmojiSuggestions.Popover.State`). Both expose `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin`, and `--available-height` for CSS transitions. `/floating-ui` also sets `--available-width`. Content's default `aria-label` is `labels.picker`.
 
-### Typeahead
+### Localization
+
+```tsx
+import { localeData } from "@brianhung/emoji-picker-core";
+
+<EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja" labels={{ searchPlaceholder: "検索", suggested: "よく使う絵文字" }}>
+  <App />
+</EmojiProvider>
+```
+
+`localeData(locale, { shortcodes, baseUrl })` returns the jsDelivr URL of a dataset in `@brianhung/emoji-picker-data`, which localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding and segmentation, A–Z order, result-count formatting, and text direction.
+
+The picker's strings and accessible names come from `labels`, a partial `EmojiLabels` that defaults to English:
+
+| Key | Default |
+|---|---|
+| `picker` | `"Emoji picker"` |
+| `searchPlaceholder`, `searchLabel`, `searchClear`, `searchResults` | `"Search"`, `"Type to search for an emoji"`, `"Clear"`, `"Search results"` |
+| `emojiList`, `categoryNavigation` | `"Emoji"`, `"Category navigation"` |
+| `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`, with `locale`'s plural rules and digits |
+| `suggested`, `custom` | `"Frequently used"`, `"Custom"`: section names |
+| `reactions`, `expandReactions` | `"Reactions"`, `"More emoji"` |
+| `previewCaption` | `"What's your mood?"` |
+| `skinTone`, `skinTones` | `"Skin tone"`, and six names from `"Default skin tone"` to `"Dark skin tone"` |
+| `withSkinTone(name, tone)` | `"thumbs up: medium skin tone"` |
+
+### Shortcode typeahead
 
 `useTextFieldEmojiTypeahead(ref, options)` adds `:shortcode` suggestions to an `<input>` or `<textarea>`. `useEmojiTypeahead({ query, anchor, replace }, options, element)` does the same for any editor, with `findShortcodeTrigger(textBeforeCaret)` to find the query; `element` is the editor's element, a ref to it, or a function that returns it. Both return an `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`, `dismiss`, `onKeyDown`) and make the field a combobox while it is open. `getListProps(props?)` and `getOptionProps(index, props?)` merge your props.
 
@@ -287,7 +313,7 @@ The options are `matchBy` (`"shortcode"`, `"search"`), `order` (`"relevance"`, `
 <EmojiPicker.Root query={typeahead.query} keyboardTarget={editor} onSelect={typeahead.suggestions.insert}>…</EmojiPicker.Root>
 ```
 
-Tiptap, Lexical, and ProseMirror adapters are registry items (`emoji-tiptap.json`, `emoji-lexical.json`, `emoji-prosemirror.json`). See the [Tiptap](https://emoji.brianhung.me/examples/tiptap/) and [Lexical](https://emoji.brianhung.me/examples/lexical/) examples.
+Tiptap, Lexical, and ProseMirror adapters are registry items (`emoji-tiptap.json`, `emoji-lexical.json`, `emoji-prosemirror.json`). The Tiptap and Lexical items include the menu and a node for custom emoji. See the [Tiptap](https://emoji.brianhung.me/examples/tiptap/) and [Lexical](https://emoji.brianhung.me/examples/lexical/) examples.
 
 ### Reactions
 
@@ -324,7 +350,14 @@ To replace a part with your own component, use its hook:
 
 ### Self-hosted data
 
-Copy `node_modules/@brianhung/emoji-picker-core/data/en.json` to a path you serve and pass its URL: `<EmojiProvider data="/emoji/en.json">`. For other locales, copy `@brianhung/emoji-picker-data`'s `data/` and use `localeData("ja", { baseUrl: "/emoji" })`, or build a dataset with `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json`, which requires `emojibase-data`. By default, English uses iamcal shortcodes and other locales use iamcal and CLDR.
+By default, datasets load from jsDelivr. To serve them yourself:
+
+| Dataset | Copy | Pass |
+|---|---|---|
+| English | `node_modules/@brianhung/emoji-picker-core/data/en.json` to `public/emoji/en.json` | `data="/emoji/en.json"` |
+| Other locales and shortcode sets | `node_modules/@brianhung/emoji-picker-data/data/` to `public/emoji/` | `data={localeData("ja", { baseUrl: "/emoji" })}`, which resolves to `/emoji/ja/iamcal.json` |
+
+With a bundler, import the file's URL instead, such as `import en from "@brianhung/emoji-picker-core/data/en.json?url"` in Vite. To build a dataset, run `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json`, which requires `emojibase-data`. `build-data` uses iamcal shortcodes for English, and iamcal and CLDR for other locales.
 
 ### Emoji fonts
 
@@ -335,9 +368,9 @@ Native rendering draws text in `--emoji-font-family`, so any color emoji font wo
 [data-slot="emoji-picker"] { --emoji-font-family: "Noto Color Emoji"; }
 ```
 
-To use Twemoji as a font, import `@brianhung/emoji-picker-twemoji-font/twemoji.css` and set `--emoji-font-family: Twemoji`.
+To use Twemoji as a font, install `@brianhung/emoji-picker-twemoji-font`, import its `twemoji.css`, and set `--emoji-font-family: Twemoji`.
 
-The default stack starts with `"Emoji Picker Apple"`, a `local("Apple Color Emoji")` face with fixed ascent and descent, so the glyph stays centered in its box at every size. Keep it first in your own stack.
+The default stack starts with `"Emoji Picker Apple"`, a `local("Apple Color Emoji")` face with fixed ascent and descent, so the glyph stays centered in its box at every size. When you write your own system font stack, keep it first.
 
 ### Custom artwork
 
@@ -349,7 +382,7 @@ const imageUrl: ImageUrl = (unified, { renderer }) => ART[withoutTone(unified)] 
 
 ### Custom popover
 
-Put the picker in any popover (Base UI, Radix, or shadcn/ui), close it from `onSelect`, and give `Search.Input` `autoFocus`. A picker without a search field takes `pickerInitialFocus(content)` (from either popover subpath) as the popover's initial focus. Escape clears the query before it reaches the popover.
+Put the picker in any popover (Base UI, Radix, React Aria, or shadcn/ui), close it from `onSelect`, and give `Search.Input` `autoFocus`. A picker without a search field takes `pickerInitialFocus(content)` (from either popover subpath) as the popover's initial focus. Escape clears the query before it reaches the popover. The registry's `emoji-picker-popover.json` (Base UI and Radix) and `emoji-picker-popover-aria.json` (React Aria) do this with your shadcn/ui popover; [Custom popover](https://emoji.brianhung.me/#custom-popover) shows both.
 
 ### Custom virtualizer
 

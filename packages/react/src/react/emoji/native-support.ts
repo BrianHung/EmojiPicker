@@ -2,6 +2,7 @@ import * as React from "react";
 import { type EmojiRecord, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
 import { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "./native";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
+import { useLayoutEffect } from "../utils/utils";
 
 type Drawable = (record: EmojiRecord, unified: string) => boolean;
 
@@ -17,7 +18,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
   const pending = React.useRef(new Set<string>());
   const timer = React.useRef<number | null>(null);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (!native || typeof window === "undefined") return setSupport(null);
     const font = (root.current && getComputedStyle(root.current).getPropertyValue("--emoji-font-family").trim()) || undefined;
     const samples = new Map<number, string>();

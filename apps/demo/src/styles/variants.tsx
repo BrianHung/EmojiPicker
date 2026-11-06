@@ -49,7 +49,7 @@ export function StyleDropdown({
   );
 }
 
-export function StyleTapback({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
+export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
   const store = useEmojiStore();
   const frequent = useFrequentEmoji({ limit: count }).items;
   const top = appStyle.tapback.pinned ?? frequent;
@@ -81,7 +81,7 @@ export function StyleTapback({ appStyle, onSelect, count = 5, className }: { app
   );
 }
 
-export function StyleAutocomplete({ appStyle, suggestions: menu, open, className }: Pick<EmojiTypeahead, "suggestions" | "open"> & { appStyle: Style; className?: string }) {
+export function StyleTypeahead({ appStyle, suggestions: menu, open, className }: Pick<EmojiTypeahead, "suggestions" | "open"> & { appStyle: Style; className?: string }) {
   const store = useEmojiStore();
   const a = appStyle.autocomplete;
   const list = React.useRef<HTMLUListElement>(null);

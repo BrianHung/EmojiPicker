@@ -15,7 +15,7 @@ import { EmojiGridNavigation } from "./navigation";
 import { Variations, type VariationsOptionProps, type VariationsOptionState, type VariationsProps, type VariationsState } from "./variations";
 import { flag, renderElement, resolve, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
-import { nextTabbable, TABBABLE } from "../utils/utils";
+import { nextTabbable, TABBABLE, useLayoutEffect } from "../utils/utils";
 import { useStoreSnapshot } from "../provider/provider";
 import { shallowEqual, useStore } from "../utils/store";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
@@ -84,7 +84,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const searching = useStore(picker.state, (s) => s.searching);
   const horizontal = orientation === "horizontal";
   const setViewportOrientation = React.useContext(ViewportContext);
-  React.useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
+  useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
 
   const { sections, request, probeRoot } = useGridSections(horizontal);
 
@@ -115,7 +115,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     }
     setMetrics((m) => (sameMetrics(m, next) ? m : next));
   }, [unpadded]);
-  React.useLayoutEffect(measure);
+  useLayoutEffect(measure);
 
   const rtlRef = React.useRef(false);
   rtlRef.current = useLocale().direction === "rtl";
@@ -185,7 +185,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const latest = React.useRef(grid);
   latest.current = grid;
 
-  React.useLayoutEffect(() => latest.current.flushJump());
+  useLayoutEffect(() => latest.current.flushJump());
 
   const onState = React.useCallback((state: VirtualizerState<CollectionNode<unknown>, React.ReactNode>) => {
     virtualizer.current = state;
@@ -442,7 +442,7 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
   const cells = React.useContext(CellsContext)!;
   const template = React.useContext(TemplateContext);
   const [top, setTop] = React.useState(0);
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const el = list.current;
     if (el && el.offsetTop !== top) setTop(el.offsetTop);
   });

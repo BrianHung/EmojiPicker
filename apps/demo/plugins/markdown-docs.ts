@@ -36,6 +36,7 @@ function toMarkdown(dir: string, mdx: string) {
       const trimmed = line.trim();
       let m: RegExpMatchArray | null;
       if ((m = trimmed.match(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/)) && files[m[2]!]) return [`\`\`\`${posix.extname(files[m[2]!]!).slice(1)} title="${m[1]}"`, read(files[m[2]!]!).trim(), "```"];
+      if ((m = trimmed.match(/^<Demo name="([\w-]+)"[^>]*>$/))) return ['```tsx title="index.tsx"', read(`src/components/demos/${m[1]}/tailwind.tsx`).trim(), "```"];
       if ((m = trimmed.match(/^<PackageManagers dlx="([^"]+)" \/>$/))) return ["```bash", `npx ${m[1]}`, "```"];
       if ((m = trimmed.match(/^<PackageManagers install="([^"]+)" \/>$/))) return ["```bash", `npm install ${m[1]}`, "```"];
       if ((m = trimmed.match(/^<PropsTable rows=\{api\.(\w+)\} \/>$/))) return [propsTable(TABLES[m[1]!] as PropRow[])];

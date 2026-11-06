@@ -3,6 +3,7 @@ import { I18nProvider, useLocale } from "react-aria/I18nProvider";
 import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { needsImageFallback, onNativeSupportChange } from "../emoji/native";
+import { useLayoutEffect } from "../utils/utils";
 
 export type { EmojiLabels };
 
@@ -64,7 +65,7 @@ export function EmojiProvider(props: EmojiProviderProps) {
 
 function Provider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, store, ...options }: EmojiProviderProps & { store: EmojiStore }) {
   const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
-  React.useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange }));
+  useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange }));
   React.useEffect(() => void (prepare && store.prepare()), [prepare, store]);
   const resolved = useRenderer(renderer);
   const loadedLocale = useStore({ subscribe: store.subscribe, getSnapshot: () => (store.status() === "ready" ? store.locale() : undefined) });
