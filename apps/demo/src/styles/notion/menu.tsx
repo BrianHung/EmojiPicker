@@ -1,16 +1,15 @@
-import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
 import { EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui";
 import * as I from "@/styles/icons";
-import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
+import { notion, NOTION_SECTIONS } from "./picker";
 import { CELL, OPTION, tokensOf } from "@/styles/style";
-import type { EmojiMenuProps } from ".";
 
 export const notionEmojiOptions: EmojiTypeaheadOptions = { matchBy: "search", limit: 200 };
 
 const ICONS: I.IconSet = I.ICONS.notion;
 const CATEGORIES = NOTION_SECTIONS.filter((c) => c.id !== "suggested");
 
-export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, editor, className, container = false }: EmojiMenuProps & { editor: HTMLElement; container?: HTMLElement | false }) {
+export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, editor, className, container = false }: EmojiTypeahead & { className?: string } & { editor: HTMLElement; container?: HTMLElement | false }) {
   return (
     <EmojiSuggestions.Popover open={open} onOpenChange={(next) => !next && dismiss()} anchor={anchor} sideOffset={4} container={container} className={className}>
       <EmojiPicker.Root

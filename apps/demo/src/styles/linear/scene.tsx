@@ -7,7 +7,7 @@ import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { LINEAR_CATEGORIES, linear } from "./picker";
 import { useEmojiTextField } from "@/components/emoji-text-field";
-import { LinearEmojiMenu, linearEmojiOptions } from "@/experiences/linear";
+import { LinearEmojiMenu, linearEmojiOptions } from "./menu";
 import { noEmoji, SearchClear } from "@/styles/parts";
 import { CELL, ROOT, tokensOf, type StylePickerProps } from "@/styles/style";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";

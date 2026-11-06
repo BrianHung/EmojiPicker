@@ -1,7 +1,6 @@
 import type * as React from "react";
 import type { EmojiSelection, PopoverFinalFocus } from "@brianhung/emoji-picker-react";
-import { EmojiPopover as FloatingPopover } from "@brianhung/emoji-picker-react/floating-ui";
-import { EmojiPopover as AriaPopover } from "@brianhung/emoji-picker-react/react-aria";
+import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { cn } from "@/lib/utils";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
 
@@ -13,28 +12,13 @@ export type PickerPopoverProps = {
   triggerClassName?: string;
   label?: string;
   picker?: React.ReactNode;
-  adapter?: "floating-ui" | "react-aria";
-  onOpenChange?: (open: boolean) => void;
   finalFocus?: PopoverFinalFocus;
   renderTrigger?: (trigger: React.ReactElement) => React.ReactNode;
 };
 
-export function PickerPopover({
-  onSelect,
-  children,
-  side = "bottom",
-  align = "start",
-  triggerClassName,
-  label = "Open emoji picker",
-  picker,
-  adapter = "floating-ui",
-  onOpenChange,
-  finalFocus,
-  renderTrigger = (t) => t,
-}: PickerPopoverProps) {
-  const EmojiPopover = adapter === "react-aria" ? AriaPopover : FloatingPopover;
+export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, finalFocus, renderTrigger = (t) => t }: PickerPopoverProps) {
   return (
-    <EmojiPopover.Root onOpenChange={onOpenChange}>
+    <EmojiPopover.Root>
       {renderTrigger(
         <EmojiPopover.Trigger
           aria-label={label}

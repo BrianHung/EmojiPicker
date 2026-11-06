@@ -3,14 +3,14 @@ import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
 import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker-react";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
-import { discord } from "./picker";
+import { discord, discordAutocompleteOptions } from "./picker";
 import { EditorContent, useEditor } from "@tiptap/react";
 import Document from "@tiptap/extension-document";
 import Paragraph from "@tiptap/extension-paragraph";
 import Text from "@tiptap/extension-text";
 import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-node";
-import { DiscordEmojiMenu, discordEmojiOptions } from "@/experiences/discord";
+import { DiscordEmojiMenu } from "./menu";
 import { Avatar, EmojiText, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
 
 
@@ -283,7 +283,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     const attrs = emojiAttrs(store, unified);
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
-  const typeahead = useTiptapEmojiTypeahead(editor, { ...discordEmojiOptions, onSelect: copyEmoji, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
+  const typeahead = useTiptapEmojiTypeahead(editor, { ...discordAutocompleteOptions, onSelect: copyEmoji, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
   const menuOpen = React.useRef(false);
   menuOpen.current = typeahead.open;
   const submit = React.useRef(() => {});

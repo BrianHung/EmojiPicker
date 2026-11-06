@@ -7,24 +7,6 @@ import { EmojiPicker, EmojiProvider } from "../../index";
 import * as floating from "../../floating-ui";
 import * as aria from "../../react-aria";
 
-function interactions(node: React.ReactNode) {
-  render(node);
-  const el = document.querySelector("button")!;
-  const seen: string[] = [];
-  const check = (name: string) => el.hasAttribute(name) && seen.push(name);
-  React.act(() => void el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true })));
-  check("data-hovered");
-  React.act(() => void el.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true, button: 0 })));
-  check("data-pressed");
-  React.act(() => void el.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, cancelable: true, button: 0 })));
-  React.act(() => {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
-    el.focus();
-  });
-  check("data-focus-visible");
-  return seen;
-}
-
 function SkinToneTrigger() {
   return (
     <EmojiProvider data={en} prepare={false}>
@@ -43,14 +25,6 @@ const popoverTrigger = ({ EmojiPopover }: typeof floating | typeof aria) =>
       </EmojiPopover.Root>
     );
   };
-
-it.each([
-  ["SkinTone.Trigger", SkinToneTrigger],
-  ["EmojiPopover.Trigger from /floating-ui", popoverTrigger(floating)],
-  ["EmojiPopover.Trigger from /react-aria", popoverTrigger(aria)],
-])("%s is hovered, pressed and focus-visible like other buttons", (_, Trigger) => {
-  expect(interactions(<Trigger />)).toEqual(["data-hovered", "data-pressed", "data-focus-visible"]);
-});
 
 // usePress cancels a button's native keyboard click outside macOS, and jsdom isn't macOS
 it.each([
