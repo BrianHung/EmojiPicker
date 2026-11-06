@@ -11,6 +11,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 jobs:
   version:
     runs-on: ubuntu-latest
