@@ -1,11 +1,11 @@
 import * as React from "react";
-import { createSearch, type EmojiSearchState, type EmojiStore, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiSearchState, type EmojiStore, type EmojiStoreStatus, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
 export type FrequentEmoji = {
   items: readonly string[];
-  record(unified: string): void;
+  pick(unified: string): void;
   remove(unified: string): void;
   clear(): void;
 };
@@ -20,8 +20,8 @@ export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): Freque
     [store],
   );
   const items = useStore({ subscribe, getSnapshot: () => store.frequent(limit) });
-  const { record, remove, clear } = store.frequents;
-  return React.useMemo(() => ({ items, record, remove, clear }), [items, record, remove, clear]);
+  const { pick, remove, clear } = store.frequents;
+  return React.useMemo(() => ({ items, pick, remove, clear }), [items, pick, remove, clear]);
 }
 
 export function useSkinTone(): [tone: SkinToneValue, setTone: EmojiStore["setSkinTone"]] {
@@ -29,7 +29,7 @@ export function useSkinTone(): [tone: SkinToneValue, setTone: EmojiStore["setSki
   return [useStoreSnapshot((s) => s.skinTone()), store.setSkinTone];
 }
 
-export function useEmojiStatus() {
+export function useEmojiStatus(): EmojiStoreStatus {
   const { store } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
   React.useEffect(() => {

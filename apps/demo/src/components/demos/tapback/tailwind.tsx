@@ -29,7 +29,7 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
             {() => (
               <EmojiPicker.List.Section>
                 <EmojiPicker.List.SectionTitle className="flex items-center bg-picker-background/90 px-3 pt-3 pb-1.5 text-xs font-medium text-picker-muted backdrop-blur" />
-                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[highlighted]:bg-picker-selected" />}</EmojiPicker.List.Items>
+                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="flex items-center justify-center rounded-md outline-none hover:bg-picker-hover data-[focused]:bg-picker-selected" />}</EmojiPicker.List.Items>
               </EmojiPicker.List.Section>
             )}
           </EmojiPicker.List>

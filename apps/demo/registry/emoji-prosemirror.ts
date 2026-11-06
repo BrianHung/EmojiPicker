@@ -1,6 +1,6 @@
 import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import { createEmojiSuggestions, createStore, findShortcodeTrigger, syncCombobox, type EmojiStore, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
 
 type Node = EditorState["doc"];
 
@@ -19,9 +19,9 @@ function matchIn({ selection: { $from, empty } }: EditorState): Match | null {
 const keyOf = (match: Match | null) => (match ? `${match.from}:${match.query}` : "");
 
 export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiTypeaheadOptions = {}) {
-  const mounted = createStore<EditorView | null, EditorView | null>(null, (_, view) => view);
+  let mounted: EditorView | null = null;
   const current = () => {
-    const view = mounted.getSnapshot();
+    const view = mounted;
     const match = view && matchIn(view.state);
     return view && match ? { view, match } : null;
   };
@@ -40,9 +40,9 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
   const plugin = new Plugin({
     key: new PluginKey("emojiTypeahead"),
     view(editor) {
-      mounted.dispatch(editor);
+      mounted = editor;
       store.load().catch(() => {});
-      const unsync = syncCombobox(editor.dom, suggestions);
+      const unsync = suggestions.syncCombobox(editor.dom);
       const sync = (state: EditorState, prev: EditorState | null) => {
         const match = matchIn(state);
         if (keyOf(match) !== (prev ? keyOf(matchIn(prev)) : "")) suggestions.setQuery(match?.query ?? "", keyOf(match));
@@ -51,7 +51,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       return {
         update: (view, prev) => sync(view.state, prev),
         destroy() {
-          mounted.dispatch(null);
+          mounted = null;
           suggestions.setQuery("");
           unsync();
         },

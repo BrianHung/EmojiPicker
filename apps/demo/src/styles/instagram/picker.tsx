@@ -66,7 +66,7 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex h-[34px] items-center bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-lg hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[highlighted]:bg-picker-selected")} />}</EmojiPicker.List.Items>
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-lg hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.List.Items>
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>

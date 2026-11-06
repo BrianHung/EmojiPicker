@@ -50,7 +50,7 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
           {() => (
             <EmojiPicker.List.Section>
               <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[highlighted]:bg-picker-selected")} />}</EmojiPicker.List.Items>
+              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.List.Items>
             </EmojiPicker.List.Section>
           )}
         </EmojiPicker.List>

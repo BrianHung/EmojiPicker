@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import data from "../data/en.json";
-import type { Dataset } from "./dataset";
-import { createPickerState, moveHighlight, setCategoryCollapsed } from "./picker";
-import { createEmojiStore } from "./store";
+import data from "@brianhung/emoji-picker-core/data/en.json";
+import { createEmojiStore, type Dataset } from "@brianhung/emoji-picker-core";
+import { createPickerState, setCategoryCollapsed } from "./picker";
 
 const ready = async () => {
   const store = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null } });
@@ -22,8 +21,8 @@ describe("picker state", () => {
     expect(sections).toHaveLength(1);
     const [first, second] = sections[0]!.items;
 
-    expect(moveHighlight(picker, "right", { columns: 8 })).toBe(first!.id);
-    expect(moveHighlight(picker, "right", { columns: 8 })).toBe(second!.id);
+    picker.highlight(first!.unified);
+    picker.highlight(second!.id);
     expect(picker.getSnapshot().active).toBe(second);
     picker.hover(first!.id);
     expect(picker.getSnapshot().active).toBe(second);
@@ -39,17 +38,16 @@ describe("picker state", () => {
     const asked: (string | null)[] = [];
     const options = { frequent: false as const, onHighlightChange: (id: string | null) => asked.push(id) };
     const picker = createPickerState(await ready(), { ...options, highlight: null });
-    let renders = 0;
-    const off = picker.subscribe(() => renders++);
+    const off = picker.subscribe(() => {});
+    const before = picker.getSnapshot();
     const [first, second] = picker.getSnapshot().sections[0]!.items;
 
     picker.highlight(first!.id);
-    expect(asked).toEqual([first!.id]);
+    expect(asked).toEqual([first!.unified]);
     expect(picker.getSnapshot().highlighted).toBeNull();
-    expect(renders).toBe(0);
+    expect(picker.getSnapshot()).toBe(before);
 
-    picker.setOptions({ ...options, highlight: second!.id }, { notify: true });
-    expect(renders).toBe(1);
+    picker.setOptions({ ...options, highlight: second!.unified }, { notify: true });
     expect(picker.getSnapshot()).toMatchObject({ highlighted: second!.id, active: second });
     expect(picker.choose()).toMatchObject({ emoji: second!.record.emoji });
     off();

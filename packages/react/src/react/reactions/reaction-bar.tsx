@@ -1,7 +1,7 @@
 import * as React from "react";
-import { mergeProps } from "react-aria/mergeProps";
 import { FocusScope, useFocusManager, type FocusManager } from "react-aria/FocusScope";
 import { Toolbar } from "react-aria-components/Toolbar";
+import { mergePartProps, type PickerHandlers } from "../utils/events";
 import { hasModifier } from "../utils/keyboard";
 import { racClassName, toRenderFunction, type ElementProps, type Orientation, type PartProps } from "../utils/render";
 
@@ -9,7 +9,7 @@ export const BUTTONS = "button:not([disabled])";
 
 export type ReactionBarState = { orientation: Orientation };
 
-export type ReactionBarProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style"> &
+export type ReactionBarProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style">> &
   PartProps<ReactionBarState, HTMLDivElement> & {
     orientation?: Orientation;
   };
@@ -22,7 +22,7 @@ function FocusManagerRef({ into }: { into: React.MutableRefObject<FocusManager |
 }
 
 // React Aria's Toolbar moves focus with the arrows and Tab; Home and End go to the ends, and the pointer carries focus once it is inside
-export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, render, children, ...props }, ref) {
+export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(function ReactionBar({ orientation = "horizontal", className, style, render, children, "aria-label": label, "aria-labelledby": labelledBy, ...props }, ref) {
   const focus = React.useRef<FocusManager | undefined>(undefined);
   const custom = toRenderFunction(render) ?? div;
   const across = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
@@ -42,7 +42,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(fu
     },
   };
   return (
-    <Toolbar {...(props as object)} ref={ref} orientation={orientation} className={racClassName(className)} render={(dom, state) => custom(mergeProps(dom, handlers) as ElementProps<HTMLDivElement>, state)}>
+    <Toolbar ref={ref} orientation={orientation} aria-label={label} aria-labelledby={labelledBy} className={racClassName(className)} style={style} render={(dom, state) => custom(mergePartProps(props, dom, handlers), state)}>
       <FocusScope>
         <FocusManagerRef into={focus} />
         {children}

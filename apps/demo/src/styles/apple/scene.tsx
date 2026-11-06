@@ -1078,7 +1078,7 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
             {() => (
               <EmojiPicker.List.Section>
                 <EmojiPicker.List.SectionTitle className="pl-[9.8px] text-[12.25px] leading-[16px] font-semibold tracking-[-0.015em] whitespace-nowrap text-[#8b8d92] uppercase dark:text-[#8d8d93]" />
-                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[10px] active:bg-black/[0.06] focus-visible:bg-black/[0.06] data-highlighted:bg-black/[0.06] dark:active:bg-white/[0.1] dark:focus-visible:bg-white/[0.1] dark:data-highlighted:bg-white/[0.1]")} />}</EmojiPicker.List.Items>
+                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[10px] active:bg-black/[0.06] focus-visible:bg-black/[0.06] data-focused:bg-black/[0.06] dark:active:bg-white/[0.1] dark:focus-visible:bg-white/[0.1] dark:data-focused:bg-white/[0.1]")} />}</EmojiPicker.List.Items>
               </EmojiPicker.List.Section>
             )}
           </EmojiPicker.List>

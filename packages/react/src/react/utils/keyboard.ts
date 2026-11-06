@@ -3,30 +3,24 @@ import type { KeyboardEvent } from "@react-types/shared";
 import type { FocusManager } from "react-aria/FocusScope";
 import { useKeyboard } from "react-aria/useKeyboard";
 import { isComposingKey } from "@brianhung/emoji-picker-core";
+import { isSkipped, preventable, type PickerEvent } from "./events";
 
-export type PickerKeyboardEvent<T extends Element = Element> = React.KeyboardEvent<T> & {
-  preventEmojiPickerHandler: () => void;
-};
-export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerKeyboardEvent<T>) => void;
+export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerEvent<React.KeyboardEvent<T>>) => void;
 
 // true: handled (preventDefault, stop); "native": stop but keep the browser's default; false: pass on
 export type KeyResult = boolean | "native";
 
-const skipped = new WeakSet<Event>();
-
 export function usePickerKeyDown<T extends Element>(user: PickerKeyboardEventHandler<T> | undefined, handle: (event: KeyboardEvent) => KeyResult, { stopSkipped = false } = {}): React.KeyboardEventHandler<T> {
   const { keyboardProps } = useKeyboard({
     onKeyDown(event) {
-      if (skipped.has(event.nativeEvent)) return stopSkipped ? undefined : event.continuePropagation();
+      if (isSkipped(event)) return stopSkipped ? undefined : event.continuePropagation();
       const result = isComposingKey(event.nativeEvent) ? false : handle(event);
       if (!result) return event.continuePropagation();
       if (result === true) event.preventDefault();
     },
   });
   return (event) => {
-    const native = event.nativeEvent;
-    (event as PickerKeyboardEvent<T>).preventEmojiPickerHandler = () => void skipped.add(native);
-    user?.(event as PickerKeyboardEvent<T>);
+    user?.(preventable(event));
     (keyboardProps.onKeyDown as unknown as React.KeyboardEventHandler<T>)(event);
   };
 }

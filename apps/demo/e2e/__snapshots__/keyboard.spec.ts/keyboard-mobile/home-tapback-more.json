@@ -74,20 +74,20 @@
   "escape": [
     {
       "open": true,
-      "focus": "searchbox \"Type to search for an emoji\"",
+      "focus": "button \"red heart\" 2764-fe0f",
       "focusReturned": false,
       "toast": null
     },
     {
       "open": true,
-      "focus": "searchbox \"Type to search for an emoji\"",
+      "focus": "button \"red heart\" 2764-fe0f",
       "focusReturned": false,
       "toast": null
     }
   ],
   "tab": {
     "focus": "option \"red heart\" 2764-fe0f",
-    "highlight": null,
+    "highlight": "option \"red heart\" 2764-fe0f",
     "open": true,
     "inside": true
   }

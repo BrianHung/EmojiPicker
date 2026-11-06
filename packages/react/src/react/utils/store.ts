@@ -1,4 +1,3 @@
-import { createStore, type Store } from "@brianhung/emoji-picker-core";
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 
 type Source<S> = { subscribe(listener: () => void): () => void; getSnapshot(): S; getServerSnapshot?: () => S };
@@ -15,7 +14,3 @@ export const shallowEqual = <T extends object>(a: T, b: T) => {
   const keys = Object.keys(b) as (keyof T)[];
   return keys.length === Object.keys(a).length && keys.every((k) => Object.is(a[k], b[k]));
 };
-
-export type Cell<T> = Store<T, T>;
-
-export const cell = <T>(initial: T): Cell<T> => createStore<T, T>(initial, (_, next) => next);

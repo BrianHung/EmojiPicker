@@ -1,5 +1,5 @@
 import * as React from "react";
-import { syncCombobox, type EmojiStore, type EmojiSuggestionsMachine, type EmojiTrigger, type KeyLike } from "@brianhung/emoji-picker-core";
+import type { EmojiStore, EmojiSuggestionsMachine, EmojiTrigger, KeyLike } from "@brianhung/emoji-picker-core";
 import { useSuggestionsMachine, useSuggestionsStore, type EmojiSuggestionsOptions, type EmojiSuggestionsState } from "./suggestions";
 import { useEmojiContext } from "../provider/provider";
 
@@ -18,16 +18,20 @@ export type EmojiTypeahead = {
 
 const closed = () => null;
 
-export function useEmojiTypeahead(trigger: EmojiTrigger | null, { insert = "emoji", ...options }: EmojiTypeaheadOptions = {}, element?: () => HTMLElement | null | undefined): EmojiTypeahead {
+export type TypeaheadElement = HTMLElement | React.RefObject<HTMLElement | null> | (() => HTMLElement | null | undefined) | null;
+
+const elementOf = (element: TypeaheadElement | undefined) => (typeof element === "function" ? element() : element && "current" in element ? element.current : element);
+
+export function useEmojiTypeahead(trigger: EmojiTrigger | null, { insert = "emoji", ...options }: EmojiTypeaheadOptions = {}, element?: TypeaheadElement): EmojiTypeahead {
   const query = trigger?.query ?? "";
   const machine = useSuggestionsMachine({ ...options, query, onChoose: (s) => trigger?.replace(machine.textFor(s, insert), s) });
   const suggestions = useSuggestionsStore(machine);
   const { open } = suggestions;
   React.useEffect(() => {
-    const el = open ? element?.() : null;
+    const el = open ? elementOf(element) : null;
     if (!el) return;
     el.addEventListener("blur", machine.dismiss);
-    const unsync = syncCombobox(el, machine);
+    const unsync = machine.syncCombobox(el);
     return () => {
       el.removeEventListener("blur", machine.dismiss);
       unsync();

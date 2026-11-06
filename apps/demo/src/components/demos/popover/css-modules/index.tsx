@@ -11,7 +11,7 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
       <EmojiPopover.Trigger aria-label="Open emoji picker" className={styles.trigger}>
         <span className={styles.emoji}>{picked?.emoji || "🙂"}</span> Add reaction
       </EmojiPopover.Trigger>
-      <EmojiPopover.Content aria-label="Emoji picker" duration={100} className={styles.content}>
+      <EmojiPopover.Content aria-label="Emoji picker" className={styles.content}>
         <EmojiPickerCard
           onSelect={(selection) => {
             setPicked(selection);

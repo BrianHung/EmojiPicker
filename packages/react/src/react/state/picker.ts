@@ -1,16 +1,11 @@
-import { createChangeDetails, type ChangeDetails } from "./change";
-import { GROUPS, type EmojiRecord, type SkinToneValue } from "./dataset";
-import { createEmojiGrid, moveInGrid, type EmojiGridMove } from "./grid";
-import type { EmojiLabels } from "./labels";
+import { createChangeDetails, createSearch, GROUPS, withoutTone, type ChangeDetails, type EmojiLabels, type EmojiRecord, type EmojiSearchState, type EmojiSelection, type EmojiStore, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { createStore, memo, stable, subscribeAll } from "./reactive";
-import { createSearch, type EmojiSearchState } from "./search/query";
 import { categoryList, categorySections, itemFactory, resultSections, type Category, type CategoryOption, type EmojiItem, type EmojiSection } from "./sections";
-import { toned, type EmojiData, type EmojiSelection, type EmojiStore } from "./store";
 
 export type SearchResultsMode = "ranked" | "grouped";
 
-export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "imperative-action" | "none">;
-export type QueryChangeDetails = ChangeDetails<"input-change" | "escape-key" | "imperative-action" | "none">;
+export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "imperative-action" | "none"> & { key: string | null };
+export type QueryChangeDetails = ChangeDetails<"input-change" | "clear-press" | "escape-key" | "imperative-action" | "none">;
 export type CollapsedCategoriesChangeDetails = ChangeDetails<"trigger-press" | "none">;
 
 export type ChangeSource<D extends ChangeDetails> = { reason?: D["reason"]; event?: Event };
@@ -31,7 +26,7 @@ export type PickerStateOptions<Icon = unknown> = {
   onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
   highlight?: string | null;
   defaultHighlight?: string | null;
-  onHighlightChange?: (id: string | null, details: HighlightChangeDetails) => void;
+  onHighlightChange?: (unified: string | null, details: HighlightChangeDetails) => void;
   disableVariations?: boolean;
   reactions?: readonly string[] | number;
 };
@@ -71,6 +66,16 @@ const findItem = (sections: readonly EmojiSection[], id: string | null) => {
   return null;
 };
 
+// A highlight is an item key or a unified code. A key whose emoji changed tone maps to the same emoji in its section; one that left the sections clears
+function resolveKey(sections: readonly EmojiSection[], value: string | null, last: string | null): string | null {
+  if (value == null || findItem(sections, value)) return value;
+  if (findItem(sections, last)?.unified === value) return last;
+  const section = sections.find((s) => value.startsWith(`${s.id}:`));
+  const unified = section ? value.slice(section.id.length + 1) : value;
+  const items = (section ? [section] : sections).flatMap((s) => s.items);
+  return (items.find((i) => i.unified === unified) ?? items.find((i) => withoutTone(i.unified) === withoutTone(unified)))?.id ?? null;
+}
+
 type Held = { suggested: readonly string[]; reactions: readonly string[] | undefined };
 
 type Ui = {
@@ -101,7 +106,6 @@ const reduceInput = <Icon>(input: Input<Icon>, action: InputAction<Icon>): Input
 
 type Controlled = Pick<PickerStateOptions, "query" | "highlight" | "collapsedCategories">;
 const queryOf = (ui: Ui, options: Controlled) => options.query ?? ui.query;
-const highlightedOf = (ui: Ui, options: Controlled) => (options.highlight === undefined ? ui.highlighted : options.highlight);
 const collapsedOf = (ui: Ui, options: Controlled) => options.collapsedCategories ?? ui.collapsed;
 
 export function createPickerState<Icon = unknown>(store: EmojiStore, options: PickerStateOptions<Icon> = {}) {
@@ -126,30 +130,41 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const opts = () => input.getSnapshot().options;
 
   const items = memo(itemFactory);
-  const categoriesOf = memo((data: EmojiData, ready: boolean, categories: readonly CategoryOption<Icon>[] | undefined, labels: EmojiLabels) =>
+  const categoriesOf = memo((groupNames: readonly string[], customGroups: ReadonlyMap<string, string | undefined>, categories: readonly CategoryOption<Icon>[] | undefined, labels: EmojiLabels) =>
     categoryList(
       categories,
-      ready ? data.groupNames : [],
+      groupNames,
       labels,
-      [...data.customGroups.values()].filter((g): g is string => !!g),
+      [...customGroups.values()].filter((g): g is string => !!g),
     ),
   );
-  const tonedIn = memo((data: EmojiData, tone: SkinToneValue) => (unified: string) => toned(data, tone, unified));
+  const tonedIn = memo((_records: readonly EmojiRecord[], _tone: SkinToneValue) => (unified: string) => store.withSkinTone(unified));
   const suggestedOf = memo((list: readonly string[], withTone: Toned) => list.map((u) => withTone(u)));
-  const sectionsOf = memo((data: EmojiData, ready: boolean, categories: readonly Category<Icon>[], suggested: readonly string[], collapsed: readonly string[], emojiVersion: number | undefined, withTone: Toned, item: Items) =>
-    ready
-      ? categorySections({
-          categories,
-          records: data.records,
-          suggested,
-          customGroup: (u) => data.customGroups.get(u),
-          collapsed: (id) => collapsed.includes(id),
-          emojiVersion,
-          get: store.get,
-          withSkinTone: withTone,
-          item,
-        })
-      : NO_SECTIONS,
+  const sectionsOf = memo(
+    (
+      records: readonly EmojiRecord[],
+      customGroups: ReadonlyMap<string, string | undefined>,
+      ready: boolean,
+      categories: readonly Category<Icon>[],
+      suggested: readonly string[],
+      collapsed: readonly string[],
+      emojiVersion: number | undefined,
+      withTone: Toned,
+      item: Items,
+    ) =>
+      ready
+        ? categorySections({
+            categories,
+            records,
+            suggested,
+            customGroup: (u) => customGroups.get(u),
+            collapsed: (id) => collapsed.includes(id),
+            emojiVersion,
+            get: store.get,
+            withSkinTone: withTone,
+            item,
+          })
+        : NO_SECTIONS,
   );
   const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined) => (emojiVersion == null ? results : results.filter((r) => r.imageUrl || r.version <= emojiVersion)));
   const resultSectionsOf = memo((results: readonly EmojiRecord[], mode: SearchResultsMode, categories: readonly Category<Icon>[], labels: EmojiLabels, groupNames: readonly string[], withTone: Toned, item: Items) => {
@@ -159,39 +174,43 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   const activeOf = memo(findItem);
   const keep = stable<PickerSnapshot<Icon>>();
 
-  const select = memo((state: Ui, opts: PickerStateOptions<Icon>, ready: boolean, data: EmojiData, tone: SkinToneValue, frequent: readonly string[], found: EmojiSearchState): PickerSnapshot<Icon> => {
-    const labels = opts.labels ?? store.labels();
-    const item = items(labels);
-    const query = queryOf(state, opts);
-    const searching = query.trim().length > 0;
-    const results = resultsOf(found.results, opts.emojiVersion);
-    const categories = categoriesOf(data, ready, opts.categories, labels);
-    const withTone = tonedIn(data, tone);
-    const suggested = suggestedOf(opts.suggested ?? (opts.frequent === false ? NO_IDS : frequent), withTone);
-    const collapsed = collapsedOf(state, opts);
-    const categorySections = sectionsOf(data, ready, categories, suggested, collapsed, opts.emojiVersion, withTone, item);
-    const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, labels, ready ? data.groupNames : NO_IDS, withTone, item) : categorySections;
-    const highlighted = highlightedOf(state, opts);
-    const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
-    return keep({
-      query,
-      searching,
-      results,
-      pending: found.pending,
-      categories,
-      categorySections,
-      sections,
-      collapsed,
-      skinTone: tone,
-      focus: virtual ? "virtual" : "roving",
-      highlighted,
-      hovered: state.hovered,
-      active: activeOf(sections, highlighted ?? state.hovered),
-      activeSection: state.activeSection,
-      variations: state.variations,
-      reactions: state.held ? state.held.reactions : reactionsOf(opts.reactions),
-    });
-  });
+  const select = memo(
+    (state: Ui, opts: PickerStateOptions<Icon>, ready: boolean, records: readonly EmojiRecord[], tone: SkinToneValue, frequent: readonly string[], found: EmojiSearchState, storeLabels: EmojiLabels): PickerSnapshot<Icon> => {
+      const labels = opts.labels ?? storeLabels;
+      const item = items(labels);
+      const groupNames = ready ? store.groupNames() : NO_IDS;
+      const customGroups = store.customGroups();
+      const query = queryOf(state, opts);
+      const searching = query.trim().length > 0;
+      const results = resultsOf(found.results, opts.emojiVersion);
+      const categories = categoriesOf(groupNames, customGroups, opts.categories, labels);
+      const withTone = tonedIn(records, tone);
+      const suggested = suggestedOf(opts.suggested ?? (opts.frequent === false ? NO_IDS : frequent), withTone);
+      const collapsed = collapsedOf(state, opts);
+      const categorySections = sectionsOf(records, customGroups, ready, categories, suggested, collapsed, opts.emojiVersion, withTone, item);
+      const sections = searching ? resultSectionsOf(results, opts.searchResults ?? "ranked", categories, labels, groupNames, withTone, item) : categorySections;
+      const highlighted = resolveKey(sections, opts.highlight === undefined ? state.highlighted : opts.highlight, state.highlighted);
+      const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
+      return keep({
+        query,
+        searching,
+        results,
+        pending: found.pending,
+        categories,
+        categorySections,
+        sections,
+        collapsed,
+        skinTone: tone,
+        focus: virtual ? "virtual" : "roving",
+        highlighted,
+        hovered: state.hovered,
+        active: activeOf(sections, highlighted ?? state.hovered),
+        activeSection: state.activeSection,
+        variations: state.variations,
+        reactions: state.held ? state.held.reactions : reactionsOf(opts.reactions),
+      });
+    },
+  );
 
   // Options arrive during render, where subscribers can't be told; a later notify publishes what they changed
   let unpublished = false;
@@ -201,9 +220,8 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
   function getSnapshot(): PickerSnapshot<Icon> {
     const state = ui.getSnapshot();
     const options = opts();
-    const { status, data } = store.getSnapshot();
     const frequent = state.held?.suggested ?? store.frequent(frequentCount());
-    return select(state, options, status === "ready", data, store.skinTone(), frequent, search.run(queryOf(state, options), options.searchLimit ?? 200));
+    return select(state, options, store.status() === "ready", store.records(), store.skinTone(), frequent, search.run(queryOf(state, options), options.searchLimit ?? 200), store.labels());
   }
 
   const setCollapsed = (id: string, value: boolean | undefined, { reason = "none", event }: ChangeSource<CollapsedCategoriesChangeDetails>) => {
@@ -238,15 +256,18 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
     },
     toggleCollapsed: (id: string, source: ChangeSource<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, undefined, source),
     setCollapsed: (id: string, value: boolean, source: ChangeSource<CollapsedCategoriesChangeDetails> = {}) => setCollapsed(id, value, source),
-    highlight(id: string | null, { reason = "none", event }: ChangeSource<HighlightChangeDetails> = {}) {
-      if (id === highlightedOf(ui.getSnapshot(), opts())) return;
-      const details = createChangeDetails(reason, event);
-      opts().onHighlightChange?.(id, details);
-      if (!details.isCanceled && opts().highlight === undefined) set({ highlighted: id });
+    highlight(emoji: string | null, { reason = "none", event }: ChangeSource<HighlightChangeDetails> = {}) {
+      const { sections, highlighted } = getSnapshot();
+      const key = resolveKey(sections, emoji, highlighted);
+      if (key === highlighted) return;
+      const details = Object.assign(createChangeDetails(reason, event), { key });
+      opts().onHighlightChange?.(findItem(sections, key)?.unified ?? null, details);
+      // Kept when controlled too: the owner's unified code then resolves to this key, not to the emoji's first section
+      if (!details.isCanceled) set({ highlighted: key });
     },
     hover: (id: string | null) => set({ hovered: id }),
     setActiveSection: (id: string | null) => set({ activeSection: id }),
-    choose: (id = highlightedOf(ui.getSnapshot(), opts())): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
+    choose: (id = getSnapshot().highlighted): EmojiSelection | undefined => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
     openVariations(id: string | null) {
       const record = findItem(getSnapshot().sections, id)?.record;
       if (!record?.tones.length || record.imageUrl || opts().disableVariations) return false;
@@ -269,13 +290,3 @@ export function createPickerState<Icon = unknown>(store: EmojiStore, options: Pi
 }
 
 export type PickerState<Icon = unknown> = ReturnType<typeof createPickerState<Icon>>;
-
-export function moveHighlight(state: PickerState, direction: EmojiGridMove, { columns = 9, pageRows = 1 }: { columns?: number; pageRows?: number } = {}): string | null {
-  const { sections, highlighted } = state.getSnapshot();
-  const grid = createEmojiGrid(sections, { columns, rowHeight: 1 });
-  const from = grid.indexOf(highlighted ?? "");
-  const to = from < 0 ? (direction === "last" ? grid.count - 1 : 0) : moveInGrid(grid, from, direction, pageRows);
-  const id = to == null ? null : (grid.at(to)?.id ?? null);
-  if (id != null) state.highlight(id, { reason: "keyboard" });
-  return id;
-}

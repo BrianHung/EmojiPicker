@@ -1,7 +1,5 @@
-import { GROUPS, type EmojiRecord, type Group } from "./dataset";
-import type { EmojiLabels } from "./labels";
+import { GROUPS, nameWithTone, type EmojiLabels, type EmojiRecord, type Group } from "@brianhung/emoji-picker-core";
 import { cached } from "./reactive";
-import { nameWithTone } from "./shortcodes";
 
 export type CategoryId = Group | "suggested" | "custom" | `custom:${string}`;
 
@@ -14,7 +12,16 @@ export type CategoryOption<Icon = unknown> = {
 
 const NO_NODES: readonly never[] = [];
 
-export class EmojiItem {
+export type EmojiItem = {
+  readonly id: string;
+  readonly section: string;
+  readonly record: EmojiRecord;
+  readonly unified: string;
+  readonly label: string;
+};
+
+// Also a React Aria collection node, so the list's collection holds the items themselves
+class Item implements EmojiItem {
   constructor(
     readonly id: string,
     readonly section: string,
@@ -71,10 +78,9 @@ const RESULT_ORDER = [...GROUPS, "custom"] as string[];
 export function categoryList<Icon>(options: readonly CategoryOption<Icon>[] | undefined, groupNames: readonly string[], labels: EmojiLabels, customGroups: Iterable<string>): Category<Icon>[] {
   const name = (id: string) => (id === "suggested" ? labels.suggested : id === "custom" ? labels.custom : id.startsWith("custom:") ? id.slice(7) : (groupNames[GROUPS.indexOf(id as (typeof GROUPS)[number])] ?? id));
   const listed: Category<Icon>[] = (options?.length ? options : DEFAULT_ORDER.map((id) => ({ id }) as CategoryOption<Icon>)).map((o) => ({ id: o.id, name: o.name ?? name(o.id), icon: o.icon, nav: o.nav !== false }));
-  const customInPlay = !options?.length || options.some((o) => o.id === "custom");
   const ids = new Set(listed.map((c) => c.id));
-  const appended = customInPlay ? [...new Set(customGroups)].filter((g) => !ids.has(`custom:${g}`)).map((g): Category<Icon> => ({ id: `custom:${g}`, name: g, nav: true })) : [];
-  return [...listed, ...appended];
+  const unlisted = ["custom", ...[...customGroups].map((g) => `custom:${g}`)].filter((id) => !ids.has(id) && ids.add(id));
+  return [...listed, ...unlisted.map((id): Category<Icon> => ({ id, name: name(id), nav: true }))];
 }
 
 type ItemCache = Map<string, EmojiItem>;
@@ -86,7 +92,7 @@ export function itemFactory(labels: EmojiLabels) {
     const id = `${section}:${unified}`;
     const hit = cache.get(id);
     if (hit?.record === record) return hit;
-    const item = new EmojiItem(id, section, record, unified, nameWithTone(record.name, unified, labels.withSkinTone));
+    const item = new Item(id, section, record, unified, nameWithTone(record.name, unified, labels.withSkinTone));
     cache.set(id, item);
     return item;
   };

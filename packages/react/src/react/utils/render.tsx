@@ -2,8 +2,12 @@ import * as React from "react";
 import { composeRenderProps } from "react-aria-components/composeRenderProps";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
+import type { PickerHandlers } from "./events";
 
 export type Orientation = "horizontal" | "vertical";
+
+// Base UI's convention: a present state attribute is empty, an absent one is undefined
+export const flag = (on: unknown): "" | undefined => (on ? "" : undefined);
 
 export type ElementProps<E extends Element = HTMLElement> = React.HTMLAttributes<E> & { ref?: React.Ref<E> };
 
@@ -17,7 +21,7 @@ export type PartProps<S, E extends Element = HTMLElement> = {
 
 type Children<S> = { children?: React.ReactNode | ((state: S) => React.ReactNode) };
 
-export type PartElementProps<S, E extends Element = HTMLDivElement, Omitted extends string = never> = Omit<React.HTMLAttributes<E>, "className" | "style" | "children" | Omitted> & PartProps<S, E> & Children<S>;
+export type PartElementProps<S, E extends Element = HTMLDivElement, Omitted extends string = never> = PickerHandlers<Omit<React.HTMLAttributes<E>, "className" | "style" | "children" | Omitted>> & PartProps<S, E> & Children<S>;
 
 type Input<S, E extends Element> = Omit<React.AllHTMLAttributes<E>, "className" | "style" | "children"> & { ref?: React.Ref<E> } & PartProps<S, E> & Children<S> & { [data: `data-${string}`]: unknown };
 
@@ -44,23 +48,19 @@ export const racClassName =
 
 export type InteractionState = { hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; disabled: boolean };
 
-export type RacState = { isHovered: boolean; isFocused: boolean; isFocusVisible: boolean; isPressed?: boolean; isDisabled: boolean; isSelected?: boolean };
+type RacState = { isHovered: boolean; isFocused: boolean; isFocusVisible: boolean; isDisabled: boolean };
 
-export const racState = (r: RacState): InteractionState & { selected: boolean } => ({
-  hovered: r.isHovered,
-  focused: r.isFocused,
-  focusVisible: r.isFocusVisible,
-  pressed: Boolean(r.isPressed),
-  disabled: r.isDisabled,
-  selected: Boolean(r.isSelected),
-});
+const racState = (r: RacState): InteractionState => ({ hovered: r.isHovered, focused: r.isFocused, focusVisible: r.isFocusVisible, pressed: false, disabled: r.isDisabled });
 
-export function racParts<S extends InteractionState, E extends Element>({ className, style, render }: PartProps<S, E>) {
+// React Aria writes its state attributes as "true"
+const presence = (props: object) => Object.fromEntries(Object.entries(props).map(([k, v]) => [k, k.startsWith("data-") && v === true ? "" : v]));
+
+export function racParts<S extends InteractionState, E extends Element>(tag: keyof React.JSX.IntrinsicElements, { className, style, render }: PartProps<S, E>) {
   const state = racState as unknown as (r: RacState) => S;
   const custom = toRenderFunction(render);
   return {
     className: (r: RacState) => resolve(className, state(r)) ?? "",
     style: (r: RacState) => resolve(style, state(r)),
-    render: custom && ((props: ElementProps<E>, r: RacState) => custom(props, state(r))),
+    render: (props: ElementProps<E>, r: RacState) => (custom ? custom(presence(props) as ElementProps<E>, state(r)) : React.createElement(tag, presence(props))),
   };
 }

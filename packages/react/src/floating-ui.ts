@@ -1,13 +1,14 @@
 "use client";
 
 export { EmojiPopover, EmojiSuggestions } from "./react/popover/floating-ui";
-export type { PopoverContentProps } from "./react/popover/floating-ui";
 export { pickerInitialFocus } from "./react/popover";
-export type { PopoverContentState } from "./react/popover";
 export type {
+  PopoverActions,
   PopoverAlign,
   PopoverAnchor,
   PopoverAnchorRect,
+  PopoverContentProps,
+  PopoverContentState,
   PopoverFinalFocus,
   PopoverInitialFocus,
   PopoverOpenChangeDetails,
@@ -18,4 +19,5 @@ export type {
   PopoverTriggerProps,
   PopoverTriggerState,
   SuggestionsPopoverProps,
+  SuggestionsPopoverState,
 } from "./react/popover";

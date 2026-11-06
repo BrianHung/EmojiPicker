@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-import data from "../data/en.json";
-import { expandDataset, type Dataset } from "./dataset";
-import { defaultLabels } from "./labels";
-import { categorySections, itemFactory, resultSections } from "./sections";
+import data from "@brianhung/emoji-picker-core/data/en.json";
+import { createEmojiStore, defaultLabels, type Dataset } from "@brianhung/emoji-picker-core";
+import { categoryList, categorySections, itemFactory, resultSections } from "./sections";
 
 describe("sections", () => {
-  const records = expandDataset(data as unknown as Dataset);
+  const records = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null, skinTone: null } }).records();
   const get = (u: string) => records.find((r) => r.unified === u || r.tones.includes(u));
   const categories = [
     { id: "suggested", name: "Frequently Used", nav: true },
@@ -103,5 +102,9 @@ describe("sections", () => {
         "Results",
       )[0]!.items[0],
     ).toBe(ranked[0]!.items[0]);
+  });
+
+  it("appends custom sections the categories don't list", () => {
+    expect(categoryList([{ id: "smileys_people" }, { id: "custom:frogs" }], [], defaultLabels, ["frogs", "cats"]).map((c) => c.id)).toEqual(["smileys_people", "custom:frogs", "custom", "custom:cats"]);
   });
 });

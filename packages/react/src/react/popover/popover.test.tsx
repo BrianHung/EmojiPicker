@@ -19,9 +19,9 @@ const outsidePress = (el: Element) =>
   });
 
 describe.each([
-  ["floating-ui", floating.EmojiPopover],
-  ["react-aria", aria.EmojiPopover],
-])("%s EmojiPopover", (_, EmojiPopover) => {
+  ["floating-ui", floating],
+  ["react-aria", aria],
+])("%s", (_, { EmojiPopover, EmojiSuggestions }) => {
   it("stays open when onOpenChange cancels an outside press", async () => {
     const outside = document.body.appendChild(document.createElement("button"));
     const host = document.body.appendChild(document.createElement("div"));
@@ -39,7 +39,23 @@ describe.each([
     );
     unmount = () => React.act(() => root.unmount());
     outsidePress(outside);
-    expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "outside-press" }));
+    expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "outside-press", event: expect.any(Event) }));
     expect(document.querySelector('[role="dialog"]')?.hasAttribute("data-open")).toBe(true);
+  });
+
+  it("renders EmojiSuggestions.Popover as a part, with state attributes and className as a function of state", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const root = createRoot(host);
+    const anchor = { getBoundingClientRect: () => ({ top: 10, left: 10, width: 0, height: 10 }) };
+    await React.act(async () =>
+      root.render(
+        <EmojiSuggestions.Popover open anchor={anchor} side="inline-end" className={({ side }) => `on-${side}`}>
+          <ul />
+        </EmojiSuggestions.Popover>,
+      ),
+    );
+    unmount = () => React.act(() => root.unmount());
+    const popup = document.querySelector('[data-slot="emoji-picker-suggestions-popover"]')!;
+    expect([popup.getAttribute("data-open"), popup.getAttribute("data-side"), popup.className]).toEqual(["", "inline-end", "on-inline-end"]);
   });
 });

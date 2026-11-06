@@ -1,26 +1,25 @@
-// Not React Aria's Tabs: they always select a tab, and "Frequently used" has none to select
+// A toolbar of jump links, not tabs: the sections are virtualized, so there are no tab panels to control, and "Frequently used" may have no tab
 import * as React from "react";
 import { useLocale } from "react-aria/I18nProvider";
-import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useFocusRing } from "react-aria/useFocusRing";
 import { useHover } from "react-aria/useHover";
 import { usePress } from "react-aria/usePress";
 import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
-import { hasModifier, rovingStep, usePickerKeyDown, type PickerKeyboardEventHandler } from "../utils/keyboard";
-import { useCategoryNavigation } from "../root/picker";
-import { renderElement, resolve, type Orientation, type PartElementProps } from "../utils/render";
+import { mergePartProps } from "../utils/events";
+import { hasModifier, rovingStep, usePickerKeyDown } from "../utils/keyboard";
+import { useCategoryNavigation, type NavCategory } from "../root/picker";
+import { flag, renderElement, resolve, type Orientation, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 
-export type NavCategory = ReturnType<typeof useCategoryNavigation>["categories"][number];
+export type { NavCategory };
 
 export type CategoryNavState = { orientation: Orientation; disabled: boolean };
 
-export type CategoryNavProps = Omit<PartElementProps<CategoryNavState, HTMLDivElement, "role" | "onKeyDown" | "dangerouslySetInnerHTML">, "children"> & {
+export type CategoryNavProps = Omit<PartElementProps<CategoryNavState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">, "children"> & {
   orientation?: Orientation;
-  onKeyDown?: PickerKeyboardEventHandler<HTMLDivElement>;
   children?: (category: NavCategory) => React.ReactNode;
 };
 
@@ -72,13 +71,13 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
           ...props,
           ref,
           id,
-          role: "tablist",
+          role: "toolbar",
           "aria-label": picker.labels.categoryNavigation,
           "aria-orientation": orientation,
           className: className ?? "",
           "data-slot": SLOTS.categoryNav,
           "data-orientation": orientation,
-          "data-disabled": disabled || undefined,
+          "data-disabled": flag(disabled),
           style: (s: CategoryNavState) => ({ pointerEvents: s.disabled ? "none" : undefined, ...resolve(style, s) }),
           onKeyDown: keys,
           onFocus: (e: React.FocusEvent) => {
@@ -102,7 +101,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
 
 export type CategoryTabState = { category: NavCategory; selected: boolean; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
 
-export type CategoryTabProps = PartElementProps<CategoryTabState, HTMLDivElement, "role" | "id">;
+export type CategoryTabProps = PartElementProps<CategoryTabState, HTMLDivElement, "role">;
 
 const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
   const nav = React.useContext(NavContext);
@@ -137,21 +136,21 @@ const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function 
     {
       "data-slot": SLOTS.categoryTab,
       id: `${nav.id}-tab-${c.id}`,
-      role: "tab",
+      role: "button",
       "aria-label": c.name,
-      "aria-selected": selected,
+      "aria-current": selected || undefined,
       "aria-disabled": disabled || undefined,
       tabIndex: disabled ? undefined : c.id === nav.stop ? 0 : -1,
       className: "",
-      ...mergeProps(props, hoverProps, pressProps, focusProps),
+      ...mergePartProps(props, hoverProps, pressProps, focusProps),
       ref: refs,
       "data-key": c.id,
-      "data-disabled": disabled || undefined,
-      "data-focused": state.focused || undefined,
-      "data-focus-visible": state.focusVisible || undefined,
-      "data-hovered": state.hovered || undefined,
-      "data-pressed": state.pressed || undefined,
-      "data-active": state.active ? "" : undefined,
+      "data-disabled": flag(disabled),
+      "data-focused": flag(state.focused),
+      "data-focus-visible": flag(state.focusVisible),
+      "data-hovered": flag(state.hovered),
+      "data-pressed": flag(state.pressed),
+      "data-active": flag(state.active),
       children: children ?? icon,
     },
     state,

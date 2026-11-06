@@ -1,5 +1,5 @@
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiItem, EmojiSection } from "../state/sections";
 
 const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): Node<unknown> => ({
   type,
@@ -22,7 +22,7 @@ export class EmojiCollection implements Collection<Node<unknown>> {
   constructor(sections: readonly EmojiSection[]) {
     for (const s of sections) {
       const header = s.header ? [node("header", `header:${s.id}`, s, s.name, [], s.id)] : [];
-      const children = [...header, ...(s.items as readonly Node<unknown>[])];
+      const children = [...header, ...(s.items as unknown as readonly Node<unknown>[])];
       this.add(node("section", s.id, s, s.name, children), true);
       for (const child of children) this.add(child);
     }

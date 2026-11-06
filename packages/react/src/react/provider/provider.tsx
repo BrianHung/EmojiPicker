@@ -1,8 +1,8 @@
 import * as React from "react";
-import { I18nProvider } from "react-aria-components/I18nProvider";
+import { I18nProvider, useLocale } from "react-aria/I18nProvider";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
 import { needsImageFallback, onNativeSupportChange } from "../emoji/native";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type InternalEmojiStore, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
 
 export type { EmojiLabels };
 
@@ -10,12 +10,11 @@ export type ImageUrl = (unified: string, context: { renderer: Renderer }) => str
 
 const twemoji: ImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
 
-export type EmojiProviderProps = EmojiStoreOptions & {
+export type EmojiProviderProps = Omit<EmojiStoreOptions, "deferStorage"> & {
   renderer?: Renderer | "auto";
   imageUrl?: ImageUrl;
   imageVersion?: number;
   prepare?: boolean;
-  labels?: Partial<EmojiLabels>;
   children: React.ReactNode;
 };
 
@@ -29,36 +28,55 @@ type ContextValue = {
 
 export const EmojiContext = React.createContext<ContextValue | null>(null);
 
-export function EmojiProvider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, ...options }: EmojiProviderProps) {
-  const [store] = React.useState(() => createEmojiStore({ ...options, locale, labels }) as InternalEmojiStore);
-  const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
-  React.useLayoutEffect(() => store.controlSkinTone(skinTone, onSkinToneChange), [store, skinTone, onSkinToneChange]);
-  React.useLayoutEffect(() => store.controlFrequents(frequents, onFrequentsChange), [store, frequents, onFrequentsChange]);
-  React.useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale }), [store, data, customEmojis, filter, searchEngine, locale]);
-  const [detected, setDetected] = React.useState<Renderer>("native");
+const contextValue = (store: EmojiStore, renderer: Renderer, imageUrl: ImageUrl, imageVersion: number, labels: EmojiLabels): ContextValue => ({
+  store,
+  renderer,
+  image: (unified, as = renderer) => (isUnified(unified) ? imageUrl(unified, { renderer: as }) : undefined),
+  labels,
+  maxVersion: renderer === "image" ? imageVersion : undefined,
+});
 
-  React.useEffect(() => {
-    const detect = () => setDetected(needsImageFallback() ? "image" : "native");
-    if (renderer === "auto") detect();
-    if (prepare) store.prepare();
-    return renderer === "auto" ? onNativeSupportChange(detect) : undefined;
-  }, [renderer, prepare, store]);
-
-  const resolved = renderer === "auto" ? detected : renderer;
-  const loadedLocale = useStore(store, (s) => (s.status === "ready" ? s.data.locale : undefined));
-  const merged = useLabels(labels, locale ?? loadedLocale);
-  const value = React.useMemo<ContextValue>(
-    () => ({
-      store,
-      renderer: resolved,
-      image: (unified, as = resolved) => (isUnified(unified) ? imageUrl(unified, { renderer: as }) : undefined),
-      labels: merged,
-      maxVersion: resolved === "image" ? imageVersion : undefined,
-    }),
-    [store, resolved, imageUrl, imageVersion, merged],
+const noop = () => () => {};
+// True while hydrating (and on the server): storage then waits until after mount, so the first client render matches the server's
+const useHydrating = () =>
+  React.useSyncExternalStore(
+    noop,
+    () => false,
+    () => true,
   );
-  const tree = <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>;
-  return locale ? <I18nProvider locale={locale}>{tree}</I18nProvider> : tree;
+
+function useRenderer(renderer: Renderer | "auto") {
+  const [detected, setDetected] = React.useState<Renderer>("native");
+  React.useEffect(() => {
+    if (renderer !== "auto") return;
+    const detect = () => setDetected(needsImageFallback() ? "image" : "native");
+    detect();
+    return onNativeSupportChange(detect);
+  }, [renderer]);
+  return renderer === "auto" ? detected : renderer;
+}
+
+export function EmojiProvider(props: EmojiProviderProps) {
+  const deferStorage = useHydrating();
+  const [store] = React.useState(() => createEmojiStore({ ...props, deferStorage }));
+  return <Provider {...props} store={store} />;
+}
+
+function Provider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, store, ...options }: EmojiProviderProps & { store: EmojiStore }) {
+  const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
+  React.useLayoutEffect(() => store.setOptions({ data, customEmojis, filter, searchEngine, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange }));
+  React.useEffect(() => void (prepare && store.prepare()), [prepare, store]);
+  const resolved = useRenderer(renderer);
+  const loadedLocale = useStore({ subscribe: store.subscribe, getSnapshot: () => (store.status() === "ready" ? store.locale() : undefined) });
+  const merged = useLabels(labels, locale ?? loadedLocale);
+  const value = React.useMemo(() => contextValue(store, resolved, imageUrl, imageVersion, merged), [store, resolved, imageUrl, imageVersion, merged]);
+  // React Aria's provider swaps components between a set and an unset locale, which would remount the tree
+  const inherited = useLocale().locale;
+  return (
+    <I18nProvider locale={locale ?? inherited}>
+      <EmojiContext.Provider value={value}>{children}</EmojiContext.Provider>
+    </I18nProvider>
+  );
 }
 
 function useLabels(labels: Partial<EmojiLabels> | undefined, locale: string | undefined): EmojiLabels {
@@ -68,11 +86,19 @@ function useLabels(labels: Partial<EmojiLabels> | undefined, locale: string | un
   return React.useMemo(() => localizeLabels(locale, latest.current), [key, locale, labels?.resultCount, labels?.withSkinTone]);
 }
 
+let shared: ContextValue | undefined;
+
+// Everything outside an EmojiProvider shares one store, created on first use with the provider's defaults, so frequents and the skin tone agree
+const sharedValue = (deferStorage: boolean) => (shared ??= contextValue(createEmojiStore({ deferStorage }), "native", twemoji, TWEMOJI_EMOJI_VERSION, localizeLabels()));
+
 export function useEmojiContext(): ContextValue {
-  const value = React.useContext(EmojiContext);
-  if (!value) throw new Error("Emoji components and hooks must be used inside <EmojiProvider>.");
-  return value;
+  const context = React.useContext(EmojiContext);
+  const hydrating = useHydrating();
+  return context ?? sharedValue(hydrating);
 }
+
+// A Root without a provider gets one around the shared store
+export const SharedProvider = ({ children }: { children: React.ReactNode }) => <Provider store={useEmojiContext().store}>{children}</Provider>;
 
 export const useEmojiStore = (): EmojiStore => useEmojiContext().store;
 
@@ -80,5 +106,5 @@ export const useEmojiLabels = (): EmojiLabels => useEmojiContext().labels;
 
 export function useStoreSnapshot<T>(read: (store: EmojiStore) => T): T {
   const { store } = useEmojiContext();
-  return useStore(store, () => read(store));
+  return useStore({ subscribe: store.subscribe, getSnapshot: () => read(store) });
 }

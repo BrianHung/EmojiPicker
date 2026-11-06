@@ -1,11 +1,11 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
 import { createChangeDetails, type ChangeDetails } from "./change";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
-import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type FrequencyStoreOptions, type FrequentsTuning } from "./frequents";
+import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type Frequents, type FrequentsChangeDetails, type FrequentsTuning } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
 import { cached, createStore, memo } from "./reactive";
-import type { CompletionOrder, SearchIndex } from "./search/search-index";
+import type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./search/search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
@@ -13,23 +13,28 @@ export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { s
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
-export type EmojiStoreOptions = Pick<FrequencyStoreOptions, "frequents" | "defaultFrequents" | "onFrequentsChange"> & {
-  storage?: { frequents?: EmojiStorage | null; skinTone?: EmojiStorage | null };
-  frequentsTuning?: FrequentsTuning;
+export type EmojiStoreOptions = {
   data?: EmojiDataSource;
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   filter?: (record: EmojiRecord) => boolean;
-  skinTone?: SkinToneValue;
-  defaultSkinTone?: SkinToneValue;
-  onSkinToneChange?: (tone: SkinToneValue, details: SkinToneChangeDetails) => void;
   searchEngine?: EmojiSearch;
   locale?: string;
   labels?: Partial<EmojiLabels>;
+  skinTone?: SkinToneValue;
+  defaultSkinTone?: SkinToneValue;
+  onSkinToneChange?: (tone: SkinToneValue, details: SkinToneChangeDetails) => void;
+  frequents?: Frequents;
+  defaultFrequents?: Frequents;
+  onFrequentsChange?: (frequents: Frequents, details: FrequentsChangeDetails) => void;
+  storage?: { frequents?: EmojiStorage | null; skinTone?: EmojiStorage | null };
+  // Server-rendered pages hydrate with the defaults, then read storage once something subscribes
+  deferStorage?: boolean;
+  frequentsTuning?: FrequentsTuning;
 };
 
-export type SkinToneChangeDetails = ChangeDetails<"item-press" | "none">;
+export type EmojiStoreUpdate = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale" | "skinTone" | "onSkinToneChange" | "frequents" | "onFrequentsChange">;
 
-export type EmojiSourceOptions = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale">;
+export type SkinToneChangeDetails = ChangeDetails<"item-press" | "none">;
 
 export type EmojiStoreStatus = "idle" | "loading" | "ready" | "error";
 
@@ -45,6 +50,33 @@ export type EmojiSelection = {
   imageUrl?: string;
 };
 
+export type EmojiStore = {
+  readonly frequents: FrequencyStore;
+  subscribe(listener: () => void): () => void;
+  setOptions(options: EmojiStoreUpdate): void;
+  load(): Promise<void>;
+  prepare(): void;
+  status(): EmojiStoreStatus;
+  error(): Error | null;
+  records(): readonly EmojiRecord[];
+  groupNames(): readonly string[];
+  customEmojis(): readonly CustomEmoji[];
+  customGroups(): ReadonlyMap<string, string | undefined>;
+  packErrors(): readonly Error[];
+  locale(): string | undefined;
+  labels(): EmojiLabels;
+  get(unified: string): EmojiRecord | undefined;
+  frequent(n: number): readonly string[];
+  fromShortcode(code: string): EmojiRecord | undefined;
+  query(text: string, options?: { limit?: number; signal?: AbortSignal }): EmojiRecord[] | Promise<EmojiRecord[]> | ProgressiveHits<EmojiRecord[]>;
+  completeShortcode(prefix: string, limit?: number, order?: CompletionOrder): ShortcodeCompletion[];
+  replaceShortcodes(text: string): string;
+  skinTone(): SkinToneValue;
+  setSkinTone(tone: SkinToneValue, options?: { reason?: SkinToneChangeDetails["reason"]; event?: Event }): void;
+  withSkinTone(unified: string): string;
+  select(unified: string, options?: { count?: boolean }): EmojiSelection | undefined;
+};
+
 export type EmojiData = {
   records: readonly EmojiRecord[];
   byUnified: ReadonlyMap<string, EmojiRecord>;
@@ -55,7 +87,7 @@ export type EmojiData = {
   packErrors: readonly Error[];
 };
 
-export type EmojiStoreState = {
+type State = {
   status: EmojiStoreStatus;
   error: Error | null;
   loading: Promise<void> | null;
@@ -64,14 +96,16 @@ export type EmojiStoreState = {
   controlledTone: SkinToneValue | undefined;
 };
 
-type EmojiStoreAction = { type: "load"; loading: Promise<void> | null } | { type: "loaded"; data: EmojiData } | { type: "failed"; error: Error } | { type: "tone"; tone: SkinToneValue } | { type: "control"; tone: SkinToneValue | undefined };
+export type InternalStore = EmojiStore & { getSnapshot(): State };
 
-const reduce = (state: EmojiStoreState, action: EmojiStoreAction): EmojiStoreState => {
+type Action = { type: "load"; loading: Promise<void> | null } | { type: "loaded"; data: EmojiData } | { type: "failed"; error: Error } | { type: "tone"; tone: SkinToneValue } | { type: "control"; tone: SkinToneValue | undefined };
+
+const reduce = (state: State, action: Action): State => {
   switch (action.type) {
     case "load":
       return { ...state, status: state.status === "ready" ? "ready" : action.loading ? "loading" : "idle", loading: action.loading };
     case "loaded":
-      return { ...state, status: "ready", data: action.data };
+      return { ...state, status: "ready", error: null, data: action.data };
     case "failed":
       return { ...state, status: "error", error: action.error, loading: null };
     case "tone":
@@ -81,8 +115,7 @@ const reduce = (state: EmojiStoreState, action: EmojiStoreAction): EmojiStoreSta
   }
 };
 
-export type InternalEmojiStore = ReturnType<typeof createInternalEmojiStore>;
-export type EmojiStore = Omit<InternalEmojiStore, "controlFrequents" | "controlSkinTone" | "prepare" | "setOptions" | "index">;
+type Source = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale">;
 
 const defaultEngine = lexical();
 const CODEPOINTS = /^[\da-f-]+$/i;
@@ -90,21 +123,24 @@ const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], 
 
 type Raw = [dataset: Dataset, packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] }];
 
-const inline = ({ data, customEmojis }: EmojiSourceOptions): Raw | null => (typeof data === "object" && !customSources(customEmojis).length ? [toDataset(data), { emojis: [], errors: [] }] : null);
+const inline = ({ data, customEmojis }: Source): Raw | null => (typeof data === "object" && !customSources(customEmojis).length ? [toDataset(data), { emojis: [], errors: [] }] : null);
 
+// A loader or pack written inline is a new function or object every render: functions count as the same source, objects by their contents
+const packKey = (pack: CustomEmojiSource) => (typeof pack === "function" ? "" : typeof pack === "string" ? pack : JSON.stringify(pack));
+const sameData = (a: Source, b: Source) => a.data === b.data || (typeof a.data === "function" && typeof b.data === "function" && a.locale === b.locale);
+const sameSource = (a: Source, b: Source) => sameData(a, b) && customSources(a.customEmojis).map(packKey).join("\n") === customSources(b.customEmojis).map(packKey).join("\n");
 const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
-const sameSource = (a: EmojiSourceOptions, b: EmojiSourceOptions) => a.data === b.data && sameItems(customSources(a.customEmojis), customSources(b.customEmojis));
 
 const lookup = (data: EmojiData, unified: string) => data.byUnified.get(unified.toLowerCase()) ?? data.byUnified.get(unified);
 
-export function toned(data: EmojiData, tone: SkinToneValue, unified: string): string {
+const toned = (data: EmojiData, tone: SkinToneValue, unified: string): string => {
   const record = lookup(data, unified);
-  return record && tone && record.tones[tone - 1] ? record.tones[tone - 1]! : unified;
-}
+  return (tone && record?.tones[tone - 1]) || unified;
+};
 
-export const createEmojiStore: (options?: EmojiStoreOptions) => EmojiStore = createInternalEmojiStore;
+export const createEmojiStore: (options?: EmojiStoreOptions) => EmojiStore = createInternalStore;
 
-function createInternalEmojiStore({
+export function createInternalStore({
   frequents: controlledFrequents,
   defaultFrequents,
   onFrequentsChange,
@@ -114,10 +150,11 @@ function createInternalEmojiStore({
   defaultSkinTone = 0,
   onSkinToneChange,
   labels: labelOverrides,
+  deferStorage = false,
   ...source
-}: EmojiStoreOptions = {}) {
-  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, storage: frequentsStorage, tuning: frequentsTuning });
-  let config: EmojiSourceOptions = source;
+}: EmojiStoreOptions = {}): InternalStore {
+  const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, storage: frequentsStorage, tuning: frequentsTuning, deferStorage });
+  let config: Source = source;
   let raw: Raw | null = null;
   let base: readonly EmojiRecord[] = [];
   let controller: AbortController | undefined;
@@ -127,14 +164,14 @@ function createInternalEmojiStore({
     raw = next;
     const [dataset, { emojis, errors }] = next;
     const all = expand(dataset);
-    base = config.filter ? all.filter(config.filter) : all;
     const byCode = new Map(all.map((r) => [r.unified, r]));
-    const records = [...base, ...customRecords(emojis, base.length, (u) => byCode.get(u.toLowerCase()))];
+    const every = [...all, ...customRecords(emojis, all.length, (u) => byCode.get(u.toLowerCase()))];
+    const records = (base = config.filter ? every.filter(config.filter) : every);
     const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
     return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customs: emojis, customGroups: new Map(emojis.map((c) => [c.id, c.group])), packErrors: errors };
   };
   const storedTone = () => clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
-  const state = createStore<EmojiStoreState, EmojiStoreAction>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, ownTone: storedTone(), controlledTone }, reduce);
+  const state = createStore<State, Action>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, ownTone: deferStorage ? clampTone(defaultSkinTone) : storedTone(), controlledTone }, reduce);
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
@@ -152,9 +189,8 @@ function createInternalEmojiStore({
   const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale }));
 
-  const store = {
-    frequents: frequents as FrequencyStore,
-    controlFrequents: frequents.control,
+  const store: InternalStore = {
+    frequents,
     getSnapshot: state.getSnapshot,
     customEmojis: (): readonly CustomEmoji[] => loaded().customs,
     customGroups: (): ReadonlyMap<string, string | undefined> => loaded().customGroups,
@@ -180,7 +216,10 @@ function createInternalEmojiStore({
       return pending;
     },
 
-    setOptions(next: EmojiSourceOptions) {
+    setOptions({ skinTone, onSkinToneChange, frequents: entries, onFrequentsChange, ...next }) {
+      onToneChange = onSkinToneChange;
+      state.dispatch({ type: "control", tone: skinTone });
+      frequents.control(entries, onFrequentsChange);
       const previous = config;
       config = next;
       if (!sameSource(previous, next)) return reload();
@@ -194,7 +233,7 @@ function createInternalEmojiStore({
       idle(() =>
         store
           .load()
-          .then(() => idle(() => store.index()))
+          .then(() => idle(index))
           .catch(() => {}),
       );
     },
@@ -217,14 +256,9 @@ function createInternalEmojiStore({
       );
     },
 
-    index(): SearchIndex {
-      if (!ready()) throw new Error("emoji data is not loaded; await store.load() first");
-      return indexOf(loaded().records, loaded().locale);
-    },
+    fromShortcode: (code) => (ready() ? index().byShortcode(code) : undefined),
 
-    fromShortcode: (code: string) => (ready() ? store.index().byShortcode(code) : undefined),
-
-    query(text: string, { limit = 200, signal = new AbortController().signal }: { limit?: number; signal?: AbortSignal } = {}): EmojiRecord[] | Promise<EmojiRecord[]> | ProgressiveHits<EmojiRecord[]> {
+    query(text, { limit = 200, signal = new AbortController().signal } = {}) {
       if (!ready() || !text.trim()) return [];
       const resolve = (hits: readonly SearchHit[]) => [...new Set(hits.map((hit) => store.get(hit.unified)).filter((r): r is EmojiRecord => r !== undefined))].slice(0, limit);
       const result = (config.searchEngine ?? defaultEngine)(text, { records: loaded().records, limit, signal, frequency: (u) => frequents.score(u), locale: loaded().locale });
@@ -233,14 +267,14 @@ function createInternalEmojiStore({
       const interim = interimOf(result);
       return interim ? withInterim(settled, resolve(interim)) : settled;
     },
-    completeShortcode: (prefix: string, limit?: number, order?: CompletionOrder) => (ready() ? store.index().completeShortcode(prefix, limit, order) : []),
-    replaceShortcodes: (text: string) => (ready() ? replaceShortcodes(text, store.index()) : text),
+    completeShortcode: (prefix, limit, order) => (ready() ? index().completeShortcode(prefix, limit, order) : []),
+    replaceShortcodes: (text) => (ready() ? replaceShortcodes(text, index()) : text),
 
     skinTone: () => {
       const { controlledTone, ownTone } = state.getSnapshot();
       return controlledTone === undefined ? ownTone : clampTone(controlledTone);
     },
-    setSkinTone(next: SkinToneValue, { reason = "none", event }: { reason?: SkinToneChangeDetails["reason"]; event?: Event } = {}) {
+    setSkinTone(next, { reason = "none", event } = {}) {
       const value = clampTone(next);
       if (value === store.skinTone()) return;
       const details = createChangeDetails(reason, event);
@@ -249,17 +283,12 @@ function createInternalEmojiStore({
       skinToneStorage?.write(String(value));
       state.dispatch({ type: "tone", tone: value });
     },
-    controlSkinTone(value: SkinToneValue | undefined, onChange?: EmojiStoreOptions["onSkinToneChange"]) {
-      onToneChange = onChange;
-      state.dispatch({ type: "control", tone: value });
-    },
-
-    select(unified: string, { record: count = true } = {}): EmojiSelection | undefined {
+    select(unified, { count = true } = {}) {
       const record = store.get(unified);
       if (!record) return undefined;
       const tone = record.imageUrl ? 0 : toneOf(unified);
       const resolved = tone ? (record.tones[tone - 1] ?? record.unified) : record.unified;
-      if (count) frequents.record(record.unified);
+      if (count) frequents.pick(record.unified);
       return {
         emoji: record.imageUrl ? "" : unifiedToNative(resolved),
         unified: resolved,
@@ -273,10 +302,11 @@ function createInternalEmojiStore({
       };
     },
 
-    withSkinTone: (unified: string): string => toned(loaded(), store.skinTone(), unified),
+    withSkinTone: (unified) => toned(loaded(), store.skinTone(), unified),
 
     subscribe: syncWith(skinToneStorage, state.subscribe, () => state.dispatch({ type: "tone", tone: storedTone() })),
   };
+  const index = (): SearchIndex => indexOf(loaded().records, loaded().locale);
   reload();
   return store;
 }
