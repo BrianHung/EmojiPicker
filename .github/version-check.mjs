@@ -11,6 +11,9 @@ const json = (file) => JSON.parse(readFileSync(join(tmp, file), "utf8"));
 const git = (...args) => execFileSync("git", ["-c", "user.name=ci", "-c", "user.email=ci@localhost", "-c", "commit.gpgsign=false", ...args], { cwd: tmp, stdio: "ignore" });
 const changeset = (...args) => execFileSync(join(root, "node_modules/.bin/changeset"), args, { cwd: tmp, stdio: ["ignore", "ignore", "inherit"] });
 
+// The check below holds only while every package versions together
+if (!JSON.parse(readFileSync(join(root, ".changeset/config.json"), "utf8")).fixed.some((group) => group.includes("@brianhung/emoji-picker-*"))) throw new Error('.changeset/config.json must set "fixed": [["@brianhung/emoji-picker-*"]]');
+
 try {
   cpSync(root, tmp, { recursive: true, filter: (src) => !/[/\\](node_modules|\.git|dist|\.claude|\.cache)$/.test(src) });
   symlinkSync(join(root, "node_modules"), join(tmp, "node_modules"));

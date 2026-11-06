@@ -75,4 +75,4 @@ jobs:
           base: ${{ github.ref_name }}
           title: ${{ steps.versions.outputs.title }}
           commit-message: Bump upstream emoji versions
-          body: Pins bumped, packages rebuilt and smoke-tested by the Upstream workflow. Review the changesets and the twemoji-font README version table; nothing is published.
+          body: The Upstream workflow bumped the pins, rebuilt the data and the font, and ran their tests. CI does not run on this PR, so run `npm run release:check` locally before merging. Review the changesets and the twemoji-font README version table. Nothing is published.

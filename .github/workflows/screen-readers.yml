@@ -10,6 +10,9 @@ concurrency:
   group: screen-readers-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   voiceover:
     runs-on: macos-latest

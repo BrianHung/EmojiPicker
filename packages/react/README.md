@@ -21,10 +21,10 @@ The item also exports `EmojiPickerBody`, `EmojiPickerCell`, `EmojiPickerFooter`,
 ### npm
 
 ```bash
-npm i @brianhung/emoji-picker-react@alpha
+npm i @brianhung/emoji-picker-react
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
 `@brianhung/emoji-picker-core` installs as a dependency. To import its helpers (`localeData`, `twemojiUrl`, `withoutTone`) under a strict package manager such as pnpm, add it to your own dependencies.
 

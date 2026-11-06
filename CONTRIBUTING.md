@@ -63,15 +63,35 @@ The API shape follows Base UI. Behavior follows React Aria.
 
 ## Releasing
 
-Changes to a published package come with a changeset (`npm run changeset`). Changesets is in prerelease mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`. In this mode, `changeset publish` publishes under the `alpha` dist-tag. The Release workflow, run by hand, opens a "Version packages" PR that applies the changesets (`npm run version-packages`). The workflow does not publish. Publishing requires the owner's npm account.
+Changes to a published package come with a changeset (`npm run changeset`). The four packages version together (`"fixed"` in `.changeset/config.json`), and `.github/version-check.mjs` checks that they do. Changesets is in prerelease mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`. The first publish sets both the `alpha` and `latest` dist-tags. Later alphas publish to `latest`, so the docs install without a tag. The Release workflow, run by hand, opens a "Version packages" PR that applies the changesets (`npm run version-packages`). The workflow does not publish. Publishing requires the owner's npm account.
 
-Before publishing, on the release commit:
+The Release and Upstream workflows open their PRs with `GITHUB_TOKEN`. GitHub starts no workflow runs for events that this token causes, so CI does not run on those PRs. To run it, give the workflows a personal access token or a GitHub App token as a secret. Otherwise, run `npm run release:check` locally before you merge.
 
-1. Run `npm run release:check`. It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), and the packed-install smoke test (`npm run smoke`: Vite, a Next.js App Router build, and `shadcn add` of the registry item). It then runs every e2e spec, including visual, and axe against a production build. Visual baselines are local, so this is the only run that checks them. If they are not in `apps/demo/e2e/__snapshots__`, restore them first.
-2. Publish:
+To publish:
 
-```bash
-npx changeset publish
-```
+1. Fast-forward `main` to the release branch. Run the Release workflow, and merge the "Version packages" PR. Check that all four packages are at the same version.
+2. On the release commit, run `npm ci` and `npm run release:check`. It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), the version check, the Twemoji font build and its publint (skipped without Python 3.12; set `PYTHON`), and the packed-install smoke test (`npm run smoke`: Vite, React 18 with a server render, a Next.js App Router build, and `shadcn add`). It then runs every e2e spec, including visual, and axe against a production build. Visual baselines are local, so this is the only run that checks them. If they are not in `apps/demo/e2e/__snapshots__`, restore them first.
+3. Publish, and push the tags. Pre mode rejects `--tag`.
 
-`prepublishOnly` builds core and the React package. The data package and the Twemoji font build when they are packed.
+   ```bash
+   npm whoami
+   npx changeset publish          # add --otp <code> with 2FA
+   git push origin --follow-tags
+   ```
+
+   `changeset publish` is not atomic. If a package fails to publish, run it again: it skips versions that are already published. `prepublishOnly` builds core and the React package. The data package and the Twemoji font build when they are packed.
+
+4. Check the dist-tags. `latest` must be the new version for all four packages.
+
+   ```bash
+   for p in core data react twemoji-font; do npm view @brianhung/emoji-picker-$p dist-tags; done
+   npm dist-tag add @brianhung/emoji-picker-<package>@<version> latest   # if latest is missing or behind
+   ```
+
+5. Check the CDN and a fresh install.
+
+   ```bash
+   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-core@<version>/data/en.json | head -1
+   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/ja/iamcal.json | head -1
+   npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json   # in a fresh Vite and Tailwind app
+   ```

@@ -27,10 +27,10 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 ### npm
 
 ```bash
-npm i @brianhung/emoji-picker-react@alpha
+npm i @brianhung/emoji-picker-react
 ```
 
-The packages are in prerelease and are published under the `alpha` tag.
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
 
 ## Usage
 
