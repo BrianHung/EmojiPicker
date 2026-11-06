@@ -4,6 +4,8 @@ import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 export type CollectionValue = EmojiSection | EmojiItem;
 export type CollectionNode = Node<CollectionValue>;
 
+export const isSection = (value: CollectionValue | null): value is EmojiSection => value != null && "items" in value;
+
 const node = (type: "section" | "header" | "item", key: Key, value: CollectionValue, textValue: string, childNodes: CollectionNode[] = [], parentKey: Key | null = null): CollectionNode => ({
   type,
   key,
@@ -33,13 +35,13 @@ export class EmojiCollection implements Collection<CollectionNode> {
   readonly #top: CollectionNode[] = [];
   readonly #positions = new Map<Key, number>();
   readonly #items = new Map<Key, EmojiItem>();
-  readonly #sections = new Map<Key, EmojiSection>();
+  readonly #sections: EmojiSection[] = [];
 
   constructor(sections: readonly EmojiSection[]) {
     for (const s of sections) {
       const header = s.header ? [node("header", `header:${s.id}`, s, s.name, [], s.id)] : [];
       const children = [...header, ...s.items.map(itemNode)];
-      this.#sections.set(s.id, s);
+      this.#sections.push(s);
       this.#add(node("section", s.id, s, s.name, children), true);
       for (const child of children) this.#add(child);
       for (const item of s.items) this.#items.set(item.id, item);
@@ -91,10 +93,7 @@ export class EmojiCollection implements Collection<CollectionNode> {
   emoji(key: Key | null | undefined): EmojiItem | undefined {
     return key == null ? undefined : this.#items.get(key);
   }
-  section(key: Key): EmojiSection | undefined {
-    return this.#sections.get(key);
-  }
-  sections(): EmojiSection[] {
-    return [...this.#sections.values()];
+  sections(): readonly EmojiSection[] {
+    return this.#sections;
   }
 }

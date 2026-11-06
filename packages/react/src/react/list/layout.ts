@@ -2,7 +2,7 @@ import type { Key } from "@react-types/shared";
 import { Layout, LayoutInfo, Rect, Size } from "react-stately/useVirtualizerState";
 import { shallowEqual, type EmojiSection, type SearchResultsMode } from "@brianhung/emoji-picker-core";
 import { createEmojiGrid, layoutStrip, placeCell, type EmojiGrid, type StripLayout } from "@brianhung/emoji-picker-core/grid";
-import type { CollectionNode, CollectionValue } from "./collection";
+import { isSection, type CollectionNode } from "./collection";
 
 export interface GridMetrics {
   cellWidth: number;
@@ -26,8 +26,6 @@ export interface EmojiGridLayoutOptions {
 
 type SectionBox = { key: Key; info: LayoutInfo; header: LayoutInfo | null; rows: number[] };
 type Add = (info: LayoutInfo | null | undefined) => void;
-
-const isSection = (value: CollectionValue): value is EmojiSection => "items" in value;
 
 const X = { horizontal: true, scroll: "scrollLeft", client: "clientWidth", by: "left", start: "x", end: "maxX", size: "width" } as const;
 const Y = { horizontal: false, scroll: "scrollTop", client: "clientHeight", by: "top", start: "y", end: "maxY", size: "height" } as const;
@@ -61,7 +59,7 @@ export abstract class EmojiGridLayout extends Layout<CollectionNode, EmojiGridLa
     this.cellInfos = new Map();
     this.sections = [];
     const sections: EmojiSection[] = [];
-    for (const n of this.virtualizer!.collection) if (n.value && isSection(n.value)) sections.push(n.value);
+    for (const n of this.virtualizer!.collection) if (isSection(n.value)) sections.push(n.value);
     this.build(sections, options);
   }
 

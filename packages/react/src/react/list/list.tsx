@@ -13,7 +13,7 @@ import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
 import { Cell, type CellProps } from "./cell";
-import type { CollectionNode } from "./collection";
+import { isSection, type CollectionNode } from "./collection";
 import { CellsContext, HorizontalContext, TemplateContext } from "./contexts";
 import { EmptyOption, type EmptyState } from "./empty";
 import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
@@ -133,16 +133,13 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     latestGrid.current.afterRender({ unifieds: shown, section: key == null ? null : String(key), settled: Boolean(rect && settled(rect)) });
   }, [measure, layout, picker.root, horizontal, settled, latestGrid]);
 
-  const renderNode = React.useCallback(
-    (node: CollectionNode) => {
-      if (node.type === "header") return <SectionHeader />;
-      const section = collection.section(node.key);
-      if (section) return <SectionView section={section} />;
-      const item = collection.emoji(node.key);
-      return item ? <ItemView item={item} /> : null;
-    },
-    [collection],
-  );
+  // React Aria's virtualizer keeps the first renderView it gets, so this reads only the node
+  const renderNode = React.useCallback((node: CollectionNode) => {
+    if (node.type === "header") return <SectionHeader />;
+    const { value } = node;
+    if (isSection(value)) return <SectionView section={value} />;
+    return value ? <ItemView item={value} /> : null;
+  }, []);
   const template = children ?? defaultSection;
   const actions = React.useMemo(() => !horizontal && !searching && sections.some((s) => s.header && partsOf(template(s)).actions), [horizontal, searching, sections, template]);
   const tab = useActionsTab(sections);
