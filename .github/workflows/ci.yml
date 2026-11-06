@@ -31,6 +31,8 @@ jobs:
       - run: npm run size
       - run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
       - run: npm run lint:packages
+      # changeset version in a temp copy: every package on the next alpha, internal ranges and core's data URL with it
+      - run: node .github/version-check.mjs
 
   smoke:
     runs-on: ubuntu-latest
@@ -40,7 +42,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      # Packed tarballs in fresh Vite, Next.js App Router and shadcn add apps
+      # Packed tarballs in fresh Vite, React 18, Next.js App Router and shadcn add apps
       - run: npm run smoke
 
   twemoji-font:

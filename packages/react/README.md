@@ -331,6 +331,8 @@ Native rendering draws text in `--emoji-font-family`, so any color emoji font wo
 
 To use Twemoji as a font, import `@brianhung/emoji-picker-twemoji-font/twemoji.css` and set `--emoji-font-family: Twemoji`.
 
+The default stack starts with `"Emoji Picker Apple"`, a `local("Apple Color Emoji")` face with fixed ascent and descent, so the glyph stays centered in its box at every size. Keep it first in your own stack.
+
 ### Custom artwork
 
 To use images instead of a font, pass `imageUrl`. It replaces particular emoji, or all of them, under any renderer:

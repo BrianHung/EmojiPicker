@@ -30,6 +30,16 @@ const vite = app("vite", ["react", "react-dom", "vite", "@floating-ui/react"]);
 run("npx", ["vite", "build", "--sourcemap", "--logLevel", "error"], vite);
 run("node", ["check.mjs"], vite);
 
+const react18 = app("react18", ["react@18", "react-dom@18", "@types/react@18", "@types/react-dom@18", "typescript", "vite"]);
+run("npx", ["tsc", "-p", "."], react18);
+run("npx", ["vite", "build", "--logLevel", "error"], react18);
+run("npx", ["vite", "build", "--ssr", "src/app.tsx", "--outDir", "ssr", "--logLevel", "error"], react18);
+run(
+  "node",
+  ["--input-type=module", "-e", 'import { createElement } from "react"; import { renderToString } from "react-dom/server"; import { App } from "./ssr/app.js"; if (!renderToString(createElement(App)).includes("<input")) process.exit(1);'],
+  react18,
+);
+
 const next = app("next", ["next@16", "react@19", "react-dom@19", "typescript", "@types/react", "@types/node"]);
 run("npx", ["next", "build"], next);
 
@@ -41,6 +51,8 @@ const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker
 item.dependencies = item.dependencies.map((dep) => dep.replace(/^(@brianhung\/[^@]+)@.+$/, "$1"));
 writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
 run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
+// shadcn's css block has no top-level @font-face, so the item nests it in :root and shadcn hoists it into the layer
+if (!/@font-face\s*\{\s*font-family: "Emoji Picker Apple"/.test(readFileSync(join(shadcn, "src/index.css"), "utf8"))) throw new Error("shadcn add did not write the Apple emoji @font-face");
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
 

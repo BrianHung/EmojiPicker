@@ -19,10 +19,17 @@
   "css": {
     "@layer base": {
       ":root": {
-        "--emoji-font-family": "\"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Segoe UI\", \"Apple Color Emoji\", \"Twemoji Mozilla\", \"Noto Color Emoji\", \"EmojiOne Color\", \"Android Emoji\"",
+        "--emoji-font-family": "\"Emoji Picker Apple\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Segoe UI\", \"Apple Color Emoji\", \"Twemoji Mozilla\", \"Noto Color Emoji\", \"EmojiOne Color\", \"Android Emoji\"",
         "--emoji-picker-background": "var(--popover)",
         "--emoji-picker-radius": "var(--radius)",
-        "--emoji-picker-shadow": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
+        "--emoji-picker-shadow": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "@font-face": {
+          "font-family": "\"Emoji Picker Apple\"",
+          "src": "local(\"Apple Color Emoji\")",
+          "ascent-override": "87.75%",
+          "descent-override": "12.25%",
+          "line-gap-override": "0%"
+        }
       }
     }
   },
