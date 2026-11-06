@@ -7,7 +7,7 @@
 | `packages/core` | [`@brianhung/emoji-picker-core`](packages/core/README.md): data, search and stores, with no dependencies |
 | `packages/react` | [`@brianhung/emoji-picker-react`](packages/react/README.md): the React parts and hooks |
 | `packages/data` | [`@brianhung/emoji-picker-data`](packages/data/README.md): datasets for every emojibase locale and shortcode set, built at pack time |
-| `packages/twemoji-font` | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md): Twemoji as a COLRv0 web font, built at pack time with nanoemoji (Python 3.12); the site needs it built once |
+| `packages/twemoji-font` | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md): Twemoji as a COLRv0 web font, built in CI and at pack time with nanoemoji (Python 3.12, `npm run build:font`); without a local build the site loads the published CSS from jsDelivr |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
 | `.changeset` | Pending release notes |
 
@@ -23,7 +23,7 @@ npm run test:e2e     # Playwright: keyboard, editors, layout, IME, perf and visu
 npm run test:a11y    # axe on every page and picker surface
 npm run typecheck    # every workspace
 npm run check        # Biome lint and format check; `npm run format` formats
-npm run build        # core, the React package, the Twemoji font, then the site and registry
+npm run build        # core, the React package, then the site and registry
 npm run size         # bundle-size budgets on the library build (.size-limit.json)
 npm run changeset    # describe a change for the next release
 ```

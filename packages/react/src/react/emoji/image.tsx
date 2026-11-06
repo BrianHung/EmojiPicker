@@ -17,6 +17,9 @@ const usePrefersReducedMotion = (): boolean => useStore(reducedMotion);
 
 const DEFAULT_SIZE = 64;
 
+// contain: layout drops the text baseline so the box sits on the line like an <img>; start-aligned because Apple Color Emoji pads its advance on the trailing side below 24px
+export const NATIVE: React.CSSProperties = { display: "inline-flex", alignItems: "center", lineHeight: 1, whiteSpace: "nowrap", contain: "layout", fontFamily: "var(--emoji-font-family)" };
+
 type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "width" | "height"> & {
   src: string;
   alt: string;
@@ -34,9 +37,8 @@ export function EmojiImage({ src, alt, record, size, animate, fallback, style, .
   const height = record?.height ?? record?.width ?? DEFAULT_SIZE;
   const shown = still ?? src;
   if (failed === shown) {
-    const box: React.CSSProperties = { display: "inline-flex", alignItems: "center", justifyContent: "center", width: size, height: size, ...style };
     return (
-      <span className={props.className} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true} data-emoji-fallback="" style={fallback ? { ...box, fontSize: size, lineHeight: 1 } : box}>
+      <span className={props.className} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true} data-emoji-fallback="" style={{ ...NATIVE, width: size, height: size, fontSize: size, ...style }}>
         {fallback}
       </span>
     );
