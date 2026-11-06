@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { appendFileSync, cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -58,4 +58,5 @@ if (!/@font-face\s*\{\s*font-family: "Emoji Picker Apple"/.test(readFileSync(joi
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
 
-console.log(`smoke passed in ${tmp}`);
+rmSync(tmp, { recursive: true, force: true });
+console.log("smoke passed");
