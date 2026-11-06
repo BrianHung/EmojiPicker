@@ -3,7 +3,7 @@ import type { KeyboardEvent } from "@react-types/shared";
 import type { FocusManager } from "react-aria/FocusScope";
 import { useKeyboard } from "react-aria/useKeyboard";
 import { isComposingKey } from "@brianhung/emoji-picker-core";
-import { exposeSkip, isSkipped, type PickerEvent } from "./events";
+import { isSkipped, preventable, type PickerEvent } from "./events";
 
 export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerEvent<React.KeyboardEvent<T>>) => void;
 
@@ -19,11 +19,9 @@ export function usePickerKeyDown<T extends Element>(user: PickerKeyboardEventHan
       if (result === true) event.preventDefault();
     },
   });
-  const own = keyboardProps.onKeyDown as unknown as React.KeyboardEventHandler<T>;
-  const { onKeyDown } = exposeSkip({ onKeyDown: user ?? (() => {}) }) as { onKeyDown: React.KeyboardEventHandler<T> };
   return (event) => {
-    onKeyDown(event);
-    own(event);
+    user?.(preventable(event));
+    (keyboardProps.onKeyDown as unknown as React.KeyboardEventHandler<T>)(event);
   };
 }
 

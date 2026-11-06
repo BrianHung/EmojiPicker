@@ -14,11 +14,9 @@ export const isSkipped = (event: object) => skipped.has(nativeOf(event));
 type Handler = (event: never) => void;
 const mapHandlers = (props: object, wrap: (fn: (event: object) => void) => Handler) => Object.fromEntries(Object.entries(props).map(([key, value]) => [key, /^on[A-Z]/.test(key) && typeof value === "function" ? wrap(value) : value]));
 
-export const exposeSkip = (props: object) =>
-  mapHandlers(props, (fn) => (event: object) => {
-    (event as PickerEvent<object>).preventEmojiPickerHandler = () => void skipped.add(nativeOf(event));
-    fn(event);
-  });
+export const preventable = <E extends object>(event: E) => Object.assign(event, { preventEmojiPickerHandler: () => void skipped.add(nativeOf(event)) });
+
+export const exposeSkip = (props: object) => mapHandlers(props, (fn) => (event: object) => fn(preventable(event)));
 
 const guard = (props: object) => mapHandlers(props, (fn) => (event: object) => !isSkipped(event) && fn(event));
 

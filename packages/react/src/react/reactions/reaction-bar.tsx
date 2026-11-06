@@ -3,7 +3,7 @@ import { FocusScope, useFocusManager, type FocusManager } from "react-aria/Focus
 import { Toolbar } from "react-aria-components/Toolbar";
 import { mergePartProps, type PickerHandlers } from "../utils/events";
 import { hasModifier } from "../utils/keyboard";
-import { racClassName, resolve, toRenderFunction, type ElementProps, type Orientation, type PartProps } from "../utils/render";
+import { racClassName, toRenderFunction, type ElementProps, type Orientation, type PartProps } from "../utils/render";
 
 export const BUTTONS = "button:not([disabled])";
 
@@ -42,15 +42,7 @@ export const ReactionBar = React.forwardRef<HTMLDivElement, ReactionBarProps>(fu
     },
   };
   return (
-    <Toolbar
-      ref={ref}
-      orientation={orientation}
-      aria-label={label}
-      aria-labelledby={labelledBy}
-      className={racClassName(className)}
-      style={(s) => resolve(style, s)}
-      render={(dom, state) => custom(mergePartProps(props, dom, handlers), state)}
-    >
+    <Toolbar ref={ref} orientation={orientation} aria-label={label} aria-labelledby={labelledBy} className={racClassName(className)} style={style} render={(dom, state) => custom(mergePartProps(props, dom, handlers), state)}>
       <FocusScope>
         <FocusManagerRef into={focus} />
         {children}

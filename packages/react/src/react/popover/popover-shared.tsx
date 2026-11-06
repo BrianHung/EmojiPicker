@@ -141,10 +141,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
     [setOpen],
   );
   React.useImperativeHandle(actionsRef, () => ({ close: () => setOpen(false, "imperative-action") }), [setOpen]);
-  const latest = React.useRef(onOpenChangeComplete);
-  latest.current = onOpenChangeComplete;
-  const complete = React.useCallback((value: boolean) => latest.current?.(value), []);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, complete }), [open, setOpen, close, closeOnSelect, complete]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
 }
 
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish

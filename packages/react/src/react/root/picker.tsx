@@ -137,11 +137,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const list = React.useRef<ListHandle | null>(null);
   const searchInput = React.useRef<HTMLInputElement | null>(null);
   const panel = React.useRef<HTMLDivElement | null>(null);
-  const [panels, setPanels] = React.useState(0);
-  const registerPanel = React.useCallback(() => {
-    setPanels((n) => n + 1);
-    return () => setPanels((n) => n - 1);
-  }, []);
+  const [panels, registerPanel] = useMounted();
   const listId = React.useId();
 
   // Passing only onValueChange tracks the value too, as in Base UI's Select
@@ -166,11 +162,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     },
     [state, reactions, collapseToReactions, setValue],
   );
-  const [variations, setVariations] = React.useState(0);
-  const registerVariations = React.useCallback(() => {
-    setVariations((n) => n + 1);
-    return () => setVariations((n) => n - 1);
-  }, []);
+  const [variations, registerVariations] = useMounted();
   const closePopover = React.useCallback((reason: PopoverOpenChangeReason, event?: Event) => {
     const { popover } = latest.current;
     popover?.close(reason, event);
@@ -273,6 +265,16 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     { searching, reactionsOpen },
   );
 });
+
+// How many of an optional part are mounted, for a default that steps aside
+function useMounted() {
+  const [count, setCount] = React.useState(0);
+  const register = React.useCallback(() => {
+    setCount((n) => n + 1);
+    return () => setCount((n) => n - 1);
+  }, []);
+  return [count, register] as const;
+}
 
 const isTextField = (el: EventTarget | null) =>
   el instanceof HTMLTextAreaElement || (el instanceof HTMLInputElement && !["button", "checkbox", "radio", "submit", "reset"].includes(el.type)) || (el instanceof HTMLElement && el.isContentEditable);

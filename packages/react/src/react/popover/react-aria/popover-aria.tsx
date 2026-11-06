@@ -70,32 +70,32 @@ const placementOf = (side: PopoverSide, align: PopoverAlign) => {
   return `${side.replace("inline-", "")}${cross && ` ${cross}`}` as never;
 };
 
-// React Aria's onOpenChange carries no reason or event: the outside press and Escape that start a close leave both
-function useDismissReason() {
+// React Aria's onOpenChange carries no reason or event: the outside press and Escape that start a close leave both. Non-modal, React Aria doesn't close on an outside press; this does, as modal
+function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element | null>, triggerRef: React.RefObject<Element | null>, close: (details: PopoverOpenChangeDetails) => void) {
   const last = React.useRef<{ reason: PopoverOpenChangeReason; event?: Event } | null>(null);
   const take = () => {
     const { reason, event } = last.current ?? { reason: "none" as const };
     last.current = null;
     return createChangeDetails(reason, event);
   };
-  return {
-    take,
-    shouldCloseOnInteractOutside: (element: Element) => Boolean((last.current = { reason: "outside-press", event: element.ownerDocument.defaultView?.event })),
-    onKeyDown: (e: React.KeyboardEvent) => void (e.key === "Escape" && (last.current = { reason: "escape-key", event: e.nativeEvent })),
-  };
-}
-
-function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitialFocus; content: React.RefObject<HTMLElement | null> }) {
-  React.useEffect(() => void initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true }), []);
-  return null;
+  useInteractOutside({
+    ref,
+    isDisabled: !open,
+    onInteractOutsideStart: (event) => void (last.current = { reason: "outside-press", event }),
+    onInteractOutside: (event) => !modal && !triggerRef.current?.contains(event.target as Node) && close(take()),
+  });
+  return { take, onKeyDown: (e: React.KeyboardEvent) => void (e.key === "Escape" && (last.current = { reason: "escape-key", event: e.nativeEvent })) };
 }
 
 // React Aria unmounts the popover once its exit animation ends, and reports entering until the entry animation ends
-function Completion({ entering, complete }: { entering: boolean; complete?: (open: boolean) => void }) {
+function Mounted({ entering, complete, initialFocus, content }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: PopoverInitialFocus; content?: React.RefObject<HTMLElement | null> }) {
   const latest = React.useRef(complete);
   latest.current = complete;
   React.useEffect(() => void (!entering && latest.current?.(true)), [entering]);
-  React.useEffect(() => () => latest.current?.(false), []);
+  React.useEffect(() => {
+    if (content) initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true });
+    return () => latest.current?.(false);
+  }, []);
   return null;
 }
 
@@ -110,11 +110,6 @@ const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRen
   style: { "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
 });
 
-// Non-modal popovers in React Aria don't close on an outside press; the dismissal here matches the modal one
-function useNonModalDismiss(open: boolean, enabled: boolean, ref: React.RefObject<Element | null>, triggerRef: React.RefObject<Element | null>, close: (event: Event) => void) {
-  useInteractOutside({ ref, isDisabled: !open || !enabled, onInteractOutside: (event) => !triggerRef.current?.contains(event.target as Node) && close(event) });
-}
-
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
   ref,
@@ -127,10 +122,10 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
     wasOpen.current = p.state.open;
   }, [p.state.open]);
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
-  const dismiss = useDismissReason();
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);
-  useNonModalDismiss(p.state.open, !p.modal, node, triggerRef, (event) => p.state.setOpen(false, "outside-press", event));
+  const setOpen = (open: boolean, { reason, event }: PopoverOpenChangeDetails) => p.state.setOpen(open, reason, event);
+  const dismiss = useDismiss(p.state.open, p.modal, node, triggerRef, (details) => setOpen(false, details));
   const custom = toRenderFunction(render);
   const attributes = useContentAttributes(props);
   return (
@@ -141,11 +136,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         triggerRef={triggerRef}
         isOpen={p.state.open}
         isNonModal={!p.modal}
-        onOpenChange={(open) => {
-          const details = dismiss.take();
-          p.state.setOpen(open, details.reason, details.event);
-        }}
-        shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
+        onOpenChange={(open) => setOpen(open, dismiss.take())}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
@@ -162,8 +153,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
       >
         {(values) => (
           <>
-            <Completion entering={values.isEntering} complete={p.state.complete} />
-            <InitialFocus initialFocus={initialFocus} content={node} />
+            <Mounted entering={values.isEntering} complete={p.state.complete} initialFocus={initialFocus} content={node} />
             <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
           </>
         )}
@@ -174,11 +164,10 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
 
 function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, render, children, ...props }: SuggestionsPopoverProps) {
   const [anchorElement, triggerRef] = useAnchorRef(anchor, null);
-  const dismiss = useDismissReason();
   const rtl = useLocale().direction === "rtl";
   const custom = toRenderFunction(render);
   const node = React.useRef<HTMLDivElement | null>(null);
-  useNonModalDismiss(open, true, node, triggerRef, (event) => onOpenChange?.(false, createChangeDetails("outside-press", event)));
+  const dismiss = useDismiss(open, false, node, triggerRef, (details) => onOpenChange?.(false, details));
   return (
     <>
       {anchorElement}
@@ -188,7 +177,6 @@ function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, 
         triggerRef={triggerRef}
         isOpen={open}
         onOpenChange={(next) => onOpenChange?.(next, dismiss.take())}
-        shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
@@ -205,7 +193,7 @@ function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, 
       >
         {(values) => (
           <>
-            <Completion entering={values.isEntering} complete={onOpenChangeComplete} />
+            <Mounted entering={values.isEntering} complete={onOpenChangeComplete} />
             {children as React.ReactNode}
           </>
         )}
