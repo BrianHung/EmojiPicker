@@ -1,1 +1,1 @@
-export type { ElementProps, PartElementProps, PartProps, RenderProp } from "./render";
+export type { ElementProps, InteractionState, PartElementProps, PartProps, RenderProp } from "./render";

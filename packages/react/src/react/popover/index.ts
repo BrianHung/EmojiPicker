@@ -1,6 +1,7 @@
 export { pickerInitialFocus } from "./popover-shared";
 export type {
   PopoverAnchor,
+  PopoverContentState,
   PopoverFinalFocus,
   PopoverInitialFocus,
   PopoverOpenChangeDetails,
