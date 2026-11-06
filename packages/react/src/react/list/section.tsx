@@ -109,6 +109,8 @@ export const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(fun
     "header",
     {
       ...headingProps,
+      // Before the slot, so the rendered attributes keep their order
+      className: props.className,
       "data-slot": SLOTS.sectionTitle,
       "data-collapsed": flag(section.collapsed),
       ...props,
