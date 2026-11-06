@@ -263,6 +263,21 @@ export const SHOTS: Shot[] = [
       { id: `gallery/${s}/reactions`, path, frame: (p) => card(p, "Reactions") },
     ];
   }),
+  {
+    id: "gallery/slack/scene-tooltip",
+    path: "/gallery/#slack",
+    only: "desktop",
+    prepare: async (p) => {
+      await card(p).scrollIntoViewIfNeeded();
+      await card(p).getByText(/^yep/).hover();
+      await card(p)
+        .getByRole("button", { name: /^React with/ })
+        .first()
+        .hover();
+      await p.getByRole("tooltip").waitFor();
+    },
+    frame: (p) => card(p),
+  },
   { id: "home/header", path: "/", frame: (p) => p.getByRole("banner") },
   { id: "home/mobile-menu", path: "/", only: "mobile", prepare: async (p) => p.getByRole("button", { name: "Menu" }).click(), frame: (p) => p.getByRole("dialog") },
   { id: "home/hero-apple", path: "/", frame: hero },
