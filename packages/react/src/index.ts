@@ -18,6 +18,9 @@ export {
   useSearchState,
 } from "./react/parts";
 export type { CategoryOption } from "./react/root";
+export type { EmojiPickerActions } from "./react/root/context";
+export type { InteractionState, Orientation, PartElementProps, PartProps } from "./react/utils/render";
+export type { PickerHandlers } from "./react/utils/events";
 export { EmojiProvider, useEmojiLabels, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
 export type { ImageUrl } from "./react/provider";
 export { useEmojiCell, useEmojiGrid } from "./react/list";
