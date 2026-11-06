@@ -44,6 +44,11 @@
       "types": "./dist/search/index.d.ts",
       "default": "./dist/search/index.js"
     },
+    "./build": {
+      "@brianhung/source": "./scripts/build-data.ts",
+      "types": "./dist/build.d.ts",
+      "import": "./dist/build.js"
+    },
     "./data/en.json": {
       "types": "./data/en.json.d.cts",
       "default": "./data/en.json"
