@@ -1,1 +1,1 @@
-export { EmojiPopover, EmojiSuggestions } from "./popover-floating";
+export { EmojiPopover, EmojiPopoverContent, EmojiPopoverRoot, EmojiPopoverTrigger, EmojiSuggestions, EmojiSuggestionsPopover } from "./popover-floating";

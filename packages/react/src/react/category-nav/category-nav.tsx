@@ -60,7 +60,7 @@ export type CategoryTabState = { category: EmojiPickerNavCategory; selected: boo
 
 export type CategoryTabProps = EmojiPickerPartElementProps<CategoryTabState, HTMLDivElement, "role">;
 
-const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
+export const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
   const nav = React.useContext(NavContext);
   const c = React.useContext(TabContext);
   const { disabled = true, choose, selected: current, id } = nav ?? {};

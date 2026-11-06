@@ -1,6 +1,6 @@
 "use client";
 
-export { EmojiPopover, EmojiSuggestions } from "./react/popover/floating-ui";
+export { EmojiPopover, EmojiPopoverContent, EmojiPopoverRoot, EmojiPopoverTrigger, EmojiSuggestions, EmojiSuggestionsPopover } from "./react/popover/floating-ui";
 export { pickerInitialFocus } from "./react/popover";
 export type {
   EmojiPopoverAnchor,

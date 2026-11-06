@@ -136,7 +136,7 @@ export type SkinToneTriggerState = SkinToneState & EmojiPickerInteractionState;
 
 export type SkinToneTriggerProps = EmojiPickerPartElementProps<SkinToneTriggerState, HTMLButtonElement>;
 
-const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
+export const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
   const { tone, open, toggle, label, triggerRef, optionsId } = useSkinToneContext("Trigger");
   const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => toggle(e.nativeEvent) });
   const interaction = useInteraction({ onClick });
@@ -167,7 +167,7 @@ export type SkinToneOptionsProps = Omit<EmojiPickerPartElementProps<SkinToneOpti
     children?: (tone: SkinToneValue) => React.ReactNode;
   };
 
-const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneOptions(props, ref) {
+export const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneOptions(props, ref) {
   const { open } = useSkinToneContext("Options");
   if (!open) return null;
   return (
@@ -206,7 +206,7 @@ export type SkinToneOptionProps = EmojiPickerPartElementProps<SkinToneOptionStat
   tone?: SkinToneValue;
 };
 
-const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone: toneProp, style, children, ...props }, ref) {
+export const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(function SkinToneOption({ tone: toneProp, style, children, ...props }, ref) {
   const { tone: current, choose, label } = useSkinToneContext("Option");
   const fromOptions = React.useContext(OptionContext);
   const tone = toneProp ?? fromOptions ?? 0;
@@ -239,7 +239,7 @@ export type SkinToneGlyphProps = Omit<EmojiProps, "emoji"> & {
   emoji?: string;
 };
 
-function SkinToneGlyph({ emoji = "✋", ...props }: SkinToneGlyphProps) {
+export function SkinToneGlyph({ emoji = "✋", ...props }: SkinToneGlyphProps) {
   const { tone: current } = useSkinToneContext("Glyph");
   const tone = React.useContext(OptionContext) ?? current;
   const unified = nativeToUnified(emoji);

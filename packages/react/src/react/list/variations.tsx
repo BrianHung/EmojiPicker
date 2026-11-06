@@ -93,7 +93,7 @@ const VariationsRow = React.forwardRef<HTMLDivElement, VariationsProps & { overl
   );
 });
 
-const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>(function VariationsOption({ tone: toneProp, style, children, ...props }, ref) {
+export const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>(function VariationsOption({ tone: toneProp, style, children, ...props }, ref) {
   const row = React.useContext(RowContext);
   const contextTone = React.useContext(ToneContext);
   const { labels } = usePicker("EmojiPicker.List.Variations.Option");

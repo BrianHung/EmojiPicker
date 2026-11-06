@@ -88,7 +88,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
 
 export type ReactionsItemsProps = { children?: (emoji: string) => React.ReactNode };
 
-function ReactionsItems({ children }: ReactionsItemsProps) {
+export function ReactionsItems({ children }: ReactionsItemsProps) {
   const { shown } = useRow("Items");
   return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <ReactionsItem emoji={unified} />}</React.Fragment>);
 }
@@ -99,7 +99,7 @@ export type ReactionsItemProps = EmojiPickerPartElementProps<ReactionsItemState,
   emoji: string;
 };
 
-const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, style, children, ...props }, ref) {
+export const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
   const row = useRow("Item");
   const record = useStoreSnapshot((s) => s.get(unified));
@@ -129,7 +129,7 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
 export type ReactionsExpandState = EmojiPickerInteractionState;
 export type ReactionsExpandProps = EmojiPickerPartElementProps<ReactionsExpandState, HTMLButtonElement>;
 
-const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
+export const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
   useRow("Expand");

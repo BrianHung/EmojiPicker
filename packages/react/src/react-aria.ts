@@ -1,6 +1,6 @@
 "use client";
 
-export { EmojiPopover, EmojiSuggestions } from "./react/popover/react-aria";
+export { EmojiPopover, EmojiPopoverContent, EmojiPopoverRoot, EmojiPopoverTrigger, EmojiSuggestions, EmojiSuggestionsPopover } from "./react/popover/react-aria";
 export { pickerInitialFocus } from "./react/popover";
 export type {
   EmojiPopoverAnchor,

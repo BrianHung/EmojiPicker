@@ -34,7 +34,7 @@ const FieldContext = React.createContext(false);
 const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
 
 // React Aria's SearchField: Search.Input renders one around itself when it isn't inside a Search.Field
-const Field = React.forwardRef<HTMLDivElement, SearchFieldProps>(function SearchFieldPart({ className, style, render, children, ...props }, ref) {
+export const Field = React.forwardRef<HTMLDivElement, SearchFieldProps>(function SearchFieldPart({ className, style, render, children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Search.Field");
   const empty = useEmpty("EmojiPicker.Search.Field");
   return (
@@ -63,7 +63,7 @@ export type SearchInputProps = EmojiPickerHandlers<
 
 const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
 
-const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
+export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels } = picker;
   const { registerInput } = picker.state;
@@ -115,7 +115,7 @@ export type SearchClearState = EmojiPickerInteractionState;
 export type SearchClearProps = EmojiPickerPartElementProps<SearchClearState, HTMLButtonElement>;
 
 // Clears the query from anywhere in Root, and keeps focus in the search field
-const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ children, ...props }, ref) {
+export const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Clear");
   const empty = useEmpty("EmojiPicker.Search.Clear");
   const { onClick, ...own } = mergePartProps<Clickable>(props, {

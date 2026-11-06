@@ -259,6 +259,7 @@ function SuggestionsPopover({
 
 export const EmojiPopover = { Root, Trigger, Content };
 export const EmojiSuggestions = { Popover: SuggestionsPopover };
+export { Content as EmojiPopoverContent, Root as EmojiPopoverRoot, SuggestionsPopover as EmojiSuggestionsPopover, Trigger as EmojiPopoverTrigger };
 
 export declare namespace EmojiPopover {
   namespace Root {

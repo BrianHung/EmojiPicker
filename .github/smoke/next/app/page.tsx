@@ -1,4 +1,4 @@
-import { EmojiPickerList, EmojiPickerRoot, EmojiPickerSearch, EmojiPickerViewport, EmojiProvider } from "@brianhung/emoji-picker-react";
+import { EmojiPickerList, EmojiPickerRoot, EmojiPickerSearch, EmojiPickerSearchInput, EmojiPickerSkinTone, EmojiPickerViewport, EmojiProvider } from "@brianhung/emoji-picker-react";
 import { Picker } from "./picker";
 
 export default function Page() {
@@ -6,7 +6,10 @@ export default function Page() {
     <EmojiProvider>
       <Picker />
       <EmojiPickerRoot>
-        <EmojiPickerSearch />
+        <EmojiPickerSearch>
+          <EmojiPickerSearchInput />
+          <EmojiPickerSkinTone />
+        </EmojiPickerSearch>
         <EmojiPickerViewport>
           <EmojiPickerList />
         </EmojiPickerViewport>
