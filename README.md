@@ -30,8 +30,6 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 npm i @brianhung/emoji-picker-react
 ```
 
-The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
-
 ## Usage
 
 ```tsx
@@ -45,18 +43,16 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Parts are unstyled. Style them with `className` and `data-*` attributes. The English dataset loads from jsDelivr, pinned to the installed version of `@brianhung/emoji-picker-core`. See the [React README](packages/react/README.md) for providers, typeahead, and popovers.
-
 ## Packages
 
 | Package | Description |
 |---|---|
-| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks. Depends on core. |
-| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies. Includes the English dataset. |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set. |
-| [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer. |
+| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies; includes the English dataset |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set |
+| [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.
+[Contributing](CONTRIBUTING.md)
 
 ## License
 

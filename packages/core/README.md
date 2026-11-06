@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-core
 
-Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies. `@brianhung/emoji-picker-react` depends on this package. To import helpers such as `localeData`, `twemojiUrl`, or `mergeFrequents` from a React app under a strict package manager such as pnpm, add this package to your dependencies.
+Framework-neutral data, search, and state for emoji pickers, with no dependencies.
 
 ## Installation
 
@@ -8,14 +8,10 @@ Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](
 npm i @brianhung/emoji-picker-core
 ```
 
-The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
-
 ## Usage
 
-`createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, and `createSearch` return stores with `subscribe(listener)`, a pure `getSnapshot()`, and methods that act on them. A framework binding subscribes and renders; the React package is one.
-
 ```ts
-import { createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
+import { createEmojiPicker, createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
 
 const store = createEmojiStore();
 store.subscribe(render);
@@ -31,15 +27,14 @@ const stop = typeahead.syncCombobox(input);
 const picker = createEmojiPicker(store, { frequent: 16 });
 picker.subscribe(() => render(picker.getSnapshot().sections));
 picker.setQuery("cat");
-picker.highlight(picker.getSnapshot().sections[0]?.items[0]?.id ?? null);
-picker.choose();
+picker.choose(picker.getSnapshot().sections[0]?.items[0]?.id);
 ```
 
 ## Entry points
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-core` | The store, emoji resolution, frequently used emoji, search and typeahead state, labels, tokenizers, Twemoji helpers, and their types |
+| `@brianhung/emoji-picker-core` | The store, emoji resolution, frequently used emoji, search, typeahead, and picker state, labels, tokenizers, Twemoji helpers, and their types |
 | `/search` | `lexical`, `remote`, `merge`, `fallback`, `progressive`, `rerank`, `preferFrequent`, `withInterim` |
 | `/grid` | Grid and strip layout math and keyboard navigation: `createEmojiGrid`, `moveInGrid`, `layoutStrip`, `moveInStrip`, `createGridNavigation` |
 | `/native` | Whether the system font draws an emoji: `nativeProbe`, `nativeSupport`, `drawsNatively`, `needsImageFallback` |
@@ -49,46 +44,51 @@ picker.choose();
 
 | Export | Description |
 |---|---|
-| `createEmojiStore(options)` | An `EmojiStore`: data, search, frequently used emoji, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }`, `frequentsTuning: { halfLifeDays?, max? }`, and `deferStorage` (read storage on the first `subscribe`, so a server-rendered page hydrates with the defaults); `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
-| `store.setOptions(options)` | Replaces the options that change after creation: `data`, `customEmojis`, `filter`, `searchEngine`, `locale`, and controlled `skinTone` and `frequents` with their callbacks. A loader function counts as the same source until `locale` changes. |
+| `createEmojiStore(options)` | An `EmojiStore`: data, search, frequently used emoji, skin tone, and labels. Options match the React provider's, plus `deferStorage` (read storage on the first `subscribe`, so a server-rendered page hydrates with the defaults). `data` defaults to `data/en.json` on jsDelivr, pinned to this version. |
+| `store.setOptions(options)` | Updates `data`, `customEmojis`, `filter`, `searchEngine`, `locale`, and controlled `skinTone` and `frequents` with their callbacks. A loader function counts as the same source until `locale` changes. |
 | `store.load()`, `store.prepare()`, `store.status()`, `store.error()` | Load the data now, or when the browser is idle along with the search index |
 | `store.query(text)`, `store.completeShortcode(prefix)`, `store.select(unified, { count? })` | Search, shortcode completion, and an `EmojiSelection` (`count: false` skips frequently used) |
-| `store.version()` | A number that changes with the records, locale, or search engine |
-| `createSearch(store, { query, limit }?)` | Search-as-you-type state: `setQuery(query, limit)` starts a search, `getSnapshot()` returns `{ results, pending }`, and `subscribe` hears when one settles |
-| `createEmojiPicker(store, options)` | The picker's headless state: sections, search, highlight, collapsed categories, variations, and reaction rows. `getSnapshot()` returns an `EmojiPickerSnapshot`; `setOptions` takes values that change, with `query`, `highlight`, and `collapsedCategories` controlled when given; `setQuery`, `highlight`, `toggleCollapsed`, and `choose` act and call the `onXChange` callbacks |
-| `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, and `syncCombobox(el)` for an editor element you don't render. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
-| `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
-| `isDataset(data)`, `isCustomEmoji(value)` | Type guards for a prebuilt `Dataset` (against an `EmojiDataInput`) and a `CustomEmoji` input |
+| `store.get(unified)`, `store.fromShortcode(code)`, `store.records()`, `store.replaceShortcodes(text)` | Lookups |
+| `store.skinTone()`, `store.setSkinTone(tone)`, `store.withSkinTone(unified)` | The shared skin tone |
 | `store.frequents` | `pick`, `remove`, `clear`, `top(n)`, `score`, `entries()`. Entries are `Record<unified, { count, lastUsed }>`; `count` halves every `frequentsTuning.halfLifeDays` days (default 14). The six default entries can be removed. |
+| `EmojiSearch` | `(query, { records, limit, signal, frequency, locale }) => { unified, score? }[] \| Promise<…>`, best first; the store's `searchEngine` |
+| `store.version()` | Changes with the records, locale, or search engine |
+| `createSearch(store, { query, limit }?)` | Search-as-you-type: `setQuery(query, limit)` starts a search, `getSnapshot()` returns `{ results, pending }`, `subscribe` fires when one settles |
+| `createEmojiPicker(store, options)` | The picker's headless state. `getSnapshot()` returns sections, search, highlight, collapsed categories, variations, and reaction rows; `setOptions` takes changed values (`query`, `highlight`, `collapsedCategories` are controlled when given); `setQuery`, `highlight`, `toggleCollapsed`, `choose` act and call the `onXChange` callbacks |
+| `createEmojiSuggestions(store, options)` | Typeahead state: `getInputProps`, `getListProps`, `getOptionProps`, IME-safe `keydown`, `syncCombobox(el)` for an element you don't render. `choose(index?)` inserts and counts a suggestion; `insert(selection)` writes one already counted. Both call `onChoose` and `onSelect(selection)`. |
+| `resolveEmoji(store, input)`, `missingEmojiText(input)` | Resolves a native emoji, shortcode, unified code, or custom id; text for unresolved input |
+| `isDataset(data)`, `isCustomEmoji(value)` | Type guards: a prebuilt `Dataset` rather than an `EmojiDataInput`; a `CustomEmoji` input |
+| `customRecord(custom)`, `SKIN_TONE_VALUES` | The `EmojiRecord` a `CustomEmoji` becomes; the skin tone values `0` to `5` |
 | `mergeFrequents(a, b, tuning?)` | Merges two histories, such as a server's and this device's |
 | `localStorageAdapter(key)`, `memoryStorageAdapter()` | `EmojiStorage` adapters for `storage`; `localStorageAdapter` syncs across tabs |
 | `createChangeDetails(reason, event)` | The `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` every `onXChange` receives |
-| `localeData(locale, { shortcodes, baseUrl })` | The URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
-| `defaultLabels`, `localizeLabels(overrides)` | The English `EmojiLabels`, with overrides |
-| `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
-| `twemojiUrl` | Twemoji image URLs |
-| `withTone`, `withoutTone`, `nativeToUnified`, `unifiedToNative` | Convert between native emoji and unified codes, and add or remove skin tones |
-| `isComposingKey` | The IME check for editor typeaheads |
-| `KEY_MOVES`, `flipForRtl` | Keyboard keys to `EmojiGridMove`s |
-| `syncAriaAttributes(el, read, subscribe)` | Writes attributes onto an element the app renders while `read()` returns them, and restores the element after |
-| `customRecord(custom)`, `SKIN_TONE_VALUES` | The `EmojiRecord` a `CustomEmoji` becomes, and the skin tone values `0` to `5` |
+| `localeData(locale, { shortcodes, baseUrl })` | URL of a `@brianhung/emoji-picker-data` dataset. `shortcodes` defaults to `"iamcal"` (English in every locale). |
+| `defaultLabels`, `localizeLabels(overrides)`, `nameWithTone` | The English `EmojiLabels` with overrides, and names with a skin tone |
+| `findShortcodeTrigger(text)`, `isComposingKey` | Finds a `:query` before the caret; the IME check for editor typeaheads |
+| `KEY_MOVES`, `flipForRtl` | Keys to `EmojiGridMove`s |
+| `syncAriaAttributes(el, read, subscribe)` | Writes attributes onto an element the app renders while `read()` returns them; restores it after |
+| `createTokenizer`, `normalizer` | Locale-aware tokenizing and folding |
+| `twemojiUrl`, `TWEMOJI_BASE_URL`, `TWEMOJI_EMOJI_VERSION` | Twemoji image URLs |
+| `withTone`, `withoutTone`, `withoutFe0f`, `nativeToUnified`, `unifiedToNative`, `isUnified` | Convert between native emoji and unified codes, and add or remove skin tones |
+| `GROUPS` | Emojibase group ids in order |
 
-A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, and `syncCombobox` is available from the registry: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
+ProseMirror plugin: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 
 ## Data
 
-This package includes the English dataset (`/data/en.json`). [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has a dataset for every Emojibase locale and shortcode set, and `localeData(locale, { shortcodes })` returns its URL. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. To build a dataset for any [Emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales), run `build-data`. It uses iamcal shortcodes for English, and iamcal and CLDR for other locales. `--shortcodes` takes a comma-separated list in priority order, such as `iamcal,cldr-native`.
-
 ```bash
-npm install --save-dev emojibase-data
+npm i -D emojibase-data
 npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 ```
 
-`data` also accepts an `EmojiDataInput` (`locale`, `groups`, `emojis`), converted on load.
+| Source | Description |
+|---|---|
+| `/data/en.json` | Included English dataset |
+| [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) | Every Emojibase locale and shortcode set, via `localeData` |
+| `build-data <locale>` | Any [Emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales). Shortcodes: iamcal for English, iamcal and CLDR otherwise; `--shortcodes` takes a priority list such as `iamcal,cldr-native`. |
+| `EmojiDataInput` | `{ locale, groups, emojis }`, accepted by `data` and converted on load |
 
 ## Search adapters
-
-`searchEngine` takes any `EmojiSearch`: `(query, { records, limit, signal, frequency, locale }) => { unified, score? }[] | Promise<…>`, best first. Build an index once per `records` array. The store passes the same array until its data changes.
 
 ```ts
 import Fuse from "fuse.js";
@@ -103,7 +103,7 @@ export const fuzzy: EmojiSearch = (query, { records, limit }) => {
 };
 ```
 
-MiniSearch and FlexSearch follow the same pattern, indexing `name`, `shortcodes`, and `tags` with `unified` as the id.
+`records` keeps the same identity until the data changes, so index once per array.
 
 ## License
 
