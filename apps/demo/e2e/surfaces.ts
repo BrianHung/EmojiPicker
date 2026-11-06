@@ -166,7 +166,14 @@ function scene(s: StyleId): Surface[] {
       ];
     case "slack":
       return [
-        popover(id("reaction"), path, (p) => button(sc(p), "Add reaction").first()),
+        popover(id("reaction"), path, (p) =>
+          button(
+            sc(p)
+              .locator("div.group")
+              .filter({ hasText: /^Priya/ }),
+            "Add reaction",
+          ).first(),
+        ),
         popover(id("composer"), path, (p) => button(sc(p), "Emoji")),
         menu(id("autocomplete"), path, (p) => sc(p).getByLabel("Message #general", { exact: true }), ":smi", shotCard),
       ];
@@ -190,14 +197,21 @@ function scene(s: StyleId): Surface[] {
           .locator(`${slot("popoverContent")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
           .filter({ visible: true })
           .last();
+      const react = (p: Page) =>
+        button(
+          sc(p)
+            .locator("div.group")
+            .filter({ hasText: "ok who's in for the lake" }),
+          "React",
+        );
       const openBar = async (p: Page) => {
         const message = sc(p).getByRole("button", { name: /^Maya: ok who's in/ });
         if (await message.count()) await hold(p, message, bar(p));
-        else await button(sc(p), "React").first().click();
+        else await react(p).click();
         await bar(p).waitFor();
       };
       return [
-        { id: id("reaction-bar"), path, kind: "bar", root: bar, open: async (p) => (await openBar(p), button(sc(p), "React").first()) },
+        { id: id("reaction-bar"), path, kind: "bar", root: bar, open: async (p) => (await openBar(p), react(p)) },
         popover(id("reaction-more"), path, (p) => bar(p).getByRole("button", { name: "More reactions" }), { prepare: openBar }),
         popover(id("composer"), path, (p) => button(sc(p), "Choose an emoji")),
       ];

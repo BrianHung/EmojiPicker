@@ -28,6 +28,9 @@ const JORDAN: Person = { name: "Jordan", color: "#22c55e" };
 type Message = { id: number; from: Person | "me"; text: string; reaction?: string; time?: string };
 
 const INITIAL: Message[] = [
+  { id: 11, from: JORDAN, text: "who renamed the chat??", reaction: "1f602", time: "Yesterday 11:48 PM" },
+  { id: 12, from: "me", text: "the frog has admin now, I don't make the rules" },
+  { id: 13, from: MAYA, text: "renamed it back from bufo's pond party 🐸" },
   { id: 1, from: MAYA, text: "ok who's in for the lake on saturday", time: "Today 10:12 AM" },
   { id: 2, from: MAYA, text: "I can drive, there's room for 4 🚗" },
   { id: 3, from: JORDAN, text: "count me in!!", reaction: "1f525" },
@@ -124,9 +127,9 @@ function Thread({ messages, listRef, onReact, compact = false }: { messages: Mes
     <div
       ref={listRef}
       onScroll={(e) => setScroll(e.currentTarget.scrollTop)}
-      className="relative flex min-h-0 flex-1 flex-col overflow-y-auto pt-4 pb-2 [scrollbar-width:none]"
+      className="relative flex min-h-0 flex-1 flex-col-reverse overflow-y-auto pt-4 pb-2 [scrollbar-width:none]"
     >
-      <div className="mt-auto" />
+      <div className="flex shrink-0 flex-col">
       {messages.map((m, i) => {
         const prev = messages[i - 1];
         const next = messages[i + 1];
@@ -143,6 +146,7 @@ function Thread({ messages, listRef, onReact, compact = false }: { messages: Mes
           </React.Fragment>
         );
       })}
+      </div>
     </div>
   );
 }

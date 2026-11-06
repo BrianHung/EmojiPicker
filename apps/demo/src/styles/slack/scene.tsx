@@ -16,6 +16,26 @@ import { slack } from "./picker";
 type Message = { id: number; author: string; color: string; time: string; text: string; reactions: Reaction[] };
 
 const INITIAL: Message[] = [
+  { id: 11, author: "Jordan", color: "#2d9ee0", time: "9:58 AM", text: "standup in 2 :coffee: who's taking notes?", reactions: [] },
+  {
+    id: 12,
+    author: "Sam",
+    color: "#1264a3",
+    time: "9:59 AM",
+    text: "last time Bufo took notes it was just 40 :frog: reactions",
+    reactions: [{ unified: "1f602", count: 3, mine: false }],
+  },
+  {
+    id: 13,
+    author: "Bufo",
+    color: "#2bac76",
+    time: "10:00 AM",
+    text: "and they were very good notes :frog:",
+    reactions: [
+      { unified: "1f438", count: 5, mine: true },
+      { unified: "1f4af", count: 1, mine: false },
+    ],
+  },
   {
     id: 1,
     author: "Priya",
@@ -111,12 +131,14 @@ export function SlackScene() {
         <Frame compact={compact}>
           <div className="flex h-[49px] shrink-0 items-center gap-2 border-b border-[#dddddd] px-4 dark:border-[#35373b]">
             <span className="text-[18px] leading-6 font-black"># general</span>
-            <span className="text-[13px] text-[#616061] dark:text-[#ababad]">3 members</span>
+            <span className="text-[13px] text-[#616061] dark:text-[#ababad]">5 members</span>
           </div>
-          <div ref={list} className="flex flex-1 flex-col justify-end overflow-y-auto py-2">
-            {messages.map((m) => (
-              <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
-            ))}
+          <div ref={list} className="flex flex-1 flex-col-reverse overflow-y-auto py-2">
+            <div className="flex shrink-0 flex-col">
+              {messages.map((m) => (
+                <SlackMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
+              ))}
+            </div>
           </div>
           <SlackComposer onSend={send} compact={compact} />
         </Frame>
