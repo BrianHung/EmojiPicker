@@ -123,7 +123,8 @@ test("a native emoji takes the image's box whatever the font", async ({ page }) 
 test("first paint in Twemoji fetches one font subset", async ({ page }) => {
   const fonts = new Set<string>();
   page.on("request", (request) => {
-    const file = request.url().match(/twemoji-\d+(?=\.woff2)/)?.[0];
+    // A production build appends a content hash to the file name
+    const file = request.url().match(/(twemoji-\d+)(?:-[\w-]+)?\.woff2/)?.[1];
     if (file) fonts.add(file);
   });
   await visit(page, "/e2e/pages/fonts/");

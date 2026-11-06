@@ -37,7 +37,8 @@ function declaredRanges(fontFamily: string): (unified: string) => boolean {
   const family = unquote(fontFamily.split(",")[0] ?? "");
   const ranges: [number, number][] = [];
   document.fonts?.forEach((face) => {
-    if (unquote(face.family) === family) ranges.push(...face.unicodeRange.split(",").map(parseRange));
+    // Only a subsetted face claims its ranges: a local() alias such as Apple Color Emoji's has the full default range and may lack new emoji
+    if (unquote(face.family) === family && !/^u\+0+-10ffff$/i.test(face.unicodeRange.trim())) ranges.push(...face.unicodeRange.split(",").map(parseRange));
   });
   const has = (cp: number) => ranges.some(([lo, hi]) => cp >= lo && cp <= hi);
   return (unified) => ranges.length > 0 && [...unifiedToNative(unified)].every((c) => has(c.codePointAt(0)!));

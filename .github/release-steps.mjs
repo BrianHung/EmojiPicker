@@ -16,7 +16,8 @@ const STEPS = {
   ],
   font: ["node .github/font-check.mjs"],
   smoke: ["npm run smoke"],
-  e2e: ["npm run test:e2e --"],
+  // npx, not npm run: npm 11 drops some flags (such as --output) passed after --
+  e2e: ["npx playwright test"],
   a11y: ["npm run test:a11y"],
 };
 
@@ -32,5 +33,5 @@ for (const group of groups.length ? groups : Object.keys(STEPS))
   for (const step of STEPS[group]) {
     const command = group === "e2e" ? [step, ...extra].join(" ") : step;
     console.log(`\n> ${command}`);
-    execSync(command, { stdio: "inherit", env: group === "e2e" || group === "a11y" ? { ...process.env, E2E_BUILD: "1" } : process.env });
+    execSync(command, { stdio: "inherit", cwd: group === "e2e" ? "apps/demo" : undefined, env: group === "e2e" || group === "a11y" ? { ...process.env, E2E_BUILD: "1" } : process.env });
   }
