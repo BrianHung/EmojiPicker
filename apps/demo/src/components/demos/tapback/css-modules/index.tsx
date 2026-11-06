@@ -1,10 +1,10 @@
-import { EmojiPicker, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import styles from "./index.module.css";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPicker.Root
-      reactions={useFrequentEmoji({ limit: 5 }).items}
+      reactions={5}
       onSelect={(selection, { collapse }) => {
         onSelect(selection);
         collapse?.();

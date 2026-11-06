@@ -1,11 +1,11 @@
-import { EmojiPicker, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker-react";
 
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-picker-hover";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiPicker.Root
-      reactions={useFrequentEmoji({ limit: 5 }).items}
+      reactions={5}
       onSelect={(selection, { collapse }) => {
         onSelect(selection);
         collapse?.();

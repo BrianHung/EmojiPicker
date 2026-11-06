@@ -122,7 +122,7 @@ async function pressUntilFocused(page: Page, target: Locator, key: string) {
   await expect(target).toBeFocused();
 }
 
-test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategoryNavigation drive the grid", async ({ page }) => {
+test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategoryNavigation, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
   await visit(page, "/e2e/pages/seams/");
   const root = page.locator('[data-slot="emoji-picker"]');
   const search = root.locator('[data-slot="emoji-picker-search-input"]');
@@ -130,31 +130,37 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
 
   await search.focus();
   await page.keyboard.press("Tab");
-  const trigger = root.getByRole("button", { name: "Skin tone: Default" });
+  const trigger = root.getByRole("button", { name: "Default skin tone" });
   await expect(trigger).toBeFocused();
   await page.keyboard.press("Enter");
-  const medium = page.getByRole("menuitemradio", { name: "Medium", exact: true });
+  const medium = page.getByRole("menuitemradio", { name: "Medium skin tone", exact: true });
   await pressUntilFocused(page, medium, "ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(root.getByRole("button", { name: "Skin tone: Medium" })).toBeFocused();
+  await expect(root.getByRole("button", { name: "Medium skin tone" })).toBeFocused();
   await search.fill("thumbs up");
   await expect(root.locator('[data-slot="emoji-picker-emoji"]').first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
   await search.fill("");
 
   await page.keyboard.press("Tab");
   await page.keyboard.press("Tab");
-  const tabs = root.getByRole("tablist", { name: "Categories" });
+  const tabs = root.getByRole("tablist", { name: "Category navigation" });
   await expect(tabs.locator('[aria-selected="true"]')).toBeFocused();
   const animals = tabs.getByRole("tab", { name: "Animals & Nature" });
   await pressUntilFocused(page, animals, "ArrowRight");
   await page.keyboard.press("Enter");
   await expect(animals).toHaveAttribute("aria-selected", "true");
-  const offset = () =>
-    root.locator('[data-slot="emoji-picker-viewport"]').evaluate((viewport) => {
-      const title = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].find((t) => t.textContent === "Animals & Nature");
+  const offset = (name: string) =>
+    root.locator('[data-slot="emoji-picker-viewport"]').evaluate((viewport, name) => {
+      const title = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].find((t) => t.textContent === name);
       return title ? Math.round(title.getBoundingClientRect().top - viewport.getBoundingClientRect().top) : null;
-    });
-  await expect.poll(offset).toBe(0);
+    }, name);
+  await expect.poll(() => offset("Animals & Nature")).toBe(0);
+
+  const flags = tabs.getByRole("tab", { name: "Flags" });
+  await pressUntilFocused(page, flags, "ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => offset("Flags")).toBe(0);
+  await expect(root.locator('[data-slot="emoji-picker-emoji"][data-unified="1f3c1"]')).toBeVisible();
 });
 
 test.describe("phone", () => {

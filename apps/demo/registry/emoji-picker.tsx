@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmojiPicker, useFrequentEmoji, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -123,7 +123,7 @@ export const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProp
 export function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
     <EmojiPicker.Root
-      reactions={useFrequentEmoji({ limit: count }).items}
+      reactions={count}
       onSelect={(selection, { collapse }) => {
         onSelect(selection);
         collapse?.();
