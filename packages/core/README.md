@@ -10,7 +10,7 @@ npm i @brianhung/emoji-picker-core
 
 ## Usage
 
-Every store has `subscribe(listener)`, `getSnapshot()`, and actions.
+`createEmojiStore`, `createPickerState` and `createEmojiSuggestions` have `subscribe(listener)`, `getSnapshot()`, and actions.
 
 ```ts
 import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker-core";

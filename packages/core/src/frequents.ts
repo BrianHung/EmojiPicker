@@ -110,7 +110,8 @@ export function createFrequencyStore({
       return cached(
         cached(tops, state, () => new Map()),
         n,
-        () => [...new Set([...ranked(state, Date.now(), tuning).map(([u]) => u), ...DEFAULTS])].slice(0, n),
+        // Decay keeps the order at any reference time; the newest use avoids reading the clock during render
+        () => [...new Set([...ranked(state, Math.max(0, ...Object.values(state).map((e) => e.lastUsed)), tuning).map(([u]) => u), ...DEFAULTS])].slice(0, n),
       );
     },
     score(unified) {
@@ -154,12 +155,15 @@ function parse(raw: string | null): Frequents | undefined {
   }
 }
 
+// Node 25+ defines a localStorage global (a warning, or a file shared by every request); only a browser's is per user
+const browserStorage = () => (typeof window === "undefined" ? undefined : window.localStorage);
+
 export function localStorageAdapter(key: string): EmojiStorage {
   const memory = memoryStorageAdapter();
   return {
     read() {
       try {
-        const local = globalThis.localStorage;
+        const local = browserStorage();
         return local ? local.getItem(key) : memory.read();
       } catch {
         return memory.read();
@@ -168,7 +172,7 @@ export function localStorageAdapter(key: string): EmojiStorage {
     write(value) {
       memory.write(value);
       try {
-        globalThis.localStorage?.setItem(key, value);
+        browserStorage()?.setItem(key, value);
       } catch {}
     },
     subscribe(listener) {

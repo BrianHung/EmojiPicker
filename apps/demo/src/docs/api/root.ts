@@ -24,7 +24,7 @@ export const root = rowsOf<RootProps>()([
   { name: "onReactionsOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "none", cancel() }) => void' },
   { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
   { name: "actionsRef", type: "Ref<EmojiPickerActions>", description: "move, pick, highlight, focusSearch, clearSearch, close and toggleSkinTone. Inside Root: useEmojiPickerActions()." },
-  { name: "keyboardTarget", type: "HTMLElement | RefObject<HTMLElement | null>", description: "An element that keeps focus (an editor) while its arrows, Page Up/Down and Enter drive the picker; it gets aria-activedescendant." },
+  { name: "keyboardTarget", type: "HTMLElement | RefObject<HTMLElement | null> | null", description: "An element that keeps focus (an editor) while its arrows, Page Up/Down and Enter drive the picker; it gets aria-activedescendant." },
   { name: "collapsedCategories", type: "readonly string[]", description: "Collapsed sections, controlled." },
   { name: "defaultCollapsedCategories", type: "readonly string[]" },
   { name: "onCollapsedCategoriesChange", type: '(ids: readonly string[], details: { reason: "trigger-press" | "none", cancel() }) => void' },

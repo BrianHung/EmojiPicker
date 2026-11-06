@@ -1,3 +1,5 @@
+"use client";
+
 export * as EmojiPicker from "./react/parts";
 export {
   CategoryNav as EmojiPickerCategoryNav,
@@ -36,7 +38,7 @@ export type {
   ViewportProps,
   ViewportState,
 } from "./react/root";
-export type { ElementProps, PartElementProps, PartProps, RenderProp } from "./react/utils";
+export type { ElementProps, InteractionState, PartElementProps, PartProps, RenderProp } from "./react/utils";
 export { useEmojiCell, useEmojiGrid } from "./react/list";
 export type { CellProps, CellState, EmptyState, EmojiGridState, ItemsProps, ListProps, ListState, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps, UseEmojiGridOptions } from "./react/list";
 export type { SearchClearProps, SearchClearState, SearchInputProps, SearchInputState, SearchProps, SearchState } from "./react/search";
@@ -46,6 +48,7 @@ export { ReactionBar } from "./react/reactions";
 export type { PanelProps, PanelState, ReactionBarProps, ReactionBarState, ReactionsExpandProps, ReactionsItemProps, ReactionsItemState, ReactionsProps } from "./react/reactions";
 export type {
   PopoverAnchor,
+  PopoverContentState,
   PopoverFinalFocus,
   PopoverInitialFocus,
   PopoverOpenChangeDetails,

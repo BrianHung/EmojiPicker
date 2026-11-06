@@ -24,7 +24,7 @@ The item also adds `EmojiTapback`, `EmojiPickerBody`, and `EmojiPickerFooter`, a
 npm i @brianhung/emoji-picker-react
 ```
 
-`@brianhung/emoji-picker-core` is a dependency; there is nothing else to install.
+`@brianhung/emoji-picker-core` is a dependency; there is nothing else to install. Add it to your own dependencies to import its helpers (`localeData`, `twemojiUrl`, `withoutTone`) under a strict package manager such as pnpm.
 
 ```tsx
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
@@ -41,6 +41,8 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 ```
 
 Core ships the English dataset, and `Root` loads it from jsDelivr, pinned to the installed core version. `@brianhung/emoji-picker-data` holds every other locale.
+
+The entry points are client modules (`"use client"`). In a React Server Component framework such as the Next.js App Router, render the parts from a `"use client"` file: a Server Component can render the flat exports (`EmojiPickerRoot`, `EmojiProvider`), but not nested parts such as `EmojiPicker.Search.Input`, or pass `onSelect`.
 
 ### Shared provider
 
@@ -110,7 +112,7 @@ Every part but `List` can be your own Base UI, React Aria, or shadcn/ui componen
 
 | Prop | Description |
 |---|---|
-| `data` | URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version |
+| `data` | URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset | EmojiDataInput>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version |
 | `locale`, `labels` | Search folding and segmentation, A–Z order, result-count formatting, text direction, and `EmojiLabels` strings |
 | `searchEngine` | An `EmojiSearch`; see [Search](#search) |
 | `customEmojis` | A `CustomEmoji`, pack URL, loader, or an array of them; see [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/) |
@@ -171,7 +173,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 </EmojiPopover.Root>
 ```
 
-Content exposes `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin`, `--available-width`, and `--available-height` for CSS transitions.
+Content exposes `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin` and `--available-height` for CSS transitions; `/floating-ui` also sets `--available-width`.
 
 ## Typeahead
 
@@ -256,7 +258,7 @@ Each part follows its WAI-ARIA Authoring Practices pattern. Nothing animates by 
 | CategoryNav, SkinTone | `tablist`; button with `aria-haspopup` opening a `radiogroup` |
 | Variations | Shift+Space or long press opens a `listbox` of six tones |
 | Reactions, ReactionBar | `toolbar`; toggle buttons with `aria-pressed` when `selected` is given |
-| EmojiPopover | Non-modal `dialog`; trigger has `aria-haspopup="dialog"`, `aria-expanded` |
+| EmojiPopover | `dialog`, non-modal from `/floating-ui` and modal from `/react-aria`; trigger has `aria-haspopup="dialog"`, `aria-expanded` |
 | Typeahead, `Emoji` | `combobox` and `listbox` props; `role="img"` (`decorative` hides it) |
 
 ## Advanced
