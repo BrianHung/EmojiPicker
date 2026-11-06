@@ -4,6 +4,12 @@ Unstyled React components for emoji pickers, reaction rows, and shortcode typeah
 
 ## Installation
 
+```bash
+npm i @brianhung/emoji-picker-react
+```
+
+To import core helpers (`localeData`, `twemojiUrl`, `withoutTone`, `mergeFrequents`) under pnpm or another strict package manager, also add `@brianhung/emoji-picker-core`.
+
 ### shadcn/ui
 
 ```bash
@@ -16,15 +22,13 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 <EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
 ```
 
-The item also exports `EmojiPickerBody`, `EmojiPickerCell`, `EmojiPickerFooter`, and `EmojiTapback`. It writes `--emoji-font-family`, `--emoji-picker-background`, `--emoji-picker-radius`, and `--emoji-picker-shadow` to your CSS file. For `EmojiPickerPopover` in your `components/ui/popover`, add `emoji-picker-popover.json` (Base UI and Radix bases) or `emoji-picker-popover-aria.json` (`--base aria`).
-
-### npm
-
-```bash
-npm i @brianhung/emoji-picker-react
-```
-
-`@brianhung/emoji-picker-core` installs as a dependency. To import its helpers (`localeData`, `twemojiUrl`, `withoutTone`, `mergeFrequents`) under a strict package manager such as pnpm, add it to your dependencies.
+| Item | Adds |
+|---|---|
+| `emoji-picker.json` | `EmojiPickerCard`, `EmojiPickerBody`, `EmojiPickerCell`, `EmojiPickerFooter`, `EmojiTapback`; writes `--emoji-font-family`, `--emoji-picker-background`, `--emoji-picker-radius`, `--emoji-picker-shadow` to your CSS file |
+| `emoji-picker-popover.json` | `EmojiPickerPopover` on your `components/ui/popover` (Base UI and Radix bases) |
+| `emoji-picker-popover-aria.json` | `EmojiPickerPopover` on your `components/ui/popover` (`--base aria`) |
+| `emoji-tiptap.json`, `emoji-lexical.json` | Shortcode menu and a custom emoji node ([Tiptap](https://emoji.brianhung.me/examples/tiptap/), [Lexical](https://emoji.brianhung.me/examples/lexical/)) |
+| `emoji-prosemirror.json` | Shortcode menu plugin |
 
 ## Usage
 
@@ -46,13 +50,9 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Core includes the English dataset, and `Root` loads it from jsDelivr, pinned to the installed core version. `@brianhung/emoji-picker-data` has a dataset for every Emojibase locale and shortcode set. See [Localization](#localization).
+Entry points are `"use client"` modules: a Server Component can render flat exports (`EmojiPickerRoot`, `EmojiProvider`) but not namespaced parts or function props.
 
-The entry points are client modules (`"use client"`). In a React Server Component framework such as the Next.js App Router, render the parts from a `"use client"` file. A Server Component can render flat exports such as `EmojiPickerRoot` and `EmojiProvider`. It cannot render namespaced parts such as `EmojiPicker.Search.Input` or pass function props such as `onSelect`.
-
-### Shared provider
-
-Every part and hook uses the nearest `EmojiProvider`. Without one, they share a single store with the default options, so frequently used emoji and the skin tone agree across the page. Add a provider to set data, locale, custom emoji, or storage for everything below it. Outside a provider, `Emoji` draws native glyphs; the provider's `renderer="auto"` adds the image fallback.
+### Provider
 
 ```tsx
 import { EmojiProvider } from "@brianhung/emoji-picker-react";
@@ -62,16 +62,18 @@ import { EmojiProvider } from "@brianhung/emoji-picker-react";
 </EmojiProvider>
 ```
 
+Without a provider, every part and hook shares one default store, and `Emoji` draws native glyphs only.
+
 ## Entry points
 
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker-react` | Components, hooks, and common core types |
-| `/floating-ui`, `/react-aria` | `EmojiPopover`, `EmojiSuggestions.Popover`, and `pickerInitialFocus`, with the same props. `@floating-ui/react` installs as a dependency and stays out of bundles that don't import `/floating-ui`. |
-| `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind v4 utilities, and the shadcn/ui theme bridge |
+| `/floating-ui`, `/react-aria` | `EmojiPopover`, `EmojiSuggestions.Popover`, `pickerInitialFocus`, with the same props. `@floating-ui/react` stays out of bundles that don't import `/floating-ui`. |
+| `/tokens.css` | Colors, radius, shadow, and fonts as CSS variables |
+| `/theme.css` | Tailwind v4 utilities such as `bg-picker-background`; import after `tokens.css` |
+| `/shadcn.css` | Takes colors from your shadcn/ui theme; import after `theme.css` |
 | `@brianhung/emoji-picker-core` | Data, search, stores, and every public type, without React ([README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/core#readme)) |
-
-Parts need no CSS. To style with Tailwind, import `tokens.css` (colors, radius, shadow, and fonts) and `theme.css` (utilities such as `bg-picker-background`). In a shadcn/ui project, add `shadcn.css` after them to take the colors from your theme.
 
 ## Anatomy
 
@@ -89,9 +91,18 @@ Root
 └ Panel
 ```
 
-Each part renders a default when it has no children. Each takes `render` (an element or `(props, state) => element`), `className`, and `style`, as values or functions of state. Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Types are namespaced on each part, as in Base UI: `EmojiPicker.Root.Props`, `EmojiPicker.Root.State`, `EmojiPicker.Root.Actions`, `EmojiPicker.List.Cell.State`, and so on. Flat aliases (`RootProps`, `CellState`) are also exported.
+| Every part | Description |
+|---|---|
+| `children` | Omitted: renders a default |
+| `render` | An element or `(props, state) => element` |
+| `className`, `style` | A value or a function of state |
+| Flat exports | `EmojiPickerRoot`, `EmojiPickerList`, … |
+| Types | `EmojiPicker.Root.Props`, `EmojiPicker.Root.State`, `EmojiPicker.Root.Actions`, `EmojiPicker.List.Cell.State`, …; flat aliases `RootProps`, `CellState`, … |
 
-Hooks inside `Root`, which throw outside one: `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, and `useSearchState` (`SearchStateValue`). Hooks that work anywhere: `useEmojiLabels()` (the localized `EmojiLabels`), `useEmojiStore()`, `useEmojiStatus()`, `useSkinTone()`, `useFrequentEmoji()`, `useEmojiSearch()`, and `useEmoji()`.
+| Hook | Scope |
+|---|---|
+| `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, `useSearchState` (`SearchStateValue`) | Inside `Root`; throws outside |
+| `useEmojiLabels()` (`EmojiLabels`), `useEmojiStore()`, `useEmojiStatus()`, `useSkinTone()`, `useFrequentEmoji()`, `useEmojiSearch()`, `useEmoji()` | Anywhere |
 
 ## API reference
 
@@ -101,48 +112,57 @@ Hooks inside `Root`, which throw outside one: `useActiveEmoji`, `useCategoryNavi
 |---|---|
 | `onSelect` | `(selection, details)`. `selection` is an `EmojiSelection` (`emoji`, `unified`, `baseUnified`, `name`, `shortcode`, `shortcodes`, `skinTone`, `isCustom`, `imageUrl`). `details` has `reason`, `event`, `cancel()` (keeps the value and the popover open), and `collapse()` with `reactions`. |
 | `query`, `value`, `highlight`, `reactionsOpen`, `collapsedCategories` | Controllable as `x` / `defaultX` / `onXChange(value, details)`. See [Controlled state](#controlled-state). |
-| `categories` | Sections in order, each `{ id, name?, icon?, nav? }`; `nav: false` hides its tab. Ids: `"suggested"` (frequently used), a group such as `"smileys_people"`, `"custom"` (custom emoji without a `group`), and `"custom:<group>"`. Custom sections you don't list follow the listed ones; to leave custom emoji out, use the provider's `filter`. |
+| `value`, `highlight` | A unified code. `highlight` also accepts an item key `"<section>:<unified>"` (`"suggested:1f44d"`), passed as `details.key`. `onValueChange` fires whether or not `value` is passed. |
+| `categories` | Sections in order, each `{ id, name?, icon?, nav? }`; `nav: false` hides its tab. Ids: `"suggested"` (frequently used), a group such as `"smileys_people"`, `"custom"` (custom emoji without a `group`), `"custom:<group>"`. Unlisted custom sections follow the listed ones; to leave custom emoji out, use the provider's `filter`. |
 | `frequent` | Number of frequently used emoji (default 16). `false` hides them. |
 | `suggested` | Fixed emoji shown in place of frequently used emoji |
 | `emojiVersion` | Hides emoji newer than this Unicode emoji version |
-| `columns` | `"fit"` (default) fits the width. A number sets exactly that many per row. |
-| `reactions` | Shows `Reactions`, a row that expands into the picker in `Panel`. Takes a list of emoji, or a number for that many frequently used emoji. See [Reactions](#reactions). |
+| `columns` | `"fit"` (default) fits the width; a number sets the count per row |
+| `reactions` | Shows `Reactions`, which expands into the picker in `Panel`. A list of emoji, or a number of frequently used emoji. See [Reactions](#reactions). |
 | `searchResults` | `"ranked"` (one list, default) or `"grouped"` (sections in rank order) |
-| `searchLimit` | Maximum number of search results (default 200) |
+| `searchLimit` | Maximum search results (default 200) |
 | `onKeyDown`, `actionsRef`, `keyboardTarget` | See [Keyboard](#keyboard) |
 | `disableVariations` | Disables per-emoji skin-tone variations (long press and Shift+Space) |
 
-`highlight` and `onHighlightChange` use the emoji's unified code, as `value` does. `details.key` is the item's section-scoped key, `"<section>:<unified>"` (`"suggested:1f44d"`, `"smileys_people:1f44d"`), which tells two copies of an emoji apart; `highlight` accepts either form. `onValueChange` fires whether or not `value` is passed, as in Base UI's Select.
+### List
 
-`List.Variations` is the skin-tone popup that a long press or Shift+Space opens on a cell. `List` renders it; to style it, render `<EmojiPicker.List.Variations>` beside `List` in the `Viewport`, with `{(tone) => <EmojiPicker.List.Variations.Option />}` as children if needed. `List.SectionActions` renders controls over a sticky title, outside the listbox. Its `toggle` and `toggleProps` collapse the section. `<List orientation="horizontal" rows={5} />` lays sections side by side, and `searchRows` sets the rows for search results. `List renderEmptyState({ status, query, error, retry })` renders while data loads (`"loading"`), after it fails (`"error"`), and when nothing matches (`"empty"`).
+| Prop or part | Description |
+|---|---|
+| `renderEmptyState({ status, query, error, retry })` | `status` is `"loading"`, `"error"`, or `"empty"` |
+| `orientation="horizontal"`, `rows`, `searchRows` | Sections side by side; `rows` per section, `searchRows` for results |
+| `List.Variations` | The skin-tone popup on a cell (long press, Shift+Space). Rendered by `List`; place it beside `List` in `Viewport` to customize. |
+| `List.SectionActions` | Controls over a sticky title, outside the listbox; `toggle` and `toggleProps` collapse the section |
 
 ### Provider
 
 | Prop | Description |
 |---|---|
-| `data` | A URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset \| EmojiDataInput>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version. |
+| `data` | A URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset \| EmojiDataInput>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version. A URL reloads when it changes; an inline loader runs once, and again when `locale` changes. A dataset object without `customEmojis` renders on the first pass, including on the server. |
 | `locale`, `labels` | Search folding and segmentation, A–Z order, result-count formatting, text direction, and `EmojiLabels` strings |
 | `searchEngine` | An `EmojiSearch`. See [Search](#search). |
-| `customEmojis` | A `CustomEmoji`, pack URL, or loader, or an array of them. See [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/). |
+| `customEmojis` | A `CustomEmoji`, pack URL, or loader, or an array of them; reloads when the contents change. See [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/). |
 | `filter` | `(record) => boolean`. Removes emoji, custom emoji included, from pickers and search. |
-| `skinTone`, `defaultSkinTone`, `onSkinToneChange` | The shared skin tone |
-| `frequents`, `defaultFrequents`, `onFrequentsChange` | Frequently used emoji as `Record<unified, { count, lastUsed }>`. `defaultFrequents` defaults to six common emoji, entries that `remove()` takes out like any other. Pickers and `useFrequentEmoji` skip entries that the current data does not include, so the history survives a change of packs. |
-| `storage` | `{ frequents?, skinTone? }`: where uncontrolled frequently used emoji and skin tone persist. Default: `localStorageAdapter(key)`, synced across tabs. `null` for either key keeps that value in memory. |
-| `frequentsTuning` | `{ halfLifeDays?, max? }`: how fast a use fades (default 14 days) and how many emoji the history keeps (default 64) |
-| `renderer`, `imageUrl`, `imageVersion` | `"auto"` (default) uses images only where the system cannot draw an emoji. `imageUrl(unified, { renderer })` returns an image URL, or `undefined` for native text. The default returns Twemoji when `renderer` is `"image"`. |
-| `prepare` | Loads the data and builds the search index when the browser is idle (default `true`) |
-
-Changing a prop updates the provider in place, except `storage`, `frequentsTuning`, `defaultSkinTone`, and `defaultFrequents`, which are read once. A `data` loader written inline runs once, and again when `locale` changes; a URL reloads when it changes; `customEmojis` reload when their contents change. A dataset object without `customEmojis` renders on the first pass, including on the server. A server-rendered page hydrates with the default skin tone and frequently used emoji, then reads storage.
+| `skinTone`, `defaultSkinTone`, `onSkinToneChange` | The shared skin tone. `defaultSkinTone` is read once. |
+| `frequents`, `defaultFrequents`, `onFrequentsChange` | `Record<unified, { count, lastUsed }>`. `defaultFrequents` (read once) is six common emoji that `remove()` can take out. Entries missing from the current data are skipped, not deleted. |
+| `storage` | `{ frequents?, skinTone? }` for uncontrolled values. Default: `localStorageAdapter(key)`, synced across tabs; `null` keeps a value in memory. Read once; a server-rendered page hydrates with the defaults, then reads storage. |
+| `frequentsTuning` | `{ halfLifeDays?, max? }`: decay half-life (default 14 days) and history size (default 64). Read once. |
+| `renderer`, `imageUrl`, `imageVersion` | `"auto"` (default) uses images only where the system can't draw an emoji. `imageUrl(unified, { renderer })` returns a URL, or `undefined` for native text; the default returns Twemoji when `renderer` is `"image"`. |
+| `prepare` | Loads data and builds the search index when the browser is idle (default `true`) |
 
 ### Controlled state
 
-Every controllable state takes `x`, `defaultX`, and `onXChange(value, details)`. `details` has `reason` and, when there is one, the `event`. `cancel()` keeps the state as it is, and `isCanceled` reports whether it was called. `allowPropagation()` and `isPropagationAllowed` control whether the key event reaches the page. Changes made through `actionsRef` report `"imperative-action"`.
+| `details` member | Description |
+|---|---|
+| `reason` | See below. Changes through `actionsRef` report `"imperative-action"`. |
+| `event` | The triggering event, when there is one |
+| `cancel()`, `isCanceled` | Keeps the state as it is |
+| `allowPropagation()`, `isPropagationAllowed` | Lets an `"escape-key"` change of Root `query` or `SkinTone` `open` reach the page, such as an enclosing dialog |
 
 | State | Reasons |
 |---|---|
 | Root `query` | `"input-change"`, `"clear-press"`, `"escape-key"`, `"imperative-action"`, `"none"` |
 | Root `highlight` | `"keyboard"`, `"pointer"`, `"imperative-action"`, `"none"`, with `details.key` |
-| Root `value`, `onSelect` | `"item-press"`, `"imperative-action"` (`actions.pick()`). `onValueChange` receives `string \| null`, as in Base UI's Select. |
+| Root `value`, `onSelect` | `"item-press"`, `"imperative-action"` (`actions.pick()`). `onValueChange` receives `string \| null`. |
 | Root `collapsedCategories` | `"trigger-press"`, `"none"` |
 | Root `reactionsOpen` | `"trigger-press"` (Expand), `"item-press"` (`details.collapse()` in `onSelect`), `"escape-key"` (Escape with no query), `"none"` |
 | `Reactions` `value` | `"item-press"`, with `details.emoji` and `details.pressed` (whether the press added it) |
@@ -151,53 +171,59 @@ Every controllable state takes `x`, `defaultX`, and `onXChange(value, details)`.
 | Provider `skinTone` | `"item-press"`, `"none"` |
 | Provider `frequents` | `"pick"`, `"remove"`, `"clear"`, with `details.emoji` |
 
-`allowPropagation()` lets an `"escape-key"` change of Root `query` or `SkinTone` `open` reach the page, such as a dialog around the picker. It has no effect on other changes.
-
 ### Keyboard
 
-Parts handle their keys with React Aria: the arrow keys, Page Up, Page Down, Home, End, and Enter in the grid, Shift+Space for skin tones, and `/` to search. Escape closes the skin-tone menu, then clears the query, then closes the popover. Keyboard and pointer move one highlight. With a search field, focus stays in the field (`aria-activedescendant`). Without one, focus moves through the cells. Direction follows React Aria's locale, not CSS `direction`.
+| Key | Action |
+|---|---|
+| Arrows, Page Up, Page Down, Home, End | Move the highlight; direction follows React Aria's locale, not CSS `direction` |
+| Enter | Pick |
+| Shift+Space | Skin-tone variations |
+| `/` | Focus search |
+| Escape | Closes the skin-tone menu, then clears the query, then closes the popover |
+
+Keyboard and pointer share one highlight. With a search field, focus stays in it (`aria-activedescendant`); without one, focus moves through the cells.
 
 | Prop | Description |
 |---|---|
-| Event handlers | Every handler a part composes with its own (keys, clicks, presses, pointer events) runs first and receives a `PickerEvent` whose `preventEmojiPickerHandler()` skips the part's handler for that event, as Base UI's `preventBaseUIHandler()`. A `List.Cell` `onClick` that calls it doesn't pick. |
-| `actionsRef` | `move(to)`, `pick()`, `highlight(emoji)` (a unified code or item key), `focusSearch()`, `clearSearch()`, `close()`, and `toggleSkinTone()`. Inside `Root`, use `useEmojiPickerActions()`. |
-| `keyboardTarget` | An element that keeps focus, such as an editor. Its arrow keys, Page Up, Page Down, and Enter drive the picker. Tab also picks while the element is an expanded combobox (`aria-expanded="true"`). |
+| Event handlers | Run before the part's own handler and receive a `PickerEvent`; `preventEmojiPickerHandler()` skips the part's handler (a `List.Cell` `onClick` that calls it doesn't pick) |
+| `actionsRef` | `move(to)`, `pick()`, `highlight(emoji)` (unified code or item key), `focusSearch()`, `clearSearch()`, `close()`, `toggleSkinTone()`. Inside `Root`: `useEmojiPickerActions()`. |
+| `keyboardTarget` | An element that keeps focus, such as an editor. Its arrows, Page Up, Page Down, and Enter drive the picker; Tab also picks while it has `aria-expanded="true"`. |
 
 ### Styling
 
-Each part has a `data-slot` prefixed `emoji-picker-`, such as `emoji-picker-search-input`, `emoji-picker-list`, `emoji-picker-emoji`, and `emoji-picker-variation`. State is exposed as data attributes, present as an empty string or absent, as in Base UI: `[data-highlighted]` and Tailwind's `data-highlighted:` match.
+Each part has a `data-slot` prefixed `emoji-picker-` (`emoji-picker-search-input`, `emoji-picker-list`, `emoji-picker-emoji`, `emoji-picker-variation`, …). State attributes are present as `""` or absent.
+
+```css
+[data-slot="emoji-picker-emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
+```
 
 | Attribute | Parts | Description |
 |---|---|---|
-| `data-highlighted` | Cells, variation options, typeahead options | The highlighted item, from the keyboard or the pointer, as on Base UI's `Menu.Item` |
-| `data-focused` | Cells | The keyboard position, by DOM focus or the search field's `aria-activedescendant` |
+| `data-highlighted` | Cells, variation options, typeahead options | The highlighted item, from the keyboard or the pointer |
+| `data-focused` | Cells | The keyboard position, by DOM focus or `aria-activedescendant` |
 | `data-selected` | Cells, skin-tone options, reaction items | The value, the current skin tone, or a selected reaction |
-| `data-pressed`, `data-hovered`, `data-focus-visible` | Cells, tabs, buttons | From React Aria. Touch input sets no hover. |
+| `data-pressed`, `data-hovered`, `data-focus-visible` | Cells, tabs, buttons | From React Aria. Touch sets no hover. |
 | `data-focused` | `List`, tabs, search input | The element holds DOM focus |
 | `data-disabled` | `CategoryNav` and its tabs | Search results are showing |
-| `data-active` | Category tabs | The tab for the section in view, as on Base UI's `Tabs.Tab` |
+| `data-active` | Category tabs | The section in view |
 | `data-open`, `data-closed` | Popups | Whether the popup is open |
 | `data-popup-open` | Popup triggers | The popup is open |
-| `data-starting-style`, `data-ending-style` | `EmojiPopover.Content`, `EmojiSuggestions.Popover` | The content is entering or exiting |
+| `data-starting-style`, `data-ending-style` | `EmojiPopover.Content`, `EmojiSuggestions.Popover` | Entering or exiting. Nothing animates by default. |
 | `data-unified` | Cells, reaction items | The unified code |
-| `data-category` | Sections | The section's category id |
+| `data-category` | Sections | The category id |
 | `data-section` | `List.SectionActions` | The section id |
-| `data-row`, `data-column`, `data-index` | Cells | Row, column, and index across the whole list |
+| `data-row`, `data-column`, `data-index` | Cells | Position across the whole list |
 | `data-overridden` | Cells, reaction items, `Emoji` | An `imageUrl` replaces the native glyph |
-| `data-has-variations` | Cells | The emoji has skin-tone variations |
+| `data-has-variations` | Cells | Has skin-tone variations |
 | `data-collapsed` | Sections, titles, section actions | The section is collapsed |
 | `data-searching` | Root, `Viewport`, `List` | Search results are showing |
-| `data-results` | `List` | `"ranked"` or `"grouped"` while search results show |
+| `data-results` | `List` | `"ranked"` or `"grouped"` while results show |
 | `data-empty` | `Search`, `Search.Field`, `List` | No query, or nothing to show |
 | `data-orientation` | `Viewport`, `List`, `CategoryNav`, skin-tone options | `horizontal` or `vertical` |
 | `data-columns` | Root | The `columns` prop |
 | `data-reactions-open` | Root | The reaction row is showing |
 | `data-side`, `data-align` | `EmojiPopover.Content`, `EmojiSuggestions.Popover` | The resolved placement |
-| `data-emoji`, `data-emoji-missing` | `Emoji` | Every rendered `Emoji`, and input that resolves to no emoji |
-
-```css
-[data-slot="emoji-picker-emoji"][data-highlighted] { background: var(--emoji-picker-selected); }
-```
+| `data-emoji`, `data-emoji-missing` | `Emoji` | Every rendered `Emoji`; input that resolves to no emoji |
 
 | Variable | Default |
 |---|---|
@@ -211,45 +237,43 @@ Each part has a `data-slot` prefixed `emoji-picker-`, such as `emoji-picker-sear
 | `--emoji-header-height` | `40px` |
 | `--emoji-skin-tone-size` | `15px` |
 | `--emoji-font-family` | System emoji fonts (from `tokens.css`) |
-
-`List` sets `--emoji-picker-content-width` on `Root` to the grid's width.
+| `--emoji-picker-content-width` | Set on `Root` by `List` to the grid's width |
 
 ### Accessibility
-
-Each part follows its WAI-ARIA Authoring Practices pattern. Nothing animates by default.
 
 | Part | Roles |
 |---|---|
 | Search | `searchbox` with `aria-activedescendant`, and a polite `status` for the result count |
 | List | `listbox` › `group` per section › `option`, with `aria-busy` during an async search |
-| CategoryNav | `toolbar` of buttons that jump to a section; the one in view has `aria-current`. Not tabs: the virtualized sections can't be tab panels. |
-| SkinTone | A disclosure button (`aria-expanded`, `aria-controls`) for a `toolbar` of `aria-pressed` buttons. Arrows move focus without picking, as in Base UI's ToggleGroup; focus leaving closes it. |
-| Variations | Shift+Space or a long press opens a `listbox` of six tones. Cells with variations have `aria-keyshortcuts="Shift+Space"`. |
-| Reactions, ReactionBar | `toolbar`. Items are toggle buttons with `aria-pressed` when the row has a `value`. Expand is a disclosure for the `Panel`; Escape with no query returns to the row. |
+| CategoryNav | `toolbar` of buttons that jump to a section; the one in view has `aria-current` (not tabs: virtualized sections can't be tab panels) |
+| SkinTone | Disclosure button (`aria-expanded`, `aria-controls`) for a `toolbar` of `aria-pressed` buttons. Arrows move focus without picking; focus leaving closes it. |
+| Variations | `listbox` of six tones. Cells with variations have `aria-keyshortcuts="Shift+Space"`. |
+| Reactions, ReactionBar | `toolbar`. Items are toggle buttons with `aria-pressed` when the row has a `value`. Expand is a disclosure for `Panel`; Escape with no query returns to the row. |
 | EmojiPopover | `dialog`, non-modal from `/floating-ui` and modal from `/react-aria` by default (`modal` sets it). The trigger has `aria-haspopup="dialog"` and `aria-expanded`. |
 | Typeahead | `combobox` and `listbox` props |
-| `Emoji` | `role="img"`. `decorative` hides it. |
+| `Emoji` | `role="img"`; `decorative` hides it |
 
 ## Guides
 
 ### Search
 
-A search is `(query, { records, limit, signal, frequency, locale }) => { unified, score? }[] | Promise<…>`, best first. Compose engines from `@brianhung/emoji-picker-core/search`:
+```ts
+type EmojiSearch = (query, { records, limit, signal, frequency, locale }) => { unified, score? }[] | Promise<…>; // best first
+```
 
-| Function | Description |
+| Export | Description |
 |---|---|
-| `lexical({ typos, typoThreshold, locale, segmenter, tokenize })` | Default. A word index over shortcodes, names, and tags, with typo correction. |
+| `lexical({ typos, typoThreshold, locale, segmenter, tokenize })` | Default. Word index over shortcodes, names, and tags, with typo correction. |
 | `fallback(primary, secondary, { min })` | Appends `secondary`'s hits when `primary` returns fewer than `min` (default 8) |
 | `merge(...searches)` | Reciprocal rank fusion |
 | `rerank(search, ...rerankers)`, `preferFrequent({ weight })` | Reorders results |
 | `progressive(fast, slow)`, `withInterim(promise, hits)` | Shows fast results until slow ones arrive |
 | `remote(fetcher)` | Any async source of hits |
+| `useEmojiSearch(query, { limit })` | `{ results, pending }` from the provider, outside a picker |
 
-`useEmojiSearch(query, { limit })` returns `{ results, pending }` from the provider, outside a picker. For embedding search, see [Semantic search](https://emoji.brianhung.me/examples/semantic-search/).
+The functions are in `@brianhung/emoji-picker-core/search`. Examples: [Semantic search](https://emoji.brianhung.me/examples/semantic-search/), [third-party engines](https://github.com/BrianHung/EmojiPicker/tree/main/packages/core#search-adapters).
 
 ### Popovers
-
-`EmojiPopover` (from `/floating-ui` or `/react-aria`, with the same props) positions, flips, and shifts its content. It closes on Escape, an outside press, or a pick (`closeOnSelect={false}` keeps it open), and restores focus to the trigger or `finalFocus`. `anchor` accepts an element, a virtual element, or a rect function. `side` is `top`, `bottom`, `left`, `right`, `inline-start`, or `inline-end`, and `align` is `start`, `center`, or `end`, as on Base UI's Positioner. Root takes `modal`, `actionsRef` (`{ close() }`), and `onOpenChangeComplete(open)`, which runs once the content's CSS animations and transitions finish; the content stays mounted with `data-ending-style` until then, so neither adapter takes a duration.
 
 ```tsx
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
@@ -262,7 +286,19 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 </EmojiPopover.Root>
 ```
 
-`EmojiPopover.Content` and `EmojiSuggestions.Popover` take `render`, `className`, and `style` like the parts, as functions of `{ open, side, align }`. Their types are namespaced (`EmojiPopover.Root.Props`, `EmojiPopover.Trigger.State`, `EmojiPopover.Content.State`, `EmojiSuggestions.Popover.State`). Both expose `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin`, and `--available-height` for CSS transitions. `/floating-ui` also sets `--available-width`. Content's default `aria-label` is `labels.picker`.
+| Prop | Description |
+|---|---|
+| Root `open`, `defaultOpen`, `onOpenChange` | Controlled state; see [Controlled state](#controlled-state) |
+| Root `closeOnSelect` | Default `true`. It also closes on Escape and an outside press. |
+| Root `modal`, `actionsRef` (`{ close() }`) | |
+| Root `onOpenChangeComplete(open)` | Runs once the content's CSS animations and transitions finish; content stays mounted with `data-ending-style` until then |
+| Content `anchor` | An element, a virtual element, or a rect function |
+| Content `side`, `align` | `top`, `bottom`, `left`, `right`, `inline-start`, `inline-end`; `start`, `center`, `end`. Flips and shifts to fit. |
+| Content `sideOffset`, `collisionPadding`, `container` | |
+| Content `initialFocus`, `finalFocus` | Focus on open, and on close (default: the trigger) |
+| Content, `EmojiSuggestions.Popover` `render`, `className`, `style` | As on parts, as functions of `{ open, side, align }`. Content's default `aria-label` is `labels.picker`. |
+| CSS variables | `--transform-origin`, `--available-height`; `/floating-ui` also sets `--available-width` |
+| Types | `EmojiPopover.Root.Props`, `EmojiPopover.Trigger.State`, `EmojiPopover.Content.State`, `EmojiSuggestions.Popover.State` |
 
 ### Localization
 
@@ -274,25 +310,26 @@ import { localeData } from "@brianhung/emoji-picker-core";
 </EmojiProvider>
 ```
 
-`localeData(locale, { shortcodes, baseUrl })` returns the jsDelivr URL of a dataset in `@brianhung/emoji-picker-data`, which localizes emoji names, tags, and section names. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. `"cldr"` gives shortcodes in the locale's language. `locale` sets search folding and segmentation, A–Z order, result-count formatting, and text direction.
+| Option | Description |
+|---|---|
+| `localeData(locale, { shortcodes, baseUrl })` | jsDelivr URL of a `@brianhung/emoji-picker-data` dataset, with localized names, tags, and section names |
+| `shortcodes` | `"iamcal"` (default; English in every locale), `"cldr"` (the locale's language), … |
+| `locale` | Search folding and segmentation, A–Z order, result-count formatting, text direction |
+| `labels` | A partial `EmojiLabels` |
 
-The picker's strings and accessible names come from `labels`, a partial `EmojiLabels` that defaults to English:
-
-| Key | Default |
+| Label | Default |
 |---|---|
 | `picker` | `"Emoji picker"` |
 | `searchPlaceholder`, `searchLabel`, `searchClear`, `searchResults` | `"Search"`, `"Type to search for an emoji"`, `"Clear"`, `"Search results"` |
 | `emojiList`, `categoryNavigation` | `"Emoji"`, `"Category navigation"` |
 | `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`, with `locale`'s plural rules and digits |
-| `suggested`, `custom` | `"Frequently used"`, `"Custom"`: section names |
+| `suggested`, `custom` | `"Frequently used"`, `"Custom"` (section names) |
 | `reactions`, `expandReactions` | `"Reactions"`, `"More emoji"` |
 | `previewCaption` | `"What's your mood?"` |
 | `skinTone`, `skinTones` | `"Skin tone"`, and six names from `"Default skin tone"` to `"Dark skin tone"` |
 | `withSkinTone(name, tone)` | `"thumbs up: medium skin tone"` |
 
 ### Shortcode typeahead
-
-`useTextFieldEmojiTypeahead(ref, options)` adds `:shortcode` suggestions to an `<input>` or `<textarea>`. `useEmojiTypeahead({ query, anchor, replace }, options, element)` does the same for any editor, with `findShortcodeTrigger(textBeforeCaret)` to find the query; `element` is the editor's element, a ref to it, or a function that returns it. Both return an `EmojiTypeahead` (`query`, `open`, `anchor`, `suggestions`, `dismiss`, `onKeyDown`) and make the field a combobox while it is open. `getListProps(props?)` and `getOptionProps(index, props?)` merge your props.
 
 ```tsx
 const typeahead = useTextFieldEmojiTypeahead(ref, { onSelect: track });
@@ -305,13 +342,30 @@ const typeahead = useTextFieldEmojiTypeahead(ref, { onSelect: track });
 </EmojiSuggestions.Popover>
 ```
 
-The options are `matchBy` (`"shortcode"`, `"search"`), `order` (`"relevance"`, `"alphabetical"`), `columns`, `limit`, `insert` (`"emoji"`, `"shortcode"`), and `onSelect(selection)`, which is called once an emoji is inserted. `suggestions.choose(index?)` inserts a suggestion and counts it as used. `suggestions.insert(selection)` only writes a selection into the field, for a picker in the menu that already counted it:
+A picker in the menu:
 
 ```tsx
 <EmojiPicker.Root query={typeahead.query} keyboardTarget={editor} onSelect={typeahead.suggestions.insert}>…</EmojiPicker.Root>
 ```
 
-Tiptap, Lexical, and ProseMirror adapters are registry items (`emoji-tiptap.json`, `emoji-lexical.json`, `emoji-prosemirror.json`). The Tiptap and Lexical items include the menu and a node for custom emoji. See the [Tiptap](https://emoji.brianhung.me/examples/tiptap/) and [Lexical](https://emoji.brianhung.me/examples/lexical/) examples.
+| Export | Description |
+|---|---|
+| `useTextFieldEmojiTypeahead(ref, options)` | For an `<input>` or `<textarea>` |
+| `useEmojiTypeahead({ query, anchor, replace }, options, element)` | For any editor; `element` is the editor element, a ref, or a getter. Find the query with `findShortcodeTrigger(textBeforeCaret)`. |
+| `EmojiTypeahead` | `query`, `open`, `anchor`, `suggestions`, `dismiss`, `onKeyDown`. The field is a combobox while open. |
+| `suggestions.choose(index?)` | Inserts a suggestion and counts it as used |
+| `suggestions.insert(selection)` | Writes a selection already counted by a picker |
+| `getListProps(props?)`, `getOptionProps(index, props?)` | Merge your props |
+| `useEmojiSuggestions({ query, onChoose })` | Suggestions state alone (`suggestions`, `highlightedIndex`, `choose`, `insert`, `onKeyDown`, prop getters) for other fields |
+| `useEmojiTypeaheadAdapter(create, deps)` | Wraps a framework-neutral typeahead as an `EmojiTypeahead`. `create(store, { id })` returns `{ suggestions, anchor() }` (from core's `createEmojiSuggestions`) plus pass-through values, such as the Tiptap item's `plugin`. |
+
+| Option | Values |
+|---|---|
+| `matchBy` | `"shortcode"`, `"search"` |
+| `order` | `"relevance"`, `"alphabetical"` |
+| `insert` | `"emoji"`, `"shortcode"` |
+| `columns`, `limit` | |
+| `onSelect(selection)` | Called once an emoji is inserted |
 
 ### Reactions
 
@@ -322,81 +376,65 @@ Tiptap, Lexical, and ProseMirror adapters are registry items (`emoji-tiptap.json
 </EmojiPicker.Root>
 ```
 
-`Reactions` is the reaction row inside a picker, which expands into the full picker. `ReactionBar` is a standalone row of your own reaction buttons, outside any picker.
-
 | Export | Description |
 |---|---|
-| `Reactions` | The row of `Root reactions`. With `value`, `defaultValue`, or `onValueChange`, as on Base UI's ToggleGroup, the items are toggle buttons, pressed for the listed emoji in any skin tone; a press that adds a reaction also calls `onSelect`. `Reactions.Expand` shows while a `Panel` is rendered. |
-| `ReactionBar` | React Aria's `Toolbar` for a row of your own buttons. Home and End move to the ends. Once focus is inside, hover moves it. |
-| `useFrequentEmoji({ limit })` | `{ items, pick, remove, clear }` for the frequently used emoji |
-| `Emoji`, `useEmoji` | Renders or resolves a native emoji, shortcode, unified code, custom emoji id, `EmojiSelection`, `EmojiRecord`, or `CustomEmoji`. Input that resolves to no emoji renders as text with `data-emoji-missing`. |
+| `Reactions` | The row of `Root reactions`, inside a picker. With `value`, `defaultValue`, or `onValueChange`, items are toggle buttons, pressed for listed emoji in any skin tone; a press that adds a reaction also calls `onSelect`. `Reactions.Expand` shows while a `Panel` is rendered. |
+| `ReactionBar` | React Aria `Toolbar` for your own buttons, outside a picker. Home and End move to the ends; once focus is inside, hover moves it. |
+| `useFrequentEmoji({ limit })` | `{ items, pick, remove, clear }` |
+| `Emoji`, `useEmoji` | Renders or resolves a native emoji, shortcode, unified code, custom emoji id, `EmojiSelection`, `EmojiRecord`, or `CustomEmoji`. Unresolved input renders as text with `data-emoji-missing`. |
 
 ## Advanced
 
 ### Custom parts
 
-To replace a part with your own component, use its hook:
-
-| Part | Hook |
+| Part | Replacement |
 |---|---|
-| `Search` | `useSearchState()` for the query and count. An input you render drives the grid as `keyboardTarget`. |
+| `Search` | `useSearchState()` for the query and count; pass your input as `keyboardTarget` |
 | `SkinTone` | `useSkinTone()` returns `[tone, setTone]` |
-| `CategoryNav` | `useCategoryNavigation()` returns `{ categories, activeCategory, jumpToCategory }`. `jumpToCategory` expands a collapsed section first. `DefaultCategoryIcon` draws the built-in icons. |
-| `Reactions` | `useFrequentEmoji({ limit })` for the items, and `useEmojiPickerActions()` to pick or expand |
-| `EmojiPopover` | Any popover, with `pickerInitialFocus` as its initial focus |
-| `List` | `useEmojiGrid` (`UseEmojiGridResult`) and `useEmojiCell` with your own virtualizer. See [Custom virtualizer](#custom-virtualizer). |
+| `CategoryNav` | `useCategoryNavigation()` returns `{ categories, activeCategory, jumpToCategory }` (expands a collapsed section first); `DefaultCategoryIcon` draws the built-in icons |
+| `Reactions` | `useFrequentEmoji({ limit })`, and `useEmojiPickerActions()` to pick or expand |
+| `EmojiPopover` | Any popover (Base UI, Radix, React Aria, shadcn/ui): close it from `onSelect` and give `Search.Input` `autoFocus`, or pass `pickerInitialFocus(content)` as initial focus when there is no search field. Escape clears the query before reaching the popover. [Example](https://emoji.brianhung.me/#custom-popover). |
+| `List` | `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` (`UseEmojiGridResult`) inside `Root`, and `useEmojiCell(state, item)` per cell, with your own virtualizer. `getGridProps(props?)` and `getHeaderProps(section, props?)` merge your props; render the result's `variations` next to the grid. [Example](https://emoji.brianhung.me/examples/virtualizer/). |
 
 ### Self-hosted data
-
-By default, datasets load from jsDelivr. To serve them yourself:
 
 | Dataset | Copy | Pass |
 |---|---|---|
 | English | `node_modules/@brianhung/emoji-picker-core/data/en.json` to `public/emoji/en.json` | `data="/emoji/en.json"` |
-| Other locales and shortcode sets | `node_modules/@brianhung/emoji-picker-data/data/` to `public/emoji/` | `data={localeData("ja", { baseUrl: "/emoji" })}`, which resolves to `/emoji/ja/iamcal.json` |
+| Other locales and shortcode sets | `node_modules/@brianhung/emoji-picker-data/data/` to `public/emoji/` | `data={localeData("ja", { baseUrl: "/emoji" })}` (resolves to `/emoji/ja/iamcal.json`) |
 
-With a bundler, import the file's URL instead, such as `import en from "@brianhung/emoji-picker-core/data/en.json?url"` in Vite. To build a dataset, run `npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json`, which requires `emojibase-data`. `build-data` uses iamcal shortcodes for English, and iamcal and CLDR for other locales.
+```ts
+import en from "@brianhung/emoji-picker-core/data/en.json?url"; // Vite
+```
+
+```bash
+npm i -D emojibase-data
+npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
+```
+
+`build-data` uses iamcal shortcodes for English, and iamcal and CLDR for other locales.
 
 ### Emoji fonts
-
-Native rendering draws text in `--emoji-font-family`, so any color emoji font works, including one you ship with your own emoji. Support detection and image fallback use that font. For example, to use Noto Color Emoji from Google Fonts:
 
 ```css
 @import url("https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap");
 [data-slot="emoji-picker"] { --emoji-font-family: "Noto Color Emoji"; }
 ```
 
-To use Twemoji as a font, install `@brianhung/emoji-picker-twemoji-font`, import its `twemoji.css`, and set `--emoji-font-family: Twemoji`.
-
-The default stack starts with `"Emoji Picker Apple"`, a `local("Apple Color Emoji")` face with fixed ascent and descent, so the glyph stays centered in its box at every size. When you write your own system font stack, keep it first.
+| Font | Setup |
+|---|---|
+| Any color emoji font | `--emoji-font-family`; support detection and image fallback use it too |
+| Twemoji | `@brianhung/emoji-picker-twemoji-font`, import its `twemoji.css`, `--emoji-font-family: Twemoji` |
+| Custom system stack | Keep `"Emoji Picker Apple"` first: a `local("Apple Color Emoji")` face with fixed metrics that keeps glyphs centered |
 
 ### Custom artwork
 
-To use images instead of a font, pass `imageUrl`. It replaces particular emoji, or all of them, under any renderer:
-
 ```tsx
+import { twemojiUrl, withoutTone } from "@brianhung/emoji-picker-core";
+import type { ImageUrl } from "@brianhung/emoji-picker-react";
+
 const imageUrl: ImageUrl = (unified, { renderer }) => ART[withoutTone(unified)] ?? (renderer === "image" ? twemojiUrl(unified) : undefined);
 ```
-
-### Custom popover
-
-Put the picker in any popover (Base UI, Radix, React Aria, or shadcn/ui), close it from `onSelect`, and give `Search.Input` `autoFocus`. A picker without a search field takes `pickerInitialFocus(content)` (from either popover subpath) as the popover's initial focus. Escape clears the query before it reaches the popover. The registry's `emoji-picker-popover.json` (Base UI and Radix) and `emoji-picker-popover-aria.json` (React Aria) do this with your shadcn/ui popover; [Custom popover](https://emoji.brianhung.me/#custom-popover) shows both.
-
-### Custom virtualizer
-
-Call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `Root` in place of `List`, and `useEmojiCell(state, item)` for each cell. `getGridProps(props?)` and `getHeaderProps(section, props?)` merge your props. Render the result's `variations` next to the grid. Keyboard, highlight, and variations work as in `List`. See [Custom virtualizer](https://emoji.brianhung.me/examples/virtualizer/).
-
-### Suggestions without an editor
-
-`useEmojiSuggestions({ query, onChoose })` is the suggestions state alone (`suggestions`, `highlightedIndex`, `choose`, `insert`, `onKeyDown`, and prop getters), for a field that the typeahead hooks do not cover.
-
-### Typeahead adapters
-
-`useEmojiTypeaheadAdapter(create, deps)` renders a framework-neutral typeahead as an `EmojiTypeahead`. `create(store, { id })` returns `{ suggestions, anchor() }`, built on core's `createEmojiSuggestions`, plus any other values to pass through. The Tiptap item returns its ProseMirror `plugin` this way.
-
-### Search adapters
-
-For third-party search engines, see the [core README](https://github.com/BrianHung/EmojiPicker/tree/main/packages/core#search-adapters).
 
 ## License
 
