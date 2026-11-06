@@ -1,5 +1,10 @@
 # @brianhung/emoji-picker-react
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/BrianHung/EmojiPicker/main/.github/assets/picker-dark.png">
+  <img alt="Emoji picker" src="https://raw.githubusercontent.com/BrianHung/EmojiPicker/main/.github/assets/picker-light.png" width="328">
+</picture>
+
 Unstyled React components for emoji pickers, reaction rows, and shortcode typeahead, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 
 ## Installation

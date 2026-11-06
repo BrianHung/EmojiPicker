@@ -1,11 +1,11 @@
 <div align="center">
+  <h1>Emoji Picker</h1>
   <a href="https://emoji.brianhung.me">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/picker-dark.png">
-      <img src=".github/assets/picker-light.png" width="352" alt="The emoji picker">
+      <img alt="Emoji picker" src=".github/assets/picker-light.png" width="328">
     </picture>
   </a>
-  <h1>Emoji Picker</h1>
   <p>A virtualized, unstyled, and composable emoji picker for React.</p>
   <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>

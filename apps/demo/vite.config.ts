@@ -60,7 +60,9 @@ document.head.append(link);`;
     ],
   },
   environments: {
-    client: { build: { rollupOptions: { input: process.env.E2E_BUILD === "1" ? { ...pages, ...Object.fromEntries(["seams", "fonts"].map((p) => [p, fileURLToPath(new URL(`./e2e/pages/${p}/index.html`, import.meta.url))])) } : pages } } },
+    client: {
+      build: { rollupOptions: { input: process.env.E2E_BUILD === "1" ? { ...pages, ...Object.fromEntries(["seams", "fonts", "hero"].map((p) => [p, fileURLToPath(new URL(`./e2e/pages/${p}/index.html`, import.meta.url))])) } : pages } },
+    },
   },
   optimizeDeps: { entries: Object.values(pages) },
   server: { port: 5199, strictPort: true },

@@ -8,6 +8,7 @@
     "build": "npm run build:registry && vite build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
     "og": "node scripts/og/render-og.mjs",
+    "readme:hero": "node scripts/readme-hero.mjs",
     "create-index": "wrangler vectorize create emoji-bge-large --dimensions=1024 --metric=cosine",
     "seed": "tsx scripts/seed.ts",
     "test": "vitest run --config worker/vitest.config.ts",

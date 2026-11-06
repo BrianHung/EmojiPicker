@@ -18,6 +18,7 @@
     "check": "biome check .",
     "size": "size-limit",
     "smoke": "node .github/smoke/run.mjs",
+    "readme:hero": "npm run readme:hero -w demo",
     "lint:packages": "publint packages/core && publint packages/react && publint packages/data && attw --pack packages/core --profile esm-only && attw --pack packages/react --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css && attw --pack packages/data --profile esm-only --entrypoints ./en/iamcal.json ./ja/cldr.json",
     "release:check": "node .github/release-steps.mjs",
     "changeset": "changeset",
