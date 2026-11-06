@@ -48,6 +48,7 @@ function toMarkdown(dir: string, mdx: string) {
             (TABLES[m[2]!] as string[][]).map(([first, ...rest]) => [`\`${first}\``, ...(rest.length === 2 ? [`\`${rest[0]}\``, rest[1]!] : rest)]),
           ),
         ];
+      if ((m = trimmed.match(/^<DefList rows=\{api\.(\w+)\} \/>$/))) return (TABLES[m[1]!] as string[][]).map(([term, description]) => `- \`${term}\`: ${description}`);
       if ((m = trimmed.match(/^<Step title="([^"]+)">$/))) return [`**${m[1]}**`];
       if ((m = trimmed.match(/^<TabPanel label="([^"]+)">$/))) return [`### ${m[1]}`];
       if (/^(import|export) /.test(line) || /^<\/?[A-Za-z][\w.]*(\s[^>]*)?\/?>$/.test(trimmed)) return [];

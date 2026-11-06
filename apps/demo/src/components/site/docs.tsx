@@ -250,11 +250,11 @@ export type PropRow = { name: string; type: string; default?: string; descriptio
 function TableShell({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
     <div className="overflow-hidden rounded-xl border border-border">
-      <Table className="min-w-[540px]">
-        <TableHeader className="bg-muted/50">
+      <Table className="max-sm:block max-sm:[&_tbody]:block max-sm:[&_td]:block max-sm:[&_td]:py-1 max-sm:[&_td:first-child]:pt-3 max-sm:[&_td:last-child]:pb-3 max-sm:[&_tr]:block">
+        <TableHeader className="bg-muted/50 max-sm:hidden">
           <TableRow className="hover:bg-transparent">
             {head.map((h) => (
-              <TableHead key={h} className="h-10 px-4 text-[13px] text-muted-foreground">
+              <TableHead key={h} className="h-10 px-4 text-[13px] whitespace-normal text-muted-foreground max-sm:px-3">
                 {h}
               </TableHead>
             ))}
@@ -266,8 +266,8 @@ function TableShell({ head, children }: { head: string[]; children: React.ReactN
   );
 }
 
-const nameCell = "px-4 py-3 align-top font-mono text-[13px] whitespace-nowrap text-foreground";
-const typeCell = "px-4 py-3 align-top font-mono text-[12.5px] whitespace-normal text-[color:var(--type)]";
+const nameCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[13px] text-foreground sm:whitespace-nowrap max-sm:whitespace-normal max-sm:[overflow-wrap:anywhere]";
+const typeCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-[color:var(--type)]";
 
 export function PropsTable({ rows }: { rows: PropRow[] }) {
   return (
@@ -276,10 +276,10 @@ export function PropsTable({ rows }: { rows: PropRow[] }) {
         <TableRow key={r.name} className="hover:bg-transparent">
           <TableCell className={nameCell}>
             {r.name}
-            {r.description ? <div className="mt-1 max-w-[260px] font-sans text-[13px] font-normal whitespace-normal text-muted-foreground">{r.description}</div> : null}
+            {r.description ? <div className="mt-1 font-sans sm:max-w-[260px] text-[13px] font-normal whitespace-normal text-muted-foreground">{r.description}</div> : null}
           </TableCell>
           <TableCell className={typeCell}>{r.type}</TableCell>
-          <TableCell className="px-4 py-3 align-top font-mono text-[12.5px] text-muted-foreground">{r.default ?? "—"}</TableCell>
+          <TableCell className={cn("px-4 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3 max-sm:before:font-sans max-sm:before:content-['Default:_']", !r.default && "max-sm:!hidden")}>{r.default ?? "—"}</TableCell>
         </TableRow>
       ))}
     </TableShell>
@@ -292,12 +292,25 @@ export function AttrTable({ head, rows }: { head: [string, string] | [string, st
       {rows.map((r, i) => (
         <TableRow key={i} className="hover:bg-transparent">
           {r.map((cell, j) => (
-            <TableCell key={j} className={j === 0 ? nameCell : j === 1 && head.length === 3 ? typeCell : "px-4 py-3 align-top text-[13px] whitespace-normal text-muted-foreground"}>
+            <TableCell key={j} className={j === 0 ? nameCell : j === 1 && head.length === 3 ? typeCell : "px-4 py-3 align-top text-[13px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3"}>
               {cell}
             </TableCell>
           ))}
         </TableRow>
       ))}
     </TableShell>
+  );
+}
+
+export function DefList({ rows }: { rows: [string, string][] }) {
+  return (
+    <dl className="divide-y divide-border rounded-xl border border-border">
+      {rows.map(([term, description]) => (
+        <div key={term} className="flex flex-col gap-1.5 px-4 py-3">
+          <dt className="font-mono text-[13px] [overflow-wrap:anywhere] text-foreground">{term}</dt>
+          <dd className="text-[13px] leading-6 text-muted-foreground">{description}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }

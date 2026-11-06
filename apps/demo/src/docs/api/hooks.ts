@@ -13,5 +13,8 @@ export const hooks: [string, string][] = [
   ["useEmojiStore()", "The provider's EmojiStore, for store.select(unified), store.withSkinTone(unified), and the rest of core's store API."],
   ["useEmojiStatus()", 'The data status: "idle", "loading", "ready", or "error". It starts loading the data.'],
   ["useEmojiPickerActions()", "Inside Root: move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone."],
-  ["useActiveEmoji(), useSearchState(), useCategoryNavigation(), useCollapsedCategories()", "Inside Root: the highlighted emoji, the query and result count, the category tabs, and the collapsed sections."],
+  ["useActiveEmoji()", "Inside Root: the highlighted emoji."],
+  ["useSearchState()", "Inside Root: the query and the result count."],
+  ["useCategoryNavigation()", "Inside Root: the category tabs."],
+  ["useCollapsedCategories()", "Inside Root: the collapsed sections."],
 ];

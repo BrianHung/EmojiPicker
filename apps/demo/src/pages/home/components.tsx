@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { MDXComponents } from "mdx/types";
 import { Demo } from "@/components/site/demo";
-import { AttrTable, H2, H3, PackageManagers, PropsTable, Step, Steps, TabPanel, TabPanels } from "@/components/site/docs";
+import { AttrTable, DefList, H2, H3, PackageManagers, PropsTable, Step, Steps, TabPanel, TabPanels } from "@/components/site/docs";
 import { components, slug, type HeadingProps } from "@/components/site/mdx";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +37,7 @@ export const homeComponents: MDXComponents = {
   Demo,
   PropsTable,
   AttrTable,
+  DefList,
   Steps,
   Step,
   TabPanels,
