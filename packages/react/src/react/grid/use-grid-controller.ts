@@ -15,10 +15,10 @@ import { EmojiCollection } from "../list/collection";
 import { cellOf, type Cells } from "../list/use-cell";
 import { usePointerHighlight } from "../list/pointer";
 import { VariationsPopup } from "../list/variations";
-import { usePicker, type HighlightSource, type ListHandle, type Overlay, type SelectReason } from "../root/context";
+import { usePicker, type HighlightSource, type ListHandle, type Overlay, type EmojiPickerRootChangeEventReason } from "../root/context";
 import { usePickerKeyDown, type KeyResult } from "../utils/keyboard";
 import { useLatest } from "../utils/latest";
-import { flag, type Orientation } from "../utils/render";
+import { flag, type EmojiPickerOrientation } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { shallowEqual, useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
@@ -36,7 +36,7 @@ interface ControllerOptions {
   "aria-labelledby"?: string;
   sections: readonly EmojiSection[];
   geometry: GridGeometry;
-  orientation: Orientation;
+  orientation: EmojiPickerOrientation;
   listRef: React.RefObject<HTMLElement | null>;
   ref?: React.Ref<HTMLElement>;
   probeRoot?: React.Ref<HTMLElement>;
@@ -74,7 +74,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     setHighlight(key, details);
     if (dom) setStop(key);
   };
-  const pick = (key: Key, event?: Event, reason?: SelectReason) => {
+  const pick = (key: Key, event?: Event, reason?: EmojiPickerRootChangeEventReason) => {
     const it = latest.current.collection.emoji(key);
     if (it) picker.pick(it.unified, event, reason);
     return Boolean(it);

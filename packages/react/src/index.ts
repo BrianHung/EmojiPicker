@@ -17,14 +17,14 @@ export {
   useEmojiPickerActions,
   useSearchState,
 } from "./react/parts";
-export type { CategoryOption } from "./react/root";
-export type { EmojiPickerActions } from "./react/root/context";
-export type { InteractionState, Orientation, PartElementProps, PartProps } from "./react/utils/render";
-export type { PickerHandlers } from "./react/utils/events";
+export type { CategoryOption, EmojiPickerCollapsedCategories, EmojiPickerNavCategory } from "./react/root";
+export type { EmojiPickerRootActions } from "./react/root/context";
+export type { EmojiPickerInteractionState, EmojiPickerOrientation, EmojiPickerPartElementProps, EmojiPickerPartProps } from "./react/utils/render";
+export type { EmojiPickerHandlers } from "./react/utils/events";
 export { EmojiProvider, useEmojiLabels, useEmojiSearch, useEmojiStatus, useEmojiStore, useFrequentEmoji, useSkinTone } from "./react/provider";
 export type { ImageUrl } from "./react/provider";
 export { useEmojiCell, useEmojiGrid } from "./react/list";
-export type { EmojiGridState } from "./react/list";
+export type { EmojiGridState, UseEmojiCellResult } from "./react/list";
 export { DefaultCategoryIcon } from "./react/category-nav";
 export { Emoji, useEmoji } from "./react/emoji";
 export { useEmojiTypeahead, useTextFieldEmojiTypeahead } from "./react/typeahead";

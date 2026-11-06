@@ -3,12 +3,12 @@ import { FocusScope, useFocusManager, type FocusManager } from "react-aria/Focus
 import { Toolbar } from "react-aria-components/Toolbar";
 import { mergePartProps } from "./events";
 import { hasModifier } from "./keyboard";
-import { resolve, toRenderFunction, type ElementProps, type Orientation, type PartProps } from "./render";
+import { resolve, toRenderFunction, type ElementProps, type EmojiPickerOrientation, type EmojiPickerPartProps } from "./render";
 import { useLayoutEffect } from "./utils";
 
 type ToolbarProps<S> = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style" | "children"> &
-  PartProps<S, HTMLDivElement> & {
-    orientation: Orientation;
+  EmojiPickerPartProps<S, HTMLDivElement> & {
+    orientation: EmojiPickerOrientation;
     state: S;
     handlers?: React.HTMLAttributes<HTMLElement>;
     toolbarRef?: React.Ref<HTMLDivElement>;

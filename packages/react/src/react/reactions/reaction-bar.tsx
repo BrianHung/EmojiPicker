@@ -1,15 +1,15 @@
 import * as React from "react";
-import type { PickerHandlers } from "../utils/events";
-import type { Orientation, PartProps } from "../utils/render";
+import type { EmojiPickerHandlers } from "../utils/events";
+import type { EmojiPickerOrientation, EmojiPickerPartProps } from "../utils/render";
 import { ToolbarPart } from "../utils/toolbar";
 
 export const BUTTONS = "button:not([disabled])";
 
-export type ReactionBarState = { orientation: Orientation };
+export type ReactionBarState = { orientation: EmojiPickerOrientation };
 
-export type ReactionBarProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style">> &
-  PartProps<ReactionBarState, HTMLDivElement> & {
-    orientation?: Orientation;
+export type ReactionBarProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style">> &
+  EmojiPickerPartProps<ReactionBarState, HTMLDivElement> & {
+    orientation?: EmojiPickerOrientation;
   };
 
 // Once focus is inside, the pointer carries it from button to button

@@ -12,7 +12,6 @@ import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
 import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
-import type { PopoverOpenChangeReason } from "../popover-context";
 import {
   anchorRect,
   ContentFocus,
@@ -25,26 +24,27 @@ import {
   useContentAttributes,
   usePopoverInternals,
   usePopoverState,
-  type PopoverActions,
+  type EmojiPopoverRootActions,
   type PopoverAlign,
-  type PopoverAnchor,
-  type PopoverContentProps,
-  type PopoverContentState,
-  type PopoverInitialFocus,
+  type EmojiPopoverAnchor,
+  type EmojiPopoverContentProps,
+  type EmojiPopoverContentState,
+  type EmojiPopoverInitialFocus,
   type PopoverInternals,
-  type PopoverOpenChangeDetails,
-  type PopoverRootProps,
+  type EmojiPopoverRootChangeEventDetails,
+  type EmojiPopoverRootChangeEventReason,
+  type EmojiPopoverRootProps,
   type PopoverSide,
-  type PopoverTriggerProps,
-  type PopoverTriggerState,
-  type SuggestionsPopoverProps,
-  type SuggestionsPopoverState,
+  type EmojiPopoverTriggerProps,
+  type EmojiPopoverTriggerState,
+  type EmojiSuggestionsPopoverProps,
+  type EmojiSuggestionsPopoverState,
   type TransitionStatus,
 } from "../popover-shared";
 
 type Internals = PopoverInternals & { id?: string; modal: boolean };
 
-function Root({ children, modal = true, ...props }: PopoverRootProps) {
+function Root({ children, modal = true, ...props }: EmojiPopoverRootProps) {
   const state = usePopoverState(props);
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
   // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself
@@ -55,7 +55,7 @@ function Root({ children, modal = true, ...props }: PopoverRootProps) {
   return <PopoverProvider value={value}>{children}</PopoverProvider>;
 }
 
-function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | null) {
+function useAnchorRef(anchor: EmojiPopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
   const virtual = !!anchor && !(anchor instanceof Element);
   // A virtual anchor moves without a new value, as a caret does, so the box follows it on every render
@@ -77,8 +77,8 @@ const placementOf = (side: PopoverSide, align: PopoverAlign) => {
 };
 
 // React Aria's onOpenChange carries no reason or event: the outside press and Escape that start a close leave both. Non-modal, React Aria doesn't close on an outside press; this does, as modal
-function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element | null>, triggerRef: React.RefObject<Element | null>, close: (details: PopoverOpenChangeDetails) => void) {
-  const last = React.useRef<{ reason: PopoverOpenChangeReason; event?: Event } | null>(null);
+function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element | null>, triggerRef: React.RefObject<Element | null>, close: (details: EmojiPopoverRootChangeEventDetails) => void) {
+  const last = React.useRef<{ reason: EmojiPopoverRootChangeEventReason; event?: Event } | null>(null);
   const take = () => {
     const { reason, event } = last.current ?? { reason: "none" as const };
     last.current = null;
@@ -94,7 +94,7 @@ function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element 
 }
 
 // React Aria unmounts the popover once its exit animation ends, and reports entering until the entry animation ends
-function Mounted({ entering, complete, initialFocus, content }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: PopoverInitialFocus; content?: React.RefObject<HTMLElement | null> }) {
+function Mounted({ entering, complete, initialFocus, content }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: EmojiPopoverInitialFocus; content?: React.RefObject<HTMLElement | null> }) {
   const latest = useLatest(complete);
   React.useEffect(() => void (!entering && latest.current?.(true)), [entering, latest]);
   // biome-ignore lint/correctness/useExhaustiveDependencies: once, on mount: initial focus, and completion on unmount
@@ -105,7 +105,7 @@ function Mounted({ entering, complete, initialFocus, content }: { entering: bool
   return null;
 }
 
-const stateOf = ({ placement }: PopoverRenderProps, open: boolean, side: PopoverSide, align: PopoverAlign, rtl: boolean): PopoverContentState => ({ open, side: placedSide(side, placement, rtl), align });
+const stateOf = ({ placement }: PopoverRenderProps, open: boolean, side: PopoverSide, align: PopoverAlign, rtl: boolean): EmojiPopoverContentState => ({ open, side: placedSide(side, placement, rtl), align });
 const statusOf = ({ isEntering, isExiting }: PopoverRenderProps): TransitionStatus => (isEntering ? "starting" : isExiting ? "ending" : "open");
 const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
 
@@ -115,13 +115,13 @@ const anchorPoint = (style: React.CSSProperties | undefined) => {
   return typeof value === "string" ? value : undefined;
 };
 
-const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRenderProps, state: PopoverContentState, className: PopoverContentProps["className"], style: PopoverContentProps["style"]) => ({
+const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRenderProps, state: EmojiPopoverContentState, className: EmojiPopoverContentProps["className"], style: EmojiPopoverContentProps["style"]) => ({
   ...stateAttributes(state, statusOf(values)),
   className: resolve(className, state),
   style: { "--transform-origin": anchorPoint(dom.style), "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
 });
 
-const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
+const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
   ref,
 ) {
@@ -135,7 +135,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);
-  const setOpen = (open: boolean, { reason, event }: PopoverOpenChangeDetails) => p.state.setOpen(open, reason, event);
+  const setOpen = (open: boolean, { reason, event }: EmojiPopoverRootChangeEventDetails) => p.state.setOpen(open, reason, event);
   const dismiss = useDismiss(p.state.open, p.modal, node, triggerRef, (details) => setOpen(false, details));
   const custom = toRenderFunction(render);
   const attributes = useContentAttributes(props);
@@ -173,7 +173,22 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   );
 });
 
-function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, render, children, ...props }: SuggestionsPopoverProps) {
+function SuggestionsPopover({
+  open,
+  onOpenChange,
+  onOpenChangeComplete,
+  anchor,
+  side = "bottom",
+  align = "start",
+  sideOffset = 4,
+  collisionPadding = 8,
+  container,
+  className,
+  style,
+  render,
+  children,
+  ...props
+}: EmojiSuggestionsPopoverProps) {
   const [anchorElement, triggerRef] = useAnchorRef(anchor, null);
   const rtl = useLocale().direction === "rtl";
   const custom = toRenderFunction(render);
@@ -193,7 +208,7 @@ function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, 
         containerPadding={collisionPadding}
         UNSTABLE_portalContainer={container || undefined}
         render={(dom, values) => {
-          const state: SuggestionsPopoverState = stateOf(values, open, side, align, rtl);
+          const state: EmojiSuggestionsPopoverState = stateOf(values, open, side, align, rtl);
           const merged = {
             ...mergePartProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom),
             "data-slot": SLOTS.suggestions,
@@ -218,23 +233,26 @@ export const EmojiSuggestions = { Popover: SuggestionsPopover };
 
 export declare namespace EmojiPopover {
   namespace Root {
-    type Props = PopoverRootProps;
-    type Actions = PopoverActions;
-    type ChangeEventDetails = PopoverOpenChangeDetails;
+    type Props = EmojiPopoverRootProps;
+    type Actions = EmojiPopoverRootActions;
+    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
   }
   namespace Trigger {
-    type Props = PopoverTriggerProps;
-    type State = PopoverTriggerState;
+    type Props = EmojiPopoverTriggerProps;
+    type State = EmojiPopoverTriggerState;
   }
   namespace Content {
-    type Props = PopoverContentProps;
-    type State = PopoverContentState;
+    type Props = EmojiPopoverContentProps;
+    type State = EmojiPopoverContentState;
   }
 }
 
 export declare namespace EmojiSuggestions {
   namespace Popover {
-    type Props = SuggestionsPopoverProps;
-    type State = SuggestionsPopoverState;
+    type Props = EmojiSuggestionsPopoverProps;
+    type State = EmojiSuggestionsPopoverState;
+    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
   }
 }

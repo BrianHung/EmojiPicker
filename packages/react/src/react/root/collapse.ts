@@ -2,15 +2,15 @@ import * as React from "react";
 import type { EmojiPicker } from "@brianhung/emoji-picker-core";
 import { usePicker } from "./context";
 
-export interface CollapsedCategories {
+export interface EmojiPickerCollapsedCategories {
   collapsed: readonly string[];
   isCollapsed: (id: string) => boolean;
   toggle: (id: string) => void;
   setCollapsed: (id: string, collapsed: boolean) => void;
 }
 
-export function useCollapse(state: EmojiPicker<React.ReactNode>, collapsed: readonly string[]): CollapsedCategories {
+export function useCollapse(state: EmojiPicker<React.ReactNode>, collapsed: readonly string[]): EmojiPickerCollapsedCategories {
   return React.useMemo(() => ({ collapsed, isCollapsed: (id) => collapsed.includes(id), toggle: (id) => state.toggleCollapsed(id), setCollapsed: (id, value) => state.setCollapsed(id, value) }), [state, collapsed]);
 }
 
-export const useCollapsedCategories = (): CollapsedCategories => usePicker("useCollapsedCategories").collapse;
+export const useCollapsedCategories = (): EmojiPickerCollapsedCategories => usePicker("useCollapsedCategories").collapse;

@@ -5,9 +5,9 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
 import { usePicker } from "../root/context";
-import { mergePartProps, type PickerHandlers } from "../utils/events";
+import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { usePickerKeyDown } from "../utils/keyboard";
-import { flag, racParts, renderElement, resolve, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
+import { flag, racParts, renderElement, resolve, type EmojiPickerInteractionState, type EmojiPickerPartElementProps, type EmojiPickerPartProps } from "../utils/render";
 import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
@@ -15,7 +15,7 @@ import { useLayoutEffect } from "../utils/utils";
 
 export type SearchState = { empty: boolean };
 
-export type SearchProps = PartElementProps<SearchState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">;
+export type SearchProps = EmojiPickerPartElementProps<SearchState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">;
 
 const useEmpty = (part: string) => useStore(usePicker(part).state, (s) => s.query === "");
 
@@ -27,7 +27,7 @@ const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search
 
 export type SearchFieldState = SearchState;
 
-export type SearchFieldProps = Omit<PartElementProps<SearchFieldState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">, "children"> & { children?: React.ReactNode };
+export type SearchFieldProps = Omit<EmojiPickerPartElementProps<SearchFieldState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">, "children"> & { children?: React.ReactNode };
 
 const FieldContext = React.createContext(false);
 
@@ -52,10 +52,12 @@ const Field = React.forwardRef<HTMLDivElement, SearchFieldProps>(function Search
   );
 });
 
-export type SearchInputState = Omit<InteractionState, "pressed">;
+export type SearchInputState = Omit<EmojiPickerInteractionState, "pressed">;
 
-export type SearchInputProps = PickerHandlers<Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
-  PartProps<SearchInputState, HTMLInputElement> & {
+export type SearchInputProps = EmojiPickerHandlers<
+  Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">
+> &
+  EmojiPickerPartProps<SearchInputState, HTMLInputElement> & {
     children?: React.ReactNode;
   };
 
@@ -109,8 +111,8 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
   return inField ? input : <Field>{input}</Field>;
 });
 
-export type SearchClearState = InteractionState;
-export type SearchClearProps = PartElementProps<SearchClearState, HTMLButtonElement>;
+export type SearchClearState = EmojiPickerInteractionState;
+export type SearchClearProps = EmojiPickerPartElementProps<SearchClearState, HTMLButtonElement>;
 
 // Clears the query from anywhere in Root, and keeps focus in the search field
 const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ children, ...props }, ref) {

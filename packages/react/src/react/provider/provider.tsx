@@ -1,7 +1,7 @@
 import * as React from "react";
 import { I18nProvider, useLocale } from "react-aria/I18nProvider";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, twemojiUrl } from "@brianhung/emoji-picker-core";
-import { type FrequentsChangeDetails, isUnified, localizeLabels, type Renderer, type SkinToneChangeDetails, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type SkinToneChangeDetails, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
 import { needsImageFallback, onNativeSupportChange } from "@brianhung/emoji-picker-core/native";
@@ -89,13 +89,12 @@ function useLabels(labels: Partial<EmojiLabels> | undefined): EmojiLabels {
   return React.useMemo(() => localizeLabels(labels), [key, resultCount, withSkinTone]);
 }
 
-type SkinToneDetails = SkinToneChangeDetails;
-type FrequentsDetails = FrequentsChangeDetails;
-
 export declare namespace EmojiProvider {
   type Props = EmojiProviderProps;
-  type SkinToneChangeEventDetails = SkinToneDetails;
-  type FrequentsChangeEventDetails = FrequentsDetails;
+  type SkinToneChangeEventReason = SkinToneChangeDetails["reason"];
+  type SkinToneChangeEventDetails = SkinToneChangeDetails;
+  type FrequentsChangeEventReason = FrequentsChangeDetails["reason"];
+  type FrequentsChangeEventDetails = FrequentsChangeDetails;
 }
 
 let sharedStore: EmojiStore | undefined;

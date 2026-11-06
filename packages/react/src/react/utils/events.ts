@@ -4,7 +4,7 @@ import { mergeProps } from "react-aria/mergeProps";
 export type PickerEvent<E = React.SyntheticEvent> = E & { preventEmojiPickerHandler(): void };
 
 // A part's props with every handler's event able to skip the part's own handler, as Base UI's preventBaseUIHandler
-export type PickerHandlers<P> = { [K in keyof P]: K extends `on${string}` ? (NonNullable<P[K]> extends (event: infer E) => void ? ((event: PickerEvent<E>) => void) | undefined : P[K]) : P[K] };
+export type EmojiPickerHandlers<P> = { [K in keyof P]: K extends `on${string}` ? (NonNullable<P[K]> extends (event: infer E) => void ? ((event: PickerEvent<E>) => void) | undefined : P[K]) : P[K] };
 
 const skipped = new WeakSet<object>();
 const nativeOf = (event: object) => (event as { nativeEvent?: object }).nativeEvent ?? event;

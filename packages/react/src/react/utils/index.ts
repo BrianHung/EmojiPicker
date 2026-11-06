@@ -1,1 +1,1 @@
-export type { ElementProps, InteractionState, Orientation, PartElementProps, PartProps, RenderProp } from "./render";
+export type { ElementProps, EmojiPickerInteractionState, EmojiPickerOrientation, EmojiPickerPartElementProps, EmojiPickerPartProps, RenderProp } from "./render";

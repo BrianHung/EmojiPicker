@@ -1,13 +1,13 @@
 import * as React from "react";
-import type { ChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import type { ChangeDetails } from "@brianhung/emoji-picker-core";
 
-export type PopoverOpenChangeDetails = ChangeDetails<"trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "scroll" | "imperative-action" | "none">;
-export type PopoverOpenChangeReason = PopoverOpenChangeDetails["reason"];
+export type EmojiPopoverRootChangeEventReason = "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "scroll" | "imperative-action" | "none";
+export type EmojiPopoverRootChangeEventDetails = ChangeDetails<EmojiPopoverRootChangeEventReason>;
 
 export type PopoverState = {
   open: boolean;
-  setOpen: (open: boolean, reason: PopoverOpenChangeReason, event?: Event) => void;
-  close: (reason?: PopoverOpenChangeReason, event?: Event) => void;
+  setOpen: (open: boolean, reason: EmojiPopoverRootChangeEventReason, event?: Event) => void;
+  close: (reason?: EmojiPopoverRootChangeEventReason, event?: Event) => void;
   selected: React.RefObject<boolean>;
   closeOnSelect: boolean;
   complete?: (open: boolean) => void;

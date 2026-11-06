@@ -1,9 +1,9 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import type { PickerHandlers } from "./events";
+import type { EmojiPickerHandlers } from "./events";
 
-export type Orientation = "horizontal" | "vertical";
+export type EmojiPickerOrientation = "horizontal" | "vertical";
 
 // Base UI's convention: a present state attribute is empty, an absent one is undefined
 export const flag = (on: unknown): "" | undefined => (on ? "" : undefined);
@@ -12,7 +12,7 @@ export type ElementProps<E extends Element = HTMLElement> = React.HTMLAttributes
 
 export type RenderProp<S, E extends Element = HTMLElement> = React.ReactElement<Record<string, unknown>> | ((props: ElementProps<E>, state: S) => React.ReactElement);
 
-export interface PartProps<S, E extends Element = HTMLElement> {
+export interface EmojiPickerPartProps<S, E extends Element = HTMLElement> {
   className?: string | ((state: S) => string | undefined);
   style?: React.CSSProperties | ((state: S) => React.CSSProperties | undefined);
   render?: RenderProp<S, E>;
@@ -20,10 +20,12 @@ export interface PartProps<S, E extends Element = HTMLElement> {
 
 type Children<S> = { children?: React.ReactNode | ((state: S) => React.ReactNode) };
 
-export type PartElementProps<S, E extends Element = HTMLDivElement, Omitted extends string = never> = PickerHandlers<Omit<React.HTMLAttributes<E>, "className" | "style" | "children" | Omitted>> & PartProps<S, E> & Children<S>;
+export type EmojiPickerPartElementProps<S, E extends Element = HTMLDivElement, Omitted extends string = never> = EmojiPickerHandlers<Omit<React.HTMLAttributes<E>, "className" | "style" | "children" | Omitted>> &
+  EmojiPickerPartProps<S, E> &
+  Children<S>;
 
 type DataAttributes = { [data: `data-${string}`]: unknown };
-type Input<S, E extends Element> = Omit<React.AllHTMLAttributes<E>, "className" | "style" | "children"> & { ref?: React.Ref<E> } & PartProps<S, E> & Children<S> & DataAttributes;
+type Input<S, E extends Element> = Omit<React.AllHTMLAttributes<E>, "className" | "style" | "children"> & { ref?: React.Ref<E> } & EmojiPickerPartProps<S, E> & Children<S> & DataAttributes;
 
 type RefCarrier<E> = { ref?: React.Ref<E>; props: { ref?: React.Ref<E> } };
 // React 19 moved an element's ref into its props
@@ -59,7 +61,7 @@ export function renderElement<S, E extends Element = HTMLElement>(tag: keyof Rea
   return custom ? custom(resolved, state) : React.createElement(tag, resolved);
 }
 
-export interface InteractionState {
+export interface EmojiPickerInteractionState {
   hovered: boolean;
   focused: boolean;
   focusVisible: boolean;
@@ -69,13 +71,13 @@ export interface InteractionState {
 
 type RacState = { isHovered: boolean; isFocused: boolean; isFocusVisible: boolean; isDisabled: boolean };
 
-const racState = (r: RacState): InteractionState => ({ hovered: r.isHovered, focused: r.isFocused, focusVisible: r.isFocusVisible, pressed: false, disabled: r.isDisabled });
+const racState = (r: RacState): EmojiPickerInteractionState => ({ hovered: r.isHovered, focused: r.isFocused, focusVisible: r.isFocusVisible, pressed: false, disabled: r.isDisabled });
 
 // React Aria writes its state attributes as "true"
 const presence = (props: object) => Object.fromEntries(Object.entries(props).map(([k, v]) => [k, k.startsWith("data-") && v === true ? "" : v]));
 
 // A part's className, style, and render mapped onto a React Aria component's render props
-export function racParts<E extends Element>(tag: keyof React.JSX.IntrinsicElements, { className, style, render }: PartProps<InteractionState, E>) {
+export function racParts<E extends Element>(tag: keyof React.JSX.IntrinsicElements, { className, style, render }: EmojiPickerPartProps<EmojiPickerInteractionState, E>) {
   const custom = toRenderFunction(render);
   return {
     className: (r: RacState) => resolve(className, racState(r)) ?? "",

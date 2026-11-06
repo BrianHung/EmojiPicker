@@ -2,7 +2,7 @@ import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
-import { flag, renderElement, resolve, type PartElementProps } from "../utils/render";
+import { flag, renderElement, resolve, type EmojiPickerPartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { Cell } from "./cell";
 import { ItemContext, SectionContext, TemplateContext, useCells, useSection } from "./contexts";
@@ -10,11 +10,11 @@ import { VirtualBranch } from "./virtualizer";
 
 export type SectionState = { section: EmojiSection; collapsed: boolean };
 
-export type SectionProps = Omit<PartElementProps<SectionState, HTMLElement>, "children"> & {
+export type SectionProps = Omit<EmojiPickerPartElementProps<SectionState, HTMLElement>, "children"> & {
   children?: React.ReactNode;
 };
 
-export type SectionTitleProps = PartElementProps<SectionState, HTMLElement>;
+export type SectionTitleProps = EmojiPickerPartElementProps<SectionState, HTMLElement>;
 
 export type ItemsProps = {
   children?: (emoji: EmojiItem) => React.ReactNode;
@@ -25,7 +25,7 @@ export type SectionActionsState = SectionState & {
   toggleProps: { "aria-expanded": boolean };
 };
 
-export type SectionActionsProps = PartElementProps<SectionActionsState>;
+export type SectionActionsProps = EmojiPickerPartElementProps<SectionActionsState>;
 
 // Markers: List reads their props, and renders the items and the actions itself
 export function Items(_: ItemsProps): null {

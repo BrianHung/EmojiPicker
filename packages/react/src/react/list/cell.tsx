@@ -1,11 +1,11 @@
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { mergePartProps } from "../utils/events";
-import { renderElement, resolve, type PartElementProps } from "../utils/render";
+import { renderElement, resolve, type EmojiPickerPartElementProps } from "../utils/render";
 import { CellsContext, HorizontalContext, ItemContext } from "./contexts";
 import { useCell, type CellState } from "./use-cell";
 
-export type CellProps = PartElementProps<CellState>;
+export type CellProps = EmojiPickerPartElementProps<CellState>;
 
 const CELL: React.CSSProperties = { width: "var(--ep-cell)", height: "var(--ep-cell)", maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)" };
 const FILL: React.CSSProperties = { width: "100%", height: "100%" };

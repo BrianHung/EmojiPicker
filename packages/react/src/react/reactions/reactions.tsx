@@ -2,7 +2,8 @@ import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { withoutTone } from "@brianhung/emoji-picker-core";
-import { type ChangeDetails, createChangeDetails, nameWithTone } from "@brianhung/emoji-picker-core/internal";
+import type { ChangeDetails } from "@brianhung/emoji-picker-core";
+import { createChangeDetails, nameWithTone } from "@brianhung/emoji-picker-core/internal";
 import { usePicker } from "../root/context";
 import { useDrawable } from "../emoji/native-support";
 import { Glyph, useOverridden } from "../emoji/glyph";
@@ -10,7 +11,7 @@ import { useStoreSnapshot } from "../provider/provider";
 import { ReactionsContext } from "./reactions-context";
 import { mergePartProps } from "../utils/events";
 import { useInteraction, type Clickable } from "../utils/interaction";
-import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
+import { flag, renderElement, resolve, type EmojiPickerInteractionState, type EmojiPickerPartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useChangeState } from "../utils/state";
 import { useLayoutEffect } from "../utils/utils";
@@ -18,7 +19,8 @@ import { ReactionBar, type ReactionBarProps, type ReactionBarState } from "./rea
 
 const NONE: readonly string[] = [];
 
-export type ReactionsValueChangeDetails = ChangeDetails<"item-press"> & { emoji: string; pressed: boolean };
+export type EmojiPickerReactionsChangeEventReason = "item-press";
+export type EmojiPickerReactionsChangeEventDetails = ChangeDetails<EmojiPickerReactionsChangeEventReason> & { emoji: string; pressed: boolean };
 
 type Row = { shown: readonly string[]; pressed: ReadonlySet<string> | null; press(unified: string, event: Event): void };
 const RowContext = React.createContext<Row | null>(null);
@@ -34,7 +36,7 @@ export type ReactionsState = ReactionBarState;
 export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation" | "defaultValue"> & {
   value?: readonly string[];
   defaultValue?: readonly string[];
-  onValueChange?: (value: readonly string[], details: ReactionsValueChangeDetails) => void;
+  onValueChange?: (value: readonly string[], details: EmojiPickerReactionsChangeEventDetails) => void;
   children?: React.ReactNode | ((emoji: string) => React.ReactNode);
 };
 
@@ -91,9 +93,9 @@ function ReactionsItems({ children }: ReactionsItemsProps) {
   return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <ReactionsItem emoji={unified} />}</React.Fragment>);
 }
 
-export type ReactionsItemState = InteractionState & { selected: boolean };
+export type ReactionsItemState = EmojiPickerInteractionState & { selected: boolean };
 
-export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButtonElement, "onChange"> & {
+export type ReactionsItemProps = EmojiPickerPartElementProps<ReactionsItemState, HTMLButtonElement, "onChange"> & {
   emoji: string;
 };
 
@@ -124,8 +126,8 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
   );
 });
 
-export type ReactionsExpandState = InteractionState;
-export type ReactionsExpandProps = PartElementProps<ReactionsExpandState, HTMLButtonElement>;
+export type ReactionsExpandState = EmojiPickerInteractionState;
+export type ReactionsExpandProps = EmojiPickerPartElementProps<ReactionsExpandState, HTMLButtonElement>;
 
 const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
@@ -165,7 +167,8 @@ type ItemsProps = ReactionsItemsProps;
 export declare namespace Reactions {
   type Props = RowProps;
   type State = RowState;
-  type ChangeEventDetails = ReactionsValueChangeDetails;
+  type ChangeEventReason = EmojiPickerReactionsChangeEventReason;
+  type ChangeEventDetails = EmojiPickerReactionsChangeEventDetails;
   namespace Items {
     type Props = ItemsProps;
   }
@@ -180,7 +183,7 @@ export declare namespace Reactions {
 }
 
 export type PanelState = { hidden: boolean };
-export type PanelProps = PartElementProps<PanelState, HTMLDivElement, "hidden">;
+export type PanelProps = EmojiPickerPartElementProps<PanelState, HTMLDivElement, "hidden">;
 
 export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);

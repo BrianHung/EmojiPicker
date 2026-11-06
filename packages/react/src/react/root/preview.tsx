@@ -2,12 +2,12 @@ import * as React from "react";
 import type { EmojiRecord } from "@brianhung/emoji-picker-core";
 import { usePicker } from "./context";
 import { useActiveEmoji } from "./hooks";
-import { renderElement, type PartElementProps } from "../utils/render";
+import { renderElement, type EmojiPickerPartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 
 export type PreviewState = { emoji: EmojiRecord | null };
 
-export type PreviewProps = PartElementProps<PreviewState>;
+export type PreviewProps = EmojiPickerPartElementProps<PreviewState>;
 
 export const Preview = React.forwardRef<HTMLDivElement, PreviewProps>(function Preview({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Preview");

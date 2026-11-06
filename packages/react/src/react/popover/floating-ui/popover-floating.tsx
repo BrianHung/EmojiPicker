@@ -24,7 +24,6 @@ import {
 } from "@floating-ui/react";
 import { useLocale } from "react-aria/I18nProvider";
 import { createChangeDetails, shallowEqual } from "@brianhung/emoji-picker-core/internal";
-import type { PopoverOpenChangeReason } from "../popover-context";
 import { mergePartProps } from "../../utils/events";
 import { useLatest } from "../../utils/latest";
 import { useLayoutEffect } from "../../utils/utils";
@@ -44,18 +43,19 @@ import {
   usePopoverInternals,
   usePopoverState,
   useTransition,
-  type PopoverActions,
-  type PopoverAnchor,
-  type PopoverContentProps,
-  type PopoverContentState,
+  type EmojiPopoverRootActions,
+  type EmojiPopoverAnchor,
+  type EmojiPopoverContentProps,
+  type EmojiPopoverContentState,
   type PopoverInternals,
-  type PopoverOpenChangeDetails,
-  type PopoverPlacementProps,
-  type PopoverRootProps,
-  type PopoverTriggerProps,
-  type PopoverTriggerState,
-  type SuggestionsPopoverProps,
-  type SuggestionsPopoverState,
+  type EmojiPopoverRootChangeEventDetails,
+  type EmojiPopoverRootChangeEventReason,
+  type EmojiPopoverPlacementProps,
+  type EmojiPopoverRootProps,
+  type EmojiPopoverTriggerProps,
+  type EmojiPopoverTriggerState,
+  type EmojiSuggestionsPopoverProps,
+  type EmojiSuggestionsPopoverState,
 } from "../popover-shared";
 
 type Placed = { placement: string; position: React.CSSProperties["position"]; top: number; left: number; origin: string | undefined };
@@ -68,7 +68,7 @@ type Internals = PopoverInternals & {
   floatingProps: (props: React.HTMLAttributes<HTMLElement>) => Record<string, unknown>;
 };
 
-const REASONS: Partial<Record<OpenChangeReason, PopoverOpenChangeReason>> = {
+const REASONS: Partial<Record<OpenChangeReason, EmojiPopoverRootChangeEventReason>> = {
   "outside-press": "outside-press",
   "escape-key": "escape-key",
   "focus-out": "focus-out",
@@ -78,12 +78,12 @@ const REASONS: Partial<Record<OpenChangeReason, PopoverOpenChangeReason>> = {
 };
 const reasonOf = (reason: OpenChangeReason | undefined) => (reason && REASONS[reason]) || "none";
 
-function Root(props: PopoverRootProps) {
+function Root(props: EmojiPopoverRootProps) {
   const node = <RootNode {...props} />;
   return useFloatingParentNodeId() === null ? <FloatingTree>{node}</FloatingTree> : node;
 }
 
-function RootNode({ children, modal = false, ...props }: PopoverRootProps) {
+function RootNode({ children, modal = false, ...props }: EmojiPopoverRootProps) {
   const state = usePopoverState(props);
   const nodeId = useFloatingNodeId();
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
@@ -113,7 +113,7 @@ const transformOrigin: Middleware = {
   },
 };
 
-function usePlacement({ side = "bottom", align = "start", sideOffset, collisionPadding = 8, anchor }: PopoverPlacementProps & { anchor?: PopoverAnchor }, options: UseFloatingOptions) {
+function usePlacement({ side = "bottom", align = "start", sideOffset, collisionPadding = 8, anchor }: EmojiPopoverPlacementProps & { anchor?: EmojiPopoverAnchor }, options: UseFloatingOptions) {
   const rtl = useLocale().direction === "rtl";
   const physical = physicalSide(side, rtl);
   const floating = useFloating({
@@ -150,13 +150,13 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   const fresh = options.open && !floating.middlewareData.transformOrigin?.detached;
   if (fresh && !shallowEqual(held, live)) setHeld(live);
   const shown = fresh ? live : held;
-  const state = (open: boolean): PopoverContentState => ({ open, side: placedSide(side, shown.placement.split("-")[0], rtl), align });
+  const state = (open: boolean): EmojiPopoverContentState => ({ open, side: placedSide(side, shown.placement.split("-")[0], rtl), align });
   return { ...floating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
 }
 
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
 
-const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
+const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
   ref,
 ) {
@@ -196,7 +196,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
           ...stateAttributes(state, status),
           ref: mergedRef,
           className,
-          style: (s: PopoverContentState) => ({ ...position, ...resolve(style, s) }),
+          style: (s: EmojiPopoverContentState) => ({ ...position, ...resolve(style, s) }),
           render,
           children: <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>,
         },
@@ -207,7 +207,22 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   );
 });
 
-function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, render, children, ...props }: SuggestionsPopoverProps) {
+function SuggestionsPopover({
+  open,
+  onOpenChange,
+  onOpenChangeComplete,
+  anchor,
+  side = "bottom",
+  align = "start",
+  sideOffset = 4,
+  collisionPadding = 8,
+  container,
+  className,
+  style,
+  render,
+  children,
+  ...props
+}: EmojiSuggestionsPopoverProps) {
   const placement = usePlacement({ side, align, sideOffset, collisionPadding, anchor }, { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason), event)) });
   const { getFloatingProps } = useInteractions([useDismiss(placement.context, { escapeKey: false })]);
   const node = React.useRef<HTMLDivElement | null>(null);
@@ -224,7 +239,7 @@ function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, 
         ref: refs,
         "data-slot": SLOTS.suggestions,
         className,
-        style: (s: SuggestionsPopoverState) => ({ ...placement.style, ...resolve(style, s) }),
+        style: (s: EmojiSuggestionsPopoverState) => ({ ...placement.style, ...resolve(style, s) }),
         render,
         children,
       },
@@ -239,23 +254,26 @@ export const EmojiSuggestions = { Popover: SuggestionsPopover };
 
 export declare namespace EmojiPopover {
   namespace Root {
-    type Props = PopoverRootProps;
-    type Actions = PopoverActions;
-    type ChangeEventDetails = PopoverOpenChangeDetails;
+    type Props = EmojiPopoverRootProps;
+    type Actions = EmojiPopoverRootActions;
+    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
   }
   namespace Trigger {
-    type Props = PopoverTriggerProps;
-    type State = PopoverTriggerState;
+    type Props = EmojiPopoverTriggerProps;
+    type State = EmojiPopoverTriggerState;
   }
   namespace Content {
-    type Props = PopoverContentProps;
-    type State = PopoverContentState;
+    type Props = EmojiPopoverContentProps;
+    type State = EmojiPopoverContentState;
   }
 }
 
 export declare namespace EmojiSuggestions {
   namespace Popover {
-    type Props = SuggestionsPopoverProps;
-    type State = SuggestionsPopoverState;
+    type Props = EmojiSuggestionsPopoverProps;
+    type State = EmojiSuggestionsPopoverState;
+    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
   }
 }

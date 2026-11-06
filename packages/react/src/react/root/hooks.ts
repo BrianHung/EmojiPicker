@@ -7,14 +7,14 @@ export function useActiveEmoji(): EmojiRecord | null {
   return useStore(usePicker("useActiveEmoji").state, (s) => s.active?.record ?? null);
 }
 
-export interface NavCategory {
+export interface EmojiPickerNavCategory {
   id: string;
   name: string;
   icon?: React.ReactNode;
 }
 
 export interface CategoryNavigation {
-  categories: readonly NavCategory[];
+  categories: readonly EmojiPickerNavCategory[];
   activeCategory: string | null;
   jumpToCategory(id: string, options?: { instant?: boolean }): void;
 }

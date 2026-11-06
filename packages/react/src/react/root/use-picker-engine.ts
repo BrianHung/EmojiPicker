@@ -1,6 +1,5 @@
 import * as React from "react";
-import { createEmojiPicker, type EmojiPicker, type EmojiPickerOptions, type EmojiStore } from "@brianhung/emoji-picker-core";
-import type { CollapsedCategoriesChangeDetails, HighlightChangeDetails, QueryChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import { type CollapsedCategoriesChangeDetails, createEmojiPicker, type EmojiPicker, type EmojiPickerOptions, type EmojiStore, type HighlightChangeDetails, type QueryChangeDetails } from "@brianhung/emoji-picker-core";
 import { useStableCallback } from "../utils/latest";
 import { useLayoutEffect } from "../utils/utils";
 

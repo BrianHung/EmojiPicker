@@ -10,20 +10,20 @@ import { useInteractOutside } from "react-aria/useInteractOutside";
 import { mergePartProps } from "../utils/events";
 import { useInteraction } from "../utils/interaction";
 import { hasModifier, moveFocus, usePickerKeyDown } from "../utils/keyboard";
-import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
+import { flag, renderElement, resolve, type EmojiPickerInteractionState, type EmojiPickerPartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
 
 export type VariationsState = { emoji: EmojiRecord; tone: SkinToneValue };
 
-export type VariationsProps = Omit<PartElementProps<VariationsState, HTMLDivElement, "role">, "children"> & {
+export type VariationsProps = Omit<EmojiPickerPartElementProps<VariationsState, HTMLDivElement, "role">, "children"> & {
   children?: (tone: SkinToneValue) => React.ReactNode;
 };
 
-export type VariationsOptionState = InteractionState & { emoji: EmojiRecord; unified: string; tone: SkinToneValue; selected: boolean; highlighted: boolean };
+export type VariationsOptionState = EmojiPickerInteractionState & { emoji: EmojiRecord; unified: string; tone: SkinToneValue; selected: boolean; highlighted: boolean };
 
-export type VariationsOptionProps = PartElementProps<VariationsOptionState, HTMLDivElement, "role"> & {
+export type VariationsOptionProps = EmojiPickerPartElementProps<VariationsOptionState, HTMLDivElement, "role"> & {
   tone?: SkinToneValue;
 };
 

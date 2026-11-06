@@ -1,7 +1,7 @@
 export { SkinTone } from "./skin-tone";
 export type {
   SkinToneGlyphProps,
-  SkinToneOpenChangeDetails,
+  EmojiPickerSkinToneChangeEventDetails,
   SkinToneOptionProps,
   SkinToneOptionState,
   SkinToneOptionsProps,

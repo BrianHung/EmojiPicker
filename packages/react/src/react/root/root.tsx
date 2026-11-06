@@ -2,32 +2,33 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Autocomplete } from "react-aria-components/Autocomplete";
-import type { CategoryOption as CoreCategoryOption, EmojiSelection } from "@brianhung/emoji-picker-core";
-import { type CollapsedCategoriesChangeDetails as CoreCollapsedCategoriesChangeDetails, createChangeDetails, type QueryChangeDetails as CoreQueryChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@brianhung/emoji-picker-core";
+import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import { useCollapse } from "./collapse";
 import {
   PickerContext,
-  type EmojiPickerActions,
-  type HighlightChangeDetails as CoreHighlightChangeDetails,
+  type EmojiPickerRootActions,
+  type EmojiPickerRootChangeEventDetails,
+  type EmojiPickerRootChangeEventReason,
+  type EmojiPickerRootReactionsOpenChangeEventDetails,
+  type EmojiPickerRootReactionsOpenChangeEventReason,
+  type EmojiPickerRootSelectEventDetails,
+  type EmojiPickerRootSelectEventReason,
   type ListHandle,
   type PickerContextValue,
-  type ReactionsOpenChangeDetails as RootReactionsOpenChangeDetails,
   type SearchResultsMode,
-  type SelectDetails as RootSelectDetails,
-  type SelectReason,
-  type ValueChangeDetails as RootValueChangeDetails,
 } from "./context";
 import { useKeyboardTarget } from "./use-keyboard-target";
 import { usePickerEngine } from "./use-picker-engine";
-import { PopoverContext, type PopoverOpenChangeReason } from "../popover/popover-context";
+import { PopoverContext, type EmojiPopoverRootChangeEventReason } from "../popover/popover-context";
 import { EmojiContext, SharedProvider, useEmojiContext } from "../provider/provider";
 import { BUTTONS } from "../reactions/reaction-bar";
 import { ReactionsContext, type ReactionsContextValue } from "../reactions/reactions-context";
-import { mergePartProps, type PickerHandlers } from "../utils/events";
+import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { useActiveWithin } from "../utils/hold";
 import { hasModifier, usePickerKeyDown } from "../utils/keyboard";
 import { useLatest } from "../utils/latest";
-import { renderElement, resolve, type PartProps } from "../utils/render";
+import { renderElement, resolve, type EmojiPickerPartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
 import { useChangeState } from "../utils/state";
@@ -38,33 +39,33 @@ export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 
 export type RootState = { searching: boolean; reactionsOpen: boolean };
 
-export type RootProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "className" | "style" | "defaultValue">> &
-  PartProps<RootState> & {
-    onSelect?: (selection: EmojiSelection, details: RootSelectDetails) => void;
-    actionsRef?: React.Ref<EmojiPickerActions>;
+export type RootProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "className" | "style" | "defaultValue">> &
+  EmojiPickerPartProps<RootState> & {
+    onSelect?: (selection: EmojiSelection, details: EmojiPickerRootSelectEventDetails) => void;
+    actionsRef?: React.Ref<EmojiPickerRootActions>;
     keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;
     columns?: "fit" | number;
     categories?: readonly CategoryOption[];
     frequent?: number | false;
     collapsedCategories?: readonly string[];
     defaultCollapsedCategories?: readonly string[];
-    onCollapsedCategoriesChange?: (ids: readonly string[], details: CoreCollapsedCategoriesChangeDetails) => void;
+    onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
     suggested?: readonly string[];
     searchResults?: SearchResultsMode;
     searchLimit?: number;
     query?: string;
     defaultQuery?: string;
-    onQueryChange?: (query: string, details: CoreQueryChangeDetails) => void;
+    onQueryChange?: (query: string, details: QueryChangeDetails) => void;
     value?: string | null;
     defaultValue?: string | null;
-    onValueChange?: (unified: string | null, details: RootValueChangeDetails) => void;
+    onValueChange?: (unified: string | null, details: EmojiPickerRootChangeEventDetails) => void;
     highlight?: string | null;
     defaultHighlight?: string | null;
-    onHighlightChange?: (unified: string | null, details: CoreHighlightChangeDetails) => void;
+    onHighlightChange?: (unified: string | null, details: HighlightChangeDetails) => void;
     reactions?: readonly string[] | number;
     reactionsOpen?: boolean;
     defaultReactionsOpen?: boolean;
-    onReactionsOpenChange?: (open: boolean, details: RootReactionsOpenChangeDetails) => void;
+    onReactionsOpenChange?: (open: boolean, details: EmojiPickerRootReactionsOpenChangeEventDetails) => void;
     emojiVersion?: number;
     disableVariations?: boolean;
     children: React.ReactNode;
@@ -177,7 +178,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const reactionsOpen = Boolean(reactions) && open;
   // Back to the reaction row; focus follows when it was in the panel, which hides
   const showReactions = React.useCallback(
-    (reason: RootReactionsOpenChangeDetails["reason"], event?: Event) => {
+    (reason: EmojiPickerRootReactionsOpenChangeEventReason, event?: Event) => {
       const details = flushSync(() => setOpen(true, createChangeDetails(reason, event)));
       const active = document.activeElement;
       if (details && !details.isCanceled && (!active || active === document.body || panel.current?.contains(active))) row.current?.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
@@ -197,11 +198,11 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const collapseToReactions = React.useCallback(() => void showReactions("item-press"), [showReactions]);
   const latest = useLatest({ onSelect, popover, selects });
   const pick = React.useCallback(
-    (unified: string, event?: Event, reason: SelectReason = "item-press") => {
+    (unified: string, event?: Event, reason: EmojiPickerRootChangeEventReason = "item-press") => {
       const selection = state.choose(unified);
       if (!selection) return undefined;
       const { onSelect, popover, selects } = latest.current;
-      const details: RootSelectDetails = Object.assign(createChangeDetails(reason, event), { collapse: reactions ? collapseToReactions : undefined });
+      const details: EmojiPickerRootSelectEventDetails = Object.assign(createChangeDetails(reason, event), { collapse: reactions ? collapseToReactions : undefined });
       onSelect?.(selection, details);
       if (details.isCanceled) return selection;
       if (selects) setValue(selection.unified, createChangeDetails(reason, event));
@@ -212,7 +213,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   );
   const [variations, registerVariations] = useMounted();
   const closePopover = React.useCallback(
-    (reason: PopoverOpenChangeReason, event?: Event) => {
+    (reason: EmojiPopoverRootChangeEventReason, event?: Event) => {
       const { popover } = latest.current;
       popover?.close(reason, event);
       return Boolean(popover);
@@ -220,7 +221,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     [latest],
   );
   const skinTone = React.useRef<(() => void) | null>(null);
-  const actions = React.useMemo<EmojiPickerActions>(
+  const actions = React.useMemo<EmojiPickerRootActions>(
     () => ({
       move: (to) => Boolean(list.current?.move(to, IMPERATIVE)),
       pick: () => Boolean(list.current?.pick(undefined, "imperative-action")),
@@ -322,22 +323,20 @@ export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props
   return React.useContext(EmojiContext) ? root : <SharedProvider>{root}</SharedProvider>;
 });
 
-// Declared, not imported, aliases: the .d.ts bundler restores an import's original name, which the namespace member would shadow
-type QueryDetails = CoreQueryChangeDetails;
-type HighlightDetails = CoreHighlightChangeDetails;
-type ValueDetails = RootValueChangeDetails;
-type CollapsedDetails = CoreCollapsedCategoriesChangeDetails;
-type ReactionsOpenDetails = RootReactionsOpenChangeDetails;
-type SelectionDetails = RootSelectDetails;
-
 export declare namespace Root {
   type Props = RootProps;
   type State = RootState;
-  type Actions = EmojiPickerActions;
-  type QueryChangeEventDetails = QueryDetails;
-  type HighlightChangeEventDetails = HighlightDetails;
-  type ValueChangeEventDetails = ValueDetails;
-  type CollapsedCategoriesChangeEventDetails = CollapsedDetails;
-  type ReactionsOpenChangeEventDetails = ReactionsOpenDetails;
-  type SelectEventDetails = SelectionDetails;
+  type Actions = EmojiPickerRootActions;
+  type ChangeEventReason = EmojiPickerRootChangeEventReason;
+  type ChangeEventDetails = EmojiPickerRootChangeEventDetails;
+  type SelectEventReason = EmojiPickerRootSelectEventReason;
+  type SelectEventDetails = EmojiPickerRootSelectEventDetails;
+  type QueryChangeEventReason = QueryChangeDetails["reason"];
+  type QueryChangeEventDetails = QueryChangeDetails;
+  type HighlightChangeEventReason = HighlightChangeDetails["reason"];
+  type HighlightChangeEventDetails = HighlightChangeDetails;
+  type CollapsedCategoriesChangeEventReason = CollapsedCategoriesChangeDetails["reason"];
+  type CollapsedCategoriesChangeEventDetails = CollapsedCategoriesChangeDetails;
+  type ReactionsOpenChangeEventReason = EmojiPickerRootReactionsOpenChangeEventReason;
+  type ReactionsOpenChangeEventDetails = EmojiPickerRootReactionsOpenChangeEventDetails;
 }

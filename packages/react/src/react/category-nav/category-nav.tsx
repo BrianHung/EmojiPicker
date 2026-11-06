@@ -2,27 +2,27 @@
 import * as React from "react";
 import { DefaultCategoryIcon } from "./category-icons";
 import { usePicker } from "../root/context";
-import { useCategoryNavigation, type NavCategory } from "../root/hooks";
-import { mergePartProps, type PickerHandlers } from "../utils/events";
+import { useCategoryNavigation, type EmojiPickerNavCategory } from "../root/hooks";
+import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { useInteraction } from "../utils/interaction";
-import { flag, renderElement, resolve, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
+import { flag, renderElement, resolve, type EmojiPickerOrientation, type EmojiPickerPartElementProps, type EmojiPickerPartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { ToolbarPart } from "../utils/toolbar";
 
-export type { NavCategory };
+export type { EmojiPickerNavCategory };
 
-export type CategoryNavState = { orientation: Orientation; disabled: boolean };
+export type CategoryNavState = { orientation: EmojiPickerOrientation; disabled: boolean };
 
-export type CategoryNavProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "className" | "style" | "dangerouslySetInnerHTML">> &
-  PartProps<CategoryNavState, HTMLDivElement> & {
-    orientation?: Orientation;
-    children?: (category: NavCategory) => React.ReactNode;
+export type CategoryNavProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "className" | "style" | "dangerouslySetInnerHTML">> &
+  EmojiPickerPartProps<CategoryNavState, HTMLDivElement> & {
+    orientation?: EmojiPickerOrientation;
+    children?: (category: EmojiPickerNavCategory) => React.ReactNode;
   };
 
 type Nav = { id: string; selected: string; disabled: boolean; choose(key: string, instant: boolean): void };
 const NavContext = React.createContext<Nav | null>(null);
-const TabContext = React.createContext<NavCategory | null>(null);
+const TabContext = React.createContext<EmojiPickerNavCategory | null>(null);
 
 const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
@@ -56,9 +56,9 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
   );
 });
 
-export type CategoryTabState = { category: NavCategory; selected: boolean; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
+export type CategoryTabState = { category: EmojiPickerNavCategory; selected: boolean; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
 
-export type CategoryTabProps = PartElementProps<CategoryTabState, HTMLDivElement, "role">;
+export type CategoryTabProps = EmojiPickerPartElementProps<CategoryTabState, HTMLDivElement, "role">;
 
 const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
   const nav = React.useContext(NavContext);

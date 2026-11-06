@@ -1,15 +1,14 @@
 import * as React from "react";
-import type { EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore } from "@brianhung/emoji-picker-core";
+import type { ChangeDetails, EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { EmojiGridMove } from "@brianhung/emoji-picker-core/grid";
-import type { ChangeDetails, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core/internal";
-import type { CollapsedCategories } from "./collapse";
-import type { Orientation } from "../utils/render";
+import type { EmojiPickerCollapsedCategories } from "./collapse";
+import type { EmojiPickerOrientation } from "../utils/render";
 
 export type { HighlightChangeDetails, SearchResultsMode };
 
 export type HighlightSource = { reason?: HighlightChangeDetails["reason"]; event?: Event };
 
-export interface EmojiPickerActions {
+export interface EmojiPickerRootActions {
   move(to: EmojiGridMove): boolean;
   pick(): boolean;
   highlight(emoji: string | null): void;
@@ -19,11 +18,13 @@ export interface EmojiPickerActions {
   toggleSkinTone(): boolean;
 }
 
-export type SelectReason = "item-press" | "imperative-action";
-export type ValueChangeDetails = ChangeDetails<SelectReason>;
-export type ReactionsOpenChangeDetails = ChangeDetails<"trigger-press" | "item-press" | "escape-key" | "none">;
+export type EmojiPickerRootChangeEventReason = "item-press" | "imperative-action";
+export type EmojiPickerRootChangeEventDetails = ChangeDetails<EmojiPickerRootChangeEventReason>;
+export type EmojiPickerRootReactionsOpenChangeEventReason = "trigger-press" | "item-press" | "escape-key" | "none";
+export type EmojiPickerRootReactionsOpenChangeEventDetails = ChangeDetails<EmojiPickerRootReactionsOpenChangeEventReason>;
 
-export type SelectDetails = ChangeDetails<SelectReason> & {
+export type EmojiPickerRootSelectEventReason = EmojiPickerRootChangeEventReason;
+export type EmojiPickerRootSelectEventDetails = ChangeDetails<EmojiPickerRootSelectEventReason> & {
   collapse?: () => void;
 };
 
@@ -36,7 +37,7 @@ export interface Overlay {
 
 export interface ListHandle {
   move(to: EmojiGridMove, source?: HighlightSource, cell?: Element | null): boolean;
-  pick(event?: Event, reason?: SelectReason): boolean;
+  pick(event?: Event, reason?: EmojiPickerRootChangeEventReason): boolean;
   highlight(emoji: string | null, source?: HighlightSource): void;
   ids(): { list: string; active: string | undefined };
   clear(): boolean;
@@ -53,12 +54,12 @@ export interface PickerContextValue {
   labels: EmojiLabels;
   inPopover: boolean;
   columns?: number;
-  collapse: CollapsedCategories;
+  collapse: EmojiPickerCollapsedCategories;
   searchResults: SearchResultsMode;
   // undefined while the Root doesn't track a value
   value: string | null | undefined;
-  pick(unified: string, event?: Event, reason?: SelectReason): EmojiSelection | undefined;
-  actions: EmojiPickerActions;
+  pick(unified: string, event?: Event, reason?: EmojiPickerRootChangeEventReason): EmojiSelection | undefined;
+  actions: EmojiPickerRootActions;
   ownsFocus(el: Element | null): boolean;
   target(): HTMLElement | null;
   skinTone: React.MutableRefObject<(() => void) | null>;
@@ -71,7 +72,7 @@ export interface PickerContextValue {
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);
 
-export const ViewportContext = React.createContext<((orientation: Orientation) => void) | null>(null);
+export const ViewportContext = React.createContext<((orientation: EmojiPickerOrientation) => void) | null>(null);
 
 export function usePicker(part = "This part"): PickerContextValue {
   const value = React.useContext(PickerContext);
@@ -79,4 +80,4 @@ export function usePicker(part = "This part"): PickerContextValue {
   return value;
 }
 
-export const useEmojiPickerActions = (): EmojiPickerActions => usePicker("useEmojiPickerActions").actions;
+export const useEmojiPickerActions = (): EmojiPickerRootActions => usePicker("useEmojiPickerActions").actions;

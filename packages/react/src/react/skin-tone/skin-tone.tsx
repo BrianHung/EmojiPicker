@@ -5,8 +5,8 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 
-import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
-import { type ChangeDetails, createChangeDetails, SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
+import { type ChangeDetails, nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { createChangeDetails, SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
 import { useStableCallback } from "../utils/latest";
 import { useChangeState } from "../utils/state";
 import { ToolbarPart } from "../utils/toolbar";
@@ -17,7 +17,7 @@ import { PickerContext } from "../root/context";
 import { mergePartProps } from "../utils/events";
 import { usePickerKeyDown } from "../utils/keyboard";
 import { useEmojiContext } from "../provider/provider";
-import { flag, renderElement, resolve, type InteractionState, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
+import { flag, renderElement, resolve, type EmojiPickerInteractionState, type EmojiPickerOrientation, type EmojiPickerPartElementProps, type EmojiPickerPartProps } from "../utils/render";
 import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 
@@ -27,7 +27,7 @@ const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-ski
 type SkinToneContextValue = {
   tone: SkinToneValue;
   open: boolean;
-  orientation: Orientation;
+  orientation: EmojiPickerOrientation;
   toggle(event?: Event): void;
   choose(tone: SkinToneValue, event?: Event): void;
   label(tone: SkinToneValue): string;
@@ -47,29 +47,29 @@ function useSkinToneContext(part: string) {
 
 export type SkinToneState = { open: boolean; tone: SkinToneValue };
 
-export type SkinToneProps = PartElementProps<SkinToneState> & {
-  orientation?: Orientation;
+export type SkinToneProps = EmojiPickerPartElementProps<SkinToneState> & {
+  orientation?: EmojiPickerOrientation;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean, details: SkinToneOpenChangeDetails) => void;
+  onOpenChange?: (open: boolean, details: EmojiPickerSkinToneChangeEventDetails) => void;
 };
 
-export type SkinToneOpenChangeDetails = ChangeDetails<"trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none">;
-type OpenReason = SkinToneOpenChangeDetails["reason"];
+export type EmojiPickerSkinToneChangeEventReason = "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none";
+export type EmojiPickerSkinToneChangeEventDetails = ChangeDetails<EmojiPickerSkinToneChangeEventReason>;
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
   const [open, change] = useChangeState(openProp, defaultOpen, onOpenChange);
-  const setOpen = (next: boolean, reason: OpenReason, event?: Event) => change(next, createChangeDetails(reason, event));
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const setOpen = (next: boolean, reason: EmojiPickerSkinToneChangeEventReason, event?: Event) => change(next, createChangeDetails(reason, event, triggerRef.current ?? undefined));
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const outside = (event: PointerEvent) => setOpen(false, "outside-press", event);
   useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutsideStart: outside, onInteractOutside: outside });
 
   const { labels } = useEmojiContext();
   const optionsId = React.useId();
-  const close = (reason: OpenReason, event?: Event) => {
+  const close = (reason: EmojiPickerSkinToneChangeEventReason, event?: Event) => {
     const inside = optionsRef.current?.contains(document.activeElement);
     const details = setOpen(false, reason, event);
     if (inside && details && !details.isCanceled) triggerRef.current?.focus();
@@ -132,9 +132,9 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   );
 });
 
-export type SkinToneTriggerState = SkinToneState & InteractionState;
+export type SkinToneTriggerState = SkinToneState & EmojiPickerInteractionState;
 
-export type SkinToneTriggerProps = PartElementProps<SkinToneTriggerState, HTMLButtonElement>;
+export type SkinToneTriggerProps = EmojiPickerPartElementProps<SkinToneTriggerState, HTMLButtonElement>;
 
 const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
   const { tone, open, toggle, label, triggerRef, optionsId } = useSkinToneContext("Trigger");
@@ -160,10 +160,10 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
   );
 });
 
-export type SkinToneOptionsState = { orientation: Orientation; tone: SkinToneValue };
+export type SkinToneOptionsState = { orientation: EmojiPickerOrientation; tone: SkinToneValue };
 
-export type SkinToneOptionsProps = Omit<PartElementProps<SkinToneOptionsState>, "children" | "role" | keyof PartProps<SkinToneOptionsState>> &
-  PartProps<SkinToneOptionsState, HTMLDivElement> & {
+export type SkinToneOptionsProps = Omit<EmojiPickerPartElementProps<SkinToneOptionsState>, "children" | "role" | keyof EmojiPickerPartProps<SkinToneOptionsState>> &
+  EmojiPickerPartProps<SkinToneOptionsState, HTMLDivElement> & {
     children?: (tone: SkinToneValue) => React.ReactNode;
   };
 
@@ -200,9 +200,9 @@ const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(fun
   );
 });
 
-export type SkinToneOptionState = InteractionState & { tone: SkinToneValue; selected: boolean };
+export type SkinToneOptionState = EmojiPickerInteractionState & { tone: SkinToneValue; selected: boolean };
 
-export type SkinToneOptionProps = PartElementProps<SkinToneOptionState, HTMLButtonElement, "role"> & {
+export type SkinToneOptionProps = EmojiPickerPartElementProps<SkinToneOptionState, HTMLButtonElement, "role"> & {
   tone?: SkinToneValue;
 };
 
@@ -251,7 +251,8 @@ export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: S
 export declare namespace SkinTone {
   type Props = SkinToneProps;
   type State = SkinToneState;
-  type ChangeEventDetails = SkinToneOpenChangeDetails;
+  type ChangeEventReason = EmojiPickerSkinToneChangeEventReason;
+  type ChangeEventDetails = EmojiPickerSkinToneChangeEventDetails;
   namespace Trigger {
     type Props = SkinToneTriggerProps;
     type State = SkinToneTriggerState;

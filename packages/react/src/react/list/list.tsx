@@ -6,9 +6,9 @@ import type { EmojiSection } from "@brianhung/emoji-picker-core";
 import { useGridController } from "../grid/use-grid-controller";
 import { useGridSections } from "../grid/use-grid-sections";
 import { usePicker, ViewportContext } from "../root/context";
-import { mergePartProps, type PickerHandlers } from "../utils/events";
+import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { useLatest } from "../utils/latest";
-import { renderElement, resolve, type Orientation, type PartProps } from "../utils/render";
+import { renderElement, resolve, type EmojiPickerOrientation, type EmojiPickerPartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
@@ -42,12 +42,12 @@ import { useListGeometry } from "./use-list-geometry";
 import { Variations, type VariationsOptionProps, type VariationsOptionState, type VariationsProps, type VariationsState } from "./variations";
 import { VirtualCollection } from "./virtualizer";
 
-export type ListState = { orientation: Orientation; searching: boolean; empty: boolean };
+export type ListState = { orientation: EmojiPickerOrientation; searching: boolean; empty: boolean };
 
-export type ListProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
-  PartProps<ListState, HTMLDivElement> & {
+export type ListProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
+  EmojiPickerPartProps<ListState, HTMLDivElement> & {
     children?: (section: EmojiSection) => React.ReactNode;
-    orientation?: Orientation;
+    orientation?: EmojiPickerOrientation;
     rows?: number;
     searchRows?: number;
     renderEmptyState?: (state: EmptyState) => React.ReactNode;
