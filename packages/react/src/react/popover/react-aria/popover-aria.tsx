@@ -58,6 +58,7 @@ function Root({ children, modal = true, ...props }: PopoverRootProps) {
 function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
   const virtual = !!anchor && !(anchor instanceof Element);
+  // A virtual anchor moves without a new value, as a caret does, so the box follows it on every render
   useLayoutEffect(() => {
     const r = virtual ? anchorRect(anchor) : undefined;
     if (r && box.current) Object.assign(box.current.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });

@@ -174,7 +174,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     return () => {
       if (list.current === handle) list.current = null;
     };
-  });
+  }, [list, handle]);
 
   // After each render the cells on screen settle the highlight, the tab stop, the active section, and a pending jump
   const afterRender = ({ unifieds, section, settled }: Rendered) => {

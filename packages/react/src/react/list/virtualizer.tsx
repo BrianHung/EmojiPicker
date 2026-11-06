@@ -114,8 +114,8 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     };
   }, [sync, scroller, scrollRef]);
 
-  // After every render of the views, which is when the cells on screen change
-  useLayoutEffect(() => onRendered?.());
+  // React Aria renders a new set of views whenever what's on screen changes
+  useLayoutEffect(() => onRendered?.(), [onRendered, state.visibleViews]);
   const size = state.contentSize;
   return (
     <div ref={content} role="presentation" style={{ position: "relative", width: horizontal ? size.width : undefined, height: size.height }}>
