@@ -211,11 +211,12 @@ A replaceable search function, with results ranked or grouped.
 
 ```ts title="search.ts" label="EmojiSearch"
 type EmojiSearch = (query: string, context: {
-  records: EmojiRecord[];
+  records: readonly EmojiRecord[];
   limit: number;
   signal: AbortSignal;
   frequency(unified: string): number;
-}) => SearchHit[] | Promise<SearchHit[]>;
+  locale?: string;
+}) => readonly SearchHit[] | PromiseLike<readonly SearchHit[]>;
 ```
 
 </Demo>
