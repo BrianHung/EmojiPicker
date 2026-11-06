@@ -8,7 +8,7 @@ export const search = rowsOf<SearchProps>()([
 
 export const searchInput = rowsOf<SearchInputProps>()([
   { name: "placeholder", type: "string", default: "labels.searchPlaceholder" },
-  { name: "autoFocus", type: "boolean", default: "inside an EmojiPopover" },
+  { name: "autoFocus", type: "boolean", default: "true inside an EmojiPopover" },
   { name: "className", type: "string | ({ hovered, focused, focusVisible, disabled }) => string | undefined" },
   { name: "onKeyDown", type: "PickerKeyboardEventHandler", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
   { name: "children", type: "ReactNode", default: "<Search.Clear />", description: "In the field, after the input." },

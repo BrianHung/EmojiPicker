@@ -10,9 +10,23 @@ import lexical from "@/registry/emoji-lexical.ts?raw";
 
 ## Installation
 
+<Steps>
+
+<Step title="Add the registry item.">
+
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
 
-Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker-react`, `lexical` and `@lexical/react`.
+Adds `hooks/emoji-lexical.ts` and installs `@brianhung/emoji-picker-react`, `lexical`, and `@lexical/react`.
+
+</Step>
+
+<Step title="Copy the menu component.">
+
+Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
+
+</Step>
+
+</Steps>
 
 ## Usage
 
@@ -38,7 +52,7 @@ export function Editor() {
 
 ## How it works
 
-`useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches and handles the keys through Lexical's command system, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`. Copy [`emoji-typeahead-plugin.tsx`](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/src/components/lexical/emoji-typeahead-plugin.tsx) into your project.
+`useLexicalEmojiTypeahead` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system, so the editor keeps its caret. `EmojiSuggestions.Popover` positions the menu at the typed `:query`.
 
 ```tsx title="emoji-typeahead-plugin.tsx (excerpt)"
 import { useLexicalEmojiTypeahead } from "@/hooks/emoji-lexical";

@@ -5,12 +5,14 @@ Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](
 ## Installation
 
 ```bash
-npm i @brianhung/emoji-picker-core
+npm i @brianhung/emoji-picker-core@alpha
 ```
+
+The packages are in prerelease and are published under the `alpha` tag.
 
 ## Usage
 
-`createEmojiStore`, `createPickerState` and `createEmojiSuggestions` have `subscribe(listener)`, `getSnapshot()`, and actions.
+`createEmojiStore`, `createPickerState`, and `createEmojiSuggestions` return stores with `subscribe(listener)`, `getSnapshot()`, and action methods.
 
 ```ts
 import { createEmojiStore, createEmojiSuggestions, createPickerState, moveHighlight } from "@brianhung/emoji-picker-core";
@@ -40,25 +42,27 @@ picker.choose();
 
 | Export | Description |
 |---|---|
-| `createEmojiStore(options)` | Data, search, frequents, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }` and `frequentsTuning: { halfLifeDays?, max? }`; `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
-| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Controlled state takes `x` / `defaultX` / `onXChange(value, details)`; `details` has `reason`, `event` and `cancel()` |
+| `createEmojiStore(options)` | Data, search, frequently used emoji, skin tone, and labels. Options match the React provider's, including `storage: { frequents?, skinTone? }` and `frequentsTuning: { halfLifeDays?, max? }`; `data` defaults to `data/en.json` on jsDelivr, pinned to this version |
+| `createPickerState(store, options)`, `moveHighlight` | Picker query, highlight, and selection. Controlled state takes `x` / `defaultX` / `onXChange(value, details)`, where `details` is the object from `createChangeDetails` |
 | `createEmojiSuggestions(store, options)` | Typeahead state with `getInputProps`, `getListProps`, `getOptionProps`, and IME-safe `keydown`. `choose(index?)` inserts a suggestion and counts it as used; `insert(selection)` only writes a selection another UI already counted. Both call `onChoose` and `onSelect(selection)` |
 | `createEmojiGrid`, `moveInGrid`, `rowsPerPage` | Grid rows and keyboard movement for a custom virtualizer |
 | `resolveEmoji(store, input)` | Resolves a native emoji, shortcode, unified code, or custom id |
-| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`: `Record<unified, { count, lastUsed }>`, `count` halving every `frequentsTuning.halfLifeDays` (14) |
+| `store.frequents` | `record`, `remove`, `clear`, `top(n)`, `score`, `entries()`. Entries are `Record<unified, { count, lastUsed }>`; `count` halves every `frequentsTuning.halfLifeDays` days (default 14) |
 | `mergeFrequents(a, b, tuning?)` | Merges two histories, such as a server's and this device's |
 | `localStorageAdapter(key)`, `memoryStorageAdapter()` | `EmojiStorage` adapters for `storage`; `localStorageAdapter` syncs across tabs |
 | `createChangeDetails(reason, event)` | The `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` every `onXChange` receives |
-| `localeData(locale, { shortcodes, baseUrl })` | URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
+| `localeData(locale, { shortcodes, baseUrl })` | The URL of a prebuilt dataset in `@brianhung/emoji-picker-data` |
 | `defaultLabels`, `localizeLabels`, `plural` | `EmojiLabels` and CLDR plural formatting |
 | `findShortcodeTrigger(text)` | Finds a `:query` before the caret |
 | `twemojiUrl` | Twemoji image URLs |
+| `withTone`, `withoutTone`, `nativeToUnified`, `unifiedToNative` | Convert between native emoji and unified codes, and add or remove skin tones |
+| `isComposingKey`, `syncCombobox` | IME and combobox helpers for editor typeaheads |
 
-A ProseMirror plugin on `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey` and `syncCombobox` is a registry item: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
+A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey`, and `syncCombobox` is available from the registry: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json` ([Tiptap example](https://emoji.brianhung.me/examples/tiptap/)).
 
 ## Data
 
-This package ships the English dataset (`/data/en.json`); [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has every other locale, and `localeData(locale)` returns its URL. Build a dataset for any [emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales). Every locale keeps the iamcal shortcodes; `--shortcodes iamcal,cldr-native` selects other sets.
+This package includes the English dataset (`/data/en.json`). [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has every other locale, and `localeData(locale)` returns its URL. To build a dataset for any [Emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales), run `build-data`. By default, English uses iamcal shortcodes and other locales use iamcal and CLDR. `--shortcodes` takes a comma-separated list in priority order, such as `iamcal,cldr-native`.
 
 ```bash
 npm install --save-dev emojibase-data
@@ -69,7 +73,7 @@ npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json
 
 ## Search adapters
 
-`searchEngine` takes any `EmojiSearch`: `(query, { records, limit, signal, frequency, locale }) => { unified, score? }[] | Promise<…>`, best first. Build an index once per `records` array; the store passes the same array until its data changes.
+`searchEngine` takes any `EmojiSearch`: `(query, { records, limit, signal, frequency, locale }) => { unified, score? }[] | Promise<…>`, best first. Build an index once per `records` array. The store passes the same array until its data changes.
 
 ```ts
 import Fuse from "fuse.js";

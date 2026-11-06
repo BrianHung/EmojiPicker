@@ -1,6 +1,6 @@
 ---
-title: Bring your own virtualizer
-description: The picker's grid on TanStack Virtual, react-window, Virtuoso, or the virtual list you already ship.
+title: Custom virtualizer
+description: The picker's grid on TanStack Virtual, react-window, Virtuoso, or your own virtual list.
 ---
 
 import { TanStackPicker } from "./demo";
@@ -10,7 +10,9 @@ import tanstackList from "./tanstack-list.tsx?raw";
 
 ## How it works
 
-`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiGrid` inside `EmojiPicker.Root` instead. It returns the grid as `rows`, each a section title or a row of emoji with its `size`, and props for the grid, titles and cells: the same keyboard, highlight, hover, long press and skin-tone variations as `EmojiPicker.List`. Pass `scrollToIndex` so arrow keys scroll your virtualizer. Your app doesn't load React Aria's virtualizer.
+`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiGrid` inside `EmojiPicker.Root` in place of `List`. It returns `rows`, each a section title or a row of emoji with its `size`, and prop getters for the grid, titles, and cells. Keyboard, highlight, hover, long press, and skin-tone variations work as in `List`. Pass `scrollToIndex` so the arrow keys scroll your virtualizer.
+
+A bundle that does not use `List` leaves out React Aria's `Virtualizer` when the bundler drops unused properties of the `EmojiPicker` namespace, as Vite does. With esbuild, import flat exports such as `EmojiPickerRoot` instead.
 
 ## TanStack Virtual
 
@@ -20,8 +22,8 @@ Put it inside `EmojiPicker.Root` where `EmojiPicker.List` would go. `grid.sticky
 
 ## react-window and Virtuoso
 
-The same `rows` feed react-window's `rowComponent` and Virtuoso's `itemContent`: render `grid.rows[index]` with the same props, and call their `scrollToRow` or `scrollToIndex` from `scrollToIndex`.
+The same `rows` feed react-window's `rowComponent` and Virtuoso's `itemContent`. Render `grid.rows[index]` with the same props, and call their `scrollToRow` or `scrollToIndex` from `scrollToIndex`.
 
 ## Without React
 
-`createEmojiGrid` and `moveInGrid` from `@brianhung/emoji-picker-core` are the rows and the keyboard on their own: offsets, sizes, lookups, and where Up, Down, Page Up and Page Down land, with short rows clamped.
+`createEmojiGrid` and `moveInGrid` from `@brianhung/emoji-picker-core` provide the rows and keyboard movement without React: offsets, sizes, lookups, and where Up, Down, Page Up, and Page Down land, with short rows clamped.

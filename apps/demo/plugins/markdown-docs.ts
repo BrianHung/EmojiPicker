@@ -2,75 +2,98 @@ import { readFileSync } from "node:fs";
 import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
+import * as api from "../src/docs/api";
+import type { PropRow } from "../src/components/site/docs";
 import { EXAMPLES } from "../src/lib/examples";
 import { PAGES, pageUrl, SITE } from "./site";
 
-const GITHUB = "https://github.com/BrianHung/EmojiPicker/blob/main";
 const NAMES = EXAMPLES.map((e) => e.id);
+const TABLES = api as unknown as Record<string, PropRow[] | string[][]>;
 
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
-function readme(text: string) {
-  return text.replace(/\]\((?!https?:|#|mailto:)([^)\s]+)\)/g, (_, link: string) => `](${GITHUB}/${posix.normalize(posix.join("packages/react", link))})`);
+const sourcePath = (dir: string, path: string) => (path.startsWith("@/registry/") ? path.slice(2) : path.startsWith("@/") ? `src/${path.slice(2)}` : posix.join(dir, path));
+
+const cell = (text = "") => text.replace(/\|/g, "\\|").replace(/\n/g, " ");
+const table = (head: string[], rows: string[][]) => [head, head.map(() => "---"), ...rows].map((r) => `| ${r.map(cell).join(" | ")} |`).join("\n");
+
+function propsTable(rows: PropRow[]) {
+  return table(
+    ["Prop", "Type", "Default", "Description"],
+    rows.map((r) => [`\`${r.name}\``, `\`${r.type}\``, r.default ? `\`${r.default}\`` : "", String(r.description ?? "")]),
+  );
 }
 
-type Page = { title: string; description: string; body: string };
-
-function inlineSources(dir: string, mdx: string) {
-  const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "((?:\.|@\/registry\/)[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, path!.startsWith("@/") ? path!.slice(2) : posix.join(dir, path!)]));
-  return mdx
-    .replace(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/gm, (line, title: string, id: string) => {
-      const path = files[id];
-      return path ? `\`\`\`${posix.extname(path).slice(1)} title="${title}"\n${read(path).trim()}\n\`\`\`` : line;
-    })
-    .replace(/^<PackageManagers dlx="([^"]+)" \/>$/gm, "```bash\nnpx $1\n```");
-}
-
-function page(name: string): Page {
-  const dir = `src/pages/examples/${name}`;
-  const source = inlineSources(dir, read(`${dir}/page.mdx`));
-  const [, yaml = "", rest = source] = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
-  const meta = Object.fromEntries(yaml.split("\n").map((line) => line.split(/:\s*(.*)/s).slice(0, 2)));
+// MDX components become Markdown: tables from docs/api, code from ?raw imports, and layout wrappers dropped
+function toMarkdown(dir: string, mdx: string) {
+  const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "((?:\.|@\/)[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, sourcePath(dir, path!)]));
   let fenced = false;
-  const body = rest
+  return mdx
     .split("\n")
-    .filter((line) => {
+    .flatMap((line) => {
       if (line.startsWith("```")) fenced = !fenced;
-      return fenced || !/^(import|export) |^<[A-Z].*\/>$/.test(line);
+      if (fenced || line.startsWith("```")) return [line];
+      const trimmed = line.trim();
+      let m: RegExpMatchArray | null;
+      if ((m = trimmed.match(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/)) && files[m[2]!]) return [`\`\`\`${posix.extname(files[m[2]!]!).slice(1)} title="${m[1]}"`, read(files[m[2]!]!).trim(), "```"];
+      if ((m = trimmed.match(/^<PackageManagers dlx="([^"]+)" \/>$/))) return ["```bash", `npx ${m[1]}`, "```"];
+      if ((m = trimmed.match(/^<PackageManagers install="([^"]+)" \/>$/))) return ["```bash", `npm install ${m[1]}`, "```"];
+      if ((m = trimmed.match(/^<PropsTable rows=\{api\.(\w+)\} \/>$/))) return [propsTable(TABLES[m[1]!] as PropRow[])];
+      if ((m = trimmed.match(/^<AttrTable head=\{(\[.*\])\} rows=\{api\.(\w+)\} \/>$/)))
+        return [
+          table(
+            JSON.parse(m[1]!),
+            (TABLES[m[2]!] as string[][]).map(([first, ...rest]) => [`\`${first}\``, ...rest]),
+          ),
+        ];
+      if ((m = trimmed.match(/^<Step title="([^"]+)">$/))) return [`**${m[1]}**`];
+      if ((m = trimmed.match(/^<TabPanel label="([^"]+)">$/))) return [`### ${m[1]}`];
+      if (/^(import|export) /.test(line) || /^<\/?[A-Za-z][\w.]*(\s[^>]*)?\/?>$/.test(trimmed)) return [];
+      return [line.replace(/\s*\{#[\w-]+\}$/, "").replace(/<span [^>]*\/>/g, "")];
     })
     .join("\n")
     .replace(/\]\(\//g, `](${SITE}/`)
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-  return { title: meta.title ?? name, description: meta.description ?? "", body };
 }
 
-function example(name: string) {
-  const { title, description, body } = page(name);
-  return `# ${title}\n\n${description}\n\nLive example: ${SITE}/examples/${name}/\n\n${body}\n`;
+type Page = { title: string; description: string; body: string };
+
+function page(dir: string): Page {
+  const source = read(`${dir}/page.mdx`);
+  const [, yaml = "", rest = source] = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
+  const meta = Object.fromEntries(yaml.split("\n").map((line) => line.split(/:\s*(.*)/s).slice(0, 2)));
+  return { title: meta.title ?? dir, description: meta.description ?? "", body: toMarkdown(dir, rest) };
+}
+
+const docs = () => page("src/pages/home");
+const example = (name: string) => page(`src/pages/examples/${name}`);
+
+function document(p: Page, url: string) {
+  return `# ${p.title}\n\n${p.description}\n\n${url}\n\n${p.body}\n`;
 }
 
 const index = (link: (name: string) => string) =>
   NAMES.map((name) => {
-    const { title, description } = page(name);
+    const { title, description } = example(name);
     return `- [${title}](${link(name)}): ${description}`;
   }).join("\n");
 
 type Route = { type: "text/markdown" | "text/plain" | "application/xml"; render: () => string };
 
 const ROUTES: Record<string, Route> = {
-  "docs.md": { type: "text/markdown", render: () => readme(read("../../packages/react/README.md")) },
-  "examples.md": { type: "text/markdown", render: () => `# Examples\n\nWorking integrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
-  ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => example(name) } satisfies Route])),
+  "docs.md": { type: "text/markdown", render: () => document(docs(), `Live docs: ${SITE}/`) },
+  "examples.md": { type: "text/markdown", render: () => `# Examples\n\nIntegrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
+  ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => document(example(name), `Live example: ${SITE}/examples/${name}/`) } satisfies Route])),
   "llms.txt": {
     type: "text/plain",
     render: () => `# Emoji Picker
 
-> Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete (@brianhung/emoji-picker-react).
+> ${docs().description.replace(/\.$/, "")} (@brianhung/emoji-picker-react).
 
 ## Docs
 
-- [Emoji Picker](${SITE}/docs.md): installation, parts, search, styling and API.
+- [Emoji Picker](${SITE}/docs.md): installation, anatomy, usage, examples, API reference, and accessibility.
 
 ## Examples
 
