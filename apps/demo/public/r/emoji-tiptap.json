@@ -2,9 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-tiptap",
   "title": "Emoji Tiptap",
-  "description": "useTiptapEmojiTypeahead: shortcode suggestions for a Tiptap 3 editor, on the ProseMirror plugin.",
+  "description": "useTiptapEmojiTypeahead adds shortcode suggestions to a Tiptap 3 editor, built on the ProseMirror plugin.",
   "dependencies": [
-    "@brianhung/emoji-picker-react",
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0",
     "@tiptap/core",
     "@tiptap/pm"
   ],

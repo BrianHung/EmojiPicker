@@ -2,9 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-lexical",
   "title": "Emoji Lexical",
-  "description": "useLexicalEmojiTypeahead: shortcode suggestions for a Lexical editor, inside LexicalComposer.",
+  "description": "useLexicalEmojiTypeahead adds shortcode suggestions to a Lexical editor, inside LexicalComposer.",
   "dependencies": [
-    "@brianhung/emoji-picker-react",
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0",
     "lexical",
     "@lexical/react"
   ],

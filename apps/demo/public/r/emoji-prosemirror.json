@@ -2,9 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-prosemirror",
   "title": "Emoji ProseMirror",
-  "description": "Shortcode suggestions as a ProseMirror plugin, without React: finds the :query, handles the keys and replaces the query with the chosen emoji.",
+  "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
   "dependencies": [
-    "@brianhung/emoji-picker-core",
+    "@brianhung/emoji-picker-core@^1.0.0-alpha.0",
     "prosemirror-state",
     "prosemirror-view"
   ],
