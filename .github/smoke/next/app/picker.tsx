@@ -16,7 +16,7 @@ export function Picker() {
               "Loading…"
             ) : status === "error" ? (
               <button type="button" onClick={retry}>
-                Retry
+                Could not load emoji. Try again
               </button>
             ) : (
               "No emoji found."

@@ -19,6 +19,8 @@
     "check": "biome check .",
     "size": "size-limit",
     "smoke": "node .github/smoke/run.mjs",
+    "lint:packages": "publint packages/core && publint packages/react && publint packages/data && attw --pack packages/core --profile esm-only && attw --pack packages/react --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css && attw --pack packages/data --profile esm-only --entrypoints ./en/iamcal.json ./ja/cldr.json",
+    "release:check": "npm run typecheck && biome ci . && npm test && npm test -w demo && npm run build -w @brianhung/emoji-picker-core && npm run build -w @brianhung/emoji-picker-react && npm run size && npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data && npm run lint:packages && npm run smoke && E2E_BUILD=1 npm run test:e2e && E2E_BUILD=1 npm run test:a11y",
     "changeset": "changeset",
     "version-packages": "changeset version && npm install --package-lock-only"
   },

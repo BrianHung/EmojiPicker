@@ -30,8 +30,7 @@ jobs:
       - run: npm run build -w @brianhung/emoji-picker-react
       - run: npm run size
       - run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
-      - run: npx publint packages/core && npx publint packages/react && npx publint packages/data
-      - run: npx @arethetypeswrong/cli --pack packages/core --profile esm-only && npx @arethetypeswrong/cli --pack packages/react --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css
+      - run: npm run lint:packages
 
   smoke:
     runs-on: ubuntu-latest
