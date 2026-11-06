@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { EmojiSelection, PopoverFinalFocus } from "@brianhung/emoji-picker-react";
+import type { EmojiSelection } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { cn } from "@/lib/utils";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
@@ -12,7 +12,7 @@ export type PickerPopoverProps = {
   triggerClassName?: string;
   label?: string;
   picker?: React.ReactNode;
-  finalFocus?: PopoverFinalFocus;
+  finalFocus?: EmojiPopover.Content.Props["finalFocus"];
   renderTrigger?: (trigger: React.ReactElement) => React.ReactNode;
 };
 

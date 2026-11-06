@@ -1,4 +1,4 @@
-import { remote } from "@brianhung/emoji-picker-core/search";
+import type { EmojiSearch } from "@brianhung/emoji-picker-react";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
 
@@ -17,8 +17,8 @@ const setStatus = (backend: Backend, value: ApiStatus) => {
   listeners.forEach((l) => l());
 };
 
-function api(backend: Backend, path: string, body: Record<string, unknown> = {}) {
-  return remote(async (query, { limit, signal, records }) => {
+function api(backend: Backend, path: string, body: Record<string, unknown> = {}): EmojiSearch {
+  return async (query, { limit, signal, records }) => {
     try {
       const response = await fetch(`${API}${path}`, {
         method: "POST",
@@ -36,7 +36,7 @@ function api(backend: Backend, path: string, body: Record<string, unknown> = {})
       setStatus(backend, "unavailable");
       return [];
     }
-  });
+  };
 }
 
 export const embeddingsSearch = api("embeddings", "/api/embed-search");

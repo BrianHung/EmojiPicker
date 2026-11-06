@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { useEmojiTypeaheadAdapter, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
+import { useEmojiStore, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
 import { emojiTypeahead } from "@/lib/emoji-prosemirror";
 
 export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
@@ -10,12 +10,14 @@ export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
 };
 
 export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {
+  const store = useEmojiStore();
+  const id = React.useId();
   const latest = React.useRef({ content, onSelect });
   latest.current = { content, onSelect };
-  const { plugin, ...typeahead } = useEmojiTypeaheadAdapter(
-    (store, options) =>
+  const { plugin, suggestions, anchor } = React.useMemo(
+    () =>
       emojiTypeahead(store, {
-        ...options,
+        id,
         insert,
         limit,
         matchBy,
@@ -27,12 +29,12 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
           return typeof replacement === "string" ? replacement : createNodeFromContent(replacement, schema);
         },
       }),
-    [insert, limit, matchBy, order, columns],
+    [store, id, insert, limit, matchBy, order, columns],
   );
   React.useEffect(() => {
     if (!editor || editor.isDestroyed) return;
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
     return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));
   }, [editor, plugin]);
-  return typeahead;
+  return useEmojiTypeahead(suggestions, { anchor });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmojiPicker, type EmojiItem, type EmojiSelection, type RootProps } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -103,7 +103,7 @@ function EmojiPickerFooter({ className }: { className?: string }) {
   );
 }
 
-type EmojiPickerCardProps = Omit<RootProps, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
+type EmojiPickerCardProps = Omit<EmojiPicker.Root.Props, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
 
 const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(function EmojiPickerCard({ className, autoFocus, rows, cell: renderCell, footer, empty, ...props }, ref) {
   return (

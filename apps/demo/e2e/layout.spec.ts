@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
-import { expect, frames, quiet, settle, slot, test, visit } from "./support";
+import { expect, quiet, settle, slot, test, visit } from "./support";
 
 const highlighted = (page: Page) => picker(page).locator(`${slot("emoji")}[data-highlighted]`);
 

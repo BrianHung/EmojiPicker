@@ -1,8 +1,8 @@
 import type { PropRow } from "@/components/site/docs";
-import type { ListProps } from "@brianhung/emoji-picker-react";
+import type { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
-export const list = rowsOf<ListProps>()([
+export const list = rowsOf<EmojiPicker.List.Props>()([
   { name: "children", type: "(section: EmojiSection) => ReactNode", default: "title and cells", description: "Called only for the sections in view." },
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },

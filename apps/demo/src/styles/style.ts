@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { EmojiSelection, SearchResultsMode } from "@brianhung/emoji-picker-react";
+import type { EmojiSelection, EmojiPicker } from "@brianhung/emoji-picker-react";
 
 export type Tokens = React.CSSProperties & Record<`--${string}`, string>;
 
@@ -9,7 +9,7 @@ export type StylePickerProps = {
   autoFocus?: boolean;
   fluid?: boolean;
   columns?: "fit" | number;
-  searchResults?: SearchResultsMode;
+  searchResults?: EmojiPicker.Root.Props["searchResults"];
   className?: string;
 };
 

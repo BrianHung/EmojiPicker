@@ -1,7 +1,6 @@
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider, type CustomEmoji, type EmojiSearch } from "@brianhung/emoji-picker-react";
-import { fallback, lexical } from "@brianhung/emoji-picker-core/search";
+import { EmojiProvider, lexical, type CustomEmoji, type EmojiSearch } from "@brianhung/emoji-picker-react";
 import { useRenderer } from "@/components/site/shell";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,10 +15,18 @@ const LIMIT = 48;
 const EMPTY_BEFORE_DOWNLOAD = "Download the model to search by meaning.";
 
 type Tab = "device" | "vector" | "decision";
+const exact = lexical();
+// The meaning-based hits first, then lexical ones when there are fewer than 8
+const withLexical =
+  (search: EmojiSearch): EmojiSearch =>
+  async (query, context) => {
+    const hits = await search(query, context);
+    return hits.length >= 8 ? hits : [...hits, ...exact(query, context)];
+  };
 const SEARCHES: Record<Tab, EmojiSearch> = {
-  device: fallback(onDeviceSearch, lexical()),
-  vector: fallback(embeddingsSearch, lexical()),
-  decision: fallback(decisionSearch, lexical()),
+  device: withLexical(onDeviceSearch),
+  vector: withLexical(embeddingsSearch),
+  decision: withLexical(decisionSearch),
 };
 
 function timed(search: EmojiSearch, report: (t: { query: string; count: number; ms: number }) => void): EmojiSearch {
@@ -81,7 +88,7 @@ export function Demo() {
         ) : null}
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
-        <EmojiProvider data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} searchEngine={search}>
+        <EmojiProvider data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} search={search}>
           <EmojiPickerCard query={query} onQueryChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
         </EmojiProvider>
         <p className="min-h-5 text-sm text-muted-foreground tabular-nums" data-testid="status" aria-live="polite">

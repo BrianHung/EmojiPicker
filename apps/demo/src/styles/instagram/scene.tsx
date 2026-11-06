@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Emoji, ReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
 import { Avatar, EmojiText, FitViewport, MobileFrame, PickerSheet, SceneFrame, ScenePicker, ld, useCompact, useLongPress } from "@/styles/scene-kit";
 import { tokensOf } from "@/styles/style";
+import { ReactionBar as ReactionRow } from "@/components/ui/emoji-reaction-bar";
 
 
 const C = {

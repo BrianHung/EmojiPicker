@@ -1,8 +1,7 @@
-import type { PopoverRootProps, PopoverTriggerProps } from "@brianhung/emoji-picker-react";
-import type { PopoverContentProps } from "@brianhung/emoji-picker-react/floating-ui";
+import type { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { rowsOf } from "./rows";
 
-export const popoverRoot = rowsOf<PopoverRootProps>()([
+export const popoverRoot = rowsOf<EmojiPopover.Root.Props>()([
   { name: "open", type: "boolean" },
   { name: "defaultOpen", type: "boolean", default: "false" },
   {
@@ -16,9 +15,9 @@ export const popoverRoot = rowsOf<PopoverRootProps>()([
   { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },
 ]);
 
-export const popoverTrigger = rowsOf<PopoverTriggerProps>()([{ name: "render", type: "ReactElement | (props, { open, hovered, pressed, focusVisible, … }) => ReactElement", description: "Merges props onto this element." }]);
+export const popoverTrigger = rowsOf<EmojiPopover.Trigger.Props>()([{ name: "render", type: "ReactElement | (props, { open, hovered, pressed, focusVisible, … }) => ReactElement", description: "Merges props onto this element." }]);
 
-export const popoverContent = rowsOf<PopoverContentProps>()([
+export const popoverContent = rowsOf<EmojiPopover.Content.Props>()([
   { name: "side", type: '"top" | "bottom" | "left" | "right" | "inline-start" | "inline-end"', default: '"bottom"', description: "Flips when there is not enough room. inline-start and inline-end follow the locale's direction." },
   { name: "align", type: '"start" | "center" | "end"', default: '"start"' },
   { name: "sideOffset", type: "number", default: "8" },

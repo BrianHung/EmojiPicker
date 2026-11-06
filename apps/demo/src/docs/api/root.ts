@@ -1,7 +1,7 @@
-import type { RootProps } from "@brianhung/emoji-picker-react";
+import type { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
-export const root = rowsOf<RootProps>()([
+export const root = rowsOf<EmojiPicker.Root.Props>()([
   { name: "onSelect", type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event?, cancel(), collapse? }) => void', description: "cancel() keeps the value and the popover open." },
   { name: "columns", type: '"fit" | number', default: '"fit"', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {

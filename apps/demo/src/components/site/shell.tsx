@@ -1,6 +1,6 @@
 import * as React from "react";
 import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker-react";
+import { EmojiProvider } from "@brianhung/emoji-picker-react";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { type EmojiFont, loadEmojiFont } from "@/lib/emoji-fonts";
@@ -57,7 +57,7 @@ if (typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.pl
 export type SiteRenderer = "auto" | "native" | EmojiFont;
 const SITE_RENDERERS: SiteRenderer[] = ["auto", "native", "twemoji", "noto"];
 
-const RendererContext = React.createContext<Renderer | "auto">("auto");
+const RendererContext = React.createContext<"native" | "image" | "auto">("auto");
 export const useRenderer = () => React.useContext(RendererContext);
 
 export function SiteShell({ page, width = "column", children }: { page: Page; width?: keyof typeof WIDTH; children: React.ReactNode }) {

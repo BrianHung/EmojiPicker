@@ -4,7 +4,7 @@ export const hooks: [string, string][] = [
     "useEmojiTypeahead({ query, anchor, replace }, options, element)",
     "Shortcode typeahead for any editor. findShortcodeTrigger(textBeforeCaret) finds the query. element is the editor's element, a ref to it, or a function that returns it.",
   ],
-  ["useEmojiSuggestions({ query, onChoose })", "The suggestions state alone, for a field that the typeahead hooks don't cover."],
+  ["useEmojiTypeahead(suggestions, { anchor })", "The same, around core's createEmojiSuggestions(store, options) for an editor plugin that owns the keys, such as ProseMirror."],
   ["useEmojiSearch(query, { limit })", "{ results, pending } from the provider's search, outside a picker."],
   ["useFrequentEmoji({ limit })", "{ items, pick, remove, clear } for the frequently used emoji."],
   ["useSkinTone()", "[tone, setTone] for the shared skin tone."],

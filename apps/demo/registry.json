@@ -61,6 +61,19 @@
       ]
     },
     {
+      "name": "emoji-reaction-bar",
+      "type": "registry:ui",
+      "title": "Emoji Reaction Bar",
+      "description": "A row of reaction buttons as a React Aria toolbar: arrows, Home and End move focus, and the pointer carries it once focus is inside.",
+      "dependencies": ["react-aria", "react-aria-components"],
+      "files": [
+        {
+          "path": "registry/emoji-reaction-bar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "emoji-prosemirror",
       "type": "registry:lib",
       "title": "Emoji ProseMirror",
