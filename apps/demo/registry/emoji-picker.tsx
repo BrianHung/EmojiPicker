@@ -5,7 +5,7 @@ import { EmojiPicker, useFrequentEmoji, type EmojiItem, type EmojiSelection, typ
 import { cn } from "@/lib/utils";
 
 const root =
-  "relative flex max-h-(--available-height) flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0 [--emoji-font-family:'Segoe_UI_Emoji','Segoe_UI_Symbol','Segoe_UI','Apple_Color_Emoji','Twemoji_Mozilla','Noto_Color_Emoji','EmojiOne_Color','Android_Emoji']";
+  "relative flex max-h-(--available-height) flex-col overflow-hidden **:box-border motion-reduce:duration-0 motion-reduce:**:duration-0";
 const tone = "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent";
 const cell =
   "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground";

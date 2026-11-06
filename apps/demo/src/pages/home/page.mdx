@@ -21,7 +21,7 @@ import registry from "@/registry/emoji-picker.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-Adds `components/ui/emoji-picker.tsx` and installs `@brianhung/emoji-picker-react`.
+Adds `components/ui/emoji-picker.tsx`, installs `@brianhung/emoji-picker-react`, and writes `--emoji-font-family` and the skin-tone row's surface tokens to your CSS file.
 
 </Step>
 
@@ -30,12 +30,6 @@ Adds `components/ui/emoji-picker.tsx` and installs `@brianhung/emoji-picker-reac
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
 
 Uses your own `components/ui/popover`, for the Base UI (default) and Radix bases. A project made with `--base aria` adds `emoji-picker-popover-aria.json` instead.
-
-</Step>
-
-<Step title="Add the provider.">
-
-<Code title="app/providers.tsx" code={providers} />
 
 </Step>
 
@@ -92,9 +86,49 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 </Step>
 
-<Step title="Add the provider.">
+</Steps>
 
-<Code title="app/providers.tsx" code={providers} />
+</TabPanel>
+
+<TabPanel label="Parts">
+
+<Steps>
+
+<Step title="Install the following dependency.">
+
+<PackageManagers install="@brianhung/emoji-picker-react" />
+
+`@brianhung/emoji-picker-core` comes with it.
+
+</Step>
+
+<Step title="Assemble the parts.">
+
+```tsx title="picker.tsx"
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
+
+<EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
+  <EmojiPicker.Search>
+    <EmojiPicker.Search.Input />
+    <EmojiPicker.SkinTone />
+  </EmojiPicker.Search>
+  <EmojiPicker.Viewport>
+    <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && "No emoji found."} />
+  </EmojiPicker.Viewport>
+</EmojiPicker.Root>
+```
+
+Parts need no provider and no CSS. `Root` loads the English dataset from jsDelivr, pinned to the installed core version.
+
+</Step>
+
+<Step title="Optional: import the tokens and Tailwind utilities.">
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@brianhung/emoji-picker-react/tokens.css";
+@import "@brianhung/emoji-picker-react/theme.css";
+```
 
 </Step>
 
@@ -106,17 +140,21 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <div className="flex flex-col gap-3">
 
+### Shared provider {#provider}
+
+`Root` uses the nearest `EmojiProvider` and creates its own when there is none. Hoist one provider to share data, locale, custom emoji, skin tone and frequently used emoji across every picker, reaction row and typeahead below it. `EmojiTapback`, `Emoji`, the typeahead hooks, and `useSkinTone` or `useFrequentEmoji` outside a `Root` require one.
+
+<Code title="app/providers.tsx" code={providers} />
+
+</div>
+
+<div className="flex flex-col gap-3">
+
 ### Emoji data {#data}
 
-`en.json` ships with the package: 1,923 emoji from Emojibase with Slack shortcodes. Pass its URL so it loads as a separate, cacheable file, or copy it to your server and pass that URL. `data` also takes a loader or the dataset object, and `filter` removes emoji from pickers and search.
+`en.json` ships with core: 1,923 emoji from Emojibase with Slack shortcodes. By default it loads from jsDelivr, pinned to the installed core version. To self-host, serve the file and pass its URL. `data` also takes a loader or the dataset object, and `filter` removes emoji from pickers and search.
 
 <CodeTabs>
-
-```tsx title="app/providers.tsx" label="Package"
-import en from "@brianhung/emoji-picker-core/data/en.json?url";
-
-<EmojiProvider data={en}>
-```
 
 ```tsx title="app/providers.tsx" label="Self-hosted"
 // cp node_modules/@brianhung/emoji-picker-core/data/en.json public/emoji/en.json
@@ -128,7 +166,7 @@ import en from "@brianhung/emoji-picker-core/data/en.json?url";
 ```
 
 ```tsx title="app/providers.tsx" label="Filter"
-<EmojiProvider data={en} filter={(e) => e.group !== "flags" && e.version <= 15}>
+<EmojiProvider filter={(e) => e.group !== "flags" && e.version <= 15}>
 ```
 
 </CodeTabs>
@@ -147,7 +185,7 @@ Import the parts and assemble them.
 import { EmojiProvider, EmojiPicker, Emoji, useFrequentEmoji } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 
-<EmojiProvider data={en}>
+<EmojiProvider>
   <EmojiPicker.Root>
     <EmojiPicker.CategoryNav />
     <EmojiPicker.Search>
@@ -254,7 +292,7 @@ Each part forwards its ref and spreads other props onto its element.
 
 ### EmojiProvider {#api-provider}
 
-Provides the dataset, search, frequently used emoji and skin tone to the parts and hooks inside it.
+Provides the dataset, search, frequently used emoji and skin tone to the parts and hooks inside it. A `Root` without one creates its own.
 
 <PropsTable rows={api.provider} />
 

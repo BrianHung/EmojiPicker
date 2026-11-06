@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { clearTextField, SURFACES } from "./surfaces";
 import { expect, frames, quiet, settle, test, visit } from "./support";
 
@@ -115,6 +115,46 @@ test("a native emoji takes the image's box whatever the font", async ({ page }) 
   const image = await box("Images", "System");
   for (const font of ["System", "Twemoji", "Noto"]) expect(await box("Native", font), font).toEqual(image);
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+async function pressUntilFocused(page: Page, target: Locator, key: string) {
+  for (let i = 0; i < 10 && !(await target.evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press(key);
+  await expect(target).toBeFocused();
+}
+
+test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategoryNavigation drive the grid", async ({ page }) => {
+  await visit(page, "/e2e/pages/seams/");
+  const root = page.locator('[data-slot="emoji-picker"]');
+  const search = root.locator('[data-slot="emoji-picker-search-input"]');
+  await root.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+
+  await search.focus();
+  await page.keyboard.press("Tab");
+  const trigger = root.getByRole("button", { name: "Skin tone: Default" });
+  await expect(trigger).toBeFocused();
+  await page.keyboard.press("Enter");
+  const medium = page.getByRole("menuitemradio", { name: "Medium", exact: true });
+  await pressUntilFocused(page, medium, "ArrowDown");
+  await page.keyboard.press("Enter");
+  await expect(root.getByRole("button", { name: "Skin tone: Medium" })).toBeFocused();
+  await search.fill("thumbs up");
+  await expect(root.locator('[data-slot="emoji-picker-emoji"]').first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
+  await search.fill("");
+
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  const tabs = root.getByRole("tablist", { name: "Categories" });
+  await expect(tabs.locator('[aria-selected="true"]')).toBeFocused();
+  const animals = tabs.getByRole("tab", { name: "Animals & Nature" });
+  await pressUntilFocused(page, animals, "ArrowRight");
+  await page.keyboard.press("Enter");
+  await expect(animals).toHaveAttribute("aria-selected", "true");
+  const offset = () =>
+    root.locator('[data-slot="emoji-picker-viewport"]').evaluate((viewport) => {
+      const title = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].find((t) => t.textContent === "Animals & Nature");
+      return title ? Math.round(title.getBoundingClientRect().top - viewport.getBoundingClientRect().top) : null;
+    });
+  await expect.poll(offset).toBe(0);
 });
 
 test.describe("phone", () => {
