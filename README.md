@@ -45,8 +45,6 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Parts are unstyled. Style them with `className` and `data-*` attributes. The English dataset loads from jsDelivr, pinned to the installed version of `@brianhung/emoji-picker-core`. See the [React README](packages/react/README.md) for providers, typeahead, and popovers.
-
 ## Packages
 
 | Package | Description |
