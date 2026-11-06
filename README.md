@@ -53,7 +53,7 @@ Parts are unstyled. Style them with `className` and `data-*` attributes. The Eng
 |---|---|
 | [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks. Depends on core. |
 | [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies. Includes the English dataset. |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every other Emojibase locale. |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set. |
 | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer. |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.

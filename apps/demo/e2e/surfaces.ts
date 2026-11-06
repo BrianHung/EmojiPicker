@@ -194,9 +194,9 @@ function gallery(s: StyleId): Surface[] {
     inline(id("inline"), path, (p) => card(p, "Inline picker")),
     popover(id("popover"), path, (p) => button(card(p, "Popover"), "Open emoji picker")),
     popover(id("popover-no-search"), path, (p) => button(card(p, "Popover without search"), "Open emoji picker")),
-    popover(id("tapback-more"), path, (p) => button(card(p, "Tapback"), "More emoji")),
-    popover(id("reactions-add"), path, (p) => button(card(p, "Reactions"), "Add reaction")),
-    menu(id("autocomplete"), path, (p) => card(p, "Autocomplete").locator("input"), ":smi", { frame: (p) => card(p, "Autocomplete") }),
+    popover(id("tapback-more"), path, (p) => button(card(p, "Reaction row"), "More emoji")),
+    popover(id("reactions-add"), path, (p) => button(card(p, "Reaction counts"), "Add reaction")),
+    menu(id("autocomplete"), path, (p) => card(p, "Shortcode typeahead").locator("input"), ":smi", { frame: (p) => card(p, "Shortcode typeahead") }),
     inline(id("sheet"), path, (p) => card(p, "Sheet")),
   ];
 }
@@ -259,8 +259,8 @@ export const SHOTS: Shot[] = [
     const path = `/gallery/#${s}`;
     return [
       { id: `gallery/${s}/scene`, path, frame: (p) => card(p) },
-      { id: `gallery/${s}/tapback`, path, frame: (p) => card(p, "Tapback") },
-      { id: `gallery/${s}/reactions`, path, frame: (p) => card(p, "Reactions") },
+      { id: `gallery/${s}/tapback`, path, frame: (p) => card(p, "Reaction row") },
+      { id: `gallery/${s}/reactions`, path, frame: (p) => card(p, "Reaction counts") },
     ];
   }),
   {

@@ -1,6 +1,6 @@
 # @brianhung/emoji-picker-core
 
-Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies. React apps install only `@brianhung/emoji-picker-react`, which depends on this package.
+Framework-neutral data, search, and state for [`@brianhung/emoji-picker-react`](https://www.npmjs.com/package/@brianhung/emoji-picker-react), with no dependencies. `@brianhung/emoji-picker-react` depends on this package. To import helpers such as `localeData`, `twemojiUrl`, or `mergeFrequents` from a React app under a strict package manager such as pnpm, add this package to your dependencies.
 
 ## Installation
 
@@ -65,7 +65,7 @@ A ProseMirror plugin built on `createEmojiSuggestions`, `findShortcodeTrigger`, 
 
 ## Data
 
-This package includes the English dataset (`/data/en.json`). [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has every other locale, and `localeData(locale)` returns its URL. To build a dataset for any [Emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales), run `build-data`. By default, English uses iamcal shortcodes and other locales use iamcal and CLDR. `--shortcodes` takes a comma-separated list in priority order, such as `iamcal,cldr-native`.
+This package includes the English dataset (`/data/en.json`). [`@brianhung/emoji-picker-data`](https://github.com/BrianHung/EmojiPicker/tree/main/packages/data#readme) has a dataset for every Emojibase locale and shortcode set, and `localeData(locale, { shortcodes })` returns its URL. `shortcodes` defaults to `"iamcal"`, whose shortcodes are English in every locale. To build a dataset for any [Emojibase locale](https://emojibase.dev/docs/datasets/#supported-locales), run `build-data`. It uses iamcal shortcodes for English, and iamcal and CLDR for other locales. `--shortcodes` takes a comma-separated list in priority order, such as `iamcal,cldr-native`.
 
 ```bash
 npm install --save-dev emojibase-data

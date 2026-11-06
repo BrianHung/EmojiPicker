@@ -27,7 +27,7 @@ export const provider = rowsOf<EmojiProviderProps>()([
     default: "localStorageAdapter(key)",
     description: "Where uncontrolled frequently used emoji and skin tone persist, synced across tabs. null for either key keeps that value in memory.",
   },
-  { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order, and the labels' counts." },
-  { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce." },
+  { name: "locale", type: "string", default: "the dataset's", description: "BCP 47 tag for search, A–Z order, result counts, and text direction. See Localization." },
+  { name: "labels", type: "Partial<EmojiLabels>", default: "defaultLabels", description: "Every string the pickers show or announce. See Localization." },
   { name: "prepare", type: "boolean", default: "true", description: "Loads data and builds the search index when the browser is idle." },
 ]);

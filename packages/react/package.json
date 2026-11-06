@@ -1,7 +1,7 @@
 {
   "name": "@brianhung/emoji-picker-react",
   "version": "1.0.0-alpha.0",
-  "description": "Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.",
+  "description": "Virtualized, unstyled React components for emoji pickers, reaction rows, and shortcode typeahead.",
   "keywords": [
     "react",
     "emoji",

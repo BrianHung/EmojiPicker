@@ -26,7 +26,7 @@ export const PAGES = {
   gallery: {
     entry: "gallery/index.html",
     heading: "Gallery",
-    description: "React emoji pickers, tapbacks, and shortcode autocomplete styled like Apple, Slack, Discord, Notion, Linear, and Instagram.",
+    description: "React emoji pickers, reaction rows, and shortcode typeahead styled like Apple, Slack, Discord, Notion, Linear, and Instagram.",
   },
   examples: {
     entry: "examples/index.html",

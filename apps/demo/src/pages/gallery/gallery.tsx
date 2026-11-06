@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
 import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
 import { toggleReaction, type Reaction } from "@/styles/scene-kit";
-import { StyleAutocomplete, StyleDropdown, StylePills, StyleTapback } from "@/styles/variants";
+import { StyleTypeahead, StyleDropdown, StylePills, StyleReactionRow } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
 import { discordEmojiOptions } from "@/experiences/discord";
 
@@ -67,12 +67,12 @@ function GalleryCard({
 
 const DRAFT = ":smi";
 
-function AutocompleteDemo({ appStyle }: { appStyle: Style }) {
+function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
   const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordEmojiOptions : {}), onSelect: copyEmoji });
   return (
     <div className="relative w-full max-w-[380px]">
-      <StyleAutocomplete appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
+      <StyleTypeahead appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
       <input
         ref={ref}
         aria-label="Message"
@@ -93,11 +93,11 @@ function PillsDemo({ appStyle }: { appStyle: Style }) {
   return <StylePills appStyle={appStyle} reactions={reactions} onToggle={(u) => setReactions((r) => toggleReaction(r, u))} onSelect={copyEmoji} />;
 }
 
-function TapbackDemo({ appStyle }: { appStyle: Style }) {
+function ReactionRowDemo({ appStyle }: { appStyle: Style }) {
   const [, setLast] = usePickedEmoji();
   return (
     <div className="flex flex-col items-center gap-3">
-      <StyleTapback appStyle={appStyle} onSelect={setLast} />
+      <StyleReactionRow appStyle={appStyle} onSelect={setLast} />
     </div>
   );
 }
@@ -170,14 +170,14 @@ export function GalleryPage() {
         >
           <DropdownDemo appStyle={appStyle} search={false} />
         </GalleryCard>
-        <GalleryCard title="Tapback" description="Frequently used emoji and an expand button." code={extract(variants, "StyleTapback")} file="styles/variants.tsx">
-          <TapbackDemo appStyle={appStyle} />
+        <GalleryCard title="Reaction row" description="Frequently used emoji that expand into the picker." code={extract(variants, "StyleReactionRow")} file="styles/variants.tsx">
+          <ReactionRowDemo appStyle={appStyle} />
         </GalleryCard>
-        <GalleryCard title="Reactions" description="Reaction counts with an add button." code={extract(variants, "StylePills")} file="styles/variants.tsx">
+        <GalleryCard title="Reaction counts" description="Reaction counts with an add button." code={extract(variants, "StylePills")} file="styles/variants.tsx">
           <PillsDemo appStyle={appStyle} />
         </GalleryCard>
-        <GalleryCard title="Autocomplete" description="Shortcode suggestions for a text field." code={extract(variants, "StyleAutocomplete")} file="styles/variants.tsx" previewClassName="items-end pt-72">
-          <AutocompleteDemo appStyle={appStyle} />
+        <GalleryCard title="Shortcode typeahead" description="Shortcode suggestions for a text field." code={extract(variants, "StyleTypeahead")} file="styles/variants.tsx" previewClassName="items-end pt-72">
+          <TypeaheadDemo appStyle={appStyle} />
         </GalleryCard>
         <GalleryCard title="Sheet" description="A picker docked at full width." code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`} file={file} previewClassName="items-end p-0 pt-6">
           <FitBox width={appStyle.size.width} height={361} className="items-end">
