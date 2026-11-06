@@ -139,11 +139,14 @@ export function progressive(fast: EmojiSearch, slow: EmojiSearch): EmojiSearch {
   };
 }
 
+// Reciprocal rank fusion's constant
+const RRF_K = 60;
+
 export function merge(...searches: EmojiSearch[]): EmojiSearch {
   return (query, context) =>
     then(all(searches.map((s) => s(query, context))), (lists) => {
       const scores = new Map<string, number>();
-      for (const list of lists) list.forEach((hit, rank) => scores.set(hit.unified, (scores.get(hit.unified) ?? 0) + 1 / (60 + rank)));
+      for (const list of lists) list.forEach((hit, rank) => scores.set(hit.unified, (scores.get(hit.unified) ?? 0) + 1 / (RRF_K + rank)));
       return [...scores]
         .sort((a, b) => b[1] - a[1])
         .slice(0, context.limit)

@@ -1,10 +1,10 @@
 // Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
-import { unifiedToNative } from "@brianhung/emoji-picker-core";
-import { createStore } from "../state/reactive";
+import { unifiedToNative, withoutFe0f, withoutTone, type EmojiRecord } from "./dataset";
+import { createStore } from "./reactive";
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
 
-export const KNOWN_FAILING = /* @__PURE__ */ new Set(["2640", "2642", "2695"]);
+const KNOWN_FAILING = /* @__PURE__ */ new Set(["2640", "2642", "2695"]);
 
 const CELL = 32;
 export const PROBE_BATCH = 16;
@@ -12,17 +12,18 @@ const FLAG_SAMPLE = "1f1fa-1f1f8";
 
 const isCountryFlag = (unified: string) => /^(1f1[ef][\da-f]-1f1[ef][\da-f]$|1f3f4-e00)/i.test(unified);
 
-type NativeProbe = {
+export interface NativeProbe {
   prime(unifieds: Iterable<string>): void;
+  // true or false once drawn, null when it can't be told, undefined before
   result(unified: string): boolean | null | undefined;
   probed(): Iterable<string>;
-};
+}
 
-export type NativeSupport = {
+export interface NativeSupport {
   probe: NativeProbe;
   failedVersions: ReadonlySet<number>;
   countryFlags: boolean;
-};
+}
 
 function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativeProbe {
   const results = new Map<string, boolean | null>();
@@ -149,6 +150,8 @@ export function isNativeSupported(support: NativeSupport | null, unified: string
   if (typeof exact === "boolean") return exact;
   return !support || !(support.failedVersions.has(version) || (!support.countryFlags && isCountryFlag(unified)));
 }
+
+export const drawsNatively = (support: NativeSupport | null, record: EmojiRecord, unified: string): boolean => !KNOWN_FAILING.has(withoutFe0f(withoutTone(record.unified))) && isNativeSupported(support, unified, record.version);
 
 export function needsImageFallback(): boolean {
   const probe = nativeProbe();

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import data from "@brianhung/emoji-picker-core/data/en.json";
-import { createEmojiStore, defaultLabels, type Dataset } from "@brianhung/emoji-picker-core";
+import { en } from "../../test/en";
+import { defaultLabels } from "../labels";
+import { createEmojiStore } from "../store";
 import { categoryList, categorySections, itemFactory, resultSections } from "./sections";
 
 describe("sections", () => {
-  const records = createEmojiStore({ data: data as unknown as Dataset, storage: { frequents: null, skinTone: null } }).records();
+  const records = createEmojiStore({ data: en, storage: { frequents: null, skinTone: null } }).records();
   const get = (u: string) => records.find((r) => r.unified === u || r.tones.includes(u));
   const categories = [
     { id: "suggested", name: "Frequently Used", nav: true },
@@ -14,7 +15,7 @@ describe("sections", () => {
   const item = itemFactory(defaultLabels);
 
   it("follows the picker's category order, with frequents first", () => {
-    const out = categorySections({ categories, records, suggested: ["1f44d-1f3fd", "nope"], customGroup: () => undefined, collapsed: () => false, get, withSkinTone: (u) => u, item });
+    const out = categorySections({ categories, records, suggested: ["1f44d-1f3fd", "nope"], customGroup: () => undefined, collapsed: [], get, tone: 0, item });
     expect(out.map((s) => s.id)).toEqual(["suggested", "flags", "smileys_people"]);
     expect(out[0]!.items.map((i) => i.unified)).toEqual(["1f44d-1f3fd"]);
     expect(out[0]!.items[0]!.record.unified).toBe("1f44d");
@@ -27,10 +28,10 @@ describe("sections", () => {
       records,
       suggested: [],
       customGroup: () => undefined,
-      collapsed: (id) => id === "flags",
+      collapsed: ["flags"],
       emojiVersion: 12,
       get,
-      withSkinTone: (u) => get(u)?.tones[2] ?? u,
+      tone: 3,
       item,
     });
     expect(out.map((s) => [s.id, s.collapsed, s.items.length > 0])).toEqual([
@@ -55,10 +56,10 @@ describe("sections", () => {
       records: [...records, ...custom],
       suggested: [],
       customGroup: (u) => (u === "shipit" ? "team" : undefined),
-      collapsed: () => false,
+      collapsed: [],
       emojiVersion: 1,
       get,
-      withSkinTone: (u) => `${u}!`,
+      tone: 2,
       item,
     });
     expect(out.map((s) => [s.id, s.items.map((i) => i.unified)])).toEqual([
@@ -69,39 +70,16 @@ describe("sections", () => {
 
   it("lays out results as one section, or one per category", () => {
     const hits = ["1f1fa-1f1f8", "1f600", "1f1ef-1f1f5"].map((u) => get(u)!);
-    const ranked = resultSections(
-      hits,
-      "ranked",
-      (g) => g,
-      (u) => u,
-      item,
-      "Results",
-    );
+    const ranked = resultSections(hits, "ranked", (g) => g, 0, item, "Results");
     expect(ranked).toHaveLength(1);
     expect(ranked[0]!.header).toBe(false);
     expect(ranked[0]!.items.map((i) => i.record)).toEqual(hits);
-    const grouped = resultSections(
-      hits,
-      "grouped",
-      (g) => g.toUpperCase(),
-      (u) => u,
-      item,
-      "Results",
-    );
+    const grouped = resultSections(hits, "grouped", (g) => g.toUpperCase(), 0, item, "Results");
     expect(grouped.map((s) => [s.name, s.category, s.items.map((i) => hits.indexOf(i.record))])).toEqual([
       ["SMILEYS_PEOPLE", "smileys_people", [1]],
       ["FLAGS", "flags", [0, 2]],
     ]);
-    expect(
-      resultSections(
-        hits,
-        "ranked",
-        (g) => g,
-        (u) => u,
-        item,
-        "Results",
-      )[0]!.items[0],
-    ).toBe(ranked[0]!.items[0]);
+    expect(resultSections(hits, "ranked", (g) => g, 0, item, "Results")[0]!.items[0]).toBe(ranked[0]!.items[0]);
   });
 
   it("appends custom sections the categories don't list", () => {

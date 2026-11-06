@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
+import { en } from "../../test/en";
 import { buildDataset } from "../../scripts/build-data";
 import { expandDataset, type Dataset, type DatasetEmoji } from "../dataset";
 import { createSearchIndex } from "./search-index";
 
-const index = createSearchIndex(expandDataset(data as unknown as Dataset), { locale: "en" });
+const index = createSearchIndex(expandDataset(en), { locale: "en" });
 const glyphs = (records: readonly { emoji: string }[]) => records.map((r) => r.emoji);
 const native = (q: string, limit?: number) => glyphs(index.search(q, limit));
 const localized = (locale: string) => createSearchIndex(expandDataset(buildDataset({ locale }).dataset), { locale });

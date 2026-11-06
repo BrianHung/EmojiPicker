@@ -1,74 +1,95 @@
 import type { EmojiRecord } from "../dataset";
-import { createStore } from "../reactive";
-import type { EmojiData, EmojiStore, InternalStore } from "../store";
-import type { ProgressiveHits } from "./search";
+import { createStore, type Subscribe } from "../reactive";
+import type { EmojiStore } from "../store";
+import { interimOf } from "./search";
 
-export type EmojiSearchState = {
+export interface EmojiSearchState {
   results: readonly EmojiRecord[];
   pending: boolean;
-};
+}
+
+export interface EmojiSearchQuery {
+  query: string;
+  limit: number;
+}
+
+export interface EmojiSearchRunner {
+  getSnapshot(): EmojiSearchState;
+  subscribe: Subscribe;
+  setQuery(query: string, limit: number): void;
+  abort(): void;
+}
 
 const NONE: readonly EmojiRecord[] = [];
 const IDLE: EmojiSearchState = { results: NONE, pending: false };
 
-type Run = { key: string | null; data: EmojiData | null; state: EmojiSearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
-type RunAction = { type: "start"; key: string; data: EmojiData; state: EmojiSearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
+// key is null once aborted, so the next query runs even when it is the same
+type Run = { key: string | null; version: number; state: EmojiSearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
+type RunAction = { type: "start"; key: string; version: number; state: EmojiSearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
 
 const reduce = (run: Run, action: RunAction): Run => {
   switch (action.type) {
     case "start":
-      return { ...run, key: action.key, data: action.data, state: action.state, controller: action.controller };
+      return { ...run, key: action.key, version: action.version, state: action.state, controller: action.controller };
     case "settle":
       return run.controller === action.controller ? { ...run, state: { results: action.results, pending: false }, settled: action.results, controller: null } : run;
     case "abort":
       return run.controller ? { ...run, key: null, controller: null } : run;
+    default:
+      return action satisfies never;
   }
 };
 
-// Runs lazily from getSnapshot, so a query set during render has results in that render; only settling notifies
-export function createSearch(store: EmojiStore) {
-  const run = createStore<Run, RunAction>({ key: "", data: null, state: IDLE, controller: null, settled: NONE }, reduce);
-  const settled = createStore(0, (n: number) => n + 1);
-  const watchers = createStore(0, (n: number, by: number) => n + by);
+// The query is an input: setting it starts the run, and getSnapshot only reads; a new data version reruns it while anything listens
+export function createSearch(store: EmojiStore, initial: EmojiSearchQuery = { query: "", limit: 0 }): EmojiSearchRunner {
+  const run = createStore<Run, RunAction>({ key: "", version: -1, state: IDLE, controller: null, settled: NONE }, reduce);
+  let input = initial;
+  let watchers = 0;
+  let unwatch: (() => void) | undefined;
+
+  const refresh = () => {
+    const { query, limit } = input;
+    const key = store.status() === "ready" && query.trim() ? `${limit}:${query}` : "";
+    const version = store.version();
+    const current = run.getSnapshot();
+    if (key === current.key && (!key || version === current.version)) return;
+    current.controller?.abort();
+    if (!key) return run.dispatch({ type: "start", key, version, state: IDLE, controller: null });
+    const controller = new AbortController();
+    const out = store.query(query, { limit, signal: controller.signal });
+    if (Array.isArray(out)) return run.dispatch({ type: "start", key, version, state: { results: out, pending: false }, controller: null });
+    run.dispatch({ type: "start", key, version, state: { results: interimOf(out) ?? current.settled, pending: true }, controller });
+    out.then(
+      (results) => run.dispatch({ type: "settle", controller, results }),
+      () => run.dispatch({ type: "settle", controller, results: NONE }),
+    );
+  };
+
   const abort = () => {
     run.getSnapshot().controller?.abort();
     run.dispatch({ type: "abort" });
   };
+
+  refresh();
   return {
-    run(query: string, limit: number): EmojiSearchState {
-      const { status, data } = (store as InternalStore).getSnapshot();
-      const key = status === "ready" && query.trim() ? `${limit}:${query}` : "";
-      const current = run.getSnapshot();
-      if (key === current.key && (!key || data === current.data)) return current.state;
-      current.controller?.abort();
-      if (!key) return start(key, IDLE, null);
-      const controller = new AbortController();
-      const out = store.query(query, { limit, signal: controller.signal });
-      if (Array.isArray(out)) return start(key, { results: out, pending: false }, null);
-      const done = (results: readonly EmojiRecord[]) => {
-        if (run.getSnapshot().controller !== controller) return;
-        run.dispatch({ type: "settle", controller, results });
-        settled.dispatch(undefined);
-      };
-      out.then(done, () => done(NONE));
-      return start(key, { results: (out as Partial<ProgressiveHits<EmojiRecord[]>>).interim ?? current.settled, pending: true }, controller);
+    getSnapshot: () => run.getSnapshot().state,
+    setQuery(query, limit) {
+      input = { query, limit };
+      refresh();
     },
     abort,
-    subscribe(listener: () => void) {
-      const off = settled.subscribe(listener);
-      watchers.dispatch(1);
+    subscribe(listener) {
+      const off = run.subscribe(listener);
+      if (watchers++ === 0) {
+        unwatch = store.subscribe(refresh);
+        refresh();
+      }
       return () => {
         off();
-        watchers.dispatch(-1);
-        if (!watchers.getSnapshot()) abort();
+        if (--watchers > 0) return;
+        unwatch?.();
+        abort();
       };
     },
   };
-
-  function start(key: string, state: EmojiSearchState, controller: AbortController | null) {
-    run.dispatch({ type: "start", key, data: (store as InternalStore).getSnapshot().data, state, controller });
-    return state;
-  }
 }
-
-export type Search = ReturnType<typeof createSearch>;

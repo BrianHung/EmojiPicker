@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import data from "../data/en.json";
-import { expandDataset, type Dataset } from "./dataset";
+import { en } from "../test/en";
+import { expandDataset } from "./dataset";
 import { createSearchIndex } from "./search/search-index";
 import { findShortcodeTrigger, isComposingKey, nameWithTone, replaceShortcodes, toneOf } from "./shortcodes";
 
-const index = createSearchIndex(expandDataset(data as unknown as Dataset));
+const index = createSearchIndex(expandDataset(en));
 
 describe("shortcodes", () => {
   it("triggers on a full-width colon after Hangul", () => {

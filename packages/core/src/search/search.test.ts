@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import data from "../../data/en.json";
-import { expandDataset, unifiedToNative, type Dataset } from "../dataset";
+import { en } from "../../test/en";
+import { expandDataset, unifiedToNative } from "../dataset";
 import { fallback, interimOf, lexical, merge, preferFrequent, progressive, remote, rerank, type EmojiSearch, type SearchContext } from "./search";
 
-const records = expandDataset(data as unknown as Dataset);
+const records = expandDataset(en);
 const context = (overrides: Partial<SearchContext> = {}): SearchContext => ({ records, limit: 20, signal: new AbortController().signal, frequency: () => 0, ...overrides });
 const glyphs = (hits: readonly { unified: string }[]) => hits.map((h) => unifiedToNative(h.unified));
 const run = (search: EmojiSearch, q: string, ctx = context()) => search(q, ctx) as readonly { unified: string }[];

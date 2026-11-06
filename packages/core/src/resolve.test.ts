@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import data from "../data/en.json";
-import { nativeToUnified, type Dataset } from "./dataset";
+import { en } from "../test/en";
+import { nativeToUnified } from "./dataset";
 import { missingEmojiText, resolveEmoji } from "./resolve";
 import { createEmojiStore } from "./store";
 
 const parrot = { id: "partyparrot", name: "Party parrot", imageUrl: "/parrot.gif", shortcodes: ["partyparrot"] };
 
 async function loadedStore() {
-  const store = createEmojiStore({ data: data as unknown as Dataset, customEmojis: [parrot] });
+  const store = createEmojiStore({ data: en, customEmojis: [parrot] });
   await store.load();
   return store;
 }
@@ -47,7 +47,7 @@ describe("resolveEmoji", () => {
   });
 
   it("draws native emoji and unified codes before data loads, nothing else", () => {
-    const store = createEmojiStore({ data: async () => data as unknown as Dataset });
+    const store = createEmojiStore({ data: async () => en });
     expect(resolveEmoji(store, "🎉")?.native).toBe("🎉");
     expect(resolveEmoji(store, "1f389")?.native).toBe("🎉");
     expect(resolveEmoji(store, ":tada:")).toBeNull();
