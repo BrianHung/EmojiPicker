@@ -1,24 +1,27 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig, type PlaywrightTestConfig } from "@playwright/test";
 
 const BUILD = process.env.E2E_BUILD === "1";
 const PORT = Number(process.env.E2E_PORT) || (BUILD ? 5198 : 5199);
-const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
-const mobile = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
+
+export const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
+export const mobile = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 
 type Project = NonNullable<PlaywrightTestConfig["projects"]>[number];
-const project = (name: string, testMatch: string, use: Project["use"]): Project => ({ name, testMatch, use: { browserName: "chromium", ...use } });
+export const project = (name: string, testMatch: string | undefined, use: Project["use"]): Project => ({ name, ...(testMatch ? { testMatch } : {}), use: { browserName: "chromium", ...use } });
 
 export default defineConfig({
-  testDir: "e2e",
-  globalSetup: "./e2e/warmup.ts",
+  testDir: here("e2e"),
+  globalSetup: here("e2e/warmup.ts"),
   snapshotPathTemplate: "{testDir}/__snapshots__/{testFileName}/{projectName}/{arg}{ext}",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: process.env.CI ? 2 : 6,
   timeout: 60_000,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "e2e/.report" }]],
-  outputDir: "e2e/.results",
+  reporter: [["list"], ["html", { open: "never", outputFolder: here("e2e/.report") }]],
+  outputDir: here("e2e/.results"),
   expect: {
     timeout: 10_000,
     toHaveScreenshot: { maxDiffPixelRatio: 0.001, animations: "disabled", caret: "hide", scale: "device" },
@@ -46,8 +49,10 @@ export default defineConfig({
   ],
   webServer: {
     command: BUILD ? `npx vite build && npx vite preview --port ${PORT} --strictPort` : `npx vite --port ${PORT} --strictPort`,
+    cwd: here("."),
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !BUILD,
+    // With E2E_PORT set, a server already on that port belongs to another checkout
+    reuseExistingServer: !BUILD && !process.env.CI && !process.env.E2E_PORT,
     timeout: 120_000,
   },
 });
