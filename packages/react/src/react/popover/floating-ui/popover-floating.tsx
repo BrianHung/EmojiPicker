@@ -23,9 +23,11 @@ import {
   type UseFloatingOptions,
 } from "@floating-ui/react";
 import { useLocale } from "react-aria/I18nProvider";
-import { createChangeDetails } from "@brianhung/emoji-picker-core";
+import { createChangeDetails, shallowEqual } from "@brianhung/emoji-picker-core";
 import type { PopoverOpenChangeReason } from "../popover-context";
 import { mergePartProps } from "../../utils/events";
+import { useLatest } from "../../utils/latest";
+import { useLayoutEffect } from "../../utils/utils";
 import { renderElement, resolve } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
@@ -55,7 +57,8 @@ import {
   type SuggestionsPopoverProps,
   type SuggestionsPopoverState,
 } from "../popover-shared";
-import { useLayoutEffect } from "../../utils/utils";
+
+type Placed = { placement: string; position: React.CSSProperties["position"]; top: number; left: number; origin: string | undefined };
 
 type Internals = PopoverInternals & {
   context: FloatingRootContext;
@@ -134,19 +137,21 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
       transformOrigin,
     ],
   });
-  const latest = React.useRef(anchor);
-  latest.current = anchor;
+  const latest = useLatest(anchor);
   const { setPositionReference, domReference } = floating.refs;
   const key = anchor instanceof Element ? anchor : anchor ? "virtual" : null;
   useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
-  }, [key, setPositionReference, domReference]);
-  const live = { placement: floating.placement, style: { position: floating.strategy, top: floating.y, left: floating.x, zIndex: 50, "--transform-origin": floating.middlewareData.transformOrigin?.origin } as React.CSSProperties };
-  // Closing (the exit animation) and a hidden reference keep the last position
-  const held = React.useRef(live);
-  if (options.open && !floating.middlewareData.transformOrigin?.detached) held.current = live;
-  const state = (open: boolean): PopoverContentState => ({ open, side: placedSide(side, held.current.placement.split("-")[0], rtl), align });
-  return { ...floating, state, style: held.current.style };
+  }, [key, setPositionReference, domReference, latest]);
+  const origin = floating.middlewareData.transformOrigin?.origin;
+  const live: Placed = { placement: floating.placement, position: floating.strategy, top: floating.y, left: floating.x, origin };
+  // Closing (the exit animation) and a hidden reference keep the last position: React's state from a previous render
+  const [held, setHeld] = React.useState(live);
+  const fresh = options.open && !floating.middlewareData.transformOrigin?.detached;
+  if (fresh && !shallowEqual(held, live)) setHeld(live);
+  const shown = fresh ? live : held;
+  const state = (open: boolean): PopoverContentState => ({ open, side: placedSide(side, shown.placement.split("-")[0], rtl), align });
+  return { ...floating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
 }
 
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);
@@ -160,8 +165,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const node = React.useRef<HTMLDivElement | null>(null);
   const status = useTransition(p.state.open, node, p.state.complete);
   const mergedRef = useMergeRefs([node, p.setFloating, ref]);
-  const latest = React.useRef({ initialFocus, finalFocus, p });
-  latest.current = { initialFocus, finalFocus, p };
+  const latest = useLatest({ initialFocus, finalFocus, p });
   const [focusTarget] = React.useState(
     () =>
       ({

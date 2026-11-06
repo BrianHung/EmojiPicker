@@ -34,15 +34,14 @@ export type {
   RootProps,
   RootState,
   SearchResultsMode,
-  SearchStateValue,
+  SearchSummary,
   SelectDetails,
   ValueChangeDetails,
   ViewportProps,
   ViewportState,
 } from "./react/root";
-export type { CategoryId, EmojiItem, EmojiSection } from "./react/state/sections";
-export type { CollapsedCategoriesChangeDetails, QueryChangeDetails } from "./react/state/picker";
-export type { EmojiGridMove, EmojiGridRow } from "./react/state/grid";
+export type { CategoryId, CollapsedCategoriesChangeDetails, EmojiGridMove, EmojiItem, EmojiSection, QueryChangeDetails, ShortcodeCompletion } from "@brianhung/emoji-picker-core";
+export type { EmojiGridRow } from "@brianhung/emoji-picker-core/grid";
 export type { ElementProps, InteractionState, Orientation, PartElementProps, PartProps, RenderProp } from "./react/utils";
 export { useEmojiCell, useEmojiGrid } from "./react/list";
 export type {
@@ -96,29 +95,11 @@ export type {
   ReactionsState,
   ReactionsValueChangeDetails,
 } from "./react/reactions";
-export type {
-  PopoverActions,
-  PopoverAlign,
-  PopoverAnchor,
-  PopoverAnchorRect,
-  PopoverContentProps,
-  PopoverContentState,
-  PopoverFinalFocus,
-  PopoverInitialFocus,
-  PopoverOpenChangeDetails,
-  PopoverOpenChangeReason,
-  PopoverPlacementProps,
-  PopoverRootProps,
-  PopoverSide,
-  PopoverTriggerProps,
-  PopoverTriggerState,
-  SuggestionsPopoverProps,
-  SuggestionsPopoverState,
-} from "./react/popover";
+export type * from "./react/popover/types";
 export { Emoji, useEmoji } from "./react/emoji";
 export type { EmojiProps } from "./react/emoji";
 export { useEmojiSuggestions, useEmojiTypeahead, useEmojiTypeaheadAdapter, useTextFieldEmojiTypeahead } from "./react/typeahead";
-export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadAdapter, EmojiTypeaheadOptions, KeyLike, ShortcodeSuggestion, TextFieldElement, TypeaheadElement } from "./react/typeahead";
+export type { EmojiSuggestionsOptions, EmojiSuggestionsState, EmojiTypeahead, EmojiTypeaheadAdapter, EmojiTypeaheadOptions, KeyLike, TextFieldElement, TypeaheadElement } from "./react/typeahead";
 
 export { findShortcodeTrigger, isComposingKey, localStorageAdapter, memoryStorageAdapter } from "@brianhung/emoji-picker-core";
 export type {

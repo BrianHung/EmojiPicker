@@ -10,7 +10,4 @@ export function useStore<S, T>(store: Source<S>, select: (snapshot: S) => T = id
   return useSyncExternalStoreWithSelector(store.subscribe, store.getSnapshot, store.getServerSnapshot ?? store.getSnapshot, select, isEqual);
 }
 
-export const shallowEqual = <T extends object>(a: T, b: T) => {
-  const keys = Object.keys(b) as (keyof T)[];
-  return keys.length === Object.keys(a).length && keys.every((k) => Object.is(a[k], b[k]));
-};
+export { shallowEqual } from "@brianhung/emoji-picker-core";

@@ -1,24 +1,29 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
-import type { Collection, Key, Node } from "@react-types/shared";
+import type { Collection, Key } from "@react-types/shared";
 import { useLocale } from "react-aria/I18nProvider";
 import { Rect, Size, useVirtualizerState, type LayoutInfo, type ReusableView, type VirtualizerState } from "react-stately/useVirtualizerState";
-import type { EmojiGridLayout, EmojiGridLayoutOptions } from "./layout";
+import { useLatest } from "../utils/latest";
 import { useLayoutEffect } from "../utils/utils";
+import type { CollectionNode } from "./collection";
+import type { EmojiGridLayout, EmojiGridLayoutOptions } from "./layout";
 
-type View = ReusableView<Node<unknown>, React.ReactNode>;
+type View = ReusableView<CollectionNode, React.ReactNode>;
 type Options = {
-  collection: Collection<Node<unknown>>;
+  collection: Collection<CollectionNode>;
   layout: EmojiGridLayout;
-  renderNode: (node: Node<unknown>) => React.ReactNode;
+  renderNode: (node: CollectionNode) => React.ReactNode;
   persistedKeys?: Set<Key> | null;
   layoutOptions: EmojiGridLayoutOptions;
   scroller: (list: HTMLElement) => HTMLElement | null;
-  onState?: (state: VirtualizerState<Node<unknown>, React.ReactNode>) => void;
+  onState?: (state: VirtualizerState<CollectionNode, React.ReactNode>) => void;
   onRendered?: () => void;
 };
 
-const BranchContext = React.createContext<{ state: VirtualizerState<Node<unknown>, React.ReactNode>; dir: "ltr" | "rtl"; horizontal: boolean } | null>(null);
+// Sticky titles overlap the scroller's edge by more than a device pixel, so their antialiased edge never shows the cells beneath
+const STICKY_OVERLAP_DEVICE_PX = 1.5;
+
+const BranchContext = React.createContext<{ state: VirtualizerState<CollectionNode, React.ReactNode>; dir: "ltr" | "rtl"; horizontal: boolean } | null>(null);
 
 function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boolean, rtl: boolean) {
   const s = scroller.getBoundingClientRect();
@@ -41,7 +46,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     [],
   );
   const dir = useLocale().direction;
-  const state = useVirtualizerState<Node<unknown>, React.ReactNode, EmojiGridLayoutOptions>({
+  const state = useVirtualizerState<CollectionNode, React.ReactNode, EmojiGridLayoutOptions>({
     allowsWindowScrolling: true,
     layout,
     collection,
@@ -59,9 +64,9 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     persistedKeys,
     layoutOptions,
   });
-  options.onState?.(state);
-  const latest = React.useRef(state);
-  latest.current = state;
+  const latest = useLatest(state);
+  const { onState, onRendered } = options;
+  useLayoutEffect(() => onState?.(state), [onState, state]);
 
   const sync = React.useCallback(
     (flush: boolean) => {
@@ -69,12 +74,12 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const el = list && scroller(list);
       if (!el || !list) return;
       const rtl = dir === "rtl";
-      // Sticky titles pin at the scroller's edge, not inside its padding, and overlap it by over a device pixel so its antialiased edge never shows the cells beneath
+      // Sticky titles pin at the scroller's edge, not inside its padding
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
       const box = el.getBoundingClientRect();
       const scale = (horizontal ? box.width / el.offsetWidth : box.height / el.offsetHeight) || 1;
       // On the scroller, so List.SectionActions, outside the list, pins with the titles
-      el.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${1.5 / ((window.devicePixelRatio || 1) * scale)}px)`);
+      el.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${STICKY_OVERLAP_DEVICE_PX / ((window.devicePixelRatio || 1) * scale)}px)`);
       const offset = visibleOffset(el, list, horizontal, rtl);
       const width = list.clientWidth;
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);
@@ -90,7 +95,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       if (flush) flushSync(apply);
       else apply();
     },
-    [scroller, scrollRef, horizontal, dir],
+    [scroller, scrollRef, horizontal, dir, latest],
   );
 
   useLayoutEffect(() => {
@@ -109,7 +114,8 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     };
   }, [sync, scroller, scrollRef]);
 
-  useLayoutEffect(() => options.onRendered?.());
+  // After every render of the views, which is when the cells on screen change
+  useLayoutEffect(() => onRendered?.());
   const size = state.contentSize;
   return (
     <div ref={content} role="presentation" style={{ position: "relative", width: horizontal ? size.width : undefined, height: size.height }}>

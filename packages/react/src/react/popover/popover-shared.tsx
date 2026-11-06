@@ -1,9 +1,11 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
+import { createChangeDetails } from "@brianhung/emoji-picker-core";
 import { PopoverContext, type PopoverOpenChangeDetails, type PopoverOpenChangeReason, type PopoverState } from "./popover-context";
 import { useEmojiLabels } from "../provider/provider";
 import { mergePartProps, type PickerHandlers } from "../utils/events";
+import { useLatest } from "../utils/latest";
 import { useChangeState } from "../utils/state";
 import { flag, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
 import { useInteraction, type Clickable } from "../utils/interaction";
@@ -129,7 +131,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
   const setOpen = React.useCallback(
     (next: boolean, reason: PopoverOpenChangeReason, event?: Event) => {
       if (next) selected.current = false;
-      setState(next, reason, event);
+      setState(next, createChangeDetails(reason, event));
     },
     [setState],
   );
@@ -148,8 +150,8 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish
 export function useTransition(open: boolean, node: React.RefObject<HTMLElement | null>, complete?: (open: boolean) => void) {
   const [status, setStatus] = React.useState<TransitionStatus | null>(open ? "open" : null);
-  const latest = React.useRef(complete);
-  latest.current = complete;
+  const latest = useLatest(complete);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a transition starts on each change of open; status and the node are read as of that change
   useLayoutEffect(() => {
     if (!open && status === null) return;
     let live = true;

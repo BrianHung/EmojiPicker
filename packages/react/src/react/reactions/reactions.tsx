@@ -1,7 +1,7 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { type ChangeDetails, nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, createChangeDetails, nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { useDrawable } from "../emoji/native-support";
 import { Glyph, useOverridden } from "../emoji/glyph";
@@ -12,12 +12,14 @@ import { useInteraction, type Clickable } from "../utils/interaction";
 import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useChangeState } from "../utils/state";
-import { BUTTONS, ReactionBar, type ReactionBarProps, type ReactionBarState } from "./reaction-bar";
 import { useLayoutEffect } from "../utils/utils";
+import { ReactionBar, type ReactionBarProps, type ReactionBarState } from "./reaction-bar";
+
+const NONE: readonly string[] = [];
 
 export type ReactionsValueChangeDetails = ChangeDetails<"item-press"> & { emoji: string; pressed: boolean };
 
-type Row = { shown: readonly string[]; pressed: ReadonlySet<string> | null; press(unified: string, event: Event): void; expanding: React.MutableRefObject<boolean> };
+type Row = { shown: readonly string[]; pressed: ReadonlySet<string> | null; press(unified: string, event: Event): void };
 const RowContext = React.createContext<Row | null>(null);
 
 function useRow(part: string) {
@@ -48,35 +50,20 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       const record = store.get(unified);
       return record != null && drawable(record, unified);
     });
-  React.useEffect(() => request(shown));
+  const probed = shown.join(" ");
+  React.useEffect(() => request(probed ? probed.split(" ") : NONE), [request, probed]);
   // Toggle buttons once the row has a value, as in Base UI's ToggleGroup
-  const tracked = defaultValue !== undefined || onValueChange !== undefined ? (defaultValue ?? []) : undefined;
-  const [value, setValue] = useChangeState<readonly string[] | undefined, "item-press", { emoji: string; pressed: boolean }>(valueProp, tracked, onValueChange as never);
-  const pressed = React.useMemo(() => (value ? new Set(value.map(withoutTone)) : null), [value]);
+  const toggles = defaultValue !== undefined || onValueChange !== undefined || valueProp !== undefined;
+  const [value, setValue] = useChangeState(valueProp, defaultValue ?? NONE, onValueChange);
+  const pressed = React.useMemo(() => (toggles ? new Set(value.map(withoutTone)) : null), [toggles, value]);
   const press = (unified: string, event: Event) => {
-    if (!value || !pressed) return void picker.pick(unified, event);
+    if (!pressed) return void picker.pick(unified, event);
     const on = !pressed.has(withoutTone(unified));
-    const details = setValue(on ? [...value, unified] : value.filter((v) => withoutTone(v) !== withoutTone(unified)), "item-press", event, { emoji: unified, pressed: on });
+    const next = on ? [...value, unified] : value.filter((v) => withoutTone(v) !== withoutTone(unified));
+    const details = setValue(next, Object.assign(createChangeDetails("item-press" as const, event), { emoji: unified, pressed: on }));
     if (on && !details?.isCanceled) picker.pick(unified, event);
   };
-  const expanding = React.useRef(false);
-  React.useEffect(() => {
-    if (!expanding.current || state?.open) return;
-    expanding.current = false;
-    const search = picker.searchInput.current;
-    if (search) search.focus({ preventScroll: true });
-    else picker.list.current?.focus();
-  }, [state?.open]);
-  const wasOpen = React.useRef(state?.open);
-  React.useEffect(() => {
-    const reopened = state?.open && wasOpen.current === false;
-    wasOpen.current = state?.open;
-    const el = row.current;
-    if (!reopened || !el) return;
-    const active = document.activeElement;
-    if (active && active !== document.body && !state?.panel.current?.contains(active)) return;
-    el.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
-  }, [state?.open]);
+  const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, row, state?.row), [ref, state?.row]);
   if (!state?.open) return null;
   const content =
     typeof children === "function" || children === undefined ? (
@@ -88,8 +75,8 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       children
     );
   return (
-    <RowContext.Provider value={{ shown, pressed, press, expanding }}>
-      <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
+    <RowContext.Provider value={{ shown, pressed, press }}>
+      <ReactionBar {...props} ref={refs} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
     </RowContext.Provider>
@@ -142,13 +129,8 @@ export type ReactionsExpandProps = PartElementProps<ReactionsExpandState, HTMLBu
 const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
-  const { expanding } = useRow("Expand");
-  const { onClick, ...own } = mergePartProps<Clickable>(props, {
-    onClick: () => {
-      expanding.current = true;
-      state?.expand?.();
-    },
-  });
+  useRow("Expand");
+  const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => state?.expand?.(e.nativeEvent) });
   const interaction = useInteraction({ onClick });
   if (!state?.expand) return null;
   return renderElement(

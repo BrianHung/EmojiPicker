@@ -1,20 +1,20 @@
 import * as React from "react";
-import { createChangeDetails, type ChangeDetails } from "@brianhung/emoji-picker-core";
+import type { ChangeDetails } from "@brianhung/emoji-picker-core";
 import { useControlledState } from "react-stately/useControlledState";
+import { useLatest } from "./latest";
 
-export function useChangeState<T, Reason extends string, Extra extends object = object>(value: T | undefined, defaultValue: T, onChange: ((value: T, details: ChangeDetails<Reason> & Extra) => void) | undefined) {
-  const [current, setCurrent] = useControlledState<T>(value as Exclude<T, undefined>, defaultValue as Exclude<T, undefined>);
-  const latest = React.useRef({ current, onChange });
-  latest.current = { current, onChange };
+// React Stately's controlled state with Base UI's onChange(value, details): the owner hears first and can cancel()
+export function useChangeState<T, D extends ChangeDetails>(value: Exclude<T, undefined> | undefined, defaultValue: Exclude<T, undefined>, onChange: ((value: T, details: D) => void) | undefined) {
+  const [current, setCurrent] = useControlledState<T>(value, defaultValue);
+  const latest = useLatest({ current, onChange });
   const set = React.useCallback(
-    (next: T, reason: Reason, event?: Event, extra?: Extra) => {
+    (next: T, details: D): D | undefined => {
       if (Object.is(next, latest.current.current)) return undefined;
-      const details = Object.assign(createChangeDetails(reason, event), extra) as ChangeDetails<Reason> & Extra;
       latest.current.onChange?.(next, details);
       if (!details.isCanceled) setCurrent(next);
       return details;
     },
-    [setCurrent],
+    [latest, setCurrent],
   );
   return [current, set] as const;
 }

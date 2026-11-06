@@ -1,10 +1,10 @@
-import type { Key, Node } from "@react-types/shared";
+import type { Key } from "@react-types/shared";
 import { Layout, LayoutInfo, Rect, Size } from "react-stately/useVirtualizerState";
-import { createEmojiGrid, type EmojiGrid } from "../state/grid";
-import type { EmojiSection } from "../state/sections";
-import { layoutStrip, placeCell, type StripLayout } from "./strip-layout";
+import { shallowEqual, type EmojiSection, type SearchResultsMode } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, layoutStrip, placeCell, type EmojiGrid, type StripLayout } from "@brianhung/emoji-picker-core/grid";
+import type { CollectionNode, CollectionValue } from "./collection";
 
-export type GridMetrics = {
+export interface GridMetrics {
   cellWidth: number;
   cellHeight: number;
   headerHeight: number;
@@ -12,26 +12,29 @@ export type GridMetrics = {
   paddingEnd: number;
   sectionGap: number;
   sectionMinWidth: number;
-};
+}
 
-export type EmojiGridLayoutOptions = {
+// The CSS defaults Root sets (--ep-cell, --ep-header, --ep-pad), until the probe measures the real ones
+export const DEFAULT_METRICS: GridMetrics = { cellWidth: 40, cellHeight: 40, headerHeight: 40, padding: 10, paddingEnd: 10, sectionGap: 10, sectionMinWidth: 0 };
+
+export interface EmojiGridLayoutOptions {
   metrics: GridMetrics;
   columns?: number;
-  results?: "ranked" | "grouped";
+  results?: SearchResultsMode;
   rows?: number;
-};
+}
 
 type SectionBox = { key: Key; info: LayoutInfo; header: LayoutInfo | null; rows: number[] };
 type Add = (info: LayoutInfo | null | undefined) => void;
 
-const same = (a: GridMetrics, b: GridMetrics) => (Object.keys(a) as (keyof GridMetrics)[]).every((k) => a[k] === b[k]);
+const isSection = (value: CollectionValue): value is EmojiSection => "items" in value;
 
 const X = { horizontal: true, scroll: "scrollLeft", client: "clientWidth", by: "left", start: "x", end: "maxX", size: "width" } as const;
 const Y = { horizontal: false, scroll: "scrollTop", client: "clientHeight", by: "top", start: "y", end: "maxY", size: "height" } as const;
 
-export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLayoutOptions> {
+export abstract class EmojiGridLayout extends Layout<CollectionNode, EmojiGridLayoutOptions> {
   abstract readonly axis: typeof X | typeof Y;
-  metrics: GridMetrics = { cellWidth: 40, cellHeight: 40, headerHeight: 40, padding: 10, paddingEnd: 10, sectionGap: 10, sectionMinWidth: 0 };
+  metrics: GridMetrics = DEFAULT_METRICS;
   grid: EmojiGrid<EmojiSection> = createEmojiGrid([], { columns: 1, rowHeight: 0 });
   strip: StripLayout | null = null;
   sections: SectionBox[] = [];
@@ -48,7 +51,7 @@ export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLay
   abstract activeSection(rect: Rect): Key | null;
 
   shouldInvalidateLayoutOptions(next: EmojiGridLayoutOptions, prev: EmojiGridLayoutOptions) {
-    return next.columns !== prev.columns || next.results !== prev.results || next.rows !== prev.rows || !same(next.metrics, prev.metrics);
+    return next.columns !== prev.columns || next.results !== prev.results || next.rows !== prev.rows || !shallowEqual(next.metrics, prev.metrics);
   }
 
   update({ layoutOptions }: { layoutOptions?: EmojiGridLayoutOptions }) {
@@ -58,7 +61,7 @@ export abstract class EmojiGridLayout extends Layout<Node<unknown>, EmojiGridLay
     this.cellInfos = new Map();
     this.sections = [];
     const sections: EmojiSection[] = [];
-    for (const n of this.virtualizer!.collection) if (n.type === "section") sections.push(n.value as EmojiSection);
+    for (const n of this.virtualizer!.collection) if (n.value && isSection(n.value)) sections.push(n.value);
     this.build(sections, options);
   }
 

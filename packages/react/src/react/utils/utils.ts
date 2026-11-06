@@ -51,5 +51,10 @@ export function scrollParent(el: Element | null | undefined): HTMLElement | null
   return parent;
 }
 
+// An element given directly or through a ref
+export const isRefObject = <T>(value: T | React.RefObject<T> | null | undefined): value is React.RefObject<T> => typeof value === "object" && value !== null && "current" in value && !(value instanceof Element);
+
+export const elementOf = <T extends Element>(value: T | React.RefObject<T | null> | null | undefined): T | null => (isRefObject(value) ? value.current : (value ?? null));
+
 // React 18 warns when useLayoutEffect renders on the server
 export const useLayoutEffect = typeof document === "undefined" ? React.useEffect : React.useLayoutEffect;

@@ -1,11 +1,21 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
-import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsMachine, type KeyLike, type ShortcodeCompletion, type SuggestionsOptions, type SuggestionsSnapshot } from "@brianhung/emoji-picker-core";
+import {
+  createEmojiSuggestions,
+  type EmojiSelection,
+  type EmojiSuggestionsMachine,
+  type EmojiSuggestionsSnapshot,
+  type KeyLike,
+  type ShortcodeCompletion,
+  type SuggestionsListProps,
+  type SuggestionsOptionProps,
+  type SuggestionsOptions,
+} from "@brianhung/emoji-picker-core";
 import { useEmojiStatus } from "../provider/hooks";
-import { useStore } from "../utils/store";
 import { useEmojiContext } from "../provider/provider";
-
-export type ShortcodeSuggestion = ShortcodeCompletion;
+import { useStableCallback } from "../utils/latest";
+import { useStore } from "../utils/store";
+import { useLayoutEffect } from "../utils/utils";
 
 export type { KeyLike };
 
@@ -13,29 +23,34 @@ export type EmojiSuggestionsOptions = Omit<SuggestionsOptions, "id" | "query"> &
   query: string;
 };
 
-export type EmojiSuggestionsState = SuggestionsSnapshot & {
+type OptionHandlers = {
+  onMouseDown: (event: React.MouseEvent) => void;
+  onPointerMove: (event: React.PointerEvent) => void;
+};
+
+export type EmojiSuggestionsState = EmojiSuggestionsSnapshot & {
   setHighlightedIndex: (index: number) => void;
   choose(index?: number): void;
   insert(selection: EmojiSelection): void;
   dismiss(): void;
-  textFor(suggestion: ShortcodeSuggestion, insert?: "emoji" | "shortcode"): string;
+  textFor(suggestion: ShortcodeCompletion, insert?: "emoji" | "shortcode"): string;
   onKeyDown(event: KeyLike): boolean;
-  getListProps<P extends object = object>(props?: P): P & ReturnType<EmojiSuggestionsMachine["getListProps"]>;
-  getOptionProps<P extends object = object>(
-    index: number,
-    props?: P,
-  ): P &
-    ReturnType<EmojiSuggestionsMachine["getOptionProps"]> & {
-      onMouseDown: (event: React.MouseEvent) => void;
-      onPointerMove: (event: React.PointerEvent) => void;
-    };
+  getListProps<P extends object = object>(props?: P): P & SuggestionsListProps;
+  getOptionProps<P extends object = object>(index: number, props?: P): P & SuggestionsOptionProps & OptionHandlers;
 };
 
-export function useSuggestionsMachine(options: EmojiSuggestionsOptions): EmojiSuggestionsMachine {
+// One machine for the component's life; values sync in a layout effect keyed on them, and callbacks are read at call time
+export function useSuggestionsMachine({ query, resetKey, limit, matchBy, order, columns, onChoose, onSelect, onDismiss }: EmojiSuggestionsOptions): EmojiSuggestionsMachine {
   const { store } = useEmojiContext();
   const id = React.useId();
-  const [machine] = React.useState(() => createEmojiSuggestions(store, { ...options, id }));
-  machine.setOptions({ ...options, id });
+  const choose = useStableCallback((suggestion: ShortcodeCompletion) => onChoose?.(suggestion));
+  const select = useStableCallback((selection: EmojiSelection) => onSelect?.(selection));
+  const dismiss = useStableCallback(() => onDismiss?.());
+  const [machine] = React.useState(() => createEmojiSuggestions(store, { query, resetKey, limit, matchBy, order, columns, id, onChoose: choose, onSelect: select, onDismiss: dismiss }));
+  useLayoutEffect(
+    () => machine.setOptions({ query, resetKey, limit, matchBy, order, columns, id, onChoose: choose, onSelect: select, onDismiss: dismiss }),
+    [machine, query, resetKey, limit, matchBy, order, columns, id, choose, select, dismiss],
+  );
   return machine;
 }
 
@@ -52,8 +67,8 @@ export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSugg
     dismiss: machine.dismiss,
     textFor: machine.textFor,
     onKeyDown: machine.keydown,
-    getListProps: (props = {} as never) => mergeProps(props, machine.getListProps()) as never,
-    getOptionProps: (index, props = {} as never) =>
+    getListProps: <P extends object = object>(props?: P) => mergeProps(props, machine.getListProps()) as P & SuggestionsListProps,
+    getOptionProps: <P extends object = object>(index: number, props?: P) =>
       mergeProps(props, machine.getOptionProps(index), {
         // mousedown, not click: keeps focus and the caret in the editor
         onMouseDown: (event: React.MouseEvent) => {
@@ -61,6 +76,6 @@ export function useSuggestionsStore(machine: EmojiSuggestionsMachine): EmojiSugg
           machine.choose(index);
         },
         onPointerMove: () => machine.highlight(index),
-      }) as never,
+      }) as P & SuggestionsOptionProps & OptionHandlers,
   };
 }

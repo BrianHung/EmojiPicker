@@ -2,8 +2,9 @@ import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { PickerContextValue } from "../root/context";
 import { SLOTS } from "../utils/slots";
-import { cellOf, keyOf, type MarksStore } from "./cell";
-import type { CellElement, Highlight } from "./grid";
+import type { Highlight } from "../grid/use-highlight";
+import type { CellElement } from "../grid/types";
+import { cellOf, keyOf } from "./use-cell";
 
 // Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
 const pointer = { x: NaN, y: NaN, moved: false, list: null as Element | null, within: false };
@@ -27,11 +28,12 @@ function trackPointer() {
 }
 
 const LONG_PRESS_MS = 500;
+// A press that travels farther is a scroll, not a long press
+const LONG_PRESS_SLOP_PX = 8;
 
 type PointerOptions = {
   picker: PickerContextValue;
   highlight: Highlight;
-  marks: MarksStore;
   listRef: React.RefObject<HTMLElement | null>;
   virtual: boolean;
   keyed: React.MutableRefObject<boolean>;
@@ -40,7 +42,7 @@ type PointerOptions = {
   pick(key: Key): void;
 };
 
-export function usePointerHighlight({ picker: { state: core, ownsFocus }, highlight: { lastKey, setHighlight }, marks, listRef, virtual, keyed, openVariations, cellElement, pick }: PointerOptions): React.HTMLAttributes<HTMLElement> {
+export function usePointerHighlight({ picker: { state: core, ownsFocus }, highlight: { lastKey, setHighlight }, listRef, virtual, keyed, openVariations, cellElement, pick }: PointerOptions): React.HTMLAttributes<HTMLElement> {
   React.useEffect(trackPointer, []);
   const hover = (key: Key | null) => core.hover(key == null ? null : String(key));
   const follow = (key: Key, event: Event) => {
@@ -51,13 +53,13 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
       if (keyed.current && !pointer.within) return;
       keyed.current = false;
       setHighlight(key, { reason: "pointer", event });
-      marks.dispatch({ stop: key });
+      core.setTabStop(String(key));
     } else if (virtual && ownsFocus(active)) setHighlight(key, { reason: "pointer", event });
   };
   // Not useLongPress: its press focuses the target and stops the click, and cells delegate from the list; it also has no move threshold
   const longPress = React.useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null);
   const endPress = () => {
-    marks.dispatch({ pressed: null });
+    core.press(null);
     if (longPress.current) clearTimeout(longPress.current.timer);
   };
   return {
@@ -65,7 +67,7 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
       const key = keyOf(e);
       if (key == null || e.button !== 0) return;
       endPress();
-      marks.dispatch({ pressed: key });
+      core.press(key);
       longPress.current = { x: e.clientX, y: e.clientY, fired: false, timer: window.setTimeout(() => longPress.current && (longPress.current.fired = openVariations(key)), LONG_PRESS_MS) };
       e.preventDefault();
       if (e.pointerType === "touch") return;
@@ -98,7 +100,7 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
     },
     onPointerMove(e) {
       const press = longPress.current;
-      if (press && !press.fired && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 8) endPress();
+      if (press && !press.fired && Math.hypot(e.clientX - press.x, e.clientY - press.y) > LONG_PRESS_SLOP_PX) endPress();
       const key = keyOf(e);
       if (key != null) follow(key, e.nativeEvent);
     },

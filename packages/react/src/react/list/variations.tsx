@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type EmojiRecord, nameWithTone, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { type EmojiRecord, nameWithTone, SKIN_TONE_VALUES, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { usePicker, type Overlay } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
@@ -28,7 +28,6 @@ export type VariationsOptionProps = PartElementProps<VariationsOptionState, HTML
 
 const ROW: React.CSSProperties = { zIndex: 4, display: "flex", background: "var(--emoji-picker-background, Canvas)", borderRadius: "var(--emoji-picker-radius, 8px)", boxShadow: "var(--emoji-picker-shadow, 0 4px 12px rgb(0 0 0 / 0.15))" };
 const OPTION: React.CSSProperties = { position: "relative", display: "flex", alignItems: "center", justifyContent: "center", width: "var(--ep-cell)", height: "var(--ep-cell)", overflow: "hidden", cursor: "default" };
-const TONES = [0, 1, 2, 3, 4, 5] as const;
 
 type Row = { record: EmojiRecord; current: SkinToneValue; pick(unified: string, event?: Event): void };
 const RowContext = React.createContext<Row | null>(null);
@@ -81,7 +80,7 @@ const VariationsRow = React.forwardRef<HTMLDivElement, VariationsProps & { overl
           onKeyDown: keys,
           "data-slot": SLOTS.variations,
           style: (s: VariationsState) => ({ ...ROW, ...overlay.style, ...resolve(style, s) }),
-          children: TONES.slice(0, record.tones.length + 1).map((t) => (
+          children: SKIN_TONE_VALUES.slice(0, record.tones.length + 1).map((t) => (
             <ToneContext.Provider key={t} value={t}>
               {children ? children(t) : <VariationsOption />}
             </ToneContext.Provider>
@@ -126,7 +125,8 @@ const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>
 
 const VariationsRoot = React.forwardRef<HTMLDivElement, VariationsProps>(function Variations(props, ref) {
   const { variations } = usePicker("EmojiPicker.List.Variations");
-  useLayoutEffect(variations.register, [variations.register]);
+  const { register } = variations;
+  useLayoutEffect(() => register(), [register]);
   return <VariationsPopup {...props} ref={ref} />;
 });
 

@@ -1,6 +1,7 @@
 import * as React from "react";
-import { createSearch, type EmojiSearchState, type EmojiStore, type EmojiStoreStatus, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiSearchState, type EmojiStore, type EmojiStoreStatus, type SkinToneValue, subscribeAll } from "@brianhung/emoji-picker-core";
 import { useStore } from "../utils/store";
+import { useLayoutEffect } from "../utils/utils";
 import { useEmojiContext, useStoreSnapshot } from "./provider";
 
 export type FrequentEmoji = {
@@ -12,13 +13,7 @@ export type FrequentEmoji = {
 
 export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): FrequentEmoji {
   const { store } = useEmojiContext();
-  const subscribe = React.useCallback(
-    (listener: () => void) => {
-      const off = [store.frequents.subscribe(listener), store.subscribe(listener)];
-      return () => off.forEach((unsubscribe) => unsubscribe());
-    },
-    [store],
-  );
+  const subscribe = React.useMemo(() => subscribeAll(store.frequents.subscribe, store.subscribe), [store]);
   const items = useStore({ subscribe, getSnapshot: () => store.frequent(limit) });
   const { pick, remove, clear } = store.frequents;
   return React.useMemo(() => ({ items, pick, remove, clear }), [items, pick, remove, clear]);
@@ -41,6 +36,7 @@ export function useEmojiStatus(): EmojiStoreStatus {
 export function useEmojiSearch(query: string, { limit = 50 }: { limit?: number } = {}): EmojiSearchState {
   const { store } = useEmojiContext();
   useEmojiStatus();
-  const [search] = React.useState(() => createSearch(store));
-  return useStore({ subscribe: search.subscribe, getSnapshot: () => search.run(query, limit) });
+  const [search] = React.useState(() => createSearch(store, { query, limit }));
+  useLayoutEffect(() => search.setQuery(query, limit), [search, query, limit]);
+  return useStore(search);
 }
