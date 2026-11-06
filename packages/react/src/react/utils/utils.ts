@@ -1,3 +1,5 @@
+import * as React from "react";
+
 // Only an option the field points at is virtually focused: the field itself keeps DOM focus and gets no synthetic blur
 function virtuallyFocused(doc: Document): Element | null {
   const id = doc.activeElement?.getAttribute("aria-activedescendant");
@@ -48,3 +50,6 @@ export function scrollParent(el: Element | null | undefined): HTMLElement | null
   while (parent && !/auto|scroll/.test(getComputedStyle(parent).overflowY)) parent = parent.parentElement;
   return parent;
 }
+
+// React 18 warns when useLayoutEffect renders on the server
+export const useLayoutEffect = typeof document === "undefined" ? React.useEffect : React.useLayoutEffect;

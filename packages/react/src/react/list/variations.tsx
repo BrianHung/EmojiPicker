@@ -12,6 +12,7 @@ import { hasModifier, moveFocus, usePickerKeyDown } from "../utils/keyboard";
 import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
+import { useLayoutEffect } from "../utils/utils";
 
 export type VariationsState = { emoji: EmojiRecord; tone: SkinToneValue };
 
@@ -125,7 +126,7 @@ const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>
 
 const VariationsRoot = React.forwardRef<HTMLDivElement, VariationsProps>(function Variations(props, ref) {
   const { variations } = usePicker("EmojiPicker.List.Variations");
-  React.useLayoutEffect(variations.register, [variations.register]);
+  useLayoutEffect(variations.register, [variations.register]);
   return <VariationsPopup {...props} ref={ref} />;
 });
 

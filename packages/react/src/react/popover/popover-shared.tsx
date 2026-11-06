@@ -7,7 +7,7 @@ import { useChangeState } from "../utils/state";
 import { flag, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
 import { useInteraction } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
-import { TABBABLE } from "../utils/utils";
+import { TABBABLE, useLayoutEffect } from "../utils/utils";
 
 export type PopoverSide = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";
 export type PopoverAlign = "start" | "center" | "end";
@@ -149,7 +149,7 @@ export function useTransition(open: boolean, node: React.RefObject<HTMLElement |
   const [status, setStatus] = React.useState<TransitionStatus | null>(open ? "open" : null);
   const latest = React.useRef(complete);
   latest.current = complete;
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (!open && status === null) return;
     let live = true;
     const settle = (next: TransitionStatus | null) =>

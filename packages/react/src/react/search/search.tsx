@@ -10,6 +10,7 @@ import { flag, racParts, renderElement, resolve, type InteractionState, type Par
 import { useInteraction } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
+import { useLayoutEffect } from "../utils/utils";
 
 export type SearchState = { empty: boolean };
 
@@ -62,7 +63,7 @@ const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.v
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels } = picker;
-  React.useLayoutEffect(picker.state.registerInput, [picker.state]);
+  useLayoutEffect(picker.state.registerInput, [picker.state]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
   const inField = React.useContext(FieldContext);

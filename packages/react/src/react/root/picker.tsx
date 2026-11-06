@@ -31,6 +31,7 @@ import { flag, renderElement, resolve, type Orientation, type PartElementProps, 
 import { useClippedScrollGuard } from "../utils/scroll-guard";
 import { shallowEqual, useStore } from "../utils/store";
 import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
+import { useLayoutEffect } from "../utils/utils";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 
@@ -122,7 +123,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
   const options: PickerStateOptions<React.ReactNode> = { ...props, labels, emojiVersion };
   const [state] = React.useState(() => createPickerState(store, options));
   state.setOptions(options);
-  React.useLayoutEffect(() => state.setOptions(options, { notify: true }));
+  useLayoutEffect(() => state.setOptions(options, { notify: true }));
   const view = useStore(
     state,
     ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }) => ({ query, searching, results, pending, categories, categorySections, sections, collapsed, focus, reactions }),
@@ -307,7 +308,7 @@ function useKeyboardTarget(target: () => HTMLElement | null, state: PickerState<
     };
   }, [target, state, list]);
   useStore(state, (s) => (target() ? s.highlighted : null));
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const el = target();
     const ids = el && list.current?.ids();
     if (!el || !ids) return;

@@ -7,7 +7,7 @@ import { usePicker } from "../root/context";
 import { mergePartProps } from "../utils/events";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
-import { scrollParent } from "../utils/utils";
+import { scrollParent, useLayoutEffect } from "../utils/utils";
 import type { EmojiGridState } from "./cell";
 import { useGridController, useGridSections, type GridGeometry } from "./grid";
 import { EmojiGridNavigation } from "./navigation";
@@ -90,7 +90,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
     if (!searching && shown[0]) picker.state.setActiveSection(shown[0].section.id);
     controller.flushJump();
   };
-  React.useLayoutEffect(() => sync.current());
+  useLayoutEffect(() => sync.current());
   // The app's virtualizer owns the scroller
   React.useEffect(() => {
     const el = windowOf(listRef.current)?.el;
