@@ -8,7 +8,7 @@ Prebuilt [Emojibase](https://emojibase.dev) datasets, one per locale and shortco
 npm i @brianhung/emoji-picker-data
 ```
 
-Only needed to self-host or bundle; `localeData` loads from jsDelivr otherwise.
+Only needed to self-host or bundle: core loads `en/iamcal.json` from jsDelivr by default, and `localeData` the others.
 
 ## Usage
 
@@ -31,7 +31,7 @@ import { localeData } from "@brianhung/emoji-picker-core";
 | `iamcal`, `cldr`, `cldr-native`, `emojibase`, `emojibase-legacy`, `github`, `joypixels` | Every locale; English-only sets stay English |
 | `emojibase-native` | Where Emojibase provides it |
 
-Files use the format of core's `en.json`, built from `emojibase-data` with core's `build-data` on pack.
+Files are core's `Dataset` format, built from `emojibase-data` with core's `build-data` on pack.
 
 ## License
 
