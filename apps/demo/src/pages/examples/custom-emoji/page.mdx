@@ -9,7 +9,7 @@ import { BufoPicker, LoadPack } from "./demo";
 
 ## Usage
 
-Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes` and `tags`, and a `group` that becomes its own section.
+Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes`, `tags`, `width`, `height`, `animated`, `stillUrl`, and `base` (a unified code whose name and tags also find it), and a `group` that becomes its own section.
 
 ```tsx title="app.tsx"
 const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
@@ -23,9 +23,9 @@ const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
 
 ## Host a pack
 
-A pack is a `pack.json` served as a static file and fetched at runtime, so it stays out of the JS bundle. A pack served from your own origin needs no CORS headers. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
+A pack is a `pack.json` served as a static file and fetched at runtime. A pack served from your own origin needs no CORS headers. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
 
-`customEmojis` also takes the array itself, or a loader that fetches through your own API, so the browser never requests another origin. Images load as `<img>` elements, which need no CORS. Under a strict Content Security Policy, self-host the images and set each emoji's `imageUrl` to your copy.
+`customEmojis` also takes a loader, `({ signal }) => Promise<CustomEmoji[]>`, such as one that fetches through your own API. Images load as `<img>` elements and need no CORS. Under a strict Content Security Policy, self-host the images and set each emoji's `imageUrl` to your copy.
 
 ```json title="pack.json"
 [
@@ -53,6 +53,6 @@ Enter a `pack.json` URL to load it. A pack on another origin must be served with
 
 - Fetch the pack by URL after the page loads, and keep it out of the bundle.
 - Ship small thumbnails (64px WebP is about 2 KB each).
-- The grid is virtualized, so only visible cells request images.
+- Only visible cells request images.
 - Animated GIFs play in the grid. Mark them `animated: true`, and add a `stillUrl` to show under reduced motion.
-- Give each emoji a readable `name` (“party parrot”, not `partyParrot`) so every word is searchable.
+- Give each emoji a readable `name` (“party parrot”, not `partyParrot`); search matches each word.

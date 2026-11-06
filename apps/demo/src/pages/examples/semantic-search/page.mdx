@@ -52,7 +52,7 @@ function rank({ ids, dims, vectors, scales }, query, limit) {
 }
 ```
 
-```tsx title="on-device.ts"
+```tsx title="on-device.tsx"
 const worker = new Worker(new URL("./on-device.worker.ts", import.meta.url), { type: "module" });
 
 const onDeviceSearch: EmojiSearch = (query, { limit }) =>

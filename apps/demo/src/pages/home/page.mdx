@@ -21,7 +21,7 @@ The packages are in prerelease (`1.0.0-alpha`). The API can change between alpha
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-Adds `components/ui/emoji-picker.tsx` and the emoji font stack to your CSS. For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
+Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS. For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
 
 </TabPanel>
 
@@ -131,7 +131,7 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 ### Popover
 
-`EmojiPopover` comes from `/floating-ui` or `/react-aria`; an app bundles only the one it imports. The React Aria one is modal.
+`EmojiPopover` comes from `/floating-ui` or `/react-aria`. The React Aria one is modal by default.
 
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" adapters />
 
@@ -143,13 +143,13 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 ### Provider {#provider}
 
-Parts and hooks use the nearest `EmojiProvider`; without one they share a store, so frequently used emoji and the skin tone agree across the page. Uncontrolled frequents and skin tone persist to `localStorage`; pass `frequents` and `skinTone` with their `onChange` to keep them elsewhere.
+Parts and hooks use the nearest `EmojiProvider`; without one they share one store. Uncontrolled frequents and skin tone persist to `localStorage`; pass `frequents` with `onFrequentsChange` and `skinTone` with `onSkinToneChange` to keep them elsewhere.
 
 <Code title="app/providers.tsx" code={providers} />
 
 ### Data and localization {#data}
 
-`data` defaults to the English dataset of `@brianhung/emoji-picker-data` on jsDelivr, and takes a URL, a loader, or the dataset; `filter` removes emoji. `localeData(locale, { shortcodes })` is a dataset's URL, and `"cldr"` gives shortcodes in the locale's language. `labels` overrides the strings.
+`data` defaults to the English dataset of `@brianhung/emoji-picker-data` on jsDelivr, and takes a URL, a loader, or the dataset; `filter` removes emoji. `localeData(locale, { shortcodes, baseUrl })` is a dataset's URL, and `"cldr"` gives shortcodes in the locale's language. `labels` overrides the strings.
 
 <Code title="app/providers.tsx" code={localization} />
 
@@ -191,7 +191,7 @@ Native emoji draw in `--emoji-font-family`. Images come from `imageUrl`: Twemoji
 
 ### Custom popover {#custom-popover}
 
-A picker works in any popover: close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` as the popover's initial focus.
+In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` as the popover's initial focus.
 
 ```tsx title="emoji-button.tsx"
 <Popover open={open} onOpenChange={setOpen}>
@@ -291,6 +291,12 @@ A disclosure button for a toolbar of `aria-pressed` tones. Focus leaving closes 
 
 Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, and `.Trigger`, `.Options`, `.Option`, `.Glyph` with `.Props`.
 
+### Preview {#api-preview}
+
+The highlighted emoji and its name, or `labels.previewCaption`. `children` and `className` take `{ emoji }`, the highlighted `EmojiRecord` or `null`. `data-slot="emoji-picker-preview"`.
+
+Types: `EmojiPicker.Preview.Props`, `.State`.
+
 ### Reactions and Panel {#api-tapback}
 
 A toolbar of reactions, toggle buttons when the row has a value. `onSelect`'s `details.collapse()` shows the row again.
@@ -299,7 +305,7 @@ A toolbar of reactions, toggle buttons when the row has a value. `onSelect`'s `d
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.reactionsAttributes} />
 
-Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.Item`, `.Expand`, `EmojiPicker.Panel.Props`.
+Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.Items`, `.Item`, `.Expand`, `EmojiPicker.Panel.Props`.
 
 ### EmojiPopover {#api-popover}
 

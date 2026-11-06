@@ -12,7 +12,7 @@ export const rootAttributes: Rows = [
 export const searchAttributes: Rows = [
   ["data-slot", "emoji-picker-search, emoji-picker-search-field, emoji-picker-search-input, emoji-picker-search-clear, emoji-picker-search-status: The row, the field, the input, the clear button, and the result-count status."],
   ["data-empty", "Search and Search.Field with no query."],
-  ["data-focused", "Search.Field while the input holds focus."],
+  ["data-focused", "Search.Input while it holds focus."],
   interaction,
 ];
 
@@ -49,7 +49,7 @@ export const skinToneAttributes: Rows = [
 ];
 
 export const reactionsAttributes: Rows = [
-  ["data-slot", "emoji-picker-reactions, emoji-picker-reactions-expand, emoji-picker-panel: The row, its expand button, and the panel."],
+  ["data-slot", "emoji-picker-reactions, emoji-picker-emoji, emoji-picker-reactions-expand, emoji-picker-panel: The row, each item, its expand button, and the panel."],
   ["data-selected", "A pressed item when the row has a value."],
   ["data-overridden · data-unified", "Items whose imageUrl replaces the glyph, and each item's unified code."],
   interaction,

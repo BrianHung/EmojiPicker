@@ -10,7 +10,7 @@ import tanstackList from "./tanstack-list.tsx?raw";
 
 ## How it works
 
-`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiGrid` inside `EmojiPicker.Root` in place of `List`. It returns `rows`, each a section title or a row of emoji with its `size`, and prop getters for the grid, titles, and cells. Keyboard, highlight, hover, long press, and skin-tone variations work as in `List`. Pass `scrollToIndex` so the arrow keys scroll your virtualizer.
+`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `EmojiPicker.Root` in place of `List`. It returns `rows`, each a section title or a row of emoji with its `size`, `getGridProps`, `getHeaderProps`, and `variations`, the skin-tone popup to render in the scroll container. `useEmojiCell(grid.state, item)` returns a cell's `cellProps`. Keyboard, highlight, hover, long press, and skin-tone variations work as in `List`. Pass `scrollToIndex` so the arrow keys scroll your virtualizer.
 
 A bundle that does not use `List` leaves out React Aria's `Virtualizer` when the bundler drops unused properties of the `EmojiPicker` namespace, as Vite does. With esbuild, import flat exports such as `EmojiPickerRoot` instead.
 

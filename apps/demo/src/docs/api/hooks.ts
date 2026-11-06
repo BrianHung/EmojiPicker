@@ -2,7 +2,7 @@ export const hooks: [string, string][] = [
   ["useTextFieldEmojiTypeahead(ref, options)", "Shortcode typeahead for an <input> or <textarea>. Returns an EmojiTypeahead: query, open, anchor, suggestions, dismiss, and onKeyDown."],
   [
     "useEmojiTypeahead({ query, anchor, replace }, options, element)",
-    "Shortcode typeahead for any editor. findShortcodeTrigger(textBeforeCaret) finds the query. element is the editor's element, a ref to it, or a function that returns it.",
+    "Shortcode typeahead for any editor. findShortcodeTrigger(textBeforeCaret) finds the query; isComposingKey(event) is true during IME composition. element is the editor's element, a ref to it, or a function that returns it.",
   ],
   ["useEmojiTypeahead(suggestions, { anchor })", "The same, around core's createEmojiSuggestions(store, options) for an editor plugin that owns the keys, such as ProseMirror."],
   ["useEmojiSearch(query, { limit })", "{ results, pending } from the provider's search, outside a picker."],
@@ -17,4 +17,6 @@ export const hooks: [string, string][] = [
   ["useSearchState()", "Inside Root: the query and the result count."],
   ["useCategoryNavigation()", "Inside Root: the category tabs."],
   ["useCollapsedCategories()", "Inside Root: the collapsed sections."],
+  ["useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "Inside Root, in place of List: rows, stickyIndexes, getGridProps, getHeaderProps, state, and variations for your own virtualizer."],
+  ["useEmojiCell(grid.state, item)", "{ cellProps, state } for one cell of useEmojiGrid."],
 ];
