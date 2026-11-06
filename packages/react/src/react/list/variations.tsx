@@ -1,5 +1,6 @@
 import * as React from "react";
-import { type EmojiRecord, nameWithTone, SKIN_TONE_VALUES, type SkinToneValue } from "@brianhung/emoji-picker-core";
+import type { EmojiRecord, SkinToneValue } from "@brianhung/emoji-picker-core";
+import { nameWithTone, SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
 import { usePicker, type Overlay } from "../root/context";
 import { Glyph } from "../emoji/glyph";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";

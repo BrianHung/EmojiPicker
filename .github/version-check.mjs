@@ -36,7 +36,7 @@ try {
   }
   execFileSync(join(root, "node_modules/.bin/tsup"), ["--silent"], { cwd: join(tmp, "packages/core"), stdio: "inherit" });
   const { DEFAULT_DATA_URL } = await import(pathToFileURL(join(tmp, "packages/core/dist/platform.js")).href);
-  if (!DEFAULT_DATA_URL.includes(`/emoji-picker-core@${version}/`)) throw new Error(`core build loads ${DEFAULT_DATA_URL}, expected ${version}`);
+  if (!DEFAULT_DATA_URL.includes(`/emoji-picker-data@${version}/data/en/iamcal.json`)) throw new Error(`core build loads ${DEFAULT_DATA_URL}, expected ${version}`);
   console.log(`changeset version: all packages at ${version}`);
 } finally {
   rmSync(tmp, { recursive: true, force: true });

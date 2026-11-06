@@ -3,7 +3,6 @@ export type VectorIndex = {
   dims: number;
   scales: Float32Array;
   vectors: Int8Array;
-  bits: Uint32Array;
 };
 
 const MAGIC = 0x31424d45;
@@ -42,45 +41,15 @@ export function decodeIndex(buffer: ArrayBuffer): VectorIndex {
   const idsEnd = 16 + pad4(idBytes);
   const scales = new Float32Array(buffer.slice(idsEnd, idsEnd + count * 4));
   const vectors = new Int8Array(buffer, idsEnd + count * 4, count * dims);
-  const words = dims / 32;
-  const bits = new Uint32Array(count * words);
-  for (let i = 0; i < count; i++) for (let d = 0; d < dims; d++) if (vectors[i * dims + d]! > 0) bits[i * words + (d >> 5)]! |= 1 << (d & 31);
-  return { ids, dims, scales, vectors, bits };
+  return { ids, dims, scales, vectors };
 }
 
-const popcount = (x: number) => {
-  x -= (x >>> 1) & 0x55555555;
-  x = (x & 0x33333333) + ((x >>> 2) & 0x33333333);
-  return (((x + (x >>> 4)) & 0x0f0f0f0f) * 0x01010101) >>> 24;
-};
-
-type RankOptions = {
-  limit: number;
-  shortlist?: number;
-};
-
-export function rank(index: VectorIndex, query: Float32Array, { limit, shortlist = 0 }: RankOptions): { unified: string; score: number }[] {
-  const { ids, dims, scales, vectors, bits } = index;
-  let candidates: number[];
-  if (shortlist > 0 && shortlist < ids.length) {
-    const words = dims / 32;
-    const qbits = new Uint32Array(words);
-    for (let d = 0; d < dims; d++) if (query[d]! > 0) qbits[d >> 5]! |= 1 << (d & 31);
-    const distance = new Uint16Array(ids.length);
-    for (let i = 0; i < ids.length; i++) {
-      let h = 0;
-      for (let w = 0; w < words; w++) h += popcount(bits[i * words + w]! ^ qbits[w]!);
-      distance[i] = h;
-    }
-    candidates = [...ids.keys()].sort((a, b) => distance[a]! - distance[b]!).slice(0, shortlist);
-  } else {
-    candidates = [...ids.keys()];
-  }
-  const scored = candidates.map((i) => {
+export function rank({ ids, dims, scales, vectors }: VectorIndex, query: Float32Array, { limit }: { limit: number }): { unified: string; score: number }[] {
+  const scored = ids.map((unified, i) => {
     let dot = 0;
     const base = i * dims;
     for (let d = 0; d < dims; d++) dot += vectors[base + d]! * query[d]!;
-    return { unified: ids[i]!, score: dot * scales[i]! };
+    return { unified, score: dot * scales[i]! };
   });
   return scored.sort((a, b) => b.score - a.score).slice(0, limit);
 }

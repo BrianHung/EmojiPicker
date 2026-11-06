@@ -25,8 +25,8 @@ npm run typecheck      # every workspace
 npm run check          # Biome lint and format check; `npm run format` formats
 npm run build          # core, the React package, then the site and registry
 npm run size           # bundle-size budgets on the library build (.size-limit.json)
-npm run smoke          # packed tarballs in fresh Vite, Next.js, and shadcn apps
-npm run release:check  # everything above, plus visual and axe on a production build
+npm run smoke          # packed tarballs in fresh Vite, React 18, Next.js, and shadcn apps
+npm run release:check  # .github/release-steps.mjs: everything above, plus visual and axe on a production build
 npm run changeset      # describe a change for the next release
 ```
 
@@ -38,7 +38,7 @@ Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 
 ### CI
 
-- [ci.yml](.github/workflows/ci.yml) runs Biome, the typecheck, the unit tests, the builds, the size budgets, the data package's validation, the Twemoji font build and its Chromium, WebKit, and Firefox render test, the packed-install smoke test, the other e2e specs against a production build, and axe.
+- [ci.yml](.github/workflows/ci.yml) runs the same step groups as `release:check` from `.github/release-steps.mjs` (`check`, `smoke`, `e2e`, `a11y`), with `E2E_VISUAL=0` because visual baselines are local, plus the Twemoji font build and its Chromium, WebKit, and Firefox render test.
 - [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
 - [upstream.yml](.github/workflows/upstream.yml), run by hand, bumps the pinned emojibase-data and Twemoji versions, rebuilds, runs the tests, and opens a PR.
 
@@ -74,7 +74,7 @@ The Release and Upstream workflows open their PRs with `GITHUB_TOKEN`. GitHub st
 To publish:
 
 1. Fast-forward `main` to the release branch. Run the Release workflow, and merge the "Version packages" PR. Check that all four packages are at the same version.
-2. On the release commit, run `npm ci` and `npm run release:check`. It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), the version check, the Twemoji font build and its publint (skipped without Python 3.12; set `PYTHON`), and the packed-install smoke test (`npm run smoke`: Vite, React 18 with a server render, a Next.js App Router build, and `shadcn add`). It then runs every e2e spec, including visual, and axe against a production build. Visual baselines are local, so this is the only run that checks them. If they are not in `apps/demo/e2e/__snapshots__`, restore them first.
+2. On the release commit, run `npm ci` and `npm run release:check` (every group in `.github/release-steps.mjs`; pass group names to run some). It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), the version check, the Twemoji font build and its publint (skipped without Python 3.12; set `PYTHON`), and the packed-install smoke test (`npm run smoke`: Vite, React 18 with a server render, a Next.js App Router build, and `shadcn add`). It then runs every e2e spec, including visual, and axe against a production build. Visual baselines are local, so this is the only run that checks them. If they are not in `apps/demo/e2e/__snapshots__`, restore them first.
 3. Publish, and push the tags. Pre mode rejects `--tag`.
 
    ```bash
@@ -95,7 +95,6 @@ To publish:
 5. Check the CDN and a fresh install.
 
    ```bash
-   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-core@<version>/data/en.json | head -1
-   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/ja/iamcal.json | head -1
+   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/en/iamcal.json | head -1
    npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json   # in a fresh Vite and Tailwind app
    ```

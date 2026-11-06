@@ -182,12 +182,14 @@ type VariationsRowProps = VariationsProps;
 type VariationsRowState = VariationsState;
 type VariationProps = VariationsOptionProps;
 type VariationState = VariationsOptionState;
+type EmptyOptionState = EmptyState;
 
 export type { CellProps, CellState, ItemsProps, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps };
 
 export declare namespace List {
   type Props = ListProps;
   type State = ListState;
+  type EmptyState = EmptyOptionState;
   namespace Section {
     type Props = SectionProps;
     type State = SectionState;

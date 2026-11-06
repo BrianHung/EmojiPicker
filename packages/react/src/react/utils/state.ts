@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ChangeDetails } from "@brianhung/emoji-picker-core";
+import type { ChangeDetails } from "@brianhung/emoji-picker-core/internal";
 import { useControlledState } from "react-stately/useControlledState";
 import { useLatest } from "./latest";
 

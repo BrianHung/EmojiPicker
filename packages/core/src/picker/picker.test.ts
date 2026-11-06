@@ -5,7 +5,7 @@ import { createEmojiPicker } from "./picker";
 import { setCategoryCollapsed } from "./sections";
 
 const ready = async () => {
-  const store = createEmojiStore({ data: en, storage: { frequents: null } });
+  const store = createEmojiStore({ data: en });
   await store.load();
   return store;
 };

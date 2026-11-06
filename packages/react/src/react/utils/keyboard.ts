@@ -2,7 +2,8 @@ import type * as React from "react";
 import type { KeyboardEvent } from "@react-types/shared";
 import type { FocusManager } from "react-aria/FocusScope";
 import { useKeyboard } from "react-aria/useKeyboard";
-import { flipForRtl, isComposingKey, KEY_MOVES } from "@brianhung/emoji-picker-core";
+import { isComposingKey } from "@brianhung/emoji-picker-core";
+import { flipForRtl, KEY_MOVES } from "@brianhung/emoji-picker-core/grid";
 import { isSkipped, preventable, type PickerEvent } from "./events";
 
 export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerEvent<React.KeyboardEvent<T>>) => void;

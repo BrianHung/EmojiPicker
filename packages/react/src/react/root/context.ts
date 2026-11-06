@@ -1,5 +1,7 @@
 import * as React from "react";
-import type { ChangeDetails, EmojiGridMove, EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core";
+import type { EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore } from "@brianhung/emoji-picker-core";
+import type { EmojiGridMove } from "@brianhung/emoji-picker-core/grid";
+import type { ChangeDetails, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core/internal";
 import type { CollapsedCategories } from "./collapse";
 import type { Orientation } from "../utils/render";
 

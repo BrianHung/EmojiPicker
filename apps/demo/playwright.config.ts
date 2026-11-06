@@ -2,6 +2,8 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, type PlaywrightTestConfig } from "@playwright/test";
 
 const BUILD = process.env.E2E_BUILD === "1";
+// CI has no visual baselines: they are local and gitignored
+const VISUAL = process.env.E2E_VISUAL !== "0";
 const PORT = Number(process.env.E2E_PORT) || (BUILD ? 5198 : 5199);
 const here = (path: string) => fileURLToPath(new URL(path, import.meta.url));
 
@@ -36,9 +38,13 @@ export default defineConfig({
     launchOptions: { args: ["--disable-smooth-scrolling"] },
   },
   projects: [
-    project("desktop-light", "visual.spec.ts", { ...desktop, colorScheme: "light" }),
-    project("desktop-dark", "visual.spec.ts", { ...desktop, colorScheme: "dark" }),
-    project("mobile-light", "visual.spec.ts", { ...mobile, colorScheme: "light" }),
+    ...(VISUAL
+      ? [
+          project("desktop-light", "visual.spec.ts", { ...desktop, colorScheme: "light" }),
+          project("desktop-dark", "visual.spec.ts", { ...desktop, colorScheme: "dark" }),
+          project("mobile-light", "visual.spec.ts", { ...mobile, colorScheme: "light" }),
+        ]
+      : []),
     project("keyboard", "keyboard.spec.ts", { ...desktop, colorScheme: "light" }),
     project("keyboard-mobile", "keyboard.spec.ts", { ...mobile, colorScheme: "light" }),
     project("editors", "editors.spec.ts", { ...desktop, colorScheme: "light" }),

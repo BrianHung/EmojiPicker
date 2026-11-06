@@ -1,7 +1,7 @@
-import type { EmojiProps } from "@brianhung/emoji-picker-react";
+import type { Emoji } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
-export const emoji = rowsOf<EmojiProps>()([
+export const emoji = rowsOf<Emoji.Props>()([
   { name: "emoji", type: "EmojiInput", description: '"🎉", ":tada:", "tada", "1f389", a custom id, a CustomEmoji, an EmojiRecord, or an EmojiSelection.' },
   { name: "size", type: "number", default: "1em", description: "Size in pixels, for images and native text." },
   { name: "renderer", type: '"native" | "image"', default: "the provider's" },

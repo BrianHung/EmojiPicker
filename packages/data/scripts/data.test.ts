@@ -24,7 +24,7 @@ describe("datasets", () => {
     expect(data).toMatchObject({ format: 1, locale: path.dirname(file) });
     expect(data.groups).toHaveLength(8);
     expect(data.emojis.some((e) => e[3].length > 0)).toBe(true);
-    const store = createEmojiStore({ data, storage: { skinTone: null } });
+    const store = createEmojiStore({ data });
     expect(store.status()).toBe("ready");
     expect(store.records().length).toBeGreaterThan(1800);
   });

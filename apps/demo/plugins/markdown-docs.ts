@@ -35,7 +35,7 @@ function toMarkdown(dir: string, mdx: string) {
       if (fenced || line.startsWith("```")) return [line];
       const trimmed = line.trim();
       let m: RegExpMatchArray | null;
-      if ((m = trimmed.match(/^<Code title="([^"]*)" code=\{(\w+)\} \/>$/)) && files[m[2]!]) return [`\`\`\`${posix.extname(files[m[2]!]!).slice(1)} title="${m[1]}"`, read(files[m[2]!]!).trim(), "```"];
+      if ((m = trimmed.match(/^<Code title="([^"]*)"(?: label="[^"]*")? code=\{(\w+)\} \/>$/)) && files[m[2]!]) return [`\`\`\`${posix.extname(files[m[2]!]!).slice(1)} title="${m[1]}"`, read(files[m[2]!]!).trim(), "```"];
       if ((m = trimmed.match(/^<Demo name="([\w-]+)"[^>]*>$/))) return ['```tsx title="index.tsx"', read(`src/components/demos/${m[1]}/tailwind.tsx`).trim(), "```"];
       if ((m = trimmed.match(/^<PackageManagers dlx="([^"]+)" \/>$/))) return ["```bash", `npx ${m[1]}`, "```"];
       if ((m = trimmed.match(/^<PackageManagers install="([^"]+)" \/>$/))) return ["```bash", `npm install ${m[1]}`, "```"];
@@ -44,7 +44,8 @@ function toMarkdown(dir: string, mdx: string) {
         return [
           table(
             JSON.parse(m[1]!),
-            (TABLES[m[2]!] as string[][]).map(([first, ...rest]) => [`\`${first}\``, ...rest]),
+            // As in AttrTable: the first column, and the second of three, are code
+            (TABLES[m[2]!] as string[][]).map(([first, ...rest]) => [`\`${first}\``, ...(rest.length === 2 ? [`\`${rest[0]}\``, rest[1]!] : rest)]),
           ),
         ];
       if ((m = trimmed.match(/^<Step title="([^"]+)">$/))) return [`**${m[1]}**`];

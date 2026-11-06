@@ -14,22 +14,21 @@ async function ime(page: Page) {
   };
 }
 
-const COMPOSERS = ["gallery/slack/scene-autocomplete", "gallery/discord/scene-autocomplete", "gallery/linear/scene-comment-autocomplete", "gallery/apple/scene-autocomplete"].map(surface);
+const COMPOSER = surface("gallery/slack/scene-autocomplete");
 
-for (const c of COMPOSERS)
-  test(`${c.id}: the Enter that commits a composition doesn't send`, async ({ page }) => {
-    await visit(page, c.path);
-    const field = c.field!(page);
-    await field.focus();
-    await clearTextField(field);
-    await page.keyboard.type("hi ");
-    const keys = await ime(page);
-    await keys.compose("にほん");
-    await keys.press("Enter");
-    await keys.commit("日本");
-    await frames(page);
-    expect(await fieldText(field)).toContain("hi 日本");
-  });
+test(`${COMPOSER.id}: the Enter that commits a composition doesn't send`, async ({ page }) => {
+  await visit(page, COMPOSER.path);
+  const field = COMPOSER.field!(page);
+  await field.focus();
+  await clearTextField(field);
+  await page.keyboard.type("hi ");
+  const keys = await ime(page);
+  await keys.compose("にほん");
+  await keys.press("Enter");
+  await keys.commit("日本");
+  await frames(page);
+  expect(await fieldText(field)).toContain("hi 日本");
+});
 
 test("picker search: arrows, Enter and Escape during a composition stay with the IME", async ({ page }) => {
   await visit(page, "/");

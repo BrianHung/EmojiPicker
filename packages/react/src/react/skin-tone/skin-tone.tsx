@@ -5,7 +5,8 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 
-import { type ChangeDetails, createChangeDetails, nativeToUnified, SKIN_TONE_VALUES, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, createChangeDetails, SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
 import { useStableCallback } from "../utils/latest";
 import { useChangeState } from "../utils/state";
 import { ToolbarPart } from "../utils/toolbar";
@@ -250,7 +251,7 @@ export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: S
 export declare namespace SkinTone {
   type Props = SkinToneProps;
   type State = SkinToneState;
-  type OpenChangeDetails = SkinToneOpenChangeDetails;
+  type ChangeEventDetails = SkinToneOpenChangeDetails;
   namespace Trigger {
     type Props = SkinToneTriggerProps;
     type State = SkinToneTriggerState;

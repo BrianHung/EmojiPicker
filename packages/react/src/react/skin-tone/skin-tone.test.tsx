@@ -24,7 +24,7 @@ const press = (name: string) => {
 
 it("keeps focus in the skin tone options when onOpenChange cancels the close", () => {
   const host = render(
-    <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+    <EmojiProvider data={en} prepare={false}>
       <EmojiPicker.Root frequent={false}>
         <EmojiPicker.SkinTone defaultOpen onOpenChange={(open, d) => !open && d.cancel()} />
       </EmojiPicker.Root>
@@ -40,7 +40,7 @@ it("keeps focus in the skin tone options when onOpenChange cancels the close", (
 
 it("opens on the current tone, moves with the arrows, and applies the tone with Enter", () => {
   const host = render(
-    <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+    <EmojiProvider data={en} prepare={false}>
       <EmojiPicker.Root suggested={["1f44d"]}>
         <EmojiPicker.SkinTone />
         <Suggested />

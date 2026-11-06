@@ -1,7 +1,6 @@
 import type { EmojiRecord } from "../dataset";
 import { createStore, type Subscribe } from "../reactive";
 import type { EmojiStore } from "../store";
-import { interimOf } from "./search";
 
 export interface EmojiSearchState {
   results: readonly EmojiRecord[];
@@ -58,7 +57,7 @@ export function createSearch(store: EmojiStore, initial: EmojiSearchQuery = { qu
     const controller = new AbortController();
     const out = store.query(query, { limit, signal: controller.signal });
     if (Array.isArray(out)) return run.dispatch({ type: "start", key, version, state: { results: out, pending: false }, controller: null });
-    run.dispatch({ type: "start", key, version, state: { results: interimOf(out) ?? current.settled, pending: true }, controller });
+    run.dispatch({ type: "start", key, version, state: { results: current.settled, pending: true }, controller });
     out.then(
       (results) => run.dispatch({ type: "settle", controller, results }),
       () => run.dispatch({ type: "settle", controller, results: NONE }),

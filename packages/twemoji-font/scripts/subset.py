@@ -7,6 +7,8 @@ from fontTools.otlLib.builder import buildLigatureSubstSubtable
 from fontTools.ttLib import TTFont
 
 FE0F = 0xFE0F
+# WebKit looks up U+1F408 when it meets VS16; the rest is the picker's own UI: SkinTone's hands and the default frequents
+FIRST_SCREEN = [0x1F408, 0x270B, *range(0x1F3FB, 0x1F400), 0x2764, 0x1F44D, 0x1F44E, 0x1F602, 0x203C, 0x2753]
 ZERO_WIDTH = {0x200D, FE0F, 0x20E3, *range(0xE0020, 0xE0080)}
 
 
@@ -126,9 +128,9 @@ def main(src, order_path, out, target, version):
                 if c in cmap and cmap[c] in sequences:
                     pending.append(cmap[c])
 
-    # WebKit looks up U+1F408 when it meets VS16, so the first screen's face carries it
     chunks.append({"glyphs": set(), "unicodes": set(), "cost": {}})
-    add(chunks[0], cmap[0x1F408])
+    for cp in FIRST_SCREEN:
+        add(chunks[0], cmap[cp])
     for group, texts in order:
         glyphs = [g for t in texts if (g := glyph_for.get(strip(parse(t)))) and g not in owner]
         if group is None or not glyphs:

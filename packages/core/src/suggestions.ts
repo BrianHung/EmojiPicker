@@ -15,7 +15,7 @@ export interface KeyLike {
   preventDefault(): void;
 }
 
-export interface SuggestionsOptions {
+export interface EmojiSuggestionsOptions {
   query?: string;
   resetKey?: string;
   id?: string;
@@ -67,7 +67,7 @@ export type SuggestionsOptionProps = {
 export interface EmojiSuggestionsMachine {
   getSnapshot(): EmojiSuggestionsSnapshot;
   subscribe: Subscribe;
-  setOptions(options: SuggestionsOptions): void;
+  setOptions(options: EmojiSuggestionsOptions): void;
   setQuery(query: string, resetKey?: string): void;
   highlight(index: number): void;
   move(direction: SuggestionsMove): boolean;
@@ -87,13 +87,13 @@ export interface EmojiSuggestionsMachine {
 const NONE: readonly ShortcodeCompletion[] = [];
 const DEFAULT_LIMIT = 8;
 
-type Input = { options: SuggestionsOptions; resetKey: string; generation: number };
+type Input = { options: EmojiSuggestionsOptions; resetKey: string; generation: number };
 type Ui = { highlight: { index: number; generation: number }; dismissed: string | null };
 type UiAction = { type: "highlight"; index: number; generation: number } | { type: "dismiss"; key: string };
 
-const resetKeyOf = (options: SuggestionsOptions) => options.resetKey ?? options.query ?? "";
+const resetKeyOf = (options: EmojiSuggestionsOptions) => options.resetKey ?? options.query ?? "";
 
-const reduceInput = (input: Input, options: SuggestionsOptions): Input => {
+const reduceInput = (input: Input, options: EmojiSuggestionsOptions): Input => {
   const resetKey = resetKeyOf(options);
   if (resetKey !== input.resetKey) return { options, resetKey, generation: input.generation + 1 };
   return shallowEqual(input.options, options) ? input : { ...input, options };
@@ -114,14 +114,14 @@ const completionOf = (record: EmojiRecord): ShortcodeCompletion => ({ record, sh
 
 const highlightOf = (input: Input, ui: Ui) => (ui.highlight.generation === input.generation ? ui.highlight.index : 0);
 
-export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOptions = {}): EmojiSuggestionsMachine {
-  const input = createStore<Input, SuggestionsOptions>({ options, resetKey: resetKeyOf(options), generation: 0 }, reduceInput);
+export function createEmojiSuggestions(store: EmojiStore, options: EmojiSuggestionsOptions = {}): EmojiSuggestionsMachine {
+  const input = createStore<Input, EmojiSuggestionsOptions>({ options, resetKey: resetKeyOf(options), generation: 0 }, reduceInput);
   const ui = createStore<Ui, UiAction>({ highlight: { index: 0, generation: 0 }, dismissed: null }, reduceUi);
-  const searchOf = ({ query = "", limit = DEFAULT_LIMIT, matchBy }: SuggestionsOptions) => ({ query: matchBy === "search" ? query : "", limit });
+  const searchOf = ({ query = "", limit = DEFAULT_LIMIT, matchBy }: EmojiSuggestionsOptions) => ({ query: matchBy === "search" ? query : "", limit });
   const search = createSearch(store, searchOf(options));
   const opts = () => input.getSnapshot().options;
   const id = (suffix: string) => `${opts().id ?? "emoji-suggestions"}-${suffix}`;
-  const update = (next: SuggestionsOptions) => {
+  const update = (next: EmojiSuggestionsOptions) => {
     const { query, limit } = searchOf(next);
     search.setQuery(query, limit);
     input.dispatch(next);

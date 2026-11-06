@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { shallowEqual } from "@brianhung/emoji-picker-core";
+import { shallowEqual } from "@brianhung/emoji-picker-core/internal";
 import { DEFAULT_METRICS, type GridMetrics } from "./layout";
 
 // A hidden box sized by the same variables as the cells, so the layout reads them as numbers

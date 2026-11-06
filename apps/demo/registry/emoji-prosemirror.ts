@@ -1,10 +1,10 @@
 import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type ShortcodeCompletion, type SuggestionsOptions } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type ShortcodeCompletion, type EmojiSuggestionsOptions } from "@brianhung/emoji-picker-core";
 
 type Node = EditorState["doc"];
 
-export type ProseMirrorEmojiTypeaheadOptions = Pick<SuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
+export type ProseMirrorEmojiTypeaheadOptions = Pick<EmojiSuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
   insert?: "emoji" | "shortcode";
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
 };

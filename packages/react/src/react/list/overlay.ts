@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core";
+import { SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
 
 export const HIDDEN_OVERLAY: React.CSSProperties = { position: "absolute", visibility: "hidden" };
 

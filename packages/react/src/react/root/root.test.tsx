@@ -3,7 +3,7 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, useSkinTone, type EmojiGridState, type EmojiItem, type EmojiPickerActions, type RootProps } from "../../index";
+import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, useSkinTone, type EmojiGridState, type EmojiItem } from "../../index";
 
 function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
   return <div {...useEmojiCell(state, item).cellProps} />;
@@ -14,11 +14,11 @@ function Grid() {
   return <div {...grid.getGridProps()}>{grid.rows.slice(0, 3).flatMap((row) => (row.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : []))}</div>;
 }
 
-function mount(props: Partial<RootProps>) {
+function mount(props: Partial<EmojiPicker.Root.Props>) {
   const input = document.body.appendChild(document.createElement("input"));
   const host = document.body.appendChild(document.createElement("div"));
   const root = createTestRoot(host);
-  const actions = React.createRef<EmojiPickerActions>();
+  const actions = React.createRef<EmojiPicker.Root.Actions>();
   React.act(() =>
     root.render(
       <EmojiProvider data={en} prepare={false}>
@@ -142,9 +142,9 @@ describe("Root keyboard", () => {
       return null;
     }
     const input = document.body.appendChild(document.createElement("input"));
-    const actions = React.createRef<EmojiPickerActions>();
+    const actions = React.createRef<EmojiPicker.Root.Actions>();
     render(
-      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root frequent={false} keyboardTarget={input} actionsRef={actions} onHighlightChange={onHighlightChange} onSelect={onSelect}>
           <ToneSetter />
           <Grid />
@@ -171,7 +171,7 @@ describe("Root keyboard", () => {
   it("skips a cell's pick when its onClick calls preventEmojiPickerHandler", () => {
     const onSelect = vi.fn();
     render(
-      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root frequent={false} onSelect={onSelect}>
           <EmojiPicker.Viewport>
             <EmojiPicker.List>
@@ -194,7 +194,7 @@ describe("Root keyboard", () => {
   it("clears the query from a Search.Clear placed beside the input", () => {
     const onQueryChange = vi.fn();
     render(
-      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root defaultQuery="smile" onQueryChange={onQueryChange}>
           <EmojiPicker.Search>
             <EmojiPicker.Search.Input>{[]}</EmojiPicker.Search.Input>
@@ -209,9 +209,9 @@ describe("Root keyboard", () => {
   });
 
   it("renders a List.Variations placed in Root in place of the default, styled by its state", () => {
-    const actions = React.createRef<EmojiPickerActions>();
+    const actions = React.createRef<EmojiPicker.Root.Actions>();
     render(
-      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root frequent={false} actionsRef={actions}>
           <EmojiPicker.Search />
           <EmojiPicker.Viewport>

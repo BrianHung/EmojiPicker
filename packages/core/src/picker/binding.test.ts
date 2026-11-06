@@ -10,7 +10,7 @@ import { createEmojiPicker } from "./picker";
 
 // A whole binding without a framework: subscribe, render the snapshot, and send keys to the engine
 function mountPicker(host: HTMLElement, input: HTMLInputElement) {
-  const store = createEmojiStore({ data: en, storage: { frequents: null, skinTone: null } });
+  const store = createEmojiStore({ data: en });
   const picker = createEmojiPicker(store, { frequent: false });
   const grid = () => createEmojiGrid(picker.getSnapshot().sections, { columns: 8, rowHeight: 40 });
   const navigation = createGridNavigation(() => ({ grid: grid(), strip: null, metrics: { cellHeight: 40, headerHeight: 0 } }));

@@ -5,7 +5,7 @@ import { createEmojiStore } from "../store";
 import { categoryList, categorySections, itemFactory, resultSections } from "./sections";
 
 describe("sections", () => {
-  const records = createEmojiStore({ data: en, storage: { frequents: null, skinTone: null } }).records();
+  const records = createEmojiStore({ data: en }).records();
   const get = (u: string) => records.find((r) => r.unified === u || r.tones.includes(u));
   const categories = [
     { id: "suggested", name: "Frequently Used", nav: true },

@@ -1,6 +1,6 @@
 ---
 title: Semantic search
-description: On-device embeddings, a vector database, or a decision model, passed to the provider's searchEngine prop.
+description: On-device embeddings, a vector database, or a decision model, passed to the provider's search prop.
 toc: true
 ---
 
@@ -10,7 +10,20 @@ import { Demo } from "./demo";
 
 ## Approaches
 
-Each approach is an `EmojiSearch`, wrapped in `fallback(…, lexical())` so keyword results fill in when it returns fewer than eight hits.
+Each approach is an `EmojiSearch`, wrapped so keyword results fill in when it returns fewer than eight hits:
+
+```ts title="with-lexical.ts"
+import { lexical, type EmojiSearch } from "@brianhung/emoji-picker-react";
+
+const exact = lexical();
+
+export const withLexical =
+  (search: EmojiSearch): EmojiSearch =>
+  async (query, context) => {
+    const hits = await search(query, context);
+    return hits.length >= 8 ? hits : [...hits, ...exact(query, context)];
+  };
+```
 
 ### On device
 
@@ -49,7 +62,7 @@ const onDeviceSearch: EmojiSearch = (query, { limit }) =>
     worker.postMessage({ id, query, limit });
   });
 
-<EmojiProvider searchEngine={fallback(onDeviceSearch, lexical())}>
+<EmojiProvider search={withLexical(onDeviceSearch)}>
 ```
 
 ```bash title="Terminal"
@@ -72,13 +85,12 @@ await env.EMOJI_INDEX.upsert(batch.map((emoji, i) => ({ id: emoji.id, values: da
 ```
 
 ```tsx title="search.tsx"
-const embeddings = remote((query, { limit, signal }) =>
+const embeddings: EmojiSearch = (query, { limit, signal }) =>
   fetch("/api/embed-search", { method: "POST", body: JSON.stringify({ query, limit }), signal })
     .then((r) => r.json())
-    .then((r) => r.hits),
-);
+    .then((r) => r.hits);
 
-<EmojiProvider searchEngine={fallback(embeddings, lexical())}>
+<EmojiProvider search={withLexical(embeddings)}>
 ```
 
 ```bash title="Terminal"
@@ -111,13 +123,12 @@ async function ask(env: Env, query: string, names: string[]) {
 ```
 
 ```tsx title="search.tsx"
-const decision = remote((query, { limit, signal }) =>
+const decision: EmojiSearch = (query, { limit, signal }) =>
   fetch("/api/decide", { method: "POST", body: JSON.stringify({ query, limit }), signal })
     .then((r) => r.json())
-    .then((r) => r.hits),
-);
+    .then((r) => r.hits);
 
-<EmojiProvider searchEngine={fallback(decision, lexical())}>
+<EmojiProvider search={withLexical(decision)}>
 ```
 
 ### Your own emoji

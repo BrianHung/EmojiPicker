@@ -1,11 +1,10 @@
 import * as React from "react";
 import { I18nProvider, useLocale } from "react-aria/I18nProvider";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { type FrequentsChangeDetails, isUnified, localizeLabels, type Renderer, type SkinToneChangeDetails, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
 import { needsImageFallback, onNativeSupportChange } from "@brianhung/emoji-picker-core/native";
-
-export type { EmojiLabels };
 
 export type ImageUrl = (unified: string, context: { renderer: Renderer }) => string | undefined;
 
@@ -64,10 +63,10 @@ export function EmojiProvider(props: EmojiProviderProps) {
 }
 
 function Provider({ renderer = "auto", imageUrl = twemoji, imageVersion = TWEMOJI_EMOJI_VERSION, prepare = true, labels, locale, children, store, ...options }: EmojiProviderProps & { store: EmojiStore }) {
-  const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, searchEngine } = options;
+  const { skinTone, onSkinToneChange, frequents, onFrequentsChange, data, customEmojis, filter, search } = options;
   useLayoutEffect(
-    () => store.setOptions({ data, customEmojis, filter, searchEngine, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange }),
-    [store, data, customEmojis, filter, searchEngine, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange],
+    () => store.setOptions({ data, customEmojis, filter, search, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange }),
+    [store, data, customEmojis, filter, search, locale, skinTone, onSkinToneChange, frequents, onFrequentsChange],
   );
   React.useEffect(() => void (prepare && store.prepare()), [prepare, store]);
   const resolved = useRenderer(renderer);
@@ -88,6 +87,15 @@ function useLabels(labels: Partial<EmojiLabels> | undefined): EmojiLabels {
   const { resultCount, withSkinTone } = labels ?? {};
   // biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the labels' contents, not their identity
   return React.useMemo(() => localizeLabels(labels), [key, resultCount, withSkinTone]);
+}
+
+type SkinToneDetails = SkinToneChangeDetails;
+type FrequentsDetails = FrequentsChangeDetails;
+
+export declare namespace EmojiProvider {
+  type Props = EmojiProviderProps;
+  type SkinToneChangeEventDetails = SkinToneDetails;
+  type FrequentsChangeEventDetails = FrequentsDetails;
 }
 
 let sharedStore: EmojiStore | undefined;

@@ -1,7 +1,8 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { type ChangeDetails, createChangeDetails, nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
+import { withoutTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, createChangeDetails, nameWithTone } from "@brianhung/emoji-picker-core/internal";
 import { usePicker } from "../root/context";
 import { useDrawable } from "../emoji/native-support";
 import { Glyph, useOverridden } from "../emoji/glyph";
@@ -164,7 +165,7 @@ type ItemsProps = ReactionsItemsProps;
 export declare namespace Reactions {
   type Props = RowProps;
   type State = RowState;
-  type ValueChangeDetails = ReactionsValueChangeDetails;
+  type ChangeEventDetails = ReactionsValueChangeDetails;
   namespace Items {
     type Props = ItemsProps;
   }

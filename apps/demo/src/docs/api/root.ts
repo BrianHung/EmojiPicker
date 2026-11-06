@@ -1,7 +1,7 @@
-import type { RootProps } from "@brianhung/emoji-picker-react";
+import type { EmojiPicker } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
-export const root = rowsOf<RootProps>()([
+export const root = rowsOf<EmojiPicker.Root.Props>()([
   { name: "onSelect", type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event?, cancel(), collapse? }) => void', description: "cancel() keeps the value and the popover open." },
   { name: "columns", type: '"fit" | number', default: '"fit"', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
@@ -28,7 +28,7 @@ export const root = rowsOf<RootProps>()([
   { name: "defaultReactionsOpen", type: "boolean", default: "true" },
   { name: "onReactionsOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "escape-key" | "none", cancel() }) => void' },
   { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it. Every handler a part composes takes the same method." },
-  { name: "actionsRef", type: "Ref<EmojiPickerActions>", description: "move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone. Inside Root, use useEmojiPickerActions()." },
+  { name: "actionsRef", type: "Ref<EmojiPicker.Root.Actions>", description: "move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone. Inside Root, use useEmojiPickerActions()." },
   {
     name: "keyboardTarget",
     type: "HTMLElement | RefObject<HTMLElement | null> | null",

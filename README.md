@@ -48,8 +48,8 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 | Package | Description |
 |---|---|
 | [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
-| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies; includes the English dataset |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set; core loads its English one by default |
 | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
 
 [Contributing](CONTRIBUTING.md)

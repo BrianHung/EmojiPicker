@@ -1,5 +1,3 @@
-import data from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { buildDataset, findEmojibase } from "@brianhung/emoji-picker-core/build";
 
-// The data's .d.cts types it from the built package, which a source checkout doesn't have
-export const en = data as unknown as Dataset;
+export const en = buildDataset({ locale: "en", load: findEmojibase()!.load }).dataset;

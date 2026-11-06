@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import en from "@brianhung/emoji-picker-core/data/en.json?url";
+import en from "@brianhung/emoji-picker-data/en/iamcal.json?url";
 import { DefaultCategoryIcon, EmojiPicker, EmojiProvider, useCategoryNavigation, useEmojiLabels, useSkinTone, type SkinToneValue } from "@brianhung/emoji-picker-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";

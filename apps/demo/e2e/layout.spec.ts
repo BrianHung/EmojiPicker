@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
-import { expect, frames, quiet, settle, slot, test, visit } from "./support";
+import { expect, quiet, settle, slot, test, visit } from "./support";
 
 const highlighted = (page: Page) => picker(page).locator(`${slot("emoji")}[data-highlighted]`);
 
@@ -118,6 +118,19 @@ test("a native emoji takes the image's box whatever the font", async ({ page }) 
   const image = await box("Images", "System");
   for (const font of ["System", "Twemoji", "Noto"]) expect(await box("Native", font), font).toEqual(image);
   await page.unrouteAll({ behavior: "ignoreErrors" });
+});
+
+test("first paint in Twemoji fetches one font subset", async ({ page }) => {
+  const fonts = new Set<string>();
+  page.on("request", (request) => {
+    // A production build appends a content hash to the file name
+    const file = request.url().match(/(twemoji-\d+)(?:-[\w-]+)?\.woff2/)?.[1];
+    if (file) fonts.add(file);
+  });
+  await visit(page, "/e2e/pages/fonts/");
+  await expect(picker(page).locator(slot("emoji")).first()).toBeVisible();
+  await settle(page);
+  expect([...fonts]).toEqual(["twemoji-0"]);
 });
 
 async function pressUntilFocused(page: Page, target: Locator, key: string) {

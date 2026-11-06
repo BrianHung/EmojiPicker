@@ -48,7 +48,7 @@ describe("CORS", () => {
     expect(res.status).toBe(200);
   });
   it("lets server-to-server calls (no Origin) through", async () => {
-    const res = await fetch(new Request("https://w.dev/api/decide", { method: "POST", body: JSON.stringify({ query: "cat", model: "jev" }) }), mockEnv().env);
+    const res = await fetch(new Request("https://w.dev/api/decide", { method: "POST", body: JSON.stringify({ query: "cat" }) }), mockEnv().env);
     expect(res.status).toBe(200);
   });
 });
@@ -207,7 +207,7 @@ describe("routing", () => {
     env.AI = { run: unreachable } as unknown as Ai;
     for (const [path, body] of [
       ["/api/embed-search", { query: "cat" }],
-      ["/api/decide", { query: "cat", model: "jev" }],
+      ["/api/decide", { query: "cat" }],
     ] as const) {
       const res = await fetch(post(path, body), env);
       expect(res.status).toBe(503);
