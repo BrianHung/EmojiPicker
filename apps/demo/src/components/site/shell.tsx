@@ -3,6 +3,7 @@ import enUrl from "@brianhung/emoji-picker-core/data/en.json?url";
 import { EmojiProvider, type Renderer } from "@brianhung/emoji-picker-react";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { type EmojiFont, loadEmojiFont } from "@/lib/emoji-fonts";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "./header";
 
@@ -53,17 +54,30 @@ if (typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.pl
   document.documentElement.classList.add("apple");
 }
 
+export type SiteRenderer = "auto" | "native" | EmojiFont;
+const SITE_RENDERERS: SiteRenderer[] = ["auto", "native", "twemoji", "noto"];
+
 const RendererContext = React.createContext<Renderer | "auto">("auto");
 export const useRenderer = () => React.useContext(RendererContext);
 
 export function SiteShell({ page, width = "column", children }: { page: Page; width?: keyof typeof WIDTH; children: React.ReactNode }) {
   const [theme, toggleTheme] = useTheme();
-  const [renderer, setRenderer] = React.useState<Renderer | "auto">(() => read("demo:renderer", "auto") as Renderer | "auto");
+  const [renderer, setRenderer] = React.useState<SiteRenderer>(() => {
+    const saved = read("demo:renderer", "auto") as SiteRenderer;
+    return SITE_RENDERERS.includes(saved) ? saved : "auto";
+  });
   React.useEffect(() => write("demo:renderer", renderer), [renderer]);
+  React.useLayoutEffect(() => {
+    const font = renderer === "twemoji" || renderer === "noto" ? renderer : undefined;
+    if (!font) return void delete document.documentElement.dataset.emojiFont;
+    loadEmojiFont(font);
+    document.documentElement.dataset.emojiFont = font;
+  }, [renderer]);
+  const providerRenderer = renderer === "auto" ? "auto" : "native";
   return (
     <TooltipProvider>
-      <RendererContext.Provider value={renderer}>
-        <EmojiProvider data={enUrl} renderer={renderer}>
+      <RendererContext.Provider value={providerRenderer}>
+        <EmojiProvider data={enUrl} renderer={providerRenderer}>
           <div className="flex min-h-svh flex-col">
             <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />
             <div className="flex-1">{children}</div>

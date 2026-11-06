@@ -1,5 +1,4 @@
 import * as React from "react";
-import type { Renderer } from "@brianhung/emoji-picker-react";
 import { MenuIcon } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { EXAMPLES } from "@/lib/examples";
 import { cn } from "@/lib/utils";
 import { GitHubIcon, NpmIcon } from "./brand-icons";
-import type { Page, Theme } from "./shell";
+import type { Page, SiteRenderer, Theme } from "./shell";
 
 const NAV: [Page, string, string][] = [
   ["docs", "Docs", "/"],
@@ -38,15 +37,16 @@ function ThemeIcon({ theme }: { theme: Theme }) {
   );
 }
 
-const RENDERERS: { value: Renderer | "auto"; label: string }[] = [
+const RENDERERS: { value: SiteRenderer; label: string }[] = [
   { value: "auto", label: "Auto" },
   { value: "native", label: "Native" },
-  { value: "image", label: "Twemoji" },
+  { value: "twemoji", label: "Twemoji" },
+  { value: "noto", label: "Noto" },
 ];
 
-function RendererSelect({ renderer, onRenderer, className }: { renderer: Renderer | "auto"; onRenderer: (r: Renderer | "auto") => void; className?: string }) {
+function RendererSelect({ renderer, onRenderer, className }: { renderer: SiteRenderer; onRenderer: (r: SiteRenderer) => void; className?: string }) {
   return (
-    <Select items={RENDERERS} value={renderer} onValueChange={(v) => v && onRenderer(v as Renderer | "auto")}>
+    <Select items={RENDERERS} value={renderer} onValueChange={(v) => v && onRenderer(v as SiteRenderer)}>
       <SelectTrigger aria-label="Renderer" className={cn("min-w-[104px] max-sm:h-10", className)}>
         <SelectValue />
       </SelectTrigger>
@@ -71,7 +71,7 @@ function IconLink({ href, label, children, className }: { href: string; label: s
   );
 }
 
-export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { page: Page; theme: Theme; onTheme: () => void; renderer: Renderer | "auto"; onRenderer: (r: Renderer | "auto") => void }) {
+export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { page: Page; theme: Theme; onTheme: () => void; renderer: SiteRenderer; onRenderer: (r: SiteRenderer) => void }) {
   const [menu, setMenu] = React.useState(false);
   const themeLabel = theme === "dark" ? "Switch to light theme" : "Switch to dark theme";
   return (
@@ -119,7 +119,7 @@ const MENU: { label: string; links: { id: string; label: string; href: string }[
   },
 ];
 
-function MobileMenu({ page, open, onOpenChange, renderer, onRenderer }: { page: Page; open: boolean; onOpenChange: (open: boolean) => void; renderer: Renderer | "auto"; onRenderer: (r: Renderer | "auto") => void }) {
+function MobileMenu({ page, open, onOpenChange, renderer, onRenderer }: { page: Page; open: boolean; onOpenChange: (open: boolean) => void; renderer: SiteRenderer; onRenderer: (r: SiteRenderer) => void }) {
   const current = typeof location === "undefined" ? "" : location.pathname;
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

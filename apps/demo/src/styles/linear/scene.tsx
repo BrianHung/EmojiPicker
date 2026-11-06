@@ -34,7 +34,7 @@ const C = {
   tabMuted: ld("lch(40 1 282)", "lch(64.714 1.425 272)"),
   tabText: ld("lch(20 1 282)", "lch(91.178 1.425 272)"),
 };
-const FONT = "'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+const FONT = "var(--site-text-emoji,) 'Inter Variable', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 const FRAME = { color: C.text, fontFamily: FONT, fontFeatureSettings: "'cv01', 'ss03'", "--hover": C.hover, "--text": C.text } as React.CSSProperties;
 const POPUP_SHADOW = "shadow-[0_6px_18px_lch(0_0_0/0.02),0_3px_9px_lch(0_0_0/0.04),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_3px_8px_lch(0_0_0/0.125),0_2px_5px_lch(0_0_0/0.125),0_1px_1px_lch(0_0_0/0.125)]";
 const CARD_SHADOW = "shadow-[0_3px_6px_-2px_lch(0_0_0/0.02),0_1px_1px_lch(0_0_0/0.04)] dark:shadow-[0_0.5px_1px_1px_lch(0_0_0/0.3)]";

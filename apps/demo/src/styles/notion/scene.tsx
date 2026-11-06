@@ -13,7 +13,7 @@ import { copyEmoji } from "@/components/site/picked";
 const INK = ld("#2c2c2b", "#f0efed");
 const MUTED = "#7d7a75";
 const SLASH = ld("rgba(55,53,47,0.35)", "rgb(255 255 255 / 0.2)");
-const FONT = "ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif";
+const FONT = "var(--site-text-emoji,) ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Helvetica, 'Apple Color Emoji', Arial, sans-serif";
 
 const CONTENT = `
 <p>Three days, one cabin, zero laptops (mostly). Type <code>:</code> and a few letters to add an emoji, like :tada or :tent.</p>

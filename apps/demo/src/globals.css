@@ -82,7 +82,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: Inter, ui-sans-serif, sans-serif;
+  --font-sans: var(--site-text-emoji,) Inter, ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "JetBrains Mono", monospace;
   --color-imessage-blue: var(--imessage-blue);
   --color-imessage-gray: var(--imessage-gray);
@@ -115,5 +115,17 @@ body {
 }
 
 .apple {
-  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-sans: var(--site-text-emoji,) system-ui, -apple-system, sans-serif;
+}
+
+/* The header's emoji font leads emoji stacks (--site-emoji-font) and text stacks (--site-text-emoji) */
+[data-emoji-font="twemoji"] {
+  --emoji-font-family: Twemoji;
+  --site-emoji-font: Twemoji,;
+  --site-text-emoji: "Twemoji Text",;
+}
+[data-emoji-font="noto"] {
+  --emoji-font-family: "Noto Color Emoji";
+  --site-emoji-font: "Noto Color Emoji",;
+  --site-text-emoji: "Noto Color Emoji Text",;
 }

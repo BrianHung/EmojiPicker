@@ -107,7 +107,7 @@ function DropdownDemo({ appStyle, search }: { appStyle: Style; search: boolean }
   return (
     <div className="flex flex-col items-center gap-3">
       <StyleDropdown appStyle={appStyle} search={search} onSelect={setLast} triggerClassName="flex size-10 items-center justify-center rounded-full border border-border bg-background text-xl hover:bg-accent">
-        {last?.unified ? <Emoji emoji={last.unified} size={22} /> : "🙂"}
+        <Emoji emoji={last?.unified ?? "🙂"} size={22} />
       </StyleDropdown>
     </div>
   );

@@ -5,7 +5,10 @@ import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import en from "@brianhung/emoji-picker-core/data/en.json";
 import type { Dataset } from "@brianhung/emoji-picker-core";
-import { EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "../../index";
+import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "../../index";
+
+const fallback = vi.hoisted(() => ({ images: false }));
+vi.mock("../emoji/native", async (original) => ({ ...(await original<typeof import("../emoji/native")>()), needsImageFallback: () => fallback.images }));
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 Object.assign(HTMLCanvasElement.prototype, { getContext: () => null });
@@ -125,5 +128,12 @@ describe("EmojiProvider", () => {
     );
     React.act(() => document.querySelector("button")!.click());
     expect(document.querySelector('[data-slot="emoji-picker-skin-tone-trigger"]')?.getAttribute("aria-label")).toBe("Medium-dark skin tone");
+  });
+
+  it("draws images outside every provider where the system cannot draw emoji, as a Root does", () => {
+    fallback.images = true;
+    mount(<Emoji emoji="🇺🇸" />);
+    fallback.images = false;
+    expect(document.querySelector("img[data-emoji]")?.getAttribute("src")).toContain("1f1fa-1f1f8");
   });
 });

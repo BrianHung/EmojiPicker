@@ -14,7 +14,7 @@
     "import": { "packages/react/dist/index.js": "{ EmojiPicker, EmojiProvider }", "packages/react/dist/react-aria.js": "{ EmojiPopover }" },
     "gzip": true,
     "ignore": ["react", "react-dom"],
-    "limit": "84.8 kB"
+    "limit": "84.9 kB"
   },
   { "name": "core", "path": "packages/core/dist/index.js", "import": "*", "gzip": true, "limit": "13.1 kB" }
 ]
