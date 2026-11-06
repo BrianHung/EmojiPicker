@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readdirSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -33,10 +33,14 @@ run("node", ["check.mjs"], vite);
 const next = app("next", ["next@16", "react@19", "react-dom@19", "typescript", "@types/react", "@types/node"]);
 run("npx", ["next", "build"], next);
 
-// The packages are preinstalled from the tarballs, so shadcn only fetches its `utils` item
+// The packages are preinstalled from the tarballs. Without a version range, shadcn skips installed
+// dependencies, so it only fetches its `utils` item.
 run("npm", ["run", "build:registry", "-w", "demo"]);
 const shadcn = app("shadcn", ["react", "react-dom", "@types/react", "@types/react-dom", "typescript", "vite", "tailwindcss", "@tailwindcss/vite", "shadcn@4"]);
-run("npx", ["shadcn", "add", join(root, "apps/demo/public/r/emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
+const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker.json"), "utf8"));
+item.dependencies = item.dependencies.map((dep) => dep.replace(/^(@brianhung\/[^@]+)@.+$/, "$1"));
+writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
+run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
 

@@ -1,6 +1,6 @@
 ---
 title: Semantic search
-description: On-device embeddings, a vector DB, or a decision model, plugged into the picker's search prop.
+description: On-device embeddings, a vector database, or a decision model, passed to the provider's searchEngine prop.
 toc: true
 ---
 
@@ -8,13 +8,13 @@ import { Demo } from "./demo";
 
 <Demo />
 
-## Build it
+## Approaches
 
-Each approach is a `search` function, wrapped in `fallback(…, lexical())` so keyword search fills in when it returns nothing.
+Each approach is an `EmojiSearch`, wrapped in `fallback(…, lexical())` so keyword results fill in when it returns fewer than eight hits.
 
 ### On device
 
-bge-small-en-v1.5 runs in a Web Worker with transformers.js. Emoji vectors are computed once at build time from each emoji's name, shortcodes and tags, and stored as int8 (746 KB for 1,923 emoji). A search is one embedding and a dot product per emoji.
+bge-small-en-v1.5 runs in a Web Worker with transformers.js. Emoji vectors are computed once at build time from each emoji's name, shortcodes, and tags, and stored as int8 (746 KB for 1,923 emoji). A search is one embedding and a dot product per emoji.
 
 ```ts title="on-device.worker.ts"
 import { pipeline } from "@huggingface/transformers";
@@ -56,7 +56,7 @@ const onDeviceSearch: EmojiSearch = (query, { limit }) =>
 npx tsx scripts/embed-emoji.ts
 ```
 
-### Vector DB
+### Vector database
 
 Workers AI embeds each emoji once with bge-large-en-v1.5, and Vectorize returns the nearest ones to the query. Nothing downloads to the browser.
 
@@ -88,7 +88,7 @@ npm run seed -- --url https://emoji-picker.<you>.workers.dev --token $ADMIN_TOKE
 
 ### Decision model
 
-Jev, a decision model on Workers AI, scores every emoji name as an option. On this site it answers in about 0.8 s for $0.0007 a search; Cloudflare's Clef takes the same request but took 2–6 s.
+Jev, a decision model on Workers AI, scores every emoji name as an option. Measured on this site, a search takes about 0.8 s and costs $0.0007. Cloudflare's Clef models accept the same request and take 2–6 s.
 
 ```ts title="worker/decide.ts"
 async function ask(env: Env, query: string, names: string[]) {
@@ -122,7 +122,7 @@ const decision = remote((query, { limit, signal }) =>
 
 ### Your own emoji
 
-Custom emoji use the `CustomEmoji` shape, plus an optional `description` to search by. Pass the same list to `customEmojis`; every approach ranks them with the built-in ones. For the vector DB, run `npm run seed -- --custom ./my-emoji.json`.
+Custom emoji use the `CustomEmoji` shape, plus an optional `description` to search by. Pass the same list to `customEmojis`. Every approach ranks them with the built-in emoji. For the vector database, run `npm run seed -- --custom ./my-emoji.json`.
 
 ```json title="my-emoji.json"
 [
@@ -144,6 +144,6 @@ npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/
 
 The site and its API deploy together as one Worker. [Deploy your own](https://github.com/BrianHung/EmojiPicker/blob/main/apps/demo/README.md).
 
----
+## See also
 
-[Emoji search without Jev](https://maxleiter.com/blog/embedding-emoji-search), Max Leiter: the same comparison on 4,668 Slack emoji, with binary-quantized embeddings in the browser.
+[Emoji search without Jev](https://maxleiter.com/blog/embedding-emoji-search), by Max Leiter, makes the same comparison on 4,668 Unicode and community custom emoji, with binary-quantized embeddings in the browser.

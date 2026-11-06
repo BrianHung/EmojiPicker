@@ -37,7 +37,7 @@ function Toolbar() {
   );
 }
 
-const PLACEHOLDER_TEXT = "Type : followed by a shortcode, such as :tada or :rocket. A complete :rocket: converts too.";
+const PLACEHOLDER_TEXT = "Type : followed by a shortcode, such as :tada or :rocket. A complete :rocket: also converts.";
 
 function LexicalEditor() {
   return (

@@ -21,11 +21,11 @@ const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
 </EmojiProvider>
 ```
 
-## Host your own pack
+## Host a pack
 
-A pack is a `pack.json` served as a static file and fetched at runtime, so it stays out of the JS bundle. Serve it from your own origin and no CORS is involved. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
+A pack is a `pack.json` served as a static file and fetched at runtime, so it stays out of the JS bundle. A pack served from your own origin needs no CORS headers. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
 
-`customEmojis` also takes the array itself, or a loader that fetches through your own API, so the browser never requests another origin. Images load as `<img>`, which needs no CORS; under a strict Content-Security-Policy, self-host them too, and point `imageUrl` at your copy if you render images.
+`customEmojis` also takes the array itself, or a loader that fetches through your own API, so the browser never requests another origin. Images load as `<img>` elements, which need no CORS. Under a strict Content Security Policy, self-host the images and set each emoji's `imageUrl` to your copy.
 
 ```json title="pack.json"
 [
@@ -42,16 +42,16 @@ A pack is a `pack.json` served as a static file and fetched at runtime, so it st
 ]
 ```
 
-## Bring your own pack
+## Load a pack by URL
 
-Try any `pack.json` URL. A pack on another origin must be served with CORS. Relative `imageUrl`s resolve against the pack's URL.
+Enter a `pack.json` URL to load it. A pack on another origin must be served with CORS. Relative `imageUrl`s resolve against the pack's URL.
 
 <LoadPack />
 
 ## Large packs
 
-- Fetch the pack by URL after the page loads; keep it out of the bundle.
+- Fetch the pack by URL after the page loads, and keep it out of the bundle.
 - Ship small thumbnails (64px WebP is about 2 KB each).
-- Only visible cells request images: the grid is virtualized.
-- GIFs animate in the grid. Mark them `animated`.
+- The grid is virtualized, so only visible cells request images.
+- Animated GIFs play in the grid. Mark them `animated: true`, and add a `stillUrl` to show under reduced motion.
 - Give each emoji a readable `name` (“party parrot”, not `partyParrot`) so every word is searchable.

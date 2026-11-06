@@ -1,6 +1,6 @@
 # Demo site
 
-The documentation site for `@brianhung/emoji-picker-react`, served at [emoji.brianhung.me](https://emoji.brianhung.me). It's a Vite multipage app plus a Cloudflare Worker that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy as one Worker.
+The documentation site for `@brianhung/emoji-picker-react`, served at [emoji.brianhung.me](https://emoji.brianhung.me). It is a Vite multipage app plus a Cloudflare Worker that serves `/api/*` for the [semantic search example](https://emoji.brianhung.me/examples/semantic-search/). Both deploy as one Worker.
 
 ## Run locally
 
@@ -20,9 +20,9 @@ Workers AI and Vectorize have no local mode, so `/api/embed-search` and `/api/de
 | `index.html`, `gallery/`, `examples/**/index.html` | Page entries. Each path is its URL. |
 | `src/pages/` | Each page's `main.tsx`. Example pages are a `page.mdx` and a live demo. |
 | `src/styles/<app>/` | An app style: a `picker.tsx` layout and a `scene.tsx` mockup. |
-| `src/components/` | shadcn components (`ui/`), site chrome (`site/`), and the Tiptap, Lexical and autocomplete integrations. |
-| `registry/` | The shadcn registry items (`aria/` holds the React Aria popover; tsc skips it, as it needs that base). `npm run build:registry` writes them to `public/r/`. |
-| `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md` and `/llms.txt`. |
+| `src/components/` | shadcn/ui components (`ui/`), site chrome (`site/`), and the Tiptap, Lexical, and typeahead integrations. |
+| `registry/` | The shadcn registry items. `aria/` holds the React Aria popover, which `tsc` skips because it needs that base. `npm run build:registry` writes the items to `public/r/`. |
+| `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md`, and `/llms.txt`, generated from the pages' MDX. |
 | `worker/` | The Worker for `/api/*`. |
 | `scripts/og/` | OG image and video generator (`npm run og`). |
 
@@ -39,9 +39,9 @@ npx wrangler secret put ADMIN_TOKEN
 npm run seed -- --url https://emoji-picker.<subdomain>.workers.dev --token "$ADMIN_TOKEN"
 ```
 
-`npm run seed` embeds every emoji into the index and is safe to run again. Add `--custom ./my-emoji.json` to index your own emoji too.
+`npm run seed` embeds every emoji into the index. It is safe to run again. Add `--custom ./my-emoji.json` to index your own emoji too.
 
-The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `wrangler.jsonc` (for the Deploy button and Workers Builds). Keep them in sync; `npm test` fails if they differ. To call the API from another origin, add it to `ALLOWED_ORIGINS` and build the pages with `VITE_SEARCH_API_URL` set to the Worker's URL.
+The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `wrangler.jsonc` (for the Deploy button and Workers Builds). Keep them in sync. `npm test` fails if they differ. To call the API from another origin, add it to `ALLOWED_ORIGINS` and build the pages with `VITE_SEARCH_API_URL` set to the Worker's URL.
 
 ## API
 
@@ -50,11 +50,11 @@ The Worker is configured in both `cloudflare.config.ts` (for the `cf` CLI) and `
 | `POST /api/embed-search` | `{ query, limit?, custom? }` | `{ hits, model, timings }` |
 | `POST /api/decide` | `{ query, limit?, custom? }` | `{ hits, model, usage, timings }` |
 | `POST /api/admin/seed` | `{ from?, count?, custom? }` with `Authorization: Bearer <ADMIN_TOKEN>` | `{ total, from, next, done, upserted, mutationIds }` |
-| `GET /api/health` | | Corpus size, index size and model ids |
+| `GET /api/health` | | Corpus size, index size, and model ids |
 
 `limit` is 1–50 and defaults to 24. `custom: true` includes custom emoji. An unreachable binding or an empty index returns `503`.
 
-`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks Jev (`typesafe/jev`) in two rounds, since a question takes at most 255 options: the emoji names in groups of 250, then one question over each group's top picks. Cloudflare's Clef takes the same request (Clef also wants its short name as `model` in the body); measured on this site, per search:
+`/api/embed-search` embeds the query with `@cf/baai/bge-large-en-v1.5` and queries Vectorize. `/api/decide` asks Jev (`typesafe/jev`) in two rounds because a question takes at most 255 options: first the emoji names in groups of 250, then one question over each group's top picks. Cloudflare's Clef models take the same request, with the model's short name as `model` in the body. Per-search measurements on this site:
 
 | Model | Latency | Cost |
 |---|---|---|
@@ -77,11 +77,11 @@ npx tsx scripts/embed-emoji.ts --custom ./my-emoji.json --out public/embeddings/
 npm test            # Worker tests, with Workers AI and Vectorize mocked
 npm run typecheck
 npx tsx worker/test/mock-server.ts --port 8799   # the Worker over mocked bindings
-npm run test:e2e    # Playwright, one spec per concern: keyboard, editors, layout, ime, perf, visual
+npm run test:e2e    # Playwright, one spec per concern: keyboard, editors, layout, IME, perf, visual
 npm run test:keyboard   # the keyboard contract on one surface per kind of picker, desktop and phone
 ```
 
-`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local (light and dark on desktop, light on a phone): capture them with `npm run test:baseline`.
+`e2e/keyboard.spec.ts` records each representative surface's key trace in `e2e/fixtures/<project>/` (regenerate with `npm run test:keyboard:update`). Visual baselines are local (light and dark on desktop, light on a phone). Capture them with `npm run test:baseline`.
 
 ### Accessibility
 
@@ -91,13 +91,13 @@ npm run test:sr:voiceover    # VoiceOver on macOS (Guidepup)
 npm run test:sr:nvda         # NVDA on Windows (Guidepup)
 ```
 
-`e2e/a11y/` opens every surface in `e2e/surfaces.ts` and requires zero axe violations, except the ones listed in `e2e/a11y/known.ts` (rule id + element pattern, each a bug to fix). `e2e/sr/scenarios.ts` holds eight keyboard scenarios that assert what the screen reader says (search field and result count, emoji names with skin tone, section names, the pick, Escape, the tapback, Discord's collapsible sections). They run on CI in `.github/workflows/screen-readers.yml`.
+`e2e/a11y/` opens every surface in `e2e/surfaces.ts` and requires zero axe violations, except the ones listed in `e2e/a11y/known.ts` (rule id and element pattern, each a bug to fix). `e2e/sr/scenarios.ts` holds eight keyboard scenarios that assert what the screen reader says (search field and result count, emoji names with skin tone, section names, the pick, Escape, the reaction row, and collapsible section headers). CI runs them in `.github/workflows/screen-readers.yml`.
 
-The screen reader suites skip locally until the machine is set up for automation. Once per machine (this changes OS settings: on macOS it enables "Allow VoiceOver to be controlled with AppleScript"; see [Guidepup's manual VoiceOver setup](https://www.guidepup.dev/docs/guides/manual-voiceover-setup) if SIP blocks it), then once per Guidepup version:
+The screen reader suites skip locally until the machine is set up for automation. Setup changes OS settings. On macOS, it enables "Allow VoiceOver to be controlled with AppleScript"; if SIP blocks that, follow [Guidepup's manual VoiceOver setup](https://www.guidepup.dev/docs/guides/manual-voiceover-setup). Run these commands once per machine, and again for each new Guidepup version:
 
 ```sh
 npx @guidepup/setup setup
 npx @guidepup/setup install   # from apps/demo
 ```
 
-JAWS isn't automated (it needs a licence and Guidepup has no JAWS driver). Before a release, run the same scenarios by hand in JAWS with Chrome.
+JAWS is not automated: it needs a license, and Guidepup has no JAWS driver. Before a release, run the same scenarios by hand in JAWS with Chrome.

@@ -170,7 +170,7 @@ export function GalleryPage() {
         >
           <DropdownDemo appStyle={appStyle} search={false} />
         </GalleryCard>
-        <GalleryCard title="Tapback" description="The most-used emoji and an expand button." code={extract(variants, "StyleTapback")} file="styles/variants.tsx">
+        <GalleryCard title="Tapback" description="Frequently used emoji and an expand button." code={extract(variants, "StyleTapback")} file="styles/variants.tsx">
           <TapbackDemo appStyle={appStyle} />
         </GalleryCard>
         <GalleryCard title="Reactions" description="Reaction counts with an add button." code={extract(variants, "StylePills")} file="styles/variants.tsx">

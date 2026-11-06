@@ -5,12 +5,14 @@
       <img src=".github/assets/picker-light.png" width="352" alt="The emoji picker">
     </picture>
   </a>
-  <h1>EmojiPicker</h1>
+  <h1>Emoji Picker</h1>
   <p>A virtualized, unstyled, and composable emoji picker for React.</p>
   <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>
 
-## shadcn/ui
+## Installation
+
+### shadcn/ui
 
 ```bash
 npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
@@ -22,11 +24,15 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 <EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
 ```
 
-## npm
+### npm
 
 ```bash
-npm i @brianhung/emoji-picker-react
+npm i @brianhung/emoji-picker-react@alpha
 ```
+
+The packages are in prerelease and are published under the `alpha` tag.
+
+## Usage
 
 ```tsx
 import { EmojiPicker } from "@brianhung/emoji-picker-react";
@@ -39,15 +45,16 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 </EmojiPicker.Root>
 ```
 
-Parts are unstyled; style them through `className` and `data-*` attributes. English data loads from jsDelivr, pinned to the installed version. See the [React README](packages/react/README.md) for providers, typeahead, and popovers.
+Parts are unstyled. Style them with `className` and `data-*` attributes. The English dataset loads from jsDelivr, pinned to the installed version of `@brianhung/emoji-picker-core`. See the [React README](packages/react/README.md) for providers, typeahead, and popovers.
 
 ## Packages
 
-| Package | |
+| Package | Description |
 |---|---|
-| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks; depends on core |
-| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies; ships English data |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every other Emojibase locale |
+| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks. Depends on core. |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies. Includes the English dataset. |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every other Emojibase locale. |
+| [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer. |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) to work on the repository.
 

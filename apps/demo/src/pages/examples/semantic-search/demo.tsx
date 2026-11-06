@@ -63,7 +63,7 @@ export function Demo() {
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList>
           <TabsTrigger value="device">On device</TabsTrigger>
-          <TabsTrigger value="vector">Vector DB</TabsTrigger>
+          <TabsTrigger value="vector">Vector database</TabsTrigger>
           <TabsTrigger value="decision">Decision model</TabsTrigger>
         </TabsList>
       </Tabs>
