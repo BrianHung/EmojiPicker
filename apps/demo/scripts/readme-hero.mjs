@@ -38,5 +38,5 @@ await server.close();
 const width = (shots[0].info.width + shots[1].info.width) / 2 + GAP;
 const height = Math.max(...shots.map((s) => s.info.height)) / 2;
 const images = shots.map((s, i) => `<image x="${i * (shots[0].info.width / 2 + GAP)}" y="0" width="${s.info.width / 2}" height="${s.info.height / 2}" href="data:image/png;base64,${s.data.toString("base64")}"/>`);
-writeFileSync(out, `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${images.join("")}</svg>\n`);
+writeFileSync(out, `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><title>Emoji picker in light and dark mode</title>${images.join("")}</svg>\n`);
 console.log(out, statSync(out).size);

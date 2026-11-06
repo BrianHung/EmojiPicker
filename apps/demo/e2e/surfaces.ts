@@ -197,13 +197,7 @@ function scene(s: StyleId): Surface[] {
           .locator(`${slot("popoverContent")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
           .filter({ visible: true })
           .last();
-      const react = (p: Page) =>
-        button(
-          sc(p)
-            .locator("div.group")
-            .filter({ hasText: "ok who's in for the lake" }),
-          "React",
-        );
+      const react = (p: Page) => button(sc(p).locator("div.group").filter({ hasText: "ok who's in for the lake" }), "React");
       const openBar = async (p: Page) => {
         const message = sc(p).getByRole("button", { name: /^Maya: ok who's in/ });
         if (await message.count()) await hold(p, message, bar(p));
