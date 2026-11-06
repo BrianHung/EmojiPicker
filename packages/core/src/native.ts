@@ -17,6 +17,7 @@ export interface NativeProbe {
   // true or false once drawn, null when it can't be told, undefined before
   result(unified: string): boolean | null | undefined;
   probed(): Iterable<string>;
+  declares(unified: string): boolean;
 }
 
 export interface NativeSupport {
@@ -25,7 +26,24 @@ export interface NativeSupport {
   countryFlags: boolean;
 }
 
-function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativeProbe {
+const unquote = (family: string) => family.trim().replace(/^(["'])(.*)\1$/, "$2");
+
+const parseRange = (range: string): [number, number] => {
+  const [lo = "", hi = lo] = range.trim().replace(/^u\+/i, "").split("-");
+  return [parseInt(lo.replace(/\?/g, "0"), 16), parseInt(hi.replace(/\?/g, "f"), 16)];
+};
+
+function declaredRanges(fontFamily: string): (unified: string) => boolean {
+  const family = unquote(fontFamily.split(",")[0] ?? "");
+  const ranges: [number, number][] = [];
+  document.fonts?.forEach((face) => {
+    if (unquote(face.family) === family) ranges.push(...face.unicodeRange.split(",").map(parseRange));
+  });
+  const has = (cp: number) => ranges.some(([lo, hi]) => cp >= lo && cp <= hi);
+  return (unified) => ranges.length > 0 && [...unifiedToNative(unified)].every((c) => has(c.codePointAt(0)!));
+}
+
+function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: (unified: string) => boolean): NativeProbe {
   const results = new Map<string, boolean | null>();
   const font = ctx.font;
   const draw = (text: string, y: number, ink: string) => {
@@ -82,6 +100,7 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number): NativePro
     },
     result: (unified) => results.get(unified),
     probed: () => [...results.keys()],
+    declares,
   };
 }
 
@@ -95,7 +114,7 @@ function probeFor(fontFamily: string): NativeProbe | null {
     ctx.font = `24px ${fontFamily}`;
     ctx.textBaseline = "top";
     const baseline = ctx.measureText("😀").width;
-    const candidate = createProbe(ctx, baseline);
+    const candidate = createProbe(ctx, baseline, declaredRanges(fontFamily));
     candidate.prime(["1f600"]);
     const color = Boolean(baseline) && candidate.result("1f600") === true;
     if (color) colorless.delete(fontFamily);
@@ -139,10 +158,12 @@ export function onNativeSupportChange(listener: () => void): () => void {
 }
 
 export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, string>): NativeSupport {
-  probe.prime([FLAG_SAMPLE, ...samples.values()]);
+  // Drawing a sample the web font claims would only fetch its subset (the flags) for a known answer
+  const checked = (unified: string) => !probe.declares(unified);
+  probe.prime([FLAG_SAMPLE, ...samples.values()].filter(checked));
   const failedVersions = new Set<number>();
-  for (const [version, unified] of samples) if (probe.result(unified) === false) failedVersions.add(version);
-  return { probe, failedVersions, countryFlags: probe.result(FLAG_SAMPLE) !== false };
+  for (const [version, unified] of samples) if (checked(unified) && probe.result(unified) === false) failedVersions.add(version);
+  return { probe, failedVersions, countryFlags: !checked(FLAG_SAMPLE) || probe.result(FLAG_SAMPLE) !== false };
 }
 
 export function isNativeSupported(support: NativeSupport | null, unified: string, version: number): boolean {

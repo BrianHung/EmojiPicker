@@ -120,6 +120,18 @@ test("a native emoji takes the image's box whatever the font", async ({ page }) 
   await page.unrouteAll({ behavior: "ignoreErrors" });
 });
 
+test("first paint in Twemoji fetches one font subset", async ({ page }) => {
+  const fonts = new Set<string>();
+  page.on("request", (request) => {
+    const file = request.url().match(/twemoji-\d+(?=\.woff2)/)?.[0];
+    if (file) fonts.add(file);
+  });
+  await visit(page, "/e2e/pages/fonts/");
+  await expect(picker(page).locator(slot("emoji")).first()).toBeVisible();
+  await settle(page);
+  expect([...fonts]).toEqual(["twemoji-0"]);
+});
+
 async function pressUntilFocused(page: Page, target: Locator, key: string) {
   for (let i = 0; i < 10 && !(await target.evaluate((el) => el === document.activeElement)); i++) await page.keyboard.press(key);
   await expect(target).toBeFocused();
