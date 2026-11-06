@@ -13,7 +13,7 @@ export const popoverRoot = rowsOf<PopoverRootProps>()([
   { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },
 ]);
 
-export const popoverTrigger = rowsOf<PopoverTriggerProps>()([{ name: "render", type: "ReactElement | (props, { open }) => ReactElement", description: "Merges props onto this element." }]);
+export const popoverTrigger = rowsOf<PopoverTriggerProps>()([{ name: "render", type: "ReactElement | (props, { open, hovered, pressed, focusVisible, … }) => ReactElement", description: "Merges props onto this element." }]);
 
 export const popoverContent = rowsOf<PopoverContentProps>()([
   { name: "side", type: '"top" | "bottom"', default: '"bottom"', description: "Flips when there isn't room." },
@@ -24,6 +24,7 @@ export const popoverContent = rowsOf<PopoverContentProps>()([
   { name: "anchor", type: "PopoverAnchor", description: "Positions against this (an element, { getBoundingClientRect } or a function) instead of the Trigger." },
   { name: "initialFocus", type: "RefObject | () => HTMLElement | false", default: "pickerInitialFocus", description: "Focused once the content opens; false leaves focus where it is." },
   { name: "finalFocus", type: "HTMLElement | RefObject | () => HTMLElement", default: "the Trigger", description: "Focused once a pick closes the content." },
+  { name: "render", type: "ReactElement | (props, { open, side, align }) => ReactElement", description: "Merges props onto this element." },
   { name: "className", type: "string | ({ open, side, align }) => string | undefined" },
   { name: "duration", type: "number | { open?: number; close?: number }", default: "0", description: "Floating UI only: ms the content stays mounted with data-ending-style after closing." },
 ]);

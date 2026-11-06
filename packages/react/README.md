@@ -35,7 +35,11 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
     <EmojiPicker.SkinTone />
   </EmojiPicker.Search>
   <EmojiPicker.Viewport>
-    <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && "No emoji found."} />
+    <EmojiPicker.List
+      renderEmptyState={({ status, retry }) =>
+        status === "loading" ? "Loading…" : status === "error" ? <button type="button" onClick={retry}>Could not load emoji. Try again</button> : "No emoji found."
+      }
+    />
   </EmojiPicker.Viewport>
 </EmojiPicker.Root>
 ```
@@ -82,7 +86,7 @@ Root
 └ Panel
 ```
 
-Each part renders a default when it has no children, and takes `render` (an element or `(props, state) => element`), `className`, and `style` (values or functions of state). Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Types live on each part, as in Base UI: `EmojiPicker.Root.Props`, `EmojiPicker.Root.State`, `EmojiPicker.Root.Actions`, `EmojiPicker.List.Cell.State`, and so on; the flat names (`RootProps`, `CellState`) are kept. Hooks inside `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useEmojiPickerActions`, `useSearchState`.
+Each part renders a default when it has no children, and takes `render` (an element or `(props, state) => element`), `className`, and `style` (values or functions of state). Parts are also exported individually (`EmojiPickerRoot`, `EmojiPickerList`, …). Types live on each part, as in Base UI: `EmojiPicker.Root.Props`, `EmojiPicker.Root.State`, `EmojiPicker.Root.Actions`, `EmojiPicker.List.Cell.State`, and so on; the flat names (`RootProps`, `CellState`) are kept. Hooks inside `Root`: `useActiveEmoji`, `useCategoryNavigation`, `useCollapsedCategories`, `useEmojiPickerActions`, `useSearchState`. `useEmojiLabels()` returns the provider's localized `EmojiLabels` for parts you render yourself.
 
 | `Root` prop | Description |
 |---|---|
@@ -90,7 +94,7 @@ Each part renders a default when it has no children, and takes `render` (an elem
 | `query`, `value`, `highlight`, `reactionsOpen`, `collapsedCategories` | Controllable as `x` / `defaultX` / `onXChange(value, details)`; see [Controlled state](#controlled-state) |
 | `categories`, `frequent`, `suggested`, `emojiVersion` | Section order, names, icons (`nav: false` hides a tab), frequents, and filtering |
 | `columns` | `"fit"` (default) fits the width; a number is exactly that many per row |
-| `reactions` | Shows `Reactions`, a row that expands into the picker in `Panel`; see [Reactions](#reactions-and-emoji) |
+| `reactions` | Shows `Reactions`, a row that expands into the picker in `Panel`: a list of emoji, or a number for that many of the most frequently used; see [Reactions](#reactions-and-emoji) |
 | `searchResults`, `searchLimit` | `"ranked"` (one list) or `"grouped"` (sections in rank order) |
 | `onKeyDown`, `actionsRef`, `keyboardTarget` | See [Keyboard](#keyboard) |
 | `disableVariations` | Disables the long-press skin-tone menu |
@@ -101,7 +105,7 @@ Every part but `List` can be your own Base UI, React Aria, or shadcn/ui componen
 |---|---|
 | `Search` | `useSearchState()` for the query and count; an input you render drives the grid as `keyboardTarget` |
 | `SkinTone` | `useSkinTone()` returns `[tone, setTone]` |
-| `CategoryNav` | `useCategoryNavigation()` returns `{ categories, activeCategory, jumpToCategory }` |
+| `CategoryNav` | `useCategoryNavigation()` returns `{ categories, activeCategory, jumpToCategory }`; `jumpToCategory` expands a collapsed section first. `DefaultCategoryIcon` draws the built-in icons |
 | `Reactions` | `useFrequentEmoji({ limit })` for the items, `useEmojiPickerActions()` to pick or expand |
 | `EmojiPopover` | Any popover, with `pickerInitialFocus` as its initial focus |
 | `List` | Owned here, since Base UI has no virtualization; bring a virtualizer with `useEmojiGrid` and `useEmojiCell` |
@@ -133,12 +137,12 @@ Every controllable state takes `x`, `defaultX` and `onXChange(value, details)`. 
 |---|---|
 | Root `query` | `"input-change"`, `"escape-key"`, `"imperative-action"`, `"none"` |
 | Root `highlight` | `"keyboard"`, `"pointer"`, `"imperative-action"`, `"none"` |
-| Root `value` | `"item-press"` |
+| Root `value` | `"item-press"`; `onValueChange` receives `string \| null`, as Base UI's Select |
 | Root `collapsedCategories` | `"trigger-press"`, `"none"` |
 | Root `reactionsOpen` | `"trigger-press"` (Expand), `"item-press"` (`details.collapse()` in `onSelect`), `"none"` |
 | `SkinTone` `open` | `"trigger-press"`, `"outside-press"`, `"escape-key"`, `"item-press"`, `"imperative-action"`, `"none"` |
 | `EmojiPopover.Root` `open`, `EmojiSuggestions.Popover` | `"trigger-press"`, `"outside-press"`, `"escape-key"`, `"item-press"`, `"focus-out"`, `"scroll"`, `"imperative-action"`, `"none"` |
-| Provider `skinTone` | `"option-press"`, `"none"` |
+| Provider `skinTone` | `"item-press"`, `"none"` |
 | Provider `frequents` | `"pick"`, `"remove"`, `"clear"`, with `details.emoji` |
 
 `allowPropagation()` lets an `"escape-key"` change of Root `query` or `SkinTone` `open` reach the page, such as a dialog around the picker. Other changes don't stop the event.
@@ -173,7 +177,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 </EmojiPopover.Root>
 ```
 
-Content exposes `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin` and `--available-height` for CSS transitions; `/floating-ui` also sets `--available-width`.
+`EmojiPopover.Content` takes `render`, `className` and `style` like the parts; types are namespaced (`EmojiPopover.Root.Props`, `EmojiPopover.Trigger.State`, `EmojiPopover.Content.State`). Content exposes `data-open`, `data-closed`, `data-starting-style`, `data-ending-style`, `data-side`, `data-align`, `--transform-origin` and `--available-height` for CSS transitions; `/floating-ui` also sets `--available-width`.
 
 ## Typeahead
 
@@ -201,9 +205,7 @@ Tiptap, Lexical and ProseMirror adapters are registry items (`emoji-tiptap.json`
 ## Reactions and emoji
 
 ```tsx
-const { items } = useFrequentEmoji({ limit: 5 });
-
-<EmojiPicker.Root reactions={items} onSelect={(selection, { collapse }) => (react(selection), collapse?.())}>
+<EmojiPicker.Root reactions={5} onSelect={(selection, { collapse }) => (react(selection), collapse?.())}>
   <EmojiPicker.Reactions selected={mine} />
   <EmojiPicker.Panel>…</EmojiPicker.Panel>
 </EmojiPicker.Root>
