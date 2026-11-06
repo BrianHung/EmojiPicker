@@ -34,6 +34,9 @@ const C = {
 type Message = { id: number; author: string; color: string; nameColor?: string; time: string; lines: string[]; reactions: Reaction[] };
 
 const INITIAL: Message[] = [
+  { id: 11, author: "Bufo", color: "#8b5cf6", nameColor: "var(--discord-role-blue)", time: "Today at 9:12 AM", lines: ["gm 🐸"], reactions: [] },
+  { id: 12, author: "Jordan", color: "#22c55e", time: "Today at 9:30 AM", lines: ["bufo it's 9:30"], reactions: [] },
+  { id: 13, author: "Bufo", color: "#8b5cf6", nameColor: "var(--discord-role-blue)", time: "Today at 9:31 AM", lines: ["gm is a state of mind ☕"], reactions: [{ unified: "1f602", count: 2, mine: false }, { unified: "1f438", count: 1, mine: true }] },
   { id: 1, author: "Maya", color: "#f97316", nameColor: "var(--discord-role-gold)", time: "Today at 9:41 AM", lines: ["morning! the new build is up on staging 🎉", "give it a spin when you get a sec"], reactions: [] },
   {
     id: 2,
@@ -93,11 +96,12 @@ function Channel({ compact = false }: { compact?: boolean }) {
   return (
     <>
       {compact ? <MobileHeader /> : <Header />}
-      <div ref={list} className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto [scrollbar-width:none]", compact ? "pb-4" : "pb-[26px]")}>
-        <div className="mt-auto" />
-        {messages.map((m) => (
-          <DiscordMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
-        ))}
+      <div ref={list} className={cn("flex min-h-0 flex-1 flex-col-reverse overflow-y-auto [scrollbar-width:none]", compact ? "pb-4" : "pb-[26px]")}>
+        <div className="flex shrink-0 flex-col">
+          {messages.map((m) => (
+            <DiscordMessage key={m.id} message={m} onToggle={(u) => toggle(m.id, u)} compact={compact} />
+          ))}
+        </div>
       </div>
       <Composer onSend={send} compact={compact} />
     </>
