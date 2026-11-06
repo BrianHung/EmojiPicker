@@ -68,9 +68,11 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const el = list && scroller(list);
       if (!el || !list) return;
       const rtl = dir === "rtl";
-      // Sticky titles pin at the scroller's edge, not inside its padding
+      // Sticky titles pin at the scroller's edge, not inside its padding, and overlap it by over a device pixel so its antialiased edge never shows the cells beneath
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
-      content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding})`);
+      const box = el.getBoundingClientRect();
+      const scale = (horizontal ? box.width / el.offsetWidth : box.height / el.offsetHeight) || 1;
+      content.current?.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${1.5 / ((window.devicePixelRatio || 1) * scale)}px)`);
       const offset = visibleOffset(el, list, horizontal, rtl);
       const width = list.clientWidth;
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);

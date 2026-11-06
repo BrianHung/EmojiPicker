@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import sharp from "sharp";
 import { clearTextField, SURFACES } from "./surfaces";
 import { expect, frames, quiet, settle, test, visit } from "./support";
 
@@ -67,24 +68,29 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
   expect(await page.getByRole("listbox", { name: "Emoji suggestions" }).locator("[data-highlighted]").evaluate(outline)).toBe("solid 2px");
 });
 
-for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover"])
-  test(`${id}: a pinned section title sits flush with the top, padding or not`, async ({ page }) => {
+for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover", "home/hero-notion"])
+  test(`${id}: a pinned section title covers the top edge, padding or not`, async ({ page }) => {
     const surface = SURFACES.find((s) => s.id === id)!;
     await visit(page, surface.path);
+    await surface.prepare?.(page);
     await surface.open(page);
     await quiet(page);
-    const gap = await surface
-      .root(page)
-      .locator('[data-slot="emoji-picker-viewport"]')
-      .first()
-      .evaluate(async (viewport) => {
-        viewport.scrollBy(0, 330);
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const top = viewport.getBoundingClientRect().top;
-        const pinned = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
-        return pinned ? pinned.top - top : null;
-      });
-    expect(gap).toBe(0);
+    const viewport = surface.root(page).locator('[data-slot="emoji-picker-viewport"]').first();
+    const gap = await viewport.evaluate(async (el) => {
+      el.scrollTop = 374.5;
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const top = el.getBoundingClientRect().top;
+      const pinned = [...el.querySelectorAll('[data-slot="emoji-picker-section-title"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
+      return pinned ? pinned.top - top : null;
+    });
+    expect(gap).toBeLessThanOrEqual(0);
+    expect(gap).toBeGreaterThan(-1);
+    const box = (await viewport.boundingBox())!;
+    const shot = await page.screenshot({ clip: { x: box.x, y: box.y, width: box.width - 16, height: 1 }, scale: "device" });
+    const { data, info } = await sharp(shot).raw().toBuffer({ resolveWithObject: true });
+    let leaked = 0;
+    for (let i = 0; i < data.length; i += info.channels) if (Math.max(data[i]!, data[i + 1]!, data[i + 2]!) - Math.min(data[i]!, data[i + 1]!, data[i + 2]!) > 60) leaked++;
+    expect(leaked, "emoji pixels above the pinned title").toBe(0);
   });
 
 test("a popover's picker fits a short viewport", async ({ page }) => {
