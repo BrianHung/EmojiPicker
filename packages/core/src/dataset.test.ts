@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import data from "../data/en.json";
-import { expandDataset, toDataset, unifiedToNative, withTone, type Dataset } from "./dataset";
+import { en } from "../test/en";
+import { expandDataset, toDataset, unifiedToNative, withTone } from "./dataset";
 
-const records = expandDataset(data as unknown as Dataset);
+const records = expandDataset(en);
 
 describe("dataset", () => {
   it("computes skin tones like emojibase", () => {

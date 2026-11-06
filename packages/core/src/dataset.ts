@@ -31,6 +31,8 @@ export const SKIN_TONES = ["1f3fb", "1f3fc", "1f3fd", "1f3fe", "1f3ff"] as const
 
 export type SkinToneValue = 0 | 1 | 2 | 3 | 4 | 5;
 
+export const SKIN_TONE_VALUES: readonly SkinToneValue[] = [0, 1, 2, 3, 4, 5];
+
 const TONE_CODES = new Set<string>(SKIN_TONES);
 
 export const withoutTone = (unified: string) =>
@@ -73,8 +75,12 @@ export const unifiedToNative = (unified: string) => (isUnified(unified) ? String
 
 export const nativeToUnified = (text: string) => [...text].map((c) => c.codePointAt(0)!.toString(16)).join("-");
 
+// A prebuilt dataset, not an EmojiDataInput to convert: format 1, with tone exceptions and emojis as tuples
+export const isDataset = (value: Dataset | EmojiDataInput): value is Dataset =>
+  "format" in value && value.format === 1 && "toneExceptions" in value && Array.isArray(value.groups) && (value.emojis.length === 0 || Array.isArray(value.emojis[0]));
+
 export function toDataset(data: Dataset | EmojiDataInput): Dataset {
-  if ("format" in data) return data;
+  if (isDataset(data)) return data;
   return {
     format: 1,
     locale: data.locale,

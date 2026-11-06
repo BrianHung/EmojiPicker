@@ -64,7 +64,8 @@ const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.v
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Input");
   const { labels } = picker;
-  useLayoutEffect(picker.state.registerInput, [picker.state]);
+  const { registerInput } = picker.state;
+  useLayoutEffect(() => registerInput(), [registerInput]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const focusOnMount = autoFocus ?? picker.inPopover;
   const inField = React.useContext(FieldContext);
@@ -82,6 +83,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
     { stopSkipped: true },
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: autoFocus, once on mount
   React.useEffect(() => {
     if (focusOnMount && !picker.inPopover) own.current?.focus({ preventScroll: true });
   }, []);
@@ -94,7 +96,7 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(functio
         onKeyDownCapture={keys}
         type="text"
         role="searchbox"
-        {...racParts<InteractionState, HTMLInputElement>("input", { className, style, render })}
+        {...racParts<HTMLInputElement>("input", { className, style, render })}
         placeholder={placeholder ?? labels.searchPlaceholder}
         aria-label={props["aria-label"] ?? labels.searchLabel}
         data-slot={SLOTS.searchInput}

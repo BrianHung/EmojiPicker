@@ -1,4 +1,4 @@
-import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
 import { EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "@/styles/notion/picker";
@@ -41,7 +41,7 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
   );
 }
 
-function Sections({ suggestions }: { suggestions: readonly ShortcodeSuggestion[] }) {
+function Sections({ suggestions }: { suggestions: readonly ShortcodeCompletion[] }) {
   const store = useEmojiStore();
   const actions = useEmojiPickerActions();
   const { jumpToCategory } = useCategoryNavigation();

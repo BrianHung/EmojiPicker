@@ -101,7 +101,7 @@ Root
 
 | Hook | Scope |
 |---|---|
-| `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, `useSearchState` (`SearchStateValue`) | Inside `Root`; throws outside |
+| `useActiveEmoji`, `useCategoryNavigation` (`CategoryNavigation`), `useCollapsedCategories` (`CollapsedCategories`), `useEmojiPickerActions`, `useSearchState` (`SearchSummary`) | Inside `Root`; throws outside |
 | `useEmojiLabels()` (`EmojiLabels`), `useEmojiStore()`, `useEmojiStatus()`, `useSkinTone()`, `useFrequentEmoji()`, `useEmojiSearch()`, `useEmoji()` | Anywhere |
 
 ## API reference
@@ -138,7 +138,7 @@ Root
 | Prop | Description |
 |---|---|
 | `data` | A URL, `Dataset`, `EmojiDataInput`, or `({ signal }) => Promise<Dataset \| EmojiDataInput>`. Default: core's `data/en.json` from jsDelivr, pinned to the core version. A URL reloads when it changes; an inline loader runs once, and again when `locale` changes. A dataset object without `customEmojis` renders on the first pass, including on the server. |
-| `locale`, `labels` | Search folding and segmentation, A–Z order, result-count formatting, text direction, and `EmojiLabels` strings |
+| `locale`, `labels` | Search folding and segmentation, A–Z order, text direction, and `EmojiLabels` strings |
 | `searchEngine` | An `EmojiSearch`. See [Search](#search). |
 | `customEmojis` | A `CustomEmoji`, pack URL, or loader, or an array of them; reloads when the contents change. See [Custom emoji](https://emoji.brianhung.me/examples/custom-emoji/). |
 | `filter` | `(record) => boolean`. Removes emoji, custom emoji included, from pickers and search. |
@@ -314,7 +314,7 @@ import { localeData } from "@brianhung/emoji-picker-core";
 |---|---|
 | `localeData(locale, { shortcodes, baseUrl })` | jsDelivr URL of a `@brianhung/emoji-picker-data` dataset, with localized names, tags, and section names |
 | `shortcodes` | `"iamcal"` (default; English in every locale), `"cldr"` (the locale's language), … |
-| `locale` | Search folding and segmentation, A–Z order, result-count formatting, text direction |
+| `locale` | Search folding and segmentation, A–Z order, text direction |
 | `labels` | A partial `EmojiLabels` |
 
 | Label | Default |
@@ -322,7 +322,7 @@ import { localeData } from "@brianhung/emoji-picker-core";
 | `picker` | `"Emoji picker"` |
 | `searchPlaceholder`, `searchLabel`, `searchClear`, `searchResults` | `"Search"`, `"Type to search for an emoji"`, `"Clear"`, `"Search results"` |
 | `emojiList`, `categoryNavigation` | `"Emoji"`, `"Category navigation"` |
-| `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`, with `locale`'s plural rules and digits |
+| `resultCount(count)` | `"No results"`, `"1 result"`, `"# results"`; with an i18n library, `resultCount: (n) => t("results", { count: n })` |
 | `suggested`, `custom` | `"Frequently used"`, `"Custom"` (section names) |
 | `reactions`, `expandReactions` | `"Reactions"`, `"More emoji"` |
 | `previewCaption` | `"What's your mood?"` |

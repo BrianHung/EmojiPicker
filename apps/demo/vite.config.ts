@@ -47,7 +47,8 @@ document.head.append(link);`;
         for (const file of Object.keys(bundle)) if (/ort-wasm.*\.wasm$/.test(file)) delete bundle[file];
       },
     },
-    cloudflare({ remoteBindings: process.env.CLOUDFLARE_REMOTE_BINDINGS === "1" }),
+    // No inspector: worktrees run dev servers side by side, and it takes a fixed port
+    cloudflare({ remoteBindings: process.env.CLOUDFLARE_REMOTE_BINDINGS === "1", inspectorPort: false }),
   ],
   resolve: {
     conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],

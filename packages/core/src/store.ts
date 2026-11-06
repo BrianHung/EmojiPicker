@@ -1,10 +1,10 @@
 import { expandDataset, SKIN_TONES, toDataset, unifiedToNative, type Dataset, type EmojiDataInput, type EmojiRecord, type SkinToneValue } from "./dataset";
-import { createChangeDetails, type ChangeDetails } from "./change";
+import { controllable, createChangeDetails, type ChangeDetails } from "./change";
 import { customRecords, customSources, loadCustomEmojis, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, localStorageAdapter, syncWith, type EmojiStorage, type FrequencyStore, type Frequents, type FrequentsChangeDetails, type FrequentsTuning } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
-import { cached, createStore, memo } from "./reactive";
+import { cached, createStore, fetchJson, memo, toError } from "./reactive";
 import type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./search/search-index";
 import { indexFor, interimOf, isThenable, lexical, withInterim, type EmojiSearch, type ProgressiveHits, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
@@ -13,7 +13,7 @@ export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { s
 
 export type { CustomEmoji, CustomEmojiLoader, CustomEmojiSource } from "./custom";
 
-export type EmojiStoreOptions = {
+export interface EmojiStoreOptions {
   data?: EmojiDataSource;
   customEmojis?: CustomEmojiSource | readonly CustomEmojiSource[];
   filter?: (record: EmojiRecord) => boolean;
@@ -30,7 +30,7 @@ export type EmojiStoreOptions = {
   // Server-rendered pages hydrate with the defaults, then read storage once something subscribes
   deferStorage?: boolean;
   frequentsTuning?: FrequentsTuning;
-};
+}
 
 export type EmojiStoreUpdate = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "searchEngine" | "locale" | "skinTone" | "onSkinToneChange" | "frequents" | "onFrequentsChange">;
 
@@ -38,7 +38,7 @@ export type SkinToneChangeDetails = ChangeDetails<"item-press" | "none">;
 
 export type EmojiStoreStatus = "idle" | "loading" | "ready" | "error";
 
-export type EmojiSelection = {
+export interface EmojiSelection {
   emoji: string;
   unified: string;
   baseUnified: string;
@@ -48,15 +48,17 @@ export type EmojiSelection = {
   skinTone: SkinToneValue;
   isCustom: boolean;
   imageUrl?: string;
-};
+}
 
-export type EmojiStore = {
+export interface EmojiStore {
   readonly frequents: FrequencyStore;
   subscribe(listener: () => void): () => void;
   setOptions(options: EmojiStoreUpdate): void;
   load(): Promise<void>;
   prepare(): void;
   status(): EmojiStoreStatus;
+  // Changes whenever the records, locale, or search engine do: a key for anything derived from them
+  version(): number;
   error(): Error | null;
   records(): readonly EmojiRecord[];
   groupNames(): readonly string[];
@@ -75,9 +77,9 @@ export type EmojiStore = {
   setSkinTone(tone: SkinToneValue, options?: { reason?: SkinToneChangeDetails["reason"]; event?: Event }): void;
   withSkinTone(unified: string): string;
   select(unified: string, options?: { count?: boolean }): EmojiSelection | undefined;
-};
+}
 
-export type EmojiData = {
+type EmojiData = {
   records: readonly EmojiRecord[];
   byUnified: ReadonlyMap<string, EmojiRecord>;
   groupNames: readonly string[];
@@ -92,11 +94,10 @@ type State = {
   error: Error | null;
   loading: Promise<void> | null;
   data: EmojiData;
+  version: number;
   ownTone: SkinToneValue;
   controlledTone: SkinToneValue | undefined;
 };
-
-export type InternalStore = EmojiStore & { getSnapshot(): State };
 
 type Action = { type: "load"; loading: Promise<void> | null } | { type: "loaded"; data: EmojiData } | { type: "failed"; error: Error } | { type: "tone"; tone: SkinToneValue } | { type: "control"; tone: SkinToneValue | undefined };
 
@@ -105,13 +106,15 @@ const reduce = (state: State, action: Action): State => {
     case "load":
       return { ...state, status: state.status === "ready" ? "ready" : action.loading ? "loading" : "idle", loading: action.loading };
     case "loaded":
-      return { ...state, status: "ready", error: null, data: action.data };
+      return { ...state, status: "ready", error: null, data: action.data, version: state.version + 1 };
     case "failed":
       return { ...state, status: "error", error: action.error, loading: null };
     case "tone":
       return action.tone === state.ownTone ? state : { ...state, ownTone: action.tone };
     case "control":
       return action.tone === state.controlledTone ? state : { ...state, controlledTone: action.tone };
+    default:
+      return action satisfies never;
   }
 };
 
@@ -138,9 +141,7 @@ const toned = (data: EmojiData, tone: SkinToneValue, unified: string): string =>
   return (tone && record?.tones[tone - 1]) || unified;
 };
 
-export const createEmojiStore: (options?: EmojiStoreOptions) => EmojiStore = createInternalStore;
-
-export function createInternalStore({
+export function createEmojiStore({
   frequents: controlledFrequents,
   defaultFrequents,
   onFrequentsChange,
@@ -152,7 +153,7 @@ export function createInternalStore({
   labels: labelOverrides,
   deferStorage = false,
   ...source
-}: EmojiStoreOptions = {}): InternalStore {
+}: EmojiStoreOptions = {}): EmojiStore {
   const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, storage: frequentsStorage, tuning: frequentsTuning, deferStorage });
   let config: Source = source;
   let raw: Raw | null = null;
@@ -171,7 +172,7 @@ export function createInternalStore({
     return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customs: emojis, customGroups: new Map(emojis.map((c) => [c.id, c.group])), packErrors: errors };
   };
   const storedTone = () => clampTone(Number(skinToneStorage?.read() ?? defaultSkinTone));
-  const state = createStore<State, Action>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, ownTone: deferStorage ? clampTone(defaultSkinTone) : storedTone(), controlledTone }, reduce);
+  const state = createStore<State, Action>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, version: 0, ownTone: deferStorage ? clampTone(defaultSkinTone) : storedTone(), controlledTone }, reduce);
   const loaded = () => state.getSnapshot().data;
   const ready = () => state.getSnapshot().status === "ready";
   const publish = (next: Raw) => state.dispatch({ type: "loaded", data: build(next) });
@@ -186,12 +187,21 @@ export function createInternalStore({
   };
   const known = memo((ranked: readonly string[], data: EmojiData, isReady: boolean) => ranked.filter((u) => (isReady ? lookup(data, u) : CODEPOINTS.test(u))));
   const tops = new WeakMap<readonly string[], Map<number, readonly string[]>>();
-  const labelsFor = memo((locale: string | undefined) => localizeLabels(locale, labelOverrides));
+  const labels = localizeLabels(labelOverrides);
   const indexOf = memo((records: readonly EmojiRecord[], locale: string | undefined) => indexFor(records, { locale }));
 
-  const store: InternalStore = {
+  const tone = controllable<SkinToneValue, SkinToneChangeDetails>({
+    controlled: () => state.getSnapshot().controlledTone,
+    own: () => state.getSnapshot().ownTone,
+    onChange: () => onToneChange,
+    write(value) {
+      skinToneStorage?.write(String(value));
+      state.dispatch({ type: "tone", tone: value });
+    },
+  });
+
+  const store: EmojiStore = {
     frequents,
-    getSnapshot: state.getSnapshot,
     customEmojis: (): readonly CustomEmoji[] => loaded().customs,
     customGroups: (): ReadonlyMap<string, string | undefined> => loaded().customGroups,
     packErrors: (): readonly Error[] => loaded().packErrors,
@@ -207,7 +217,7 @@ export function createInternalStore({
         },
         (e: unknown) => {
           if (controller !== current) return;
-          const error = e instanceof Error ? e : new Error(String(e));
+          const error = toError(e);
           state.dispatch({ type: "failed", error });
           throw error;
         },
@@ -239,11 +249,12 @@ export function createInternalStore({
     },
 
     status: () => state.getSnapshot().status,
+    version: () => state.getSnapshot().version,
     error: () => state.getSnapshot().error,
     records: (): readonly EmojiRecord[] => loaded().records,
     groupNames: () => loaded().groupNames,
     locale: () => loaded().locale,
-    labels: (): EmojiLabels => labelsFor(loaded().locale),
+    labels: (): EmojiLabels => labels,
 
     get: (unified: string) => lookup(loaded(), unified),
 
@@ -270,18 +281,10 @@ export function createInternalStore({
     completeShortcode: (prefix, limit, order) => (ready() ? index().completeShortcode(prefix, limit, order) : []),
     replaceShortcodes: (text) => (ready() ? replaceShortcodes(text, index()) : text),
 
-    skinTone: () => {
-      const { controlledTone, ownTone } = state.getSnapshot();
-      return controlledTone === undefined ? ownTone : clampTone(controlledTone);
-    },
+    skinTone: () => clampTone(tone.value()),
     setSkinTone(next, { reason = "none", event } = {}) {
       const value = clampTone(next);
-      if (value === store.skinTone()) return;
-      const details = createChangeDetails(reason, event);
-      onToneChange?.(value, details);
-      if (details.isCanceled || state.getSnapshot().controlledTone !== undefined) return;
-      skinToneStorage?.write(String(value));
-      state.dispatch({ type: "tone", tone: value });
+      if (value !== store.skinTone()) tone.set(value, createChangeDetails(reason, event));
     },
     select(unified, { count = true } = {}) {
       const record = store.get(unified);
@@ -313,19 +316,10 @@ export function createInternalStore({
 
 const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 && n <= SKIN_TONES.length ? (n as SkinToneValue) : 0);
 
-const byUrl = new Map<string, Promise<Dataset | EmojiDataInput>>();
-
 function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset | EmojiDataInput> {
   if (typeof source === "function") return source({ signal });
   if (typeof source !== "string") return Promise.resolve(source);
-  return cached(byUrl, source, () => {
-    const pending = fetch(source, { priority: "low" } as RequestInit).then((response) => {
-      if (!response.ok) throw new Error(`emoji data: ${response.status} ${response.statusText}`);
-      return response.json() as Promise<Dataset | EmojiDataInput>;
-    });
-    pending.catch(() => byUrl.delete(source));
-    return pending;
-  });
+  return fetchJson<Dataset | EmojiDataInput>(source, "emoji data");
 }
 
 function idle(fn: () => void) {

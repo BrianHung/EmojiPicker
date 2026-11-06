@@ -1,12 +1,15 @@
-export type Store<State, Action> = {
+export type Listener = () => void;
+export type Subscribe = (listener: Listener) => () => void;
+
+export interface Store<State, Action> {
   getSnapshot(): State;
-  subscribe(listener: () => void): () => void;
+  subscribe: Subscribe;
   dispatch(action: Action): void;
-};
+}
 
 export function createStore<State, Action>(initial: State, reduce: (state: State, action: Action) => State): Store<State, Action> {
   let state = initial;
-  const listeners = new Set<() => void>();
+  const listeners = new Set<Listener>();
   return {
     getSnapshot: () => state,
     subscribe(listener) {
@@ -17,28 +20,33 @@ export function createStore<State, Action>(initial: State, reduce: (state: State
       const next = reduce(state, action);
       if (Object.is(next, state)) return;
       state = next;
-      listeners.forEach((listener) => listener());
+      for (const listener of listeners) listener();
     },
   };
 }
 
+export const shallowEqual = <T extends object>(a: T, b: T, eq: (x: T[keyof T], y: T[keyof T]) => boolean = Object.is): boolean => {
+  const keys = Object.keys(b) as (keyof T)[];
+  return keys.length === Object.keys(a).length && keys.every((k) => eq(a[k], b[k]));
+};
+
+// The patch's fields merged in, or the same object when none of them changes
+export const patch = <T extends object>(state: T, fields: Partial<T>): T => ((Object.keys(fields) as (keyof T)[]).every((k) => Object.is(state[k], fields[k])) ? state : { ...state, ...fields });
+
 const sameArgs = (a: readonly unknown[], b: readonly unknown[]) => a.length === b.length && a.every((x, i) => Object.is(x, b[i]));
-const sameFields = <T extends object>(a: T, b: T) => (Object.keys(b) as (keyof T)[]).every((k) => Object.is(a[k], b[k]));
 
 export function memo<A extends unknown[], R>(fn: (...args: A) => R): (...args: A) => R {
-  const last = createStore<{ args: A; value: R } | null, A>(null, (prev, args) => (prev && sameArgs(prev.args, args) ? prev : { args, value: fn(...args) }));
+  let last: { args: A; value: R } | undefined;
   return (...args) => {
-    last.dispatch(args);
-    return last.getSnapshot()!.value;
+    if (!last || !sameArgs(last.args, args)) last = { args, value: fn(...args) };
+    return last.value;
   };
 }
 
+// The previous object while every field is the same, so snapshots keep their identity
 export function stable<T extends object>(): (next: T) => T {
-  const last = createStore<T | null, T>(null, (prev, next) => (prev && sameFields(prev, next) ? prev : next));
-  return (next) => {
-    last.dispatch(next);
-    return last.getSnapshot()!;
-  };
+  let last: T | undefined;
+  return (next) => (last = last && shallowEqual(last, next) ? last : next);
 }
 
 type Cache<K, V> = { get(key: K): V | undefined; set(key: K, value: V): unknown };
@@ -52,8 +60,26 @@ export function cached<K, V>(cache: Cache<K, V>, key: K, create: () => V): V {
 }
 
 export const subscribeAll =
-  (...subscribes: ((listener: () => void) => () => void)[]) =>
-  (listener: () => void) => {
+  (...subscribes: Subscribe[]): Subscribe =>
+  (listener) => {
     const offs = subscribes.map((subscribe) => subscribe(listener));
-    return () => offs.forEach((off) => off());
+    return () => {
+      for (const off of offs) off();
+    };
   };
+
+export const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));
+
+const byUrl = new Map<string, Promise<unknown>>();
+
+// One request per URL; a failure is forgotten so a retry fetches again
+export function fetchJson<T>(url: string, label: string): Promise<T> {
+  return cached(byUrl, url, () => {
+    const pending = fetch(url, { priority: "low" }).then((response) => {
+      if (!response.ok) throw new Error(`${label}: ${response.status} ${response.statusText}`);
+      return response.json();
+    });
+    pending.catch(() => byUrl.delete(url));
+    return pending;
+  }) as Promise<T>;
+}

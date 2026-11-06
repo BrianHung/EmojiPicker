@@ -1,43 +1,24 @@
 import type { Key, KeyboardDelegate } from "@react-types/shared";
-import { type EmojiGrid, type EmojiGridMove, moveInGrid, rowsPerPage } from "../state/grid";
-import type { EmojiSection } from "../state/sections";
-import { columnsPerPage, moveInStrip, pageInStrip, type StripKey, type StripLayout } from "./strip-layout";
+import type { EmojiGridMove } from "@brianhung/emoji-picker-core";
+import { createGridNavigation, type NavigationSource } from "@brianhung/emoji-picker-core/grid";
 
-type NavigationSource = { grid: EmojiGrid<EmojiSection>; strip: StripLayout | null; metrics: { cellHeight: number; headerHeight: number } };
+export interface GridKeyboardDelegate extends KeyboardDelegate {
+  move(key: Key, move: EmojiGridMove, viewport?: number): Key | null;
+  getFirstKey(): Key | null;
+  getLastKey(): Key | null;
+}
 
-const STRIP: Partial<Record<EmojiGridMove, StripKey>> = { up: "ArrowUp", down: "ArrowDown", left: "ArrowLeft", right: "ArrowRight" };
-
-export class EmojiGridNavigation implements KeyboardDelegate {
-  constructor(private source: () => NavigationSource) {}
-
-  move(key: Key, move: EmojiGridMove, viewport = 0): Key | null {
-    const { grid, strip, metrics } = this.source();
-    const index = grid.indexOf(String(key));
-    const page = move === "page-up" || move === "page-down";
-    const next =
-      strip && STRIP[move]
-        ? moveInStrip(strip, index, STRIP[move])
-        : strip && page
-          ? pageInStrip(strip, index, move === "page-down" ? 1 : -1, columnsPerPage(strip, viewport))
-          : moveInGrid(grid, index, move, rowsPerPage(viewport, metrics.cellHeight, metrics.headerHeight));
-    return index < 0 || next == null ? null : (grid.at(next)?.id ?? null);
-  }
-
-  getKeyBelow = (key: Key) => this.move(key, "down");
-  getKeyAbove = (key: Key) => this.move(key, "up");
-  getKeyRightOf = (key: Key) => this.move(key, "right");
-  getKeyLeftOf = (key: Key) => this.move(key, "left");
-  getFirstKey = () => this.source().grid.at(0)?.id ?? null;
-  getLastKey = () => this.source().grid.at(this.source().grid.count - 1)?.id ?? null;
-
-  getKeyForSearch = (search: string, fromKey?: Key | null) => {
-    const { grid } = this.source();
-    const text = search.toLocaleLowerCase();
-    const start = Math.max(0, fromKey == null ? 0 : grid.indexOf(String(fromKey)));
-    for (let n = 0; n < grid.count; n++) {
-      const item = grid.at((start + n) % grid.count)!;
-      if (item.label.toLocaleLowerCase().startsWith(text)) return item.id;
-    }
-    return null;
+// Core's grid navigation as React Aria's keyboard delegate
+export function gridKeyboardDelegate(source: () => NavigationSource): GridKeyboardDelegate {
+  const navigation = createGridNavigation(source);
+  return {
+    move: (key, move, viewport) => navigation.move(String(key), move, viewport),
+    getKeyBelow: (key) => navigation.move(String(key), "down"),
+    getKeyAbove: (key) => navigation.move(String(key), "up"),
+    getKeyRightOf: (key) => navigation.move(String(key), "right"),
+    getKeyLeftOf: (key) => navigation.move(String(key), "left"),
+    getFirstKey: navigation.first,
+    getLastKey: navigation.last,
+    getKeyForSearch: (search, from) => navigation.search(search, from == null ? null : String(from)),
   };
 }

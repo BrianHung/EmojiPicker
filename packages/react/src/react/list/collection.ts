@@ -1,7 +1,12 @@
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiItem, EmojiSection } from "../state/sections";
+import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 
-const node = (type: string, key: Key, value: unknown, textValue: string, childNodes: Node<unknown>[] = [], parentKey: Key | null = null): Node<unknown> => ({
+export type CollectionValue = EmojiSection | EmojiItem;
+export type CollectionNode = Node<CollectionValue>;
+
+export const isSection = (value: CollectionValue | null): value is EmojiSection => value != null && "items" in value;
+
+const node = (type: "section" | "header" | "item", key: Key, value: CollectionValue, textValue: string, childNodes: CollectionNode[] = [], parentKey: Key | null = null): CollectionNode => ({
   type,
   key,
   value,
@@ -14,64 +19,81 @@ const node = (type: string, key: Key, value: unknown, textValue: string, childNo
   parentKey,
 });
 
-export class EmojiCollection implements Collection<Node<unknown>> {
-  private readonly nodes: Node<unknown>[] = [];
-  private readonly top: Node<unknown>[] = [];
-  private readonly positions = new Map<Key, number>();
+// Items keep their node across collections, so the virtualizer reuses its views
+const itemNodes = new WeakMap<EmojiItem, CollectionNode>();
+const itemNode = (item: EmojiItem) => {
+  const hit = itemNodes.get(item);
+  if (hit) return hit;
+  const created = node("item", item.id, item, item.label, [], item.section);
+  itemNodes.set(item, created);
+  return created;
+};
+
+// React Aria's collection over the picker's sections: a section, its title, then its items
+export class EmojiCollection implements Collection<CollectionNode> {
+  readonly #nodes: CollectionNode[] = [];
+  readonly #top: CollectionNode[] = [];
+  readonly #positions = new Map<Key, number>();
+  readonly #items = new Map<Key, EmojiItem>();
+  readonly #sections: EmojiSection[] = [];
 
   constructor(sections: readonly EmojiSection[]) {
     for (const s of sections) {
       const header = s.header ? [node("header", `header:${s.id}`, s, s.name, [], s.id)] : [];
-      const children = [...header, ...(s.items as unknown as readonly Node<unknown>[])];
-      this.add(node("section", s.id, s, s.name, children), true);
-      for (const child of children) this.add(child);
+      const children = [...header, ...s.items.map(itemNode)];
+      this.#sections.push(s);
+      this.#add(node("section", s.id, s, s.name, children), true);
+      for (const child of children) this.#add(child);
+      for (const item of s.items) this.#items.set(item.id, item);
     }
   }
 
-  private add(n: Node<unknown>, top = false) {
-    this.positions.set(n.key, this.nodes.length);
-    this.nodes.push(n);
-    if (top) this.top.push(n);
+  #add(n: CollectionNode, top = false) {
+    this.#positions.set(n.key, this.#nodes.length);
+    this.#nodes.push(n);
+    if (top) this.#top.push(n);
   }
 
   get size() {
-    return this.nodes.length;
+    return this.#nodes.length;
   }
   *[Symbol.iterator]() {
-    yield* this.top;
+    yield* this.#top;
   }
   getKeys() {
-    return this.nodes.map((n) => n.key);
+    return this.#nodes.map((n) => n.key);
   }
   getItem(key: Key) {
-    const i = this.positions.get(key);
-    return i == null ? null : this.nodes[i]!;
+    const i = this.#positions.get(key);
+    return i == null ? null : this.#nodes[i]!;
   }
   at(index: number) {
-    return this.nodes[index] ?? null;
+    return this.#nodes[index] ?? null;
   }
   getKeyBefore(key: Key) {
-    const i = this.positions.get(key);
-    return i ? this.nodes[i - 1]!.key : null;
+    const i = this.#positions.get(key);
+    return i ? this.#nodes[i - 1]!.key : null;
   }
   getKeyAfter(key: Key) {
-    const i = this.positions.get(key);
-    return i == null ? null : (this.nodes[i + 1]?.key ?? null);
+    const i = this.#positions.get(key);
+    return i == null ? null : (this.#nodes[i + 1]?.key ?? null);
   }
   getFirstKey() {
-    return this.nodes[0]?.key ?? null;
+    return this.#nodes[0]?.key ?? null;
   }
   getLastKey() {
-    return this.nodes[this.nodes.length - 1]?.key ?? null;
+    return this.#nodes[this.#nodes.length - 1]?.key ?? null;
   }
-  getChildren(key: Key): Iterable<Node<unknown>> {
+  getChildren(key: Key): Iterable<CollectionNode> {
     return this.getItem(key)?.childNodes ?? [];
   }
   getTextValue(key: Key) {
     return this.getItem(key)?.textValue ?? "";
   }
   emoji(key: Key | null | undefined): EmojiItem | undefined {
-    const n = key == null ? null : this.getItem(key);
-    return n?.type === "item" ? (n as unknown as EmojiItem) : undefined;
+    return key == null ? undefined : this.#items.get(key);
+  }
+  sections(): readonly EmojiSection[] {
+    return this.#sections;
   }
 }

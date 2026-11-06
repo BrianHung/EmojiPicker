@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
-import { SHOTS, SURFACES } from "./surfaces";
-import { expect, fileName, quiet, settle, test, viewportOf, visit } from "./support";
+import { SHOTS, SURFACES, show } from "./surfaces";
+import { expect, fileName, settle, test, viewportOf, visit } from "./support";
 
 async function shoot(page: Page, id: string, frame: Locator, mask: Locator[] = []) {
   await frame.scrollIntoViewIfNeeded();
@@ -19,9 +19,6 @@ for (const shot of SHOTS)
 for (const s of SURFACES)
   test(s.id, async ({ page }, info) => {
     test.skip(!!s.only && s.only !== viewportOf(info), `${s.only} only`);
-    await visit(page, s.path);
-    await s.prepare?.(page);
-    if (!s.inline) await s.open(page);
-    await quiet(page);
+    await show(page, s);
     await shoot(page, s.id, (s.frame ?? s.root)(page));
   });

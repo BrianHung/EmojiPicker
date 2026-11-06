@@ -1,13 +1,21 @@
 import { unifiedToNative, type EmojiRecord } from "./dataset";
-import { createStore, memo, stable, subscribeAll } from "./reactive";
+import { KEY_MOVES } from "./keys";
+import { createStore, memo, shallowEqual, stable, subscribeAll, type Subscribe } from "./reactive";
 import { createSearch } from "./search/query";
 import type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
 import { isComposingKey } from "./shortcodes";
 import type { EmojiSelection, EmojiStore } from "./store";
+import { syncAriaAttributes } from "./sync-attributes";
 
-export type KeyLike = { key: string; shiftKey?: boolean; isComposing?: boolean; keyCode?: number; preventDefault(): void };
+export interface KeyLike {
+  key: string;
+  shiftKey?: boolean;
+  isComposing?: boolean;
+  keyCode?: number;
+  preventDefault(): void;
+}
 
-export type SuggestionsOptions = {
+export interface SuggestionsOptions {
   query?: string;
   resetKey?: string;
   id?: string;
@@ -18,36 +26,77 @@ export type SuggestionsOptions = {
   onChoose?: (suggestion: ShortcodeCompletion) => void;
   onSelect?: (selection: EmojiSelection) => void;
   onDismiss?: () => void;
-};
+}
 
-export type SuggestionsSnapshot = {
+export interface EmojiSuggestionsSnapshot {
   query: string;
   open: boolean;
   suggestions: readonly ShortcodeCompletion[];
   highlightedIndex: number;
   activeDescendant: string | undefined;
-};
+}
 
 export type SuggestionsMove = "up" | "down" | "left" | "right";
 
-export type EmojiTrigger = {
+export interface EmojiTrigger {
   query: string;
   anchor: () => DOMRect | null;
   replace: (text: string, suggestion: ShortcodeCompletion) => void;
+}
+
+export type SuggestionsInputProps = {
+  role: "combobox";
+  "aria-autocomplete": "list";
+  "aria-expanded": boolean;
+  "aria-controls": string | undefined;
+  "aria-activedescendant": string | undefined;
 };
 
+export type SuggestionsListProps = {
+  id: string;
+  role: "listbox";
+};
+
+export type SuggestionsOptionProps = {
+  id: string;
+  role: "option";
+  "aria-selected": boolean;
+  "data-highlighted": "" | undefined;
+};
+
+export interface EmojiSuggestionsMachine {
+  getSnapshot(): EmojiSuggestionsSnapshot;
+  subscribe: Subscribe;
+  setOptions(options: SuggestionsOptions): void;
+  setQuery(query: string, resetKey?: string): void;
+  highlight(index: number): void;
+  move(direction: SuggestionsMove): boolean;
+  choose(index?: number): void;
+  // For a selection another UI made and already recorded, such as a picker in the menu
+  insert(selection: EmojiSelection): void;
+  dismiss(): void;
+  keydown(event: KeyLike): boolean;
+  textFor(suggestion: ShortcodeCompletion, insert?: "emoji" | "shortcode"): string;
+  getListProps(): SuggestionsListProps;
+  getOptionProps(index: number): SuggestionsOptionProps;
+  getInputProps(): SuggestionsInputProps;
+  // For an editor element the app doesn't render: writes getInputProps() while open and restores the element after
+  syncCombobox(el: Element): () => void;
+}
+
 const NONE: readonly ShortcodeCompletion[] = [];
-const KEYS: Record<string, SuggestionsMove> = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right" };
+const DEFAULT_LIMIT = 8;
 
 type Input = { options: SuggestionsOptions; resetKey: string; generation: number };
 type Ui = { highlight: { index: number; generation: number }; dismissed: string | null };
-type UiAction = { type: "highlight"; index: number; generation: number } | { type: "dismiss"; key: string } | { type: "refresh" };
+type UiAction = { type: "highlight"; index: number; generation: number } | { type: "dismiss"; key: string };
 
 const resetKeyOf = (options: SuggestionsOptions) => options.resetKey ?? options.query ?? "";
 
 const reduceInput = (input: Input, options: SuggestionsOptions): Input => {
   const resetKey = resetKeyOf(options);
-  return resetKey === input.resetKey ? { ...input, options } : { options, resetKey, generation: input.generation + 1 };
+  if (resetKey !== input.resetKey) return { options, resetKey, generation: input.generation + 1 };
+  return shallowEqual(input.options, options) ? input : { ...input, options };
 };
 
 const reduceUi = (ui: Ui, action: UiAction): Ui => {
@@ -55,9 +104,9 @@ const reduceUi = (ui: Ui, action: UiAction): Ui => {
     case "highlight":
       return { ...ui, highlight: { index: action.index, generation: action.generation } };
     case "dismiss":
-      return { ...ui, dismissed: action.key };
-    case "refresh":
-      return { ...ui };
+      return ui.dismissed === action.key ? ui : { ...ui, dismissed: action.key };
+    default:
+      return action satisfies never;
   }
 };
 
@@ -65,30 +114,30 @@ const completionOf = (record: EmojiRecord): ShortcodeCompletion => ({ record, sh
 
 const highlightOf = (input: Input, ui: Ui) => (ui.highlight.generation === input.generation ? ui.highlight.index : 0);
 
-export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOptions = {}) {
-  // Options arrive every render, so they update silently: nothing subscribes to this store
+export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOptions = {}): EmojiSuggestionsMachine {
   const input = createStore<Input, SuggestionsOptions>({ options, resetKey: resetKeyOf(options), generation: 0 }, reduceInput);
   const ui = createStore<Ui, UiAction>({ highlight: { index: 0, generation: 0 }, dismissed: null }, reduceUi);
-  const search = createSearch(store);
+  const searchOf = ({ query = "", limit = DEFAULT_LIMIT, matchBy }: SuggestionsOptions) => ({ query: matchBy === "search" ? query : "", limit });
+  const search = createSearch(store, searchOf(options));
   const opts = () => input.getSnapshot().options;
   const id = (suffix: string) => `${opts().id ?? "emoji-suggestions"}-${suffix}`;
+  const update = (next: SuggestionsOptions) => {
+    const { query, limit } = searchOf(next);
+    search.setQuery(query, limit);
+    input.dispatch(next);
+  };
   const suggestionsOf = memo((status: string, q: string, n: number, matchBy: string | undefined, order: CompletionOrder | undefined, searched: readonly EmojiRecord[]) =>
     status !== "ready" || !q ? NONE : matchBy === "search" ? searched.map(completionOf) : store.completeShortcode(q, n, order),
   );
-  const keep = stable<SuggestionsSnapshot>();
-  const select = memo((current: Input, state: Ui, status: string, searched: readonly EmojiRecord[]): SuggestionsSnapshot => {
-    const { query: q = "", limit = 8, matchBy, order } = current.options;
+  const keep = stable<EmojiSuggestionsSnapshot>();
+  const getSnapshot = memo((current: Input, state: Ui, status: string, searched: readonly EmojiRecord[]): EmojiSuggestionsSnapshot => {
+    const { query: q = "", limit = DEFAULT_LIMIT, matchBy, order } = current.options;
     const suggestions = suggestionsOf(status, q, limit, matchBy, order, searched);
     const index = Math.min(highlightOf(current, state), Math.max(suggestions.length - 1, 0));
     const open = suggestions.length > 0 && state.dismissed !== current.resetKey;
     return keep({ query: q, open, suggestions, highlightedIndex: index, activeDescendant: open ? id(`option-${index}`) : undefined });
   });
-
-  function getSnapshot(): SuggestionsSnapshot {
-    const current = input.getSnapshot();
-    const { query: q = "", limit = 8, matchBy } = current.options;
-    return select(current, ui.getSnapshot(), store.status(), search.run(matchBy === "search" ? q : "", limit).results);
-  }
+  const snapshot = () => getSnapshot(input.getSnapshot(), ui.getSnapshot(), store.status(), search.getSnapshot().results);
 
   const highlight = (index: number) => {
     const current = input.getSnapshot();
@@ -96,17 +145,14 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
     ui.dispatch({ type: "highlight", index, generation: current.generation });
   };
 
-  const machine = {
-    getSnapshot,
-    subscribe: subscribeAll(ui.subscribe, store.subscribe, search.subscribe),
-    setOptions: (next: SuggestionsOptions) => input.dispatch(next),
-    setQuery(q: string, key = q) {
-      input.dispatch({ ...opts(), query: q, resetKey: key });
-      ui.dispatch({ type: "refresh" });
-    },
+  const machine: EmojiSuggestionsMachine = {
+    getSnapshot: snapshot,
+    subscribe: subscribeAll(input.subscribe, ui.subscribe, store.subscribe, search.subscribe),
+    setOptions: update,
+    setQuery: (q, key = q) => update({ ...opts(), query: q, resetKey: key }),
     highlight,
-    move(direction: SuggestionsMove): boolean {
-      const { open, suggestions, highlightedIndex: i } = getSnapshot();
+    move(direction) {
+      const { open, suggestions, highlightedIndex: i } = snapshot();
       const n = suggestions.length;
       const columns = opts().columns;
       const step = columns ? { left: -1, right: 1, up: -columns, down: columns }[direction] : { up: -1, down: 1, left: 0, right: 0 }[direction];
@@ -114,16 +160,14 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       highlight(columns ? Math.max(0, Math.min(n - 1, i + step)) : (i + step + n) % n);
       return true;
     },
-    choose(index = getSnapshot().highlightedIndex) {
-      const suggestion = getSnapshot().suggestions[index];
+    choose(index = snapshot().highlightedIndex) {
+      const suggestion = snapshot().suggestions[index];
       if (!suggestion) return;
-      const { unified, imageUrl } = suggestion.record;
-      const selection = store.select(imageUrl ? unified : store.withSkinTone(unified));
+      const selection = store.select(store.withSkinTone(suggestion.record.unified));
       opts().onChoose?.(suggestion);
       if (selection) opts().onSelect?.(selection);
     },
-    // For a selection another UI made and already recorded, such as a picker in the menu
-    insert(selection: EmojiSelection) {
+    insert(selection) {
       const record = store.get(selection.baseUnified);
       if (!record) return;
       opts().onChoose?.(completionOf(record));
@@ -133,9 +177,10 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       ui.dispatch({ type: "dismiss", key: input.getSnapshot().resetKey });
       opts().onDismiss?.();
     },
-    keydown(event: KeyLike): boolean {
-      if (!getSnapshot().open || isComposingKey(event)) return false;
-      const direction = KEYS[event.key];
+    keydown(event) {
+      if (!snapshot().open || isComposingKey(event)) return false;
+      const move = KEY_MOVES[event.key];
+      const direction = move === "up" || move === "down" || move === "left" || move === "right" ? move : undefined;
       if (direction) {
         if (!machine.move(direction)) return false;
       } else if ((event.key === "Enter" && !event.shiftKey) || event.key === "Tab") machine.choose();
@@ -144,42 +189,17 @@ export function createEmojiSuggestions(store: EmojiStore, options: SuggestionsOp
       event.preventDefault();
       return true;
     },
-    textFor: ({ record, shortcode }: ShortcodeCompletion, insert: "emoji" | "shortcode" = "emoji") => (record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified))),
-    getListProps: () => ({ id: id("listbox"), role: "listbox" as const }),
-    getOptionProps(index: number) {
-      const selected = index === getSnapshot().highlightedIndex;
-      return { id: id(`option-${index}`), role: "option" as const, "aria-selected": selected, "data-highlighted": selected ? ("" as const) : undefined };
+    textFor: ({ record, shortcode }, insert = "emoji") => (record.imageUrl || insert === "shortcode" ? `:${shortcode}:` : unifiedToNative(store.withSkinTone(record.unified))),
+    getListProps: () => ({ id: id("listbox"), role: "listbox" }),
+    getOptionProps(index) {
+      const selected = index === snapshot().highlightedIndex;
+      return { id: id(`option-${index}`), role: "option", "aria-selected": selected, "data-highlighted": selected ? "" : undefined };
     },
     getInputProps() {
-      const { open, activeDescendant } = getSnapshot();
-      return { role: "combobox" as const, "aria-autocomplete": "list" as const, "aria-expanded": open, "aria-controls": open ? id("listbox") : undefined, "aria-activedescendant": activeDescendant };
+      const { open, activeDescendant } = snapshot();
+      return { role: "combobox", "aria-autocomplete": "list", "aria-expanded": open, "aria-controls": open ? id("listbox") : undefined, "aria-activedescendant": activeDescendant };
     },
-    // For an editor element the app doesn't render: writes getInputProps() while open and restores its role after
-    syncCombobox(el: Element): () => void {
-      let role: string | null | undefined;
-      const restore = () => {
-        if (role === undefined) return;
-        for (const name of Object.keys(machine.getInputProps())) el.removeAttribute(name);
-        if (role) el.setAttribute("role", role);
-        role = undefined;
-      };
-      const sync = () => {
-        if (!getSnapshot().open) return restore();
-        if (role === undefined) role = el.getAttribute("role");
-        for (const [name, value] of Object.entries(machine.getInputProps())) {
-          if (value === undefined) el.removeAttribute(name);
-          else el.setAttribute(name, String(value));
-        }
-      };
-      sync();
-      const off = machine.subscribe(sync);
-      return () => {
-        off();
-        restore();
-      };
-    },
+    syncCombobox: (el) => syncAriaAttributes(el, () => (snapshot().open ? machine.getInputProps() : null), machine.subscribe),
   };
   return machine;
 }
-
-export type EmojiSuggestionsMachine = ReturnType<typeof createEmojiSuggestions>;

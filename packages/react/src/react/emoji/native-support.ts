@@ -1,6 +1,6 @@
 import * as React from "react";
-import { type EmojiRecord, withoutFe0f, withoutTone } from "@brianhung/emoji-picker-core";
-import { isNativeSupported, KNOWN_FAILING, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "./native";
+import type { EmojiRecord } from "@brianhung/emoji-picker-core";
+import { drawsNatively, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "@brianhung/emoji-picker-core/native";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 import { useLayoutEffect } from "../utils/utils";
 
@@ -65,9 +65,10 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
     [],
   );
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the probe's results are mutable; version counts the batches that changed a verdict
   const drawable = React.useMemo<Drawable>(() => {
     if (!native) return always;
-    return (record, unified) => record.imageUrl != null || image(unified) !== undefined || (!KNOWN_FAILING.has(withoutFe0f(withoutTone(record.unified))) && isNativeSupported(support, unified, record.version));
+    return (record, unified) => record.imageUrl != null || image(unified) !== undefined || drawsNatively(support, record, unified);
   }, [native, support, version, image]);
   return { drawable, request };
 }

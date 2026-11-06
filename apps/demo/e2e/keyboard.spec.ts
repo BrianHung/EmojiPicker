@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { PAGE_SCROLLS } from "./known-issues";
-import { SURFACES, type Kind, type Surface } from "./surfaces";
-import { expect, fileName, probe, quiet, test, viewportOf, visit, type Probe } from "./support";
+import { fieldText, show, surface, type Kind, type Surface } from "./surfaces";
+import { expect, fileName, probe, quiet, slot, test, viewportOf, visit, type Probe } from "./support";
 
 const REPRESENTATIVE = [
   "home/inline-tailwind",
@@ -24,7 +24,7 @@ const KEYS: Record<Kind, string[]> = {
   bar: ["ArrowRight", "ArrowRight", "ArrowLeft", "End", "Home", "ArrowDown", "ArrowUp"],
 };
 const CONTINUE: Record<Kind, string> = { picker: "ArrowRight", menu: "ArrowDown", bar: "ArrowRight" };
-const ITEM: Record<Kind, string> = { picker: '[data-slot="emoji-picker-emoji"]', menu: '[role="option"]', bar: "button" };
+const ITEM: Record<Kind, string> = { picker: slot("emoji"), menu: '[role="option"]', bar: "button" };
 const FOCUS_MOVES = ["gallery/apple/scene-tapback-more", "home/tapback-more"];
 
 type Step = Probe & { key: string; scrolled: number };
@@ -32,18 +32,22 @@ type Step = Probe & { key: string; scrolled: number };
 const scrollY = (page: Page) => page.evaluate(() => Math.round(window.scrollY));
 const isOpen = (root: Locator) => root.isVisible();
 const holdsFocus = (target: Locator) => target.evaluate((el) => el === document.activeElement, null, { timeout: 500 }).catch(() => false);
-const fieldText = (target: Locator) =>
-  target.evaluate((el) => (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : (el as HTMLElement).isContentEditable ? el.textContent : null), null, { timeout: 500 }).catch(() => null);
 
+// Settled once focus and highlight read the same 100 ms apart
 async function stableProbe(page: Page, root: Locator): Promise<Probe> {
-  let last = await probe(page, root);
-  for (let i = 0; i < 10; i++) {
-    await page.waitForTimeout(100);
-    const next = await probe(page, root);
-    if (next.focus === last.focus && next.highlight === last.highlight) return next;
-    last = next;
-  }
-  return last;
+  let last: Probe | undefined;
+  await expect
+    .poll(
+      async () => {
+        const next = await probe(page, root);
+        const same = last !== undefined && next.focus === last.focus && next.highlight === last.highlight;
+        last = next;
+        return same;
+      },
+      { intervals: [100], timeout: 2_000 },
+    )
+    .toBe(true);
+  return last!;
 }
 
 async function press(page: Page, root: Locator, key: string): Promise<Step> {
@@ -53,12 +57,9 @@ async function press(page: Page, root: Locator, key: string): Promise<Step> {
 }
 
 async function fresh(page: Page, s: Surface): Promise<[Locator, Locator]> {
-  await visit(page, s.path);
-  await s.prepare?.(page);
-  const back = await s.open(page);
-  await quiet(page);
+  const { back, root } = await show(page, s, { interact: true });
   await page.mouse.move(0, 0);
-  return [back, s.root(page)];
+  return [back!, root];
 }
 
 async function outcome(page: Page, root: Locator, back: Locator) {
@@ -76,13 +77,16 @@ async function outcome(page: Page, root: Locator, back: Locator) {
 }
 
 const mark = (root: Locator, name: string) =>
-  root.evaluate((el, name) => {
-    const active = document.activeElement;
-    const id = active?.getAttribute("aria-activedescendant");
-    const item = (id && document.getElementById(id)) || (active !== el && el.contains(active) && active?.matches('[data-slot="emoji-picker-emoji"], [role="option"]') ? active : el.querySelector("[data-highlighted]"));
-    item?.setAttribute("data-e2e", name);
-    return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
-  }, name);
+  root.evaluate(
+    (el, [name, cell]) => {
+      const active = document.activeElement;
+      const id = active?.getAttribute("aria-activedescendant");
+      const item = (id && document.getElementById(id)) || (active !== el && el.contains(active) && active?.matches(`${cell}, [role="option"]`) ? active : el.querySelector("[data-highlighted]"));
+      item?.setAttribute("data-e2e", name);
+      return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
+    },
+    [name, slot("emoji")] as const,
+  );
 
 const highlightLook = (page: Page) =>
   page.evaluate(() => {
@@ -140,7 +144,10 @@ async function fromKeyboard(page: Page, s: Surface) {
     back = s.trigger(page);
     await back.focus();
     await page.keyboard.press("Enter");
-    await root.locator('[data-slot="emoji-picker-emoji"], [role="option"]').first().waitFor();
+    await root
+      .locator(`${slot("emoji")}, [role="option"]`)
+      .first()
+      .waitFor();
   } else back = await s.open(page);
   await quiet(page);
   await page.mouse.move(0, 0);
@@ -167,13 +174,7 @@ async function fromKeyboard(page: Page, s: Surface) {
   expect((await holdsFocus(back)) || landed === "field" || (FOCUS_MOVES.includes(s.id) && landed !== "body"), `focus after picking: ${(await probe(page, root)).focus}`).toBe(true);
 }
 
-const surfaces = REPRESENTATIVE.map((id) => {
-  const surface = SURFACES.find((s) => s.id === id);
-  if (!surface) throw new Error(`No surface ${id}`);
-  return surface;
-});
-
-for (const s of surfaces)
+for (const s of REPRESENTATIVE.map(surface))
   test(s.id, async ({ page }, info) => {
     test.skip(!!s.only && s.only !== viewportOf(info), `${s.only} only`);
     const touch = viewportOf(info) === "mobile";
@@ -216,8 +217,8 @@ for (const s of surfaces)
 
 test("search: arrows move the highlight with the caret at the end of the query, and the caret within it", async ({ page }) => {
   await visit(page, "/");
-  const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);
-  const search = root.locator('[data-slot="emoji-picker-search-input"]');
+  const root = surface("home/inline-tailwind").root(page);
+  const search = root.locator(slot("searchInput"));
   await search.fill("smile");
   const highlight = async () => (await probe(page, root)).highlight;
   await expect.poll(highlight).not.toBeNull();
@@ -233,8 +234,8 @@ test("search: arrows move the highlight with the caret at the end of the query, 
 
 test("search: aria-activedescendant names an option in the list after Escape and after a query change, and follows the first arrow", async ({ page }) => {
   await visit(page, "/");
-  const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);
-  const search = root.locator('[data-slot="emoji-picker-search-input"]');
+  const root = surface("home/inline-tailwind").root(page);
+  const search = root.locator(slot("searchInput"));
   const active = () =>
     search.evaluate((el) => {
       const id = el.getAttribute("aria-activedescendant");
@@ -258,24 +259,24 @@ test("search: aria-activedescendant names an option in the list after Escape and
 
 test("Shift+Space on a result opens its skin tones, and Enter picks the toned emoji", async ({ page }) => {
   await visit(page, "/");
-  const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);
-  await root.locator('[data-slot="emoji-picker-search-input"]').fill("thumbs up");
+  const root = surface("home/inline-tailwind").root(page);
+  await root.locator(slot("searchInput")).fill("thumbs up");
   await expect.poll(async () => (await probe(page, root)).highlight).toContain("thumbs up");
   await page.keyboard.press("Shift+Space");
-  await expect(root.locator('[data-slot="emoji-picker-variations"] [role="option"]')).toHaveCount(6);
+  await expect(root.locator(`${slot("variations")} [role="option"]`)).toHaveCount(6);
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText("👍🏼");
-  await expect(root.locator('[data-slot="emoji-picker-variations"]')).toHaveCount(0);
-  await expect(root.locator('[data-slot="emoji-picker-search-input"]')).toBeFocused();
+  await expect(root.locator(slot("variations"))).toHaveCount(0);
+  await expect(root.locator(slot("searchInput"))).toBeFocused();
 });
 
 test("examples/virtualizer", async ({ page }) => {
   await visit(page, "/examples/virtualizer/");
-  const root = page.locator('main [data-slot="emoji-picker"]');
-  const search = root.locator('[data-slot="emoji-picker-search-input"]');
-  const viewport = root.locator('[data-slot="emoji-picker-viewport"]');
+  const root = page.locator(`main ${slot("root")}`);
+  const search = root.locator(slot("searchInput"));
+  const viewport = root.locator(slot("viewport"));
   await search.fill("face");
   const highlighted = async () => (await probe(page, root)).highlight;
   await expect.poll(highlighted).toMatch(/^option /);

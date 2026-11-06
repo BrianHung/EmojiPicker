@@ -1,24 +1,25 @@
 // A toolbar of toggle buttons, as Base UI's ToggleGroup, not radios: the arrows move focus without checking, and a press picks
 import * as React from "react";
-import { FocusScope, useFocusManager } from "react-aria/FocusScope";
-import { useLocale } from "react-aria/I18nProvider";
+import { FocusScope } from "react-aria/FocusScope";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 
-import { type ChangeDetails, nativeToUnified, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, createChangeDetails, nativeToUnified, SKIN_TONE_VALUES, type SkinToneValue, withTone } from "@brianhung/emoji-picker-core";
+import { useStableCallback } from "../utils/latest";
 import { useChangeState } from "../utils/state";
+import { ToolbarPart } from "../utils/toolbar";
+import { useLayoutEffect } from "../utils/utils";
 import { Emoji, type EmojiProps } from "../emoji/emoji";
 import { useSkinTone } from "../provider/hooks";
 import { PickerContext } from "../root/context";
 import { mergePartProps } from "../utils/events";
-import { moveFocus, usePickerKeyDown } from "../utils/keyboard";
+import { usePickerKeyDown } from "../utils/keyboard";
 import { useEmojiContext } from "../provider/provider";
-import { flag, renderElement, resolve, type InteractionState, type Orientation, type PartElementProps } from "../utils/render";
+import { flag, renderElement, resolve, type InteractionState, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
 import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 
-const TONES = [0, 1, 2, 3, 4, 5] as const;
 const SWATCHES = ["#ffd225", "#ffdfbd", "#e9c197", "#c88e62", "#a86637", "#60463a"];
 const swatch = (tone: number): React.CSSProperties => ({ width: "var(--emoji-skin-tone-size, 15px)", height: "var(--emoji-skin-tone-size, 15px)", borderRadius: "50%", background: SWATCHES[tone] });
 
@@ -57,7 +58,8 @@ type OpenReason = SkinToneOpenChangeDetails["reason"];
 
 const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
-  const [open, setOpen] = useChangeState(openProp, defaultOpen, onOpenChange);
+  const [open, change] = useChangeState(openProp, defaultOpen, onOpenChange);
+  const setOpen = (next: boolean, reason: OpenReason, event?: Event) => change(next, createChangeDetails(reason, event));
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
@@ -74,16 +76,14 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
   };
   const toggle = (event?: Event) => (open ? close(event ? "trigger-press" : "imperative-action", event) : setOpen(true, event ? "trigger-press" : "imperative-action", event));
   const toggles = React.useContext(PickerContext)?.skinTone;
-  const latest = React.useRef(toggle);
-  latest.current = toggle;
-  React.useEffect(() => {
+  const imperativeToggle = useStableCallback(() => void toggle());
+  useLayoutEffect(() => {
     if (!toggles) return;
-    const fn = () => latest.current();
-    toggles.current = fn;
+    toggles.current = imperativeToggle;
     return () => {
-      if (toggles.current === fn) toggles.current = null;
+      if (toggles.current === imperativeToggle) toggles.current = null;
     };
-  }, [toggles]);
+  }, [toggles, imperativeToggle]);
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (!open || e.key !== "Escape") return false;
     return !close("escape-key", e.nativeEvent)?.isPropagationAllowed;
@@ -116,7 +116,6 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
           onKeyDown: keys,
           ref: merged,
           "data-slot": SLOTS.skinTone,
-          "data-open": flag(open),
           "data-closed": flag(!open),
           children: children ?? (
             <>
@@ -126,6 +125,7 @@ const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function Sk
           ),
         },
         { open, tone },
+        ["open"],
       )}
     </SkinToneContext.Provider>
   );
@@ -161,9 +161,10 @@ const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps
 
 export type SkinToneOptionsState = { orientation: Orientation; tone: SkinToneValue };
 
-export type SkinToneOptionsProps = Omit<PartElementProps<SkinToneOptionsState>, "children" | "role"> & {
-  children?: (tone: SkinToneValue) => React.ReactNode;
-};
+export type SkinToneOptionsProps = Omit<PartElementProps<SkinToneOptionsState>, "children" | "role" | keyof PartProps<SkinToneOptionsState>> &
+  PartProps<SkinToneOptionsState, HTMLDivElement> & {
+    children?: (tone: SkinToneValue) => React.ReactNode;
+  };
 
 const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneOptions(props, ref) {
   const { open } = useSkinToneContext("Options");
@@ -175,32 +176,26 @@ const SkinToneOptions = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(f
   );
 });
 
-const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneGroup({ style, children, onKeyDown, ...props }, ref) {
+const SkinToneGroup = React.forwardRef<HTMLDivElement, SkinToneOptionsProps>(function SkinToneGroup({ style, children, ...props }, ref) {
   const { orientation, group, tone, optionsRef, optionsId } = useSkinToneContext("Options");
-  const focus = useFocusManager();
-  const rtl = useLocale().direction === "rtl" && orientation === "horizontal";
-  const keys = usePickerKeyDown(onKeyDown, (e) => !e.altKey && !e.metaKey && moveFocus(focus, e.key, rtl, orientation === "vertical"));
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, optionsRef), [ref, optionsRef]);
-  return renderElement(
-    "div",
-    {
-      id: optionsId,
-      role: "toolbar",
-      "aria-label": group,
-      "aria-orientation": orientation,
-      ...props,
-      onKeyDown: keys,
-      ref: refs,
-      "data-slot": SLOTS.skinToneOptions,
-      "data-orientation": orientation,
-      style: (s: SkinToneOptionsState) => ({ position: "absolute", zIndex: 4, background: "var(--emoji-picker-background, Canvas)", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) }),
-      children: TONES.map((t) => (
+  return (
+    <ToolbarPart
+      id={optionsId}
+      aria-label={group}
+      {...props}
+      toolbarRef={refs}
+      orientation={orientation}
+      state={{ orientation, tone }}
+      data-slot={SLOTS.skinToneOptions}
+      style={(s: SkinToneOptionsState) => ({ position: "absolute", zIndex: 4, background: "var(--emoji-picker-background, Canvas)", ...(orientation === "vertical" ? { flexDirection: "column" } : null), ...resolve(style, s) })}
+    >
+      {SKIN_TONE_VALUES.map((t) => (
         <OptionContext.Provider key={t} value={t}>
           {children ? children(t) : <SkinToneOption tone={t} />}
         </OptionContext.Provider>
-      )),
-    },
-    { orientation, tone },
+      ))}
+    </ToolbarPart>
   );
 });
 

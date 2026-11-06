@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { hold, quiet, type Viewport, visit } from "./support";
+import { hold, quiet, slot, SLOTS, type Viewport, visit } from "./support";
 
 export type Kind = "picker" | "menu" | "bar";
 
@@ -12,18 +12,30 @@ export type Surface = {
   trigger?: (page: Page) => Locator;
   open: (page: Page) => Promise<Locator>;
   root: (page: Page) => Locator;
+  field?: (page: Page) => Locator;
   frame?: (page: Page) => Locator;
   inline?: boolean;
 };
 
-const layer = (page: Page) => page.locator('[data-slot="emoji-picker-popover-content"], [data-slot="drawer-popup"]').filter({ visible: true }).last();
-export const listbox = (page: Page) => page.getByRole("listbox").filter({ visible: true }).and(page.locator(":not([data-slot=emoji-picker-list]), [data-slot=emoji-picker-suggestions-popover] [data-slot=emoji-picker-list]")).last();
-const pickerIn = (scope: Locator) => scope.locator('xpath=descendant-or-self::*[@data-slot="emoji-picker" or @data-epr-part="root"]').first();
+const layer = (page: Page) =>
+  page
+    .locator(`${slot("popoverContent")}, [data-slot="drawer-popup"]`)
+    .filter({ visible: true })
+    .last();
+export const listbox = (page: Page) =>
+  page
+    .getByRole("listbox")
+    .filter({ visible: true })
+    .and(page.locator(`:not(${slot("list")}), ${slot("suggestions")} ${slot("list")}`))
+    .last();
+export const pickerIn = (scope: Locator) => scope.locator(`xpath=descendant-or-self::*[@data-slot="${SLOTS.root}" or @data-epr-part="root"]`).first();
+export const firstPicker = (page: Page) => page.locator(slot("root")).first();
 const button = (scope: Page | Locator, name: string) => scope.getByRole("button", { name, exact: true });
 
 export const card = (page: Page, title?: string) => (title ? page.locator('[data-slot="card"]').filter({ has: page.getByRole("heading", { name: title, exact: true }) }) : page.locator('[data-slot="card"]').first());
-const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
+export const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
 export const preview = (page: Page, id: string) => example(page, id).locator("div.relative").first();
+export const homePopover = (page: Page) => button(example(page, "popover"), "Open emoji picker");
 const hero = (page: Page) => page.getByRole("tablist", { name: "App" }).locator("xpath=../following-sibling::div[1]");
 
 type Extra = Partial<Omit<Surface, "id" | "path" | "kind" | "open">>;
@@ -38,7 +50,11 @@ function popover(id: string, path: string, trigger: (p: Page) => Locator, extra:
     open: async (p) => {
       await trigger(p).click();
       if (extra.root) await extra.root(p).waitFor();
-      else await layer(p).locator('[data-slot="emoji-picker-emoji"], [data-slot="emoji-picker-search-input"]').first().waitFor();
+      else
+        await layer(p)
+          .locator(`${slot("emoji")}, ${slot("searchInput")}`)
+          .first()
+          .waitFor();
       await p.mouse.move(0, 0);
       await quiet(p);
       await p.evaluate(() => window.dispatchEvent(new Event("resize")));
@@ -69,6 +85,7 @@ function menu(id: string, path: string, field: (p: Page) => Locator, text: strin
     path,
     kind: "menu",
     root: listbox,
+    field,
     open: async (p) => {
       await field(p).click();
       await clearTextField(field(p));
@@ -81,27 +98,25 @@ function menu(id: string, path: string, field: (p: Page) => Locator, text: strin
   };
 }
 
+export const tiptapField = (p: Page) => p.locator("main [contenteditable=true]").first();
+export const lexicalField = (p: Page) => p.getByLabel("Editor", { exact: true });
+
 export type Editor = { name: string; path: string; field: (p: Page) => Locator; trigger: string; gap?: number };
 
 export const EDITORS: Editor[] = [
-  { name: "Tiptap", path: "/examples/tiptap/", field: (p) => p.locator("main [contenteditable=true]").first(), trigger: ":smi" },
-  { name: "Lexical", path: "/examples/lexical/", field: (p) => p.getByLabel("Editor", { exact: true }), trigger: ":smi" },
+  { name: "Tiptap", path: "/examples/tiptap/", field: tiptapField, trigger: ":smi" },
+  { name: "Lexical", path: "/examples/lexical/", field: lexicalField, trigger: ":smi" },
   { name: "Textarea (Slack)", path: "/gallery/#slack", field: (p) => card(p).getByLabel("Message #general", { exact: true }), trigger: ":smi" },
   { name: "Grid menu (Notion)", path: "/gallery/#notion", field: (p) => card(p).getByLabel("Page content", { exact: true }), trigger: ":sm", gap: 64 },
 ];
 
 export async function openEditorMenu(page: Page, e: Editor, trigger = e.trigger) {
   await visit(page, e.path);
-  const field = e.field(page);
-  await field.click();
-  await clearTextField(field);
-  await caretToEnd(field);
-  await page.keyboard.type(trigger, { delay: 40 });
-  await listbox(page).getByRole("option").first().waitFor();
-  return field;
+  return menu(e.name, e.path, e.field, trigger).open(page);
 }
 
-export const fieldText = (field: Locator) => field.evaluate((el) => (el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement ? el.value : (el.textContent ?? "")));
+export const fieldText = (field: Locator) =>
+  field.evaluate((el) => (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : (el as HTMLElement).isContentEditable ? el.textContent : null), null, { timeout: 500 }).catch(() => null);
 
 function inline(id: string, path: string, scope: (p: Page) => Locator, extra: Extra = {}): Surface {
   return {
@@ -113,8 +128,8 @@ function inline(id: string, path: string, scope: (p: Page) => Locator, extra: Ex
     frame: scope,
     open: async (p) => {
       const root = pickerIn(scope(p));
-      const search = root.locator('[data-slot="emoji-picker-search-input"]');
-      const target = (await search.count()) ? search.first() : root.locator('[data-slot="emoji-picker-emoji"]').first();
+      const search = root.locator(slot("searchInput"));
+      const target = (await search.count()) ? search.first() : root.locator(slot("emoji")).first();
       await target.click();
       return target;
     },
@@ -170,10 +185,14 @@ function scene(s: StyleId): Surface[] {
         menu(id("comment-autocomplete"), path, (p) => sc(p).getByLabel("Leave a comment", { exact: true }), ":smi", shotCard),
       ];
     case "instagram": {
-      const bar = (p: Page) => p.locator('[data-slot="emoji-picker-popover-content"][aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])').filter({ visible: true }).last();
+      const bar = (p: Page) =>
+        p
+          .locator(`${slot("popoverContent")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
+          .filter({ visible: true })
+          .last();
       const openBar = async (p: Page) => {
         const message = sc(p).getByRole("button", { name: /^Maya: ok who's in/ });
-        if (await message.count()) await hold(p, message);
+        if (await message.count()) await hold(p, message, bar(p));
         else await button(sc(p), "React").first().click();
         await bar(p).waitFor();
       };
@@ -206,7 +225,7 @@ const home: Surface[] = [
   ...STYLES.filter((s) => s !== "apple").map((s) => inline(`home/hero-${s}`, "/", hero, { prepare: tab(LABEL[s]) })),
   inline("home/inline-tailwind", "/", (p) => preview(p, "inline")),
   inline("home/inline-css-modules", "/", (p) => preview(p, "inline"), { prepare: async (p) => example(p, "inline").getByRole("tab", { name: "CSS Modules" }).click() }),
-  popover("home/popover", "/", (p) => button(example(p, "popover"), "Open emoji picker")),
+  popover("home/popover", "/", homePopover),
   {
     id: "home/tapback-more",
     path: "/",
@@ -215,7 +234,7 @@ const home: Surface[] = [
     trigger: (p) => button(preview(p, "tapback"), "More emoji"),
     open: async (p) => {
       await button(preview(p, "tapback"), "More emoji").click();
-      await preview(p, "tapback").locator('[data-slot="emoji-picker-search-input"]').waitFor();
+      await preview(p, "tapback").locator(slot("searchInput")).waitFor();
       return button(preview(p, "tapback"), "More emoji");
     },
   },
@@ -225,11 +244,10 @@ const home: Surface[] = [
   menu("home/autocomplete", "/", (p) => example(p, "headless").getByLabel("Message", { exact: true }), ":smi", { frame: (p) => preview(p, "headless") }),
 ];
 
-const tiptapEditor = (p: Page) => p.locator("main [contenteditable=true]").first();
 const examples: Surface[] = [
-  menu("examples/tiptap/menu", "/examples/tiptap/", tiptapEditor, ":smi"),
+  menu("examples/tiptap/menu", "/examples/tiptap/", tiptapField, ":smi"),
   popover("examples/tiptap/insert", "/examples/tiptap/", (p) => button(p, "Insert emoji")),
-  menu("examples/lexical/menu", "/examples/lexical/", (p) => p.getByLabel("Editor", { exact: true }), ":smi"),
+  menu("examples/lexical/menu", "/examples/lexical/", lexicalField, ":smi"),
   popover("examples/lexical/insert", "/examples/lexical/", (p) => button(p, "Insert emoji")),
   inline("examples/custom-emoji", "/examples/custom-emoji/", (p) => p.locator("main").getByRole("complementary").first()),
   inline("examples/semantic-search", "/examples/semantic-search/", (p) => p.locator("main").getByRole("complementary").first(), {
@@ -238,6 +256,21 @@ const examples: Surface[] = [
 ];
 
 export const SURFACES: Surface[] = [...STYLES.flatMap(gallery), ...home, ...examples];
+
+export function surface(id: string): Surface {
+  const found = SURFACES.find((s) => s.id === id);
+  if (!found) throw new Error(`No surface ${id}`);
+  return found;
+}
+
+// Opens an inline picker too when `interact` is set: its open() focuses the search field or the first emoji
+export async function show(page: Page, s: Surface, { interact = false } = {}) {
+  await visit(page, s.path);
+  await s.prepare?.(page);
+  const back = interact || !s.inline ? await s.open(page) : null;
+  await quiet(page);
+  return { back, root: s.root(page) };
+}
 
 export type Shot = { id: string; path: string; only?: Viewport; prepare?: (page: Page) => Promise<void>; frame: (page: Page) => Locator; mask?: (page: Page) => Locator[] };
 
@@ -250,8 +283,8 @@ const searchFor =
       await ex.getByRole("tab", { name, exact: true }).focus();
       await p.keyboard.press("Enter");
     }
-    await preview(p, "search").locator('[data-slot="emoji-picker-search-input"]').fill("smile");
-    await preview(p, "search").locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+    await preview(p, "search").locator(slot("searchInput")).fill("smile");
+    await preview(p, "search").locator(slot("emoji")).first().waitFor();
   };
 
 export const SHOTS: Shot[] = [

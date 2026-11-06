@@ -1,7 +1,5 @@
 import * as React from "react";
-import type { ChangeDetails, EmojiLabels, EmojiRecord, EmojiSelection, EmojiStore } from "@brianhung/emoji-picker-core";
-import type { EmojiGridMove } from "../state/grid";
-import type { HighlightChangeDetails, PickerState, SearchResultsMode } from "../state/picker";
+import type { ChangeDetails, EmojiGridMove, EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { CollapsedCategories } from "./collapse";
 import type { Orientation } from "../utils/render";
 
@@ -9,7 +7,7 @@ export type { HighlightChangeDetails, SearchResultsMode };
 
 export type HighlightSource = { reason?: HighlightChangeDetails["reason"]; event?: Event };
 
-export type EmojiPickerActions = {
+export interface EmojiPickerActions {
   move(to: EmojiGridMove): boolean;
   pick(): boolean;
   highlight(emoji: string | null): void;
@@ -17,7 +15,7 @@ export type EmojiPickerActions = {
   clearSearch(): void;
   close(): boolean;
   toggleSkinTone(): boolean;
-};
+}
 
 export type SelectReason = "item-press" | "imperative-action";
 export type ValueChangeDetails = ChangeDetails<SelectReason>;
@@ -27,9 +25,14 @@ export type SelectDetails = ChangeDetails<SelectReason> & {
   collapse?: () => void;
 };
 
-export type Overlay = { record: EmojiRecord; style: React.CSSProperties; pick(unified: string, event?: Event): void; close(restore: boolean): void };
+export interface Overlay {
+  record: EmojiRecord;
+  style: React.CSSProperties;
+  pick(unified: string, event?: Event): void;
+  close(restore: boolean): void;
+}
 
-export type ListHandle = {
+export interface ListHandle {
   move(to: EmojiGridMove, source?: HighlightSource, cell?: Element | null): boolean;
   pick(event?: Event, reason?: SelectReason): boolean;
   highlight(emoji: string | null, source?: HighlightSource): void;
@@ -40,16 +43,17 @@ export type ListHandle = {
   atStart(): boolean;
   variations(target: Element | null): boolean;
   overlay(): Overlay | null;
-};
+}
 
-export type PickerContextValue = {
+export interface PickerContextValue {
   store: EmojiStore;
-  state: PickerState<React.ReactNode>;
+  state: EmojiPicker<React.ReactNode>;
   labels: EmojiLabels;
   inPopover: boolean;
   columns?: number;
   collapse: CollapsedCategories;
   searchResults: SearchResultsMode;
+  // undefined while the Root doesn't track a value
   value: string | null | undefined;
   pick(unified: string, event?: Event, reason?: SelectReason): EmojiSelection | undefined;
   actions: EmojiPickerActions;
@@ -61,7 +65,7 @@ export type PickerContextValue = {
   searchInput: React.RefObject<HTMLInputElement | null>;
   listId: string;
   variations: { custom: boolean; register(): () => void };
-};
+}
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);
 

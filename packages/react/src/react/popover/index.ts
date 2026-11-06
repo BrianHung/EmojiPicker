@@ -1,20 +1,2 @@
 export { pickerInitialFocus } from "./popover-shared";
-export type {
-  PopoverActions,
-  PopoverAlign,
-  PopoverAnchor,
-  PopoverAnchorRect,
-  PopoverContentProps,
-  PopoverContentState,
-  PopoverFinalFocus,
-  PopoverInitialFocus,
-  PopoverOpenChangeDetails,
-  PopoverOpenChangeReason,
-  PopoverPlacementProps,
-  PopoverRootProps,
-  PopoverSide,
-  PopoverTriggerProps,
-  PopoverTriggerState,
-  SuggestionsPopoverProps,
-  SuggestionsPopoverState,
-} from "./popover-shared";
+export type * from "./types";

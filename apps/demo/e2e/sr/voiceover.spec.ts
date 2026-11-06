@@ -1,14 +1,3 @@
-import { mergeTests } from "@playwright/test";
-import { voiceOverTest } from "@guidepup/playwright";
-import { test as site } from "../support";
-import { notReady } from "./ready";
-import { scenarios, type Reader } from "./scenarios";
+import { readerSuite } from "./scenarios";
 
-const test = mergeTests(site, voiceOverTest).extend<{ sr: Reader }>({ sr: ({ voiceOver }, use) => use(voiceOver) });
-test.use({ voiceOverStartOptions: { capture: true } });
-
-const skip = process.env.CI ? null : notReady("voiceover");
-if (skip) console.warn(`Skipping the VoiceOver suite: ${skip}`);
-test.skip(!!skip, skip ?? "");
-
-scenarios(test);
+readerSuite("voiceover");

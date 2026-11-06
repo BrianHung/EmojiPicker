@@ -1,4 +1,6 @@
-export type StripMetrics = {
+import type { EmojiGridMove } from "../keys";
+
+export interface StripMetrics {
   rows: number;
   cellWidth: number;
   cellHeight: number;
@@ -6,7 +8,7 @@ export type StripMetrics = {
   padding: number;
   sectionGap: number;
   sectionMinWidth: number;
-};
+}
 
 type StripSection = {
   id: string;
@@ -67,41 +69,47 @@ export function placeCell(layout: StripLayout, index: number): CellPlace | null 
   return { section, column, row, x: s.x + column * layout.cellWidth, y: layout.headerHeight + row * layout.cellHeight };
 }
 
-export type StripKey = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home" | "End";
-
-export function moveInStrip(layout: StripLayout, index: number, key: StripKey): number | null {
+// Strips fill columns top to bottom; a page moves by the columns in view
+export function moveInStrip(layout: StripLayout, index: number, move: EmojiGridMove, pageColumns = 1): number | null {
   const { rows, sections, total } = layout;
   if (!total) return null;
-  if (key === "Home") return index === 0 ? null : 0;
-  if (key === "End") return index === total - 1 ? null : total - 1;
-  const place = placeCell(layout, index);
-  if (!place) return 0;
-  const s = sections[place.section]!;
-  const i = index - s.start;
-  if (key === "ArrowUp") return place.row > 0 ? index - 1 : null;
-  if (key === "ArrowDown") return place.row < rows - 1 && i + 1 < s.count ? index + 1 : null;
-  const step = key === "ArrowRight" ? 1 : -1;
-  const sameSection = i + step * rows;
-  if (sameSection >= 0 && sameSection < s.count) return s.start + sameSection;
-  const next = sections[place.section + step];
-  if (!next) return null;
-  const column = step > 0 ? 0 : next.columns - 1;
-  const inColumn = Math.min(rows, next.count - column * rows);
-  return next.start + column * rows + Math.min(place.row, inColumn - 1);
+  switch (move) {
+    case "first":
+      return index === 0 ? null : 0;
+    case "last":
+      return index === total - 1 ? null : total - 1;
+    case "page-up":
+    case "page-down": {
+      const step = move === "page-down" ? "right" : "left";
+      let current = index;
+      for (let i = 0; i < Math.max(1, pageColumns); i++) current = moveInStrip(layout, current, step) ?? current;
+      return current === index ? null : current;
+    }
+    case "up":
+    case "down":
+    case "left":
+    case "right": {
+      const place = placeCell(layout, index);
+      if (!place) return 0;
+      const s = sections[place.section]!;
+      const i = index - s.start;
+      if (move === "up") return place.row > 0 ? index - 1 : null;
+      if (move === "down") return place.row < rows - 1 && i + 1 < s.count ? index + 1 : null;
+      const step = move === "right" ? 1 : -1;
+      const sameSection = i + step * rows;
+      if (sameSection >= 0 && sameSection < s.count) return s.start + sameSection;
+      const next = sections[place.section + step];
+      if (!next) return null;
+      const column = step > 0 ? 0 : next.columns - 1;
+      const inColumn = Math.min(rows, next.count - column * rows);
+      return next.start + column * rows + Math.min(place.row, inColumn - 1);
+    }
+    default:
+      return move satisfies never;
+  }
 }
 
 export function columnsPerPage(layout: StripLayout, viewportWidth: number): number {
   if (!(layout.cellWidth > 0)) return 1;
   return Math.max(1, Math.floor((viewportWidth - 2 * layout.padding) / layout.cellWidth));
-}
-
-export function pageInStrip(layout: StripLayout, index: number, direction: 1 | -1, columns: number): number | null {
-  const key: StripKey = direction > 0 ? "ArrowRight" : "ArrowLeft";
-  let current = index;
-  for (let i = 0; i < Math.max(1, columns); i++) {
-    const next = moveInStrip(layout, current, key);
-    if (next == null) break;
-    current = next;
-  }
-  return current === index ? null : current;
 }

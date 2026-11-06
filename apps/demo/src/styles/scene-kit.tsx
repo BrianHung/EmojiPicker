@@ -217,6 +217,7 @@ export function useLongPress(onLongPress: () => void, delay = 450) {
     window.clearTimeout(timer.current);
     start.current = null;
   };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: clears the timer on unmount; cancel only touches refs
   React.useEffect(() => cancel, []);
   const outside = (e: React.SyntheticEvent) => !(e.currentTarget as Node).contains(e.target as Node);
   return {
@@ -286,6 +287,7 @@ const toUnified = (emoji: string) => [...emoji].map((c) => c.codePointAt(0)!.toS
 export function EmojiText({ text, size, className }: { text: string; size: number; className?: string }) {
   const store = useEmojiStore();
   const status = useEmojiStatus();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: segments again once the data loads
   return React.useMemo(() => {
     const segs = segmenter ? [...segmenter.segment(text)].map((s) => s.segment) : [text];
     const out: React.ReactNode[] = [];

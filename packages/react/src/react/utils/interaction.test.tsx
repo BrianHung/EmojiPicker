@@ -1,26 +1,14 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { createRoot } from "react-dom/client";
-import { afterEach, expect, it } from "vitest";
-import en from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { expect, it } from "vitest";
+import { cleanupRoots, render } from "../../../test/render";
+import { en } from "../../../test/en";
 import { EmojiPicker, EmojiProvider } from "../../index";
 import * as floating from "../../floating-ui";
 import * as aria from "../../react-aria";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-Object.assign(HTMLCanvasElement.prototype, { getContext: () => null });
-
-let unmount = () => {};
-afterEach(() => {
-  unmount();
-  document.body.replaceChildren();
-});
-
 function interactions(node: React.ReactNode) {
-  const root = createRoot(document.body.appendChild(document.createElement("div")));
-  React.act(() => root.render(node));
-  unmount = () => React.act(() => root.unmount());
+  render(node);
   const el = document.querySelector("button")!;
   const seen: string[] = [];
   const check = (name: string) => el.hasAttribute(name) && seen.push(name);
@@ -39,7 +27,7 @@ function interactions(node: React.ReactNode) {
 
 function SkinToneTrigger() {
   return (
-    <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ skinTone: null }}>
+    <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
       <EmojiPicker.Root>
         <EmojiPicker.SkinTone />
       </EmojiPicker.Root>
@@ -71,8 +59,7 @@ it.each([
   ["EmojiPopover.Trigger from /react-aria", popoverTrigger(aria)],
 ])("%s opens with Enter and Space", (_, Trigger) => {
   for (const key of ["Enter", " "]) {
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() => root.render(<Trigger />));
+    render(<Trigger />);
     const el = document.querySelector("button")!;
     React.act(() => {
       el.focus();
@@ -80,7 +67,7 @@ it.each([
       el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true, cancelable: true }));
     });
     expect(el.getAttribute("aria-expanded"), JSON.stringify(key)).toBe("true");
-    React.act(() => root.unmount());
+    cleanupRoots();
     document.body.replaceChildren();
   }
 });

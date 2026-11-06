@@ -1,8 +1,8 @@
 import type { EmojiRecord } from "./dataset";
-import { cached } from "./reactive";
+import { fetchJson, toError } from "./reactive";
 import { tokenizerFor } from "./search/tokenize";
 
-export type CustomEmoji = {
+export interface CustomEmoji {
   id: string;
   name: string;
   imageUrl: string;
@@ -14,7 +14,7 @@ export type CustomEmoji = {
   animated?: boolean;
   stillUrl?: string;
   base?: string;
-};
+}
 
 export type CustomEmojiLoader = (options: { signal: AbortSignal }) => Promise<readonly CustomEmoji[]>;
 
@@ -29,19 +29,6 @@ export function splitWords(text: string): string[] {
     .map((w) => w.toLowerCase());
 }
 
-const byUrl = new Map<string, Promise<readonly CustomEmoji[]>>();
-
-function fetchPack(url: string): Promise<readonly CustomEmoji[]> {
-  return cached(byUrl, url, () => {
-    const pending = fetch(url, { priority: "low" } as RequestInit).then((response) => {
-      if (!response.ok) throw new Error(`custom emoji ${url}: ${response.status} ${response.statusText}`);
-      return response.json() as Promise<readonly CustomEmoji[]>;
-    });
-    pending.catch(() => byUrl.delete(url));
-    return pending;
-  });
-}
-
 const isSourceList = (value: CustomEmojiSource | readonly CustomEmojiSource[]): value is readonly CustomEmojiSource[] => Array.isArray(value);
 
 export function customSources(value: CustomEmojiSource | readonly CustomEmojiSource[] | undefined): CustomEmojiSource[] {
@@ -52,7 +39,7 @@ export function customSources(value: CustomEmojiSource | readonly CustomEmojiSou
 export async function loadCustomEmojis(sources: readonly CustomEmojiSource[], signal: AbortSignal): Promise<{ emojis: CustomEmoji[]; errors: Error[] }> {
   const settled = await Promise.allSettled(
     sources.map((source): Promise<readonly CustomEmoji[]> | readonly CustomEmoji[] => {
-      if (typeof source === "string") return fetchPack(source);
+      if (typeof source === "string") return fetchJson<readonly CustomEmoji[]>(source, `custom emoji ${source}`);
       if (typeof source === "function") return source({ signal });
       return Array.isArray(source) ? (source as readonly CustomEmoji[]) : [source as CustomEmoji];
     }),
@@ -62,7 +49,7 @@ export async function loadCustomEmojis(sources: readonly CustomEmojiSource[], si
   const errors: Error[] = [];
   for (const result of settled) {
     if (result.status === "rejected") {
-      errors.push(result.reason instanceof Error ? result.reason : new Error(String(result.reason)));
+      errors.push(toError(result.reason));
       continue;
     }
     for (const emoji of result.value) {
@@ -74,29 +61,30 @@ export async function loadCustomEmojis(sources: readonly CustomEmojiSource[], si
   return { emojis, errors };
 }
 
-export function customRecords(customs: readonly CustomEmoji[], firstOrder: number, base: (unified: string) => EmojiRecord | undefined): EmojiRecord[] {
+// The record a custom emoji becomes: search words come from its id, shortcodes, tags, and the emoji it is based on
+export function customRecord(c: CustomEmoji, { order = 0, base }: { order?: number; base?: EmojiRecord } = {}): EmojiRecord {
+  const shortcodes = c.shortcodes ?? [];
+  const words = new Set([...(c.tags ?? []), ...splitWords(c.id), ...shortcodes.flatMap(splitWords)]);
   const tokenize = tokenizerFor();
-  return customs.map((c, i) => {
-    const shortcodes = c.shortcodes ?? [];
-    const words = new Set([...(c.tags ?? []), ...splitWords(c.id), ...shortcodes.flatMap(splitWords)]);
-    const from = c.base ? base(c.base) : undefined;
-    if (from) for (const word of [...tokenize(from.name), ...from.tags]) words.add(word);
-    for (const word of tokenize(c.name)) words.delete(word);
-    return {
-      unified: c.id,
-      emoji: "",
-      name: c.name,
-      tags: [...words],
-      shortcodes,
-      group: "custom",
-      version: 0,
-      tones: [],
-      order: firstOrder + i,
-      imageUrl: c.imageUrl,
-      ...(c.stillUrl ? { stillUrl: c.stillUrl } : {}),
-      ...(c.animated ? { animated: true } : {}),
-      ...(c.width ? { width: c.width } : {}),
-      ...(c.height ? { height: c.height } : {}),
-    };
-  });
+  if (base) for (const word of [...tokenize(base.name), ...base.tags]) words.add(word);
+  for (const word of tokenize(c.name)) words.delete(word);
+  return {
+    unified: c.id,
+    emoji: "",
+    name: c.name,
+    tags: [...words],
+    shortcodes,
+    group: "custom",
+    version: 0,
+    tones: [],
+    order,
+    imageUrl: c.imageUrl,
+    ...(c.stillUrl ? { stillUrl: c.stillUrl } : {}),
+    ...(c.animated ? { animated: true } : {}),
+    ...(c.width ? { width: c.width } : {}),
+    ...(c.height ? { height: c.height } : {}),
+  };
 }
+
+export const customRecords = (customs: readonly CustomEmoji[], firstOrder: number, base: (unified: string) => EmojiRecord | undefined): EmojiRecord[] =>
+  customs.map((c, i) => customRecord(c, { order: firstOrder + i, base: c.base ? base(c.base) : undefined }));

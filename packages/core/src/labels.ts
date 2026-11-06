@@ -1,5 +1,6 @@
-export type PluralForms = { other: string } & Partial<Record<Intl.LDMLPluralRule | `=${number}`, string>>;
+type PluralForms = { other: string } & Partial<Record<Intl.LDMLPluralRule | `=${number}`, string>>;
 
+// The default resultCount; apps plug their own i18n library into labels.resultCount
 export function plural(locale: string, forms: PluralForms): (count: number) => string {
   const rules = new Intl.PluralRules(locale);
   const number = new Intl.NumberFormat(locale);
@@ -32,8 +33,9 @@ export type EmojiLabels = {
 
 const COUNT: PluralForms = { "=0": "No results", one: "# result", other: "# results" };
 
-export function localizeLabels(locale?: string, overrides?: Partial<EmojiLabels>): EmojiLabels {
-  return { ...defaultLabels, ...(locale ? { resultCount: plural(locale, COUNT) } : {}), ...overrides };
+// English, with the app's overrides: a locale alone doesn't translate the strings, so it doesn't change their plural rules either
+export function localizeLabels(overrides?: Partial<EmojiLabels>): EmojiLabels {
+  return overrides ? { ...defaultLabels, ...overrides } : defaultLabels;
 }
 
 const TONE_SUFFIXES = ["light skin tone", "medium-light skin tone", "medium skin tone", "medium-dark skin tone", "dark skin tone"];

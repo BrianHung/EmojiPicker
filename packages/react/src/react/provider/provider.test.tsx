@@ -1,28 +1,14 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { createRoot, hydrateRoot } from "react-dom/client";
+import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import en from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { describe, expect, it, vi } from "vitest";
+import { render, trackRoot } from "../../../test/render";
+import { en } from "../../../test/en";
 import { EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "../../index";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-Object.assign(HTMLCanvasElement.prototype, { getContext: () => null });
-
-const data = en as unknown as Dataset;
-
-let cleanup = () => {};
-afterEach(() => {
-  cleanup();
-  document.body.replaceChildren();
-  localStorage.clear();
-});
-
 function mount(node: React.ReactNode) {
-  const root = createRoot(document.body.appendChild(document.createElement("div")));
-  React.act(() => root.render(node));
-  cleanup = () => React.act(() => root.unmount());
+  render(node);
 }
 
 describe("EmojiProvider", () => {
@@ -32,7 +18,7 @@ describe("EmojiProvider", () => {
       return <span>tone {tone}</span>;
     }
     const app = () => (
-      <EmojiProvider data={data} prepare={false}>
+      <EmojiProvider data={en} prepare={false}>
         <Tone />
       </EmojiProvider>
     );
@@ -43,11 +29,9 @@ describe("EmojiProvider", () => {
     host.innerHTML = html;
     const errors: unknown[] = [];
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-    let root!: ReturnType<typeof hydrateRoot>;
     await React.act(async () => {
-      root = hydrateRoot(host, app(), { onRecoverableError: (e) => errors.push(e) });
+      trackRoot(hydrateRoot(host, app(), { onRecoverableError: (e) => errors.push(e) }));
     });
-    cleanup = () => React.act(() => root.unmount());
     spy.mockRestore();
     expect(errors).toEqual([]);
     expect(host.textContent).toBe("tone 3");
@@ -72,7 +56,7 @@ describe("EmojiProvider", () => {
           storage={{ frequents: null, skinTone: null }}
           data={async () => {
             calls();
-            return data;
+            return en;
           }}
         >
           <Status n={n} />
@@ -96,7 +80,7 @@ describe("EmojiProvider", () => {
       const [locale, set] = React.useState<string | undefined>(undefined);
       setLocale = set;
       return (
-        <EmojiProvider data={data} prepare={false} locale={locale} storage={{ frequents: null, skinTone: null }}>
+        <EmojiProvider data={en} prepare={false} locale={locale} storage={{ frequents: null, skinTone: null }}>
           <Child />
         </EmojiProvider>
       );

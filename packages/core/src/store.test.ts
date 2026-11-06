@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import data from "../data/en.json";
+import { en } from "../test/en";
 import type { CustomEmoji } from "./custom";
 import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { memoryStorageAdapter } from "./frequents";
@@ -7,7 +7,7 @@ import { defaultLabels } from "./labels";
 import { interimOf, lexical, progressive, remote } from "./search/search";
 import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
-const dataset = data as unknown as Dataset;
+const dataset = en;
 const frog = (id: string, extra: Partial<CustomEmoji> = {}): CustomEmoji => ({ id, name: id, imageUrl: `/frogs/${id}.png`, ...extra });
 const storeWith = (customEmojis: EmojiStoreOptions["customEmojis"]) => createEmojiStore({ data: dataset, customEmojis, storage: { frequents: null } });
 const tiny = (locale: string, emojis: [unified: string, name: string, shortcodes?: string[]][]): Dataset => ({
@@ -101,7 +101,7 @@ describe("store locale", () => {
     expect((store.query("İĞNE") as readonly { emoji: string }[]).map((r) => r.emoji)).toEqual(["🪡"]);
   });
 
-  it("sets collation and counts from the locale; labels passed replace only themselves", async () => {
+  it("sets collation from the locale and keeps the English labels; labels passed replace only themselves", async () => {
     const sv = tiny("sv", [
       ["1f600", "a", ["sz"]],
       ["1f601", "b", ["så"]],
@@ -111,7 +111,7 @@ describe("store locale", () => {
     const swedish = createEmojiStore({ data: sv, storage: { frequents: null } });
     await swedish.load();
     expect(alphabetical(swedish)).toEqual(["sa", "sz", "så"]);
-    expect(swedish.labels().resultCount(1234)).toBe(`${new Intl.NumberFormat("sv").format(1234)} results`);
+    expect(swedish.labels().resultCount(1234)).toBe("1,234 results");
 
     const mixed = createEmojiStore({ data: sv, storage: { frequents: null }, locale: "en", labels: { searchPlaceholder: "Sök" } });
     await mixed.load();

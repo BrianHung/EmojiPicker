@@ -5,6 +5,8 @@ import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 import { mergePartProps } from "../../utils/events";
+import { useLatest } from "../../utils/latest";
+import { useLayoutEffect } from "../../utils/utils";
 import { resolve, toRenderFunction, type ElementProps } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
@@ -39,7 +41,6 @@ import {
   type SuggestionsPopoverState,
   type TransitionStatus,
 } from "../popover-shared";
-import { useLayoutEffect } from "../../utils/utils";
 
 type Internals = PopoverInternals & { id?: string; modal: boolean };
 
@@ -57,6 +58,7 @@ function Root({ children, modal = true, ...props }: PopoverRootProps) {
 function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
   const virtual = !!anchor && !(anchor instanceof Element);
+  // A virtual anchor moves without a new value, as a caret does, so the box follows it on every render
   useLayoutEffect(() => {
     const r = virtual ? anchorRect(anchor) : undefined;
     if (r && box.current) Object.assign(box.current.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
@@ -66,9 +68,12 @@ function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | nul
 }
 
 // React Aria names inline-start "start", and aligns a side placement by "top" and "bottom"
+const sideOf = (side: PopoverSide) => (side === "inline-start" ? "start" : side === "inline-end" ? "end" : side);
 const placementOf = (side: PopoverSide, align: PopoverAlign) => {
-  const cross = align === "center" ? "" : side === "top" || side === "bottom" ? align : align === "start" ? "top" : "bottom";
-  return `${side.replace("inline-", "")}${cross && ` ${cross}`}` as never;
+  const s = sideOf(side);
+  if (align === "center") return s;
+  if (s === "top" || s === "bottom") return `${s} ${align}` as const;
+  return `${s} ${align === "start" ? "top" : "bottom"}` as const;
 };
 
 // React Aria's onOpenChange carries no reason or event: the outside press and Escape that start a close leave both. Non-modal, React Aria doesn't close on an outside press; this does, as modal
@@ -90,9 +95,9 @@ function useDismiss(open: boolean, modal: boolean, ref: React.RefObject<Element 
 
 // React Aria unmounts the popover once its exit animation ends, and reports entering until the entry animation ends
 function Mounted({ entering, complete, initialFocus, content }: { entering: boolean; complete?: (open: boolean) => void; initialFocus?: PopoverInitialFocus; content?: React.RefObject<HTMLElement | null> }) {
-  const latest = React.useRef(complete);
-  latest.current = complete;
-  React.useEffect(() => void (!entering && latest.current?.(true)), [entering]);
+  const latest = useLatest(complete);
+  React.useEffect(() => void (!entering && latest.current?.(true)), [entering, latest]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: once, on mount: initial focus, and completion on unmount
   React.useEffect(() => {
     if (content) initialFocusTarget(initialFocus, content.current)?.focus({ preventScroll: true });
     return () => latest.current?.(false);
@@ -105,10 +110,15 @@ const statusOf = ({ isEntering, isExiting }: PopoverRenderProps): TransitionStat
 const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
 
 // State attributes, and className and style as functions of the part's state rather than React Aria's
+const anchorPoint = (style: React.CSSProperties | undefined) => {
+  const value = style && "--trigger-anchor-point" in style ? style["--trigger-anchor-point"] : undefined;
+  return typeof value === "string" ? value : undefined;
+};
+
 const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRenderProps, state: PopoverContentState, className: PopoverContentProps["className"], style: PopoverContentProps["style"]) => ({
   ...stateAttributes(state, statusOf(values)),
   className: resolve(className, state),
-  style: { "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
+  style: { "--transform-origin": anchorPoint(dom.style), "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
 });
 
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
@@ -121,7 +131,7 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   React.useEffect(() => {
     if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });
     wasOpen.current = p.state.open;
-  }, [p.state.open]);
+  }, [p.state.open, finalFocus, p.state.selected]);
   const [anchorElement, triggerRef] = useAnchorRef(anchor, p.trigger);
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);

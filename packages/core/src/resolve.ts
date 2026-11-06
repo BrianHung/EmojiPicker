@@ -20,9 +20,11 @@ const NATIVE = /^(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|[#*0-9]️?
 const COLON_CODE = /^:([a-z0-9_+\-']+):(?::skin-tone-([2-6]):)?$/i;
 const BARE_CODE = /^[a-z0-9_+\-']+$/i;
 
-const isSelection = (v: object): v is EmojiSelection => "baseUnified" in v;
-const isRecord = (v: object): v is EmojiRecord => "unified" in v && "tones" in v;
-const isCustom = (v: object): v is CustomEmoji => "id" in v && "imageUrl" in v;
+const isSelection = (v: object): v is EmojiSelection => "baseUnified" in v && typeof v.baseUnified === "string" && "unified" in v && typeof v.unified === "string";
+const isRecord = (v: object): v is EmojiRecord => "unified" in v && typeof v.unified === "string" && "tones" in v && Array.isArray(v.tones);
+
+// A custom emoji given as input: an id and an image, unlike a record or a selection
+export const isCustomEmoji = (v: object): v is CustomEmoji => "id" in v && typeof v.id === "string" && "imageUrl" in v && typeof v.imageUrl === "string";
 
 function fromRecord(record: EmojiRecord, unified = record.unified): ResolvedEmoji {
   return { unified, record, imageUrl: record.imageUrl, name: record.name, native: record.imageUrl ? "" : unifiedToNative(unified) };
@@ -40,7 +42,7 @@ export function resolveEmoji(store: EmojiLookup, input: EmojiInput): ResolvedEmo
       return { unified: input.unified, record, imageUrl: input.imageUrl, name: input.name, native: input.emoji };
     }
     if (isRecord(input)) return fromRecord(input);
-    if (isCustom(input)) {
+    if (isCustomEmoji(input)) {
       const record = store.get(input.id);
       return { unified: input.id, record, imageUrl: input.imageUrl, name: input.name, native: "" };
     }
@@ -76,7 +78,7 @@ export function resolveEmoji(store: EmojiLookup, input: EmojiInput): ResolvedEmo
 }
 
 export function missingEmojiText(input: EmojiInput): string {
-  if (typeof input !== "string") return "id" in input ? `:${input.id}:` : input.name;
+  if (typeof input !== "string") return isCustomEmoji(input) ? `:${input.id}:` : input.name;
   const text = input.trim();
   return BARE_CODE.test(text) ? `:${text}:` : text;
 }

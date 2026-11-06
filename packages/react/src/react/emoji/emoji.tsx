@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type EmojiInput, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
+import { customRecord, type EmojiInput, isCustomEmoji, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji, resolveEmoji } from "@brianhung/emoji-picker-core";
 import { EmojiImage, NATIVE } from "./image";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
 
@@ -17,8 +17,9 @@ export type EmojiProps = BaseProps & {
 export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   const { store } = useEmojiContext();
   const status = useStoreSnapshot((s) => s.status());
-  const records = useStoreSnapshot((s) => s.records());
-  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, status, records]);
+  const version = useStoreSnapshot((s) => s.version());
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the store is mutable; its version changes with the records resolveEmoji reads
+  const resolved = React.useMemo(() => resolveEmoji(store, input), [store, input, version]);
   React.useEffect(() => {
     if (!resolved && status === "idle") store.load().catch(() => {});
   }, [resolved, status, store]);
@@ -46,7 +47,7 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
   const a11y = decorative ? { "aria-hidden": true } : {};
   const src = resolved.imageUrl ?? context.image(resolved.unified, renderer);
   if (src) {
-    const record = resolved.record ?? (typeof input === "object" && "id" in input ? { ...input, unified: input.id, emoji: "", tags: [], shortcodes: [], group: "custom" as const, version: 0, tones: [], order: 0 } : undefined);
+    const record = resolved.record ?? (typeof input === "object" && isCustomEmoji(input) ? customRecord(input) : undefined);
     return (
       <EmojiImage
         {...props}

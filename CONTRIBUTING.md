@@ -32,7 +32,7 @@ npm run changeset      # describe a change for the next release
 
 In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
 
-The e2e, axe, and screen reader suites serve the site on port 5199 (5198 with `E2E_BUILD=1`); set `E2E_PORT` to use another, for example beside a running dev server or a second checkout.
+The e2e, axe, and screen reader suites serve the site on port 5199 (5198 with `E2E_BUILD=1`); set `E2E_PORT` to use another, for example beside a running dev server or a second checkout. With `E2E_PORT` set, the suites start their own server and never reuse one.
 
 Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 
@@ -61,7 +61,9 @@ The API shape follows Base UI. Behavior follows React Aria.
 | Locale, RTL, and collation through `I18nProvider` and `useLocale` | React Aria |
 | Collections take render-function children and `renderEmptyState`; layout and virtualization follow `Virtualizer` / `Layout` | React Aria |
 | Headless hooks return prop getters (`getListProps`, `getOptionProps`) that merge the props you pass, as `useAutocomplete` returns `inputProps` and `collectionProps` | React Aria |
-| Core exports only what an app builds with: the store, data, search, frequently used emoji, and typeahead APIs and their types. React uses core's public API; React-only state (the picker state, sections, and grid) lives in the React package. | This package |
+| Core holds the framework-neutral engine: the store, search, typeahead, and picker state (`createEmojiPicker`), with grid math on `/grid` and native support on `/native`. Snapshots are read-only and actions are methods, as in the AI SDK's `AbstractChat`; private state stays in closures. React binds through core's public API and adds only DOM, React Aria, and virtualizer glue. | AI SDK |
+| State transitions go through pure reducers over immutable state, unions are matched exhaustively (`satisfies never`), and `getSnapshot()` never starts work | This package |
+| No state or ref writes during render: `useLatest` and `useStableCallback` for values handlers read; props sync into a store in a layout effect keyed on them. `useExhaustiveDependencies` is on; an exception says why on one line | Base UI |
 
 ## Releasing
 

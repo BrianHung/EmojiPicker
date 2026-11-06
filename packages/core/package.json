@@ -44,6 +44,21 @@
       "types": "./dist/search/index.d.ts",
       "default": "./dist/search/index.js"
     },
+    "./grid": {
+      "@brianhung/source": "./src/grid.ts",
+      "types": "./dist/grid.d.ts",
+      "default": "./dist/grid.js"
+    },
+    "./native": {
+      "@brianhung/source": "./src/native.ts",
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./build": {
+      "@brianhung/source": "./scripts/build-data.ts",
+      "types": "./dist/build.d.ts",
+      "default": "./dist/build.js"
+    },
     "./data/en.json": {
       "types": "./data/en.json.d.cts",
       "default": "./data/en.json"
@@ -66,9 +81,11 @@
     }
   },
   "devDependencies": {
+    "@brianhung/emoji-picker-twemoji-font": "^1.0.0-alpha.0",
     "@types/node": "^22.20.5",
     "emojibase": "^18.0.0",
     "emojibase-data": "^18.0.0",
+    "jsdom": "^26.1.0",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",

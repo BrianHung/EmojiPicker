@@ -1,18 +1,18 @@
-import { createChangeDetails, type ChangeDetails } from "./change";
+import { controllable, createChangeDetails, type ChangeDetails } from "./change";
 import { cached, createStore } from "./reactive";
 
-export type EmojiStorage = {
+export interface EmojiStorage {
   read(): string | null;
   write(value: string): void;
   subscribe?(listener: () => void): () => void;
-};
+}
 
 // count is the use count decayed by half every halfLifeDays (14 by default), as of lastUsed
 export type FrequentEntry = { count: number; lastUsed: number };
 export type Frequents = Readonly<Record<string, FrequentEntry>>;
 export type FrequentsChangeDetails = ChangeDetails<"pick" | "remove" | "clear"> & { emoji?: string };
 
-export type FrequencyStore = {
+export interface FrequencyStore {
   pick(unified: string): void;
   remove(unified: string): void;
   clear(): void;
@@ -20,7 +20,7 @@ export type FrequencyStore = {
   score(unified: string): number;
   entries(): Frequents;
   subscribe(listener: () => void): () => void;
-};
+}
 
 export type FrequencyStoreOptions = {
   frequents?: Frequents;
@@ -75,6 +75,8 @@ export function reduceFrequents(entries: Frequents, action: FrequentsAction, tun
     }
     case "clear":
       return NONE;
+    default:
+      return action satisfies never;
   }
 }
 
@@ -94,25 +96,25 @@ export function createFrequencyStore({
 }: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {
   const read = () => parse(storage?.read() ?? null) ?? defaultFrequents;
   const store = createStore<FrequencyState, FrequencyAction>({ own: deferStorage ? defaultFrequents : read(), controlled: frequents }, reduce);
-  const callbacks = { onFrequentsChange };
-  const entries = () => store.getSnapshot().controlled ?? store.getSnapshot().own;
+  let onChange = onFrequentsChange;
   const tuning = tuningOf(tuningOptions);
   const tops = new WeakMap<Frequents, Map<number, readonly string[]>>();
-
-  const change = (action: FrequentsAction) => {
-    const next = reduceFrequents(entries(), action, tuning);
-    if (next === entries()) return;
-    const details = Object.assign(createChangeDetails(action.type), { emoji: "emoji" in action ? action.emoji : undefined });
-    callbacks.onFrequentsChange?.(next, details);
-    if (details.isCanceled || store.getSnapshot().controlled !== undefined) return;
-    storage?.write(JSON.stringify(next));
-    store.dispatch({ type: "own", entries: next });
-  };
+  const value = controllable<Frequents, FrequentsChangeDetails>({
+    controlled: () => store.getSnapshot().controlled,
+    own: () => store.getSnapshot().own,
+    onChange: () => onChange,
+    write(next) {
+      storage?.write(JSON.stringify(next));
+      store.dispatch({ type: "own", entries: next });
+    },
+  });
+  const entries = value.value;
+  const change = (action: FrequentsAction) => value.set(reduceFrequents(entries(), action, tuning), Object.assign(createChangeDetails(action.type), { emoji: action.type === "clear" ? undefined : action.emoji }));
 
   return {
-    pick: (emoji) => change({ type: "pick", emoji, now: Date.now() }),
-    remove: (emoji) => change({ type: "remove", emoji }),
-    clear: () => change({ type: "clear" }),
+    pick: (emoji) => void change({ type: "pick", emoji, now: Date.now() }),
+    remove: (emoji) => void change({ type: "remove", emoji }),
+    clear: () => void change({ type: "clear" }),
     top(n) {
       const state = entries();
       return cached(
@@ -131,9 +133,9 @@ export function createFrequencyStore({
     },
     entries,
     subscribe: syncWith(storage, store.subscribe, () => store.dispatch({ type: "own", entries: read() })),
-    control(value, onChange) {
-      callbacks.onFrequentsChange = onChange;
-      store.dispatch({ type: "control", entries: value });
+    control(next, handler) {
+      onChange = handler;
+      store.dispatch({ type: "control", entries: next });
     },
   };
 }
@@ -196,6 +198,6 @@ export function localStorageAdapter(key: string): EmojiStorage {
 }
 
 export const memoryStorageAdapter = (): EmojiStorage => {
-  const box = createStore<string | null, string>(null, (_, value) => value);
-  return { read: box.getSnapshot, write: box.dispatch };
+  let value: string | null = null;
+  return { read: () => value, write: (next) => void (value = next) };
 };

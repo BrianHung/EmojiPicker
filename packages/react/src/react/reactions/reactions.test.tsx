@@ -1,29 +1,16 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { createRoot } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import en from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { describe, expect, it, vi } from "vitest";
+import { createTestRoot, render } from "../../../test/render";
+import { en } from "../../../test/en";
 import { EmojiPicker, EmojiProvider } from "../../index";
 
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-Object.assign(HTMLCanvasElement.prototype, { getContext: () => null });
-
-let unmount = () => {};
-afterEach(() => unmount());
-
 function mount(children: React.ReactNode) {
-  unmount();
-  const host = document.body.appendChild(document.createElement("div"));
-  const root = createRoot(host);
-  React.act(() =>
-    root.render(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ skinTone: null }}>
-        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>{children}</EmojiPicker.Root>
-      </EmojiProvider>,
-    ),
+  const host = render(
+    <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
+      <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>{children}</EmojiPicker.Root>
+    </EmojiProvider>,
   );
-  unmount = () => React.act(() => root.unmount());
   return host;
 }
 
@@ -46,8 +33,7 @@ describe("Reactions", () => {
 
   it("shows the most frequently used emoji without a provider above Root", async () => {
     vi.stubGlobal("fetch", async () => new Response(JSON.stringify(en)));
-    unmount();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
+    const root = createTestRoot(document.body.appendChild(document.createElement("div")));
     await React.act(async () =>
       root.render(
         <EmojiPicker.Root reactions={3}>
@@ -55,7 +41,6 @@ describe("Reactions", () => {
         </EmojiPicker.Root>,
       ),
     );
-    unmount = () => React.act(() => root.unmount());
     await vi.waitFor(() => expect(document.querySelectorAll('[data-slot="emoji-picker-reactions"] [data-unified]')).toHaveLength(3));
     vi.unstubAllGlobals();
   });
@@ -63,18 +48,13 @@ describe("Reactions", () => {
   it("reports whether a press added or removed a reaction, and picks only an added one", () => {
     const changes: [readonly string[], boolean][] = [];
     const picked: string[] = [];
-    unmount();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() =>
-      root.render(
-        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ skinTone: null }}>
-          <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} onSelect={(s) => picked.push(s.unified)}>
-            <EmojiPicker.Reactions defaultValue={["1f44d"]} onValueChange={(value, details) => changes.push([value, details.pressed])} />
-          </EmojiPicker.Root>
-        </EmojiProvider>,
-      ),
+    render(
+      <EmojiProvider data={en} prepare={false} storage={{ skinTone: null }}>
+        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} onSelect={(s) => picked.push(s.unified)}>
+          <EmojiPicker.Reactions defaultValue={["1f44d"]} onValueChange={(value, details) => changes.push([value, details.pressed])} />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
     );
-    unmount = () => React.act(() => root.unmount());
     const [thumbs, heart] = document.querySelectorAll<HTMLButtonElement>("[data-unified]");
     React.act(() => heart!.click());
     React.act(() => thumbs!.click());

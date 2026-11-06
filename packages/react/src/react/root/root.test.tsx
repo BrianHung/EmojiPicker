@@ -1,13 +1,9 @@
 // @vitest-environment jsdom
 import * as React from "react";
-import { createRoot } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
-import en from "@brianhung/emoji-picker-core/data/en.json";
-import type { Dataset } from "@brianhung/emoji-picker-core";
+import { describe, expect, it, vi } from "vitest";
+import { createTestRoot, render } from "../../../test/render";
+import { en } from "../../../test/en";
 import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, useSkinTone, type EmojiGridState, type EmojiItem, type EmojiPickerActions, type RootProps } from "../../index";
-
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, CSS: { escape: (s: string) => s.replace(/[^\w-]/g, "\\$&") } });
-Object.assign(HTMLCanvasElement.prototype, { getContext: () => null });
 
 function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
   return <div {...useEmojiCell(state, item).cellProps} />;
@@ -18,27 +14,20 @@ function Grid() {
   return <div {...grid.getGridProps()}>{grid.rows.slice(0, 3).flatMap((row) => (row.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : []))}</div>;
 }
 
-let unmount = () => {};
-afterEach(() => {
-  unmount();
-  document.body.replaceChildren();
-});
-
 function mount(props: Partial<RootProps>) {
   const input = document.body.appendChild(document.createElement("input"));
   const host = document.body.appendChild(document.createElement("div"));
-  const root = createRoot(host);
+  const root = createTestRoot(host);
   const actions = React.createRef<EmojiPickerActions>();
   React.act(() =>
     root.render(
-      <EmojiProvider data={en as unknown as Dataset} prepare={false}>
+      <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root frequent={false} keyboardTarget={input} actionsRef={actions} {...props}>
           <Grid />
         </EmojiPicker.Root>
       </EmojiProvider>,
     ),
   );
-  unmount = () => React.act(() => root.unmount());
   input.focus();
   return { input, host, actions: actions.current! };
 }
@@ -111,18 +100,17 @@ describe("Root keyboard", () => {
       </>
     );
     const host = document.body.appendChild(document.createElement("div"));
-    const root = createRoot(host);
-    const render = (name: string) =>
+    const root = createTestRoot(host);
+    const show = (name: string) =>
       React.act(() =>
         root.render(
-          <EmojiProvider data={en as unknown as Dataset} prepare={false}>
+          <EmojiProvider data={en} prepare={false}>
             <EmojiPicker.Root categories={[{ id: "smileys_people", name }, { id: "animals_nature" }]}>{parts}</EmojiPicker.Root>
           </EmojiProvider>,
         ),
       );
-    unmount = () => React.act(() => root.unmount());
-    render("Faces");
-    render("People");
+    show("Faces");
+    show("People");
     expect(host.querySelector('[data-slot="emoji-picker-category-tab"]')?.getAttribute("aria-label")).toBe("People");
   });
 
@@ -155,18 +143,14 @@ describe("Root keyboard", () => {
     }
     const input = document.body.appendChild(document.createElement("input"));
     const actions = React.createRef<EmojiPickerActions>();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() =>
-      root.render(
-        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ frequents: null, skinTone: null }}>
-          <EmojiPicker.Root frequent={false} keyboardTarget={input} actionsRef={actions} onHighlightChange={onHighlightChange} onSelect={onSelect}>
-            <ToneSetter />
-            <Grid />
-          </EmojiPicker.Root>
-        </EmojiProvider>,
-      ),
+    render(
+      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+        <EmojiPicker.Root frequent={false} keyboardTarget={input} actionsRef={actions} onHighlightChange={onHighlightChange} onSelect={onSelect}>
+          <ToneSetter />
+          <Grid />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
     );
-    unmount = () => React.act(() => root.unmount());
     input.focus();
     React.act(() => actions.current!.highlight("1f44d"));
     expect(onHighlightChange).toHaveBeenLastCalledWith("1f44d", expect.objectContaining({ key: "smileys_people:1f44d" }));
@@ -186,25 +170,21 @@ describe("Root keyboard", () => {
 
   it("skips a cell's pick when its onClick calls preventEmojiPickerHandler", () => {
     const onSelect = vi.fn();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() =>
-      root.render(
-        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ frequents: null, skinTone: null }}>
-          <EmojiPicker.Root frequent={false} onSelect={onSelect}>
-            <EmojiPicker.Viewport>
-              <EmojiPicker.List>
-                {() => (
-                  <EmojiPicker.List.Section>
-                    <EmojiPicker.List.Items>{(emoji) => <EmojiPicker.List.Cell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiPickerHandler()} />}</EmojiPicker.List.Items>
-                  </EmojiPicker.List.Section>
-                )}
-              </EmojiPicker.List>
-            </EmojiPicker.Viewport>
-          </EmojiPicker.Root>
-        </EmojiProvider>,
-      ),
+    render(
+      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+        <EmojiPicker.Root frequent={false} onSelect={onSelect}>
+          <EmojiPicker.Viewport>
+            <EmojiPicker.List>
+              {() => (
+                <EmojiPicker.List.Section>
+                  <EmojiPicker.List.Items>{(emoji) => <EmojiPicker.List.Cell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiPickerHandler()} />}</EmojiPicker.List.Items>
+                </EmojiPicker.List.Section>
+              )}
+            </EmojiPicker.List>
+          </EmojiPicker.Viewport>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
     );
-    unmount = () => React.act(() => root.unmount());
     const click = (u: string) => React.act(() => (document.querySelector(`[data-unified="${u}"]`) as HTMLElement | null)?.click());
     click("1f600");
     click("1f603");
@@ -213,20 +193,16 @@ describe("Root keyboard", () => {
 
   it("clears the query from a Search.Clear placed beside the input", () => {
     const onQueryChange = vi.fn();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() =>
-      root.render(
-        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ frequents: null, skinTone: null }}>
-          <EmojiPicker.Root defaultQuery="smile" onQueryChange={onQueryChange}>
-            <EmojiPicker.Search>
-              <EmojiPicker.Search.Input>{[]}</EmojiPicker.Search.Input>
-              <EmojiPicker.Search.Clear />
-            </EmojiPicker.Search>
-          </EmojiPicker.Root>
-        </EmojiProvider>,
-      ),
+    render(
+      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+        <EmojiPicker.Root defaultQuery="smile" onQueryChange={onQueryChange}>
+          <EmojiPicker.Search>
+            <EmojiPicker.Search.Input>{[]}</EmojiPicker.Search.Input>
+            <EmojiPicker.Search.Clear />
+          </EmojiPicker.Search>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
     );
-    unmount = () => React.act(() => root.unmount());
     React.act(() => (document.querySelector('[data-slot="emoji-picker-search-clear"]') as HTMLElement).click());
     expect(onQueryChange).toHaveBeenCalledWith("", expect.objectContaining({ reason: "clear-press" }));
     expect(document.querySelector('[data-slot="emoji-picker-search-clear"]')).toBeNull();
@@ -234,21 +210,17 @@ describe("Root keyboard", () => {
 
   it("renders a List.Variations placed in Root in place of the default, styled by its state", () => {
     const actions = React.createRef<EmojiPickerActions>();
-    const root = createRoot(document.body.appendChild(document.createElement("div")));
-    React.act(() =>
-      root.render(
-        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ frequents: null, skinTone: null }}>
-          <EmojiPicker.Root frequent={false} actionsRef={actions}>
-            <EmojiPicker.Search />
-            <EmojiPicker.Viewport>
-              <EmojiPicker.List />
-              <EmojiPicker.List.Variations className={({ emoji }) => `tones-${emoji.unified}`} />
-            </EmojiPicker.Viewport>
-          </EmojiPicker.Root>
-        </EmojiProvider>,
-      ),
+    render(
+      <EmojiProvider data={en} prepare={false} storage={{ frequents: null, skinTone: null }}>
+        <EmojiPicker.Root frequent={false} actionsRef={actions}>
+          <EmojiPicker.Search />
+          <EmojiPicker.Viewport>
+            <EmojiPicker.List />
+            <EmojiPicker.List.Variations className={({ emoji }) => `tones-${emoji.unified}`} />
+          </EmojiPicker.Viewport>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
     );
-    unmount = () => React.act(() => root.unmount());
     const search = document.querySelector<HTMLInputElement>('[data-slot="emoji-picker-search-input"]')!;
     React.act(() => search.focus());
     React.act(() => actions.current!.highlight("1f44d"));

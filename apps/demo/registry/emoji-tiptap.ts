@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { useEmojiTypeaheadAdapter, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeSuggestion } from "@brianhung/emoji-picker-react";
+import { useEmojiTypeaheadAdapter, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
 import { emojiTypeahead } from "@/lib/emoji-prosemirror";
 
 export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
-  content?: (text: string, suggestion: ShortcodeSuggestion) => Content;
+  content?: (text: string, suggestion: ShortcodeCompletion) => Content;
 };
 
 export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {
