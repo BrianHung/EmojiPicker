@@ -316,16 +316,24 @@ export const Root = React.forwardRef<HTMLElement, RootProps>(function Root(props
   return React.useContext(EmojiContext) ? root : <EmojiProvider>{root}</EmojiProvider>;
 });
 
+// Declared, not imported, aliases: the .d.ts bundler restores an import's original name, which the namespace member would shadow
+type QueryDetails = CoreQueryChangeDetails;
+type HighlightDetails = CoreHighlightChangeDetails;
+type ValueDetails = RootValueChangeDetails;
+type CollapsedDetails = CoreCollapsedCategoriesChangeDetails;
+type ReactionsOpenDetails = RootReactionsOpenChangeDetails;
+type SelectionDetails = RootSelectDetails;
+
 export declare namespace Root {
   type Props = RootProps;
   type State = RootState;
   type Actions = EmojiPickerActions;
-  type QueryChangeDetails = CoreQueryChangeDetails;
-  type HighlightChangeDetails = CoreHighlightChangeDetails;
-  type ValueChangeDetails = RootValueChangeDetails;
-  type CollapsedCategoriesChangeDetails = CoreCollapsedCategoriesChangeDetails;
-  type ReactionsOpenChangeDetails = RootReactionsOpenChangeDetails;
-  type SelectDetails = RootSelectDetails;
+  type QueryChangeDetails = QueryDetails;
+  type HighlightChangeDetails = HighlightDetails;
+  type ValueChangeDetails = ValueDetails;
+  type CollapsedCategoriesChangeDetails = CollapsedDetails;
+  type ReactionsOpenChangeDetails = ReactionsOpenDetails;
+  type SelectDetails = SelectionDetails;
 }
 
 export function useActiveEmoji(): EmojiRecord | null {
