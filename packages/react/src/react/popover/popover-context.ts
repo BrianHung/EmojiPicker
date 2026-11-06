@@ -10,6 +10,7 @@ export type PopoverState = {
   close: (reason?: PopoverOpenChangeReason, event?: Event) => void;
   selected: React.RefObject<boolean>;
   closeOnSelect: boolean;
+  complete(open: boolean): void;
   focusGrid?: boolean;
 };
 

@@ -1,8 +1,10 @@
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import { mergeProps } from "react-aria/mergeProps";
-import { createEmojiGrid, type EmojiGridRow, type EmojiSection } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, type EmojiGrid, type EmojiGridRow } from "../state/grid";
+import type { EmojiSection } from "../state/sections";
 import { usePicker } from "../root/context";
+import { mergePartProps } from "../utils/events";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { scrollParent } from "../utils/utils";
@@ -23,7 +25,7 @@ function windowOf(list: HTMLElement | null) {
   return list && el ? { el, top: el.getBoundingClientRect().top + el.clientTop - list.getBoundingClientRect().top, height: el.clientHeight } : null;
 }
 
-export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions) {
+export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions): UseEmojiGridResult {
   const picker = usePicker("useEmojiGrid");
   const searching = useStore(picker.state, (s) => s.searching);
   const { sections, request, probeRoot } = useGridSections(false);
@@ -99,9 +101,18 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
 
   return {
     ...grid,
-    getGridProps: (props: React.HTMLAttributes<HTMLElement> = {}) => mergeProps(props, controller.gridProps) as typeof controller.gridProps,
-    getHeaderProps: (section: EmojiSection) => ({ role: "presentation", "data-slot": SLOTS.sectionTitle, children: section.name }),
+    getGridProps: (props = {}) => mergePartProps(props, controller.gridProps),
+    getHeaderProps: (section, props = {}) => mergeProps(props, { role: "presentation", "data-slot": SLOTS.sectionTitle, children: section.name }),
     state: controller.cells as unknown as EmojiGridState,
     variations: controller.variations,
   };
 }
+
+type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement> };
+
+export type UseEmojiGridResult = EmojiGrid<EmojiSection> & {
+  getGridProps(props?: React.HTMLAttributes<HTMLElement>): GridElementProps;
+  getHeaderProps(section: EmojiSection, props?: React.HTMLAttributes<HTMLElement>): React.HTMLAttributes<HTMLElement>;
+  state: EmojiGridState;
+  variations: React.ReactNode;
+};

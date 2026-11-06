@@ -24,6 +24,7 @@ export const SLOTS = {
   preview: "emoji-picker-preview",
   panel: "emoji-picker-panel",
   variations: "emoji-picker-variations",
+  variation: "emoji-picker-variation",
   popoverTrigger: "emoji-picker-popover-trigger",
   popoverContent: "emoji-picker-popover-content",
   suggestions: "emoji-picker-suggestions-popover",

@@ -1,18 +1,21 @@
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { Button } from "react-aria-components/Button";
-import { ToggleButton } from "react-aria-components/ToggleButton";
-import { nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
+import { type ChangeDetails, nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
 import { useDrawable } from "../emoji/native-support";
 import { Glyph, useOverridden } from "../emoji/glyph";
-import { ReactionsContext, isPressed } from "./reactions-context";
-import { racParts, racState, renderElement, resolve, type InteractionState, type PartElementProps, type RacState } from "../utils/render";
+import { useStoreSnapshot } from "../provider/provider";
+import { ReactionsContext } from "./reactions-context";
+import { mergePartProps } from "../utils/events";
+import { useInteraction } from "../utils/interaction";
+import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
-import { useStore } from "../utils/store";
-import { BUTTONS, ReactionBar, type ReactionBarProps } from "./reaction-bar";
+import { useChangeState } from "../utils/state";
+import { BUTTONS, ReactionBar, type ReactionBarProps, type ReactionBarState } from "./reaction-bar";
 
-type Row = { shown: readonly string[]; selected: ReadonlySet<string> | null; expanding: React.MutableRefObject<boolean> };
+export type ReactionsValueChangeDetails = ChangeDetails<"item-press"> & { emoji: string; pressed: boolean };
+
+type Row = { shown: readonly string[]; pressed: ReadonlySet<string> | null; press(unified: string, event: Event): void; expanding: React.MutableRefObject<boolean> };
 const RowContext = React.createContext<Row | null>(null);
 
 function useRow(part: string) {
@@ -21,16 +24,20 @@ function useRow(part: string) {
   return row;
 }
 
-export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation"> & {
-  selected?: readonly string[];
+export type ReactionsState = ReactionBarState;
+
+export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation" | "defaultValue"> & {
+  value?: readonly string[];
+  defaultValue?: readonly string[];
+  onValueChange?: (value: readonly string[], details: ReactionsValueChangeDetails) => void;
   children?: React.ReactNode | ((emoji: string) => React.ReactNode);
 };
 
-const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ selected, children, ...props }, ref) {
+const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ value: valueProp, defaultValue, onValueChange, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
-  useStore(store);
+  useStoreSnapshot((s) => s.records());
   const row = React.useRef<HTMLDivElement | null>(null);
   const { drawable, request } = useDrawable(row);
   const shown = (state?.reactions ?? [])
@@ -40,7 +47,16 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       return record != null && drawable(record, unified);
     });
   React.useEffect(() => request(shown));
-  const pressed = React.useMemo(() => (selected ? new Set(selected.map(withoutTone)) : null), [selected]);
+  // Toggle buttons once the row has a value, as in Base UI's ToggleGroup
+  const tracked = defaultValue !== undefined || onValueChange !== undefined ? (defaultValue ?? []) : undefined;
+  const [value, setValue] = useChangeState<readonly string[] | undefined, "item-press", { emoji: string; pressed: boolean }>(valueProp, tracked, onValueChange as never);
+  const pressed = React.useMemo(() => (value ? new Set(value.map(withoutTone)) : null), [value]);
+  const press = (unified: string, event: Event) => {
+    if (!value || !pressed) return void picker.pick(unified, event);
+    const on = !pressed.has(withoutTone(unified));
+    const details = setValue(on ? [...value, unified] : value.filter((v) => withoutTone(v) !== withoutTone(unified)), "item-press", event, { emoji: unified, pressed: on });
+    if (on && !details?.isCanceled) picker.pick(unified, event);
+  };
   const expanding = React.useRef(false);
   React.useEffect(() => {
     if (!expanding.current || state?.open) return;
@@ -70,7 +86,7 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
       children
     );
   return (
-    <RowContext.Provider value={{ shown, selected: pressed, expanding }}>
+    <RowContext.Provider value={{ shown, pressed, press, expanding }}>
       <ReactionBar {...props} ref={mergeRefs<HTMLDivElement>(ref, row)} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
@@ -78,78 +94,102 @@ const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function 
   );
 });
 
-function ReactionsItems({ children }: { children?: (emoji: string) => React.ReactNode }) {
+export type ReactionsItemsProps = { children?: (emoji: string) => React.ReactNode };
+
+function ReactionsItems({ children }: ReactionsItemsProps) {
   const { shown } = useRow("Items");
   return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <ReactionsItem emoji={unified} />}</React.Fragment>);
 }
 
 export type ReactionsItemState = InteractionState & { selected: boolean };
 
-export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButtonElement, "onClick" | "onChange"> & {
+export type ReactionsItemProps = PartElementProps<ReactionsItemState, HTMLButtonElement, "onChange"> & {
   emoji: string;
 };
 
-const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, className, style, render, children, ...props }, ref) {
+const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions.Item");
-  const { selected } = useRow("Item");
-  const record = useStore(picker.store, () => picker.store.get(unified));
+  const row = useRow("Item");
+  const record = useStoreSnapshot((s) => s.get(unified));
   const overridden = useOverridden(unified, record);
-  const on = selected ? isPressed(selected, unified) : undefined;
-  const attrs = {
-    ...(props as object),
-    ref,
-    "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
-    "data-slot": SLOTS.emoji,
-    "data-unified": unified,
-    "data-overridden": overridden ? "" : undefined,
-    "data-selected": on ? "" : undefined,
-    ...racParts<ReactionsItemState, HTMLButtonElement>({ className, style: (s) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }), render }),
-    children: typeof children === "function" ? (r: RacState) => children(racState(r)) : (children ?? <Glyph unified={unified} record={record} />),
-  };
-  return on === undefined ? <Button {...attrs} onPress={() => picker.pick(unified)} /> : <ToggleButton {...attrs} isSelected={on} onChange={() => picker.pick(unified)} />;
+  const interaction = useInteraction();
+  const selected = Boolean(row.pressed?.has(withoutTone(unified)));
+  return renderElement(
+    "button",
+    {
+      type: "button",
+      "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
+      "aria-pressed": row.pressed ? selected : undefined,
+      ...mergePartProps(props, interaction.props, { onClick: (e: React.MouseEvent) => row.press(unified, e.nativeEvent) }),
+      ref,
+      "data-slot": SLOTS.emoji,
+      "data-unified": unified,
+      "data-overridden": flag(overridden),
+      "data-selected": flag(selected),
+      style: (s: ReactionsItemState) => ({ maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)", ...resolve(style, s) }),
+      children: children ?? <Glyph unified={unified} record={record} />,
+    },
+    { ...interaction.state, selected },
+  );
 });
 
-export type ReactionsExpandProps = PartElementProps<InteractionState, HTMLButtonElement, "onClick">;
+export type ReactionsExpandState = InteractionState;
+export type ReactionsExpandProps = PartElementProps<ReactionsExpandState, HTMLButtonElement>;
 
-const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ className, style, render, children, ...props }, ref) {
+const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
   const { expanding } = useRow("Expand");
+  const interaction = useInteraction();
   if (!state?.expand) return null;
-  return (
-    <Button
-      {...(props as object)}
-      ref={ref}
-      aria-label={labels.expandReactions}
-      data-slot={SLOTS.reactionsExpand}
-      {...racParts({ className, style, render })}
-      {...{ title: labels.expandReactions }}
-      onPress={() => {
-        expanding.current = true;
-        state.expand!();
-      }}
-    >
-      {typeof children === "function"
-        ? (r) => children(racState(r))
-        : (children ?? (
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          ))}
-    </Button>
+  const expand = state.expand;
+  return renderElement(
+    "button",
+    {
+      type: "button",
+      title: labels.expandReactions,
+      "aria-label": labels.expandReactions,
+      // A disclosure for the Panel; Escape with no query collapses back to this row
+      "aria-expanded": false,
+      "aria-controls": state.panelId,
+      ...mergePartProps(props, interaction.props, {
+        onClick: () => {
+          expanding.current = true;
+          expand();
+        },
+      }),
+      ref,
+      "data-slot": SLOTS.reactionsExpand,
+      children: children ?? (
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      ),
+    },
+    interaction.state,
   );
 });
 
 export const Reactions = /* @__PURE__ */ Object.assign(ReactionsRoot, { Items: ReactionsItems, Item: ReactionsItem, Expand: ReactionsExpand });
 
+type RowProps = ReactionsProps;
+type RowState = ReactionsState;
+type ItemsProps = ReactionsItemsProps;
+
 export declare namespace Reactions {
-  type Props = ReactionsProps;
+  type Props = RowProps;
+  type State = RowState;
+  type ValueChangeDetails = ReactionsValueChangeDetails;
+  namespace Items {
+    type Props = ItemsProps;
+  }
   namespace Item {
     type Props = ReactionsItemProps;
     type State = ReactionsItemState;
   }
   namespace Expand {
     type Props = ReactionsExpandProps;
+    type State = ReactionsExpandState;
   }
 }
 
@@ -162,7 +202,11 @@ export const Panel = React.forwardRef<HTMLDivElement, PanelProps>(function Panel
   React.useLayoutEffect(() => register?.(), [register]);
   const hidden = Boolean(state?.open);
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
-  return renderElement("div", { "data-slot": SLOTS.panel, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) }, { hidden });
+  return renderElement(
+    "div",
+    { "data-slot": SLOTS.panel, id: state?.panelId, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: PanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) },
+    { hidden },
+  );
 });
 
 export declare namespace Panel {

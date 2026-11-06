@@ -1,30 +1,29 @@
 // Not React Aria's ListBox: its collection renders a hidden React tree with a fiber per emoji per picker
 import * as React from "react";
 import type { Node as CollectionNode } from "@react-types/shared";
-import { mergeProps } from "react-aria/mergeProps";
 import { useLocale } from "react-aria/I18nProvider";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useListBoxSection } from "react-aria/useListBox";
 import type { Rect, VirtualizerState } from "react-stately/useVirtualizerState";
-import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiItem, EmojiSection } from "../state/sections";
 import { usePicker, ViewportContext } from "../root/context";
 import { useCell, type CellState, type Cells } from "./cell";
 import { useGridController, useGridSections, type GridGeometry } from "./grid";
-import type { PickerKeyboardEventHandler } from "../utils/keyboard";
+import { mergePartProps, type PickerHandlers } from "../utils/events";
 import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { EmojiGridNavigation } from "./navigation";
-import { renderElement, resolve, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
+import { Variations, type VariationsOptionProps, type VariationsOptionState, type VariationsProps, type VariationsState } from "./variations";
+import { flag, renderElement, resolve, type Orientation, type PartElementProps, type PartProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { nextTabbable, TABBABLE } from "../utils/utils";
 import { useStoreSnapshot } from "../provider/provider";
 import { shallowEqual, useStore } from "../utils/store";
 import { VirtualBranch, VirtualCollection } from "./virtualizer";
 
-export type EmojiPickerListState = { orientation: Orientation; searching: boolean; empty: boolean };
+export type ListState = { orientation: Orientation; searching: boolean; empty: boolean };
 
-export type ListProps = Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "onKeyDown" | "dangerouslySetInnerHTML" | "className" | "style"> &
-  PartProps<EmojiPickerListState, HTMLDivElement> & {
-    onKeyDown?: PickerKeyboardEventHandler<HTMLElement>;
+export type ListProps = PickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
+  PartProps<ListState, HTMLDivElement> & {
     children?: (section: EmojiSection) => React.ReactNode;
     orientation?: Orientation;
     rows?: number;
@@ -182,7 +181,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
     };
   }, [layout, navigation, scroller]);
 
-  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, onKeyDown, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref: ref as React.Ref<HTMLElement>, probeRoot, onKeyDown: onKeyDown as never, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const latest = React.useRef(grid);
   latest.current = grid;
 
@@ -234,11 +233,10 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
           {renderElement(
             "div",
             {
-              ...rest,
-              ...grid.gridProps,
-              onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined,
+              ...mergePartProps(rest, grid.gridProps, { onKeyDownCapture: actions ? tab.onKeyDownCapture : undefined }),
+              ref: grid.gridProps.ref,
               className,
-              style: (s: EmojiPickerListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(unpadded ? UNPADDED : null), ...resolve(style, s) }),
+              style: (s: ListState) => ({ ...(horizontal ? HORIZONTAL : null), ...(unpadded ? UNPADDED : null), ...resolve(style, s) }),
               render,
               children: (
                 <>
@@ -316,7 +314,7 @@ const Section = React.forwardRef<HTMLElement, SectionProps>(function Section({ c
           id: cells.sectionDomId(section.id),
           "data-slot": SLOTS.section,
           "data-category": section.category,
-          "data-collapsed": section.collapsed || undefined,
+          "data-collapsed": flag(section.collapsed),
           ...props,
           style: (s: SectionState) => ({ height: "100%", ...resolve(style, s) }),
           ref,
@@ -349,7 +347,7 @@ const SectionTitle = React.forwardRef<HTMLElement, SectionTitleProps>(function S
       ...headingProps,
       className: props.className,
       "data-slot": SLOTS.sectionTitle,
-      "data-collapsed": section.collapsed || undefined,
+      "data-collapsed": flag(section.collapsed),
       ...props,
       style: (s: SectionState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),
       ref: refs,
@@ -386,7 +384,7 @@ const Cell = React.forwardRef<HTMLDivElement, CellProps>(function Cell({ classNa
   const horizontal = React.useContext(HorizontalContext);
   const { cellProps, state } = useCell(cells, item);
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(cellProps.ref, ref), [cellProps.ref, ref]);
-  return renderElement("div", { ...mergeProps(cellProps, props), ref: refs, className, style: (s: CellState) => ({ ...(horizontal ? FILL : CELL), ...resolve(style, s) }), render, children: children ?? cellProps.children }, state);
+  return renderElement("div", { ...mergePartProps(props, cellProps), ref: refs, className, style: (s: CellState) => ({ ...(horizontal ? FILL : CELL), ...resolve(style, s) }), render, children: children ?? cellProps.children }, state);
 });
 
 const CELL: React.CSSProperties = { width: "var(--ep-cell)", height: "var(--ep-cell)", maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)" };
@@ -466,7 +464,7 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
                 ref: mergeRefs<HTMLDivElement>((props as { ref?: React.Ref<HTMLDivElement> }).ref, block(s.id)),
                 "data-slot": SLOTS.sectionActions,
                 "data-section": s.id,
-                "data-collapsed": s.collapsed || undefined,
+                "data-collapsed": flag(s.collapsed),
                 style: (st: SectionActionsState) => ({ position: "sticky", top: 0, height: layout.metrics.headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, st) }),
                 children,
               },
@@ -479,17 +477,31 @@ function ActionsLayer({ layout, list, sections, actions }: { layout: EmojiGridLa
   );
 }
 
-export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell });
+export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell, Variations });
+
+type VariationsRowProps = VariationsProps;
+type VariationsRowState = VariationsState;
+type VariationProps = VariationsOptionProps;
+type VariationState = VariationsOptionState;
 
 export declare namespace List {
   type Props = ListProps;
-  type State = EmojiPickerListState;
+  type State = ListState;
   namespace Section {
     type Props = SectionProps;
     type State = SectionState;
   }
   namespace SectionTitle {
     type Props = SectionTitleProps;
+    type State = SectionState;
+  }
+  namespace Variations {
+    type Props = VariationsRowProps;
+    type State = VariationsRowState;
+    namespace Option {
+      type Props = VariationProps;
+      type State = VariationState;
+    }
   }
   namespace SectionActions {
     type Props = SectionActionsProps;

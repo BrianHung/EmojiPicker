@@ -29,7 +29,7 @@ function mount(children: React.ReactNode) {
 
 describe("Reactions", () => {
   it("presses the selected reactions in any skin tone", () => {
-    const host = mount(<EmojiPicker.Reactions selected={["1f44d-1f3fd"]} />);
+    const host = mount(<EmojiPicker.Reactions defaultValue={["1f44d-1f3fd"]} />);
     expect([...host.querySelectorAll("[data-unified]")].map((b) => b.getAttribute("aria-pressed"))).toEqual(["true", "false"]);
   });
 
@@ -58,5 +58,30 @@ describe("Reactions", () => {
     unmount = () => React.act(() => root.unmount());
     await vi.waitFor(() => expect(document.querySelectorAll('[data-slot="emoji-picker-reactions"] [data-unified]')).toHaveLength(3));
     vi.unstubAllGlobals();
+  });
+
+  it("reports whether a press added or removed a reaction, and picks only an added one", () => {
+    const changes: [readonly string[], boolean][] = [];
+    const picked: string[] = [];
+    unmount();
+    const root = createRoot(document.body.appendChild(document.createElement("div")));
+    React.act(() =>
+      root.render(
+        <EmojiProvider data={en as unknown as Dataset} prepare={false} storage={{ skinTone: null }}>
+          <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} onSelect={(s) => picked.push(s.unified)}>
+            <EmojiPicker.Reactions defaultValue={["1f44d"]} onValueChange={(value, details) => changes.push([value, details.pressed])} />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    unmount = () => React.act(() => root.unmount());
+    const [thumbs, heart] = document.querySelectorAll<HTMLButtonElement>("[data-unified]");
+    React.act(() => heart!.click());
+    React.act(() => thumbs!.click());
+    expect(changes).toEqual([
+      [["1f44d", "2764-fe0f"], true],
+      [["2764-fe0f"], false],
+    ]);
+    expect(picked).toEqual(["2764-fe0f"]);
   });
 });

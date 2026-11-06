@@ -1,14 +1,17 @@
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { ListState } from "react-stately/useListState";
-import { createStore, type EmojiItem, type PickerSnapshot, type PickerState } from "@brianhung/emoji-picker-core";
+import type { PickerSnapshot, PickerState } from "../state/picker";
+import { createStore } from "../state/reactive";
+import type { EmojiItem } from "../state/sections";
 import { Glyph, useOverridden } from "../emoji/glyph";
+import { flag } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { moveVirtualFocus } from "../utils/utils";
 
 const STOP = 1;
-const ACTIVE = 2;
+const HIGHLIGHTED = 2;
 const HOVERED = 4;
 const PRESSED = 8;
 const FOCUSED = 16;
@@ -17,7 +20,8 @@ type Marks = { stop: Key | null; pressed: Key | null };
 export const createMarks = () => createStore<Marks, Partial<Marks>>({ stop: null, pressed: null }, (marks, patch) => ((Object.keys(patch) as (keyof Marks)[]).every((k) => Object.is(marks[k], patch[k])) ? marks : { ...marks, ...patch }));
 export type MarksStore = ReturnType<typeof createMarks>;
 
-const pickerFlags = ({ hovered, highlighted }: PickerSnapshot, key: Key) => ((highlighted ?? hovered) === key ? ACTIVE : 0) | (hovered === key ? HOVERED : 0) | (highlighted === key ? FOCUSED : 0);
+// Highlighted as in Base UI: the keyboard position, or the hovered cell while there is none. Focused: the keyboard position, by DOM or virtual focus
+const pickerFlags = ({ hovered, highlighted }: PickerSnapshot, key: Key) => ((highlighted ?? hovered) === key ? HIGHLIGHTED : 0) | (hovered === key ? HOVERED : 0) | (highlighted === key ? FOCUSED : 0);
 const markFlags = ({ stop, pressed }: Marks, key: Key) => (stop === key ? STOP : 0) | (pressed === key ? PRESSED : 0);
 
 // Handlers are delegated from the list: one set for every mounted cell
@@ -41,20 +45,19 @@ export type Cells = {
   toggle(id: string): void;
 };
 
-export type CellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; active: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
+export type CellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
 function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boolean) {
   const { selection: m } = cells;
   const { record, unified } = item;
   const position = cells.position(item.id);
   const focused = Boolean(flags & FOCUSED);
-  const highlighted = cells.virtual && focused;
+  const variations = record.tones.length > 0 && !record.imageUrl;
   const state: CellState = {
     emoji: item,
     row: position?.[3] ?? 0,
     column: position?.[4] ?? 0,
-    highlighted,
-    active: Boolean(flags & ACTIVE) || highlighted,
+    highlighted: Boolean(flags & HIGHLIGHTED),
     hovered: Boolean(flags & HOVERED),
     focused,
     focusVisible: focused && cells.focusVisible,
@@ -68,6 +71,7 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     "aria-selected": m.selectionMode === "none" ? undefined : state.selected,
     "aria-posinset": position?.[0],
     "aria-setsize": position?.[1],
+    "aria-keyshortcuts": variations ? "Shift+Space" : undefined,
     tabIndex: flags & STOP ? 0 : -1,
     "data-slot": SLOTS.emoji,
     "data-key": item.id,
@@ -76,14 +80,15 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     "data-index": position?.[2],
     "data-row": position?.[3],
     "data-column": position?.[4],
-    "data-selected": state.selected || undefined,
-    "data-hovered": state.hovered || undefined,
-    "data-focus-visible": state.focusVisible || undefined,
-    "data-pressed": state.pressed || undefined,
-    "data-highlighted": highlighted ? "" : undefined,
-    "data-overridden": overridden ? "" : undefined,
-    "data-has-variations": record.tones.length && !record.imageUrl ? "" : undefined,
-    children: <Glyph unified={unified} record={record} animate={state.active && Boolean(record.animated)} />,
+    "data-selected": flag(state.selected),
+    "data-hovered": flag(state.hovered),
+    "data-focused": flag(focused),
+    "data-focus-visible": flag(state.focusVisible),
+    "data-pressed": flag(state.pressed),
+    "data-highlighted": flag(state.highlighted),
+    "data-overridden": flag(overridden),
+    "data-has-variations": flag(variations),
+    children: <Glyph unified={unified} record={record} animate={state.highlighted && Boolean(record.animated)} />,
   };
   return { props, state };
 }

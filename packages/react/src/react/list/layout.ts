@@ -1,6 +1,7 @@
 import type { Key, Node } from "@react-types/shared";
 import { Layout, LayoutInfo, Rect, Size } from "react-stately/useVirtualizerState";
-import { createEmojiGrid, type EmojiGrid, type EmojiSection } from "@brianhung/emoji-picker-core";
+import { createEmojiGrid, type EmojiGrid } from "../state/grid";
+import type { EmojiSection } from "../state/sections";
 import { layoutStrip, placeCell, type StripLayout } from "./strip-layout";
 
 export type GridMetrics = {

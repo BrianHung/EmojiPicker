@@ -1,8 +1,11 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Popover, type PopoverRenderProps } from "react-aria-components/Popover";
+import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";
-import { resolve, toRenderFunction } from "../../utils/render";
+import { useInteractOutside } from "react-aria/useInteractOutside";
+import { mergePartProps } from "../../utils/events";
+import { resolve, toRenderFunction, type ElementProps } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import { useOverlayTrigger } from "react-aria/useOverlayTrigger";
 import { useOverlayTriggerState } from "react-stately/useOverlayTriggerState";
@@ -11,13 +14,16 @@ import type { PopoverOpenChangeReason } from "../popover-context";
 import {
   anchorRect,
   ContentFocus,
-  contentAttributes,
   finalFocusTarget,
   initialFocusTarget,
+  placedSide,
   PopoverProvider,
+  stateAttributes,
   Trigger,
+  useContentAttributes,
   usePopoverInternals,
   usePopoverState,
+  type PopoverActions,
   type PopoverAlign,
   type PopoverAnchor,
   type PopoverContentProps,
@@ -30,18 +36,20 @@ import {
   type PopoverTriggerProps,
   type PopoverTriggerState,
   type SuggestionsPopoverProps,
+  type SuggestionsPopoverState,
+  type TransitionStatus,
 } from "../popover-shared";
 
-type Internals = PopoverInternals & { id?: string };
+type Internals = PopoverInternals & { id?: string; modal: boolean };
 
-function Root({ children, ...props }: PopoverRootProps) {
+function Root({ children, modal = true, ...props }: PopoverRootProps) {
   const state = usePopoverState(props);
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
   // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself
   const overlay = useOverlayTriggerState({ isOpen: state.open, onOpenChange: (open) => state.setOpen(open, open ? "trigger-press" : "scroll") });
   const { triggerProps, overlayProps } = useOverlayTrigger({ type: "dialog" }, overlay, { current: trigger });
   const { onPress: _, ...aria } = triggerProps;
-  const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => mergeProps(props, aria), id: overlayProps.id };
+  const value: Internals = { state, trigger, setTrigger, triggerProps: (props) => mergeProps(props, aria), id: overlayProps.id, modal };
   return <PopoverProvider value={value}>{children}</PopoverProvider>;
 }
 
@@ -56,20 +64,24 @@ function useAnchorRef(anchor: PopoverAnchor | undefined, fallback: Element | nul
   return [element, virtual ? box : { current: anchor instanceof Element ? anchor : fallback }] as const;
 }
 
-const placementOf = (side: PopoverSide, align: PopoverAlign) => (align === "center" ? side : (`${side} ${align}` as const));
+// React Aria names inline-start "start", and aligns a side placement by "top" and "bottom"
+const placementOf = (side: PopoverSide, align: PopoverAlign) => {
+  const cross = align === "center" ? "" : side === "top" || side === "bottom" ? align : align === "start" ? "top" : "bottom";
+  return `${side.replace("inline-", "")}${cross && ` ${cross}`}` as never;
+};
 
-// React Aria's onOpenChange carries no reason: the outside press and Escape that start a close leave one
+// React Aria's onOpenChange carries no reason or event: the outside press and Escape that start a close leave both
 function useDismissReason() {
-  const reason = React.useRef<PopoverOpenChangeReason | null>(null);
+  const last = React.useRef<{ reason: PopoverOpenChangeReason; event?: Event } | null>(null);
   const take = () => {
-    const taken = reason.current ?? "none";
-    reason.current = null;
-    return taken;
+    const { reason, event } = last.current ?? { reason: "none" as const };
+    last.current = null;
+    return createChangeDetails(reason, event);
   };
   return {
     take,
-    shouldCloseOnInteractOutside: () => Boolean((reason.current = "outside-press")),
-    onKeyDown: (e: React.KeyboardEvent) => void (e.key === "Escape" && (reason.current = "escape-key")),
+    shouldCloseOnInteractOutside: (element: Element) => Boolean((last.current = { reason: "outside-press", event: element.ownerDocument.defaultView?.event })),
+    onKeyDown: (e: React.KeyboardEvent) => void (e.key === "Escape" && (last.current = { reason: "escape-key", event: e.nativeEvent })),
   };
 }
 
@@ -78,12 +90,37 @@ function InitialFocus({ initialFocus, content }: { initialFocus?: PopoverInitial
   return null;
 }
 
+// React Aria unmounts the popover once its exit animation ends, and reports entering until the entry animation ends
+function Completion({ entering, complete }: { entering: boolean; complete?: (open: boolean) => void }) {
+  const latest = React.useRef(complete);
+  latest.current = complete;
+  React.useEffect(() => void (!entering && latest.current?.(true)), [entering]);
+  React.useEffect(() => () => latest.current?.(false), []);
+  return null;
+}
+
+const stateOf = ({ placement }: PopoverRenderProps, open: boolean, side: PopoverSide, align: PopoverAlign, rtl: boolean): PopoverContentState => ({ open, side: placedSide(side, placement, rtl), align });
+const statusOf = ({ isEntering, isExiting }: PopoverRenderProps): TransitionStatus => (isEntering ? "starting" : isExiting ? "ending" : "open");
+const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
+
+// State attributes, and className and style as functions of the part's state rather than React Aria's
+const partAttributes = (dom: { style?: React.CSSProperties }, values: PopoverRenderProps, state: PopoverContentState, className: PopoverContentProps["className"], style: PopoverContentProps["style"]) => ({
+  ...stateAttributes(state, statusOf(values)),
+  className: resolve(className, state),
+  style: { "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style, ...resolve(style, state) } as React.CSSProperties,
+});
+
+// Non-modal popovers in React Aria don't close on an outside press; the dismissal here matches the modal one
+function useNonModalDismiss(open: boolean, enabled: boolean, ref: React.RefObject<Element | null>, triggerRef: React.RefObject<Element | null>, close: (event: Event) => void) {
+  useInteractOutside({ ref, isDisabled: !open || !enabled, onInteractOutside: (event) => !triggerRef.current?.contains(event.target as Node) && close(event) });
+}
+
 const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function Content(
-  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...rest },
+  { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },
   ref,
 ) {
-  const { duration: _duration, ...props } = rest as typeof rest & { duration?: unknown };
   const p = usePopoverInternals<Internals>("Content");
+  const rtl = useLocale().direction === "rtl";
   const wasOpen = React.useRef(p.state.open);
   React.useEffect(() => {
     if (wasOpen.current && !p.state.open && finalFocus && p.state.selected.current) finalFocusTarget(finalFocus)?.focus({ preventScroll: true });
@@ -93,7 +130,9 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
   const dismiss = useDismissReason();
   const node = React.useRef<HTMLDivElement | null>(null);
   React.useImperativeHandle(ref, () => node.current!);
+  useNonModalDismiss(p.state.open, !p.modal, node, triggerRef, (event) => p.state.setOpen(false, "outside-press", event));
   const custom = toRenderFunction(render);
+  const attributes = useContentAttributes(props);
   return (
     <>
       {anchorElement}
@@ -101,55 +140,75 @@ const Content = React.forwardRef<HTMLDivElement, PopoverContentProps>(function C
         ref={node}
         triggerRef={triggerRef}
         isOpen={p.state.open}
-        onOpenChange={(open) => p.state.setOpen(open, dismiss.take())}
+        isNonModal={!p.modal}
+        onOpenChange={(open) => {
+          const details = dismiss.take();
+          p.state.setOpen(open, details.reason, details.event);
+        }}
         shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
         UNSTABLE_portalContainer={container || undefined}
-        className={(values) => resolve(className, stateOf(values, p.state.open, side, align)) ?? ""}
-        style={(values) => resolve(style, stateOf(values, p.state.open, side, align))}
         render={(dom, values) => {
-          const state = stateOf(values, p.state.open, side, align);
+          const state = stateOf(values, p.state.open, side, align, rtl);
           const merged = {
-            ...mergeProps(props, { onKeyDown: dismiss.onKeyDown }, contentAttributes({ ...state, status: statusOf(values), props }), dom, { id: p.id }),
-            style: { "--transform-origin": dom.style?.["--trigger-anchor-point" as never], "--available-height": maxHeightOf(dom.style), ...dom.style } as React.CSSProperties,
+            ...mergePartProps(props, { onKeyDown: dismiss.onKeyDown }, dom, { id: p.id }),
+            ...attributes,
+            ...partAttributes(dom, values, state, className, style),
           };
           return custom ? custom(merged, state) : <div {...merged} />;
         }}
       >
-        <InitialFocus initialFocus={initialFocus} content={node} />
-        <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
+        {(values) => (
+          <>
+            <Completion entering={values.isEntering} complete={p.state.complete} />
+            <InitialFocus initialFocus={initialFocus} content={node} />
+            <ContentFocus initialFocus={initialFocus}>{children}</ContentFocus>
+          </>
+        )}
       </Popover>
     </>
   );
 });
 
-const stateOf = ({ placement }: PopoverRenderProps, open: boolean, side: PopoverSide, align: PopoverAlign): PopoverContentState => ({ open, side: placement === "top" || placement === "bottom" ? placement : side, align });
-const statusOf = ({ isEntering, isExiting }: PopoverRenderProps) => (isEntering ? "starting" : isExiting ? "ending" : "open");
-const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
-
-function SuggestionsPopover({ open, onOpenChange, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, children, ...props }: SuggestionsPopoverProps) {
+function SuggestionsPopover({ open, onOpenChange, onOpenChangeComplete, anchor, side = "bottom", align = "start", sideOffset = 4, collisionPadding = 8, container, className, style, render, children, ...props }: SuggestionsPopoverProps) {
   const [anchorElement, triggerRef] = useAnchorRef(anchor, null);
   const dismiss = useDismissReason();
+  const rtl = useLocale().direction === "rtl";
+  const custom = toRenderFunction(render);
+  const node = React.useRef<HTMLDivElement | null>(null);
+  useNonModalDismiss(open, true, node, triggerRef, (event) => onOpenChange?.(false, createChangeDetails("outside-press", event)));
   return (
     <>
       {anchorElement}
       <Popover
+        ref={node}
         isNonModal
         triggerRef={triggerRef}
         isOpen={open}
-        onOpenChange={(next) => onOpenChange?.(next, createChangeDetails(dismiss.take()))}
+        onOpenChange={(next) => onOpenChange?.(next, dismiss.take())}
         shouldCloseOnInteractOutside={dismiss.shouldCloseOnInteractOutside}
         placement={placementOf(side, align)}
         offset={sideOffset}
         containerPadding={collisionPadding}
         UNSTABLE_portalContainer={container || undefined}
-        className={className}
-        style={style}
-        render={(dom, { placement }) => <div {...mergeProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom)} data-slot={SLOTS.suggestions} data-side={placement ?? side} data-align={align} />}
+        render={(dom, values) => {
+          const state: SuggestionsPopoverState = stateOf(values, open, side, align, rtl);
+          const merged = {
+            ...mergePartProps(props, { onMouseDown: (e: React.MouseEvent) => e.preventDefault() }, dom),
+            "data-slot": SLOTS.suggestions,
+            ...partAttributes(dom, values, state, className, style),
+          } as ElementProps<HTMLDivElement>;
+          return custom ? custom(merged, state) : <div {...merged} />;
+        }}
       >
-        {children}
+        {(values) => (
+          <>
+            <Completion entering={values.isEntering} complete={onOpenChangeComplete} />
+            {children as React.ReactNode}
+          </>
+        )}
       </Popover>
     </>
   );
@@ -161,6 +220,7 @@ export const EmojiSuggestions = { Popover: SuggestionsPopover };
 export declare namespace EmojiPopover {
   namespace Root {
     type Props = PopoverRootProps;
+    type Actions = PopoverActions;
     type OpenChangeDetails = PopoverOpenChangeDetails;
   }
   namespace Trigger {
@@ -176,5 +236,6 @@ export declare namespace EmojiPopover {
 export declare namespace EmojiSuggestions {
   namespace Popover {
     type Props = SuggestionsPopoverProps;
+    type State = SuggestionsPopoverState;
   }
 }
