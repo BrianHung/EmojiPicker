@@ -69,18 +69,11 @@ const findItem = (sections: readonly EmojiSection[], id: string | null) => {
 // A highlight is an item key or a unified code. A key whose emoji changed tone maps to the same emoji in its section; one that left the sections clears
 function resolveKey(sections: readonly EmojiSection[], value: string | null, last: string | null): string | null {
   if (value == null || findItem(sections, value)) return value;
-  const previous = findItem(sections, last);
-  if (previous?.unified === value) return last;
+  if (findItem(sections, last)?.unified === value) return last;
   const section = sections.find((s) => value.startsWith(`${s.id}:`));
   const unified = section ? value.slice(section.id.length + 1) : value;
-  const base = withoutTone(unified);
-  let toned: string | null = null;
-  for (const s of section ? [section] : sections)
-    for (const item of s.items) {
-      if (item.unified === unified) return item.id;
-      toned ??= withoutTone(item.unified) === base ? item.id : null;
-    }
-  return toned;
+  const items = (section ? [section] : sections).flatMap((s) => s.items);
+  return (items.find((i) => i.unified === unified) ?? items.find((i) => withoutTone(i.unified) === withoutTone(unified)))?.id ?? null;
 }
 
 type Held = { suggested: readonly string[]; reactions: readonly string[] | undefined };

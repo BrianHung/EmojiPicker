@@ -98,11 +98,11 @@ const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>
   const { labels } = usePicker("EmojiPicker.List.Variations.Option");
   // No usePress: it would take Enter and Space from the row's keys
   const interaction = useInteraction({ pressed: false });
-  if (!row) throw new Error("EmojiPicker.List.Variations.Option must be inside EmojiPicker.List.Variations.");
+  if (!row) throw new Error("EmojiPicker.List.Variations.Option must be inside List.Variations.");
   const tone = toneProp ?? contextTone;
   const unified = unifiedOf(row.record, tone);
   const selected = tone === row.current;
-  const state: VariationsOptionState = { ...interaction.state, emoji: row.record, unified, tone, selected, highlighted: interaction.state.focused };
+  const state: VariationsOptionState = { ...interaction.state, emoji: row.record, unified, tone, selected, highlighted: interaction.state.focused || interaction.state.hovered };
   return renderElement(
     "div",
     {
@@ -110,11 +110,7 @@ const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>
       "aria-selected": selected,
       "aria-label": nameWithTone(row.record.name, unified, labels.withSkinTone),
       tabIndex: selected ? 0 : -1,
-      ...mergePartProps(props, interaction.props, {
-        onClick: (e: React.MouseEvent) => row.pick(unified, e.nativeEvent),
-        // The pointer carries focus, so one option is highlighted
-        onPointerEnter: (e: React.PointerEvent<HTMLElement>) => e.pointerType !== "touch" && e.currentTarget.focus({ preventScroll: true }),
-      }),
+      ...mergePartProps(props, interaction.props, { onClick: (e: React.MouseEvent) => row.pick(unified, e.nativeEvent) }),
       ref,
       "data-slot": SLOTS.variation,
       "data-unified": unified,
