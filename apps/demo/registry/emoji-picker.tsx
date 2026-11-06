@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { EmojiPicker, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, EmojiPicker, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -91,7 +91,7 @@ function EmojiPickerFooter({ className }: { className?: string }) {
       {({ emoji }) =>
         emoji ? (
           <>
-            <span className="text-lg leading-none">{emoji.imageUrl ? <img src={emoji.imageUrl} alt="" className="size-[18px]" /> : emoji.emoji}</span>
+            <Emoji emoji={emoji} decorative className="text-lg" />
             <span className="truncate font-medium">{emoji.name}</span>
             {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>

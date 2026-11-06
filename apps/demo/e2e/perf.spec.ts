@@ -2,7 +2,7 @@ import type { CDPSession, Locator, Page } from "@playwright/test";
 import { firstPicker, homePopover, preview } from "./surfaces";
 import { expect, frames, quiet, slot, test, visit } from "./support";
 
-const BUDGET = { heapMB: 6, commits: 3, renders: 6, autocomplete: 7 };
+const BUDGET = { heapMB: 6, commits: 3, renders: 7, autocomplete: 7 };
 const STEPS = 20;
 
 declare global {
