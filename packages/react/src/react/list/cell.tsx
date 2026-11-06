@@ -20,7 +20,7 @@ type Marks = { stop: Key | null; pressed: Key | null };
 export const createMarks = () => createStore<Marks, Partial<Marks>>({ stop: null, pressed: null }, (marks, patch) => ((Object.keys(patch) as (keyof Marks)[]).every((k) => Object.is(marks[k], patch[k])) ? marks : { ...marks, ...patch }));
 export type MarksStore = ReturnType<typeof createMarks>;
 
-// Highlighted as in Base UI: the keyboard position, or the hovered cell while there is none. Focused: the keyboard position, by DOM or virtual focus
+// Focused: the keyboard position, by DOM or virtual focus. Highlighted, as in Base UI: that position once the keyboard moves it (focus on open alone doesn't count), or the hovered cell while there is none
 const pickerFlags = ({ hovered, highlighted }: PickerSnapshot, key: Key) => ((highlighted ?? hovered) === key ? HIGHLIGHTED : 0) | (hovered === key ? HOVERED : 0) | (highlighted === key ? FOCUSED : 0);
 const markFlags = ({ stop, pressed }: Marks, key: Key) => (stop === key ? STOP : 0) | (pressed === key ? PRESSED : 0);
 
@@ -57,7 +57,7 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     emoji: item,
     row: position?.[3] ?? 0,
     column: position?.[4] ?? 0,
-    highlighted: Boolean(flags & HIGHLIGHTED),
+    highlighted: (focused && (cells.virtual || cells.focusVisible)) || (flags & (HIGHLIGHTED | HOVERED)) === (HIGHLIGHTED | HOVERED),
     hovered: Boolean(flags & HOVERED),
     focused,
     focusVisible: focused && cells.focusVisible,

@@ -1,7 +1,7 @@
+// Only an option the field points at is virtually focused: the field itself keeps DOM focus and gets no synthetic blur
 function virtuallyFocused(doc: Document): Element | null {
-  const active = doc.activeElement;
-  const id = active?.getAttribute("aria-activedescendant");
-  return (id && doc.getElementById(id)) || active;
+  const id = doc.activeElement?.getAttribute("aria-activedescendant");
+  return id ? doc.getElementById(id) : null;
 }
 
 // The keyboard target isn't blurred: an editor's blur listener would close its menu

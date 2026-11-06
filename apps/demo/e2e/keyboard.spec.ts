@@ -231,6 +231,30 @@ test("search: arrows move the highlight with the caret at the end of the query, 
   expect(await highlight()).toBe(second);
 });
 
+test("search: aria-activedescendant names an option in the list after Escape and after a query change, and follows the first arrow", async ({ page }) => {
+  await visit(page, "/");
+  const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);
+  const search = root.locator('[data-slot="emoji-picker-search-input"]');
+  const active = () => search.evaluate((el) => {
+    const id = el.getAttribute("aria-activedescendant");
+    return id ? (document.getElementById(id)?.getAttribute("aria-label") ?? "missing") : null;
+  });
+  await search.fill("smile");
+  await expect.poll(active).not.toBeNull();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Escape");
+  await expect.poll(active).not.toBe("missing");
+  await page.keyboard.press("PageDown");
+  await expect.poll(active).not.toBeNull();
+  await search.fill("a");
+  expect(await active()).not.toBe("missing");
+  await expect.poll(active).not.toBeNull();
+  const before = await active();
+  await page.keyboard.press("ArrowRight");
+  await expect.poll(active).not.toBe(before);
+  expect(await active()).toBe(await root.locator("[data-highlighted]").getAttribute("aria-label"));
+});
+
 test("Shift+Space on a result opens its skin tones, and Enter picks the toned emoji", async ({ page }) => {
   await visit(page, "/");
   const root = SURFACES.find((s) => s.id === "home/inline-tailwind")!.root(page);

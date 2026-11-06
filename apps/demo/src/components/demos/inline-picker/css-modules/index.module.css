@@ -88,7 +88,7 @@
 .cell:hover {
   background: var(--emoji-picker-hover);
 }
-.cell[data-highlighted] {
+.cell[data-focused] {
   background: var(--emoji-picker-selected);
 }
 
@@ -136,7 +136,7 @@
 }
 
 @media (forced-colors: active) {
-  .cell[data-highlighted] {
+  .cell[data-focused] {
     outline: 2px solid Highlight;
     outline-offset: -2px;
   }

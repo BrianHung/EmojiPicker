@@ -21,6 +21,7 @@ import { useDrawable } from "../emoji/native-support";
 import { PopoverContext } from "../popover/popover-context";
 import { SLOTS } from "../utils/slots";
 import { flag, type Orientation } from "../utils/render";
+import { moveVirtualFocus } from "../utils/utils";
 import { shallowEqual, useStore } from "../utils/store";
 import { VariationsPopup } from "./variations";
 import { cellOf, createMarks, type Cells, type MarksStore } from "./cell";
@@ -148,18 +149,22 @@ function useVariations(core: PickerState<React.ReactNode>, cellElement: CellElem
   return { open, close };
 }
 
-// The search field's aria-activedescendant is React Aria's focused node: it follows the highlight, and clears when the highlight leaves the collection
-function useActiveDescendant(core: PickerState<React.ReactNode>, latest: React.RefObject<Latest>, cellElement: CellElement) {
+// The search field's aria-activedescendant is React Aria's focused node, which follows virtual focus events: re-send them for the highlight, and clear one that left the collection
+function useActiveDescendant(core: PickerState<React.ReactNode>, latest: React.RefObject<Latest>, cellElement: CellElement, target: () => Element | null, ownsFocus: (el: Element | null) => boolean) {
   const autocomplete = React.useContext(AutocompleteStateContext);
   const ref = React.useRef(autocomplete);
   ref.current = autocomplete;
   const sync = React.useCallback(() => {
     const state = ref.current;
-    if (!state) return;
     const key = core.getSnapshot().highlighted;
-    const id = latest.current.virtual && key != null && latest.current.collection.emoji(key) && cellElement(key) ? `${latest.current.listId}-option-${key}` : null;
-    if (state.focusedNodeId !== id) state.setFocusedNodeId(id);
-  }, [core]);
+    const valid = latest.current.virtual && key != null && latest.current.collection.emoji(key);
+    const cell = valid ? cellElement(key) : null;
+    // Only while the field or keyboard target has focus: React Aria pulls focus back to the field on a virtual focus event
+    if (cell && ownsFocus(document.activeElement)) moveVirtualFocus(cell, target());
+    // React Aria delays a new id while typing; until then the field must not point at a removed option
+    const stale = state?.focusedNodeId != null && !document.getElementById(state.focusedNodeId);
+    if (stale || (!valid && state?.focusedNodeId != null)) state!.setFocusedNodeId(null);
+  }, [core, target, ownsFocus]);
   React.useLayoutEffect(sync);
   React.useEffect(() => core.subscribe(() => queueMicrotask(sync)), [core, sync]);
 }
@@ -331,7 +336,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
     return handle.move(to, { reason: "keyboard", event: e.nativeEvent }, cell);
   });
 
-  useActiveDescendant(core, latest, cellElement);
+  useActiveDescendant(core, latest, cellElement, picker.target, picker.ownsFocus);
   const cellHandlers = usePointerHighlight({ picker, highlight, marks, listRef, virtual, keyed, openVariations: variations.open, cellElement, pick });
   const { isFocusVisible: focusVisible } = useFocusVisible();
 

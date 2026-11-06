@@ -96,7 +96,8 @@ const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>
   const row = React.useContext(RowContext);
   const contextTone = React.useContext(ToneContext);
   const { labels } = usePicker("EmojiPicker.List.Variations.Option");
-  const interaction = useInteraction();
+  // No usePress: it would take Enter and Space from the row's keys
+  const interaction = useInteraction({ pressed: false });
   if (!row) throw new Error("EmojiPicker.List.Variations.Option must be inside EmojiPicker.List.Variations.");
   const tone = toneProp ?? contextTone;
   const unified = unifiedOf(row.record, tone);
