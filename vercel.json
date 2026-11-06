@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "ONNXRUNTIME_NODE_INSTALL=skip npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/demo/.cloudflare/output/v0/workers/default/assets",
+  "rewrites": [{ "source": "/r/:name([^./]+)", "destination": "/r/:name.json" }]
+}

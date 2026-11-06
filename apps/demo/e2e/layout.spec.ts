@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
-import { clearTextField, SURFACES } from "./surfaces";
+import { card, clearTextField, SURFACES } from "./surfaces";
 import { expect, frames, quiet, settle, test, visit } from "./support";
 
 const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
@@ -167,6 +167,30 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
   await page.keyboard.press("Enter");
   await expect.poll(() => offset("Flags")).toBe(0);
   await expect(root.locator('[data-slot="emoji-picker-emoji"][data-unified="1f3c1"]')).toBeVisible();
+});
+
+test("Slack: the reaction picker fades out where it was when its hover toolbar hides on pick", async ({ page }) => {
+  await visit(page, "/gallery/#slack");
+  const scene = card(page);
+  await scene.scrollIntoViewIfNeeded();
+  await scene.getByText(/^yep/).hover();
+  await scene.getByRole("button", { name: "Add reaction" }).last().click();
+  const content = page.locator('[data-slot="emoji-picker-popover-content"]');
+  await content.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+  await settle(page);
+  // The placed offsets, not the rect: the exit animation's own transform is fine
+  const sampling = content.evaluate(async (el) => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 60 && el.isConnected; i++) {
+      const { left, top } = getComputedStyle(el);
+      seen.add(`${left} ${top}`);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    return [...seen];
+  });
+  const at = await content.evaluate((el) => `${getComputedStyle(el).left} ${getComputedStyle(el).top}`);
+  await content.locator('[data-slot="emoji-picker-emoji"]').nth(5).click();
+  expect(await sampling).toEqual([at]);
 });
 
 test.describe("phone", () => {

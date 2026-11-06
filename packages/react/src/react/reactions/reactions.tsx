@@ -1,4 +1,5 @@
 import * as React from "react";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { type ChangeDetails, nameWithTone, withoutTone } from "@brianhung/emoji-picker-core";
 import { usePicker } from "../root/context";
@@ -7,7 +8,7 @@ import { Glyph, useOverridden } from "../emoji/glyph";
 import { useStoreSnapshot } from "../provider/provider";
 import { ReactionsContext } from "./reactions-context";
 import { mergePartProps } from "../utils/events";
-import { useInteraction } from "../utils/interaction";
+import { useInteraction, type Clickable } from "../utils/interaction";
 import { flag, renderElement, resolve, type InteractionState, type PartElementProps } from "../utils/render";
 import { SLOTS } from "../utils/slots";
 import { useChangeState } from "../utils/state";
@@ -112,15 +113,16 @@ const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(fu
   const row = useRow("Item");
   const record = useStoreSnapshot((s) => s.get(unified));
   const overridden = useOverridden(unified, record);
-  const interaction = useInteraction();
   const selected = Boolean(row.pressed?.has(withoutTone(unified)));
+  const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => row.press(unified, e.nativeEvent) });
+  const interaction = useInteraction({ onClick });
   return renderElement(
     "button",
     {
       type: "button",
       "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
       "aria-pressed": row.pressed ? selected : undefined,
-      ...mergePartProps(props, interaction.props, { onClick: (e: React.MouseEvent) => row.press(unified, e.nativeEvent) }),
+      ...mergeProps(own, interaction.props),
       ref,
       "data-slot": SLOTS.emoji,
       "data-unified": unified,
@@ -140,9 +142,14 @@ const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps
   const { labels } = usePicker("EmojiPicker.Reactions.Expand");
   const state = React.useContext(ReactionsContext);
   const { expanding } = useRow("Expand");
-  const interaction = useInteraction();
+  const { onClick, ...own } = mergePartProps<Clickable>(props, {
+    onClick: () => {
+      expanding.current = true;
+      state?.expand?.();
+    },
+  });
+  const interaction = useInteraction({ onClick });
   if (!state?.expand) return null;
-  const expand = state.expand;
   return renderElement(
     "button",
     {
@@ -152,12 +159,7 @@ const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps
       // A disclosure for the Panel; Escape with no query collapses back to this row
       "aria-expanded": false,
       "aria-controls": state.panelId,
-      ...mergePartProps(props, interaction.props, {
-        onClick: () => {
-          expanding.current = true;
-          expand();
-        },
-      }),
+      ...mergeProps(own, interaction.props),
       ref,
       "data-slot": SLOTS.reactionsExpand,
       children: children ?? (

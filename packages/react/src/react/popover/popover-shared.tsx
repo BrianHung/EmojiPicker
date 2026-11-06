@@ -1,11 +1,12 @@
 import * as React from "react";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { PopoverContext, type PopoverOpenChangeDetails, type PopoverOpenChangeReason, type PopoverState } from "./popover-context";
 import { useEmojiLabels } from "../provider/provider";
 import { mergePartProps, type PickerHandlers } from "../utils/events";
 import { useChangeState } from "../utils/state";
 import { flag, renderElement, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
-import { useInteraction } from "../utils/interaction";
+import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { TABBABLE } from "../utils/utils";
 
@@ -200,9 +201,11 @@ export const Trigger = React.forwardRef<HTMLButtonElement, PopoverTriggerProps>(
   const { state, setTrigger, triggerProps } = usePopoverInternals("Trigger");
   const toggle = (e: React.MouseEvent) => state.setOpen(!state.open, "trigger-press", e.nativeEvent);
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(setTrigger, ref), [setTrigger, ref]);
-  const interaction = useInteraction({ disabled: props.disabled });
-  const merged = triggerProps(
-    mergePartProps({ type: render ? undefined : "button", ...props }, { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-popup-open": flag(state.open), onClick: toggle }, interaction.props),
+  const { onClick, ...own } = mergePartProps<Clickable>(
+    { type: render ? undefined : "button", ...props },
+    { "aria-haspopup": "dialog", "aria-expanded": state.open, "data-slot": SLOTS.popoverTrigger, "data-popup-open": flag(state.open), onClick: toggle },
   );
+  const interaction = useInteraction({ disabled: props.disabled, onClick });
+  const merged = triggerProps(mergeProps(own, interaction.props));
   return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { ...interaction.state, open: state.open });
 });

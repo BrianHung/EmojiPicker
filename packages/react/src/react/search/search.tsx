@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useLocale } from "react-aria/I18nProvider";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Input } from "react-aria-components/Input";
 import { SearchField } from "react-aria-components/SearchField";
@@ -7,7 +8,7 @@ import { usePicker } from "../root/context";
 import { mergePartProps, type PickerHandlers } from "../utils/events";
 import { usePickerKeyDown } from "../utils/keyboard";
 import { flag, racParts, renderElement, resolve, type InteractionState, type PartElementProps, type PartProps } from "../utils/render";
-import { useInteraction } from "../utils/interaction";
+import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 
@@ -112,7 +113,13 @@ export type SearchClearProps = PartElementProps<SearchClearState, HTMLButtonElem
 const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Search.Clear");
   const empty = useEmpty("EmojiPicker.Search.Clear");
-  const interaction = useInteraction({ preventFocusOnPress: true });
+  const { onClick, ...own } = mergePartProps<Clickable>(props, {
+    onClick: (e: React.MouseEvent) => {
+      picker.state.setQuery("", { reason: "clear-press", event: e.nativeEvent });
+      picker.searchInput.current?.focus();
+    },
+  });
+  const interaction = useInteraction({ preventFocusOnPress: true, onClick });
   if (empty) return null;
   return renderElement(
     "button",
@@ -121,12 +128,7 @@ const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(functi
       tabIndex: -1,
       title: picker.labels.searchClear,
       "aria-label": picker.labels.searchClear,
-      ...mergePartProps(props, interaction.props, {
-        onClick: (e: React.MouseEvent) => {
-          picker.state.setQuery("", { reason: "clear-press", event: e.nativeEvent });
-          picker.searchInput.current?.focus();
-        },
-      }),
+      ...mergeProps(own, interaction.props),
       ref,
       "data-slot": SLOTS.searchClear,
       children: children ?? "×",

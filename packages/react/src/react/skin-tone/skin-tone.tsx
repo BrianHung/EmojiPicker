@@ -2,6 +2,7 @@
 import * as React from "react";
 import { FocusScope, useFocusManager } from "react-aria/FocusScope";
 import { useLocale } from "react-aria/I18nProvider";
+import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 
@@ -14,7 +15,7 @@ import { mergePartProps } from "../utils/events";
 import { moveFocus, usePickerKeyDown } from "../utils/keyboard";
 import { useEmojiContext } from "../provider/provider";
 import { flag, renderElement, resolve, type InteractionState, type Orientation, type PartElementProps } from "../utils/render";
-import { useInteraction } from "../utils/interaction";
+import { useInteraction, type Clickable } from "../utils/interaction";
 import { SLOTS } from "../utils/slots";
 
 const TONES = [0, 1, 2, 3, 4, 5] as const;
@@ -136,14 +137,15 @@ export type SkinToneTriggerProps = PartElementProps<SkinToneTriggerState, HTMLBu
 
 const SkinToneTrigger = React.forwardRef<HTMLButtonElement, SkinToneTriggerProps>(function SkinToneTrigger({ style, children, ...props }, ref) {
   const { tone, open, toggle, label, triggerRef, optionsId } = useSkinToneContext("Trigger");
-  const interaction = useInteraction();
+  const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => toggle(e.nativeEvent) });
+  const interaction = useInteraction({ onClick });
   const state: SkinToneTriggerState = { open, tone, ...interaction.state };
   const refs = React.useMemo(() => mergeRefs<HTMLButtonElement>(ref, triggerRef), [ref, triggerRef]);
   return renderElement(
     "button",
     {
       type: "button",
-      ...mergePartProps(props, { onClick: (e: React.MouseEvent) => toggle(e.nativeEvent) }, interaction.props),
+      ...mergeProps(own, interaction.props),
       ref: refs,
       "data-slot": SLOTS.skinToneTrigger,
       "aria-label": label(tone),
@@ -212,7 +214,8 @@ const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(
   const { tone: current, choose, label } = useSkinToneContext("Option");
   const fromOptions = React.useContext(OptionContext);
   const tone = toneProp ?? fromOptions ?? 0;
-  const interaction = useInteraction();
+  const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => choose(tone, e.nativeEvent) });
+  const interaction = useInteraction({ onClick });
   const selected = tone === current;
   return (
     <OptionContext.Provider value={tone}>
@@ -222,7 +225,7 @@ const SkinToneOption = React.forwardRef<HTMLButtonElement, SkinToneOptionProps>(
           type: "button",
           "aria-label": label(tone),
           "aria-pressed": selected,
-          ...mergePartProps(props, interaction.props, { onClick: (e: React.MouseEvent) => choose(tone, e.nativeEvent) }),
+          ...mergeProps(own, interaction.props),
           ref,
           tabIndex: selected ? 0 : -1,
           "data-slot": SLOTS.skinToneOption,
