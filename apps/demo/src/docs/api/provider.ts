@@ -2,7 +2,7 @@ import type { EmojiProviderProps } from "@brianhung/emoji-picker-react";
 import { rowsOf } from "./rows";
 
 export const provider = rowsOf<EmojiProviderProps>()([
-  { name: "data", type: "Dataset | string | (({ signal }) => Promise<Dataset>)", description: "A URL, a loader or a dataset object." },
+  { name: "data", type: "Dataset | string | (({ signal }) => Promise<Dataset>)", default: "core's en.json on jsDelivr", description: "A URL, a loader or a dataset object." },
   { name: "customEmojis", type: "CustomEmojiSource | CustomEmojiSource[]", description: "Custom emoji, pack URLs or loaders: { id, name, imageUrl, shortcodes?, tags?, group? }" },
   { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji from the picker and search." },
   { name: "searchEngine", type: "EmojiSearch", default: "lexical()", description: "(query, context) => hits | Promise<hits>" },
