@@ -6,7 +6,7 @@ import { isKnown } from "./known";
 
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
-const PAGES = ["/", ...STYLES.map((s) => `/gallery/#${s}`), "/examples/", "/examples/tiptap/", "/examples/lexical/", "/examples/semantic-search/", "/examples/custom-emoji/", "/examples/virtualizer/"];
+const PAGES = ["/", ...STYLES.map((s) => `/gallery/#${s}`), "/examples/", "/examples/tiptap/", "/examples/lexical/", "/examples/semantic-search/", "/examples/custom-emoji/", "/examples/virtualizer/", "/e2e/pages/seams/"];
 
 async function still(page: Page) {
   await page.evaluate(() =>
