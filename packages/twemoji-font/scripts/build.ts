@@ -80,23 +80,32 @@ wght = 400
 
 type Subset = { file: string; range: string; glyphs: number };
 
+const python = path.join(bin, "python");
+const orderFile = path.join(build, "order.json");
+const ttf = path.join(out, "Twemoji.ttf");
+
 await fetchSvgs();
 squareViewBoxes();
 ensureVenv();
 fs.mkdirSync(build, { recursive: true });
-fs.writeFileSync(path.join(build, "twemoji.toml"), config);
 const files = fs
   .readdirSync(svgs)
   .filter((f) => f.endsWith(".svg"))
   .sort()
   .map((f) => path.join(svgs, f));
-run(path.join(bin, "nanoemoji"), ["--build_dir", build, path.join(build, "twemoji.toml"), ...files]);
-
 const order = [...data].sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity)).map((e) => [e.group ?? null, [e.emoji, ...(e.skins ?? []).map((s) => s.emoji)]]);
-fs.writeFileSync(path.join(build, "order.json"), JSON.stringify(order));
+fs.writeFileSync(orderFile, JSON.stringify(order));
+const check = () => console.log(run(python, ["scripts/check.py", ttf, path.join(out, "twemoji-0.woff2"), orderFile, version, svgs]).trim());
+if (process.argv.includes("--check")) {
+  check();
+  process.exit();
+}
+
+fs.writeFileSync(path.join(build, "twemoji.toml"), config);
+run(path.join(bin, "nanoemoji"), ["--build_dir", build, path.join(build, "twemoji.toml"), ...files]);
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out);
-const subsets: Subset[] = JSON.parse(run(path.join(bin, "python"), ["scripts/subset.py", path.join(build, "Twemoji.ttf"), path.join(build, "order.json"), out, String(TARGET_BYTES)]));
+const subsets: Subset[] = JSON.parse(run(python, ["scripts/subset.py", path.join(build, "Twemoji.ttf"), orderFile, out, String(TARGET_BYTES), version]));
 
 const face = ({ file, range }: Subset) => `@font-face {
   font-family: "Twemoji";
@@ -114,3 +123,5 @@ const kb = (file: string) => (fs.statSync(path.join(out, file)).size / 1024).toF
 for (const s of subsets) console.log(`${s.file}  ${s.glyphs} glyphs  ${kb(s.file)} kB`);
 const total = subsets.reduce((sum, s) => sum + fs.statSync(path.join(out, s.file)).size, 0);
 console.log(`Twemoji ${version}: ${files.length} SVGs, ${subsets.length} subsets, ${(total / 1024).toFixed(1)} kB in ${path.relative(process.cwd(), out)}`);
+console.log(`Twemoji.ttf  ${kb("Twemoji.ttf")} kB`);
+check();
