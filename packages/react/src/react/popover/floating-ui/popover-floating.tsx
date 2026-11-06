@@ -94,6 +94,9 @@ function RootNode({ children, modal = false, ...props }: PopoverRootProps) {
   );
 }
 
+// A reference hidden on close (a hover toolbar) measures 0 x 0 at the viewport's corner
+const hasBox = (r: { width: number; height: number }) => r.width > 0 || r.height > 0;
+
 const transformOrigin: Middleware = {
   name: "transformOrigin",
   fn: ({ x, y, placement, rects: { reference: r, floating: f } }) => {
@@ -102,7 +105,7 @@ const transformOrigin: Middleware = {
     const vertical = side === "top" || side === "bottom";
     const ox = vertical ? clamp(r.x + r.width / 2 - x, f.width) : Math.round((side === "left" ? r.x : r.x + r.width) - x);
     const oy = vertical ? Math.round((side === "top" ? r.y : r.y + r.height) - y) : clamp(r.y + r.height / 2 - y, f.height);
-    return { data: { origin: `${ox}px ${oy}px` } };
+    return { data: { origin: `${ox}px ${oy}px`, detached: !hasBox(r) } };
   },
 };
 
@@ -121,7 +124,8 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
       shift({ padding: collisionPadding, crossAxis: true }),
       size({
         padding: collisionPadding,
-        apply({ availableWidth, availableHeight, elements }) {
+        apply({ availableWidth, availableHeight, elements, rects }) {
+          if (!hasBox(rects.reference)) return;
           elements.floating.style.setProperty("--available-width", `${Math.round(availableWidth)}px`);
           elements.floating.style.setProperty("--available-height", `${Math.round(availableHeight)}px`);
         },
@@ -136,8 +140,12 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   React.useLayoutEffect(() => {
     setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
   }, [key, setPositionReference, domReference]);
-  const state = (open: boolean): PopoverContentState => ({ open, side: placedSide(side, floating.placement.split("-")[0], rtl), align });
-  return { ...floating, state, style: { position: floating.strategy, top: floating.y, left: floating.x, zIndex: 50, "--transform-origin": floating.middlewareData.transformOrigin?.origin } as React.CSSProperties };
+  const live = { placement: floating.placement, style: { position: floating.strategy, top: floating.y, left: floating.x, zIndex: 50, "--transform-origin": floating.middlewareData.transformOrigin?.origin } as React.CSSProperties };
+  // Closing (the exit animation) and a hidden reference keep the last position
+  const held = React.useRef(live);
+  if (options.open && !floating.middlewareData.transformOrigin?.detached) held.current = live;
+  const state = (open: boolean): PopoverContentState => ({ open, side: placedSide(side, held.current.placement.split("-")[0], rtl), align });
+  return { ...floating, state, style: held.current.style };
 }
 
 const portal = (content: React.ReactElement, container: HTMLElement | false | undefined) => (container === false ? content : <FloatingPortal root={container}>{content}</FloatingPortal>);

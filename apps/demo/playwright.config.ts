@@ -1,7 +1,7 @@
 import { defineConfig, type PlaywrightTestConfig } from "@playwright/test";
 
 const BUILD = process.env.E2E_BUILD === "1";
-const PORT = BUILD ? 5198 : 5199;
+const PORT = Number(process.env.E2E_PORT) || (BUILD ? 5198 : 5199);
 const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 };
 const mobile = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 

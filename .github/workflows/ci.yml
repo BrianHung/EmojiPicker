@@ -13,6 +13,10 @@ concurrency:
 permissions:
   contents: read
 
+# onnxruntime-node (under @huggingface/transformers) otherwise fetches CUDA binaries from NuGet on Linux
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
 jobs:
   check:
     runs-on: ubuntu-latest

@@ -63,3 +63,24 @@ it.each([
 ])("%s is hovered, pressed and focus-visible like other buttons", (_, Trigger) => {
   expect(interactions(<Trigger />)).toEqual(["data-hovered", "data-pressed", "data-focus-visible"]);
 });
+
+// usePress cancels a button's native keyboard click outside macOS, and jsdom isn't macOS
+it.each([
+  ["SkinTone.Trigger", SkinToneTrigger],
+  ["EmojiPopover.Trigger from /floating-ui", popoverTrigger(floating)],
+  ["EmojiPopover.Trigger from /react-aria", popoverTrigger(aria)],
+])("%s opens with Enter and Space", (_, Trigger) => {
+  for (const key of ["Enter", " "]) {
+    const root = createRoot(document.body.appendChild(document.createElement("div")));
+    React.act(() => root.render(<Trigger />));
+    const el = document.querySelector("button")!;
+    React.act(() => {
+      el.focus();
+      el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+      el.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true, cancelable: true }));
+    });
+    expect(el.getAttribute("aria-expanded"), JSON.stringify(key)).toBe("true");
+    React.act(() => root.unmount());
+    document.body.replaceChildren();
+  }
+});
