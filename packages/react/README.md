@@ -276,6 +276,8 @@ Each part follows its WAI-ARIA Authoring Practices pattern. Nothing animates by 
 
 Twemoji as a font: `import "@brianhung/emoji-picker-twemoji-font/twemoji.css"` and set `--emoji-font-family: Twemoji`.
 
+The default stack starts with `"Emoji Picker Apple"`, a `local("Apple Color Emoji")` face with fixed ascent and descent so the glyph is centred in its box at every size. Keep it first in a stack of your own.
+
 **Own artwork.** Images instead of a font: `imageUrl` replaces particular emoji (or all of them) under any renderer:
 
 ```tsx

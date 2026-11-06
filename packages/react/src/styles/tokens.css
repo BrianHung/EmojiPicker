@@ -1,3 +1,12 @@
+/* Chromium and WebKit report a size-dependent ascent for Apple Color Emoji; fixed metrics centre its ink in the 1em box */
+@font-face {
+  font-family: "Emoji Picker Apple";
+  src: local("Apple Color Emoji");
+  ascent-override: 87.75%;
+  descent-override: 12.25%;
+  line-gap-override: 0%;
+}
+
 :where(:root) {
   --emoji-picker-background: var(--color-background-primary, light-dark(#ffffff, #171717));
   --emoji-picker-foreground: var(--color-text-primary, light-dark(#171717, #fafafa));
@@ -15,5 +24,5 @@
   --emoji-picker-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
   --emoji-picker-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   /* A color emoji font first, so text-default symbols (keycaps, ‼) draw as emoji */
-  --emoji-font-family: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji";
+  --emoji-font-family: "Emoji Picker Apple", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji";
 }
