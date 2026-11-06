@@ -46,7 +46,7 @@ export function SceneFrame({ width = SITE_FRAME.width, height = SITE_FRAME.heigh
           aria-label={label}
           data-style={appStyle?.id}
           className={cn("relative overflow-hidden rounded-xl border shadow-2xl", className)}
-          style={{ ...tokensOf(appStyle), width, height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: "0 0", ...style }}
+          style={{ ...tokensOf(appStyle), width, height, zoom: scale < 1 ? scale : undefined, ...style }}
         >
           {children}
         </div>
