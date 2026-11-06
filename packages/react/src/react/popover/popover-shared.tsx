@@ -51,7 +51,7 @@ export type EmojiPopoverTriggerProps = EmojiPickerPartElementProps<EmojiPopoverT
 
 export type EmojiPopoverInitialFocus = boolean | React.RefObject<HTMLElement | null> | ((openType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
 export type EmojiPopoverFinalFocus = boolean | React.RefObject<HTMLElement | null> | ((closeType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
-export type EmojiPopoverContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | false | null;
+export type EmojiPopoverContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | null;
 
 export type EmojiPopoverPlacementProps = {
   side?: PopoverSide;
@@ -112,8 +112,7 @@ export function initialFocusTarget(state: PopoverState, initialFocus: EmojiPopov
   return target === true ? pickerInitialFocus(content) : target;
 }
 
-// Only a pick moves focus to finalFocus; any other close returns it to the Trigger
-export const finalFocusTarget = (state: PopoverState, finalFocus: EmojiPopoverFinalFocus | undefined) => (state.selected.current ? resolveFocus(finalFocus, state.interaction.current) : true);
+export const finalFocusTarget = (state: PopoverState, finalFocus: EmojiPopoverFinalFocus | undefined) => resolveFocus(finalFocus, state.interaction.current);
 
 export type TransitionStatus = "starting" | "open" | "ending";
 
@@ -148,27 +147,19 @@ export function usePopoverInternals<T extends PopoverInternals>(part: string): T
 
 export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, closeOnSelect = true }: Omit<EmojiPopoverRootProps, "children" | "modal">, trigger: HTMLElement | null) {
   const [open, setState] = useChangeState(controlled, defaultOpen, onOpenChange);
-  const selected = React.useRef(false);
   const interaction = React.useRef<EmojiPopoverInteractionType>("");
   const focusGrid = React.useRef(false);
   const setOpen = React.useCallback(
     (next: boolean, reason: EmojiPopoverRootChangeEventReason, event?: Event) => {
-      if (next) selected.current = false;
       interaction.current = interactionOf(event);
       setState(next, createChangeDetails(reason, event, trigger?.isConnected ? trigger : undefined));
     },
     [setState, trigger],
   );
   // After the task's microtasks, so an editor focused in onSelect (Lexical updates in a microtask) keeps focus
-  const close = React.useCallback(
-    (reason: EmojiPopoverRootChangeEventReason = "none", event?: Event) => {
-      selected.current = reason === "item-press";
-      queueMicrotask(() => setOpen(false, reason, event));
-    },
-    [setOpen],
-  );
+  const close = React.useCallback((reason: EmojiPopoverRootChangeEventReason = "none", event?: Event) => queueMicrotask(() => setOpen(false, reason, event)), [setOpen]);
   React.useImperativeHandle(actionsRef, () => ({ close: () => setOpen(false, "imperative-action") }), [setOpen]);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, selected, interaction, focusGrid, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, interaction, focusGrid, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
 }
 
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish

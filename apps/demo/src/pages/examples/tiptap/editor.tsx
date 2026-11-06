@@ -21,7 +21,7 @@ function TiptapEditor() {
         <PickerPopover
           label="Insert emoji"
           triggerClassName="rounded-md px-2 py-1"
-          finalFocus={() => editor.view.dom}
+          focusAfterPick={() => editor.view.dom}
           onSelect={(s) => {
             const attrs = s.emoji ? null : emojiAttrs(store, s.unified);
             if (attrs) editor.commands.insertEmoji(attrs);

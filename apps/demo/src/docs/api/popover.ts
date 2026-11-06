@@ -22,7 +22,7 @@ export const popoverContent = rowsOf<EmojiPopover.Content.Props>()([
   { name: "align", type: '"start" | "center" | "end"', default: '"start"' },
   { name: "sideOffset", type: "number", default: "8" },
   { name: "collisionPadding", type: "number", default: "8" },
-  { name: "container", type: "HTMLElement | ShadowRoot | RefObject | false", default: "document.body", description: "The portal target. false renders in place." },
+  { name: "container", type: "HTMLElement | ShadowRoot | RefObject", default: "document.body", description: "The portal target." },
   { name: "anchor", type: "EmojiPopoverAnchor", description: "Positions against this element, { getBoundingClientRect } object, or function instead of the Trigger." },
   {
     name: "initialFocus",
@@ -34,7 +34,7 @@ export const popoverContent = rowsOf<EmojiPopover.Content.Props>()([
     name: "finalFocus",
     type: "boolean | RefObject | (closeType) => HTMLElement | boolean | null | undefined",
     default: "the Trigger",
-    description: "Focused once a pick closes the content; other closes return focus to the Trigger. false leaves focus where onSelect put it.",
+    description: "Focused once the content closes. closeType is mouse, touch, pen, keyboard, or empty; true or null returns focus to the Trigger, false leaves it where it is.",
   },
   { name: "render", type: "ReactElement | (props, { open, side, align }) => ReactElement", description: "Merges props onto this element." },
   { name: "className", type: "string | ({ open, side, align }) => string | undefined" },

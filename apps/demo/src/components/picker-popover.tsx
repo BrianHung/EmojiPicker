@@ -1,4 +1,4 @@
-import type * as React from "react";
+import * as React from "react";
 import type { EmojiSelection } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { cn } from "@/lib/utils";
@@ -12,13 +12,14 @@ export type PickerPopoverProps = {
   triggerClassName?: string;
   label?: string;
   picker?: React.ReactNode;
-  finalFocus?: EmojiPopover.Content.Props["finalFocus"];
+  focusAfterPick?: () => HTMLElement | null;
   renderTrigger?: (trigger: React.ReactElement) => React.ReactNode;
 };
 
-export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, finalFocus, renderTrigger = (t) => t }: PickerPopoverProps) {
+export function PickerPopover({ onSelect, children, side = "bottom", align = "start", triggerClassName, label = "Open emoji picker", picker, focusAfterPick, renderTrigger = (t) => t }: PickerPopoverProps) {
+  const picked = React.useRef(false);
   return (
-    <EmojiPopover.Root>
+    <EmojiPopover.Root onOpenChange={(_, details) => void (picked.current = details.reason === "item-press")}>
       {renderTrigger(
         <EmojiPopover.Trigger
           aria-label={label}
@@ -34,7 +35,7 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
         side={side}
         align={align}
         aria-label="Emoji picker"
-        finalFocus={finalFocus}
+        finalFocus={() => (picked.current && focusAfterPick?.()) || true}
         className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
       >
         {picker ?? <EmojiPickerCard onSelect={onSelect} />}

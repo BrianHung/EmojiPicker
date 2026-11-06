@@ -73,7 +73,7 @@ export function NotionScene() {
         {editor ? (
           <>
             <EditorContent editor={editor} />
-            <NotionEmojiMenu {...emoji} editor={editor.view.dom} />
+            <NotionEmojiMenu {...emoji} editor={editor.view.dom} container={ref} />
           </>
         ) : null}
       </div>

@@ -158,7 +158,7 @@ function usePlacement({ side = "bottom", align = "start", sideOffset, collisionP
   return { ...floating, state, style: { position: shown.position, top: shown.top, left: shown.left, zIndex: 50, "--transform-origin": shown.origin } as React.CSSProperties };
 }
 
-const portal = (content: React.ReactElement, container: EmojiPopoverContainer | undefined) => (container === false ? content : <FloatingPortal root={containerOf(container)}>{content}</FloatingPortal>);
+const portal = (content: React.ReactElement, container: EmojiPopoverContainer | undefined) => <FloatingPortal root={containerOf(container)}>{content}</FloatingPortal>;
 
 const Content = React.forwardRef<HTMLDivElement, EmojiPopoverContentProps>(function Content(
   { side = "bottom", align = "start", sideOffset = 8, collisionPadding = 8, container, anchor, initialFocus, finalFocus, className, style, render, children, ...props },

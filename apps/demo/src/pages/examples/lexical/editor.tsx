@@ -19,7 +19,7 @@ function Toolbar() {
       <PickerPopover
         label="Insert emoji"
         triggerClassName="rounded-md px-2 py-1"
-        finalFocus={() => editor.getRootElement()}
+        focusAfterPick={() => editor.getRootElement()}
         onSelect={(s) => {
           editor.update(() => {
             const selection = $getSelection();
