@@ -1,6 +1,6 @@
 import type { CDPSession, Page } from "@playwright/test";
-import { card, clearTextField, EDITORS, fieldText, listbox, openEditorMenu } from "./surfaces";
-import { expect, frames, quiet, test, visit } from "./support";
+import { clearTextField, EDITORS, fieldText, firstPicker, listbox, openEditorMenu, surface, tiptapField } from "./surfaces";
+import { expect, frames, quiet, slot, test, visit } from "./support";
 
 async function ime(page: Page) {
   const cdp = await page.context().newCDPSession(page);
@@ -14,17 +14,12 @@ async function ime(page: Page) {
   };
 }
 
-const COMPOSERS = [
-  { name: "Slack", path: "/gallery/#slack", label: "Message #general" },
-  { name: "Discord", path: "/gallery/#discord", label: "Message #general" },
-  { name: "Linear", path: "/gallery/#linear", label: "Leave a comment" },
-  { name: "iMessage", path: "/gallery/#apple", label: "Message" },
-];
+const COMPOSERS = ["gallery/slack/scene-autocomplete", "gallery/discord/scene-autocomplete", "gallery/linear/scene-comment-autocomplete", "gallery/apple/scene-autocomplete"].map(surface);
 
 for (const c of COMPOSERS)
-  test(`${c.name}: the Enter that commits a composition doesn't send`, async ({ page }) => {
+  test(`${c.id}: the Enter that commits a composition doesn't send`, async ({ page }) => {
     await visit(page, c.path);
-    const field = card(page).getByLabel(c.label, { exact: true });
+    const field = c.field!(page);
     await field.focus();
     await clearTextField(field);
     await page.keyboard.type("hi ");
@@ -38,11 +33,11 @@ for (const c of COMPOSERS)
 
 test("picker search: arrows, Enter and Escape during a composition stay with the IME", async ({ page }) => {
   await visit(page, "/");
-  const picker = page.locator('[data-slot="emoji-picker"]').first();
+  const picker = firstPicker(page);
   await picker.scrollIntoViewIfNeeded();
   const search = picker.locator("input").first();
   await search.click();
-  const highlighted = () => picker.evaluate((p) => p.querySelector('[data-slot="emoji-picker-emoji"][data-highlighted]')?.getAttribute("aria-label") ?? null);
+  const highlighted = () => picker.evaluate((p, cell) => p.querySelector(`${cell}[data-highlighted]`)?.getAttribute("aria-label") ?? null, slot("emoji"));
   const keys = await ime(page);
   await keys.compose("smile");
   await quiet(page);
@@ -59,7 +54,7 @@ test("picker search: arrows, Enter and Escape during a composition stay with the
 
 test("editor menu: arrows and Escape during a composition don't move or close it", async ({ page }) => {
   await visit(page, "/examples/tiptap/");
-  const field = page.locator("main [contenteditable=true]").first();
+  const field = tiptapField(page);
   await field.click();
   await page.keyboard.type(":smi", { delay: 40 });
   const menu = page.getByRole("listbox", { name: "Emoji suggestions" });

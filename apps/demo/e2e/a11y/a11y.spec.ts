@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { STYLES, SURFACES } from "../surfaces";
+import { STYLES, SURFACES, show } from "../surfaces";
 import { expect, settle, test, viewportOf, visit } from "../support";
 import { isKnown } from "./known";
 
@@ -40,9 +40,7 @@ for (const path of PAGES)
 for (const s of SURFACES)
   test(s.id, async ({ page }, info) => {
     test.skip(!!s.only && s.only !== viewportOf(info), `${s.only} only`);
-    await visit(page, s.path);
-    await s.prepare?.(page);
-    if (!s.inline) await s.open(page);
+    await show(page, s);
     const scope = s.inline ? (s.frame ?? s.root)(page) : s.root(page);
     await scope.evaluate((el) => el.setAttribute("data-axe-scope", ""));
     expect(await audit(page, "[data-axe-scope]")).toEqual([]);

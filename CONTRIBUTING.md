@@ -32,7 +32,7 @@ npm run changeset      # describe a change for the next release
 
 In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
 
-The e2e, axe, and screen reader suites serve the site on port 5199 (5198 with `E2E_BUILD=1`); set `E2E_PORT` to use another, for example beside a running dev server or a second checkout.
+The e2e, axe, and screen reader suites serve the site on port 5199 (5198 with `E2E_BUILD=1`); set `E2E_PORT` to use another, for example beside a running dev server or a second checkout. With `E2E_PORT` set, the suites start their own server and never reuse one.
 
 Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 

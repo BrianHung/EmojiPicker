@@ -32,7 +32,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsx scripts/build.ts",
+    "build": "tsx --conditions=@brianhung/source scripts/build.ts",
     "prepack": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

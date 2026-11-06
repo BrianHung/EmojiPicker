@@ -1,10 +1,9 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
-import { card, clearTextField, SURFACES } from "./surfaces";
-import { expect, frames, quiet, settle, test, visit } from "./support";
+import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
+import { expect, frames, quiet, settle, slot, test, visit } from "./support";
 
-const picker = (page: Page) => page.locator('[data-slot="emoji-picker"]').first();
-const highlighted = (page: Page) => picker(page).locator('[data-slot="emoji-picker-emoji"][data-highlighted]');
+const highlighted = (page: Page) => picker(page).locator(`${slot("emoji")}[data-highlighted]`);
 
 async function focusSearch(page: Page) {
   await picker(page).scrollIntoViewIfNeeded();
@@ -29,6 +28,8 @@ test.describe("right-to-left", () => {
   });
 });
 
+const SELECTORS = { emoji: slot("emoji"), viewport: slot("viewport"), title: slot("sectionTitle") };
+
 test("moving up never hides the highlighted emoji under a sticky section title", async ({ page }) => {
   await visit(page, "/");
   await focusSearch(page);
@@ -36,18 +37,18 @@ test("moving up never hides the highlighted emoji under a sticky section title",
   for (let i = 0; i < 60; i++) {
     await page.keyboard.press("ArrowUp");
     await frames(page);
-    const hidden = await picker(page).evaluate((root) => {
-      const cell = root.querySelector('[data-slot="emoji-picker-emoji"][data-highlighted]')?.getBoundingClientRect();
+    const hidden = await picker(page).evaluate((root, { emoji, viewport, title }) => {
+      const cell = root.querySelector(`${emoji}[data-highlighted]`)?.getBoundingClientRect();
       if (!cell) return null;
-      const top = root.querySelector('[data-slot="emoji-picker-viewport"]')!.getBoundingClientRect().top;
+      const top = root.querySelector(viewport)!.getBoundingClientRect().top;
       return Math.max(
         0,
-        ...[...root.querySelectorAll('[data-slot="emoji-picker-section-title"]')]
+        ...[...root.querySelectorAll(title)]
           .map((h) => h.getBoundingClientRect())
           .filter((h) => Math.abs(h.top - top) < 2)
           .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
       );
-    });
+    }, SELECTORS);
     if (hidden === null) break;
     expect(hidden).toBe(0);
   }
@@ -61,7 +62,7 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
   expect(await highlighted(page).evaluate(outline)).toBe("solid 2px");
 
   await visit(page, "/gallery/#slack");
-  const composer = page.locator('[data-slot="card"]').first().getByLabel("Message #general", { exact: true });
+  const composer = card(page).getByLabel("Message #general", { exact: true });
   await composer.click();
   await clearTextField(composer);
   await page.keyboard.type(":smi", { delay: 40 });
@@ -70,19 +71,15 @@ test("forced colors: the highlighted emoji and suggestion keep a visible outline
 
 for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover", "home/hero-notion"])
   test(`${id}: a pinned section title covers the top edge, padding or not`, async ({ page }) => {
-    const surface = SURFACES.find((s) => s.id === id)!;
-    await visit(page, surface.path);
-    await surface.prepare?.(page);
-    await surface.open(page);
-    await quiet(page);
-    const viewport = surface.root(page).locator('[data-slot="emoji-picker-viewport"]').first();
-    const gap = await viewport.evaluate(async (el) => {
+    const { root } = await show(page, surface(id), { interact: true });
+    const viewport = root.locator(slot("viewport")).first();
+    const gap = await viewport.evaluate(async (el, title) => {
       el.scrollTop = 374.5;
       await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const top = el.getBoundingClientRect().top;
-      const pinned = [...el.querySelectorAll('[data-slot="emoji-picker-section-title"]')].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
+      const pinned = [...el.querySelectorAll(title)].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
       return pinned ? pinned.top - top : null;
-    });
+    }, slot("sectionTitle"));
     expect(gap).toBeLessThanOrEqual(0);
     expect(gap).toBeGreaterThan(-1);
     const box = (await viewport.boundingBox())!;
@@ -97,8 +94,8 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
   await visit(page, "/examples/lexical/");
   await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
-  const root = page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker"]');
-  await root.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+  const root = page.locator(`${slot("popoverContent")} ${slot("root")}`);
+  await root.locator(slot("emoji")).first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
   expect(
@@ -130,9 +127,9 @@ async function pressUntilFocused(page: Page, target: Locator, key: string) {
 
 test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategoryNavigation, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
   await visit(page, "/e2e/pages/seams/");
-  const root = page.locator('[data-slot="emoji-picker"]');
-  const search = root.locator('[data-slot="emoji-picker-search-input"]');
-  await root.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+  const root = page.locator(slot("root"));
+  const search = root.locator(slot("searchInput"));
+  await root.locator(slot("emoji")).first().waitFor();
 
   await search.focus();
   await page.keyboard.press("Tab");
@@ -144,7 +141,7 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
   await page.keyboard.press("Enter");
   await expect(root.getByRole("button", { name: "Medium skin tone" })).toBeFocused();
   await search.fill("thumbs up");
-  await expect(root.locator('[data-slot="emoji-picker-emoji"]').first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
+  await expect(root.locator(slot("emoji")).first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
   await search.fill("");
 
   await page.keyboard.press("Tab");
@@ -156,17 +153,20 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
   await page.keyboard.press("Enter");
   await expect(animals).toHaveAttribute("aria-selected", "true");
   const offset = (name: string) =>
-    root.locator('[data-slot="emoji-picker-viewport"]').evaluate((viewport, name) => {
-      const title = [...viewport.querySelectorAll('[data-slot="emoji-picker-section-title"]')].find((t) => t.textContent === name);
-      return title ? Math.round(title.getBoundingClientRect().top - viewport.getBoundingClientRect().top) : null;
-    }, name);
+    root.locator(slot("viewport")).evaluate(
+      (viewport, [name, selector]) => {
+        const title = [...viewport.querySelectorAll(selector!)].find((t) => t.textContent === name);
+        return title ? Math.round(title.getBoundingClientRect().top - viewport.getBoundingClientRect().top) : null;
+      },
+      [name, slot("sectionTitle")],
+    );
   await expect.poll(() => offset("Animals & Nature")).toBe(0);
 
   const flags = tabs.getByRole("tab", { name: "Flags" });
   await pressUntilFocused(page, flags, "ArrowRight");
   await page.keyboard.press("Enter");
   await expect.poll(() => offset("Flags")).toBe(0);
-  await expect(root.locator('[data-slot="emoji-picker-emoji"][data-unified="1f3c1"]')).toBeVisible();
+  await expect(root.locator(`${slot("emoji")}[data-unified="1f3c1"]`)).toBeVisible();
 });
 
 test("Slack: the reaction picker fades out where it was when its hover toolbar hides on pick", async ({ page }) => {
@@ -175,8 +175,8 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
   await scene.scrollIntoViewIfNeeded();
   await scene.getByText(/^yep/).hover();
   await scene.getByRole("button", { name: "Add reaction" }).last().click();
-  const content = page.locator('[data-slot="emoji-picker-popover-content"]');
-  await content.locator('[data-slot="emoji-picker-emoji"]').first().waitFor();
+  const content = page.locator(slot("popoverContent"));
+  await content.locator(slot("emoji")).first().waitFor();
   await settle(page);
   // The placed offsets, not the rect: the exit animation's own transform is fine
   const sampling = content.evaluate(async (el) => {
@@ -189,7 +189,7 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
     return [...seen];
   });
   const at = await content.evaluate((el) => `${getComputedStyle(el).left} ${getComputedStyle(el).top}`);
-  await content.locator('[data-slot="emoji-picker-emoji"]').nth(5).click();
+  await content.locator(slot("emoji")).nth(5).click();
   expect(await sampling).toEqual([at]);
 });
 

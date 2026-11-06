@@ -2,12 +2,15 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { test as base, expect, type Locator, type Page, type Route, type TestInfo } from "@playwright/test";
+import { SLOTS } from "../../../packages/react/src/react/utils/slots";
 
 const DIR = fileURLToPath(new URL(".", import.meta.url));
 const CACHE = `${DIR}.cache/`;
 const REMOTE_IMAGE = readFileSync(`${DIR}fixtures/remote-image.png`);
 
-export { expect };
+export { expect, SLOTS };
+
+export const slot = (name: keyof typeof SLOTS) => `[data-slot="${SLOTS[name]}"]`;
 
 export type Viewport = "desktop" | "mobile";
 export const viewportOf = (info: TestInfo): Viewport => (info.project.use.isMobile ? "mobile" : "desktop");
@@ -58,10 +61,17 @@ export async function visit(page: Page, path: string) {
 
 export const frames = (page: Page) => page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 
+// Until no finite animation runs across two frames, so one that starts after another ends counts too
 export async function quiet(page: Page) {
   await settle(page);
-  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running" || a.effect?.getComputedTiming().iterations === Infinity), null, { timeout: 3_000 }).catch(() => {});
-  await page.waitForTimeout(150);
+  const running = () =>
+    page.evaluate(async () => {
+      const finite = () => document.getAnimations().filter((a) => a.playState === "running" && a.effect?.getComputedTiming().iterations !== Infinity);
+      await Promise.all(finite().map((a) => a.finished.catch(() => {})));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      return finite().length;
+    });
+  await expect.poll(running, { timeout: 5_000, intervals: [0] }).toBe(0);
   await frames(page);
 }
 
@@ -82,11 +92,11 @@ export async function settle(page: Page) {
   await frames(page);
 }
 
-export async function hold(page: Page, target: Locator, ms = 700) {
+export async function hold(page: Page, target: Locator, until: Locator) {
   const box = (await target.boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
-  await page.waitForTimeout(ms);
+  await expect(until).toBeVisible();
   await page.mouse.up();
 }
 

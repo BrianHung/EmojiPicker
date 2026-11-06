@@ -1,6 +1,6 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
-import { card, preview } from "./surfaces";
-import { expect, frames, quiet, test, visit } from "./support";
+import { card, firstPicker, homePopover, preview } from "./surfaces";
+import { expect, frames, quiet, slot, test, visit } from "./support";
 
 const BUDGET = { heapMB: 6, commits: 3, renders: 6, autocomplete: 7 };
 const STEPS = 20;
@@ -78,23 +78,28 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
   return { commits: (commits - start[0]!) / STEPS, renders: (renders - start[1]!) / STEPS, by };
 }
 
+const CELL = `${slot("list")} ${slot("emoji")}`;
+
 async function steps(page: Page, root: Locator) {
   await root.scrollIntoViewIfNeeded();
-  const cells = await root.evaluate((el) => {
-    const view = el.querySelector('[data-slot="emoji-picker-viewport"]')!.getBoundingClientRect();
-    return [...el.querySelectorAll('[data-slot="emoji-picker-list"] [data-slot="emoji-picker-emoji"]')]
-      .map((c) => c.getBoundingClientRect())
-      .filter((r) => r.width > 0 && r.top >= view.top + 48 && r.bottom <= view.bottom)
-      .map((r) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 }));
-  });
+  const cells = await root.evaluate(
+    (el, { viewport, cell }) => {
+      const view = el.querySelector(viewport)!.getBoundingClientRect();
+      return [...el.querySelectorAll(cell)]
+        .map((c) => c.getBoundingClientRect())
+        .filter((r) => r.width > 0 && r.top >= view.top + 48 && r.bottom <= view.bottom)
+        .map((r) => ({ x: r.x + r.width / 2, y: r.y + r.height / 2 }));
+    },
+    { viewport: slot("viewport"), cell: CELL },
+  );
   await page.mouse.move(cells[0]!.x, cells[0]!.y);
   await frames(page);
   const hover = await perStep(page, async (i) => page.mouse.move(cells[(i % (cells.length - 1)) + 1]!.x, cells[(i % (cells.length - 1)) + 1]!.y));
   await page.mouse.move(0, 0);
-  await root.locator('[data-slot="emoji-picker-list"] [data-slot="emoji-picker-emoji"][tabindex="0"]').focus();
+  await root.locator(`${CELL}[tabindex="0"]`).focus();
   await frames(page);
   const focus = await perStep(page, () => page.keyboard.press("ArrowRight"));
-  await root.locator('[data-slot="emoji-picker-search-input"]').click();
+  await root.locator(slot("searchInput")).click();
   await page.keyboard.press("ArrowDown");
   await frames(page);
   const key = await perStep(page, () => page.keyboard.press("ArrowRight"));
@@ -122,11 +127,14 @@ test("home: inline picker renders per hover and per ArrowRight", async ({ page }
 
 test("home: popover picker heap on open", async ({ page }) => {
   await visit(page, "/");
-  const trigger = page.locator("section:has(> h3#popover)").getByRole("button", { name: "Open emoji picker", exact: true });
+  const trigger = homePopover(page);
   await trigger.scrollIntoViewIfNeeded();
   const delta = await openDelta(page, async () => {
     await trigger.click();
-    await page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker-emoji"]').first().waitFor();
+    await page
+      .locator(`${slot("popoverContent")} ${slot("emoji")}`)
+      .first()
+      .waitFor();
   });
   record("home-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
@@ -141,7 +149,10 @@ test("gallery: Slack picker renders per step, and heap on open", async ({ page }
   await trigger.scrollIntoViewIfNeeded();
   const delta = await openDelta(page, async () => {
     await trigger.click();
-    await page.locator('[data-slot="emoji-picker-popover-content"] [data-slot="emoji-picker-emoji"]').first().waitFor();
+    await page
+      .locator(`${slot("popoverContent")} ${slot("emoji")}`)
+      .first()
+      .waitFor();
   });
   record("gallery-slack-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
@@ -149,7 +160,7 @@ test("gallery: Slack picker renders per step, and heap on open", async ({ page }
 
 test("bring your own virtualizer: renders per hover and per ArrowRight", async ({ page }) => {
   await visit(page, "/examples/virtualizer/");
-  const result = await steps(page, page.locator('[data-slot="emoji-picker"]').first());
+  const result = await steps(page, firstPicker(page));
   record("byo-tanstack", result);
   withinBudget(result);
 });
