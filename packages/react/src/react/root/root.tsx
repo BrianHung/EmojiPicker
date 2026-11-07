@@ -15,7 +15,6 @@ import {
   type EmojiPickerRootReactionsOpenChangeEventDetails,
   type EmojiPickerRootReactionsOpenChangeEventReason,
   type EmojiPickerRootSelectEventDetails,
-  type EmojiPickerRootSelectEventReason,
   type ListHandle,
   type PickerContextValue,
   type SearchResultsMode,
@@ -335,7 +334,6 @@ export declare namespace Root {
   type Actions = EmojiPickerRootActions;
   type ChangeEventReason = EmojiPickerRootChangeEventReason;
   type ChangeEventDetails = EmojiPickerRootChangeEventDetails;
-  type SelectEventReason = EmojiPickerRootSelectEventReason;
   type SelectEventDetails = EmojiPickerRootSelectEventDetails;
   type QueryChangeEventReason = QueryChangeDetails["reason"];
   type QueryChangeEventDetails = QueryChangeDetails;

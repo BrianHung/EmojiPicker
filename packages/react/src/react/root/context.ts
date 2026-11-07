@@ -25,8 +25,7 @@ export type EmojiPickerRootChangeEventDetails = ChangeDetails<EmojiPickerRootCha
 export type EmojiPickerRootReactionsOpenChangeEventReason = "trigger-press" | "item-press" | "escape-key" | "none";
 export type EmojiPickerRootReactionsOpenChangeEventDetails = ChangeDetails<EmojiPickerRootReactionsOpenChangeEventReason>;
 
-export type EmojiPickerRootSelectEventReason = EmojiPickerRootChangeEventReason;
-export type EmojiPickerRootSelectEventDetails = ChangeDetails<EmojiPickerRootSelectEventReason> & {
+export type EmojiPickerRootSelectEventDetails = ChangeDetails<EmojiPickerRootChangeEventReason> & {
   collapse?: () => void;
 };
 

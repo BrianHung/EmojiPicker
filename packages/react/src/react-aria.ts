@@ -11,7 +11,6 @@ export {
   EmojiSuggestionsPositioner,
   EmojiSuggestionsRoot,
 } from "./react/popover/react-aria";
-export { pickerInitialFocus } from "./react/popover";
 export type {
   EmojiPopoverAlign,
   EmojiPopoverAnchor,

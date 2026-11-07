@@ -14,7 +14,7 @@ export const hooks: [string, string][] = [
   ["useEmojiStatus()", 'The data status: "idle", "loading", "ready", or "error". It starts loading the data.'],
   ["useEmojiPickerActions()", "Inside Root: move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone."],
   ["useActiveEmoji()", "Inside Root: the highlighted emoji."],
-  ["useSearchState()", "Inside Root: the query and the result count."],
+  ["usePickerSearch()", "Inside Root: the query and the result count."],
   ["useCategoryNavigation()", "Inside Root: the category tabs."],
   ["useCollapsedCategories()", "Inside Root: the collapsed sections."],
   ["useEmojiGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "Inside Root, in place of List: rows, stickyIndexes, getGridProps, getHeaderProps, state, and variations for your own virtualizer."],
