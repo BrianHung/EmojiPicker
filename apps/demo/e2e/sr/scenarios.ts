@@ -44,9 +44,14 @@ class Ear {
   ) {}
 
   async hear(action: () => Promise<unknown>, pattern?: RegExp, ms = 5_000) {
+    return this.hearAll([action], pattern, ms);
+  }
+
+  // Guidepup reads the last phrase only after an action, so what a reader says between keystrokes is captured one key at a time
+  async hearAll(actions: (() => Promise<unknown>)[], pattern?: RegExp, ms = 5_000) {
     const from = (await this.sr.spokenPhraseLog()).length;
     const said = async () => (await this.sr.spokenPhraseLog()).slice(from).join(" | ").toLowerCase();
-    await this.sr.capture(action, { capture: true });
+    for (const action of actions) await this.sr.capture(action, { capture: true });
     for (const end = Date.now() + ms; pattern && !pattern.test(await said()) && Date.now() < end; ) await this.sr.capture(() => this.page.waitForTimeout(250), { capture: true });
     return said();
   }
@@ -58,7 +63,10 @@ class Ear {
   }
 
   async type(text: string, pattern: RegExp, why: string) {
-    const said = await this.hear(() => this.page.keyboard.type(text, { delay: 60 }), pattern);
+    const said = await this.hearAll(
+      [...text].map((key) => () => this.page.keyboard.type(key)),
+      pattern,
+    );
     expect(said, why).toMatch(pattern);
     return said;
   }
@@ -87,8 +95,7 @@ function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     const ear = await start(page, sr, "/", homePopover(page));
     const opened = await ear.press("Enter", SEARCH, "opening announces the search field by name");
     expect(opened, "…and as a text field").toMatch(FIELD);
-    const typed = await ear.hear(() => page.keyboard.type("heart", { delay: 120 }), /\d+ results?/);
-    expect(typed, "the result count is announced").toMatch(/\d+ results?/);
+    await ear.type("heart", /\d+ results?/, "the result count is announced");
   });
 
   test("arrows speak each emoji's name, with the skin tone once one is set", async ({ page, sr }) => {

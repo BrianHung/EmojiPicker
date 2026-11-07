@@ -77,6 +77,17 @@ describe("Root keyboard", () => {
     expect(onHighlightChange).toHaveBeenLastCalledWith("1f604", expect.objectContaining({ reason: "pointer" }));
   });
 
+  it("keeps a key move when the pointer moves again over the cell it was on, as VoiceOver's pointer does", () => {
+    const { input, host } = mount({});
+    const move = (unified: string, at: number) => React.act(() => void host.querySelector(`[data-unified="${unified}"]`)!.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: at, clientY: at })));
+    move("1f600", 1);
+    press(input, "ArrowRight");
+    move("1f600", 2);
+    expect(highlighted(host)).toBe("1f603");
+    move("1f604", 3);
+    expect(highlighted(host)).toBe("1f604");
+  });
+
   it("leaves a controlled highlight to its owner", () => {
     const onHighlightChange = vi.fn();
     const { input, host } = mount({ highlight: "smileys_people:1f600", onHighlightChange });

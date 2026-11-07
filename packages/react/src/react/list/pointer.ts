@@ -6,13 +6,16 @@ import type { Highlight } from "../grid/use-highlight";
 import type { CellElement } from "../grid/types";
 import { cellOf, keyOf } from "./use-cell";
 
-// Hover moves the keyboard position only on a real pointer move: a keyboard scroll slides cells under a resting pointer
-const pointer = { x: NaN, y: NaN, moved: false, list: null as Element | null, within: false };
+// Hover moves the keyboard position only on a real pointer move into another cell: a keyboard scroll slides cells under a resting pointer, and VoiceOver puts the pointer back on the cell it last read, behind focus
+const pointer = { x: NaN, y: NaN, moved: false, list: null as Element | null, within: false, cell: null as Element | null, entered: false };
 const LISTEN = { capture: true, passive: true };
 let lists = 0;
 
 function onPointerMove(e: PointerEvent) {
-  const list = cellOf(e.target)?.closest(`[data-slot="${SLOTS.list}"]`) ?? null;
+  const cell = cellOf(e.target);
+  const list = cell?.closest(`[data-slot="${SLOTS.list}"]`) ?? null;
+  pointer.entered = cell !== pointer.cell;
+  pointer.cell = cell;
   pointer.moved = e.clientX !== pointer.x || e.clientY !== pointer.y;
   pointer.within = list !== null && list === pointer.list;
   pointer.list = list;
@@ -46,7 +49,7 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
   React.useEffect(trackPointer, []);
   const hover = (key: Key | null) => core.hover(key == null ? null : String(key));
   const follow = (key: Key, event: Event) => {
-    if (!pointer.moved || lastKey() === key) return;
+    if (!pointer.moved || !pointer.entered || lastKey() === key) return;
     const active = document.activeElement;
     const list = listRef.current;
     if (list?.contains(active) && active !== list) {
