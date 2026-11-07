@@ -104,12 +104,11 @@ function EmojiPickerFooter({ className }: { className?: string }) {
   );
 }
 
-type EmojiPickerCardProps = Omit<EmojiPicker.Root.Props, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
+type EmojiPickerCardProps = Omit<React.ComponentProps<typeof EmojiPicker.Root>, "children" | "className"> & EmojiPickerBodyProps & { className?: string };
 
-const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(function EmojiPickerCard({ className, autoFocus, rows, cell: renderCell, footer, empty, ...props }, ref) {
+function EmojiPickerCard({ className, autoFocus, rows, cell: renderCell, footer, empty, ...props }: EmojiPickerCardProps) {
   return (
     <EmojiPicker.Root
-      ref={ref}
       className={cn(
         root,
         "h-[360px] w-[328px] max-w-full in-data-side:max-w-[var(--available-width,calc(100vw-24px))] in-data-placement:max-w-[calc(100vw-24px)] rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
@@ -120,7 +119,7 @@ const EmojiPickerCard = React.forwardRef<HTMLElement, EmojiPickerCardProps>(func
       <EmojiPickerBody autoFocus={autoFocus} rows={rows} cell={renderCell} footer={footer} empty={empty} />
     </EmojiPicker.Root>
   );
-});
+}
 
 function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection: EmojiSelection) => void; count?: number; className?: string }) {
   return (
