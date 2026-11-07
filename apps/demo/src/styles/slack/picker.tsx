@@ -137,7 +137,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
                 {() => (
                   <EmojiPicker.List.Cell
                     style={cellHover}
-                    className={cn(CELL, "isolate before:absolute before:inset-[0_0_1px_-2px] before:-z-10 before:rounded-[6px] before:transition-[background-color] before:duration-50 before:ease-[ease-out] hover:before:bg-(--slack-cell-hover) data-focus-visible:before:bg-(--slack-cell-hover) data-[highlighted]:before:bg-(--slack-cell-hover)")}
+                    className={cn(CELL, "isolate overflow-visible before:absolute before:inset-[0_0_1px_-2px] before:-z-10 before:rounded-[6px] before:transition-[background-color] before:duration-50 before:ease-[ease-out] hover:before:bg-(--slack-cell-hover) data-focus-visible:before:bg-(--slack-cell-hover) data-[highlighted]:before:bg-(--slack-cell-hover)")}
                   />
                 )}
               </EmojiPicker.List.Items>
