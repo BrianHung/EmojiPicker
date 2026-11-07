@@ -142,6 +142,13 @@ function Mounted({ entering, complete }: { entering: boolean; complete?: (open: 
 }
 
 const statusOf = ({ isEntering, isExiting }: PopoverRenderProps): TransitionStatus => (isEntering ? "starting" : isExiting ? "ending" : "idle");
+// Whole device pixels, as Floating UI's floatingStyles, so the popup's glyphs rasterize the same at any fractional offset
+const toDevicePixels = (style: React.CSSProperties | undefined, dpr: number): React.CSSProperties | undefined => {
+  if (!style) return style;
+  const round = (value: React.CSSProperties["top"]) => (typeof value === "number" ? Math.round(value * dpr) / dpr : value);
+  return { ...style, top: round(style.top), left: round(style.left), right: round(style.right), bottom: round(style.bottom) };
+};
+
 const maxHeightOf = (style: React.CSSProperties | undefined) => (typeof style?.maxHeight === "number" ? `${style.maxHeight}px` : style?.maxHeight);
 
 const anchorPoint = (style: React.CSSProperties | undefined) => {
@@ -214,7 +221,7 @@ function usePositioner(
               "--transform-origin": anchorPoint(dom.style),
               "--available-height": maxHeightOf(dom.style),
               ...anchorVariables(triggerRef.current, values, sideOffset, collisionPadding),
-              ...dom.style,
+              ...toDevicePixels(dom.style, typeof window === "undefined" ? 1 : window.devicePixelRatio),
               ...closedPointerEvents(open),
               ...resolve(style, state),
             } as React.CSSProperties,

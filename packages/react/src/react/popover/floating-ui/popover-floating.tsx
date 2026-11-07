@@ -70,7 +70,7 @@ import {
   type TransitionStatus,
 } from "../popover-shared";
 
-type Placed = { placement: string; position: React.CSSProperties["position"]; top: number; left: number; origin: string | undefined };
+type Placed = { placement: string; position: React.CSSProperties["position"]; top: React.CSSProperties["top"]; left: React.CSSProperties["left"]; origin: string | undefined };
 
 type FloatingProps = (props: React.HTMLAttributes<HTMLElement>) => Record<string, unknown>;
 
@@ -180,7 +180,9 @@ function usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, 
     setPositionReference(target === "virtual" ? { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() } : target);
   });
   const origin = floating.middlewareData.transformOrigin?.origin;
-  const live: Placed = { placement: floating.placement, position: floating.strategy, top: floating.y, left: floating.x, origin };
+  // floatingStyles rounds to whole device pixels, so the popup's glyphs rasterize the same at any fractional offset
+  const { position, top, left } = floating.floatingStyles;
+  const live: Placed = { placement: floating.placement, position, top, left, origin };
   // Closing (the exit animation) and a hidden reference keep the last position: React's state from a previous render
   const [held, setHeld] = React.useState(live);
   const fresh = options.open && !floating.middlewareData.transformOrigin?.detached;
