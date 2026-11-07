@@ -92,7 +92,7 @@ function EmojiPickerFooter({ className }: { className?: string }) {
       {({ emoji }) =>
         emoji ? (
           <>
-            <Emoji emoji={emoji} decorative className="text-lg" />
+            <Emoji emoji={emoji} aria-hidden className="text-lg" />
             <span className="truncate font-medium">{emoji.name}</span>
             {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>

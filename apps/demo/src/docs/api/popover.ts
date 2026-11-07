@@ -16,7 +16,6 @@ export const popoverRoot = rowsOf<EmojiPopover.Root.Props>()([
   onOpenChangeComplete,
   { name: "modal", type: "boolean", default: "false (/floating-ui), true (/react-aria)", description: "Traps focus and hides the page from assistive technology." },
   { name: "actionsRef", type: "Ref<{ close(): void }>", description: "Closes the popover with reason imperative-action." },
-  { name: "closeOnSelect", type: "boolean", default: "true", description: "Closes when a picker inside selects an emoji." },
 ]);
 
 export const popoverTrigger = rowsOf<EmojiPopover.Trigger.Props>()([{ name: "render", type: "ReactElement | (props, { open, hovered, pressed, focusVisible, … }) => ReactElement", description: "Merges props onto this element." }]);

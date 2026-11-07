@@ -314,7 +314,11 @@ Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeE
 
 ### EmojiPopover {#api-popover}
 
-A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-aria`. `Portal`, `Positioner`, and `Popup` follow Base UI's Popover.
+A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-aria`. `Portal`, `Positioner`, and `Popup` follow Base UI's Popover. A pick closes it; to keep it open, cancel that close:
+
+```tsx
+<EmojiPopover.Root onOpenChange={(open, details) => details.reason === "item-press" && details.cancel()}>
+```
 
 <PropsTable rows={api.popoverRootParts} />
 
