@@ -22,7 +22,7 @@ export { Cell as EmojiPickerListCell } from "./react/list/cell";
 export { Items as EmojiPickerListItems, Section as EmojiPickerListSection, SectionActions as EmojiPickerListSectionActions, SectionTitle as EmojiPickerListSectionTitle } from "./react/list/section";
 export { Variations as EmojiPickerListVariations, VariationsOption as EmojiPickerListVariationsOption } from "./react/list/variations";
 export { ReactionsExpand as EmojiPickerReactionsExpand, ReactionsItem as EmojiPickerReactionsItem, ReactionsItems as EmojiPickerReactionsItems } from "./react/reactions/reactions";
-export { Field as EmojiPickerSearchField, SearchClear as EmojiPickerSearchClear, SearchInput as EmojiPickerSearchInput } from "./react/search/search";
+export { Field as EmojiPickerSearchField, SearchClear as EmojiPickerSearchClear, SearchInput as EmojiPickerSearchInput, SearchStatus as EmojiPickerSearchStatus } from "./react/search/search";
 export { SkinToneGlyph as EmojiPickerSkinToneGlyph, SkinToneOption as EmojiPickerSkinToneOption, SkinToneOptions as EmojiPickerSkinToneOptions, SkinToneTrigger as EmojiPickerSkinToneTrigger } from "./react/skin-tone/skin-tone";
 export type { CategoryOption, EmojiPickerCollapsedCategories, EmojiPickerNavCategory } from "./react/root";
 export type { EmojiPickerRootActions } from "./react/root/context";

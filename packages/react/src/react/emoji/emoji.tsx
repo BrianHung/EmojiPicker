@@ -3,6 +3,7 @@ import { resolveEmoji } from "@brianhung/emoji-picker-core";
 import { customRecord, type EmojiInput, isCustomEmoji, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji } from "@brianhung/emoji-picker-core/internal";
 import { EmojiImage, NATIVE } from "./image";
 import { useEmojiContext, useStoreSnapshot } from "../provider/provider";
+import { SLOTS } from "../utils/slots";
 
 type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
   size?: number;
@@ -31,7 +32,8 @@ export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   return resolved;
 }
 
-export function Emoji({ emoji: input, size, renderer: override, animate = true, decorative = false, ...props }: EmojiProps) {
+export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ emoji: input, size, renderer: override, animate = true, decorative = false, ...rest }, ref) {
+  const props = { ...rest, ref, "data-slot": SLOTS.emojiElement };
   const context = useEmojiContext();
   const resolved = useEmoji(input);
   const status = useStoreSnapshot((s) => s.status());
@@ -73,4 +75,4 @@ export function Emoji({ emoji: input, size, renderer: override, animate = true, 
       {resolved.native}
     </span>
   );
-}
+});

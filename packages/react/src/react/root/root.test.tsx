@@ -208,6 +208,23 @@ describe("Root keyboard", () => {
     expect(document.querySelector('[data-slot="emoji-picker-search-clear"]')).toBeNull();
   });
 
+  it("announces the result count in a Search.Status in place of Root's own live region", () => {
+    render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root defaultQuery="smile">
+          <EmojiPicker.Search>
+            <EmojiPicker.Search.Input />
+            <EmojiPicker.Search.Status className={({ resultCount }) => `count-${resultCount}`} />
+          </EmojiPicker.Search>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    const statuses = document.querySelectorAll('[role="status"]');
+    expect(statuses).toHaveLength(1);
+    expect(statuses[0]!.textContent).toMatch(/\d+ results?/);
+    expect(statuses[0]!.className).toMatch(/^count-\d+$/);
+  });
+
   it("renders a List.Variations placed in Root in place of the default, styled by its state", () => {
     const actions = React.createRef<EmojiPicker.Root.Actions>();
     render(

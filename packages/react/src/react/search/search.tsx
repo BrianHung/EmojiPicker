@@ -142,7 +142,24 @@ export const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>
   );
 });
 
-export const Search = Object.assign(SearchRoot, { Field, Input: SearchInput, Clear: SearchClear });
+export type SearchStatusState = { resultCount: number | null };
+export type SearchStatusProps = EmojiPickerPartElementProps<SearchStatusState, HTMLDivElement, "role">;
+
+// Base UI's Combobox.Status: the result count's live region, for placing and styling it; without one, Root renders a visually hidden one
+export const SearchStatus = React.forwardRef<HTMLDivElement, SearchStatusProps>(function SearchStatus({ children, ...props }, ref) {
+  const picker = usePicker("EmojiPicker.Search.Status");
+  const resultCount = useStore(picker.state, (s) => (s.searching && !s.pending ? s.results.length : null));
+  const register = picker.registerStatus;
+  useLayoutEffect(() => register(), [register]);
+  const state: SearchStatusState = { resultCount };
+  return renderElement(
+    "div",
+    { role: "status", "aria-live": "polite", "aria-atomic": true, "data-slot": SLOTS.searchStatus, ...props, ref, children: children ?? (resultCount === null ? "" : picker.labels.resultCount(resultCount)) },
+    state,
+  );
+});
+
+export const Search = Object.assign(SearchRoot, { Field, Input: SearchInput, Clear: SearchClear, Status: SearchStatus });
 
 export declare namespace Search {
   type Props = SearchProps;
@@ -158,5 +175,9 @@ export declare namespace Search {
   namespace Clear {
     type Props = SearchClearProps;
     type State = SearchClearState;
+  }
+  namespace Status {
+    type Props = SearchStatusProps;
+    type State = SearchStatusState;
   }
 }

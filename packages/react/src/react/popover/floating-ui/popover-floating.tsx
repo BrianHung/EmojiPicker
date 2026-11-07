@@ -31,6 +31,7 @@ import { useLayoutEffect } from "../../utils/utils";
 import { renderElement, resolve, type EmojiPickerPartElementProps } from "../../utils/render";
 import { SLOTS } from "../../utils/slots";
 import {
+  anchorElement,
   anchorRect,
   closedPointerEvents,
   containerOf,
@@ -170,10 +171,14 @@ function usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, 
   });
   const latest = useLatest(anchor);
   const { setPositionReference, domReference } = floating.refs;
-  const key = !anchor ? null : anchor instanceof Element ? anchor : "virtual";
+  const reference = React.useRef<Element | "virtual" | null>(null);
+  // A ref or function anchor resolves after commit, so the reference is checked on every render and set when it changes
   useLayoutEffect(() => {
-    setPositionReference(key instanceof Element || key === null ? key : { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() });
-  }, [key, setPositionReference, domReference, latest]);
+    const target = latest.current ? (anchorElement(latest.current) ?? "virtual") : null;
+    if (target === reference.current) return;
+    reference.current = target;
+    setPositionReference(target === "virtual" ? { getBoundingClientRect: () => anchorRect(latest.current) ?? domReference.current?.getBoundingClientRect() ?? new DOMRect() } : target);
+  });
   const origin = floating.middlewareData.transformOrigin?.origin;
   const live: Placed = { placement: floating.placement, position: floating.strategy, top: floating.y, left: floating.x, origin };
   // Closing (the exit animation) and a hidden reference keep the last position: React's state from a previous render

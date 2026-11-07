@@ -68,6 +68,7 @@ export interface PickerContextValue {
   searchInput: React.RefObject<HTMLInputElement | null>;
   listId: string;
   variations: { custom: boolean; register(): () => void };
+  registerStatus(): () => void;
 }
 
 export const PickerContext = React.createContext<PickerContextValue | null>(null);

@@ -15,6 +15,7 @@ export const SLOTS = {
   sectionTitle: "emoji-picker-section-title",
   sectionActions: "emoji-picker-section-actions",
   emoji: "emoji-picker-emoji",
+  emojiElement: "emoji",
   skinTone: "emoji-picker-skin-tone",
   skinToneOption: "emoji-picker-skin-tone-option",
   skinToneOptions: "emoji-picker-skin-tone-options",

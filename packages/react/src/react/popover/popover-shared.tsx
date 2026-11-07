@@ -23,10 +23,19 @@ export const physicalSide = (side: EmojiPopoverSide, rtl: boolean): Physical => 
 export const placedSide = (side: EmojiPopoverSide, placed: string | null | undefined, rtl: boolean): EmojiPopoverSide =>
   !placed || placed === physicalSide(side, rtl) ? side : side === "inline-start" ? "inline-end" : side === "inline-end" ? "inline-start" : (placed as Physical);
 export type PopoverAnchorRect = { top: number; left: number; width: number; height: number };
-export type EmojiPopoverAnchor = { getBoundingClientRect(): PopoverAnchorRect } | (() => PopoverAnchorRect | null | undefined);
+type VirtualAnchor = { getBoundingClientRect(): PopoverAnchorRect };
+export type EmojiPopoverAnchor = Element | VirtualAnchor | React.RefObject<Element | null> | (() => Element | VirtualAnchor | PopoverAnchorRect | null | undefined) | null;
+
+const resolveAnchor = (anchor: EmojiPopoverAnchor | undefined) => (typeof anchor === "function" ? anchor() : anchor && "current" in anchor ? anchor.current : anchor);
+
+export const anchorElement = (anchor: EmojiPopoverAnchor | undefined) => {
+  const target = resolveAnchor(anchor);
+  return target instanceof Element ? target : null;
+};
 
 export const anchorRect = (anchor: EmojiPopoverAnchor | undefined) => {
-  const r = typeof anchor === "function" ? anchor() : anchor?.getBoundingClientRect();
+  const target = resolveAnchor(anchor);
+  const r = target && "getBoundingClientRect" in target ? target.getBoundingClientRect() : target;
   return r ? new DOMRect(r.left, r.top, r.width, r.height) : undefined;
 };
 

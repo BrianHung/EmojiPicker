@@ -212,6 +212,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
     [state, latest, reactions, collapseToReactions, setValue],
   );
   const [variations, registerVariations] = useMounted();
+  const [statuses, registerStatus] = useMounted();
   const closePopover = React.useCallback(
     (reason: EmojiPopoverRootChangeEventReason, event?: Event) => {
       const { popover } = latest.current;
@@ -266,8 +267,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       searchInput,
       listId,
       variations: { custom: variations > 0, register: registerVariations },
+      registerStatus,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, listId, variations, registerVariations],
+    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, listId, variations, registerVariations, registerStatus],
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
@@ -307,9 +309,11 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
               <ReactionsContext.Provider value={reactionsContext}>{children}</ReactionsContext.Provider>
             </PickerContext.Provider>
           </Autocomplete>
-          <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
-            {count}
-          </span>
+          {statuses ? null : (
+            <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+              {count}
+            </span>
+          )}
         </>
       ),
     },

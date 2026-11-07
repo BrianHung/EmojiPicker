@@ -27,9 +27,10 @@ type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "
   size: string | number;
   animate: boolean;
   fallback?: string;
+  "data-slot"?: string;
 };
 
-export function EmojiImage({ src, alt, record, size, animate, fallback, style, ...props }: EmojiImageProps) {
+export const EmojiImage = React.forwardRef<HTMLElement, EmojiImageProps>(function EmojiImage({ src, alt, record, size, animate, fallback, style, "data-slot": slot, ...props }, ref) {
   const reduce = usePrefersReducedMotion();
   const [failed, setFailed] = React.useState<string | null>(null);
   const still = record?.animated && record.stillUrl && (!animate || reduce) ? record.stillUrl : undefined;
@@ -38,7 +39,16 @@ export function EmojiImage({ src, alt, record, size, animate, fallback, style, .
   const shown = still ?? src;
   if (failed === shown) {
     return (
-      <span className={props.className} role={alt ? "img" : undefined} aria-label={alt || undefined} aria-hidden={alt ? undefined : true} data-emoji-fallback="" style={{ ...NATIVE, width: size, height: size, fontSize: size, ...style }}>
+      <span
+        ref={ref}
+        className={props.className}
+        data-slot={slot}
+        role={alt ? "img" : undefined}
+        aria-label={alt || undefined}
+        aria-hidden={alt ? undefined : true}
+        data-emoji-fallback=""
+        style={{ ...NATIVE, width: size, height: size, fontSize: size, ...style }}
+      >
         {fallback}
       </span>
     );
@@ -46,6 +56,8 @@ export function EmojiImage({ src, alt, record, size, animate, fallback, style, .
   return (
     <img
       {...props}
+      data-slot={slot}
+      ref={ref as React.Ref<HTMLImageElement>}
       src={shown}
       onError={(e) => {
         setFailed(shown);
@@ -60,4 +72,4 @@ export function EmojiImage({ src, alt, record, size, animate, fallback, style, .
       style={{ width: size, height: size, objectFit: "contain", ...style }}
     />
   );
-}
+});

@@ -84,14 +84,24 @@ function Portal({ container, children }: EmojiPopoverPortalProps) {
 
 function useAnchorRef(anchor: EmojiPopoverAnchor | undefined, fallback: Element | null) {
   const box = React.useRef<HTMLSpanElement>(null);
-  const virtual = !!anchor && !(anchor instanceof Element);
+  const ref = anchor && "current" in anchor ? anchor : null;
+  const virtual = !!anchor && !ref && !(anchor instanceof Element);
   // A virtual anchor moves without a new value, as a caret does, so the box follows it on every render
   useLayoutEffect(() => {
     const r = virtual ? anchorRect(anchor) : undefined;
     if (r && box.current) Object.assign(box.current.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px` });
   });
   const element = virtual && typeof document !== "undefined" ? createPortal(<span ref={box} aria-hidden style={{ position: "fixed", visibility: "hidden", pointerEvents: "none" }} />, document.body) : null;
-  return [element, virtual ? box : { current: anchor instanceof Element ? anchor : fallback }] as const;
+  const target: React.RefObject<Element | null> = virtual
+    ? box
+    : ref
+      ? {
+          get current() {
+            return ref.current ?? fallback;
+          },
+        }
+      : { current: anchor instanceof Element ? anchor : fallback };
+  return [element, target] as const;
 }
 
 // React Aria names inline-start "start", and aligns a side placement by "top" and "bottom"
