@@ -1,16 +1,5 @@
-export {
-  EmojiPopover,
-  EmojiPopoverPopup,
-  EmojiPopoverPortal,
-  EmojiPopoverPositioner,
-  EmojiPopoverRoot,
-  EmojiPopoverTrigger,
-  EmojiSuggestions,
-  EmojiSuggestionsPopup,
-  EmojiSuggestionsPortal,
-  EmojiSuggestionsPositioner,
-  EmojiSuggestionsRoot,
-} from "./react/popover/floating-ui";
+export * as EmojiPopover from "./react/popover/floating-ui/parts";
+export * as EmojiSuggestions from "./react/popover/floating-ui/suggestions-parts";
 export type {
   EmojiPopoverAlign,
   EmojiPopoverAnchor,

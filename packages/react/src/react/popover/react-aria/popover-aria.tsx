@@ -26,7 +26,6 @@ import {
   PopoverProvider,
   popupAttributes,
   positionerAttributes,
-  Trigger,
   usePopoverInternals,
   usePopoverState,
   usePopupAttributes,
@@ -46,12 +45,12 @@ import {
   type EmojiPopoverTriggerState,
   type EmojiSuggestionsPopupProps,
   type EmojiSuggestionsPopupState,
-  type EmojiSuggestionsPortalProps,
   type EmojiSuggestionsPositionerProps,
   type EmojiSuggestionsPositionerState,
   type EmojiSuggestionsRootProps,
   type EmojiPopoverAlign,
   type Placement,
+  Trigger as SharedTrigger,
   type PopoverInternals,
   type EmojiPopoverSide,
   type TransitionStatus,
@@ -59,7 +58,7 @@ import {
 
 type Internals = PopoverInternals & { id?: string; modal: boolean; finalFocus: React.MutableRefObject<EmojiPopoverFinalFocus | undefined> };
 
-function Root({ children, modal = true, ...props }: EmojiPopoverRootProps) {
+export function Root({ children, modal = true, ...props }: EmojiPopoverRootProps) {
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
   const state = usePopoverState(props, trigger);
   // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself
@@ -80,7 +79,7 @@ function Root({ children, modal = true, ...props }: EmojiPopoverRootProps) {
 
 const PortalContext = React.createContext<EmojiPopoverContainer | undefined>(undefined);
 
-function Portal({ container, children }: EmojiPopoverPortalProps) {
+export function Portal({ container, children }: EmojiPopoverPortalProps) {
   return <PortalContext.Provider value={container}>{children}</PortalContext.Provider>;
 }
 
@@ -245,7 +244,7 @@ function usePositioner(
   );
 }
 
-const Positioner = React.forwardRef<HTMLDivElement, EmojiPopoverPositionerProps>(function Positioner({ side = "bottom", align = "start", sideOffset = 8, alignOffset = 0, collisionPadding = 8, ...props }, ref) {
+export const Positioner = React.forwardRef<HTMLDivElement, EmojiPopoverPositionerProps>(function Positioner({ side = "bottom", align = "start", sideOffset = 8, alignOffset = 0, collisionPadding = 8, ...props }, ref) {
   const p = usePopoverInternals<Internals>("Positioner");
   const overlay: Overlay = {
     open: p.state.open,
@@ -258,7 +257,7 @@ const Positioner = React.forwardRef<HTMLDivElement, EmojiPopoverPositionerProps>
   return usePositioner(overlay, { side, align, sideOffset, alignOffset, collisionPadding, ...props }, ref);
 });
 
-const Popup = React.forwardRef<HTMLDivElement, EmojiPopoverPopupProps>(function Popup({ initialFocus, finalFocus, className, style, render, children, ...props }, ref) {
+export const Popup = React.forwardRef<HTMLDivElement, EmojiPopoverPopupProps>(function Popup({ initialFocus, finalFocus, className, style, render, children, ...props }, ref) {
   const p = usePopoverInternals<Internals>("Popup");
   const { state: placed, status } = usePositioned("EmojiPopover");
   const node = React.useRef<HTMLDivElement | null>(null);
@@ -279,12 +278,15 @@ type Suggestions = Pick<EmojiSuggestionsRootProps, "open" | "onOpenChange" | "on
 
 const SuggestionsContext = React.createContext<Suggestions | null>(null);
 
-function SuggestionsRoot({ open, onOpenChange, onOpenChangeComplete, children }: EmojiSuggestionsRootProps) {
+export function SuggestionsRoot({ open, onOpenChange, onOpenChangeComplete, children }: EmojiSuggestionsRootProps) {
   const value = React.useMemo(() => ({ open, onOpenChange, onOpenChangeComplete }), [open, onOpenChange, onOpenChangeComplete]);
   return <SuggestionsContext.Provider value={value}>{children}</SuggestionsContext.Provider>;
 }
 
-const SuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsPositionerProps>(function SuggestionsPositioner({ side = "bottom", align = "start", sideOffset = 4, alignOffset = 0, collisionPadding = 8, ...props }, ref) {
+export const SuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsPositionerProps>(function SuggestionsPositioner(
+  { side = "bottom", align = "start", sideOffset = 4, alignOffset = 0, collisionPadding = 8, ...props },
+  ref,
+) {
   const suggestions = React.useContext(SuggestionsContext);
   if (!suggestions) throw new Error("EmojiSuggestions.Positioner must be inside EmojiSuggestions.Root");
   const { open, onOpenChange, onOpenChangeComplete } = suggestions;
@@ -292,7 +294,7 @@ const SuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsP
   return usePositioner(overlay, { side, align, sideOffset, alignOffset, collisionPadding, ...props }, ref);
 });
 
-const SuggestionsPopup = React.forwardRef<HTMLDivElement, EmojiSuggestionsPopupProps>(function SuggestionsPopup({ className, style, render, children, ...props }, ref) {
+export const SuggestionsPopup = React.forwardRef<HTMLDivElement, EmojiSuggestionsPopupProps>(function SuggestionsPopup({ className, style, render, children, ...props }, ref) {
   const { state: placed, status } = usePositioned("EmojiSuggestions");
   const state: EmojiSuggestionsPopupState = { ...placed, transitionStatus: status };
   return renderElement(
@@ -311,59 +313,47 @@ const SuggestionsPopup = React.forwardRef<HTMLDivElement, EmojiSuggestionsPopupP
   );
 });
 
-export const EmojiPopover = { Root, Trigger, Portal, Positioner, Popup };
-export const EmojiSuggestions = { Root: SuggestionsRoot, Portal, Positioner: SuggestionsPositioner, Popup: SuggestionsPopup };
-export {
-  Popup as EmojiPopoverPopup,
-  Portal as EmojiPopoverPortal,
-  Portal as EmojiSuggestionsPortal,
-  Positioner as EmojiPopoverPositioner,
-  Root as EmojiPopoverRoot,
-  SuggestionsPopup as EmojiSuggestionsPopup,
-  SuggestionsPositioner as EmojiSuggestionsPositioner,
-  SuggestionsRoot as EmojiSuggestionsRoot,
-  Trigger as EmojiPopoverTrigger,
-};
+// Typed here so each entry's declarations name only public types
+export const Trigger: React.ForwardRefExoticComponent<EmojiPopoverTriggerProps & React.RefAttributes<HTMLButtonElement>> = SharedTrigger;
 
-export declare namespace EmojiPopover {
-  namespace Root {
-    type Props = EmojiPopoverRootProps;
-    type Actions = EmojiPopoverRootActions;
-    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
-    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
-  }
-  namespace Trigger {
-    type Props = EmojiPopoverTriggerProps;
-    type State = EmojiPopoverTriggerState;
-  }
-  namespace Portal {
-    type Props = EmojiPopoverPortalProps;
-  }
-  namespace Positioner {
-    type Props = EmojiPopoverPositionerProps;
-    type State = EmojiPopoverPositionerState;
-  }
-  namespace Popup {
-    type Props = EmojiPopoverPopupProps;
-    type State = EmojiPopoverPopupState;
-  }
+export declare namespace Root {
+  type Props = EmojiPopoverRootProps;
+  type Actions = EmojiPopoverRootActions;
+  type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+  type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
 }
 
-export declare namespace EmojiSuggestions {
-  namespace Root {
-    type Props = EmojiSuggestionsRootProps;
-    type ChangeEventReason = EmojiPopoverRootChangeEventReason;
-    type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
-  }
-  namespace Portal {
-    type Props = EmojiSuggestionsPortalProps;
-  }
-  namespace Positioner {
-    type Props = EmojiSuggestionsPositionerProps;
-    type State = EmojiSuggestionsPositionerState;
-  }
-  namespace Popup {
-    type Props = EmojiSuggestionsPopupProps;
-    type State = EmojiSuggestionsPopupState;
-  }
+export declare namespace Trigger {
+  type Props = EmojiPopoverTriggerProps;
+  type State = EmojiPopoverTriggerState;
+}
+
+export declare namespace Portal {
+  type Props = EmojiPopoverPortalProps;
+}
+
+export declare namespace Positioner {
+  type Props = EmojiPopoverPositionerProps;
+  type State = EmojiPopoverPositionerState;
+}
+
+export declare namespace Popup {
+  type Props = EmojiPopoverPopupProps;
+  type State = EmojiPopoverPopupState;
+}
+
+export declare namespace SuggestionsRoot {
+  type Props = EmojiSuggestionsRootProps;
+  type ChangeEventReason = EmojiPopoverRootChangeEventReason;
+  type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
+}
+
+export declare namespace SuggestionsPositioner {
+  type Props = EmojiSuggestionsPositionerProps;
+  type State = EmojiSuggestionsPositionerState;
+}
+
+export declare namespace SuggestionsPopup {
+  type Props = EmojiSuggestionsPopupProps;
+  type State = EmojiSuggestionsPopupState;
 }
