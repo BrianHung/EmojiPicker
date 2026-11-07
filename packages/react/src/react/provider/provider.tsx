@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { I18nProvider, useLocale } from "react-aria/I18nProvider";
 import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type SkinToneChangeDetails, twemojiUrl } from "@brianhung/emoji-picker-core";

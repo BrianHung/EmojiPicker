@@ -1,3 +1,5 @@
+"use client";
+
 // A toolbar of jump links, not tabs: the sections are virtualized, so there are no tab panels to control, and "Frequently used" may have no tab
 import * as React from "react";
 import { DefaultCategoryIcon } from "./category-icons";

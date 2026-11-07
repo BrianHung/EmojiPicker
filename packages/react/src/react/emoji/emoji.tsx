@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { resolveEmoji } from "@brianhung/emoji-picker-core";
 import { customRecord, type EmojiInput, isCustomEmoji, missingEmojiText, nameWithTone, type Renderer, type ResolvedEmoji } from "@brianhung/emoji-picker-core/internal";

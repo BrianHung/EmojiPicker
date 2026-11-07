@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { EmojiRecord } from "@brianhung/emoji-picker-core";
 import { drawsNatively, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport, onNativeSupportChange, PROBE_BATCH } from "@brianhung/emoji-picker-core/native";

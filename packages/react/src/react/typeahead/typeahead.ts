@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsMachine, type EmojiSuggestionsOptions, type EmojiTrigger, type ShortcodeCompletion } from "@brianhung/emoji-picker-core";

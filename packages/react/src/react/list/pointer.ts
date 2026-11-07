@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { PickerContextValue } from "../root/context";

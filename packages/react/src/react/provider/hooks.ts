@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { createSearch, type EmojiStore, type SkinToneValue } from "@brianhung/emoji-picker-core";
 import { type EmojiSearchState, type EmojiStoreStatus, subscribeAll } from "@brianhung/emoji-picker-core/internal";

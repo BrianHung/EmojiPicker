@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { type CollapsedCategoriesChangeDetails, createEmojiPicker, type EmojiPicker, type EmojiPickerOptions, type EmojiStore, type HighlightChangeDetails, type QueryChangeDetails } from "@brianhung/emoji-picker-core";
 import { useStableCallback } from "../utils/latest";

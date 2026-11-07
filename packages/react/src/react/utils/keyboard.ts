@@ -1,3 +1,5 @@
+"use client";
+
 import type * as React from "react";
 import type { KeyboardEvent } from "@react-types/shared";
 import type { FocusManager } from "react-aria/FocusScope";

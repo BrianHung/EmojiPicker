@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 // Only an option the field points at is virtually focused: the field itself keeps DOM focus and gets no synthetic blur

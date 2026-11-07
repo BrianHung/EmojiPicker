@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 // Before layout effects, so they and every handler read this render's value; never written while rendering

@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { ChangeDetails, EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@brianhung/emoji-picker-core";
 import type { EmojiGridMove } from "@brianhung/emoji-picker-core/grid";

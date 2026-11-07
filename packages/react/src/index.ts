@@ -1,5 +1,3 @@
-"use client";
-
 export * as EmojiPicker from "./react/parts";
 export {
   CategoryNav as EmojiPickerCategoryNav,

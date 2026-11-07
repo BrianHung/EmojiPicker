@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { useDrawable } from "../emoji/native-support";
 import { usePicker } from "../root/context";

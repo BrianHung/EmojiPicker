@@ -1,19 +1,34 @@
-import { EmojiPickerList, EmojiPickerRoot, EmojiPickerSearch, EmojiPickerSearchInput, EmojiPickerSkinTone, EmojiPickerViewport, EmojiProvider } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, EmojiPickerSearchInput, EmojiProvider } from "@brianhung/emoji-picker-react";
+import { EmojiPopoverPopup, EmojiPopoverPortal, EmojiPopoverPositioner, EmojiPopoverRoot, EmojiPopoverTrigger } from "@brianhung/emoji-picker-react/floating-ui";
 import { Picker } from "./picker";
 
 export default function Page() {
   return (
     <EmojiProvider>
       <Picker />
-      <EmojiPickerRoot>
-        <EmojiPickerSearch>
+      <EmojiPicker.Root>
+        <EmojiPicker.Search>
           <EmojiPickerSearchInput />
-          <EmojiPickerSkinTone />
-        </EmojiPickerSearch>
-        <EmojiPickerViewport>
-          <EmojiPickerList />
-        </EmojiPickerViewport>
-      </EmojiPickerRoot>
+          <EmojiPicker.SkinTone />
+        </EmojiPicker.Search>
+        <EmojiPicker.Viewport>
+          <EmojiPicker.List />
+        </EmojiPicker.Viewport>
+      </EmojiPicker.Root>
+      <EmojiPopoverRoot>
+        <EmojiPopoverTrigger>Open</EmojiPopoverTrigger>
+        <EmojiPopoverPortal>
+          <EmojiPopoverPositioner>
+            <EmojiPopoverPopup>
+              <EmojiPicker.Root>
+                <EmojiPicker.Viewport>
+                  <EmojiPicker.List />
+                </EmojiPicker.Viewport>
+              </EmojiPicker.Root>
+            </EmojiPopoverPopup>
+          </EmojiPopoverPositioner>
+        </EmojiPopoverPortal>
+      </EmojiPopoverRoot>
     </EmojiProvider>
   );
 }

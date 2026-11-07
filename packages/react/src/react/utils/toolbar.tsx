@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { FocusScope, useFocusManager, type FocusManager } from "react-aria/FocusScope";
 import { Toolbar } from "react-aria-components/Toolbar";
