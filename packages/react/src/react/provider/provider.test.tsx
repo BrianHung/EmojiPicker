@@ -119,4 +119,15 @@ describe("EmojiProvider", () => {
     fallback.images = false;
     expect(document.querySelector("img[data-emoji]")?.getAttribute("src")).toContain("1f1fa-1f1f8");
   });
+
+  it("drops an aria-hidden Emoji's role and name, and forwards its ref", () => {
+    const ref = React.createRef<HTMLElement>();
+    mount(
+      <EmojiProvider data={en} prepare={false}>
+        <Emoji ref={ref} emoji="1f600" aria-hidden />
+      </EmojiProvider>,
+    );
+    const el = document.querySelector('[data-slot="emoji"]')!;
+    expect([ref.current === el, el.getAttribute("aria-hidden"), el.getAttribute("role"), el.getAttribute("aria-label")]).toEqual([true, "true", null, null]);
+  });
 });

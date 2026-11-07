@@ -49,7 +49,6 @@ export type ListProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivEle
     children?: (section: EmojiSection) => React.ReactNode;
     orientation?: EmojiPickerOrientation;
     rows?: number;
-    searchRows?: number;
     renderEmptyState?: (state: EmptyState) => React.ReactNode;
   };
 
@@ -60,7 +59,7 @@ const HORIZONTAL: React.CSSProperties = { flex: "none", width: "max-content" };
 const UNPADDED = { "--ep-glyph-pad": "0px" } as React.CSSProperties;
 const COLUMNS: React.CSSProperties = { height: 0, width: "calc(var(--ep-columns) * var(--ep-cell) + 2 * var(--ep-pad))", maxWidth: "100%" };
 
-const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = DEFAULT_ROWS, searchRows, renderEmptyState, className, style, render, ...rest }, ref) {
+const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = DEFAULT_ROWS, renderEmptyState, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
   const searching = useStore(picker.state, (s) => s.searching);
   const horizontal = orientation === "horizontal";
@@ -76,7 +75,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const results = searching && !horizontal ? picker.searchResults : undefined;
   // Results and the strip size cells from the probe with unpadded glyphs; the category grid measures its rendered cells
   const unpadded = horizontal || results !== undefined;
-  const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(() => ({ metrics, columns: picker.columns, results, rows: searching ? (searchRows ?? rows) : rows }), [metrics, picker.columns, results, searching, searchRows, rows]);
+  const layoutOptions = React.useMemo<EmojiGridLayoutOptions>(() => ({ metrics, columns: picker.columns, results, rows }), [metrics, picker.columns, results, rows]);
 
   const rtl = useLatest(useLocale().direction === "rtl");
   const virtualizer = React.useRef<VirtualizerState<CollectionNode, React.ReactNode> | null>(null);

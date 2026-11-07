@@ -2,6 +2,17 @@
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot } from "../../../test/render";
+import { en } from "../../../test/en";
+import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "../../index";
+
+function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
+  return <div {...useEmojiCell(state, item).cellProps} />;
+}
+
+function Grid() {
+  const grid = useEmojiGrid({ rowHeight: 40, columns: 8 });
+  return <div {...grid.getGridProps()}>{grid.rows.slice(0, 2).flatMap((row) => (row.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : []))}</div>;
+}
 import * as floating from "../../floating-ui";
 import * as aria from "../../react-aria";
 
@@ -35,6 +46,33 @@ describe.each([
     );
     press(outside);
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "outside-press", event: expect.any(Event) }));
+    expect(document.querySelector('[role="dialog"]')?.hasAttribute("data-open")).toBe(true);
+  });
+
+  it("closes on a pick with reason item-press, and stays open when onOpenChange cancels it", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    const root = createTestRoot(host);
+    const onOpenChange = vi.fn((_: boolean, details: floating.EmojiPopover.Root.ChangeEventDetails) => details.reason === "item-press" && details.cancel());
+    await React.act(async () =>
+      root.render(
+        <EmojiProvider data={en} prepare={false}>
+          <EmojiPopover.Root defaultOpen onOpenChange={onOpenChange}>
+            <EmojiPopover.Trigger>Open</EmojiPopover.Trigger>
+            <EmojiPopover.Portal>
+              <EmojiPopover.Positioner>
+                <EmojiPopover.Popup aria-label="Emoji">
+                  <EmojiPicker.Root frequent={false}>
+                    <Grid />
+                  </EmojiPicker.Root>
+                </EmojiPopover.Popup>
+              </EmojiPopover.Positioner>
+            </EmojiPopover.Portal>
+          </EmojiPopover.Root>
+        </EmojiProvider>,
+      ),
+    );
+    await React.act(async () => (document.querySelector('[data-unified="1f600"]') as HTMLElement).click());
+    expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "item-press" }));
     expect(document.querySelector('[role="dialog"]')?.hasAttribute("data-open")).toBe(true);
   });
 

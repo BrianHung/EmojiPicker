@@ -206,7 +206,7 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
       onSelect?.(selection, details);
       if (details.isCanceled) return selection;
       if (selects) setValue(selection.unified, createChangeDetails(reason, event));
-      if (popover?.closeOnSelect) popover.close("item-press", event);
+      popover?.close("item-press", event);
       return selection;
     },
     [state, latest, reactions, collapseToReactions, setValue],

@@ -9,7 +9,6 @@ type BaseProps = Omit<React.HTMLAttributes<HTMLElement>, "children"> & {
   size?: number;
   renderer?: Renderer;
   animate?: boolean;
-  decorative?: boolean;
 };
 
 export type EmojiProps = BaseProps & {
@@ -32,7 +31,7 @@ export function useEmoji(input: EmojiInput): ResolvedEmoji | null {
   return resolved;
 }
 
-export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ emoji: input, size, renderer: override, animate = true, decorative = false, ...rest }, ref) {
+export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ emoji: input, size, renderer: override, animate = true, ...rest }, ref) {
   const props = { ...rest, ref, "data-slot": SLOTS.emojiElement };
   const context = useEmojiContext();
   const resolved = useEmoji(input);
@@ -51,16 +50,15 @@ export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ 
   }
 
   const name = nameWithTone(resolved.name, resolved.unified, context.labels.withSkinTone);
-  const a11y = decorative ? { "aria-hidden": true } : {};
+  const hidden = props["aria-hidden"] === true || props["aria-hidden"] === "true";
   const src = resolved.imageUrl ?? context.image(resolved.unified, renderer);
   if (src) {
     const record = resolved.record ?? (typeof input === "object" && isCustomEmoji(input) ? customRecord(input) : undefined);
     return (
       <EmojiImage
         {...props}
-        {...a11y}
         src={src}
-        alt={decorative ? "" : name}
+        alt={hidden ? "" : name}
         record={record}
         size={size ?? "1em"}
         animate={animate}
@@ -71,7 +69,7 @@ export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ 
     );
   }
   return (
-    <span {...props} {...(decorative ? a11y : { role: "img", "aria-label": name })} data-emoji="" style={{ ...NATIVE, width: "1em", height: "1em", fontSize: size, ...props.style }}>
+    <span {...props} {...(hidden ? {} : { role: "img", "aria-label": name })} data-emoji="" style={{ ...NATIVE, width: "1em", height: "1em", fontSize: size, ...props.style }}>
       {resolved.native}
     </span>
   );

@@ -14,7 +14,6 @@ export type PopoverState = {
   interaction: React.RefObject<EmojiPopoverInteractionType>;
   // Set when the content's initial focus falls to the default, which a picker inside takes as focusing its grid
   focusGrid: React.MutableRefObject<boolean>;
-  closeOnSelect: boolean;
   complete?: (open: boolean) => void;
 };
 

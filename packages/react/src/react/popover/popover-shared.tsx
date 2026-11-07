@@ -50,7 +50,6 @@ export type EmojiPopoverRootProps = {
   onOpenChangeComplete?: (open: boolean) => void;
   actionsRef?: React.Ref<EmojiPopoverRootActions>;
   modal?: boolean;
-  closeOnSelect?: boolean;
   children: React.ReactNode;
 };
 
@@ -179,7 +178,7 @@ export function usePopoverInternals<T extends PopoverInternals>(part: string): T
   return internals as T;
 }
 
-export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef, closeOnSelect = true }: Omit<EmojiPopoverRootProps, "children" | "modal">, trigger: HTMLElement | null) {
+export function usePopoverState({ open: controlled, defaultOpen = false, onOpenChange, onOpenChangeComplete, actionsRef }: Omit<EmojiPopoverRootProps, "children" | "modal">, trigger: HTMLElement | null) {
   const [open, setState] = useChangeState(controlled, defaultOpen, onOpenChange);
   const interaction = React.useRef<EmojiPopoverInteractionType>("");
   const focusGrid = React.useRef(false);
@@ -193,7 +192,7 @@ export function usePopoverState({ open: controlled, defaultOpen = false, onOpenC
   // After the task's microtasks, so an editor focused in onSelect (Lexical updates in a microtask) keeps focus
   const close = React.useCallback((reason: EmojiPopoverRootChangeEventReason = "none", event?: Event) => queueMicrotask(() => setOpen(false, reason, event)), [setOpen]);
   React.useImperativeHandle(actionsRef, () => ({ close: () => setOpen(false, "imperative-action") }), [setOpen]);
-  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, closeOnSelect, interaction, focusGrid, complete: onOpenChangeComplete }), [open, setOpen, close, closeOnSelect, onOpenChangeComplete]);
+  return React.useMemo<PopoverState>(() => ({ open, setOpen, close, interaction, focusGrid, complete: onOpenChangeComplete }), [open, setOpen, close, onOpenChangeComplete]);
 }
 
 // Base UI's approach: entering for one frame, and mounted until the content's CSS animations and transitions finish
