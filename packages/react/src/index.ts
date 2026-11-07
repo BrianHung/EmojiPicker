@@ -36,4 +36,23 @@ export { useEmojiTypeahead, useTextFieldEmojiTypeahead } from "./react/typeahead
 export type { EmojiTypeahead, EmojiTypeaheadOptions } from "./react/typeahead";
 
 export { findShortcodeTrigger, isComposingKey, lexical, localeData } from "@brianhung/emoji-picker-core";
-export type { CustomEmoji, Dataset, EmojiDataInput, EmojiItem, EmojiLabels, EmojiRecord, EmojiSearch, EmojiSelection, EmojiStore, Frequents, ShortcodeCompletion, SkinToneValue } from "@brianhung/emoji-picker-core";
+export type {
+  CustomEmoji,
+  Dataset,
+  EmojiDataInput,
+  EmojiInput,
+  EmojiItem,
+  EmojiLabels,
+  EmojiRecord,
+  EmojiSearch,
+  EmojiSearchState,
+  EmojiSelection,
+  EmojiStore,
+  EmojiStoreStatus,
+  Frequents,
+  KeyLike,
+  Renderer,
+  ResolvedEmoji,
+  ShortcodeCompletion,
+  SkinToneValue,
+} from "@brianhung/emoji-picker-core";

@@ -2,8 +2,8 @@ import type { Key } from "@react-types/shared";
 import { Layout, LayoutInfo, Rect, Size } from "react-stately/useVirtualizerState";
 import type { EmojiSection } from "@brianhung/emoji-picker-core";
 import type { SearchResultsMode } from "@brianhung/emoji-picker-core";
-import { shallowEqual } from "@brianhung/emoji-picker-core/internal";
-import { createEmojiGrid, layoutStrip, placeCell, type EmojiGrid, type StripLayout } from "@brianhung/emoji-picker-core/grid";
+import { createEmojiGrid, type EmojiGrid } from "@brianhung/emoji-picker-core/grid";
+import { layoutStrip, placeCell, shallowEqual, type StripLayout } from "@brianhung/emoji-picker-core/internal";
 import { isSection, type CollectionNode } from "./collection";
 
 export interface GridMetrics {

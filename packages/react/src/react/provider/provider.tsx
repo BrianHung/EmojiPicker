@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import { I18nProvider, useLocale } from "react-aria/I18nProvider";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type SkinToneChangeDetails, twemojiUrl } from "@brianhung/emoji-picker-core";
-import { isUnified, localizeLabels, type Renderer, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type Renderer, type SkinToneChangeDetails, twemojiUrl } from "@brianhung/emoji-picker-core";
+import { isUnified, localizeLabels, onNativeSupportChange, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
-import { needsImageFallback, onNativeSupportChange } from "@brianhung/emoji-picker-core/native";
+import { needsImageFallback } from "@brianhung/emoji-picker-core/native";
 
 export type ImageUrl = (unified: string, context: { renderer: Renderer }) => string | undefined;
 
