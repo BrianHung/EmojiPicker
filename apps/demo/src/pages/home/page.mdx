@@ -57,6 +57,7 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
     <EmojiPicker.Search>
       <EmojiPicker.Search.Input />
       <EmojiPicker.SkinTone />
+      <EmojiPicker.Search.Status />
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
       <EmojiPicker.List />
@@ -255,7 +256,7 @@ A searchbox with `aria-activedescendant` and a polite result count. `Search.Fiel
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.searchAttributes} />
 
-Types: `EmojiPicker.Search.Props`, `.State`, and `.Field`, `.Input`, `.Clear` with `.Props` and `.State`.
+Types: `EmojiPicker.Search.Props`, `.State`, and `.Field`, `.Input`, `.Clear`, `.Status` with `.Props` and `.State`.
 
 ### CategoryNav {#api-category-nav}
 
@@ -361,7 +362,7 @@ Types: `EmojiSuggestions.Root.Props`, `.Root.ChangeEventDetails`, `.Root.ChangeE
 
 ### Emoji {#api-emoji}
 
-One emoji, drawn as the pickers draw it, with `role="img"`.
+One emoji, drawn as the pickers draw it, with `role="img"`. It forwards its ref.
 
 <PropsTable rows={api.emoji} />
 

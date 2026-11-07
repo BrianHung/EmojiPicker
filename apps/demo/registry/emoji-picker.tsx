@@ -38,6 +38,7 @@ function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
           )}
         </EmojiPicker.SkinTone.Options>
       </EmojiPicker.SkinTone>
+      <EmojiPicker.Search.Status className="sr-only" />
     </EmojiPicker.Search>
   );
 }

@@ -19,4 +19,9 @@ export const searchInput = rowsOf<EmojiPicker.Search.Input.Props>()([
   { name: "children", type: "ReactNode", default: "<Search.Clear />", description: "In the field, after the input." },
 ]);
 
-export const searchParts = [...search, ...inPart("Field", searchField), ...inPart("Input", searchInput)];
+export const searchStatus = rowsOf<EmojiPicker.Search.Status.Props>()([
+  { name: "children", type: "ReactNode | ({ resultCount }) => ReactNode", default: "labels.resultCount(resultCount)", description: "A polite live region, as Base UI's Combobox.Status. Without one, Root renders a visually hidden one." },
+  { name: "className", type: "string | ({ resultCount }) => string | undefined", description: "resultCount is null while not searching." },
+]);
+
+export const searchParts = [...search, ...inPart("Field", searchField), ...inPart("Input", searchInput), ...inPart("Status", searchStatus)];

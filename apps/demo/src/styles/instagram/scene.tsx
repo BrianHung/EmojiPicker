@@ -292,7 +292,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
         </EmojiPopover.Trigger>
       )}
       <EmojiPopover.Portal>
-        <EmojiPopover.Positioner side="top" align={align} sideOffset={6} anchor={anchor ? () => anchor.current?.getBoundingClientRect() : undefined}>
+        <EmojiPopover.Positioner side="top" align={align} sideOffset={6} anchor={anchor}>
           <EmojiPopover.Popup initialFocus={anchor ? first : undefined} aria-label="Reactions">
             <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={tb.className} aria-label="Reactions">
               <div className={tb.reactions}>

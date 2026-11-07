@@ -38,7 +38,11 @@ export const popoverPositioner = rowsOf<EmojiPopover.Positioner.Props>()([
   { name: "sideOffset", type: "number", default: "8", description: "Distance from the anchor." },
   { name: "alignOffset", type: "number", default: "0", description: "Offset along the alignment axis, away from the aligned edge." },
   { name: "collisionPadding", type: "number", default: "8", description: "Space kept from the viewport's edges." },
-  { name: "anchor", type: "EmojiPopoverAnchor", description: "Positions against this element, { getBoundingClientRect } object, or function instead of the Trigger." },
+  {
+    name: "anchor",
+    type: "Element | RefObject<Element> | { getBoundingClientRect() } | (() => Element | { getBoundingClientRect() } | DOMRect | null) | null",
+    description: "Positions against this instead of the Trigger. A function is read on each update, as a caret moves.",
+  },
   { name: "className", type: "string | ({ open, side, align }) => string | undefined" },
 ]);
 

@@ -71,6 +71,7 @@ export const popoverPopupAttributes: Rows = [
 ];
 
 export const emojiAttributes: Rows = [
+  ["data-slot", "emoji."],
   ["data-emoji", "Every rendered Emoji."],
   ["data-emoji-missing", "An input that resolves to no emoji."],
   ["data-overridden", "An emoji whose imageUrl replaces the native glyph."],
