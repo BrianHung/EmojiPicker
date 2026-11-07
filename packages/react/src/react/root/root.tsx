@@ -3,6 +3,7 @@
 import * as React from "react";
 import { flushSync } from "react-dom";
 import { mergeRefs } from "react-aria/mergeRefs";
+import { VisuallyHidden } from "react-aria/VisuallyHidden";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@brianhung/emoji-picker-core";
 import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
@@ -31,7 +32,7 @@ import { hasModifier, usePickerKeyDown } from "../utils/keyboard";
 import { useLatest } from "../utils/latest";
 import { renderElement, resolve, type EmojiPickerPartProps } from "../utils/render";
 import { useClippedScrollGuard } from "../utils/scroll-guard";
-import { SLOTS, VISUALLY_HIDDEN } from "../utils/slots";
+import { SLOTS } from "../utils/slots";
 import { useChangeState } from "../utils/state";
 import { shallowEqual, useStore } from "../utils/store";
 import { elementOf } from "../utils/utils";
@@ -311,9 +312,9 @@ const PickerRoot = React.forwardRef<HTMLElement, RootProps>(function PickerRoot(
             </PickerContext.Provider>
           </Autocomplete>
           {statuses ? null : (
-            <span role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus} style={VISUALLY_HIDDEN}>
+            <VisuallyHidden elementType="span" role="status" aria-live="polite" aria-atomic="true" data-slot={SLOTS.searchStatus}>
               {count}
-            </span>
+            </VisuallyHidden>
           )}
         </>
       ),

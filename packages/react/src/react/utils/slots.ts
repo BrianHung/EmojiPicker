@@ -1,5 +1,3 @@
-import type * as React from "react";
-
 export const SLOTS = {
   root: "emoji-picker",
   search: "emoji-picker-search",
@@ -32,5 +30,3 @@ export const SLOTS = {
   suggestionsPositioner: "emoji-picker-suggestions-positioner",
   suggestionsPopup: "emoji-picker-suggestions-popup",
 } as const;
-
-export const VISUALLY_HIDDEN: React.CSSProperties = { position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap", border: 0 };
