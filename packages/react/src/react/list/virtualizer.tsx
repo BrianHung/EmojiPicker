@@ -33,6 +33,14 @@ function visibleOffset(scroller: HTMLElement, list: HTMLElement, horizontal: boo
   return rtl ? (l.right - (s.right - scroller.clientLeft * scale)) / scale : (s.left + scroller.clientLeft * scale - l.left) / scale;
 }
 
+// From the scroll position now: the virtualizer's own rect waits for the scroll event, a frame behind a key move's scroll
+export function visibleRect(scroller: HTMLElement, list: HTMLElement, horizontal: boolean, rtl: boolean) {
+  const offset = visibleOffset(scroller, list, horizontal, rtl);
+  const start = Math.max(0, offset);
+  const extent = Math.max(0, (horizontal ? scroller.clientWidth : scroller.clientHeight) + Math.min(0, offset));
+  return horizontal ? new Rect(start, 0, extent, list.clientHeight) : new Rect(0, start, list.clientWidth, extent);
+}
+
 export const VirtualCollection = React.memo(function VirtualCollection(options: Options) {
   const { collection, persistedKeys, layout, layoutOptions, scroller, renderNode } = options;
   const horizontal = layout.axis.horizontal;
@@ -80,12 +88,8 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const scale = (horizontal ? box.width / el.offsetWidth : box.height / el.offsetHeight) || 1;
       // On the scroller, so List.SectionActions, outside the list, pins with the titles
       el.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${STICKY_OVERLAP_DEVICE_PX / ((window.devicePixelRatio || 1) * scale)}px)`);
-      const offset = visibleOffset(el, list, horizontal, rtl);
-      const width = list.clientWidth;
-      const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(width, el.clientHeight);
-      const start = Math.max(0, offset);
-      const extent = Math.max(0, (horizontal ? el.clientWidth : el.clientHeight) + Math.min(0, offset));
-      const rect = horizontal ? new Rect(start, 0, extent, list.clientHeight) : new Rect(0, start, width, extent);
+      const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(list.clientWidth, el.clientHeight);
+      const rect = visibleRect(el, list, horizontal, rtl);
       const { virtualizer, setSize, setVisibleRect } = latest.current;
       if (virtualizer.size.equals(size) && virtualizer.visibleRect.equals(rect)) return;
       const apply = () => {

@@ -1,27 +1,24 @@
 import * as React from "react";
-import type { Rect, VirtualizerState } from "react-stately/useVirtualizerState";
+import type { Rect } from "react-stately/useVirtualizerState";
 import type { GridGeometry } from "../grid/types";
-import type { CollectionNode } from "./collection";
 import type { EmojiGridLayout } from "./layout";
 import type { GridKeyboardDelegate } from "./navigation";
 import { HIDDEN_OVERLAY, variationsOverlay } from "./overlay";
+import { visibleRect as liveRect } from "./virtualizer";
 
 const prefersReducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-// The List's grid on screen, through its layout and React Aria's virtualizer; scrolls go to the Viewport
-export function useListGeometry(
-  layout: EmojiGridLayout,
-  navigation: GridKeyboardDelegate,
-  listRef: React.RefObject<HTMLElement | null>,
-  scroller: () => HTMLElement | null,
-  virtualizer: React.RefObject<VirtualizerState<CollectionNode, React.ReactNode> | null>,
-  rtl: { readonly current: boolean },
-) {
+// The List's grid on screen, through its layout; scrolls go to the Viewport
+export function useListGeometry(layout: EmojiGridLayout, navigation: GridKeyboardDelegate, listRef: React.RefObject<HTMLElement | null>, scroller: () => HTMLElement | null, rtl: { readonly current: boolean }) {
   // A jump's target section, until the smooth scroll gets there
   const jumping = React.useRef<Rect | null>(null);
   const geometry = React.useMemo<GridGeometry>(() => {
-    const visibleRect = () => virtualizer.current?.virtualizer.visibleRect ?? null;
     const { axis } = layout;
+    const visibleRect = () => {
+      const el = scroller();
+      const list = listRef.current;
+      return el && list ? liveRect(el, list, axis.horizontal, rtl.current) : null;
+    };
     const sign = () => (axis.horizontal && rtl.current ? -1 : 1);
     return {
       grid: () => layout.grid,
@@ -68,7 +65,7 @@ export function useListGeometry(
         return cell && list ? variationsOverlay(cell, layout.getContentSize().width, visibleRect()?.y ?? 0, list) : HIDDEN_OVERLAY;
       },
     };
-  }, [layout, navigation, scroller, listRef, virtualizer, rtl]);
+  }, [layout, navigation, scroller, listRef, rtl]);
 
   // True once a jump's smooth scroll has reached its section, or there was none
   const settled = React.useCallback(

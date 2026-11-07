@@ -81,7 +81,7 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   const virtualizer = React.useRef<VirtualizerState<CollectionNode, React.ReactNode> | null>(null);
   // The Viewport's ref isn't attached yet when the list's first layout effects run
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
-  const { geometry, settled } = useListGeometry(layout, navigation, listRef, scroller, virtualizer, rtl);
+  const { geometry, settled } = useListGeometry(layout, navigation, listRef, scroller, rtl);
   const grid = useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, request, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const { collection, persisted, cells } = grid;
   const { elements, headers } = cells;

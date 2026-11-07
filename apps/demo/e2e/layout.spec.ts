@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
-import { expect, quiet, settle, slot, test, visit } from "./support";
+import { expect, frames, quiet, settle, slot, test, visit } from "./support";
 
 const highlighted = (page: Page) => picker(page).locator(`${slot("emoji")}[data-highlighted]`);
 
@@ -30,28 +30,41 @@ test.describe("right-to-left", () => {
 
 const SELECTORS = { emoji: slot("emoji"), viewport: slot("viewport"), title: slot("sectionTitle") };
 
+const hidden = (page: Page) =>
+  picker(page).evaluate((root, { emoji, viewport, title }) => {
+    const cell = root.querySelector(`${emoji}[data-highlighted]`)?.getBoundingClientRect();
+    if (!cell) return null;
+    const top = root.querySelector(viewport)!.getBoundingClientRect().top;
+    return Math.max(
+      0,
+      ...[...root.querySelectorAll(title)]
+        .map((h) => h.getBoundingClientRect())
+        .filter((h) => Math.abs(h.top - top) < 2)
+        .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
+    );
+  }, SELECTORS);
+
 test("moving up never hides the highlighted emoji under a sticky section title", async ({ page }) => {
   await visit(page, "/");
   await focusSearch(page);
   for (let i = 0; i < 8; i++) await page.keyboard.press("PageDown");
   for (let i = 0; i < 60; i++) {
     await page.keyboard.press("ArrowUp");
-    const hidden = () =>
-      picker(page).evaluate((root, { emoji, viewport, title }) => {
-        const cell = root.querySelector(`${emoji}[data-highlighted]`)?.getBoundingClientRect();
-        if (!cell) return null;
-        const top = root.querySelector(viewport)!.getBoundingClientRect().top;
-        return Math.max(
-          0,
-          ...[...root.querySelectorAll(title)]
-            .map((h) => h.getBoundingClientRect())
-            .filter((h) => Math.abs(h.top - top) < 2)
-            .map((h) => Math.min(cell.bottom, h.bottom) - Math.max(cell.top, h.top)),
-        );
-      }, SELECTORS);
-    if ((await hidden()) === null) break;
-    await expect.poll(hidden, { timeout: 1000 }).toBe(0);
+    if ((await hidden(page)) === null) break;
+    await expect.poll(() => hidden(page), { timeout: 1000 }).toBe(0);
   }
+});
+
+test("a key move before the last move's scroll event still reveals the emoji", async ({ page }) => {
+  await visit(page, "/");
+  await focusSearch(page);
+  await page.keyboard.press("PageDown");
+  await frames(page);
+  await page.evaluate(() => {
+    for (const key of ["PageDown", "ArrowUp"]) document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+  });
+  await frames(page);
+  expect(await hidden(page)).toBe(0);
 });
 
 test("forced colors: the highlighted emoji and suggestion keep a visible outline", async ({ page }) => {
