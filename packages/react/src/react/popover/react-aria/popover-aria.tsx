@@ -101,7 +101,7 @@ function useAnchorRef(anchor: EmojiPopoverAnchor | undefined, fallback: Element 
             return ref.current ?? fallback;
           },
         }
-      : { current: anchor instanceof Element ? anchor : fallback };
+      : { current: anchor ? (anchor as Element) : fallback };
   return [element, target] as const;
 }
 
