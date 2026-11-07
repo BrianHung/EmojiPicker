@@ -15,36 +15,36 @@ const reaction = "flex size-10 items-center justify-center rounded-full text-[26
 function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
   return (
     <EmojiPicker.Search className="relative flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3 has-[input:focus-visible]:border-primary forced-colors:has-[input:focus-visible]:outline-2 forced-colors:has-[input:focus-visible]:-outline-offset-2">
-      <EmojiPicker.Search.Input autoFocus={autoFocus} className="h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none">
-        <EmojiPicker.Search.Clear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 transform-none items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
+      <EmojiPicker.SearchInput autoFocus={autoFocus} className="h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none">
+        <EmojiPicker.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 transform-none items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
           <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
-        </EmojiPicker.Search.Clear>
-      </EmojiPicker.Search.Input>
+        </EmojiPicker.SearchClear>
+      </EmojiPicker.SearchInput>
       <svg viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 opacity-50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-3.5-3.5" />
       </svg>
       <EmojiPicker.SkinTone className="relative inline-flex">
-        <EmojiPicker.SkinTone.Trigger className={tone}>
-          <EmojiPicker.SkinTone.Glyph />
-        </EmojiPicker.SkinTone.Trigger>
-        <EmojiPicker.SkinTone.Options className="end-0 top-1/2 -translate-y-1/2 z-3 flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
+        <EmojiPicker.SkinToneTrigger className={tone}>
+          <EmojiPicker.SkinToneGlyph />
+        </EmojiPicker.SkinToneTrigger>
+        <EmojiPicker.SkinToneOptions className="end-0 top-1/2 -translate-y-1/2 z-3 flex rounded-lg border border-border bg-popover p-0.5 shadow-md">
           {(t) => (
-            <EmojiPicker.SkinTone.Option tone={t} className={tone}>
-              <EmojiPicker.SkinTone.Glyph />
-            </EmojiPicker.SkinTone.Option>
+            <EmojiPicker.SkinToneOption tone={t} className={tone}>
+              <EmojiPicker.SkinToneGlyph />
+            </EmojiPicker.SkinToneOption>
           )}
-        </EmojiPicker.SkinTone.Options>
+        </EmojiPicker.SkinToneOptions>
       </EmojiPicker.SkinTone>
-      <EmojiPicker.Search.Status className="sr-only" />
+      <EmojiPicker.SearchStatus className="sr-only" />
     </EmojiPicker.Search>
   );
 }
 
-function EmojiPickerCell({ className, ...props }: Omit<React.ComponentProps<typeof EmojiPicker.List.Cell>, "className"> & { className?: string }) {
-  return <EmojiPicker.List.Cell className={cn(cell, className)} {...props} />;
+function EmojiPickerCell({ className, ...props }: Omit<React.ComponentProps<typeof EmojiPicker.ListCell>, "className"> & { className?: string }) {
+  return <EmojiPicker.ListCell className={cn(cell, className)} {...props} />;
 }
 
 type EmojiPickerBodyProps = {
@@ -74,10 +74,10 @@ function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, emp
           )}
         >
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="flex items-center bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
-              <EmojiPicker.List.Items>{renderCell ?? (() => <EmojiPickerCell />)}</EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className="flex items-center bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
+              <EmojiPicker.ListItems>{renderCell ?? (() => <EmojiPickerCell />)}</EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>
@@ -137,12 +137,12 @@ function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection
       )}
     >
       <EmojiPicker.Reactions className="flex items-center gap-0.5 p-1.5 [--emoji-image-size:28px]">
-        <EmojiPicker.Reactions.Items>{(emoji) => <EmojiPicker.Reactions.Item emoji={emoji} className={reaction} />}</EmojiPicker.Reactions.Items>
-        <EmojiPicker.Reactions.Expand className={reaction}>
+        <EmojiPicker.ReactionsItems>{(emoji) => <EmojiPicker.ReactionsItem emoji={emoji} className={reaction} />}</EmojiPicker.ReactionsItems>
+        <EmojiPicker.ReactionsExpand className={reaction}>
           <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
             <path d="M12 5v14M5 12h14" />
           </svg>
-        </EmojiPicker.Reactions.Expand>
+        </EmojiPicker.ReactionsExpand>
       </EmojiPicker.Reactions>
       <EmojiPicker.Panel className="flex min-h-0 min-w-0 flex-1 flex-col">
         <EmojiPickerBody footer={false} />

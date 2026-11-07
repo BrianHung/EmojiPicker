@@ -10,11 +10,11 @@ export const reactions = [
       type: '(value: readonly string[], details: { reason: "item-press", emoji, pressed, event, cancel() }) => void',
       description: "details.pressed is whether the press added the reaction. Only an added reaction calls onSelect.",
     },
-    { name: "children", type: "ReactNode | (emoji: string) => ReactNode", default: "Items, then Expand", description: "Each reaction, or Reactions.Items and Reactions.Expand." },
+    { name: "children", type: "ReactNode | (emoji: string) => ReactNode", default: "ReactionsItems, then ReactionsExpand", description: "Each reaction, or ReactionsItems and ReactionsExpand." },
   ]),
-  ...rowsOfParts<{ Item: EmojiPicker.Reactions.Item.Props; Expand: EmojiPicker.Reactions.Expand.Props; Panel: EmojiPicker.Panel.Props }>()([
-    { name: "Item › emoji", type: "string", description: "Unified code. State: { hovered, focused, focusVisible, pressed, disabled, selected }." },
-    { name: "Expand › children", type: "ReactNode | (state) => ReactNode", default: "a plus", description: "Shown while a Panel is rendered. Closes the row to show the Panel; Escape with no query brings it back." },
+  ...rowsOfParts<{ ReactionsItem: EmojiPicker.ReactionsItem.Props; ReactionsExpand: EmojiPicker.ReactionsExpand.Props; Panel: EmojiPicker.Panel.Props }>()([
+    { name: "ReactionsItem › emoji", type: "string", description: "Unified code. State: { hovered, focused, focusVisible, pressed, disabled, selected }." },
+    { name: "ReactionsExpand › children", type: "ReactNode | (state) => ReactNode", default: "a plus", description: "Shown while a Panel is rendered. Closes the row to show the Panel; Escape with no query brings it back." },
     { name: "Panel › children", type: "ReactNode | (state) => ReactNode", description: "The full picker, hidden while the reaction row shows." },
   ]),
 ];

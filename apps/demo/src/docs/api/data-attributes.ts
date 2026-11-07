@@ -11,8 +11,8 @@ export const rootAttributes: Rows = [
 
 export const searchAttributes: Rows = [
   ["data-slot", "emoji-picker-search, emoji-picker-search-field, emoji-picker-search-input, emoji-picker-search-clear, emoji-picker-search-status: The row, the field, the input, the clear button, and the result-count status."],
-  ["data-empty", "Search and Search.Field with no query."],
-  ["data-focused", "Search.Input while it holds focus."],
+  ["data-empty", "Search and SearchField with no query."],
+  ["data-focused", "SearchInput while it holds focus."],
   interaction,
 ];
 
@@ -33,7 +33,7 @@ export const listAttributes: Rows = [
   ["data-focused", "The cell at the keyboard position, by DOM focus or the search field's aria-activedescendant."],
   ["data-selected", "A single-value picker's cell."],
   ["data-collapsed", "A collapsed section, its title, and its actions."],
-  ["data-category · data-section", "A section's category id; List.SectionActions' section id."],
+  ["data-category · data-section", "A section's category id; ListSectionActions' section id."],
   ["data-has-variations · data-overridden · data-unified", "Cells with skin-tone variations, cells whose imageUrl replaces the glyph, and each cell's unified code."],
   ["data-row · data-column · data-index", "Cells: the row and column, and the index across the list."],
   ["data-orientation", '"horizontal" or "vertical".'],

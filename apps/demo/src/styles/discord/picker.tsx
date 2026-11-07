@@ -102,13 +102,13 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
       />
       {search ? (
         <EmojiPicker.Search className="relative flex h-[53px] shrink-0 items-center gap-3 border-b border-picker-border px-4 pb-3 [--search-icon-x:28px]">
-          <EmojiPicker.Search.Input
+          <EmojiPicker.SearchInput
             placeholder="Find the perfect emoji"
             autoFocus={autoFocus}
             className="h-10 w-full rounded-[8px] border border-picker-input-border bg-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-picker-ring focus:outline-2 focus:outline-picker-ring"
           >
             <SearchClear />
-          </EmojiPicker.Search.Input>
+          </EmojiPicker.SearchInput>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-3 left-[var(--search-icon-x,12px)] translate-y-0 text-picker-muted" />
           <HandTone emoji="👏" className="flex size-[38px] items-center justify-center text-[28px] leading-none" />
           <button type="button" className="h-10 min-w-[100px] shrink-0 rounded-[8px] border border-(--discord-chip-border) bg-(--discord-chip) px-[15px] py-[7px] text-[16px] text-(--discord-strong)">
@@ -120,7 +120,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
         <div className="flex w-12 shrink-0 flex-col items-center rounded-bl-lg bg-picker-panel pt-2 pb-[9px]">
           <EmojiPicker.CategoryNav ref={nav} orientation="vertical" className="flex min-h-0 w-full flex-1 flex-col items-center gap-2 overflow-y-auto [scrollbar-width:none]">
             {() => (
-              <EmojiPicker.CategoryNav.Tab className="relative flex size-8 shrink-0 items-center justify-center rounded text-picker-subtle hover:bg-picker-hover hover:text-(--discord-strong) data-active:bg-picker-selected data-active:text-(--discord-strong) data-active:before:absolute data-active:before:top-1 data-active:before:-left-3 data-active:before:h-6 data-active:before:w-2 data-active:before:rounded-r-full data-active:before:bg-(--discord-strong)" />
+              <EmojiPicker.CategoryNavTab className="relative flex size-8 shrink-0 items-center justify-center rounded text-picker-subtle hover:bg-picker-hover hover:text-(--discord-strong) data-active:bg-picker-selected data-active:text-(--discord-strong) data-active:before:absolute data-active:before:top-1 data-active:before:-left-3 data-active:before:h-6 data-active:before:w-2 data-active:before:rounded-r-full data-active:before:bg-(--discord-strong)" />
             )}
           </EmojiPicker.CategoryNav>
           <span className="mt-auto flex size-8 shrink-0 items-center justify-center text-picker-subtle">
@@ -143,17 +143,17 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
               {(section) => {
                 const Icon = ICONS[section.category];
                 return (
-                  <EmojiPicker.List.Section>
-                    <EmojiPicker.List.SectionTitle className="flex h-8 items-center gap-1 bg-picker-background pr-1 pl-1 text-[14px] leading-[18px] font-semibold text-picker-muted">
+                  <EmojiPicker.ListSection>
+                    <EmojiPicker.ListSectionTitle className="flex h-8 items-center gap-1 bg-picker-background pr-1 pl-1 text-[14px] leading-[18px] font-semibold text-picker-muted">
                       <div className="flex h-full min-w-0 flex-1 items-center gap-1">
                         {Icon ? <Icon size={16} strokeWidth={2} /> : null}
                         <span className="truncate">{section.name}</span>
                         <I.ChevronDown size={16} strokeWidth={2} aria-hidden className={cn("shrink-0 transition-transform duration-150", section.collapsed && "-rotate-90")} />
                       </div>
-                    </EmojiPicker.List.SectionTitle>
-                    <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded hover:bg-picker-hover data-focus-visible:bg-picker-hover data-[highlighted]:bg-picker-hover")} />}</EmojiPicker.List.Items>
-                    <EmojiPicker.List.SectionActions>{({ section, toggle, toggleProps }) => <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0 cursor-pointer outline-none" />}</EmojiPicker.List.SectionActions>
-                  </EmojiPicker.List.Section>
+                    </EmojiPicker.ListSectionTitle>
+                    <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded hover:bg-picker-hover data-focus-visible:bg-picker-hover data-[highlighted]:bg-picker-hover")} />}</EmojiPicker.ListItems>
+                    <EmojiPicker.ListSectionActions>{({ section, toggle, toggleProps }) => <button type="button" {...toggleProps} aria-label={section.name} onClick={toggle} className="absolute inset-0 cursor-pointer outline-none" />}</EmojiPicker.ListSectionActions>
+                  </EmojiPicker.ListSection>
                 );
               }}
             </EmojiPicker.List>

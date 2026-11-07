@@ -11,21 +11,21 @@ export const list = rowsOf<EmojiPicker.List.Props>()([
 ]);
 
 export const listParts: PropRow[] = [
-  { name: "List.Section", type: "{ section, collapsed }", description: "A section (group) with List.SectionTitle, List.Items, and List.SectionActions." },
-  { name: "List.SectionTitle", type: "{ section, collapsed }", default: "section.name", description: "The section title, inside the listbox. Sticks to the top of a vertical list and to the start of a horizontal one." },
-  { name: "List.Items › children", type: "(emoji: EmojiItem) => ReactNode", default: "<List.Cell />", description: "Called only for the emoji in view." },
+  { name: "ListSection", type: "{ section, collapsed }", description: "A section (group) with ListSectionTitle, ListItems, and ListSectionActions." },
+  { name: "ListSectionTitle", type: "{ section, collapsed }", default: "section.name", description: "The section title, inside the listbox. Sticks to the top of a vertical list and to the start of a horizontal one." },
+  { name: "ListItems › children", type: "(emoji: EmojiItem) => ReactNode", default: "<ListCell />", description: "Called only for the emoji in view." },
   {
-    name: "List.Cell",
+    name: "ListCell",
     type: "{ emoji, row, column, highlighted, hovered, focused, focusVisible, pressed, selected }",
     default: "the glyph",
     description: "An option. Re-renders only when its own state changes. onClick and pointer handlers can call event.preventEmojiPickerHandler().",
   },
-  { name: "List.SectionActions", type: "{ section, collapsed, toggle, toggleProps }", description: "Controls over the title, outside the listbox." },
+  { name: "ListSectionActions", type: "{ section, collapsed, toggle, toggleProps }", description: "Controls over the title, outside the listbox." },
   {
-    name: "List.Variations",
+    name: "ListVariations",
     type: "{ emoji, tone }",
     default: "rendered by List",
     description: "The skin-tone popup a long press or Shift+Space opens. Render it in Root, beside List in the Viewport, to style it. children: (tone) => ReactNode.",
   },
-  { name: "List.Variations.Option", type: "{ emoji, unified, tone, selected, highlighted, hovered, focused, focusVisible }", description: "One tone. tone defaults to the one List.Variations' children were called with." },
+  { name: "ListVariationsOption", type: "{ emoji, unified, tone, selected, highlighted, hovered, focused, focusVisible }", description: "One tone. tone defaults to the one ListVariations' children were called with." },
 ];

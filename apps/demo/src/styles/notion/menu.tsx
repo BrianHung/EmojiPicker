@@ -30,10 +30,10 @@ export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismis
               <EmojiPicker.Viewport className="relative min-h-0 flex-1 pt-[0.5px] [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]">
                 <EmojiPicker.List aria-label="Emoji suggestions" className="outline-none">
                   {() => (
-                    <EmojiPicker.List.Section>
-                      <EmojiPicker.List.SectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
-                      <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={`${CELL} ${OPTION} cursor-pointer rounded-[4px] data-[focused]:bg-picker-selected`} />}</EmojiPicker.List.Items>
-                    </EmojiPicker.List.Section>
+                    <EmojiPicker.ListSection>
+                      <EmojiPicker.ListSectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
+                      <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={`${CELL} ${OPTION} cursor-pointer rounded-[4px] data-[focused]:bg-picker-selected`} />}</EmojiPicker.ListItems>
+                    </EmojiPicker.ListSection>
                   )}
                 </EmojiPicker.List>
               </EmojiPicker.Viewport>

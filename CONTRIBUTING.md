@@ -48,7 +48,7 @@ The API shape follows Base UI. Behavior follows React Aria.
 
 | Rule | Source |
 |---|---|
-| Parts compose (`EmojiPicker.Root`, `List.Cell`); types are namespaced on the part (`EmojiPicker.Root.Props`, `.State`, `.Actions`) beside flat aliases | Base UI |
+| Parts are one-level namespace members (`EmojiPicker.Root`, `EmojiPicker.ListCell`); types are namespaced on the part (`EmojiPicker.Root.Props`, `.State`, `.Actions`) beside flat type aliases | Base UI |
 | Every part takes `render`, `className`, and `style`, each a value or a function of state | Base UI |
 | State is `x` / `defaultX` / `onXChange(value, details)`; `details` is `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` | Base UI |
 | Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `input-change`, `clear-press`, `imperative-action`, `none`; a highlight moves by `keyboard`, `pointer`, or `none`, as in `onItemHighlighted` | Base UI |

@@ -51,29 +51,29 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
-          <EmojiPicker.Search.Input
+          <EmojiPicker.SearchInput
             placeholder="Search emoji"
             autoFocus={autoFocus}
             className="h-10 w-full rounded-full border border-picker-input-border bg-picker-input pr-4 pl-[33.3px] text-[14px] text-picker-foreground outline-none placeholder:text-(--instagram-placeholder)"
           >
             <SearchClear />
-          </EmojiPicker.Search.Input>
+          </EmojiPicker.SearchInput>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-[calc(50%+6px)] left-[var(--search-icon-x,12px)] size-[14px] -translate-y-1/2 text-picker-subtle" />
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-width:none]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="flex h-[34px] items-center bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-lg hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className="flex h-[34px] items-center bg-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-lg hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>
       <div className="flex h-[42px] shrink-0 items-center border-t border-picker-border px-[10.5px]">
         <EmojiPicker.CategoryNav ref={nav} className="flex w-full min-w-0 flex-1 items-center justify-between overflow-x-auto [scrollbar-width:none]">
-          {() => <EmojiPicker.CategoryNav.Tab className="relative flex size-8 shrink-0 items-center justify-center rounded-full text-picker-subtle hover:text-picker-foreground data-active:text-picker-foreground" />}
+          {() => <EmojiPicker.CategoryNavTab className="relative flex size-8 shrink-0 items-center justify-center rounded-full text-picker-subtle hover:text-picker-foreground data-active:text-picker-foreground" />}
         </EmojiPicker.CategoryNav>
       </div>
     </EmojiPicker.Root>

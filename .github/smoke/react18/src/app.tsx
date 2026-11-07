@@ -9,7 +9,7 @@ export function App() {
     <EmojiProvider data={data} locale="ja">
       <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
         <EmojiPicker.Search>
-          <EmojiPicker.Search.Input />
+          <EmojiPicker.SearchInput />
           <EmojiPicker.SkinTone />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport>

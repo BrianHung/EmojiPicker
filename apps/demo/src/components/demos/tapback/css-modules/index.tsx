@@ -12,20 +12,20 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
       className={styles.root}
     >
       <EmojiPicker.Reactions className={styles.reactions}>
-        <EmojiPicker.Reactions.Items>{(emoji) => <EmojiPicker.Reactions.Item emoji={emoji} className={styles.reaction} />}</EmojiPicker.Reactions.Items>
-        <EmojiPicker.Reactions.Expand className={styles.reaction} />
+        <EmojiPicker.ReactionsItems>{(emoji) => <EmojiPicker.ReactionsItem emoji={emoji} className={styles.reaction} />}</EmojiPicker.ReactionsItems>
+        <EmojiPicker.ReactionsExpand className={styles.reaction} />
       </EmojiPicker.Reactions>
       <EmojiPicker.Panel className={styles.panel}>
         <EmojiPicker.Search className={styles.search}>
-          <EmojiPicker.Search.Input className={styles.input} />
+          <EmojiPicker.SearchInput className={styles.input} />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className={styles.viewport}>
           <EmojiPicker.List>
             {() => (
-              <EmojiPicker.List.Section>
-                <EmojiPicker.List.SectionTitle className={styles.header} />
-                <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
-              </EmojiPicker.List.Section>
+              <EmojiPicker.ListSection>
+                <EmojiPicker.ListSectionTitle className={styles.header} />
+                <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={styles.cell} />}</EmojiPicker.ListItems>
+              </EmojiPicker.ListSection>
             )}
           </EmojiPicker.List>
         </EmojiPicker.Viewport>

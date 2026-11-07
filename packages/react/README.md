@@ -19,7 +19,7 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
   <EmojiPicker.Search>
-    <EmojiPicker.Search.Input />
+    <EmojiPicker.SearchInput />
   </EmojiPicker.Search>
   <EmojiPicker.Viewport>
     <EmojiPicker.List />
@@ -35,7 +35,7 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 | `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind utilities for them, and a mapping to a shadcn/ui theme |
 
-A Server Component can render the top-level parts through the namespace (`EmojiPicker.Root`, `EmojiPicker.Search`). It can't reach into sub-parts or `EmojiPopover`, so every part is also a flat export: `EmojiPickerSearchInput`, `EmojiPickerListCell`, `EmojiPopoverTrigger`, and so on.
+`EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them: `EmojiPicker.SearchInput`, `EmojiPopover.Positioner`. Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component.
 
 ## Docs
 

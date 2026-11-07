@@ -5,31 +5,31 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
   return (
     <EmojiPicker.Root onSelect={onSelect} className={styles.root}>
       <EmojiPicker.Search className={styles.search}>
-        <EmojiPicker.Search.Input className={styles.input} />
+        <EmojiPicker.SearchInput className={styles.input} />
         <EmojiPicker.SkinTone className={styles.skinTone}>
-          <EmojiPicker.SkinTone.Trigger className={styles.tone}>
-            <EmojiPicker.SkinTone.Glyph />
-          </EmojiPicker.SkinTone.Trigger>
-          <EmojiPicker.SkinTone.Options className={styles.tones}>
+          <EmojiPicker.SkinToneTrigger className={styles.tone}>
+            <EmojiPicker.SkinToneGlyph />
+          </EmojiPicker.SkinToneTrigger>
+          <EmojiPicker.SkinToneOptions className={styles.tones}>
             {(tone) => (
-              <EmojiPicker.SkinTone.Option tone={tone} className={styles.tone}>
-                <EmojiPicker.SkinTone.Glyph />
-              </EmojiPicker.SkinTone.Option>
+              <EmojiPicker.SkinToneOption tone={tone} className={styles.tone}>
+                <EmojiPicker.SkinToneGlyph />
+              </EmojiPicker.SkinToneOption>
             )}
-          </EmojiPicker.SkinTone.Options>
+          </EmojiPicker.SkinToneOptions>
         </EmojiPicker.SkinTone>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className={styles.viewport}>
         <EmojiPicker.List renderEmptyState={({ status }) => status === "empty" && <div className={styles.empty}>No emoji found.</div>}>
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className={styles.header} />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={styles.cell} />}</EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className={styles.header} />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={styles.cell} />}</EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>
-      <EmojiPicker.CategoryNav className={styles.nav}>{() => <EmojiPicker.CategoryNav.Tab className={styles.tab} />}</EmojiPicker.CategoryNav>
+      <EmojiPicker.CategoryNav className={styles.nav}>{() => <EmojiPicker.CategoryNavTab className={styles.tab} />}</EmojiPicker.CategoryNav>
     </EmojiPicker.Root>
   );
 }

@@ -40,18 +40,18 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
-          <EmojiPicker.Search.Input placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-muted">
+          <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-muted">
             <SearchClear />
-          </EmojiPicker.Search.Input>
+          </EmojiPicker.SearchInput>
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-2.5")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-3.5 text-[12px] leading-[22px] font-medium text-picker-muted" />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>

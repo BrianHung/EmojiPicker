@@ -50,7 +50,7 @@ createRoot(document.getElementById("root")!).render(
       <EmojiPicker.Root defaultCollapsedCategories={["flags"]} className="flex h-[420px] flex-col gap-2 rounded-xl border border-border bg-popover p-2 text-popover-foreground [--emoji-size:24px]">
         <div className="flex items-center gap-2">
           <EmojiPicker.Search className="flex-1">
-            <EmojiPicker.Search.Input className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none" />
+            <EmojiPicker.SearchInput className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none" />
           </EmojiPicker.Search>
           <SkinToneMenu />
         </div>

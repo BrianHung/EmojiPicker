@@ -95,13 +95,13 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
             reaction ? "pt-2 pb-[14.5px]" : "mt-1 mb-2.5 py-1 [&_[data-slot=emoji-picker-skin-tone]]:-ml-0.5",
           )}
         >
-          <EmojiPicker.Search.Input
+          <EmojiPicker.SearchInput
             placeholder="Filter…"
             autoFocus={autoFocus}
             className="h-7 w-full rounded-[6px] bg-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]"
           >
             <SearchClear />
-          </EmojiPicker.Search.Input>
+          </EmojiPicker.SearchInput>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-picker-subtle" />
           <HandTone className="flex size-7 items-center justify-center rounded-[6px] text-[20px] leading-none hover:bg-picker-hover" />
           {reaction ? null : <Shuffle onPick={(s) => onSelect?.(s)} />}
@@ -110,16 +110,16 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
-              <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className={cn(CELL, "rounded-[4px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[4px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>
       <div className="flex h-[51px] shrink-0 items-center border-t border-(--notion-bar-rule) px-3 pt-2 pb-2.5">
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-start gap-[3.2px] overflow-x-auto [scrollbar-width:none]">
-          {() => <EmojiPicker.CategoryNav.Tab className="relative flex size-8 shrink-0 items-center justify-center rounded-[6px] text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected" />}
+          {() => <EmojiPicker.CategoryNavTab className="relative flex size-8 shrink-0 items-center justify-center rounded-[6px] text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected" />}
         </EmojiPicker.CategoryNav>
         <span className="flex size-8 shrink-0 items-center justify-center text-picker-subtle">
           <I.PlusCircleFilled size={22} />

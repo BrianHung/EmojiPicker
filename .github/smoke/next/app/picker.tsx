@@ -6,7 +6,7 @@ export function Picker() {
   return (
     <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
       <EmojiPicker.Search>
-        <EmojiPicker.Search.Input />
+        <EmojiPicker.SearchInput />
         <EmojiPicker.SkinTone />
       </EmojiPicker.Search>
       <EmojiPicker.Viewport>

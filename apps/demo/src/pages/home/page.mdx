@@ -55,9 +55,9 @@ import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 <EmojiProvider>
   <EmojiPicker.Root>
     <EmojiPicker.Search>
-      <EmojiPicker.Search.Input />
+      <EmojiPicker.SearchInput />
       <EmojiPicker.SkinTone />
-      <EmojiPicker.Search.Status />
+      <EmojiPicker.SearchStatus />
     </EmojiPicker.Search>
     <EmojiPicker.Viewport>
       <EmojiPicker.List />
@@ -92,7 +92,7 @@ Parts render with no provider and no CSS. `Root` loads the English dataset from 
 ```tsx title="picker.tsx"
 <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
   <EmojiPicker.Search>
-    <EmojiPicker.Search.Input />
+    <EmojiPicker.SearchInput />
   </EmojiPicker.Search>
   <EmojiPicker.Viewport className="h-80">
     <EmojiPicker.List />
@@ -108,7 +108,7 @@ Import `@brianhung/emoji-picker-react/theme.css` for Tailwind utilities on the t
 <EmojiPicker.Root className="w-80 rounded-picker bg-picker-background shadow-picker [--emoji-size:24px]">
   <EmojiPicker.Viewport className="h-80">
     <EmojiPicker.List>
-      {() => <EmojiPicker.List.Items>{() => <EmojiPicker.List.Cell className="rounded-md data-highlighted:bg-picker-selected" />}</EmojiPicker.List.Items>}
+      {() => <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className="rounded-md data-highlighted:bg-picker-selected" />}</EmojiPicker.ListItems>}
     </EmojiPicker.List>
   </EmojiPicker.Viewport>
 </EmojiPicker.Root>
@@ -206,7 +206,7 @@ In another popover, close it from `onSelect` and give the search field `autoFocu
   <PopoverContent aria-label="Emoji picker" className="w-80 p-0">
     <EmojiPicker.Root onSelect={({ emoji }) => (onEmoji(emoji), setOpen(false))}>
       <EmojiPicker.Search>
-        <EmojiPicker.Search.Input autoFocus />
+        <EmojiPicker.SearchInput autoFocus />
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="h-72">
         <EmojiPicker.List />
@@ -226,7 +226,7 @@ Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Vir
 
 ## API reference
 
-Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. A Server Component can render the top-level parts through the namespace (`EmojiPicker.Root`, `EmojiPicker.Search`) but can't reach into a part's sub-parts or into `EmojiPopover`, so for those it renders the flat exports: `EmojiPickerSearchInput`, `EmojiPopoverTrigger`, and so on.
+Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them (`EmojiPicker.SearchInput`, `EmojiPopover.Positioner`). Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component's function.
 
 <PropsTable rows={api.part} />
 
@@ -252,13 +252,13 @@ Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.
 
 ### Search {#api-search}
 
-A searchbox with `aria-activedescendant` and a polite result count. `Search.Field` is React Aria's `SearchField`; `Search.Clear` renders while there is a query.
+A searchbox with `aria-activedescendant` and a polite result count. `SearchField` is React Aria's `SearchField`; `SearchClear` renders while there is a query.
 
 <PropsTable rows={api.searchParts} />
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.searchAttributes} />
 
-Types: `EmojiPicker.Search.Props`, `.State`, and `.Field`, `.Input`, `.Clear`, `.Status` with `.Props` and `.State`.
+Types: `EmojiPicker.Search`, `.SearchField`, `.SearchInput`, `.SearchClear`, `.SearchStatus`, each with `.Props` and `.State`.
 
 ### CategoryNav {#api-category-nav}
 
@@ -268,7 +268,7 @@ A toolbar of buttons that scroll to a section; the one in view has `aria-current
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.categoryNavAttributes} />
 
-Types: `EmojiPicker.CategoryNav.Props`, `.State`, `.Tab.Props`, `.Tab.State`.
+Types: `EmojiPicker.CategoryNav`, `.CategoryNavTab`, each with `.Props` and `.State`.
 
 ### Viewport and List {#api-list}
 
@@ -284,7 +284,7 @@ The scroll container and a virtualized listbox with a group per section. Shift+S
 
 <AttrTable head={["CSS variable", "Default", "Description"]} rows={api.listVariables} />
 
-Types: `EmojiPicker.Viewport.Props`, `.State`, `EmojiPicker.List.Props`, `.State`, `.EmptyState`, `.Items.Props`, and `.Section`, `.SectionTitle`, `.SectionActions`, `.Cell`, `.Variations`, `.Variations.Option` with `.Props` and `.State`.
+Types: `EmojiPicker.Viewport.Props`, `.State`, `EmojiPicker.List.Props`, `.State`, `.EmptyState`, `EmojiPicker.ListItems.Props`, and `.ListSection`, `.ListSectionTitle`, `.ListSectionActions`, `.ListCell`, `.ListVariations`, `.ListVariationsOption` with `.Props` and `.State`.
 
 ### SkinTone {#api-skin-tone}
 
@@ -296,7 +296,7 @@ A disclosure button for a toolbar of `aria-pressed` tones. Focus leaving closes 
 
 <AttrTable head={["CSS variable", "Default", "Description"]} rows={api.skinToneVariables} />
 
-Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `.Glyph.Props`, and `.Trigger`, `.Options`, `.Option` with `.Props` and `.State`.
+Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `EmojiPicker.SkinToneGlyph.Props`, and `.SkinToneTrigger`, `.SkinToneOptions`, `.SkinToneOption` with `.Props` and `.State`.
 
 ### Preview {#api-preview}
 
@@ -312,7 +312,7 @@ A toolbar of reactions, toggle buttons when the row has a value. `onSelect`'s `d
 
 <AttrTable head={["Data attribute", "Description"]} rows={api.reactionsAttributes} />
 
-Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `.Items.Props`, `.Item` and `.Expand` with `.Props` and `.State`, `EmojiPicker.Panel.Props`, `.State`.
+Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `EmojiPicker.ReactionsItems.Props`, `.ReactionsItem` and `.ReactionsExpand` with `.Props` and `.State`, `EmojiPicker.Panel.Props`, `.State`.
 
 ### EmojiPopover {#api-popover}
 

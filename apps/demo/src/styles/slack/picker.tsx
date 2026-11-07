@@ -103,7 +103,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
         </span>
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-between gap-0 overflow-x-auto [scrollbar-width:none]">
           {() => (
-            <EmojiPicker.CategoryNav.Tab
+            <EmojiPicker.CategoryNavTab
               className={cn(TAB, "relative data-active:text-picker-foreground data-active:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)] data-active:group-has-[input:focus]:text-picker-subtle data-active:group-has-[input:focus]:shadow-none")}
             />
           )}
@@ -114,13 +114,13 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       </div>
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-[17.5px] pt-3.5 pb-[7px]">
-          <EmojiPicker.Search.Input
+          <EmojiPicker.SearchInput
             placeholder="Search all emoji"
             autoFocus={autoFocus}
             className="h-9 w-full rounded-[8px] border border-picker-input-border bg-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
           >
             <SearchClear />
-          </EmojiPicker.Search.Input>
+          </EmojiPicker.SearchInput>
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport
@@ -131,17 +131,17 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       >
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
-            <EmojiPicker.List.Section>
-              <EmojiPicker.List.SectionTitle className="mr-[3px] -ml-px block h-[26px] bg-picker-background/95 px-3.5 text-[13px] leading-[26px] font-bold text-picker-foreground" />
-              <EmojiPicker.List.Items>
+            <EmojiPicker.ListSection>
+              <EmojiPicker.ListSectionTitle className="mr-[3px] -ml-px block h-[26px] bg-picker-background/95 px-3.5 text-[13px] leading-[26px] font-bold text-picker-foreground" />
+              <EmojiPicker.ListItems>
                 {() => (
-                  <EmojiPicker.List.Cell
+                  <EmojiPicker.ListCell
                     style={cellHover}
                     className={cn(CELL, "isolate overflow-visible before:absolute before:inset-[0_0_1px_-2px] before:-z-10 before:rounded-[6px] hover:before:transition-[background-color] hover:before:duration-50 hover:before:ease-[ease-out] hover:before:bg-(--slack-cell-hover) data-focus-visible:before:bg-(--slack-cell-hover) data-[highlighted]:before:bg-(--slack-cell-hover)")}
                   />
                 )}
-              </EmojiPicker.List.Items>
-            </EmojiPicker.List.Section>
+              </EmojiPicker.ListItems>
+            </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>

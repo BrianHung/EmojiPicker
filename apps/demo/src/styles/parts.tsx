@@ -20,22 +20,22 @@ export function withIcons(
 export function HandTone({ emoji, className }: { emoji?: string; className: string }) {
   return (
     <EmojiPicker.SkinTone className="relative inline-flex">
-      <EmojiPicker.SkinTone.Trigger className={className}>
-        <EmojiPicker.SkinTone.Glyph emoji={emoji} />
-      </EmojiPicker.SkinTone.Trigger>
-      <EmojiPicker.SkinTone.Options className="end-0 top-0 z-3 flex">
+      <EmojiPicker.SkinToneTrigger className={className}>
+        <EmojiPicker.SkinToneGlyph emoji={emoji} />
+      </EmojiPicker.SkinToneTrigger>
+      <EmojiPicker.SkinToneOptions className="end-0 top-0 z-3 flex">
         {(tone) => (
-          <EmojiPicker.SkinTone.Option tone={tone} className={className}>
-            <EmojiPicker.SkinTone.Glyph emoji={emoji} />
-          </EmojiPicker.SkinTone.Option>
+          <EmojiPicker.SkinToneOption tone={tone} className={className}>
+            <EmojiPicker.SkinToneGlyph emoji={emoji} />
+          </EmojiPicker.SkinToneOption>
         )}
-      </EmojiPicker.SkinTone.Options>
+      </EmojiPicker.SkinToneOptions>
     </EmojiPicker.SkinTone>
   );
 }
 
 export function SearchClear() {
-  return <EmojiPicker.Search.Clear className="absolute end-[var(--emoji-list-padding,10px)] top-1/2 flex size-[30px] -translate-y-1/2 items-center justify-center" />;
+  return <EmojiPicker.SearchClear className="absolute end-[var(--emoji-list-padding,10px)] top-1/2 flex size-[30px] -translate-y-1/2 items-center justify-center" />;
 }
 
 export function Tabs({ items, active, className, tab, activeTab, inactiveTab, right }: { items: React.ReactNode[]; active: number; className: string; tab: string; activeTab: string; inactiveTab?: string; right?: React.ReactNode }) {
