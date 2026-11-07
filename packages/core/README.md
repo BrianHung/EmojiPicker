@@ -38,7 +38,7 @@ const stop = typeahead.syncCombobox(input);
 
 ## Docs
 
-[emoji.brianhung.me](https://emoji.brianhung.me). The ProseMirror plugin: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-prosemirror.json`.
+[emoji.brianhung.me](https://emoji.brianhung.me)
 
 ## License
 
