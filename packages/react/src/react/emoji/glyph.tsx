@@ -5,12 +5,15 @@ import { useEmojiContext } from "../provider/provider";
 
 const SIZE = "var(--emoji-image-size, var(--ep-size))";
 
+// Browsers draw a glyph on a whole px row, so the top pad puts the baseline (ascent 87.75%, tokens.css) on the row nearest the centred one
+const TOP = "calc(round(var(--ep-glyph-pad) + 0.8775em, 1px) - round(0.8775em, 1px))";
+
 const TEXT: React.CSSProperties = {
   position: "relative",
   display: "block",
   alignSelf: "center",
   justifySelf: "center",
-  padding: "var(--ep-glyph-pad)",
+  padding: `${TOP} var(--ep-glyph-pad) calc(2 * var(--ep-glyph-pad) - ${TOP})`,
   fontFamily: "var(--emoji-font-family)",
   fontSize: "var(--ep-size)",
   lineHeight: "100%",

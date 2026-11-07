@@ -45,7 +45,7 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
           </EmojiPicker.Search.Input>
         </EmojiPicker.Search>
       ) : null}
-      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
+      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-2.5")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.List.Section>
