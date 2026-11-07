@@ -1,4 +1,4 @@
-import { Emoji, EmojiPicker, useEmojiStore, useFrequentEmoji, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
+import { Emoji, EmojiPicker, useActiveEmoji, useEmojiStore, useFrequentEmoji, type EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { HandTone, noEmoji, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
@@ -63,7 +63,7 @@ const CATEGORIES = withIcons(ICONS, {
 });
 
 function Footer() {
-  const active = EmojiPicker.useActiveEmoji();
+  const active = useActiveEmoji();
   const store = useEmojiStore();
   const first = useFrequentEmoji({ limit: 1 }).items[0];
   const shown = active ?? (first ? store.get(first) : undefined);

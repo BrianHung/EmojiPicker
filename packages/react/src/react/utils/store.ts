@@ -1,3 +1,5 @@
+"use client";
+
 import { useSyncExternalStoreWithSelector } from "use-sync-external-store/with-selector";
 
 type Source<S> = { subscribe(listener: () => void): () => void; getSnapshot(): S; getServerSnapshot?: () => S };

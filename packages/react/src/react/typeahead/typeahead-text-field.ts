@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { InputRange } from "dom-input-range";
 import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";

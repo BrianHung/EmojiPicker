@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { Popover, type PopoverRenderProps } from "react-aria-components/Popover";

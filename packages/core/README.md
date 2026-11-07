@@ -32,7 +32,7 @@ const stop = typeahead.syncCombobox(input);
 | Import | Contents |
 |---|---|
 | `@brianhung/emoji-picker-core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexical`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
-| `/grid` | Grid and strip layout and keyboard navigation, for your own virtualizer |
+| `/grid` | Grid layout and keyboard moves, for your own virtualizer |
 | `/native` | Whether the system font draws an emoji |
 | `/build` | `buildDataset` from `emojibase-data`, also as the `emoji-picker build-data <locale>` CLI |
 

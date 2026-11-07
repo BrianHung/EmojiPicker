@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";

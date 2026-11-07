@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { Rect } from "react-stately/useVirtualizerState";
 import type { GridGeometry } from "../grid/types";

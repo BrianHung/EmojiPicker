@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { EmojiRecord, SkinToneValue } from "@brianhung/emoji-picker-core";
 import { nameWithTone, SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";

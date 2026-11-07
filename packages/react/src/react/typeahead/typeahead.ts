@@ -1,7 +1,8 @@
+"use client";
+
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
-import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsMachine, type EmojiSuggestionsOptions, type EmojiTrigger, type ShortcodeCompletion } from "@brianhung/emoji-picker-core";
-import type { KeyLike } from "@brianhung/emoji-picker-core/internal";
+import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsMachine, type EmojiSuggestionsOptions, type EmojiTrigger, type KeyLike, type ShortcodeCompletion } from "@brianhung/emoji-picker-core";
 import { useEmojiStatus } from "../provider/hooks";
 import { useEmojiContext } from "../provider/provider";
 import { useLatest, useStableCallback } from "../utils/latest";

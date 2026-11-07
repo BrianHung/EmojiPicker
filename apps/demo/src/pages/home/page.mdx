@@ -194,9 +194,11 @@ Native emoji draw in `--emoji-font-family`. Images come from `imageUrl`: Twemoji
 
 <DefList rows={api.hooks} />
 
+Types: `EmojiTypeahead`, `EmojiTypeaheadOptions`, `EmojiSearchState`, `FrequentEmoji`, `ResolvedEmoji`, `EmojiStoreStatus`, `EmojiPickerRootActions`, `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiGridOptions`, `UseEmojiGridResult`, `UseEmojiCellResult`.
+
 ### Custom popover {#custom-popover}
 
-In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` as the popover's initial focus.
+In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` from the main entry as the popover's initial focus.
 
 ```tsx title="emoji-button.tsx"
 <Popover open={open} onOpenChange={setOpen}>
@@ -224,7 +226,7 @@ Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Vir
 
 ## API reference
 
-Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. A Server Component can't reach into a client module's objects, so it renders the flat exports instead: `EmojiPickerRoot`, `EmojiPickerSearchInput`, `EmojiPopoverTrigger`, and so on.
+Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. A Server Component can render the top-level parts through the namespace (`EmojiPicker.Root`, `EmojiPicker.Search`) but can't reach into a part's sub-parts or into `EmojiPopover`, so for those it renders the flat exports: `EmojiPickerSearchInput`, `EmojiPopoverTrigger`, and so on.
 
 <PropsTable rows={api.part} />
 
@@ -246,7 +248,7 @@ Contains a picker. Each controllable state takes `x`, `defaultX`, and `onXChange
 
 <AttrTable head={["CSS variable", "Default", "Description"]} rows={api.rootVariables} />
 
-Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.HighlightChangeEventDetails`, `.CollapsedCategoriesChangeEventDetails`, `.ReactionsOpenChangeEventDetails`, each with its `…EventReason`.
+Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.HighlightChangeEventDetails`, `.CollapsedCategoriesChangeEventDetails`, `.ReactionsOpenChangeEventDetails`, each with its `…EventReason` (`.SelectEventDetails` uses `.ChangeEventReason`).
 
 ### Search {#api-search}
 

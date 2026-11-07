@@ -1,8 +1,9 @@
+"use client";
+
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { ListState } from "react-stately/useListState";
-import type { EmojiItem, EmojiPicker } from "@brianhung/emoji-picker-core";
-import type { EmojiPickerSnapshot } from "@brianhung/emoji-picker-core/internal";
+import type { EmojiItem, EmojiPicker, EmojiPickerSnapshot } from "@brianhung/emoji-picker-core";
 import { Glyph, useOverridden } from "../emoji/glyph";
 import { flag, stateAttributes } from "../utils/render";
 import { SLOTS } from "../utils/slots";

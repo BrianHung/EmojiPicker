@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { mergePartProps } from "../utils/events";

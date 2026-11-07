@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 
 // Focusing a clipped element scrolls overflow:hidden ancestors users can't scroll back: snap them back

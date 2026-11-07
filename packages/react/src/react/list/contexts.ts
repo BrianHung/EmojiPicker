@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
 import type { Cells } from "./use-cell";

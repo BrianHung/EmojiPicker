@@ -1,3 +1,5 @@
+"use client";
+
 // A toolbar of toggle buttons, as Base UI's ToggleGroup, not radios: the arrows move focus without checking, and a press picks
 import * as React from "react";
 import { FocusScope } from "react-aria/FocusScope";

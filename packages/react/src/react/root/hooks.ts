@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { EmojiRecord } from "@brianhung/emoji-picker-core";
 import { usePicker } from "./context";
@@ -13,13 +15,13 @@ export interface EmojiPickerNavCategory {
   icon?: React.ReactNode;
 }
 
-export interface CategoryNavigation {
+export interface EmojiPickerCategoryNavigation {
   categories: readonly EmojiPickerNavCategory[];
   activeCategory: string | null;
   jumpToCategory(id: string, options?: { instant?: boolean }): void;
 }
 
-export function useCategoryNavigation(): CategoryNavigation {
+export function useCategoryNavigation(): EmojiPickerCategoryNavigation {
   const picker = usePicker("useCategoryNavigation");
   const view = useStore(picker.state, ({ categories, categorySections, searching, activeSection }) => ({ categories, categorySections, searching, activeSection }), shallowEqual);
   const categories = React.useMemo(() => {
@@ -38,12 +40,12 @@ export function useCategoryNavigation(): CategoryNavigation {
   return { categories, activeCategory: view.searching ? null : view.activeSection, jumpToCategory };
 }
 
-export interface SearchSummary {
+export interface EmojiPickerSearchSummary {
   query: string;
   resultCount: number | null;
 }
 
-export function useSearchState(): SearchSummary {
-  const { state } = usePicker("useSearchState");
+export function usePickerSearch(): EmojiPickerSearchSummary {
+  const { state } = usePicker("usePickerSearch");
   return useStore(state, ({ query, searching, pending, results }) => ({ query, resultCount: searching && !pending ? results.length : null }), shallowEqual);
 }

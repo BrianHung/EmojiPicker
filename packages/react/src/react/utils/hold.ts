@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { useFocusWithin } from "react-aria/useFocusWithin";

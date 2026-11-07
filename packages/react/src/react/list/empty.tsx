@@ -1,3 +1,5 @@
+"use client";
+
 import type * as React from "react";
 import { usePicker } from "../root/context";
 import { useStoreSnapshot } from "../provider/provider";

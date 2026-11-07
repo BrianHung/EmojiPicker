@@ -1,3 +1,5 @@
+"use client";
+
 // Not React Aria's ListBox: its collection renders a hidden React tree with a fiber per emoji per picker
 import * as React from "react";
 import { useLocale } from "react-aria/I18nProvider";

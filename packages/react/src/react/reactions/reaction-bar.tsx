@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import type { EmojiPickerHandlers } from "../utils/events";
 import type { EmojiPickerOrientation, EmojiPickerPartProps } from "../utils/render";

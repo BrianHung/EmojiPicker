@@ -1,3 +1,5 @@
+"use client";
+
 import type * as React from "react";
 import type { PressEvent } from "@react-types/shared";
 import { mergeProps } from "react-aria/mergeProps";
