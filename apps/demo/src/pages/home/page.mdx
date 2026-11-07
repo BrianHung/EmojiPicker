@@ -21,7 +21,7 @@ The packages are in prerelease (`1.0.0-alpha`). The API can change between alpha
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS. For a popover, add `emoji-picker-popover.json` (Floating UI) or `emoji-picker-popover-aria.json` (React Aria).
+Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS. For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
 
 </TabPanel>
 
@@ -115,7 +115,7 @@ Import `@brianhung/emoji-picker-react/theme.css` for Tailwind utilities on the t
 
 ### In a popover
 
-The registry component takes your shadcn/ui theme. Its popover item adds `EmojiPickerPopover`, and `EmojiPickerPopoverContent` for your own trigger.
+The registry component takes your shadcn/ui theme, and its popover item uses your `components/ui/popover`.
 
 ```tsx title="message.tsx"
 import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";

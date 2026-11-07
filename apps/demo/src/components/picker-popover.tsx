@@ -3,7 +3,6 @@ import type { EmojiSelection } from "@brianhung/emoji-picker-react";
 import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
 import { cn } from "@/lib/utils";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
-import { EmojiPickerPopoverContent } from "@/registry/emoji-picker-popover";
 
 export type PickerPopoverProps = {
   onSelect: (selection: EmojiSelection) => void;
@@ -32,9 +31,17 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
           {children}
         </EmojiPopover.Trigger>,
       )}
-      <EmojiPickerPopoverContent side={side} align={align} aria-label="Emoji picker" finalFocus={() => (picked.current && focusAfterPick?.()) || true}>
-        {picker ?? <EmojiPickerCard onSelect={onSelect} />}
-      </EmojiPickerPopoverContent>
+      <EmojiPopover.Portal>
+        <EmojiPopover.Positioner side={side} align={align}>
+          <EmojiPopover.Popup
+            aria-label="Emoji picker"
+            finalFocus={() => (picked.current && focusAfterPick?.()) || true}
+            className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
+          >
+            {picker ?? <EmojiPickerCard onSelect={onSelect} />}
+          </EmojiPopover.Popup>
+        </EmojiPopover.Positioner>
+      </EmojiPopover.Portal>
     </EmojiPopover.Root>
   );
 }
