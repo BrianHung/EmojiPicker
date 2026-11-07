@@ -31,11 +31,11 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-react` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks |
-| `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`), `pickerInitialFocus` on either positioning library |
-
-Server Components can't reach into a client module's objects, so every part is also a flat export: `EmojiPickerRoot`, `EmojiPickerSearchInput`, `EmojiPickerListCell`, `EmojiPopoverTrigger`, and so on.
+| `@brianhung/emoji-picker-react` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `pickerInitialFocus` |
+| `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind utilities for them, and a mapping to a shadcn/ui theme |
+
+A Server Component can render the top-level parts through the namespace (`EmojiPicker.Root`, `EmojiPicker.Search`). It can't reach into sub-parts or `EmojiPopover`, so every part is also a flat export: `EmojiPickerSearchInput`, `EmojiPickerListCell`, `EmojiPopoverTrigger`, and so on.
 
 ## Docs
 
