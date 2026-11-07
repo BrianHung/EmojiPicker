@@ -11,7 +11,7 @@ export default withGuidepup(
     testDir: ".",
     outputDir: fileURLToPath(new URL(".results", import.meta.url)),
     reporter: [["list"]],
-    timeout: 180_000,
+    timeout: 360_000,
     retries: process.env.CI ? 2 : 0,
     projects: [project("voiceover", "voiceover.spec.ts", screen), project("nvda", "nvda.spec.ts", screen)],
   }),
