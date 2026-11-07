@@ -38,9 +38,9 @@ const ToneContext = React.createContext<SkinToneValue>(0);
 
 const unifiedOf = (record: EmojiRecord, tone: SkinToneValue) => (tone ? record.tones[tone - 1]! : record.unified);
 
-// The popup a long press or Shift+Space opens on a cell; List renders one unless a List.Variations is in Root
+// The popup a long press or Shift+Space opens on a cell; List renders one unless a ListVariations is in Root
 export const VariationsPopup = React.forwardRef<HTMLDivElement, VariationsProps>(function VariationsPopup(props, ref) {
-  const { state, list } = usePicker("EmojiPicker.List.Variations");
+  const { state, list } = usePicker("EmojiPicker.ListVariations");
   useStore(state, (s) => s.variations);
   const overlay = list.current?.overlay();
   if (!overlay) return null;
@@ -98,10 +98,10 @@ const VariationsRow = React.forwardRef<HTMLDivElement, VariationsProps & { overl
 export const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptionProps>(function VariationsOption({ tone: toneProp, style, children, ...props }, ref) {
   const row = React.useContext(RowContext);
   const contextTone = React.useContext(ToneContext);
-  const { labels } = usePicker("EmojiPicker.List.Variations.Option");
+  const { labels } = usePicker("EmojiPicker.ListVariationsOption");
   // No usePress: it would take Enter and Space from the row's keys
   const interaction = useInteraction({ pressed: false });
-  if (!row) throw new Error("EmojiPicker.List.Variations.Option must be inside List.Variations.");
+  if (!row) throw new Error("EmojiPicker.ListVariationsOption must be inside EmojiPicker.ListVariations.");
   const tone = toneProp ?? contextTone;
   const unified = unifiedOf(row.record, tone);
   const selected = tone === row.current;
@@ -126,11 +126,19 @@ export const VariationsOption = React.forwardRef<HTMLDivElement, VariationsOptio
   );
 });
 
-const VariationsRoot = React.forwardRef<HTMLDivElement, VariationsProps>(function Variations(props, ref) {
-  const { variations } = usePicker("EmojiPicker.List.Variations");
+export const Variations = React.forwardRef<HTMLDivElement, VariationsProps>(function Variations(props, ref) {
+  const { variations } = usePicker("EmojiPicker.ListVariations");
   const { register } = variations;
   useLayoutEffect(() => register(), [register]);
   return <VariationsPopup {...props} ref={ref} />;
 });
 
-export const Variations = /* @__PURE__ */ Object.assign(VariationsRoot, { Option: VariationsOption });
+export declare namespace Variations {
+  type Props = VariationsProps;
+  type State = VariationsState;
+}
+
+export declare namespace VariationsOption {
+  type Props = VariationsOptionProps;
+  type State = VariationsOptionState;
+}

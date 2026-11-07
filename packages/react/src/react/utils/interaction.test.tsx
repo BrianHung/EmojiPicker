@@ -28,7 +28,7 @@ const popoverTrigger = ({ EmojiPopover }: typeof floating | typeof aria) =>
 
 // usePress cancels a button's native keyboard click outside macOS, and jsdom isn't macOS
 it.each([
-  ["SkinTone.Trigger", SkinToneTrigger],
+  ["SkinToneTrigger", SkinToneTrigger],
   ["EmojiPopover.Trigger from /floating-ui", popoverTrigger(floating)],
   ["EmojiPopover.Trigger from /react-aria", popoverTrigger(aria)],
 ])("%s opens with Enter and Space", (_, Trigger) => {

@@ -1,7 +1,12 @@
 export { List } from "./list";
-export type { CellProps, CellState, EmptyState, ItemsProps, ListProps, ListState, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps } from "./list";
+export type { EmptyState, ListProps, ListState } from "./list";
+export { Cell } from "./cell";
+export type { CellProps } from "./cell";
+export { Items, Section, SectionActions, SectionTitle } from "./section";
+export type { ItemsProps, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps } from "./section";
+export { Variations, VariationsOption } from "./variations";
 export type { VariationsOptionProps, VariationsOptionState, VariationsProps, VariationsState } from "./variations";
 export { useEmojiCell } from "./use-cell";
-export type { EmojiGridState, UseEmojiCellResult } from "./use-cell";
+export type { CellState, EmojiGridState, UseEmojiCellResult } from "./use-cell";
 export { useEmojiGrid } from "./emoji-grid";
 export type { UseEmojiGridOptions, UseEmojiGridResult } from "./emoji-grid";

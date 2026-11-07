@@ -187,9 +187,9 @@ describe("Root keyboard", () => {
           <EmojiPicker.Viewport>
             <EmojiPicker.List>
               {() => (
-                <EmojiPicker.List.Section>
-                  <EmojiPicker.List.Items>{(emoji) => <EmojiPicker.List.Cell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiPickerHandler()} />}</EmojiPicker.List.Items>
-                </EmojiPicker.List.Section>
+                <EmojiPicker.ListSection>
+                  <EmojiPicker.ListItems>{(emoji) => <EmojiPicker.ListCell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiPickerHandler()} />}</EmojiPicker.ListItems>
+                </EmojiPicker.ListSection>
               )}
             </EmojiPicker.List>
           </EmojiPicker.Viewport>
@@ -202,14 +202,14 @@ describe("Root keyboard", () => {
     expect(onSelect.mock.calls.map(([s]) => s.unified)).toEqual(["1f603"]);
   });
 
-  it("clears the query from a Search.Clear placed beside the input", () => {
+  it("clears the query from a SearchClear placed beside the input", () => {
     const onQueryChange = vi.fn();
     render(
       <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root defaultQuery="smile" onQueryChange={onQueryChange}>
           <EmojiPicker.Search>
-            <EmojiPicker.Search.Input>{[]}</EmojiPicker.Search.Input>
-            <EmojiPicker.Search.Clear />
+            <EmojiPicker.SearchInput>{[]}</EmojiPicker.SearchInput>
+            <EmojiPicker.SearchClear />
           </EmojiPicker.Search>
         </EmojiPicker.Root>
       </EmojiProvider>,
@@ -219,13 +219,13 @@ describe("Root keyboard", () => {
     expect(document.querySelector('[data-slot="emoji-picker-search-clear"]')).toBeNull();
   });
 
-  it("announces the result count in a Search.Status in place of Root's own live region", () => {
+  it("announces the result count in a SearchStatus in place of Root's own live region", () => {
     render(
       <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root defaultQuery="smile">
           <EmojiPicker.Search>
-            <EmojiPicker.Search.Input />
-            <EmojiPicker.Search.Status className={({ resultCount }) => `count-${resultCount}`} />
+            <EmojiPicker.SearchInput />
+            <EmojiPicker.SearchStatus className={({ resultCount }) => `count-${resultCount}`} />
           </EmojiPicker.Search>
         </EmojiPicker.Root>
       </EmojiProvider>,
@@ -236,7 +236,7 @@ describe("Root keyboard", () => {
     expect(statuses[0]!.className).toMatch(/^count-\d+$/);
   });
 
-  it("renders a List.Variations placed in Root in place of the default, styled by its state", () => {
+  it("renders a ListVariations placed in Root in place of the default, styled by its state", () => {
     const actions = React.createRef<EmojiPicker.Root.Actions>();
     render(
       <EmojiProvider data={en} prepare={false}>
@@ -244,7 +244,7 @@ describe("Root keyboard", () => {
           <EmojiPicker.Search />
           <EmojiPicker.Viewport>
             <EmojiPicker.List />
-            <EmojiPicker.List.Variations className={({ emoji }) => `tones-${emoji.unified}`} />
+            <EmojiPicker.ListVariations className={({ emoji }) => `tones-${emoji.unified}`} />
           </EmojiPicker.Viewport>
         </EmojiPicker.Root>
       </EmojiProvider>,

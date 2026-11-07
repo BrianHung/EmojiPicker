@@ -14,34 +14,15 @@ import { renderElement, resolve, type EmojiPickerOrientation, type EmojiPickerPa
 import { SLOTS } from "../utils/slots";
 import { useStore } from "../utils/store";
 import { useLayoutEffect } from "../utils/utils";
-import { Cell, type CellProps } from "./cell";
 import { isSection, type CollectionNode } from "./collection";
 import { CellsContext, HorizontalContext, TemplateContext } from "./contexts";
 import { EmptyOption, type EmptyState } from "./empty";
 import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridLayoutOptions, type GridMetrics } from "./layout";
 import { layoutUnits, PROBE, readProbe, sameMetrics } from "./measure";
 import { gridKeyboardDelegate } from "./navigation";
-import {
-  defaultSection,
-  Items,
-  ItemView,
-  partsOf,
-  Section,
-  SectionActions,
-  SectionHeader,
-  SectionTitle,
-  SectionView,
-  type ItemsProps,
-  type SectionActionsProps,
-  type SectionActionsState,
-  type SectionProps,
-  type SectionState,
-  type SectionTitleProps,
-} from "./section";
+import { defaultSection, ItemView, partsOf, SectionHeader, SectionView } from "./section";
 import { ActionsLayer, useActionsTab } from "./section-actions";
-import type { CellState } from "./use-cell";
 import { useListGeometry } from "./use-list-geometry";
-import { Variations, type VariationsOptionProps, type VariationsOptionState, type VariationsProps, type VariationsState } from "./variations";
 import { VirtualCollection } from "./virtualizer";
 
 export type ListState = { orientation: EmojiPickerOrientation; searching: boolean; empty: boolean };
@@ -54,6 +35,7 @@ export type ListProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivEle
     renderEmptyState?: (state: EmptyState) => React.ReactNode;
   };
 
+type EmptyOptionState = EmptyState;
 export type { EmptyState };
 
 const DEFAULT_ROWS = 5;
@@ -61,7 +43,7 @@ const HORIZONTAL: React.CSSProperties = { flex: "none", width: "max-content" };
 const UNPADDED = { "--ep-glyph-pad": "0px" } as React.CSSProperties;
 const COLUMNS: React.CSSProperties = { height: 0, width: "calc(var(--ep-columns) * var(--ep-cell) + 2 * var(--ep-pad))", maxWidth: "100%" };
 
-const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = DEFAULT_ROWS, renderEmptyState, className, style, render, ...rest }, ref) {
+export const List = React.forwardRef<HTMLDivElement, ListProps>(function List({ children, orientation = "vertical", rows = DEFAULT_ROWS, renderEmptyState, className, style, render, ...rest }, ref) {
   const picker = usePicker("EmojiPicker.List");
   const searching = useStore(picker.state, (s) => s.searching);
   const horizontal = orientation === "horizontal";
@@ -177,45 +159,8 @@ const ListRoot = React.forwardRef<HTMLDivElement, ListProps>(function List({ chi
   );
 });
 
-export const List = /* @__PURE__ */ Object.assign(ListRoot, { Section, SectionTitle, SectionActions, Items, Cell, Variations });
-
-type VariationsRowProps = VariationsProps;
-type VariationsRowState = VariationsState;
-type VariationProps = VariationsOptionProps;
-type VariationState = VariationsOptionState;
-type EmptyOptionState = EmptyState;
-
-export type { CellProps, CellState, ItemsProps, SectionActionsProps, SectionActionsState, SectionProps, SectionState, SectionTitleProps };
-
 export declare namespace List {
   type Props = ListProps;
   type State = ListState;
   type EmptyState = EmptyOptionState;
-  namespace Section {
-    type Props = SectionProps;
-    type State = SectionState;
-  }
-  namespace SectionTitle {
-    type Props = SectionTitleProps;
-    type State = SectionState;
-  }
-  namespace Variations {
-    type Props = VariationsRowProps;
-    type State = VariationsRowState;
-    namespace Option {
-      type Props = VariationProps;
-      type State = VariationState;
-    }
-  }
-  namespace SectionActions {
-    type Props = SectionActionsProps;
-    type State = SectionActionsState;
-  }
-  namespace Items {
-    type Props = ItemsProps;
-  }
-  namespace Cell {
-    type Props = CellProps;
-    type State = CellState;
-  }
 }

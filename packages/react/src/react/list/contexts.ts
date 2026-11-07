@@ -18,12 +18,12 @@ export const SectionContext = React.createContext<SectionData | null>(null);
 
 export function useCells(part: string): Cells {
   const cells = React.useContext(CellsContext);
-  if (!cells) throw new Error(`EmojiPicker.List.${part} must be inside EmojiPicker.List.`);
+  if (!cells) throw new Error(`EmojiPicker.List${part} must be inside EmojiPicker.List.`);
   return cells;
 }
 
 export function useSection(part: string): SectionData {
   const data = React.useContext(SectionContext);
-  if (!data) throw new Error(`EmojiPicker.List.${part} must be in a List.Section, inside EmojiPicker.List's children.`);
+  if (!data) throw new Error(`EmojiPicker.List${part} must be in an EmojiPicker.ListSection, inside EmojiPicker.List's children.`);
   return data;
 }

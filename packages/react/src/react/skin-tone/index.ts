@@ -1,4 +1,4 @@
-export { SkinTone } from "./skin-tone";
+export { SkinTone, SkinToneGlyph, SkinToneOption, SkinToneOptions, SkinToneTrigger } from "./skin-tone";
 export type {
   SkinToneGlyphProps,
   EmojiPickerSkinToneChangeEventDetails,

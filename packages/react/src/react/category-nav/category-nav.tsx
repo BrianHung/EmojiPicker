@@ -26,7 +26,7 @@ type Nav = { id: string; selected: string; disabled: boolean; choose(key: string
 const NavContext = React.createContext<Nav | null>(null);
 const TabContext = React.createContext<EmojiPickerNavCategory | null>(null);
 
-const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", style, children, ...props }, ref) {
+export const CategoryNav = React.forwardRef<HTMLDivElement, CategoryNavProps>(function CategoryNav({ orientation = "horizontal", style, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.CategoryNav");
   const disabled = useStore(picker.state, (s) => s.searching);
   const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
@@ -50,7 +50,7 @@ const CategoryNavRoot = React.forwardRef<HTMLDivElement, CategoryNavProps>(funct
       >
         {categories.map((c) => (
           <TabContext.Provider key={c.id} value={c}>
-            {children ? children(c) : <CategoryTab />}
+            {children ? children(c) : <CategoryNavTab />}
           </TabContext.Provider>
         ))}
       </ToolbarPart>
@@ -62,12 +62,12 @@ export type CategoryTabState = { category: EmojiPickerNavCategory; selected: boo
 
 export type CategoryTabProps = EmojiPickerPartElementProps<CategoryTabState, HTMLDivElement, "role">;
 
-export const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryTab({ children, ...props }, ref) {
+export const CategoryNavTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(function CategoryNavTab({ children, ...props }, ref) {
   const nav = React.useContext(NavContext);
   const c = React.useContext(TabContext);
   const { disabled = true, choose, selected: current, id } = nav ?? {};
   const interaction = useInteraction({ disabled, onPress: (e) => c && choose?.(c.id, e.pointerType === "keyboard" || e.pointerType === "virtual") });
-  if (!nav || !c) throw new Error("EmojiPicker.CategoryNav.Tab must be inside EmojiPicker.CategoryNav.");
+  if (!nav || !c) throw new Error("EmojiPicker.CategoryNavTab must be inside EmojiPicker.CategoryNav.");
   const selected = c.id === current;
   const state: CategoryTabState = { ...interaction.state, category: c, selected, active: selected && !disabled };
   return renderElement(
@@ -92,13 +92,12 @@ export const CategoryTab = React.forwardRef<HTMLDivElement, CategoryTabProps>(fu
   );
 });
 
-export const CategoryNav = /* @__PURE__ */ Object.assign(CategoryNavRoot, { Tab: CategoryTab });
-
 export declare namespace CategoryNav {
   type Props = CategoryNavProps;
   type State = CategoryNavState;
-  namespace Tab {
-    type Props = CategoryTabProps;
-    type State = CategoryTabState;
-  }
+}
+
+export declare namespace CategoryNavTab {
+  type Props = CategoryTabProps;
+  type State = CategoryTabState;
 }

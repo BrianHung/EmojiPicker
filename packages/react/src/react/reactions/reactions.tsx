@@ -29,7 +29,7 @@ const RowContext = React.createContext<Row | null>(null);
 
 function useRow(part: string) {
   const row = React.useContext(RowContext);
-  if (!row) throw new Error(`EmojiPicker.Reactions.${part} must be inside <EmojiPicker.Reactions>.`);
+  if (!row) throw new Error(`EmojiPicker.Reactions${part} must be inside <EmojiPicker.Reactions>.`);
   return row;
 }
 
@@ -42,7 +42,7 @@ export type ReactionsProps = Omit<ReactionBarProps, "children" | "orientation" |
   children?: React.ReactNode | ((emoji: string) => React.ReactNode);
 };
 
-const ReactionsRoot = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ value: valueProp, defaultValue, onValueChange, children, ...props }, ref) {
+export const Reactions = React.forwardRef<HTMLDivElement, ReactionsProps>(function Reactions({ value: valueProp, defaultValue, onValueChange, children, ...props }, ref) {
   const picker = usePicker("EmojiPicker.Reactions");
   const state = React.useContext(ReactionsContext);
   const { store, labels } = picker;
@@ -102,7 +102,7 @@ export type ReactionsItemProps = EmojiPickerPartElementProps<ReactionsItemState,
 };
 
 export const ReactionsItem = React.forwardRef<HTMLButtonElement, ReactionsItemProps>(function ReactionsItem({ emoji: unified, style, children, ...props }, ref) {
-  const picker = usePicker("EmojiPicker.Reactions.Item");
+  const picker = usePicker("EmojiPicker.ReactionsItem");
   const row = useRow("Item");
   const record = useStoreSnapshot((s) => s.get(unified));
   const overridden = useOverridden(unified, record);
@@ -132,7 +132,7 @@ export type ReactionsExpandState = EmojiPickerInteractionState;
 export type ReactionsExpandProps = EmojiPickerPartElementProps<ReactionsExpandState, HTMLButtonElement>;
 
 export const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpandProps>(function ReactionsExpand({ children, ...props }, ref) {
-  const { labels } = usePicker("EmojiPicker.Reactions.Expand");
+  const { labels } = usePicker("EmojiPicker.ReactionsExpand");
   const state = React.useContext(ReactionsContext);
   useRow("Expand");
   const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => state?.expand?.(e.nativeEvent) });
@@ -160,28 +160,25 @@ export const ReactionsExpand = React.forwardRef<HTMLButtonElement, ReactionsExpa
   );
 });
 
-export const Reactions = /* @__PURE__ */ Object.assign(ReactionsRoot, { Items: ReactionsItems, Item: ReactionsItem, Expand: ReactionsExpand });
-
-type RowProps = ReactionsProps;
-type RowState = ReactionsState;
-type ItemsProps = ReactionsItemsProps;
-
 export declare namespace Reactions {
-  type Props = RowProps;
-  type State = RowState;
+  type Props = ReactionsProps;
+  type State = ReactionsState;
   type ChangeEventReason = EmojiPickerReactionsChangeEventReason;
   type ChangeEventDetails = EmojiPickerReactionsChangeEventDetails;
-  namespace Items {
-    type Props = ItemsProps;
-  }
-  namespace Item {
-    type Props = ReactionsItemProps;
-    type State = ReactionsItemState;
-  }
-  namespace Expand {
-    type Props = ReactionsExpandProps;
-    type State = ReactionsExpandState;
-  }
+}
+
+export declare namespace ReactionsItems {
+  type Props = ReactionsItemsProps;
+}
+
+export declare namespace ReactionsItem {
+  type Props = ReactionsItemProps;
+  type State = ReactionsItemState;
+}
+
+export declare namespace ReactionsExpand {
+  type Props = ReactionsExpandProps;
+  type State = ReactionsExpandState;
 }
 
 export type PanelState = { hidden: boolean };

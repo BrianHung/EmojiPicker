@@ -5,7 +5,7 @@ import { useLocale } from "react-aria/I18nProvider";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { Input } from "react-aria-components/Input";
-import { SearchField } from "react-aria-components/SearchField";
+import { SearchField as AriaSearchField } from "react-aria-components/SearchField";
 import { usePicker } from "../root/context";
 import { mergePartProps, type EmojiPickerHandlers } from "../utils/events";
 import { usePickerKeyDown } from "../utils/keyboard";
@@ -21,7 +21,7 @@ export type SearchProps = EmojiPickerPartElementProps<SearchState, HTMLDivElemen
 
 const useEmpty = (part: string) => useStore(usePicker(part).state, (s) => s.query === "");
 
-const SearchRoot = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
+export const Search = React.forwardRef<HTMLDivElement, SearchProps>(function Search({ onKeyDown, children, ...props }, ref) {
   const empty = useEmpty("EmojiPicker.Search");
   const keys = usePickerKeyDown(onKeyDown, () => false);
   return renderElement("div", { "data-slot": SLOTS.search, "data-empty": flag(empty), ...props, ref, onKeyDown: keys, children: children ?? <SearchInput /> }, { empty });
@@ -35,12 +35,12 @@ const FieldContext = React.createContext(false);
 
 const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
 
-// React Aria's SearchField: Search.Input renders one around itself when it isn't inside a Search.Field
-export const Field = React.forwardRef<HTMLDivElement, SearchFieldProps>(function SearchFieldPart({ className, style, render, children, ...props }, ref) {
-  const { labels } = usePicker("EmojiPicker.Search.Field");
-  const empty = useEmpty("EmojiPicker.Search.Field");
+// React Aria's SearchField: SearchInput renders one around itself when it isn't inside a SearchField
+export const SearchField = React.forwardRef<HTMLDivElement, SearchFieldProps>(function SearchField({ className, style, render, children, ...props }, ref) {
+  const { labels } = usePicker("EmojiPicker.SearchField");
+  const empty = useEmpty("EmojiPicker.SearchField");
   return (
-    <SearchField
+    <AriaSearchField
       {...(props as object)}
       ref={ref}
       data-slot={SLOTS.searchField}
@@ -50,7 +50,7 @@ export const Field = React.forwardRef<HTMLDivElement, SearchFieldProps>(function
       render={(dom) => renderElement("div", { ...dom, "data-empty": flag(empty), render }, { empty })}
     >
       <FieldContext.Provider value>{children}</FieldContext.Provider>
-    </SearchField>
+    </AriaSearchField>
   );
 });
 
@@ -66,7 +66,7 @@ export type SearchInputProps = EmojiPickerHandlers<
 const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
 
 export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
-  const picker = usePicker("EmojiPicker.Search.Input");
+  const picker = usePicker("EmojiPicker.SearchInput");
   const { labels } = picker;
   const { registerInput } = picker.state;
   useLayoutEffect(() => registerInput(), [registerInput]);
@@ -110,7 +110,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       {children ?? <SearchClear />}
     </>
   );
-  return inField ? input : <Field>{input}</Field>;
+  return inField ? input : <SearchField>{input}</SearchField>;
 });
 
 export type SearchClearState = EmojiPickerInteractionState;
@@ -118,8 +118,8 @@ export type SearchClearProps = EmojiPickerPartElementProps<SearchClearState, HTM
 
 // Clears the query from anywhere in Root, and keeps focus in the search field
 export const SearchClear = React.forwardRef<HTMLButtonElement, SearchClearProps>(function SearchClear({ children, ...props }, ref) {
-  const picker = usePicker("EmojiPicker.Search.Clear");
-  const empty = useEmpty("EmojiPicker.Search.Clear");
+  const picker = usePicker("EmojiPicker.SearchClear");
+  const empty = useEmpty("EmojiPicker.SearchClear");
   const { onClick, ...own } = mergePartProps<Clickable>(props, {
     onClick: (e: React.MouseEvent) => {
       picker.state.setQuery("", { reason: "clear-press", event: e.nativeEvent });
@@ -149,7 +149,7 @@ export type SearchStatusProps = EmojiPickerPartElementProps<SearchStatusState, H
 
 // Base UI's Combobox.Status: the result count's live region, for placing and styling it; without one, Root renders a visually hidden one
 export const SearchStatus = React.forwardRef<HTMLDivElement, SearchStatusProps>(function SearchStatus({ children, ...props }, ref) {
-  const picker = usePicker("EmojiPicker.Search.Status");
+  const picker = usePicker("EmojiPicker.SearchStatus");
   const resultCount = useStore(picker.state, (s) => (s.searching && !s.pending ? s.results.length : null));
   const register = picker.registerStatus;
   useLayoutEffect(() => register(), [register]);
@@ -161,25 +161,27 @@ export const SearchStatus = React.forwardRef<HTMLDivElement, SearchStatusProps>(
   );
 });
 
-export const Search = Object.assign(SearchRoot, { Field, Input: SearchInput, Clear: SearchClear, Status: SearchStatus });
-
 export declare namespace Search {
   type Props = SearchProps;
   type State = SearchState;
-  namespace Field {
-    type Props = SearchFieldProps;
-    type State = SearchFieldState;
-  }
-  namespace Input {
-    type Props = SearchInputProps;
-    type State = SearchInputState;
-  }
-  namespace Clear {
-    type Props = SearchClearProps;
-    type State = SearchClearState;
-  }
-  namespace Status {
-    type Props = SearchStatusProps;
-    type State = SearchStatusState;
-  }
+}
+
+export declare namespace SearchField {
+  type Props = SearchFieldProps;
+  type State = SearchFieldState;
+}
+
+export declare namespace SearchInput {
+  type Props = SearchInputProps;
+  type State = SearchInputState;
+}
+
+export declare namespace SearchClear {
+  type Props = SearchClearProps;
+  type State = SearchClearState;
+}
+
+export declare namespace SearchStatus {
+  type Props = SearchStatusProps;
+  type State = SearchStatusState;
 }

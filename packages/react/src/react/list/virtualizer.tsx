@@ -88,7 +88,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
       const padding = getComputedStyle(el)[horizontal ? "paddingInlineStart" : "paddingTop"];
       const box = el.getBoundingClientRect();
       const scale = (horizontal ? box.width / el.offsetWidth : box.height / el.offsetHeight) || 1;
-      // On the scroller, so List.SectionActions, outside the list, pins with the titles
+      // On the scroller, so ListSectionActions, outside the list, pins with the titles
       el.style.setProperty("--ep-sticky-offset", `calc(-1 * ${padding} - ${STICKY_OVERLAP_DEVICE_PX / ((window.devicePixelRatio || 1) * scale)}px)`);
       const size = horizontal ? new Size(el.clientWidth, list.clientHeight) : new Size(list.clientWidth, el.clientHeight);
       const rect = visibleRect(el, list, horizontal, rtl);

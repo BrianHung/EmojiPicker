@@ -15,9 +15,14 @@ const FILL: React.CSSProperties = { width: "100%", height: "100%" };
 export const Cell = React.forwardRef<HTMLDivElement, CellProps>(function Cell({ className, style, render, children, ...props }, ref) {
   const cells = React.useContext(CellsContext);
   const item = React.useContext(ItemContext);
-  if (!cells || !item) throw new Error("EmojiPicker.List.Cell must be inside List.Items.");
+  if (!cells || !item) throw new Error("EmojiPicker.ListCell must be inside EmojiPicker.ListItems.");
   const horizontal = React.useContext(HorizontalContext);
   const { cellProps, state } = useCell(cells, item);
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(cellProps.ref, ref), [cellProps.ref, ref]);
   return renderElement("div", { ...mergePartProps(props, cellProps), ref: refs, className, style: (s: CellState) => ({ ...(horizontal ? FILL : CELL), ...resolve(style, s) }), render, children: children ?? cellProps.children }, state);
 });
+
+export declare namespace Cell {
+  type Props = CellProps;
+  type State = CellState;
+}

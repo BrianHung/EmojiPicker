@@ -133,3 +133,22 @@ export function ItemView({ item }: { item: EmojiItem }) {
   const template = React.useContext(PartsContext).items?.props.children;
   return <ItemContext.Provider value={item}>{template ? template(item) : <Cell />}</ItemContext.Provider>;
 }
+
+export declare namespace Section {
+  type Props = SectionProps;
+  type State = SectionState;
+}
+
+export declare namespace SectionTitle {
+  type Props = SectionTitleProps;
+  type State = SectionState;
+}
+
+export declare namespace SectionActions {
+  type Props = SectionActionsProps;
+  type State = SectionActionsState;
+}
+
+export declare namespace Items {
+  type Props = ItemsProps;
+}

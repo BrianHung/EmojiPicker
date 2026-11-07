@@ -43,7 +43,7 @@ const OptionContext = React.createContext<SkinToneValue | null>(null);
 
 function useSkinToneContext(part: string) {
   const value = React.useContext(SkinToneContext);
-  if (!value) throw new Error(`EmojiPicker.SkinTone.${part} must be inside <EmojiPicker.SkinTone>.`);
+  if (!value) throw new Error(`EmojiPicker.SkinTone${part} must be inside <EmojiPicker.SkinTone>.`);
   return value;
 }
 
@@ -59,7 +59,7 @@ export type SkinToneProps = EmojiPickerPartElementProps<SkinToneState> & {
 export type EmojiPickerSkinToneChangeEventReason = "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none";
 export type EmojiPickerSkinToneChangeEventDetails = ChangeDetails<EmojiPickerSkinToneChangeEventReason>;
 
-const SkinToneRoot = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props }, ref) {
+export const SkinTone = React.forwardRef<HTMLDivElement, SkinToneProps>(function SkinTone({ orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props }, ref) {
   const [tone, setTone] = useSkinTone();
   const [open, change] = useChangeState(openProp, defaultOpen, onOpenChange);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
@@ -248,26 +248,28 @@ export function SkinToneGlyph({ emoji = "✋", ...props }: SkinToneGlyphProps) {
   return <Emoji {...props} emoji={tone > 0 ? withTone(unified, tone) : unified} />;
 }
 
-export const SkinTone = /* @__PURE__ */ Object.assign(SkinToneRoot, { Trigger: SkinToneTrigger, Options: SkinToneOptions, Option: SkinToneOption, Glyph: SkinToneGlyph });
-
 export declare namespace SkinTone {
   type Props = SkinToneProps;
   type State = SkinToneState;
   type ChangeEventReason = EmojiPickerSkinToneChangeEventReason;
   type ChangeEventDetails = EmojiPickerSkinToneChangeEventDetails;
-  namespace Trigger {
-    type Props = SkinToneTriggerProps;
-    type State = SkinToneTriggerState;
-  }
-  namespace Options {
-    type Props = SkinToneOptionsProps;
-    type State = SkinToneOptionsState;
-  }
-  namespace Option {
-    type Props = SkinToneOptionProps;
-    type State = SkinToneOptionState;
-  }
-  namespace Glyph {
-    type Props = SkinToneGlyphProps;
-  }
+}
+
+export declare namespace SkinToneTrigger {
+  type Props = SkinToneTriggerProps;
+  type State = SkinToneTriggerState;
+}
+
+export declare namespace SkinToneOptions {
+  type Props = SkinToneOptionsProps;
+  type State = SkinToneOptionsState;
+}
+
+export declare namespace SkinToneOption {
+  type Props = SkinToneOptionProps;
+  type State = SkinToneOptionState;
+}
+
+export declare namespace SkinToneGlyph {
+  type Props = SkinToneGlyphProps;
 }
