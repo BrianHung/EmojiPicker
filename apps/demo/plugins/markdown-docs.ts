@@ -93,13 +93,13 @@ export const ROUTES: Record<string, Route> = {
   ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => document(example(name), `Live example: ${SITE}/examples/${name}/`) } satisfies Route])),
   "llms.txt": {
     type: "text/plain",
-    render: () => `# Emoji Picker
+    render: () => `# Emoji Components
 
 > ${docs().description.replace(/\.$/, "")} (emoji-components).
 
 ## Docs
 
-- [Emoji Picker](${SITE}/docs.md): installation, anatomy, usage, examples, API reference, and accessibility.
+- [Emoji Components](${SITE}/docs.md): installation, anatomy, usage, examples, API reference, and accessibility.
 
 ## Examples
 

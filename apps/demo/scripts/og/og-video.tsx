@@ -66,8 +66,8 @@ function Pointer({ x, y, pressed, away }: { x: number; y: number; pressed: boole
 function OgTitle() {
   return (
     <div className="relative z-10 flex w-[600px] flex-col gap-6 pl-20">
-      <h1 className="text-[84px] leading-[1.02] font-semibold tracking-[-0.035em]">Emoji Picker</h1>
-      <p className="text-[32px] leading-[1.3] tracking-[-0.01em] text-neutral-500">Virtualized, unstyled React components for emoji pickers, tapbacks, and shortcode autocomplete.</p>
+      <h1 className="text-[84px] leading-[1.02] font-semibold tracking-[-0.035em]">Emoji Components</h1>
+      <p className="text-[32px] leading-[1.3] tracking-[-0.01em] text-neutral-500">Unstyled, composable emoji components for React.</p>
     </div>
   );
 }

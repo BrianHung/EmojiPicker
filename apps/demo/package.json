@@ -83,7 +83,7 @@
     "wrangler": "^4.156.2"
   },
   "cloudflare": {
-    "label": "Emoji Picker",
+    "label": "Emoji Components",
     "products": [
       "Workers",
       "Workers AI",

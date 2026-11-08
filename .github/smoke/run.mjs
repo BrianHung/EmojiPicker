@@ -66,7 +66,7 @@ item.dependencies = item.dependencies.map((dep) => dep.replace(/^(emoji-componen
 writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
 run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
 // shadcn's css block has no top-level @font-face, so the item nests it in :root and shadcn hoists it into the layer
-if (!/@font-face\s*\{\s*font-family: "Emoji Picker Apple"/.test(readFileSync(join(shadcn, "src/index.css"), "utf8"))) throw new Error("shadcn add did not write the Apple emoji @font-face");
+if (!/@font-face\s*\{\s*font-family: "Emoji Components Apple"/.test(readFileSync(join(shadcn, "src/index.css"), "utf8"))) throw new Error("shadcn add did not write the Apple emoji @font-face");
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
 

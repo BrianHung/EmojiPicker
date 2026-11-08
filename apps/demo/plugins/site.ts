@@ -3,8 +3,8 @@ import type { HtmlTagDescriptor, Plugin } from "vite";
 import { EXAMPLES } from "../src/lib/examples";
 
 export const SITE = "https://emoji.brianhung.me";
-const NAME = "Emoji Picker";
-const TAGLINE = "A virtualized, unstyled, and composable emoji picker for React.";
+const NAME = "Emoji Components";
+const TAGLINE = "Unstyled, composable emoji components for React.";
 const PACKAGE = "emoji-components";
 
 type Page = { entry: string; heading: string; description: string; title?: string };
@@ -22,7 +22,7 @@ function example(name: string): Page {
 }
 
 export const PAGES = {
-  main: { entry: "index.html", heading: NAME, title: `${NAME} · Virtualized, unstyled React emoji picker`, description: TAGLINE },
+  main: { entry: "index.html", heading: NAME, title: `${NAME} · Unstyled, composable emoji components for React`, description: TAGLINE },
   gallery: {
     entry: "gallery/index.html",
     heading: "Gallery",
@@ -55,7 +55,7 @@ const jsonLd = (page: Page) => ({
   alternateName: PACKAGE,
   description: page.description,
   url: pageUrl(page),
-  codeRepository: "https://github.com/BrianHung/EmojiPicker",
+  codeRepository: "https://github.com/BrianHung/emoji-components",
   programmingLanguage: "TypeScript",
   runtimePlatform: "React",
   license: "https://opensource.org/licenses/MIT",

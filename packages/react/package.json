@@ -1,7 +1,7 @@
 {
   "name": "emoji-components",
   "version": "1.0.0-alpha.0",
-  "description": "Virtualized, unstyled React components for emoji pickers, reaction rows, and shortcode typeahead.",
+  "description": "Unstyled, composable emoji components for React.",
   "keywords": [
     "react",
     "emoji",
@@ -16,11 +16,11 @@
   "license": "MIT",
   "author": "Brian Hung",
   "homepage": "https://emoji.brianhung.me",
-  "bugs": "https://github.com/BrianHung/EmojiPicker/issues",
+  "bugs": "https://github.com/BrianHung/emoji-components/issues",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BrianHung/EmojiPicker.git",
+    "url": "git+https://github.com/BrianHung/emoji-components.git",
     "directory": "packages/react"
   },
   "engines": {

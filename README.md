@@ -1,9 +1,9 @@
 <div align="center">
-  <h1>Emoji Picker</h1>
+  <h1>Emoji Components</h1>
   <a href="https://emoji.brianhung.me">
     <img alt="Emoji picker in light and dark mode" src=".github/assets/picker.svg" width="680">
   </a>
-  <p>A virtualized, unstyled, and composable emoji picker for React.</p>
+  <p>Unstyled, composable emoji components for React.</p>
   <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>
 
