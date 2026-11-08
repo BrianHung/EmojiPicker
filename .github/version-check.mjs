@@ -11,7 +11,7 @@ const json = (file) => JSON.parse(readFileSync(join(tmp, file), "utf8"));
 const git = (...args) => execFileSync("git", ["-c", "user.name=ci", "-c", "user.email=ci@localhost", "-c", "commit.gpgsign=false", ...args], { cwd: tmp, stdio: "ignore" });
 const changeset = (...args) => execFileSync(join(root, "node_modules/.bin/changeset"), args, { cwd: tmp, stdio: ["ignore", "ignore", "inherit"] });
 
-// The check below holds only while every package versions together
+// The check below holds only while every package versions together; packages pin each other exactly, and changeset version keeps an exact range exact
 const FIXED = ["emoji-components", "@emoji-components/*"];
 const ours = (dep) => dep === "emoji-components" || dep.startsWith("@emoji-components/");
 if (!JSON.parse(readFileSync(join(root, ".changeset/config.json"), "utf8")).fixed.some((group) => FIXED.every((name) => group.includes(name)))) throw new Error(`.changeset/config.json must set "fixed": [${JSON.stringify(FIXED)}]`);
@@ -34,7 +34,7 @@ try {
   for (const name of packages) {
     const pkg = json(`packages/${name}/package.json`);
     if (pkg.version !== version) throw new Error(`${pkg.name} is ${pkg.version}, expected ${version}`);
-    for (const [dep, range] of Object.entries({ ...pkg.dependencies, ...pkg.peerDependencies })) if (ours(dep) && range !== `^${version}`) throw new Error(`${pkg.name} depends on ${dep}@${range}, expected ^${version}`);
+    for (const [dep, range] of Object.entries({ ...pkg.dependencies, ...pkg.peerDependencies })) if (ours(dep) && range !== version) throw new Error(`${pkg.name} depends on ${dep}@${range}, expected exactly ${version}`);
   }
   execFileSync(join(root, "node_modules/.bin/tsup"), ["--silent"], { cwd: join(tmp, "packages/core"), stdio: "inherit" });
   const { DEFAULT_DATA_URL } = await import(pathToFileURL(join(tmp, "packages/core/dist/platform.js")).href);
