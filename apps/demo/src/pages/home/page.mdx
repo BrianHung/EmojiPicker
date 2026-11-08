@@ -1,0 +1,408 @@
+---
+title: Emoji Picker
+description: Virtualized, unstyled React components for emoji pickers, reaction rows, and shortcode typeahead.
+---
+
+import * as api from "@/docs/api";
+import * as ref from "virtual:api-reference";
+import providers from "@/docs/snippets/providers.tsx?raw";
+import localization from "@/docs/snippets/localization.tsx?raw";
+import recipes from "@/docs/snippets/search.ts?raw";
+import registry from "@/registry/emoji-picker.tsx?raw";
+
+<Section>
+
+## Installation
+
+The packages are in prerelease (`1.0.0-alpha`). The API can change between alphas.
+
+<TabPanels label="Installation">
+
+<TabPanel label="CLI">
+
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
+
+Adds `components/ui/emoji-picker.tsx`, and the emoji font stack and picker tokens to your CSS.
+
+```tsx title="App.tsx"
+import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+
+export default function App() {
+  return <EmojiPickerCard onSelect={(selection) => console.log(selection.emoji)} />;
+}
+```
+
+For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
+
+</TabPanel>
+
+<TabPanel label="Manual">
+
+<PackageManagers install="@brianhung/emoji-picker-react" />
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "@brianhung/emoji-picker-react/tokens.css";
+```
+
+<CodeTabs collapse={10}>
+  <Code title="components/ui/emoji-picker.tsx" code={registry} />
+</CodeTabs>
+
+</TabPanel>
+
+</TabPanels>
+
+</Section>
+
+<Section>
+
+## Anatomy
+
+```tsx title="anatomy.tsx"
+import { Emoji, EmojiPicker, EmojiProvider } from "@brianhung/emoji-picker-react";
+import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
+
+<EmojiProvider>
+  <EmojiPicker.Root>
+    <EmojiPicker.Search>
+      <EmojiPicker.SearchInput />
+      <EmojiPicker.SkinTone />
+      <EmojiPicker.SearchStatus />
+    </EmojiPicker.Search>
+    <EmojiPicker.Viewport>
+      <EmojiPicker.List />
+    </EmojiPicker.Viewport>
+    <EmojiPicker.CategoryNav />
+    <EmojiPicker.Preview />
+  </EmojiPicker.Root>
+
+  <EmojiPopover.Root>
+    <EmojiPopover.Trigger />
+    <EmojiPopover.Portal>
+      <EmojiPopover.Positioner>
+        <EmojiPopover.Popup>…</EmojiPopover.Popup>
+      </EmojiPopover.Positioner>
+    </EmojiPopover.Portal>
+  </EmojiPopover.Root>
+
+  <Emoji emoji="1f44d-1f3fd" />
+</EmojiProvider>
+```
+
+</Section>
+
+<Section>
+
+## Usage
+
+### Parts
+
+Parts render with no provider and no CSS. `Root` loads the English dataset from jsDelivr. `Viewport` needs a height to virtualize the list. A handler such as `onSelect` makes the file a Client Component.
+
+```tsx title="app/page.tsx"
+"use client";
+
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
+
+export default function Page() {
+  return (
+    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPicker.Search>
+        <EmojiPicker.SearchInput />
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport style={{ height: 320 }}>
+        <EmojiPicker.List />
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
+```
+
+### Styled
+
+Import `@brianhung/emoji-picker-react/theme.css` for Tailwind utilities on the tokens, such as `bg-picker-background`. Every part takes `className` and `style` as a value or a function of its state, and writes its state as data attributes.
+
+```tsx title="picker.tsx"
+<EmojiPicker.Root className="w-80 rounded-picker bg-picker-background shadow-picker [--emoji-size:24px]">
+  <EmojiPicker.Viewport className="h-80">
+    <EmojiPicker.List>
+      {() => <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className="rounded-md data-highlighted:bg-picker-selected" />}</EmojiPicker.ListItems>}
+    </EmojiPicker.List>
+  </EmojiPicker.Viewport>
+</EmojiPicker.Root>
+```
+
+### In a popover
+
+The registry component takes your shadcn/ui theme, and its popover item uses your `components/ui/popover`.
+
+```tsx title="message.tsx"
+import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
+
+<EmojiPickerPopover onSelect={(selection) => react(message.id, selection.unified)}>🙂 Add reaction</EmojiPickerPopover>
+```
+
+</Section>
+
+<Section className="gap-14">
+
+## Examples
+
+### Inline
+
+<Demo name="inline-picker" />
+
+### Popover
+
+`EmojiPopover` comes from `/floating-ui` or `/react-aria`. The React Aria one is modal by default.
+
+<Demo name="popover" className="min-h-[180px] flex-col gap-3" adapters />
+
+### Reactions {#tapback}
+
+`Root reactions` shows a row of emoji that expands into the picker in `Panel`.
+
+<Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
+
+### Provider {#provider}
+
+Parts and hooks use the nearest `EmojiProvider`; without one they share one store. Uncontrolled frequents and skin tone persist to `localStorage`; pass `frequents` with `onFrequentsChange` and `skinTone` with `onSkinToneChange` to keep them elsewhere.
+
+<Code title="app/providers.tsx" code={providers} />
+
+### Data and localization {#data}
+
+`data` defaults to the English dataset of `@brianhung/emoji-picker-data` on jsDelivr, and takes a URL, a loader, or the dataset; `filter` removes emoji. `localeData(locale, { shortcodes, baseUrl })` is a dataset's URL, and `"cldr"` gives shortcodes in the locale's language. `labels` overrides the strings.
+
+<Code title="app/providers.tsx" code={localization} />
+
+### Search
+
+`search` takes any `EmojiSearch`; the default, `lexical()`, ranks names, shortcodes, and tags with typo correction.
+
+<Demo name="search" className="flex-col gap-3">
+  <Code title="search.ts" label="Recipes" code={recipes} />
+</Demo>
+
+### Rendering
+
+Native emoji draw in `--emoji-font-family`. Images come from `imageUrl`: Twemoji by default, or your own art. `renderer="auto"` draws an image wherever the font can't.
+
+<Demo name="rendering" className="flex-col gap-4" />
+
+<AttrTable head={["Rendering", "Snippet", "Notes"]} rows={api.rendering} />
+
+### Custom emoji
+
+`customEmojis` takes a list or a loader. Each `group` becomes a section.
+
+<Demo name="custom-emoji" className="flex-col gap-3" />
+
+### Custom cells
+
+<Demo name="cells-and-rows" className="flex-col gap-3" />
+
+### Shortcode typeahead {#headless}
+
+`useTextFieldEmojiTypeahead(ref)` for a text field; `useEmojiTypeahead` for an editor ([Tiptap](/examples/tiptap/), [Lexical](/examples/lexical/)).
+
+<Demo name="autocomplete" className="flex-col items-center gap-10 pt-48" />
+
+### Hooks {#hooks}
+
+<DefList rows={api.hooks} />
+
+Types: `EmojiTypeahead`, `EmojiTypeaheadOptions`, `EmojiSearchState`, `FrequentEmoji`, `ResolvedEmoji`, `EmojiStoreStatus`, `EmojiPickerRootActions`, `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiGridOptions`, `UseEmojiGridResult`, `UseEmojiCellResult`.
+
+### Custom popover {#custom-popover}
+
+In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` from the main entry as the popover's initial focus.
+
+```tsx title="emoji-button.tsx"
+<Popover open={open} onOpenChange={setOpen}>
+  <PopoverTrigger aria-label="Add emoji">😀</PopoverTrigger>
+  <PopoverContent aria-label="Emoji picker" className="w-80 p-0">
+    <EmojiPicker.Root onSelect={({ emoji }) => (onEmoji(emoji), setOpen(false))}>
+      <EmojiPicker.Search>
+        <EmojiPicker.SearchInput autoFocus />
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport className="h-72">
+        <EmojiPicker.List />
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  </PopoverContent>
+</Popover>
+```
+
+### Custom virtualizer
+
+Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Virtual, react-window, or your own list. See [Custom virtualizer](/examples/virtualizer/).
+
+</Section>
+
+<Section className="gap-12">
+
+## API reference
+
+Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them (`EmojiPicker.SearchInput`, `EmojiPopover.Positioner`). Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component's function.
+
+<PropsTable rows={api.part} />
+
+### EmojiProvider {#api-provider}
+
+The dataset, search, frequently used emoji, and skin tone for the parts and hooks inside it.
+
+<PropsTable rows={api.provider} />
+
+Types: `EmojiProvider.Props`, `EmojiProvider.SkinToneChangeEventDetails`, `EmojiProvider.FrequentsChangeEventDetails`, each with its `…EventReason`.
+
+### Root {#api-root}
+
+Contains a picker. Each controllable state takes `x`, `defaultX`, and `onXChange(value, details)`; `details.event` is the native event, or a synthetic one; `details.cancel()` keeps the current state, and `details.allowPropagation()` lets an Escape reach the page. To drive the picker from an editor that keeps focus, pass it as `keyboardTarget`, or call `actionsRef`.
+
+<PropsTable rows={api.root} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.rootAttributes} />
+
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={ref.rootVariables} />
+
+Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.HighlightChangeEventDetails`, `.CollapsedCategoriesChangeEventDetails`, `.ReactionsOpenChangeEventDetails`, each with its `…EventReason` (`.SelectEventDetails` uses `.ChangeEventReason`).
+
+### Search {#api-search}
+
+A searchbox with `aria-activedescendant` and a polite result count. `SearchField` is React Aria's `SearchField`; `SearchClear` renders while there is a query.
+
+<PropsTable rows={api.searchParts} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.searchAttributes} />
+
+Types: `EmojiPicker.Search`, `.SearchField`, `.SearchInput`, `.SearchClear`, `.SearchStatus`, each with `.Props` and `.State`.
+
+### CategoryNav {#api-category-nav}
+
+A toolbar of buttons that scroll to a section; the one in view has `aria-current`.
+
+<PropsTable rows={api.categoryNavParts} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.categoryNavAttributes} />
+
+Types: `EmojiPicker.CategoryNav`, `.CategoryNavTab`, each with `.Props` and `.State`.
+
+### Viewport and List {#api-list}
+
+The scroll container and a virtualized listbox with a group per section. Shift+Space or a long press opens a cell's skin tones.
+
+<PropsTable rows={api.list} />
+
+<PropsTable rows={api.listParts} />
+
+<PropsTable rows={api.states} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.listAttributes} />
+
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={ref.listVariables} />
+
+Types: `EmojiPicker.Viewport.Props`, `.State`, `EmojiPicker.List.Props`, `.State`, `.EmptyState`, `EmojiPicker.ListItems.Props`, and `.ListSection`, `.ListSectionTitle`, `.ListSectionActions`, `.ListCell`, `.ListVariations`, `.ListVariationsOption` with `.Props` and `.State`.
+
+### SkinTone {#api-skin-tone}
+
+A disclosure button for a toolbar of `aria-pressed` tones. Focus leaving closes it.
+
+<PropsTable rows={api.skinTone} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.skinToneAttributes} />
+
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={ref.skinToneVariables} />
+
+Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `EmojiPicker.SkinToneGlyph.Props`, and `.SkinToneTrigger`, `.SkinToneOptions`, `.SkinToneOption` with `.Props` and `.State`.
+
+### Preview {#api-preview}
+
+The highlighted emoji and its name, or `labels.previewCaption`. `children` and `className` take `{ emoji }`, the highlighted `EmojiRecord` or `null`.
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.previewAttributes} />
+
+Types: `EmojiPicker.Preview.Props`, `.State`.
+
+### Reactions and Panel {#api-tapback}
+
+A toolbar of reactions, toggle buttons when the row has a value. `onSelect`'s `details.collapse()` shows the row again.
+
+<PropsTable rows={api.reactions} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.reactionsAttributes} />
+
+Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`, `EmojiPicker.ReactionsItems.Props`, `.ReactionsItem` and `.ReactionsExpand` with `.Props` and `.State`, `EmojiPicker.Panel.Props`, `.State`.
+
+### EmojiPopover {#api-popover}
+
+A dialog next to its trigger: non-modal from `/floating-ui`, modal from `/react-aria`. `Portal`, `Positioner`, and `Popup` follow Base UI's Popover. A pick closes it; to keep it open, cancel that close:
+
+```tsx
+<EmojiPopover.Root onOpenChange={(open, details) => details.reason === "item-press" && details.cancel()}>
+```
+
+<PropsTable rows={api.popoverRootParts} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.popoverTriggerAttributes} />
+
+Types: `EmojiPopover.Root.Props`, `.Root.Actions`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Trigger.Props`, `.Trigger.State`.
+
+### EmojiPopover.Portal {#api-popover-portal}
+
+Renders the positioner into `<body>` or `container` while the popup is mounted.
+
+<PropsTable rows={api.popoverPortal} />
+
+Types: `EmojiPopover.Portal.Props`.
+
+### EmojiPopover.Positioner {#api-popover-positioner}
+
+Places the popup against the Trigger or `anchor`. Renders a `<div>`.
+
+<PropsTable rows={api.popoverPositioner} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.popoverPositionerAttributes} />
+
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={ref.popoverPositionerVariables} />
+
+Types: `EmojiPopover.Positioner.Props`, `.State`.
+
+### EmojiPopover.Popup {#api-popover-popup}
+
+The dialog. Renders a `<div>`.
+
+<PropsTable rows={api.popoverPopup} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.popoverPopupAttributes} />
+
+Types: `EmojiPopover.Popup.Props`, `.State`.
+
+### EmojiSuggestions {#api-suggestions}
+
+A typeahead menu at the caret that never takes focus, with the parts of Base UI's Combobox popup: `Root`, `Portal`, `Positioner`, and a `Popup` without the focus props.
+
+<PropsTable rows={api.suggestionsParts} />
+
+Types: `EmojiSuggestions.Root.Props`, `.Root.ChangeEventDetails`, `.Root.ChangeEventReason`, `.Portal.Props`, and `.Positioner`, `.Popup` with `.Props` and `.State`.
+
+### Emoji {#api-emoji}
+
+One emoji, drawn as the pickers draw it, with `role="img"`. It forwards its ref.
+
+<PropsTable rows={api.emoji} />
+
+<AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.emojiAttributes} />
+
+Types: `Emoji.Props`.
+
+### Design tokens {#api-tokens}
+
+Defined in `tokens.css`; set them on `Root` or an ancestor.
+
+<AttrTable head={["Token", "Default (light / dark)", "Description"]} rows={api.tokens} />
+
+Domain types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `ImageUrl`, `EmojiStore`, `EmojiTypeahead`, `EmojiTypeaheadOptions`, `ShortcodeCompletion`, `EmojiGridState`.
+
+</Section>

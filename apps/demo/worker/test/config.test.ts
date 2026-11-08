@@ -1,0 +1,36 @@
+import { readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+
+const read = (f: string) => readFileSync(new URL(`../../${f}`, import.meta.url), "utf8");
+const wrangler = JSON.parse(read("wrangler.jsonc").replace(/^\s*\/\/.*$/gm, ""));
+const cf = read("cloudflare.config.ts");
+const text = (key: string) => cf.match(new RegExp(`${key}: bindings\\.text\\("([^"]*)"\\)`))?.[1];
+
+describe("config", () => {
+  it("cloudflare.config.ts matches wrangler.jsonc", () => {
+    expect(cf).toContain(`name: "${wrangler.name}"`);
+    expect(cf).toContain(`compatibilityDate: "${wrangler.compatibility_date}"`);
+    expect(cf).toContain(`${wrangler.ai.binding}: bindings.ai()`);
+    expect(wrangler.vectorize).toHaveLength(1);
+    expect(cf).toContain(`${wrangler.vectorize[0].binding}: bindings.vectorize({ name: "${wrangler.vectorize[0].index_name}" })`);
+    expect(wrangler.main).toBe("worker/index.ts");
+    expect(cf).toContain(`import * as entrypoint from "./${wrangler.main}"`);
+    expect(cf).toContain(`runWorkerFirst: ${JSON.stringify(wrangler.assets.run_worker_first)}`);
+    for (const [key, value] of Object.entries(wrangler.vars)) expect(text(key), key).toBe(value);
+    for (const r of wrangler.ratelimits) expect(cf).toContain(`${r.name}: bindings.rateLimit({ namespace: "${r.namespace_id}", simple: { limit: ${r.simple.limit}, period: ${r.simple.period} } })`);
+  });
+  it("declares every secret in .dev.vars.example", () => {
+    const secrets = [...cf.matchAll(/(\w+): bindings\.secret\(\)/g)].map((m) => m[1]);
+    const example = read(".dev.vars.example");
+    for (const s of secrets) expect(example).toMatch(new RegExp(`^${s}=`, "m"));
+    expect(Object.keys(JSON.parse(read("package.json")).cloudflare.bindings).sort()).toEqual(secrets.sort());
+  });
+  it("creates the Vectorize index the config names", () => {
+    const scripts = JSON.parse(read("package.json")).scripts;
+    expect(scripts["create-index"]).toBe(`wrangler vectorize create ${wrangler.vectorize[0].index_name} --dimensions=1024 --metric=cosine`);
+  });
+  it("has no account id", () => {
+    expect(wrangler.account_id).toBeUndefined();
+    expect(cf).not.toMatch(/accountId/);
+  });
+});

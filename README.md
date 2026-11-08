@@ -1,62 +1,56 @@
 <div align="center">
-  <br><b>React Twemoji Picker</b> is an emoji component
-  <br>made for fast show-and-scroll and filtering
-  <br><a href="https://brianhung.github.io/EmojiPicker">demo</a>
-  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./light-theme.png" alt="image of emoji picker" title="click to navigate to demo"></a>
-  <br><a href="https://brianhung.github.io/EmojiPicker"><img width="343px" src="./dark-theme.png" alt="image of emoji picker" title="click to navigate to demo"></a>
+  <h1>Emoji Picker</h1>
+  <a href="https://emoji.brianhung.me">
+    <img alt="Emoji picker in light and dark mode" src=".github/assets/picker.svg" width="680">
+  </a>
+  <p>A virtualized, unstyled, and composable emoji picker for React.</p>
+  <p><a href="https://emoji.brianhung.me">Docs</a> · <a href="https://emoji.brianhung.me/gallery/">Gallery</a> · <a href="https://emoji.brianhung.me/examples/">Examples</a></p>
 </div>
-
-To do this, we virtualize emoji elements with [`react-window`](https://github.com/bvaughn/react-window) 
-and [`react-window-infinite-loader`](), meaning elements are not rendered into the DOM until they 
-are visible through the scroll viewport. This allows [`react-twemoji-picker`](https://github.com/BrianHung/EmojiPicker) to be used with input or contenteditable components which require fast responsivity.
-
-Original svg sources for emoji spritesheet comes from Twitter's [`twemoji`](https://github.com/twitter/twemoji) library. 😊
 
 ## Installation
 
+### shadcn/ui
+
 ```bash
-npm install --save github:brianhung/emojipicker
+npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
+```
+
+```tsx
+import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+
+<EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
+```
+
+### npm
+
+```bash
+npm i @brianhung/emoji-picker-react
 ```
 
 ## Usage
 
-```js
-import { EmojiPicker } from 'react-twemoji-picker';
-import EmojiData from "react-twemoji-picker/data/twemoji.json";
-import "react-twemoji-picker/dist/EmojiPicker.css"
+```tsx
+import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
-const emojiData = Object.freeze(EmojiData);
-const handleEmojiSelect = (emoji: EmojiObject) => console.log(emoji);
-
-<EmojiPicker emojiData={emojiData} handleEmojiSelect={handleEmojiSelect}/>
+<EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
+  <EmojiPicker.Search />
+  <EmojiPicker.Viewport style={{ height: 320 }}>
+    <EmojiPicker.List />
+  </EmojiPicker.Viewport>
+</EmojiPicker.Root>
 ```
 
-If you want to programatically get or set internal state (e.g. `search`), you have to use `EmojiPickertRef` 
-since `EmojiPicker` is a functional component. As an example,
+## Packages
 
-```jsx
-import { EmojiPicker, EmojiPickerRef } from 'react-twemoji-picker';
-const ref = React.createRef<EmojiPickerRef>()
-const handleSearch = (query: string) => ref.current.search(query);
-<EmojiPicker emojiData={emojiData} handleEmojiSelect={handleEmojiSelect} ref={ref}/>
-<input onChange={event => handleSearch(event.target.value)} placeholder="search"></input>
-```
+| Package | Description |
+|---|---|
+| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
+| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies |
+| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set; core loads its English one by default |
+| [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
 
-To see an example, look at the <a href="./website/index.tsx">source code</a> for the demo.
+[Contributing](CONTRIBUTING.md)
 
-### Props
+## License
 
-| prop | default | description |
-|:-----|:--------|:------------|
-| emojiData: Record<string, EmojiObject[]> | `{}` | map of categories to list of emoji objects |
-| emojiSize?: number | `36` | pixel size of an emoji |
-| numberScrollRows?: number | `12` | number of rows in the scroll element |
-| onEmojiSelect?: (emoji: EmojiObject, event: KeyboardEvent | MouseEvent) => void, | `(emoji: EmojiObject) => console.log(emoji)` | handle emoji click or enter key here |
-| showNavbar?: boolean; | `false` | allows navigation to categories |
-| showFooter?: boolean; | `false` | show focused emoji and its name |
-| showScroll?: boolean; | `true` | turn off if query is always not null |
-| emojisPerRow?: number; | `9` | number of emojis to show per row |
-| onKeyDownScroll?: Function; | `(event) => null` | handle additional key events like 'ctrl-c' here |
-| collapseCategoriesOnSearch?: boolean; | `true` | merge categories into single 'search results' category |
-| collapseHeightOnSearch?: boolean; | `true` | scroll height changes with number of emojis |
-| theme?: "system", "light", "dark" | `"system"` | css theme |
+MIT. Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

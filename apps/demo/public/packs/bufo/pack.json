@@ -1,0 +1,1185 @@
+[
+  {
+    "id": "bufo-yes",
+    "name": "bufo yes",
+    "imageUrl": "https://all-the.bufo.zone/bufo-yes.png",
+    "shortcodes": [
+      "bufo-yes"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-no",
+    "name": "bufo no",
+    "imageUrl": "https://all-the.bufo.zone/bufo-no.gif",
+    "shortcodes": [
+      "bufo-no"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-no.gif"
+  },
+  {
+    "id": "bufo-lgtm",
+    "name": "bufo lgtm",
+    "imageUrl": "https://all-the.bufo.zone/bufo-lgtm.png",
+    "shortcodes": [
+      "bufo-lgtm"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-wave",
+    "name": "bufo wave",
+    "imageUrl": "https://all-the.bufo.zone/bufo-wave.gif",
+    "shortcodes": [
+      "bufo-wave"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wave.gif"
+  },
+  {
+    "id": "bufo-heart",
+    "name": "bufo heart",
+    "imageUrl": "https://all-the.bufo.zone/bufo-heart.png",
+    "shortcodes": [
+      "bufo-heart"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-thumbsup",
+    "name": "bufo thumbsup",
+    "imageUrl": "https://all-the.bufo.zone/bufo-thumbsup.png",
+    "shortcodes": [
+      "bufo-thumbsup"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-laugh-xd",
+    "name": "bufo laugh xd",
+    "imageUrl": "https://all-the.bufo.zone/bufo-laugh-xd.png",
+    "shortcodes": [
+      "bufo-laugh-xd"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-hug",
+    "name": "bufo hug",
+    "imageUrl": "https://all-the.bufo.zone/bufo-hug.png",
+    "shortcodes": [
+      "bufo-hug"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-pray",
+    "name": "bufo pray",
+    "imageUrl": "https://all-the.bufo.zone/bufo-pray.png",
+    "shortcodes": [
+      "bufo-pray"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-eyes",
+    "name": "bufo eyes",
+    "imageUrl": "https://all-the.bufo.zone/bufo-eyes.png",
+    "shortcodes": [
+      "bufo-eyes"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-facepalm",
+    "name": "bufo facepalm",
+    "imageUrl": "https://all-the.bufo.zone/bufo-facepalm.png",
+    "shortcodes": [
+      "bufo-facepalm"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-shrug",
+    "name": "bufo shrug",
+    "imageUrl": "https://all-the.bufo.zone/bufo-shrug.png",
+    "shortcodes": [
+      "bufo-shrug"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-happy",
+    "name": "bufo happy",
+    "imageUrl": "https://all-the.bufo.zone/bufo-happy.png",
+    "shortcodes": [
+      "bufo-happy"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-sweat",
+    "name": "bufo sweat",
+    "imageUrl": "https://all-the.bufo.zone/bufo-sweat.png",
+    "shortcodes": [
+      "bufo-sweat"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-hello",
+    "name": "bufo hello",
+    "imageUrl": "https://all-the.bufo.zone/bufo-hello.gif",
+    "shortcodes": [
+      "bufo-hello"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hello.gif"
+  },
+  {
+    "id": "bufo-thanks",
+    "name": "bufo thanks",
+    "imageUrl": "https://all-the.bufo.zone/bufo-thanks.png",
+    "shortcodes": [
+      "bufo-thanks"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-ack",
+    "name": "bufo ack",
+    "imageUrl": "https://all-the.bufo.zone/bufo-ack.png",
+    "shortcodes": [
+      "bufo-ack"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-check",
+    "name": "bufo check",
+    "imageUrl": "https://all-the.bufo.zone/bufo-check.png",
+    "shortcodes": [
+      "bufo-check"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-congrats",
+    "name": "bufo congrats",
+    "imageUrl": "https://all-the.bufo.zone/bufo-congrats.png",
+    "shortcodes": [
+      "bufo-congrats"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-upvote",
+    "name": "bufo upvote",
+    "imageUrl": "https://all-the.bufo.zone/bufo-upvote.png",
+    "shortcodes": [
+      "bufo-upvote"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-downvote",
+    "name": "bufo downvote",
+    "imageUrl": "https://all-the.bufo.zone/bufo-downvote.png",
+    "shortcodes": [
+      "bufo-downvote"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-excited",
+    "name": "bufo excited",
+    "imageUrl": "https://all-the.bufo.zone/bufo-excited.gif",
+    "shortcodes": [
+      "bufo-excited"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-excited.gif"
+  },
+  {
+    "id": "bufo-shy",
+    "name": "bufo shy",
+    "imageUrl": "https://all-the.bufo.zone/bufo-shy.gif",
+    "shortcodes": [
+      "bufo-shy"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shy.gif"
+  },
+  {
+    "id": "bufo-worried",
+    "name": "bufo worried",
+    "imageUrl": "https://all-the.bufo.zone/bufo-worried.png",
+    "shortcodes": [
+      "bufo-worried"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-phew",
+    "name": "bufo phew",
+    "imageUrl": "https://all-the.bufo.zone/bufo-phew.png",
+    "shortcodes": [
+      "bufo-phew"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-wat",
+    "name": "bufo wat",
+    "imageUrl": "https://all-the.bufo.zone/bufo-wat.png",
+    "shortcodes": [
+      "bufo-wat"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-idk",
+    "name": "bufo idk",
+    "imageUrl": "https://all-the.bufo.zone/bufo-idk.png",
+    "shortcodes": [
+      "bufo-idk"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-please",
+    "name": "bufo please",
+    "imageUrl": "https://all-the.bufo.zone/bufo-please.png",
+    "shortcodes": [
+      "bufo-please"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-welcome",
+    "name": "bufo welcome",
+    "imageUrl": "https://all-the.bufo.zone/bufo-welcome.png",
+    "shortcodes": [
+      "bufo-welcome"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-mindblown",
+    "name": "bufo mindblown",
+    "imageUrl": "https://all-the.bufo.zone/bufo-mindblown.png",
+    "shortcodes": [
+      "bufo-mindblown"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-nervous",
+    "name": "bufo nervous",
+    "imageUrl": "https://all-the.bufo.zone/bufo-nervous.gif",
+    "shortcodes": [
+      "bufo-nervous"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-nervous.gif"
+  },
+  {
+    "id": "bufo-confused",
+    "name": "bufo confused",
+    "imageUrl": "https://all-the.bufo.zone/bufo-confused.gif",
+    "shortcodes": [
+      "bufo-confused"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-confused.gif"
+  },
+  {
+    "id": "bufo-uwu",
+    "name": "bufo uwu",
+    "imageUrl": "https://all-the.bufo.zone/bufo-uwu.png",
+    "shortcodes": [
+      "bufo-uwu"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-blep",
+    "name": "bufo blep",
+    "imageUrl": "https://all-the.bufo.zone/bufo-blep.png",
+    "shortcodes": [
+      "bufo-blep"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-chefkiss",
+    "name": "bufo chefkiss",
+    "imageUrl": "https://all-the.bufo.zone/bufo-chefkiss.png",
+    "shortcodes": [
+      "bufo-chefkiss"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-innocent",
+    "name": "bufo innocent",
+    "imageUrl": "https://all-the.bufo.zone/bufo-innocent.gif",
+    "shortcodes": [
+      "bufo-innocent"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-innocent.gif"
+  },
+  {
+    "id": "bufo-pog",
+    "name": "bufo pog",
+    "imageUrl": "https://all-the.bufo.zone/bufo-pog.png",
+    "shortcodes": [
+      "bufo-pog"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-lfg",
+    "name": "bufo lfg",
+    "imageUrl": "https://all-the.bufo.zone/bufo-lfg.png",
+    "shortcodes": [
+      "bufo-lfg"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-grin",
+    "name": "bufo grin",
+    "imageUrl": "https://all-the.bufo.zone/bufo-grin.png",
+    "shortcodes": [
+      "bufo-grin"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-concerned",
+    "name": "bufo concerned",
+    "imageUrl": "https://all-the.bufo.zone/bufo-concerned.png",
+    "shortcodes": [
+      "bufo-concerned"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-snore",
+    "name": "bufo snore",
+    "imageUrl": "https://all-the.bufo.zone/bufo-snore.png",
+    "shortcodes": [
+      "bufo-snore"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-shaking-head",
+    "name": "bufo shaking head",
+    "imageUrl": "https://all-the.bufo.zone/bufo-shaking-head.gif",
+    "shortcodes": [
+      "bufo-shaking-head"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shaking-head.gif"
+  },
+  {
+    "id": "bufo-tips-hat",
+    "name": "bufo tips hat",
+    "imageUrl": "https://all-the.bufo.zone/bufo-tips-hat.png",
+    "shortcodes": [
+      "bufo-tips-hat"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-detective",
+    "name": "bufo detective",
+    "imageUrl": "https://all-the.bufo.zone/bufo-detective.png",
+    "shortcodes": [
+      "bufo-detective"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-pirate",
+    "name": "bufo pirate",
+    "imageUrl": "https://all-the.bufo.zone/bufo-pirate.png",
+    "shortcodes": [
+      "bufo-pirate"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-cowboy",
+    "name": "bufo cowboy",
+    "imageUrl": "https://all-the.bufo.zone/bufo-cowboy.png",
+    "shortcodes": [
+      "bufo-cowboy"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-king",
+    "name": "bufo king",
+    "imageUrl": "https://all-the.bufo.zone/bufo-king.png",
+    "shortcodes": [
+      "bufo-king"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-nerd",
+    "name": "bufo nerd",
+    "imageUrl": "https://all-the.bufo.zone/bufo-nerd.png",
+    "shortcodes": [
+      "bufo-nerd"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-science",
+    "name": "bufo science",
+    "imageUrl": "https://all-the.bufo.zone/bufo-science.png",
+    "shortcodes": [
+      "bufo-science"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-medal",
+    "name": "bufo medal",
+    "imageUrl": "https://all-the.bufo.zone/bufo-medal.png",
+    "shortcodes": [
+      "bufo-medal"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-yay",
+    "name": "bufo yay",
+    "imageUrl": "https://all-the.bufo.zone/bufo-yay.gif",
+    "shortcodes": [
+      "bufo-yay"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-yay.gif"
+  },
+  {
+    "id": "bufo-starstruck",
+    "name": "bufo starstruck",
+    "imageUrl": "https://all-the.bufo.zone/bufo-starstruck.png",
+    "shortcodes": [
+      "bufo-starstruck"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-cuppa",
+    "name": "bufo cuppa",
+    "imageUrl": "https://all-the.bufo.zone/bufo-cuppa.png",
+    "shortcodes": [
+      "bufo-cuppa"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-boba",
+    "name": "bufo boba",
+    "imageUrl": "https://all-the.bufo.zone/bufo-boba.png",
+    "shortcodes": [
+      "bufo-boba"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-ice-cream",
+    "name": "bufo ice cream",
+    "imageUrl": "https://all-the.bufo.zone/bufo-ice-cream.png",
+    "shortcodes": [
+      "bufo-ice-cream"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-popcorn",
+    "name": "bufo popcorn",
+    "imageUrl": "https://all-the.bufo.zone/bufo-popcorn.gif",
+    "shortcodes": [
+      "bufo-popcorn"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-popcorn.gif"
+  },
+  {
+    "id": "bufo-ramen",
+    "name": "bufo ramen",
+    "imageUrl": "https://all-the.bufo.zone/bufo-ramen.gif",
+    "shortcodes": [
+      "bufo-ramen"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-ramen.gif"
+  },
+  {
+    "id": "bufo-shipping",
+    "name": "bufo shipping",
+    "imageUrl": "https://all-the.bufo.zone/bufo-shipping.gif",
+    "shortcodes": [
+      "bufo-shipping"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shipping.gif"
+  },
+  {
+    "id": "bufo-offers-a-deploy-lock",
+    "name": "bufo offers a deploy lock",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-a-deploy-lock.png",
+    "shortcodes": [
+      "bufo-offers-a-deploy-lock"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-code-freeze",
+    "name": "bufo code freeze",
+    "imageUrl": "https://all-the.bufo.zone/bufo-code-freeze.png",
+    "shortcodes": [
+      "bufo-code-freeze"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-blesses-this-pr",
+    "name": "bufo blesses this pr",
+    "imageUrl": "https://all-the.bufo.zone/bufo-blesses-this-pr.png",
+    "shortcodes": [
+      "bufo-blesses-this-pr"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-approve",
+    "name": "bufo approve",
+    "imageUrl": "https://all-the.bufo.zone/bufo-approve.png",
+    "shortcodes": [
+      "bufo-approve"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 127
+  },
+  {
+    "id": "bufo-revokes-his-approval",
+    "name": "bufo revokes his approval",
+    "imageUrl": "https://all-the.bufo.zone/bufo-revokes-his-approval.png",
+    "shortcodes": [
+      "bufo-revokes-his-approval"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-thinks-about-rubberduck",
+    "name": "bufo thinks about rubberduck",
+    "imageUrl": "https://all-the.bufo.zone/bufo-thinks-about-rubberduck.png",
+    "shortcodes": [
+      "bufo-thinks-about-rubberduck"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-offers-a-loading-spinner",
+    "name": "bufo offers a loading spinner",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-a-loading-spinner.gif",
+    "shortcodes": [
+      "bufo-offers-a-loading-spinner"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-offers-a-loading-spinner.gif"
+  },
+  {
+    "id": "bufo-hackerman",
+    "name": "bufo hackerman",
+    "imageUrl": "https://all-the.bufo.zone/bufo-hackerman.gif",
+    "shortcodes": [
+      "bufo-hackerman"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hackerman.gif"
+  },
+  {
+    "id": "bufo-raised-hand",
+    "name": "bufo raised hand",
+    "imageUrl": "https://all-the.bufo.zone/bufo-raised-hand.png",
+    "shortcodes": [
+      "bufo-raised-hand"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112
+  },
+  {
+    "id": "bufo-this-is-fine",
+    "name": "bufo this is fine",
+    "imageUrl": "https://all-the.bufo.zone/bufo-this-is-fine.png",
+    "shortcodes": [
+      "bufo-this-is-fine"
+    ],
+    "group": "Bufo",
+    "width": 127,
+    "height": 128
+  },
+  {
+    "id": "bufo-panic",
+    "name": "bufo panic",
+    "imageUrl": "https://all-the.bufo.zone/bufo-panic.png",
+    "shortcodes": [
+      "bufo-panic"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 127
+  },
+  {
+    "id": "bufo-deep-hmm",
+    "name": "bufo deep hmm",
+    "imageUrl": "https://all-the.bufo.zone/bufo-deep-hmm.gif",
+    "shortcodes": [
+      "bufo-deep-hmm"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-deep-hmm.gif"
+  },
+  {
+    "id": "bufo-wink",
+    "name": "bufo wink",
+    "imageUrl": "https://all-the.bufo.zone/bufo-wink.gif",
+    "shortcodes": [
+      "bufo-wink"
+    ],
+    "group": "Bufo",
+    "width": 123,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wink.gif"
+  },
+  {
+    "id": "bufo-extra-cool",
+    "name": "bufo extra cool",
+    "imageUrl": "https://all-the.bufo.zone/bufo-extra-cool.gif",
+    "shortcodes": [
+      "bufo-extra-cool"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-extra-cool.gif"
+  },
+  {
+    "id": "bufo-ok",
+    "name": "bufo ok",
+    "imageUrl": "https://all-the.bufo.zone/bufo-ok.png",
+    "shortcodes": [
+      "bufo-ok"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 127
+  },
+  {
+    "id": "bufo-tada",
+    "name": "bufo tada",
+    "imageUrl": "https://all-the.bufo.zone/bufo-tada.png",
+    "shortcodes": [
+      "bufo-tada"
+    ],
+    "group": "Bufo",
+    "width": 124,
+    "height": 117
+  },
+  {
+    "id": "bufo-clap-hd",
+    "name": "bufo clap hd",
+    "imageUrl": "https://all-the.bufo.zone/bufo-clap-hd.gif",
+    "shortcodes": [
+      "bufo-clap-hd"
+    ],
+    "group": "Bufo",
+    "width": 127,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-clap-hd.gif"
+  },
+  {
+    "id": "bufo-salute",
+    "name": "bufo salute",
+    "imageUrl": "https://all-the.bufo.zone/bufo-salute.png",
+    "shortcodes": [
+      "bufo-salute"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112
+  },
+  {
+    "id": "bufo-angry",
+    "name": "bufo angry",
+    "imageUrl": "https://all-the.bufo.zone/bufo-angry.gif",
+    "shortcodes": [
+      "bufo-angry"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 123,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-angry.gif"
+  },
+  {
+    "id": "bufo-shifty",
+    "name": "bufo shifty",
+    "imageUrl": "https://all-the.bufo.zone/bufo-shifty.gif",
+    "shortcodes": [
+      "bufo-shifty"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-shifty.gif"
+  },
+  {
+    "id": "bufo-what-have-i-done",
+    "name": "bufo what have i done",
+    "imageUrl": "https://all-the.bufo.zone/bufo-what-have-i-done.png",
+    "shortcodes": [
+      "bufo-what-have-i-done"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-sad-rain",
+    "name": "bufo sad rain",
+    "imageUrl": "https://all-the.bufo.zone/bufo-sad-rain.gif",
+    "shortcodes": [
+      "bufo-sad-rain"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-sad-rain.gif"
+  },
+  {
+    "id": "bufo-headphones",
+    "name": "bufo headphones",
+    "imageUrl": "https://all-the.bufo.zone/bufo-headphones.png",
+    "shortcodes": [
+      "bufo-headphones"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 122
+  },
+  {
+    "id": "bufos-in-love",
+    "name": "bufos in love",
+    "imageUrl": "https://all-the.bufo.zone/bufos-in-love.png",
+    "shortcodes": [
+      "bufos-in-love"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-gives-star",
+    "name": "bufo gives star",
+    "imageUrl": "https://all-the.bufo.zone/bufo-gives-star.png",
+    "shortcodes": [
+      "bufo-gives-star"
+    ],
+    "group": "Bufo",
+    "width": 134,
+    "height": 134
+  },
+  {
+    "id": "bufo-pray-partying",
+    "name": "bufo pray partying",
+    "imageUrl": "https://all-the.bufo.zone/bufo-pray-partying.png",
+    "shortcodes": [
+      "bufo-pray-partying"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-party-birthday",
+    "name": "bufo party birthday",
+    "imageUrl": "https://all-the.bufo.zone/bufo-party-birthday.png",
+    "shortcodes": [
+      "bufo-party-birthday"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-offers-a-cake",
+    "name": "bufo offers a cake",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-a-cake.png",
+    "shortcodes": [
+      "bufo-offers-a-cake"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-disco",
+    "name": "bufo disco",
+    "imageUrl": "https://all-the.bufo.zone/bufo-disco.png",
+    "shortcodes": [
+      "bufo-disco"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-hype",
+    "name": "bufo hype",
+    "imageUrl": "https://all-the.bufo.zone/bufo-hype.gif",
+    "shortcodes": [
+      "bufo-hype"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-hype.gif"
+  },
+  {
+    "id": "bufo-magician",
+    "name": "bufo magician",
+    "imageUrl": "https://all-the.bufo.zone/bufo-magician.png",
+    "shortcodes": [
+      "bufo-magician"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-gamer",
+    "name": "bufo gamer",
+    "imageUrl": "https://all-the.bufo.zone/bufo-gamer.png",
+    "shortcodes": [
+      "bufo-gamer"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-photographer",
+    "name": "bufo photographer",
+    "imageUrl": "https://all-the.bufo.zone/bufo-photographer.png",
+    "shortcodes": [
+      "bufo-photographer"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-santa",
+    "name": "bufo santa",
+    "imageUrl": "https://all-the.bufo.zone/bufo-santa.png",
+    "shortcodes": [
+      "bufo-santa"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-cash-money",
+    "name": "bufo cash money",
+    "imageUrl": "https://all-the.bufo.zone/bufo-cash-money.png",
+    "shortcodes": [
+      "bufo-cash-money"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-make-it-rain",
+    "name": "bufo make it rain",
+    "imageUrl": "https://all-the.bufo.zone/bufo-make-it-rain.gif",
+    "shortcodes": [
+      "bufo-make-it-rain"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-make-it-rain.gif"
+  },
+  {
+    "id": "bufo-offers-chart-with-upwards-trend",
+    "name": "bufo offers chart with upwards trend",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-chart-with-upwards-trend.png",
+    "shortcodes": [
+      "bufo-offers-chart-with-upwards-trend"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-has-a-hot-take",
+    "name": "bufo has a hot take",
+    "imageUrl": "https://all-the.bufo.zone/bufo-has-a-hot-take.png",
+    "shortcodes": [
+      "bufo-has-a-hot-take"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-wizard",
+    "name": "bufo wizard",
+    "imageUrl": "https://all-the.bufo.zone/bufo-wizard.gif",
+    "shortcodes": [
+      "bufo-wizard"
+    ],
+    "group": "Bufo",
+    "width": 112,
+    "height": 112,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-wizard.gif"
+  },
+  {
+    "id": "bufo-offers-coffee",
+    "name": "bufo offers coffee",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-coffee.png",
+    "shortcodes": [
+      "bufo-offers-coffee"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-beer",
+    "name": "bufo beer",
+    "imageUrl": "https://all-the.bufo.zone/bufo-beer.png",
+    "shortcodes": [
+      "bufo-beer"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-chef",
+    "name": "bufo chef",
+    "imageUrl": "https://all-the.bufo.zone/bufo-chef.png",
+    "shortcodes": [
+      "bufo-chef"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-cookie",
+    "name": "bufo cookie",
+    "imageUrl": "https://all-the.bufo.zone/bufo-cookie.png",
+    "shortcodes": [
+      "bufo-cookie"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-offers-avocado",
+    "name": "bufo offers avocado",
+    "imageUrl": "https://all-the.bufo.zone/bufo-offers-avocado.png",
+    "shortcodes": [
+      "bufo-offers-avocado"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "bufo-firefighter",
+    "name": "bufo firefighter",
+    "imageUrl": "https://all-the.bufo.zone/bufo-firefighter.png",
+    "shortcodes": [
+      "bufo-firefighter"
+    ],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128
+  }
+]

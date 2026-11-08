@@ -1,0 +1,36 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "emoji-tiptap",
+  "title": "Emoji Tiptap",
+  "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
+  "dependencies": [
+    "@brianhung/emoji-picker-react@^1.0.0-alpha.0",
+    "@tiptap/core",
+    "@tiptap/pm",
+    "@tiptap/react"
+  ],
+  "registryDependencies": [
+    "https://emoji.brianhung.me/r/emoji-prosemirror.json",
+    "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"
+  ],
+  "files": [
+    {
+      "path": "registry/emoji-tiptap.ts",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiStore, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from \"@brianhung/emoji-picker-react\";\nimport { emojiTypeahead } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {\n  content?: (text: string, suggestion: ShortcodeCompletion) => Content;\n};\n\nexport function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {\n  const store = useEmojiStore();\n  const id = React.useId();\n  const latest = React.useRef({ content, onSelect });\n  latest.current = { content, onSelect };\n  const { plugin, suggestions, anchor } = React.useMemo(\n    () =>\n      emojiTypeahead(store, {\n        id,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        onSelect: (selection) => latest.current.onSelect?.(selection),\n        content(text, suggestion, schema) {\n          const replacement = latest.current.content?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [store, id, insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));\n  }, [editor, plugin]);\n  return useEmojiTypeahead(suggestions, { anchor });\n}\n",
+      "type": "registry:hook"
+    },
+    {
+      "path": "src/components/tiptap/emoji-suggestion.tsx",
+      "content": "import type { Editor } from \"@tiptap/react\";\nimport type { EmojiTypeaheadOptions } from \"@brianhung/emoji-picker-react\";\nimport { useTiptapEmojiTypeahead } from \"@/hooks/emoji-tiptap\";\nimport { SuggestionMenu, type SuggestionMenuProps } from \"@/components/suggestion-menu\";\nimport { emojiContent } from \"./emoji-node\";\n\nexport function EmojiSuggestionMenu({ editor, className, side, ...options }: SuggestionMenuProps & EmojiTypeaheadOptions & { editor: Editor | null }) {\n  const emoji = useTiptapEmojiTypeahead(editor, {\n    ...options,\n    content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),\n  });\n  return <SuggestionMenu {...emoji} className={className} side={side} />;\n}\n",
+      "type": "registry:component",
+      "target": "components/tiptap/emoji-suggestion.tsx"
+    },
+    {
+      "path": "src/components/tiptap/emoji-node.tsx",
+      "content": "import { InputRule, Node, NodeViewWrapper, ReactNodeViewRenderer, mergeAttributes, type NodeViewProps } from \"@tiptap/react\";\nimport { Emoji, type EmojiStore } from \"@brianhung/emoji-picker-react\";\n\nexport type EmojiNodeAttrs = {\n  unified: string;\n  shortcode: string;\n  text: string | null;\n};\n\nexport type EmojiNodeOptions = {\n  store: EmojiStore | null;\n};\n\ndeclare module \"@tiptap/react\" {\n  interface Commands<ReturnType> {\n    emoji: { insertEmoji: (attrs: EmojiNodeAttrs) => ReturnType };\n  }\n}\n\nexport function emojiAttrs(store: EmojiStore, idOrShortcode: string): EmojiNodeAttrs | null {\n  const record = store.get(idOrShortcode) ?? store.fromShortcode(idOrShortcode);\n  if (!record) return null;\n  const unified = record.imageUrl ? record.unified : store.withSkinTone(record.unified);\n  const text = record.imageUrl ? null : String.fromCodePoint(...unified.split(\"-\").map((hex) => parseInt(hex, 16)));\n  return { unified, shortcode: record.shortcodes[0] ?? record.unified, text };\n}\n\nexport const emojiContent = (attrs: EmojiNodeAttrs) => [\n  { type: \"emoji\", attrs },\n  { type: \"text\", text: \" \" },\n];\n\nfunction EmojiView({ node }: NodeViewProps) {\n  const { unified } = node.attrs as EmojiNodeAttrs;\n  return (\n    <NodeViewWrapper as=\"span\" className=\"inline-block align-[-0.2em]\" data-emoji-node=\"\">\n      <Emoji emoji={unified} size={20} className=\"inline-block size-[1.25em] leading-none\" />\n    </NodeViewWrapper>\n  );\n}\n\nexport const EmojiNode = Node.create<EmojiNodeOptions>({\n  name: \"emoji\",\n  group: \"inline\",\n  inline: true,\n  atom: true,\n  selectable: false,\n  addOptions: () => ({ store: null }),\n\n  addAttributes: () => ({\n    unified: { default: null, parseHTML: (el) => el.getAttribute(\"data-unified\") },\n    shortcode: { default: null, parseHTML: (el) => el.getAttribute(\"data-shortcode\") },\n    text: { default: null, parseHTML: (el) => el.getAttribute(\"data-text\") },\n  }),\n\n  parseHTML: () => [{ tag: \"span[data-emoji-node]\" }],\n\n  renderHTML({ node, HTMLAttributes }) {\n    const { unified, shortcode, text } = node.attrs as EmojiNodeAttrs;\n    return [\"span\", mergeAttributes(HTMLAttributes, { \"data-emoji-node\": \"\", \"data-unified\": unified, \"data-shortcode\": shortcode, \"data-text\": text }), text ?? `:${shortcode}:`];\n  },\n\n  renderText: ({ node }) => {\n    const { shortcode, text } = node.attrs as EmojiNodeAttrs;\n    return text ?? `:${shortcode}:`;\n  },\n\n  addNodeView() {\n    return ReactNodeViewRenderer(EmojiView, { as: \"span\" });\n  },\n\n  addCommands() {\n    return {\n      insertEmoji:\n        (attrs) =>\n        ({ commands }) =>\n          commands.insertContent(emojiContent(attrs)),\n    };\n  },\n\n  addInputRules() {\n    const { store } = this.options;\n    return [\n      new InputRule({\n        find: /:([a-z0-9_+'-]+):$/i,\n        handler: ({ state, range, match }) => {\n          const attrs = store ? emojiAttrs(store, match[1]!) : null;\n          if (!attrs) return null;\n          state.tr.replaceWith(range.from, range.to, this.type.create(attrs));\n        },\n      }),\n    ];\n  },\n});\n",
+      "type": "registry:component",
+      "target": "components/tiptap/emoji-node.tsx"
+    }
+  ],
+  "type": "registry:hook"
+}

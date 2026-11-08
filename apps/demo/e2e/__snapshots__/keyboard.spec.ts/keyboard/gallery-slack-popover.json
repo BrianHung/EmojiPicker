@@ -1,0 +1,100 @@
+{
+  "opened": {
+    "focus": "searchbox \"Type to search for an emoji\"",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"eyes\" 1f440",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"raising hands\" 1f64c",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"keycap: 1\" 31-fe0f-20e3",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"party popper\" 1f389",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"eyes\" 1f440",
+      "scrolled": 0
+    },
+    {
+      "key": "End",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "scrolled": 0
+    },
+    {
+      "key": "Home",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
+      "scrolled": 0
+    },
+    {
+      "key": "PageDown",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"sleepy face\" 1f62a",
+      "scrolled": 0
+    },
+    {
+      "key": "PageUp",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"check mark button\" 2705",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "button \"Open emoji picker\"",
+    "focusReturned": true,
+    "toast": "✅ :white_check_mark: check mark button"
+  },
+  "hover": {
+    "hovered": {
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"keycap: 1\" 31-fe0f-20e3"
+    },
+    "then": {
+      "key": "ArrowRight",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"keycap: 2\" 32-fe0f-20e3",
+      "scrolled": 0
+    }
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "button \"Open emoji picker\"",
+      "focusReturned": true,
+      "toast": null
+    }
+  ],
+  "tab": {
+    "focus": "option \"check mark button\" 2705",
+    "highlight": "option \"check mark button\" 2705",
+    "open": true,
+    "inside": true
+  }
+}

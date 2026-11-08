@@ -1,0 +1,84 @@
+import * as React from "react";
+import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
+import { ClaudeIcon, MarkdownIcon, OpenAIIcon } from "./brand-icons";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+
+const ITEM = "h-9 gap-2.5 rounded-md px-2.5 text-sm [&_svg]:size-4";
+
+function CopyPage({ md, className }: { md: string; className?: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const markdown = React.useRef<Promise<string> | null>(null);
+  const load = React.useCallback(() => (markdown.current ??= fetch(md).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status} ${md}`))))), [md]);
+  React.useEffect(() => {
+    load().catch(() => (markdown.current = null));
+  }, [load]);
+
+  const url = typeof location === "undefined" ? md : new URL(md, location.origin).href;
+  const prompt = encodeURIComponent(`Read ${url} and help me integrate @brianhung/emoji-picker-react into my app.`);
+
+  const copy = async () => {
+    try {
+      const text = load();
+      // Safari needs the write started synchronously; ClipboardItem accepts the pending text
+      if (typeof ClipboardItem !== "undefined" && "supports" in ClipboardItem) {
+        await navigator.clipboard.write([new ClipboardItem({ "text/plain": text.then((t) => new Blob([t], { type: "text/plain" })) })]);
+      } else {
+        await navigator.clipboard.writeText(await text);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      markdown.current = null;
+    }
+  };
+
+  return (
+    <ButtonGroup className={cn("shrink-0", className)}>
+      <Button variant="secondary" size="sm" onClick={copy} aria-live="polite" className="bg-clip-border max-sm:h-10">
+        {copied ? <CheckIcon /> : <CopyIcon />}
+        {copied ? "Copied" : "Copy Page"}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              aria-label="More page options"
+              className="relative bg-clip-border before:absolute before:top-1/2 before:left-0 before:h-4 before:w-px before:-translate-y-1/2 before:bg-foreground/15 max-sm:size-10"
+            />
+          }
+        >
+          <ChevronDownIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 p-1">
+          <DropdownMenuItem className={ITEM} render={<a href={md} target="_blank" rel="noreferrer" />}>
+            <MarkdownIcon />
+            View as Markdown
+          </DropdownMenuItem>
+          <DropdownMenuItem className={ITEM} render={<a href={`https://chatgpt.com/?q=${prompt}`} target="_blank" rel="noreferrer" />}>
+            <OpenAIIcon />
+            Open in ChatGPT
+          </DropdownMenuItem>
+          <DropdownMenuItem className={ITEM} render={<a href={`https://claude.ai/new?q=${prompt}`} target="_blank" rel="noreferrer" />}>
+            <ClaudeIcon />
+            Open in Claude
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </ButtonGroup>
+  );
+}
+
+export function PageHeader({ title, description, md, className }: { title: React.ReactNode; description: React.ReactNode; md?: string; className?: string }) {
+  return (
+    <div className={cn("grid gap-2", md && "sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-6", className)}>
+      <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+      {md ? <CopyPage md={md} className="mt-2 sm:col-start-2 sm:row-start-1 sm:mt-0.5 sm:self-start max-sm:order-last" /> : null}
+      <p className="max-w-2xl text-base text-muted-foreground">{description}</p>
+    </div>
+  );
+}

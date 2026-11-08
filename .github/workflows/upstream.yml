@@ -1,0 +1,78 @@
+name: Upstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      emojibase:
+        description: emojibase-data version
+        default: latest
+      twemoji:
+        description: jdecked/twemoji version
+        default: latest
+
+concurrency:
+  group: upstream
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - id: versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EMOJIBASE: ${{ inputs.emojibase }}
+          TWEMOJI: ${{ inputs.twemoji }}
+        run: |
+          newer() { [ "$1" != "$2" ] && [ "$(printf '%s\n' "$1" "$2" | sort -V | tail -1)" = "$2" ]; }
+          emojibase=$(npm view "emojibase-data@$EMOJIBASE" version | tail -1)
+          twemoji=$([ "$TWEMOJI" = latest ] && gh api repos/jdecked/twemoji/releases/latest --jq .tag_name || echo "$TWEMOJI")
+          twemoji=${twemoji#v}
+          title="Upstream:"
+          if newer "$(jq -r '.devDependencies["emojibase-data"]' packages/data/package.json)" "$emojibase"; then
+            echo "emojibase=$emojibase" >> "$GITHUB_OUTPUT"
+            title="$title emojibase-data $emojibase"
+          fi
+          if newer "$(jq -r .config.twemoji packages/twemoji-font/package.json)" "$twemoji"; then
+            echo "twemoji=$twemoji" >> "$GITHUB_OUTPUT"
+            title="$title Twemoji $twemoji"
+          fi
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+      - if: steps.versions.outputs.emojibase
+        env: { V: "${{ steps.versions.outputs.emojibase }}" }
+        run: |
+          npm pkg set devDependencies.emojibase=$V devDependencies.emojibase-data=$V -w @brianhung/emoji-picker-data
+          npm pkg set devDependencies.emojibase-data=$V -w @brianhung/emoji-picker-twemoji-font
+          printf -- '---\n"@brianhung/emoji-picker-data": minor\n---\n\nDatasets built from emojibase-data %s.\n' "$V" > .changeset/emojibase-$V.md
+      - if: steps.versions.outputs.twemoji
+        env: { V: "${{ steps.versions.outputs.twemoji }}" }
+        run: |
+          npm pkg set config.twemoji=$V -w @brianhung/emoji-picker-twemoji-font
+          printf -- '---\n"@brianhung/emoji-picker-twemoji-font": minor\n---\n\nTwemoji %s.\n' "$V" > .changeset/twemoji-$V.md
+      - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
+        run: npm install --no-audit --no-fund
+      - if: steps.versions.outputs.emojibase
+        run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
+      - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
+        run: |
+          npm run build -w @brianhung/emoji-picker-twemoji-font
+          npx playwright install --with-deps chromium webkit firefox
+          npm test -w @brianhung/emoji-picker-twemoji-font
+      - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: upstream/emojibase-${{ steps.versions.outputs.emojibase || 'pinned' }}-twemoji-${{ steps.versions.outputs.twemoji || 'pinned' }}
+          base: ${{ github.ref_name }}
+          title: ${{ steps.versions.outputs.title }}
+          commit-message: Bump upstream emoji versions
+          body: The Upstream workflow bumped the pins, rebuilt the data and the font, and ran their tests. CI does not run on this PR, so run `npm run release:check` locally before merging. Review the changesets and the twemoji-font README version table. Nothing is published.

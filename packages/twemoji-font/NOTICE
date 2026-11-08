@@ -1,0 +1,13 @@
+Twemoji font for @brianhung/emoji-picker-react
+
+The font files (dist/*.woff2, dist/Twemoji.ttf) are built from the SVG
+graphics of Twemoji (https://github.com/jdecked/twemoji), Copyright 2019
+Twitter, Inc and other contributors, licensed under CC-BY 4.0 (see LICENSE,
+https://creativecommons.org/licenses/by/4.0/).
+
+Changes from the original graphics: converted to COLRv0 glyphs with nanoemoji,
+non-square artwork centered in a square em box, split into unicode-range
+subsets for the web font. Twitter and the Twemoji contributors do not endorse
+this package.
+
+The build scripts in the source repository are MIT licensed, Copyright (c) Brian Hung.

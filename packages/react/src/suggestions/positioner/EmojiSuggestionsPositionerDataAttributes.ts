@@ -1,0 +1,7 @@
+/**
+ * Identifies the positioner.
+ * @type {'emoji-picker-suggestions-positioner'}
+ */
+export const slot = "data-slot";
+
+export { open, closed, side, align } from "../../popover/positioner/EmojiPopoverPositionerDataAttributes";

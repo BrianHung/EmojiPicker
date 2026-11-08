@@ -1,0 +1,15 @@
+:root {
+  --emoji-picker-background: var(--popover);
+  --emoji-picker-foreground: var(--popover-foreground);
+  --emoji-picker-muted: var(--muted-foreground);
+  --emoji-picker-subtle: color-mix(in oklab, var(--muted-foreground) 70%, transparent);
+  --emoji-picker-border: var(--border);
+  --emoji-picker-input: transparent;
+  --emoji-picker-input-border: var(--input);
+  --emoji-picker-panel: var(--muted);
+  --emoji-picker-hover: var(--accent);
+  --emoji-picker-selected: var(--accent);
+  --emoji-picker-accent: var(--primary);
+  --emoji-picker-ring: var(--ring);
+  --emoji-picker-radius: var(--radius);
+}

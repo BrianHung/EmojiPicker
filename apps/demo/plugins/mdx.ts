@@ -1,0 +1,51 @@
+import mdxRollup from "@mdx-js/rollup";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import type { Plugin } from "vite";
+
+type Node = { type: string; lang?: string | null; meta?: string | null; value?: string; depth?: number; data?: { hProperties?: Record<string, string> }; children?: Node[]; [key: string]: unknown };
+
+const walk = (node: Node, visit: (child: Node, parent: Node, index: number) => void) =>
+  node.children?.forEach((child, i) => {
+    visit(child, node, i);
+    walk(child, visit);
+  });
+
+function remarkCode() {
+  const attr = (name: string, value: string) => ({ type: "mdxJsxAttribute", name, value });
+  return (tree: Node) =>
+    walk(tree, (child, parent, i) => {
+      if (child.type !== "code") return;
+      const meta = [...(child.meta ?? "").matchAll(/(\w+)="([^"]*)"/g)].map(([, key, value]) => attr(key!, value!));
+      parent.children![i] = {
+        type: "mdxJsxFlowElement",
+        name: "Code",
+        attributes: [attr("lang", child.lang ?? "tsx"), attr("code", child.value ?? ""), ...meta],
+        children: [],
+      };
+    });
+}
+
+const HEADING_ID = /^(#{1,6} .*) \{#([\w-]+)\}$/gm;
+
+function remarkHeadingId() {
+  return (tree: Node) =>
+    walk(tree, (child) => {
+      const last = child.type === "heading" ? child.children?.at(-1) : undefined;
+      const match = last?.type === "text" ? last.value!.match(/\s*\{#([\w-]+)\}$/) : null;
+      if (!last || !match) return;
+      last.value = last.value!.slice(0, match.index);
+      child.data = { ...child.data, hProperties: { id: match[1]! } };
+    });
+}
+
+export function mdx(): Plugin {
+  const plugin = mdxRollup({ remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkCode, remarkHeadingId] }) as unknown as Plugin & { transform: Extract<Plugin["transform"], (...args: never[]) => unknown> };
+  return {
+    ...plugin,
+    enforce: "pre",
+    transform(code, id, options) {
+      return plugin.transform.call(this, id.endsWith(".mdx") ? code.replace(HEADING_ID, "$1 \\{#$2\\}") : code, id, options);
+    },
+  };
+}

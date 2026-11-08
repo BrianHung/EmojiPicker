@@ -1,0 +1,17 @@
+@theme inline {
+  --color-picker-background: var(--emoji-picker-background);
+  --color-picker-foreground: var(--emoji-picker-foreground);
+  --color-picker-muted: var(--emoji-picker-muted);
+  --color-picker-subtle: var(--emoji-picker-subtle);
+  --color-picker-border: var(--emoji-picker-border);
+  --color-picker-input: var(--emoji-picker-input);
+  --color-picker-input-border: var(--emoji-picker-input-border);
+  --color-picker-panel: var(--emoji-picker-panel);
+  --color-picker-hover: var(--emoji-picker-hover);
+  --color-picker-selected: var(--emoji-picker-selected);
+  --color-picker-accent: var(--emoji-picker-accent);
+  --color-picker-ring: var(--emoji-picker-ring);
+  --radius-picker: var(--emoji-picker-radius);
+  --shadow-picker: var(--emoji-picker-shadow);
+  --font-picker: var(--emoji-picker-font);
+}

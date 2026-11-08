@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "customConditions": ["@brianhung/source"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client", "node", "mdx"],
+    "paths": {
+      "@/registry/*": ["./registry/*"],
+      "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"],
+      "@/components/ui/emoji-reaction-bar": ["./registry/emoji-reaction-bar.tsx"],
+      "@/lib/emoji-prosemirror": ["./registry/emoji-prosemirror.ts"],
+      "@/hooks/emoji-tiptap": ["./registry/emoji-tiptap.ts"],
+      "@/hooks/emoji-lexical": ["./registry/emoji-lexical.ts"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "registry", "scripts", "plugins", "e2e", "playwright.config.ts", "vite.config.ts"],
+  "exclude": ["registry/aria"]
+}

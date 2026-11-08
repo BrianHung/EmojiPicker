@@ -1,0 +1,66 @@
+{
+  "opened": {
+    "focus": "combobox \"Page content\"",
+    "highlight": "option \"grinning face with big eyes\" 1f603"
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"upside-down face\" 1f643",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "combobox \"Page content\"",
+      "highlight": "option \"slightly smiling face\" 1f642",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "textbox \"Page content\"",
+    "focusReturned": true,
+    "toast": "🙂 :slightly_smiling_face: slightly smiling face",
+    "field": "e :tada or :tent.Packing listHiking boots 🥾Board games 🎲Snacks for the drive🙂"
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "textbox \"Page content\"",
+      "focusReturned": true,
+      "toast": null,
+      "field": " :tada or :tent.Packing listHiking boots 🥾Board games 🎲Snacks for the drive:sm"
+    }
+  ],
+  "tab": {
+    "focus": "textbox \"Page content\"",
+    "highlight": null,
+    "open": false,
+    "inside": false
+  }
+}
