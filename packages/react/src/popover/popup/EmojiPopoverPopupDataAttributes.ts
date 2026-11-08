@@ -2,7 +2,7 @@ import * as CommonPopupDataAttributes from "../utils/CommonPopupDataAttributes";
 
 /**
  * Identifies the popup.
- * @type {'emoji-picker-popover-popup'}
+ * @type {'emoji-popover-popup'}
  */
 export const slot = "data-slot";
 /**

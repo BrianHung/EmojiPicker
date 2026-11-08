@@ -3,7 +3,7 @@ import * as CommonTriggerDataAttributes from "../utils/CommonTriggerDataAttribut
 
 /**
  * Identifies the trigger.
- * @type {'emoji-picker-popover-trigger'}
+ * @type {'emoji-popover-trigger'}
  */
 export const slot = "data-slot";
 /**

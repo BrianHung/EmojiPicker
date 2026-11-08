@@ -1,6 +1,6 @@
 /**
  * Identifies the positioner.
- * @type {'emoji-picker-suggestions-positioner'}
+ * @type {'emoji-suggestions-positioner'}
  */
 export const slot = "data-slot";
 

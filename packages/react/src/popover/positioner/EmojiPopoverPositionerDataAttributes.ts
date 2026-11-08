@@ -2,7 +2,7 @@ import * as CommonPopupDataAttributes from "../utils/CommonPopupDataAttributes";
 
 /**
  * Identifies the positioner.
- * @type {'emoji-picker-popover-positioner'}
+ * @type {'emoji-popover-positioner'}
  */
 export const slot = "data-slot";
 /**

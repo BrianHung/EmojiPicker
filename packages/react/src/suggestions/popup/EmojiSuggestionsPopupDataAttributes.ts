@@ -1,6 +1,6 @@
 /**
  * Identifies the popup.
- * @type {'emoji-picker-suggestions-popup'}
+ * @type {'emoji-suggestions-popup'}
  */
 export const slot = "data-slot";
 

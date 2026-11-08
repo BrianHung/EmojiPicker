@@ -159,9 +159,9 @@ describe.each([
         </EmojiSuggestions.Root>,
       ),
     );
-    const popup = document.querySelector('[data-slot="emoji-picker-suggestions-popup"]')!;
+    const popup = document.querySelector('[data-slot="emoji-suggestions-popup"]')!;
     expect([popup.parentElement?.getAttribute("data-slot"), popup.parentElement?.getAttribute("data-side"), popup.getAttribute("data-open"), popup.getAttribute("data-side"), popup.className]).toEqual([
-      "emoji-picker-suggestions-positioner",
+      "emoji-suggestions-positioner",
       "inline-end",
       "",
       "inline-end",
