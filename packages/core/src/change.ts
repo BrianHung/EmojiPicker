@@ -13,7 +13,7 @@ export function createChangeDetails<Reason extends string>(reason: Reason, event
   let propagates = false;
   return {
     reason,
-    event: event ?? new Event("emoji-picker"),
+    event: event ?? new Event("emoji-components"),
     trigger,
     cancel: () => void (canceled = true),
     get isCanceled() {

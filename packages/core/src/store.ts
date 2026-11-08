@@ -149,7 +149,7 @@ export function createEmojiStore({
   ...source
 }: EmojiStoreOptions = {}): EmojiStore {
   const frequents = createFrequencyStore({ frequents: controlledFrequents, defaultFrequents, onFrequentsChange, deferStorage });
-  const skinToneStorage = persisted("emoji-picker:skin-tone");
+  const skinToneStorage = persisted("emoji-components:skin-tone");
   let config: Source = source;
   let raw: Raw | null = null;
   let base: readonly EmojiRecord[] = [];

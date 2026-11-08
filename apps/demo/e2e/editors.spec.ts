@@ -19,6 +19,6 @@ for (const e of EDITORS)
     await openEditorMenu(page, e);
     await page.keyboard.press("Enter");
     await expect(listbox(page)).toBeHidden();
-    const scores = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem("emoji-picker:frequents") ?? "{}") as Record<string, { count: number }>).map(({ count }) => Math.round(count)));
+    const scores = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem("emoji-components:frequents") ?? "{}") as Record<string, { count: number }>).map(({ count }) => Math.round(count)));
     expect(scores.filter(Boolean)).toEqual([1]);
   });

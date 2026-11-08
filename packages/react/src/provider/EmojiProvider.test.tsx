@@ -27,7 +27,7 @@ describe("EmojiProvider", () => {
     );
     const html = renderToString(app());
     expect(html).toContain("tone <!-- -->0");
-    localStorage.setItem("emoji-picker:skin-tone", "3");
+    localStorage.setItem("emoji-components:skin-tone", "3");
     const host = document.body.appendChild(document.createElement("div"));
     host.innerHTML = html;
     const errors: unknown[] = [];

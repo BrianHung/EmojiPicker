@@ -55,7 +55,7 @@ describe("store", () => {
     expect(onSkinToneChange).toHaveBeenCalledWith(5, expect.objectContaining({ reason: "none" }));
     controlled.setOptions({ data: dataset, skinTone: 5, onSkinToneChange });
     expect(controlled.skinTone()).toBe(5);
-    expect(items.get("emoji-picker:skin-tone")).toBe("3");
+    expect(items.get("emoji-components:skin-tone")).toBe("3");
   });
 });
 

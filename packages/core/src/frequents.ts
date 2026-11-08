@@ -71,7 +71,7 @@ export function createFrequencyStore({
   onFrequentsChange,
   deferStorage,
 }: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {
-  const storage = persisted("emoji-picker:frequents");
+  const storage = persisted("emoji-components:frequents");
   const read = () => parse(storage.read()) ?? defaultFrequents;
   const store = createStore<FrequencyState, FrequencyAction>({ own: deferStorage ? defaultFrequents : read(), controlled: frequents }, reduce);
   let onChange = onFrequentsChange;
