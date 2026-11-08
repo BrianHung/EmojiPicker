@@ -5,8 +5,8 @@ import { flushSync } from "react-dom";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { VisuallyHidden } from "react-aria/VisuallyHidden";
 import { Autocomplete } from "react-aria-components/Autocomplete";
-import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@brianhung/emoji-picker-core";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@emoji-components/core";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { useCollapse } from "./utils/useCollapsedCategories";
 import {
   EmojiPickerRootContext,

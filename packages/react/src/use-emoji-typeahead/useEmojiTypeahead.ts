@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
-import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsStore, type EmojiSuggestionsOptions, type EmojiTrigger, type KeyLike, type ShortcodeCompletion } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, type EmojiSelection, type EmojiSuggestionsStore, type EmojiSuggestionsOptions, type EmojiTrigger, type KeyLike, type ShortcodeCompletion } from "@emoji-components/core";
 import { useEmojiStatus } from "../provider/utils/useEmojiStatus";
 import { useEmojiContext } from "../provider/EmojiProviderContext";
 import { useLatest, useStableCallback } from "../utils/useLatest";

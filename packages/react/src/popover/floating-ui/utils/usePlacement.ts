@@ -3,7 +3,7 @@
 import * as React from "react";
 import { autoUpdate, flip, type Middleware, offset, type OpenChangeReason, shift, size, type UseFloatingOptions, useFloating } from "@floating-ui/react";
 import { useLocale } from "react-aria/I18nProvider";
-import { shallowEqual } from "@brianhung/emoji-picker-core/internal";
+import { shallowEqual } from "@emoji-components/core/internal";
 import { useLatest } from "../../../utils/useLatest";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
 import * as EmojiPopoverPositionerCssVars from "../../positioner/EmojiPopoverPositionerCssVars";

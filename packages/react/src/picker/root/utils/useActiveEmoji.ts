@@ -1,6 +1,6 @@
 "use client";
 
-import type { EmojiRecord } from "@brianhung/emoji-picker-core";
+import type { EmojiRecord } from "@emoji-components/core";
 import { useStore } from "../../../utils/useStore";
 import { useEmojiPickerRootContext } from "../EmojiPickerRootContext";
 

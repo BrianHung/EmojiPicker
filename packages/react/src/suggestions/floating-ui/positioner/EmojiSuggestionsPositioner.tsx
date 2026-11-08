@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useDismiss, useInteractions, useMergeRefs } from "@floating-ui/react";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { SLOTS } from "../../../internals/slots";
 import { positioned } from "../../../popover/floating-ui/utils/positioned";
 import { reasonOf, usePlacement } from "../../../popover/floating-ui/utils/usePlacement";

@@ -1,6 +1,6 @@
 "use client";
 
-import type { EmojiLabels } from "@brianhung/emoji-picker-core";
+import type { EmojiLabels } from "@emoji-components/core";
 import { useEmojiContext } from "../EmojiProviderContext";
 
 export const useEmojiLabels = (): EmojiLabels => useEmojiContext().labels;

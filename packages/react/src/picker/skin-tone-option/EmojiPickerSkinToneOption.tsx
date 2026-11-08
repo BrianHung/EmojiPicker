@@ -3,7 +3,7 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 
-import type { SkinToneValue } from "@brianhung/emoji-picker-core";
+import type { SkinToneValue } from "@emoji-components/core";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";

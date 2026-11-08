@@ -4,7 +4,7 @@
   "access": "public",
   "ignore": ["demo"],
   "privatePackages": false,
-  "fixed": [["@brianhung/emoji-picker-*"]],
+  "fixed": [["emoji-components", "@emoji-components/*"]],
   "linked": [],
   "updateInternalDependencies": "patch",
   "commit": false,

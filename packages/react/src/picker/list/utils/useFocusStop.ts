@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker } from "@brianhung/emoji-picker-core";
+import type { EmojiPicker } from "@emoji-components/core";
 import { PopoverContext } from "../../../popover/root/EmojiPopoverRootContext";
 import { SLOTS } from "../../../internals/slots";
 import type { CellElement, GridLatest } from "./types";

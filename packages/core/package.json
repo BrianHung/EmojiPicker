@@ -1,5 +1,5 @@
 {
-  "name": "@brianhung/emoji-picker-core",
+  "name": "@emoji-components/core",
   "version": "1.0.0-alpha.0",
   "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state.",
   "keywords": [
@@ -26,7 +26,7 @@
   },
   "sideEffects": false,
   "bin": {
-    "emoji-picker": "./dist/cli.js"
+    "emoji-components": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -34,27 +34,27 @@
   ],
   "exports": {
     ".": {
-      "@brianhung/source": "./src/index.ts",
+      "@emoji-components/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./grid": {
-      "@brianhung/source": "./src/grid.ts",
+      "@emoji-components/source": "./src/grid.ts",
       "types": "./dist/grid.d.ts",
       "default": "./dist/grid.js"
     },
     "./native": {
-      "@brianhung/source": "./src/native.ts",
+      "@emoji-components/source": "./src/native.ts",
       "types": "./dist/native.d.ts",
       "default": "./dist/native.js"
     },
     "./internal": {
-      "@brianhung/source": "./src/internal.ts",
+      "@emoji-components/source": "./src/internal.ts",
       "types": "./dist/internal.d.ts",
       "default": "./dist/internal.js"
     },
     "./build": {
-      "@brianhung/source": "./scripts/build-data.ts",
+      "@emoji-components/source": "./scripts/build-data.ts",
       "types": "./dist/build.d.ts",
       "default": "./dist/build.js"
     },
@@ -75,7 +75,7 @@
     }
   },
   "devDependencies": {
-    "@brianhung/emoji-picker-twemoji-font": "^1.0.0-alpha.0",
+    "@emoji-components/twemoji-font": "^1.0.0-alpha.0",
     "@types/node": "^22.20.5",
     "emojibase": "^18.0.0",
     "emojibase-data": "^18.0.0",

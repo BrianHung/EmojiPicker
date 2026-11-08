@@ -6,8 +6,8 @@ import * as React from "react";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { useInteractOutside } from "react-aria/useInteractOutside";
 
-import type { ChangeDetails, SkinToneValue } from "@brianhung/emoji-picker-core";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import type { ChangeDetails, SkinToneValue } from "@emoji-components/core";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { useStableCallback } from "../../utils/useLatest";
 import { useChangeState } from "../../utils/useChangeState";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";

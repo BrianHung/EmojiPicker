@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { createSearch, type EmojiSearchState } from "@brianhung/emoji-picker-core";
+import { createSearch, type EmojiSearchState } from "@emoji-components/core";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useStore } from "../../utils/useStore";
 import { useEmojiContext } from "../EmojiProviderContext";

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { type EmojiRecord, unifiedToNative } from "@brianhung/emoji-picker-core";
+import { type EmojiRecord, unifiedToNative } from "@emoji-components/core";
 import * as EmojiPickerRootCssVars from "../picker/root/EmojiPickerRootCssVars";
 import { EmojiImage } from "./EmojiImage";
 import { useEmojiContext } from "../provider/EmojiProviderContext";

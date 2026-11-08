@@ -1,6 +1,6 @@
 "use client";
 
-import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "emoji-components";
 
 export function Picker() {
   return (

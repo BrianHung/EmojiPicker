@@ -8,7 +8,7 @@ describe("platform", () => {
   });
 
   it("points localeData at the data package, or at your own copy", () => {
-    expect(localeData("ja")).toMatch(/^https:\/\/cdn\.jsdelivr\.net\/npm\/@brianhung\/emoji-picker-data@[^/]+\/data\/ja\/iamcal\.json$/);
+    expect(localeData("ja")).toMatch(/^https:\/\/cdn\.jsdelivr\.net\/npm\/@emoji-components\/data@[^/]+\/data\/ja\/iamcal\.json$/);
     expect(localeData("ja", { shortcodes: "cldr", baseUrl: "/emoji" })).toBe("/emoji/ja/cldr.json");
   });
 });

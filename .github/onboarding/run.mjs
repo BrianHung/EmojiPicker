@@ -63,20 +63,22 @@ const tarballs = {};
 const routed = [];
 let registry;
 if (!fromNpm) {
-  run("npm", ["run", "build", "-w", "@brianhung/emoji-picker-core", "-w", "@brianhung/emoji-picker-react"]);
+  run("npm", ["run", "build", "-w", "@emoji-components/core", "-w", "emoji-components"]);
   run("npm", ["run", "build:registry", "-w", "demo"]);
-  run("npm", ["pack", "-w", "@brianhung/emoji-picker-core", "-w", "@brianhung/emoji-picker-react", "-w", "@brianhung/emoji-picker-data", "--pack-destination", tmp, "--silent"]);
-  for (const f of readdirSync(tmp).filter((f) => f.endsWith(".tgz"))) tarballs[`@brianhung/${f.match(/^brianhung-(emoji-picker-[a-z]+)-/)[1]}`] = join(tmp, f);
+  run("npm", ["pack", "-w", "@emoji-components/core", "-w", "emoji-components", "-w", "@emoji-components/data", "--pack-destination", tmp, "--silent"]);
+  for (const f of readdirSync(tmp).filter((f) => f.endsWith(".tgz"))) {
+    const scoped = f.match(/^emoji-components-([a-z-]+?)-\d/)?.[1];
+    tarballs[scoped ? `@emoji-components/${scoped}` : "emoji-components"] = join(tmp, f);
+  }
   mkdirSync(join(tmp, "data"));
-  run("tar", ["-xzf", tarballs["@brianhung/emoji-picker-data"], "-C", join(tmp, "data")]);
+  run("tar", ["-xzf", tarballs["@emoji-components/data"], "-C", join(tmp, "data")]);
   // The registry item from the local build, with its packages pointing at the tarballs
   const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker.json"), "utf8"));
-  item.dependencies = [...item.dependencies.map((d) => `${d.replace(/@[^@/]+$/, "")}@file:${tarballs[d.replace(/@[^@/]+$/, "")]}`), `@brianhung/emoji-picker-core@file:${tarballs["@brianhung/emoji-picker-core"]}`];
+  item.dependencies = [...item.dependencies.map((d) => `${d.replace(/@[^@/]+$/, "")}@file:${tarballs[d.replace(/@[^@/]+$/, "")]}`), `@emoji-components/core@file:${tarballs["@emoji-components/core"]}`];
   writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
   registry = await serve(tmp, `node -e 'require("node:http").createServer((q, s) => s.end(require("node:fs").readFileSync("emoji-picker.json"))).listen(${PORT})'`, PORT);
 }
-const local = (command) =>
-  fromNpm ? command : command.replace(SITE, `http://localhost:${PORT}`).replace(/@brianhung\/emoji-picker-react(?!\/|@)/, `${tarballs["@brianhung/emoji-picker-react"]} ${tarballs["@brianhung/emoji-picker-core"]}`);
+const local = (command) => (fromNpm ? command : command.replace(SITE, `http://localhost:${PORT}`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
 
 async function serve(cwd, command, port) {
   const child = spawn("sh", ["-c", `exec ${command}`], { cwd, env: { ...env, PORT: String(port) }, detached: true, stdio: ["ignore", "pipe", "pipe"] });
@@ -117,9 +119,9 @@ async function check(url, effect) {
   const problems = [];
   const logs = [];
   if (!fromNpm)
-    await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/@brianhung\/emoji-picker-data@[^/]+\/(.+)$/, (route) => {
+    await page.route(/^https:\/\/cdn\.jsdelivr\.net\/npm\/@emoji-components\/data@[^/]+\/(.+)$/, (route) => {
       routed.push(route.request().url());
-      return route.fulfill({ path: join(tmp, "data/package", new URL(route.request().url()).pathname.replace(/^.*?emoji-picker-data@[^/]+\//, "")) });
+      return route.fulfill({ path: join(tmp, "data/package", new URL(route.request().url()).pathname.replace(/^.*?\/data@[^/]+\//, "")) });
     });
   page.on("console", (m) => (m.type() === "error" ? problems.push(m.text()) : m.type() === "log" && logs.push(m.text())));
   page.on("pageerror", (e) => problems.push(String(e)));

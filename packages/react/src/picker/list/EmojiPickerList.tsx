@@ -6,7 +6,7 @@ import { Collection } from "react-aria/Collection";
 import { CollectionBuilder } from "react-aria/CollectionBuilder";
 import { useLocale } from "react-aria/I18nProvider";
 import type { VirtualizerState } from "react-stately/useVirtualizerState";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiSection } from "@emoji-components/core";
 import { useGridController } from "./utils/useGridController";
 import { useGridSections } from "./utils/useGridSections";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";

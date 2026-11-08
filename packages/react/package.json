@@ -1,5 +1,5 @@
 {
-  "name": "@brianhung/emoji-picker-react",
+  "name": "emoji-components",
   "version": "1.0.0-alpha.0",
   "description": "Virtualized, unstyled React components for emoji pickers, reaction rows, and shortcode typeahead.",
   "keywords": [
@@ -36,52 +36,52 @@
   ],
   "exports": {
     ".": {
-      "@brianhung/source": "./src/index.ts",
+      "@emoji-components/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./floating-ui": {
-      "@brianhung/source": "./src/floating-ui.ts",
+      "@emoji-components/source": "./src/floating-ui.ts",
       "types": "./dist/floating-ui.d.ts",
       "default": "./dist/floating-ui.js"
     },
     "./react-aria": {
-      "@brianhung/source": "./src/react-aria.ts",
+      "@emoji-components/source": "./src/react-aria.ts",
       "types": "./dist/react-aria.d.ts",
       "default": "./dist/react-aria.js"
     },
     "./picker": {
-      "@brianhung/source": "./src/picker/index.ts",
+      "@emoji-components/source": "./src/picker/index.ts",
       "types": "./dist/picker/index.d.ts",
       "default": "./dist/picker/index.js"
     },
     "./emoji": {
-      "@brianhung/source": "./src/emoji/index.ts",
+      "@emoji-components/source": "./src/emoji/index.ts",
       "types": "./dist/emoji/index.d.ts",
       "default": "./dist/emoji/index.js"
     },
     "./provider": {
-      "@brianhung/source": "./src/provider/index.ts",
+      "@emoji-components/source": "./src/provider/index.ts",
       "types": "./dist/provider/index.d.ts",
       "default": "./dist/provider/index.js"
     },
     "./popover/floating-ui": {
-      "@brianhung/source": "./src/popover/floating-ui/index.ts",
+      "@emoji-components/source": "./src/popover/floating-ui/index.ts",
       "types": "./dist/popover/floating-ui/index.d.ts",
       "default": "./dist/popover/floating-ui/index.js"
     },
     "./popover/react-aria": {
-      "@brianhung/source": "./src/popover/react-aria/index.ts",
+      "@emoji-components/source": "./src/popover/react-aria/index.ts",
       "types": "./dist/popover/react-aria/index.d.ts",
       "default": "./dist/popover/react-aria/index.js"
     },
     "./suggestions/floating-ui": {
-      "@brianhung/source": "./src/suggestions/floating-ui/index.ts",
+      "@emoji-components/source": "./src/suggestions/floating-ui/index.ts",
       "types": "./dist/suggestions/floating-ui/index.d.ts",
       "default": "./dist/suggestions/floating-ui/index.js"
     },
     "./suggestions/react-aria": {
-      "@brianhung/source": "./src/suggestions/react-aria/index.ts",
+      "@emoji-components/source": "./src/suggestions/react-aria/index.ts",
       "types": "./dist/suggestions/react-aria/index.d.ts",
       "default": "./dist/suggestions/react-aria/index.js"
     },
@@ -101,7 +101,7 @@
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "dependencies": {
-    "@brianhung/emoji-picker-core": "^1.0.0-alpha.0",
+    "@emoji-components/core": "^1.0.0-alpha.0",
     "@floating-ui/react": "^0.27.20",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",

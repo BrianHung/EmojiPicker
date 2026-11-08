@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
-import { withoutTone } from "@brianhung/emoji-picker-core";
-import { nameWithTone } from "@brianhung/emoji-picker-core/internal";
+import { withoutTone } from "@emoji-components/core";
+import { nameWithTone } from "@emoji-components/core/internal";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { Glyph, useOverridden } from "../../emoji/Glyph";
 import { useStoreSnapshot } from "../../provider/EmojiProviderContext";

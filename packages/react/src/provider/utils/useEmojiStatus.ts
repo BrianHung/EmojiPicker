@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiStoreStatus } from "@brianhung/emoji-picker-core";
+import type { EmojiStoreStatus } from "@emoji-components/core";
 import { useEmojiContext, useStoreSnapshot } from "../EmojiProviderContext";
 
 export function useEmojiStatus(): EmojiStoreStatus {

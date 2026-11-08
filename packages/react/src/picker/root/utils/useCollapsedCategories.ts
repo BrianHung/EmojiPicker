@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPicker } from "@brianhung/emoji-picker-core";
+import type { EmojiPicker } from "@emoji-components/core";
 import { useEmojiPickerRootContext } from "../EmojiPickerRootContext";
 
 export interface EmojiPickerCollapsedCategories {

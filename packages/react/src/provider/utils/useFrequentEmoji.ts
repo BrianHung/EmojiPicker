@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { subscribeAll } from "@brianhung/emoji-picker-core/internal";
+import { subscribeAll } from "@emoji-components/core/internal";
 import { useStore } from "../../utils/useStore";
 import { useEmojiContext } from "../EmojiProviderContext";
 

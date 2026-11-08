@@ -1,6 +1,6 @@
 import type { Key, KeyboardDelegate } from "@react-types/shared";
-import type { EmojiGridMove } from "@brianhung/emoji-picker-core/grid";
-import { createGridNavigation, type NavigationSource } from "@brianhung/emoji-picker-core/internal";
+import type { EmojiGridMove } from "@emoji-components/core/grid";
+import { createGridNavigation, type NavigationSource } from "@emoji-components/core/internal";
 
 export interface GridKeyboardDelegate extends KeyboardDelegate {
   move(key: Key, move: EmojiGridMove, viewport?: number): Key | null;

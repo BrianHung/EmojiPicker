@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Collection, Node } from "@react-types/shared";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiSection } from "@emoji-components/core";
 import { SLOTS } from "../../../internals/slots";
 import { hasModifier } from "../../../internals/usePickerKeyDown";
 import { nextTabbable, TABBABLE } from "../../../utils/dom";

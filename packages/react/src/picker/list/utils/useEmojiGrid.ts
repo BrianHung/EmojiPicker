@@ -3,8 +3,8 @@
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import { mergeProps } from "react-aria/mergeProps";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
-import { createEmojiGrid, type EmojiGrid, type EmojiGridRow } from "@brianhung/emoji-picker-core/grid";
+import type { EmojiSection } from "@emoji-components/core";
+import { createEmojiGrid, type EmojiGrid, type EmojiGridRow } from "@emoji-components/core/grid";
 import type { GridGeometry } from "./types";
 import { useGridController } from "./useGridController";
 import { useGridSections } from "./useGridSections";

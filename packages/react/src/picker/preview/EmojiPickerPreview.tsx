@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiRecord } from "@brianhung/emoji-picker-core";
+import type { EmojiRecord } from "@emoji-components/core";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { useActiveEmoji } from "../root/utils/useActiveEmoji";
 import { renderElement } from "../../internals/renderElement";

@@ -6,7 +6,7 @@ import { mergePartProps } from "../../internals/mergePartProps";
 import { renderElement, resolve } from "../../internals/renderElement";
 import type { EmojiPickerPartElementProps } from "../../internals/types";
 import { CellsContext, HorizontalContext, ItemContext } from "../list/EmojiPickerListContext";
-import type { EmojiItem } from "@brianhung/emoji-picker-core";
+import type { EmojiItem } from "@emoji-components/core";
 import { useCell } from "./utils/useEmojiCell";
 
 export type EmojiPickerListCellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };

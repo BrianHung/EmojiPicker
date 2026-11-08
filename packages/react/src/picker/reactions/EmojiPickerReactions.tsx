@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
-import { withoutTone, type ChangeDetails } from "@brianhung/emoji-picker-core";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import { withoutTone, type ChangeDetails } from "@emoji-components/core";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { ReactionsContext, useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { useDrawable } from "../../emoji/utils/useDrawable";
 import { useStoreSnapshot } from "../../provider/EmojiProviderContext";

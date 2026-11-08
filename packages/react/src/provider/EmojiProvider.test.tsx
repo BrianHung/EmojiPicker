@@ -8,7 +8,7 @@ import { en } from "../../test/en";
 import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "..";
 
 const fallback = vi.hoisted(() => ({ images: false }));
-vi.mock("@brianhung/emoji-picker-core/native", async (original) => ({ ...(await original<typeof import("@brianhung/emoji-picker-core/native")>()), needsImageFallback: () => fallback.images }));
+vi.mock("@emoji-components/core/native", async (original) => ({ ...(await original<typeof import("@emoji-components/core/native")>()), needsImageFallback: () => fallback.images }));
 
 function mount(node: React.ReactNode) {
   render(node);

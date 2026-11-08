@@ -1,5 +1,5 @@
-import { EmojiPicker, EmojiProvider } from "@brianhung/emoji-picker-react";
-import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
+import { EmojiPicker, EmojiProvider } from "emoji-components";
+import { EmojiPopover } from "emoji-components/floating-ui";
 import { Picker } from "./picker";
 
 export default function Page() {

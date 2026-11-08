@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { InputRange } from "dom-input-range";
-import { findShortcodeTrigger } from "@brianhung/emoji-picker-core";
+import { findShortcodeTrigger } from "@emoji-components/core";
 import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } from "./useEmojiTypeahead";
 
 type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;

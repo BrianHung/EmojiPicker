@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { ChangeDetails } from "@brianhung/emoji-picker-core";
+import type { ChangeDetails } from "@emoji-components/core";
 import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
 
 export type EmojiPopoverSide = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";

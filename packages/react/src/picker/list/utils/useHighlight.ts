@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker, EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiPicker, EmojiSection } from "@emoji-components/core";
 import type { HighlightSource } from "../../root/EmojiPickerRootContext";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
 import type { GridLatest } from "./types";

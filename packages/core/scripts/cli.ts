@@ -5,7 +5,7 @@ import { parseArgs } from "node:util";
 import { gzipSync } from "node:zlib";
 import { buildDataset, defaultShortcodeSets, emojibaseLocales, findEmojibase } from "./build-data";
 
-const USAGE = `Usage: emoji-picker build-data <locale> [--out <file>] [--shortcodes <sets>]
+const USAGE = `Usage: emoji-components build-data <locale> [--out <file>] [--shortcodes <sets>]
 
 Builds a dataset for <locale> from emojibase-data.
 
@@ -14,13 +14,13 @@ Builds a dataset for <locale> from emojibase-data.
                 iamcal, cldr, cldr-native, emojibase, github, joypixels.
                 Default: iamcal for English, iamcal,cldr otherwise.
 
-Example: npx @brianhung/emoji-picker-core build-data ja --out public/emoji/ja.json`;
+Example: npx @emoji-components/core build-data ja --out public/emoji/ja.json`;
 
-const INSTALL = `emoji-picker build-data reads emojibase-data. Install it in your project:
+const INSTALL = `emoji-components build-data reads emojibase-data. Install it in your project:
 
   npm install --save-dev emojibase-data
 
-or run both together: npx -p emojibase-data -p @brianhung/emoji-picker-core emoji-picker build-data <locale>`;
+or run both together: npx -p emojibase-data -p @emoji-components/core emoji-components build-data <locale>`;
 
 function fail(message: string): never {
   console.error(message);

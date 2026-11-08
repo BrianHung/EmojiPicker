@@ -1,7 +1,7 @@
 import type * as React from "react";
 import type { Key, LayoutDelegate } from "@react-types/shared";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
-import type { EmojiGrid } from "@brianhung/emoji-picker-core/grid";
+import type { EmojiSection } from "@emoji-components/core";
+import type { EmojiGrid } from "@emoji-components/core/grid";
 import type { EmojiCollection } from "./collection";
 import type { GridKeyboardDelegate } from "./navigation";
 

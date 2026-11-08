@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { type CollapsedCategoriesChangeDetails, createEmojiPicker, type EmojiPicker, type EmojiPickerOptions, type EmojiStore, type HighlightChangeDetails, type QueryChangeDetails } from "@brianhung/emoji-picker-core";
+import { type CollapsedCategoriesChangeDetails, createEmojiPicker, type EmojiPicker, type EmojiPickerOptions, type EmojiStore, type HighlightChangeDetails, type QueryChangeDetails } from "@emoji-components/core";
 import { useStableCallback } from "../../../utils/useLatest";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
 

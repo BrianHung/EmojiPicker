@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import { createLeafComponent } from "react-aria/CollectionBuilder";
-import type { EmojiItem } from "@brianhung/emoji-picker-core";
+import type { EmojiItem } from "@emoji-components/core";
 import { ITEMS } from "../list-section/EmojiPickerListSectionContext";
 
 export type EmojiPickerListItemsProps = {

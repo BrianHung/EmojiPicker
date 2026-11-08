@@ -1,6 +1,6 @@
-import type { Dataset } from "@brianhung/emoji-picker-core";
-import ja from "@brianhung/emoji-picker-data/ja/cldr.json";
-import { EmojiPicker, EmojiProvider } from "@brianhung/emoji-picker-react";
+import type { Dataset } from "@emoji-components/core";
+import ja from "@emoji-components/data/ja/cldr.json";
+import { EmojiPicker, EmojiProvider } from "emoji-components";
 
 const data: Dataset = ja;
 

@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiRecord } from "@brianhung/emoji-picker-core";
-import { onNativeSupportChange, PROBE_BATCH } from "@brianhung/emoji-picker-core/internal";
-import { drawsNatively, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport } from "@brianhung/emoji-picker-core/native";
+import type { EmojiRecord } from "@emoji-components/core";
+import { onNativeSupportChange, PROBE_BATCH } from "@emoji-components/core/internal";
+import { drawsNatively, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport } from "@emoji-components/core/native";
 import { useEmojiContext, useStoreSnapshot } from "../../provider/EmojiProviderContext";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 

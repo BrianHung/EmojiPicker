@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiRecord } from "@brianhung/emoji-picker-core";
+import type { EmojiRecord } from "@emoji-components/core";
 import { useStore } from "../utils/useStore";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";

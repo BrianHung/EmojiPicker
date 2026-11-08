@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPicker } from "@brianhung/emoji-picker-core";
+import type { EmojiPicker } from "@emoji-components/core";
 import { AutocompleteStateContext } from "react-aria-components/Autocomplete";
 import { useLatest } from "../../../utils/useLatest";
 import { moveVirtualFocus } from "../../../utils/dom";

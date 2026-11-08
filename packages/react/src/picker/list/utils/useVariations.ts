@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker } from "@brianhung/emoji-picker-core";
+import type { EmojiPicker } from "@emoji-components/core";
 import type { CellElement } from "./types";
 
 // The skin tone row a long press or Shift+Space opens; closing it can hand focus back

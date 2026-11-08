@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useListBoxSection } from "react-aria/useListBox";
-import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiItem, EmojiSection } from "@emoji-components/core";
 import { EmojiPickerListCell } from "../../list-cell/EmojiPickerListCell";
 import { EmojiPickerListSection } from "../../list-section/EmojiPickerListSection";
 import { EmojiPickerListSectionContext, partsOf } from "../../list-section/EmojiPickerListSectionContext";

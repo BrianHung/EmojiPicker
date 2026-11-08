@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { SkinToneValue } from "@brianhung/emoji-picker-core";
+import type { SkinToneValue } from "@emoji-components/core";
 import type { EmojiPickerOrientation } from "../../internals/types";
 
 export type EmojiPickerSkinToneContext = {

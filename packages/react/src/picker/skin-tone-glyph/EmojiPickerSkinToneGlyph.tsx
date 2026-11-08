@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { nativeToUnified, withTone } from "@brianhung/emoji-picker-core";
+import { nativeToUnified, withTone } from "@emoji-components/core";
 import { Emoji, type EmojiProps } from "../../emoji/Emoji";
 import { EmojiPickerSkinToneOptionContext, useEmojiPickerSkinToneContext } from "../skin-tone/EmojiPickerSkinToneContext";
 

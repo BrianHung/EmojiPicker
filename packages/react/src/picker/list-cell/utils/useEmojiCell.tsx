@@ -5,7 +5,7 @@ import * as EmojiPickerListCellDataAttributes from "../EmojiPickerListCellDataAt
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { ListState } from "react-stately/useListState";
-import type { EmojiItem, EmojiPicker, EmojiPickerSnapshot } from "@brianhung/emoji-picker-core";
+import type { EmojiItem, EmojiPicker, EmojiPickerSnapshot } from "@emoji-components/core";
 import { Glyph, useOverridden } from "../../../emoji/Glyph";
 import { flag, stateAttributes } from "../../../internals/renderElement";
 import { SLOTS } from "../../../internals/slots";

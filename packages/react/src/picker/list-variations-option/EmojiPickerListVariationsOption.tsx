@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiRecord, SkinToneValue } from "@brianhung/emoji-picker-core";
-import { nameWithTone } from "@brianhung/emoji-picker-core/internal";
+import type { EmojiRecord, SkinToneValue } from "@emoji-components/core";
+import { nameWithTone } from "@emoji-components/core/internal";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { Glyph } from "../../emoji/Glyph";

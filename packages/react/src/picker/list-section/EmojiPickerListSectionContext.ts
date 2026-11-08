@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiSection } from "@emoji-components/core";
 
 // Collection node types for a section's parts, built by React Aria's CollectionBuilder from List's children
 export const SECTION = "emoji-picker-section";

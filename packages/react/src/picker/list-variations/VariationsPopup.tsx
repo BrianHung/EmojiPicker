@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import type { SkinToneValue } from "@brianhung/emoji-picker-core";
-import { SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
+import type { SkinToneValue } from "@emoji-components/core";
+import { SKIN_TONE_VALUES } from "@emoji-components/core/internal";
 import { useEmojiPickerRootContext, type Overlay } from "../root/EmojiPickerRootContext";
 import { useLocale } from "react-aria/I18nProvider";
 import { ListKeyboardDelegate } from "react-aria/ListKeyboardDelegate";

@@ -51,23 +51,23 @@ jobs:
       - if: steps.versions.outputs.emojibase
         env: { V: "${{ steps.versions.outputs.emojibase }}" }
         run: |
-          npm pkg set devDependencies.emojibase=$V devDependencies.emojibase-data=$V -w @brianhung/emoji-picker-data
-          npm pkg set devDependencies.emojibase-data=$V -w @brianhung/emoji-picker-twemoji-font
-          printf -- '---\n"@brianhung/emoji-picker-data": minor\n---\n\nDatasets built from emojibase-data %s.\n' "$V" > .changeset/emojibase-$V.md
+          npm pkg set devDependencies.emojibase=$V devDependencies.emojibase-data=$V -w @emoji-components/data
+          npm pkg set devDependencies.emojibase-data=$V -w @emoji-components/twemoji-font
+          printf -- '---\n"@emoji-components/data": minor\n---\n\nDatasets built from emojibase-data %s.\n' "$V" > .changeset/emojibase-$V.md
       - if: steps.versions.outputs.twemoji
         env: { V: "${{ steps.versions.outputs.twemoji }}" }
         run: |
-          npm pkg set config.twemoji=$V -w @brianhung/emoji-picker-twemoji-font
-          printf -- '---\n"@brianhung/emoji-picker-twemoji-font": minor\n---\n\nTwemoji %s.\n' "$V" > .changeset/twemoji-$V.md
+          npm pkg set config.twemoji=$V -w @emoji-components/twemoji-font
+          printf -- '---\n"@emoji-components/twemoji-font": minor\n---\n\nTwemoji %s.\n' "$V" > .changeset/twemoji-$V.md
       - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
         run: npm install --no-audit --no-fund
       - if: steps.versions.outputs.emojibase
-        run: npm run build -w @brianhung/emoji-picker-data && npm test -w @brianhung/emoji-picker-data
+        run: npm run build -w @emoji-components/data && npm test -w @emoji-components/data
       - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
         run: |
-          npm run build -w @brianhung/emoji-picker-twemoji-font
+          npm run build -w @emoji-components/twemoji-font
           npx playwright install --with-deps chromium webkit firefox
-          npm test -w @brianhung/emoji-picker-twemoji-font
+          npm test -w @emoji-components/twemoji-font
       - if: steps.versions.outputs.emojibase || steps.versions.outputs.twemoji
         uses: peter-evans/create-pull-request@v7
         with:

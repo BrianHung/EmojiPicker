@@ -3,7 +3,7 @@
 import type * as React from "react";
 import type { KeyboardEvent } from "@react-types/shared";
 import { useKeyboard } from "react-aria/useKeyboard";
-import { isComposingKey } from "@brianhung/emoji-picker-core";
+import { isComposingKey } from "@emoji-components/core";
 import { isSkipped, preventable } from "./mergePartProps";
 import type { PickerEvent } from "./types";
 

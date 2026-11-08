@@ -1,5 +1,5 @@
 import type { Collection, Key, Node } from "@react-types/shared";
-import type { EmojiItem, EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiItem, EmojiSection } from "@emoji-components/core";
 
 export type CollectionValue = EmojiSection | EmojiItem;
 export type CollectionNode = Node<CollectionValue>;

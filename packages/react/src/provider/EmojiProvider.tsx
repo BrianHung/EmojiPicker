@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { I18nProvider, useLocale } from "react-aria/I18nProvider";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type Renderer, type SkinToneChangeDetails } from "@brianhung/emoji-picker-core";
-import { localizeLabels, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type Renderer, type SkinToneChangeDetails } from "@emoji-components/core";
+import { localizeLabels, TWEMOJI_EMOJI_VERSION } from "@emoji-components/core/internal";
 import { useLayoutEffect } from "../utils/useLayoutEffect";
 import { contextValue, EmojiProviderContext, type ImageUrl, twemoji, useEmojiContext, useHydrating, useRenderer } from "./EmojiProviderContext";
 

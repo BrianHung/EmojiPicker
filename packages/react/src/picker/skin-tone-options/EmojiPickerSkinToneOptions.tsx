@@ -4,8 +4,8 @@ import * as React from "react";
 import { FocusScope } from "react-aria/FocusScope";
 import { mergeRefs } from "react-aria/mergeRefs";
 
-import type { SkinToneValue } from "@brianhung/emoji-picker-core";
-import { SKIN_TONE_VALUES } from "@brianhung/emoji-picker-core/internal";
+import type { SkinToneValue } from "@emoji-components/core";
+import { SKIN_TONE_VALUES } from "@emoji-components/core/internal";
 import { ToolbarPart } from "../../internals/ToolbarPart";
 import { resolve } from "../../internals/renderElement";
 import type { EmojiPickerOrientation, EmojiPickerPartElementProps, EmojiPickerPartProps } from "../../internals/types";

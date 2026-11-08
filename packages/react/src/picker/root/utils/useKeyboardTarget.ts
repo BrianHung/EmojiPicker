@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { type EmojiPicker, isComposingKey } from "@brianhung/emoji-picker-core";
-import { KEY_MOVES } from "@brianhung/emoji-picker-core/grid";
-import { syncAriaAttributes } from "@brianhung/emoji-picker-core/internal";
+import { type EmojiPicker, isComposingKey } from "@emoji-components/core";
+import { KEY_MOVES } from "@emoji-components/core/grid";
+import { syncAriaAttributes } from "@emoji-components/core/internal";
 import type { ListHandle } from "../EmojiPickerRootContext";
 import { hasModifier } from "../../../internals/usePickerKeyDown";
 

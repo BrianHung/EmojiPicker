@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { createEmojiStore, type EmojiLabels, type EmojiStore, type Renderer, twemojiUrl } from "@brianhung/emoji-picker-core";
-import { isUnified, localizeLabels, onNativeSupportChange, TWEMOJI_EMOJI_VERSION } from "@brianhung/emoji-picker-core/internal";
-import { needsImageFallback } from "@brianhung/emoji-picker-core/native";
+import { createEmojiStore, type EmojiLabels, type EmojiStore, type Renderer, twemojiUrl } from "@emoji-components/core";
+import { isUnified, localizeLabels, onNativeSupportChange, TWEMOJI_EMOJI_VERSION } from "@emoji-components/core/internal";
+import { needsImageFallback } from "@emoji-components/core/native";
 import { useStore } from "../utils/useStore";
 
 export type ImageUrl = (unified: string, context: { renderer: Renderer }) => string | undefined;

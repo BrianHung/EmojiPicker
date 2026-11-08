@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { useChangeState } from "../../utils/useChangeState";
 import type { PopoverState } from "../root/EmojiPopoverRootContext";
 import { interactionOf } from "./focus";

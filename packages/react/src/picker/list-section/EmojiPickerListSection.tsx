@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import { createBranchComponent } from "react-aria/CollectionBuilder";
-import type { EmojiSection } from "@brianhung/emoji-picker-core";
+import type { EmojiSection } from "@emoji-components/core";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
 import type { EmojiPickerPartElementProps } from "../../internals/types";

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, expectTypeOf, it } from "vitest";
-import { createEmojiStore, type Dataset } from "@brianhung/emoji-picker-core";
+import { createEmojiStore, type Dataset } from "@emoji-components/core";
 import type { Dataset as Published } from "../dataset.cjs";
 
 const root = fileURLToPath(new URL("../data/", import.meta.url));

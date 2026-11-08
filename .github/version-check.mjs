@@ -12,7 +12,9 @@ const git = (...args) => execFileSync("git", ["-c", "user.name=ci", "-c", "user.
 const changeset = (...args) => execFileSync(join(root, "node_modules/.bin/changeset"), args, { cwd: tmp, stdio: ["ignore", "ignore", "inherit"] });
 
 // The check below holds only while every package versions together
-if (!JSON.parse(readFileSync(join(root, ".changeset/config.json"), "utf8")).fixed.some((group) => group.includes("@brianhung/emoji-picker-*"))) throw new Error('.changeset/config.json must set "fixed": [["@brianhung/emoji-picker-*"]]');
+const FIXED = ["emoji-components", "@emoji-components/*"];
+const ours = (dep) => dep === "emoji-components" || dep.startsWith("@emoji-components/");
+if (!JSON.parse(readFileSync(join(root, ".changeset/config.json"), "utf8")).fixed.some((group) => FIXED.every((name) => group.includes(name)))) throw new Error(`.changeset/config.json must set "fixed": [${JSON.stringify(FIXED)}]`);
 
 try {
   cpSync(root, tmp, { recursive: true, filter: (src) => !/[/\\](node_modules|\.git|dist|\.claude|\.cache)$/.test(src) });
@@ -32,11 +34,11 @@ try {
   for (const name of packages) {
     const pkg = json(`packages/${name}/package.json`);
     if (pkg.version !== version) throw new Error(`${pkg.name} is ${pkg.version}, expected ${version}`);
-    for (const [dep, range] of Object.entries({ ...pkg.dependencies, ...pkg.peerDependencies })) if (dep.startsWith("@brianhung/") && range !== `^${version}`) throw new Error(`${pkg.name} depends on ${dep}@${range}, expected ^${version}`);
+    for (const [dep, range] of Object.entries({ ...pkg.dependencies, ...pkg.peerDependencies })) if (ours(dep) && range !== `^${version}`) throw new Error(`${pkg.name} depends on ${dep}@${range}, expected ^${version}`);
   }
   execFileSync(join(root, "node_modules/.bin/tsup"), ["--silent"], { cwd: join(tmp, "packages/core"), stdio: "inherit" });
   const { DEFAULT_DATA_URL } = await import(pathToFileURL(join(tmp, "packages/core/dist/platform.js")).href);
-  if (!DEFAULT_DATA_URL.includes(`/emoji-picker-data@${version}/data/en/iamcal.json`)) throw new Error(`core build loads ${DEFAULT_DATA_URL}, expected ${version}`);
+  if (!DEFAULT_DATA_URL.includes(`/@emoji-components/data@${version}/data/en/iamcal.json`)) throw new Error(`core build loads ${DEFAULT_DATA_URL}, expected ${version}`);
   console.log(`changeset version: all packages at ${version}`);
 } finally {
   rmSync(tmp, { recursive: true, force: true });

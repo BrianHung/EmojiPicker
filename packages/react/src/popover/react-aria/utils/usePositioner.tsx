@@ -6,7 +6,7 @@ import { Popover, type PopoverRenderProps } from "react-aria-components/Popover"
 import { useLocale } from "react-aria/I18nProvider";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { useInteractOutside } from "react-aria/useInteractOutside";
-import { createChangeDetails } from "@brianhung/emoji-picker-core/internal";
+import { createChangeDetails } from "@emoji-components/core/internal";
 import { mergePartProps } from "../../../internals/mergePartProps";
 import { resolve, toRenderFunction } from "../../../internals/renderElement";
 import type { ElementProps } from "../../../internals/types";

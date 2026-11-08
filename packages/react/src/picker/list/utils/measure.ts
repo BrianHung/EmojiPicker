@@ -1,5 +1,5 @@
 import type * as React from "react";
-import { shallowEqual } from "@brianhung/emoji-picker-core/internal";
+import { shallowEqual } from "@emoji-components/core/internal";
 import * as EmojiPickerRootCssVars from "../../root/EmojiPickerRootCssVars";
 import * as EmojiPickerListCssVars from "../EmojiPickerListCssVars";
 import { DEFAULT_METRICS, type GridMetrics } from "./layout";

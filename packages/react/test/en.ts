@@ -1,3 +1,3 @@
-import { buildDataset, findEmojibase } from "@brianhung/emoji-picker-core/build";
+import { buildDataset, findEmojibase } from "@emoji-components/core/build";
 
 export const en = buildDataset({ locale: "en", load: findEmojibase()!.load }).dataset;
