@@ -11,7 +11,9 @@ Builds a dataset for <locale> from emojibase-data.
 
   --out         Where to write it. Default: ./<locale>.json
   --shortcodes  emojibase shortcode sets, comma-separated, in priority order:
-                iamcal, cldr, cldr-native, emojibase, github, joypixels.
+                iamcal, cldr, cldr-native, emojibase, emojibase-native,
+                emojibase-legacy, github, joypixels. A set the locale lacks
+                comes from English.
                 Default: iamcal for English, iamcal,cldr otherwise.
 
 Example: npx @emoji-components/core build-data ja --out public/emoji/ja.json`;
