@@ -44,7 +44,7 @@ const INLINE_MENU = [
   "[font-family:'Inter_Variable',Inter,-apple-system,sans-serif]",
   "[&>li]:h-[34px] [&>li]:gap-2 [&>li]:rounded-[6px] [&>li]:px-[10px]",
   "[&>li[data-highlighted]]:bg-[lch(95_0_282)] [&>li[data-highlighted]]:text-[lch(10_0_282)] dark:[&>li[data-highlighted]]:bg-[lch(18_1_272)] dark:[&>li[data-highlighted]]:text-[lch(100_0_272)]",
-  "[&_[data-emoji]]:w-[15px] [&_[data-emoji]]:text-[15px] [&_span]:[font-family:inherit] [&_span]:text-[13px] [&_span]:[font-weight:450] [&_b]:[font-weight:inherit]",
+  "[&_[data-slot=emoji]]:w-[15px] [&_[data-slot=emoji]]:text-[15px] [&_span]:[font-family:inherit] [&_span]:text-[13px] [&_span]:[font-weight:450] [&_b]:[font-weight:inherit]",
 ].join(" ");
 const BODY = "text-[15px] leading-6 font-[450] tracking-[-0.1px]";
 
@@ -514,10 +514,10 @@ function IconPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
       onSelect={onSelect}
       data-style="linear"
       style={tokensOf(linear)}
-      className={cn(ROOT, "h-[379.5px] w-[412px] bg-transparent font-picker text-picker-foreground [--emoji-cell-size:28px] [--emoji-header-height:28px] [--emoji-image-size:20px] [--emoji-list-padding:10.5px] [--emoji-size:20px]", className)}
+      className={cn(ROOT, "h-[379.5px] w-[412px] bg-transparent font-emoji-picker text-emoji-picker-foreground [--emoji-picker-cell-size:28px] [--emoji-picker-header-height:28px] [--emoji-picker-emoji-image-size:20px] [--emoji-picker-list-padding:10.5px] [--emoji-picker-emoji-size:20px]", className)}
     >
       <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1">
-        <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-picker-subtle">
+        <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-emoji-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-subtle">
           <SearchClear />
         </EmojiPicker.SearchInput>
       </EmojiPicker.Search>
@@ -525,8 +525,8 @@ function IconPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.ListSection>
-              <EmojiPicker.ListSectionTitle className="flex h-7 items-center bg-picker-background pt-1.5 pr-1.5 pl-[10.5px] text-[12px] leading-[22px] font-medium text-picker-muted" />
-              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[8px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.ListItems>
+              <EmojiPicker.ListSectionTitle className="flex h-7 items-center bg-emoji-picker-background pt-1.5 pr-1.5 pl-[10.5px] text-[12px] leading-[22px] font-medium text-emoji-picker-muted" />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[8px] hover:bg-emoji-picker-hover data-focus-visible:bg-emoji-picker-selected data-[focused]:bg-emoji-picker-selected")} />}</EmojiPicker.ListItems>
             </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
@@ -580,7 +580,7 @@ function IconPopover({ value, onChange, sheet = false }: { value: string; onChan
         <EmojiPopover.Positioner side="bottom" align="start">
           <EmojiPopover.Popup aria-label="Linear style icon picker" style={{ fontFamily: FONT }}>
             <FitViewport width={412}>
-              <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-picker-border bg-picker-background text-picker-foreground", POPUP_SHADOW)}>
+              <div data-style="linear" style={tokensOf(linear)} className={cn("flex h-[411px] w-[412px] flex-col overflow-hidden rounded-[6px] border-[0.5px] border-emoji-picker-border bg-emoji-picker-background text-emoji-picker-foreground", POPUP_SHADOW)}>
                 {ICON_TABS}
                 <IconPicker
                   onSelect={(s) => {

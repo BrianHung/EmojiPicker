@@ -126,7 +126,7 @@ describe("store.query", () => {
     expect(store.query("   ")).toEqual([]);
   });
 
-  it("defaults to lexical, synchronously", async () => {
+  it("defaults to lexicalSearch, synchronously", async () => {
     const store = createEmojiStore({ data: dataset });
     await store.load();
     const out = store.query("fire");

@@ -6,9 +6,9 @@ import { isUnified, localizeLabels, onNativeSupportChange, TWEMOJI_EMOJI_VERSION
 import { needsImageFallback } from "@emoji-components/core/native";
 import { useStore } from "../utils/useStore";
 
-export type ImageUrl = (unified: string, context: { renderer: Renderer }) => string | undefined;
+export type EmojiImageUrl = (unified: string, context: { renderer: Renderer }) => string | undefined;
 
-export const twemoji: ImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
+export const twemoji: EmojiImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
 
 export type EmojiProviderContext = {
   store: EmojiStore;
@@ -20,7 +20,7 @@ export type EmojiProviderContext = {
 
 export const EmojiProviderContext = React.createContext<EmojiProviderContext | null>(null);
 
-export const contextValue = (store: EmojiStore, renderer: Renderer, imageUrl: ImageUrl, imageVersion: number, labels: EmojiLabels): EmojiProviderContext => ({
+export const contextValue = (store: EmojiStore, renderer: Renderer, imageUrl: EmojiImageUrl, imageVersion: number, labels: EmojiLabels): EmojiProviderContext => ({
   store,
   renderer,
   image: (unified, as = renderer) => (isUnified(unified) ? imageUrl(unified, { renderer: as }) : undefined),

@@ -111,7 +111,7 @@ function EmojiPickerCard({ className, autoFocus, rows, cell: renderCell, footer,
     <EmojiPicker.Root
       className={cn(
         root,
-        "h-[360px] w-[328px] max-w-full in-data-side:max-w-[var(--available-width,calc(100vw-24px))] in-data-placement:max-w-[calc(100vw-24px)] rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
+        "h-[360px] w-[328px] max-w-full in-data-side:max-w-[var(--available-width,calc(100vw-24px))] in-data-placement:max-w-[calc(100vw-24px)] rounded-xl [corner-shape:squircle] border border-border bg-popover text-popover-foreground shadow-md [--emoji-picker-cell-size:36px] [--emoji-picker-header-height:28px] [--emoji-picker-list-padding:6px] [--emoji-picker-emoji-size:24px]",
         className,
       )}
       {...props}
@@ -132,11 +132,11 @@ function EmojiTapback({ onSelect, count = 5, className }: { onSelect: (selection
       className={cn(
         root,
         "w-fit max-w-[352px] rounded-full border border-border bg-popover text-foreground shadow-lg",
-        "has-[[data-slot=emoji-picker-panel]:not([hidden])]:h-[360px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:w-[328px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:rounded-xl [--emoji-cell-size:36px] [--emoji-header-height:28px] [--emoji-list-padding:6px] [--emoji-size:24px]",
+        "has-[[data-slot=emoji-picker-panel]:not([hidden])]:h-[360px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:w-[328px] has-[[data-slot=emoji-picker-panel]:not([hidden])]:rounded-xl [--emoji-picker-cell-size:36px] [--emoji-picker-header-height:28px] [--emoji-picker-list-padding:6px] [--emoji-picker-emoji-size:24px]",
         className,
       )}
     >
-      <EmojiPicker.Reactions className="flex items-center gap-0.5 p-1.5 [--emoji-image-size:28px]">
+      <EmojiPicker.Reactions className="flex items-center gap-0.5 p-1.5 [--emoji-picker-emoji-image-size:28px]">
         <EmojiPicker.ReactionsItems>{(emoji) => <EmojiPicker.ReactionsItem emoji={emoji} className={reaction} />}</EmojiPicker.ReactionsItems>
         <EmojiPicker.ReactionsExpand className={reaction}>
           <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>

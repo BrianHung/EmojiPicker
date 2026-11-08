@@ -22,7 +22,7 @@ for (const colorScheme of ["light", "dark"]) {
   await page.addStyleTag({ content: "html, body { background: transparent !important }" });
   await page.waitForFunction(() => document.fonts.ready.then(() => [...document.fonts].every((f) => f.status !== "loading")));
   const picker = page.locator('[data-slot="emoji-picker"]');
-  await picker.locator('[data-slot="emoji-picker-emoji"]').nth(18).hover();
+  await picker.locator('[data-slot="emoji-picker-list-cell"]').nth(18).hover();
   await page.waitForFunction(() => document.fonts.ready.then(() => [...document.fonts].every((f) => f.status !== "loading")));
   await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
   const png = await sharp(await picker.screenshot({ omitBackground: true, animations: "disabled" }))

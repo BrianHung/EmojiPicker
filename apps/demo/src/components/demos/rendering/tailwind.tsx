@@ -1,6 +1,6 @@
 import * as React from "react";
 import en from "@emoji-components/data/en/iamcal.json?url";
-import { EmojiProvider, type EmojiSelection, type ImageUrl } from "emoji-components";
+import { EmojiProvider, type EmojiSelection, type EmojiImageUrl } from "emoji-components";
 import { twemojiUrl, withoutTone } from "@emoji-components/core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
@@ -17,8 +17,8 @@ const artwork: Record<string, string> = {
   "2753": "/reactions/question.webp",
 };
 
-const twemoji: ImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
-const tapbacks: ImageUrl = (unified, context) => artwork[withoutTone(unified)] ?? twemoji(unified, context);
+const twemoji: EmojiImageUrl = (unified, { renderer }) => (renderer === "image" ? twemojiUrl(unified) : undefined);
+const tapbacks: EmojiImageUrl = (unified, context) => artwork[withoutTone(unified)] ?? twemoji(unified, context);
 
 const NOTO = "https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap";
 const FONTS = { system: undefined, twemoji: "[--emoji-font-family:Twemoji]", noto: "[--emoji-font-family:'Noto_Color_Emoji']" };

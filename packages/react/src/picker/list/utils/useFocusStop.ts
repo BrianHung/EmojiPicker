@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker } from "@emoji-components/core";
+import type { EmojiPickerStore } from "@emoji-components/core";
 import { PopoverContext } from "../../../popover/root/EmojiPopoverRootContext";
 import { SLOTS } from "../../../internals/slots";
 import type { CellElement, GridLatest } from "./types";
 
 // One cell is the list's tab stop; a popover whose initial focus falls to the default also gets focus there on open
-export function useFocusStop(core: EmojiPicker<React.ReactNode>, listRef: React.RefObject<HTMLElement | null>, latest: { readonly current: GridLatest }, cellElement: CellElement) {
+export function useFocusStop(core: EmojiPickerStore<React.ReactNode>, listRef: React.RefObject<HTMLElement | null>, latest: { readonly current: GridLatest }, cellElement: CellElement) {
   const focusGrid = React.useContext(PopoverContext)?.focusGrid;
   const lastFocused = React.useRef<Key | null>(null);
   const syncStop = () => {

@@ -31,7 +31,7 @@ import { EmojiPicker } from "emoji-components";
 
 | Import | Contents |
 |---|---|
-| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `pickerInitialFocus` |
+| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `emojiPickerInitialFocus` |
 | `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
 | `/picker`, `/emoji`, `/provider` | One component each: `EmojiPicker` with its hooks, `Emoji`, and `EmojiProvider` with its hooks |
 | `/popover/floating-ui`, `/popover/react-aria`, `/suggestions/floating-ui`, `/suggestions/react-aria` | `EmojiPopover` or `EmojiSuggestions` alone |

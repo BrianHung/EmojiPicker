@@ -4,11 +4,11 @@ description: Shortcode suggestions and an emoji picker for the Tiptap editor.
 ---
 
 import { Editor } from "./editor";
-import tiptap from "@/registry/emoji-tiptap.ts?raw";
+import tiptap from "@/registry/use-emoji-tiptap.ts?raw";
 import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
 import suggestion from "@/components/tiptap/emoji-suggestion.tsx?raw";
 import node from "@/components/tiptap/emoji-node.tsx?raw";
-import menu from "@/components/suggestion-menu.tsx?raw";
+import menu from "@/registry/emoji-suggestions.tsx?raw";
 
 <Editor />
 
@@ -20,7 +20,7 @@ import menu from "@/components/suggestion-menu.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-tiptap.json" />
 
-Adds `hooks/emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/suggestion-menu.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emoji-suggestions.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
 </Step>
 
@@ -68,7 +68,7 @@ export function Editor() {
 `useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
 
 ```tsx title="emoji-suggestion.tsx (excerpt)"
-import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
+import { useTiptapEmojiTypeahead } from "@/hooks/use-emoji-tiptap";
 
 const emoji = useTiptapEmojiTypeahead(editor, {
   content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),
@@ -89,7 +89,7 @@ const emoji = useTiptapEmojiTypeahead(editor, {
 
 ## Source
 
-<Code title="hooks/emoji-tiptap.ts" code={tiptap} />
+<Code title="hooks/use-emoji-tiptap.ts" code={tiptap} />
 
 <Code title="lib/emoji-prosemirror.ts" code={prosemirror} />
 
@@ -97,4 +97,4 @@ const emoji = useTiptapEmojiTypeahead(editor, {
 
 <Code title="components/tiptap/emoji-node.tsx" code={node} />
 
-<Code title="components/suggestion-menu.tsx" code={menu} />
+<Code title="components/ui/emoji-suggestions.tsx" code={menu} />

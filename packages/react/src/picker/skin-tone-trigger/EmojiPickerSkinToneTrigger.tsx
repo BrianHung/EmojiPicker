@@ -5,7 +5,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { useInteraction, type Clickable } from "../../internals/useInteraction";
 import { SLOTS } from "../../internals/slots";
 
@@ -14,9 +14,9 @@ import { useEmojiPickerSkinToneContext } from "../skin-tone/EmojiPickerSkinToneC
 import * as EmojiPickerSkinToneTriggerDataAttributes from "./EmojiPickerSkinToneTriggerDataAttributes";
 import type { EmojiPickerSkinToneState } from "../skin-tone/EmojiPickerSkinTone";
 
-export type EmojiPickerSkinToneTriggerState = EmojiPickerSkinToneState & EmojiPickerInteractionState;
+export type EmojiPickerSkinToneTriggerState = EmojiPickerSkinToneState & EmojiComponentsInteractionState;
 
-export type EmojiPickerSkinToneTriggerProps = EmojiPickerPartElementProps<EmojiPickerSkinToneTriggerState, HTMLButtonElement>;
+export type EmojiPickerSkinToneTriggerProps = EmojiComponentsPartElementProps<EmojiPickerSkinToneTriggerState, HTMLButtonElement>;
 
 export const EmojiPickerSkinToneTrigger = React.forwardRef<HTMLButtonElement, EmojiPickerSkinToneTriggerProps>(function EmojiPickerSkinToneTrigger({ style, children, ...props }, ref) {
   const { tone, open, toggle, label, triggerRef, optionsId } = useEmojiPickerSkinToneContext("Trigger");

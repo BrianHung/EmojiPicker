@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPickerHandlers, EmojiPickerOrientation, EmojiPickerPartProps } from "../../internals/types";
-import { ToolbarPart } from "../../internals/ToolbarPart";
+import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
+import { ToolbarPart } from "../utils/ToolbarPart";
 
 export const BUTTONS = "button:not([disabled])";
 
 export type ReactionBarState = { orientation: EmojiPickerOrientation };
 
-export type ReactionBarProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style">> &
-  EmojiPickerPartProps<ReactionBarState, HTMLDivElement> & {
+export type ReactionBarProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style">> &
+  EmojiComponentsPartProps<ReactionBarState, HTMLDivElement> & {
     orientation?: EmojiPickerOrientation;
   };
 

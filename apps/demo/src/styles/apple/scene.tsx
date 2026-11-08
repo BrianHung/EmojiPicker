@@ -1016,11 +1016,11 @@ function EmojiLayer({ rect, message, onClose }: { rect: Rect; message: Message; 
 }
 
 const IOS_GROUPS: { id: EmojiRecord["group"]; label: string; icon: React.ReactNode }[] = [
-  { id: "smileys_people", label: "Smileys & People", icon: <SFFaceSmiling size={18.5} /> },
-  { id: "animals_nature", label: "Animals & Nature", icon: <I.DogFace size={19} strokeWidth={1.7} /> },
-  { id: "food_drink", label: "Food & Drink", icon: <I.Burger size={19} strokeWidth={1.7} /> },
+  { id: "smileys-people", label: "Smileys & People", icon: <SFFaceSmiling size={18.5} /> },
+  { id: "animals-nature", label: "Animals & Nature", icon: <I.DogFace size={19} strokeWidth={1.7} /> },
+  { id: "food-drink", label: "Food & Drink", icon: <I.Burger size={19} strokeWidth={1.7} /> },
   { id: "activities", label: "Activity", icon: <SFSoccerball size={18.5} /> },
-  { id: "travel_places", label: "Travel & Places", icon: <SFCar size={18.5} /> },
+  { id: "travel-places", label: "Travel & Places", icon: <SFCar size={18.5} /> },
   { id: "objects", label: "Objects", icon: <SFLightbulb size={18.5} /> },
   { id: "symbols", label: "Symbols", icon: <SymbolsGlyph /> },
   { id: "flags", label: "Flags", icon: <SFFlag size={17.5} /> },
@@ -1054,14 +1054,14 @@ const MAX_VERSION = 16;
 const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently Used", icon: <SFClock size={20} /> }, ...IOS_GROUPS.map((g) => ({ id: g.id, name: g.label, icon: g.icon }))];
 
 const KEYBOARD_SIZES = {
-  "--emoji-size": `${K.emoji}px`,
+  "--emoji-picker-emoji-size": `${K.emoji}px`,
   "--emoji-font-family": 'var(--site-emoji-font,) -apple-system, system-ui, "SF Pro Text", sans-serif',
-  "--emoji-cell-width": `${K.col}px`,
-  "--emoji-cell-height": `${K.row}px`,
-  "--emoji-header-height": `${K.grid - K.label}px`,
-  "--emoji-list-padding": `${K.left}px`,
-  "--emoji-section-gap": `${K.gap}px`,
-  "--emoji-section-min-width": "150px",
+  "--emoji-picker-cell-width": `${K.col}px`,
+  "--emoji-picker-cell-height": `${K.row}px`,
+  "--emoji-picker-header-height": `${K.grid - K.label}px`,
+  "--emoji-picker-list-padding": `${K.left}px`,
+  "--emoji-picker-section-gap": `${K.gap}px`,
+  "--emoji-picker-section-min-width": "150px",
 } as React.CSSProperties;
 const SHEET: React.CSSProperties = {
   background: C.sheet,

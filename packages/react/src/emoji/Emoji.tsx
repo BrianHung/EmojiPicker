@@ -42,10 +42,10 @@ export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ 
 
   if (!resolved) {
     if (status !== "ready" && status !== "error") {
-      return <span {...props} aria-hidden data-emoji="" style={{ display: "inline-block", width: size ?? "1em", height: size ?? "1em", ...props.style }} />;
+      return <span {...props} aria-hidden style={{ display: "inline-block", width: size ?? "1em", height: size ?? "1em", ...props.style }} />;
     }
     return (
-      <span {...props} data-emoji="" data-emoji-missing="">
+      <span {...props} data-emoji-missing="">
         {missingEmojiText(input)}
       </span>
     );
@@ -57,21 +57,11 @@ export const Emoji = React.forwardRef<HTMLElement, EmojiProps>(function Emoji({ 
   if (src) {
     const record = resolved.record ?? (typeof input === "object" && isCustomEmoji(input) ? customRecord(input) : undefined);
     return (
-      <EmojiImage
-        {...props}
-        src={src}
-        alt={hidden ? "" : name}
-        record={record}
-        size={size ?? "1em"}
-        animate={animate}
-        fallback={resolved.native || undefined}
-        data-emoji=""
-        data-overridden={!resolved.imageUrl && renderer === "native" ? "" : undefined}
-      />
+      <EmojiImage {...props} src={src} alt={hidden ? "" : name} record={record} size={size ?? "1em"} animate={animate} fallback={resolved.native || undefined} data-overridden={!resolved.imageUrl && renderer === "native" ? "" : undefined} />
     );
   }
   return (
-    <span {...props} {...(hidden ? {} : { role: "img", "aria-label": name })} data-emoji="" style={{ ...NATIVE, width: "1em", height: "1em", fontSize: size, ...props.style }}>
+    <span {...props} {...(hidden ? {} : { role: "img", "aria-label": name })} style={{ ...NATIVE, width: "1em", height: "1em", fontSize: size, ...props.style }}>
       {resolved.native}
     </span>
   );

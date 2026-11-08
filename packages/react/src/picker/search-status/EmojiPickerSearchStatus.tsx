@@ -3,13 +3,13 @@
 import * as React from "react";
 import { renderElement } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useStore } from "../../utils/useStore";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 
 export type EmojiPickerSearchStatusState = { resultCount: number | null };
-export type EmojiPickerSearchStatusProps = EmojiPickerPartElementProps<EmojiPickerSearchStatusState, HTMLDivElement, "role">;
+export type EmojiPickerSearchStatusProps = EmojiComponentsPartElementProps<EmojiPickerSearchStatusState, HTMLDivElement, "role">;
 
 // Base UI's Combobox.Status: the result count's live region, for placing and styling it; without one, Root renders a visually hidden one
 export const EmojiPickerSearchStatus = React.forwardRef<HTMLDivElement, EmojiPickerSearchStatusProps>(function EmojiPickerSearchStatus({ children, ...props }, ref) {

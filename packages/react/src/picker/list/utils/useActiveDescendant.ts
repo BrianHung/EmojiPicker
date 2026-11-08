@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPicker } from "@emoji-components/core";
+import type { EmojiPickerStore } from "@emoji-components/core";
 import { AutocompleteStateContext } from "react-aria-components/Autocomplete";
 import { useLatest } from "../../../utils/useLatest";
 import { moveVirtualFocus } from "../../../utils/dom";
@@ -11,7 +11,7 @@ import type { CellElement, GridLatest } from "./types";
 
 // The search field's aria-activedescendant is React Aria's focused node, which follows virtual focus events: re-send them for the highlight, and clear one that left the collection
 export function useActiveDescendant(
-  core: EmojiPicker<React.ReactNode>,
+  core: EmojiPickerStore<React.ReactNode>,
   latest: { readonly current: GridLatest },
   collection: EmojiCollection,
   virtual: boolean,

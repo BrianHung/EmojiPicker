@@ -2,7 +2,7 @@ import * as InteractionDataAttributes from "../../internals/InteractionDataAttri
 
 /**
  * Identifies a variation.
- * @type {'emoji-picker-variation'}
+ * @type {'emoji-picker-list-variations-option'}
  */
 export const slot = "data-slot";
 /**

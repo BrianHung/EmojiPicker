@@ -1,6 +1,6 @@
 /**
  * Identifies a section title.
- * @type {'emoji-picker-section-title'}
+ * @type {'emoji-picker-list-section-title'}
  */
 export const slot = "data-slot";
 /**

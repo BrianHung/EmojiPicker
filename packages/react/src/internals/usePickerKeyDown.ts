@@ -5,9 +5,9 @@ import type { KeyboardEvent } from "@react-types/shared";
 import { useKeyboard } from "react-aria/useKeyboard";
 import { isComposingKey } from "@emoji-components/core";
 import { isSkipped, preventable } from "./mergePartProps";
-import type { PickerEvent } from "./types";
+import type { EmojiComponentsEvent } from "./types";
 
-export type PickerKeyboardEventHandler<T extends Element = Element> = (event: PickerEvent<React.KeyboardEvent<T>>) => void;
+export type PickerKeyboardEventHandler<T extends Element = Element> = (event: EmojiComponentsEvent<React.KeyboardEvent<T>>) => void;
 
 // true: handled (preventDefault, stop); "native": stop but keep the browser's default; false: pass on
 export type KeyResult = boolean | "native";

@@ -1,6 +1,6 @@
 .root {
-  --emoji-size: 24px;
-  --emoji-cell-size: 36px;
+  --emoji-picker-emoji-size: 24px;
+  --emoji-picker-cell-size: 36px;
   display: flex;
   flex-direction: column;
   width: fit-content;
@@ -20,7 +20,7 @@
 }
 
 .reactions {
-  --emoji-image-size: 28px;
+  --emoji-picker-emoji-image-size: 28px;
   display: flex;
   align-items: center;
   gap: 2px;

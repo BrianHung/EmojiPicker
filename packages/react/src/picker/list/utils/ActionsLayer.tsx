@@ -22,7 +22,7 @@ export function useActionsTab(sections: readonly EmojiSection[]) {
   const [actions] = React.useState<ActionBlocks>(() => ({ layer: { current: null }, blocks: new Map() }));
   const onKeyDownCapture = (e: React.KeyboardEvent) => {
     if (e.key !== "Tab" || e.defaultPrevented || hasModifier(e)) return;
-    const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.emoji}"]`) : null;
+    const cell = e.target instanceof Element ? e.target.closest(`[data-slot="${SLOTS.listCell}"]`) : null;
     const at = sections.findIndex((s) => s.items.some((i) => i.id === cell?.getAttribute("data-key")));
     if (!cell || at < 0) return;
     // Header actions take any buttons and links: find the tabbables

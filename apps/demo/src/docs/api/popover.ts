@@ -49,7 +49,7 @@ export const popoverPopup = rowsOf<EmojiPopover.Popup.Props>()([
   {
     name: "initialFocus",
     type: "boolean | RefObject | (openType) => HTMLElement | boolean | null | undefined",
-    default: "pickerInitialFocus",
+    default: "emojiPickerInitialFocus",
     description: "Focused once the popup opens. openType is mouse, touch, pen, keyboard, or empty; true or null keeps the default, false leaves focus where it is.",
   },
   {

@@ -11,7 +11,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M12 7v5l3.2 2" />
     </>
   ),
-  smileys_people: (
+  "smileys-people": (
     <>
       <circle cx={12} cy={12} r={9} />
       {dot(9, 10)}
@@ -19,7 +19,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M8.5 14.3a4.6 4.6 0 0 0 7 0" />
     </>
   ),
-  animals_nature: (
+  "animals-nature": (
     <>
       <path d="M7.6 9.6c0-2.6 2-4.4 4.4-4.4s4.4 1.8 4.4 4.4v3.4c0 3-2 5.3-4.4 5.3s-4.4-2.3-4.4-5.3z" />
       <path d="M8.3 6.3C6 5.5 4.1 6.6 3.8 9.1c-.3 2.3.7 4.5 2.6 5.1.9-.9 1.3-2.4 1.3-3.8M15.7 6.3c2.3-.8 4.2.3 4.5 2.8.3 2.3-.7 4.5-2.6 5.1-.9-.9-1.3-2.4-1.3-3.8" />
@@ -29,7 +29,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M10.4 15.6c.9.6 2.3.6 3.2 0" />
     </>
   ),
-  food_drink: (
+  "food-drink": (
     <>
       <path d="M12 8c-1.2-.9-2.4-1.2-3.6-1.1C6 7.1 4.8 9.1 4.8 11.7c0 4 2.6 8.3 4.9 8.3 1 0 1.4-.5 2.3-.5s1.3.5 2.3.5c2.3 0 4.9-4.3 4.9-8.3 0-2.6-1.2-4.6-3.6-4.8-1.2-.1-2.4.2-3.6 1.1z" />
       <path d="M12 8c0-1.6.6-2.9 1.8-3.9" />
@@ -42,7 +42,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M12 9.2V6l-5.3-1.3M12 6l5.3-1.3M14.7 11.1l3-1-.4-5.4M17.7 10.1l2.9 4.7M13.7 14.3l1.8 2.5 5.1-2M15.5 16.8 12 21M10.3 14.3l-1.8 2.5L12 21M8.5 16.8l-5.1-2M9.3 11.1l-3-1 .4-5.4M6.3 10.1l-2.9 4.7" />
     </>
   ),
-  travel_places: (
+  "travel-places": (
     <>
       <path d="M5.6 16.6H4.5a1 1 0 0 1-1-1v-2.9c0-.9.6-1.6 1.4-1.8l1.6-.4 1.7-3a2.2 2.2 0 0 1 1.9-1.1h3.8a2.2 2.2 0 0 1 1.9 1.1l1.7 3 1.6.4c.8.2 1.4.9 1.4 1.8v2.9a1 1 0 0 1-1 1h-1.1M9.4 16.6h5.2M6.6 10.5h10.8" />
       <circle cx={7.5} cy={16.6} r={1.9} />
@@ -67,13 +67,13 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export type DefaultCategoryIconProps = React.SVGAttributes<SVGSVGElement> & { category: string };
+export type EmojiPickerCategoryIconProps = React.SVGAttributes<SVGSVGElement> & { category: string };
 
-export declare namespace DefaultCategoryIcon {
-  type Props = DefaultCategoryIconProps;
+export declare namespace EmojiPickerCategoryIcon {
+  type Props = EmojiPickerCategoryIconProps;
 }
 
-export function DefaultCategoryIcon({ category, style, ...props }: DefaultCategoryIconProps) {
+export function EmojiPickerCategoryIcon({ category, style, ...props }: EmojiPickerCategoryIconProps) {
   return (
     <svg
       data-default-icon=""
@@ -89,7 +89,7 @@ export function DefaultCategoryIcon({ category, style, ...props }: DefaultCatego
       {...props}
       style={{ display: "block", ...(props.className ? null : { width: "100%", height: "100%" }), ...style }}
     >
-      {ICONS[category.startsWith("custom:") ? "custom" : category] ?? ICONS.smileys_people}
+      {ICONS[category.startsWith("custom:") ? "custom" : category] ?? ICONS["smileys-people"]}
     </svg>
   );
 }

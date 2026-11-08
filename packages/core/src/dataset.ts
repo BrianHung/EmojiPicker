@@ -1,4 +1,4 @@
-export const GROUPS = ["smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"] as const;
+export const GROUPS = ["smileys-people", "animals-nature", "food-drink", "travel-places", "activities", "objects", "symbols", "flags"] as const;
 
 export type Group = (typeof GROUPS)[number];
 
@@ -14,7 +14,7 @@ export type Dataset = {
 };
 
 export type EmojiDataInputEntry = ({ emoji: string; unified?: never } | { unified: string; emoji?: never }) & {
-  label: string;
+  name: string;
   tags?: readonly string[];
   shortcodes?: readonly string[];
   group: Group;
@@ -23,7 +23,7 @@ export type EmojiDataInputEntry = ({ emoji: string; unified?: never } | { unifie
 
 export type EmojiDataInput = {
   locale: string;
-  groups: readonly { id: Group; label: string }[];
+  groups: readonly { id: Group; name: string }[];
   emojis: readonly EmojiDataInputEntry[];
 };
 
@@ -85,8 +85,8 @@ export function toDataset(data: Dataset | EmojiDataInput): Dataset {
     format: 1,
     locale: data.locale,
     emojibase: "",
-    groups: GROUPS.map((id) => data.groups.find((g) => g.id === id)?.label ?? id),
-    emojis: data.emojis.map((e) => [e.unified?.toLowerCase() ?? nativeToUnified(e.emoji!), e.label, e.tags ?? [], e.shortcodes ?? [], GROUPS.indexOf(e.group), e.version ?? 0, 0] as DatasetEmoji),
+    groups: GROUPS.map((id) => data.groups.find((g) => g.id === id)?.name ?? id),
+    emojis: data.emojis.map((e) => [e.unified?.toLowerCase() ?? nativeToUnified(e.emoji!), e.name, e.tags ?? [], e.shortcodes ?? [], GROUPS.indexOf(e.group), e.version ?? 0, 0] as DatasetEmoji),
     toneExceptions: {},
   };
 }

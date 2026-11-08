@@ -11,17 +11,17 @@
   ],
   "registryDependencies": [
     "https://emoji.brianhung.me/r/emoji-prosemirror.json",
-    "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"
+    "https://emoji.brianhung.me/r/emoji-suggestions.json"
   ],
   "files": [
     {
-      "path": "registry/emoji-tiptap.ts",
+      "path": "registry/use-emoji-tiptap.ts",
       "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiStore, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from \"emoji-components\";\nimport { emojiTypeahead } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {\n  content?: (text: string, suggestion: ShortcodeCompletion) => Content;\n};\n\nexport function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {\n  const store = useEmojiStore();\n  const id = React.useId();\n  const latest = React.useRef({ content, onSelect });\n  latest.current = { content, onSelect };\n  const { plugin, suggestions, anchor } = React.useMemo(\n    () =>\n      emojiTypeahead(store, {\n        id,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        onSelect: (selection) => latest.current.onSelect?.(selection),\n        content(text, suggestion, schema) {\n          const replacement = latest.current.content?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [store, id, insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));\n  }, [editor, plugin]);\n  return useEmojiTypeahead(suggestions, { anchor });\n}\n",
       "type": "registry:hook"
     },
     {
       "path": "src/components/tiptap/emoji-suggestion.tsx",
-      "content": "import type { Editor } from \"@tiptap/react\";\nimport type { EmojiTypeaheadOptions } from \"emoji-components\";\nimport { useTiptapEmojiTypeahead } from \"@/hooks/emoji-tiptap\";\nimport { SuggestionMenu, type SuggestionMenuProps } from \"@/components/suggestion-menu\";\nimport { emojiContent } from \"./emoji-node\";\n\nexport function EmojiSuggestionMenu({ editor, className, side, ...options }: SuggestionMenuProps & EmojiTypeaheadOptions & { editor: Editor | null }) {\n  const emoji = useTiptapEmojiTypeahead(editor, {\n    ...options,\n    content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),\n  });\n  return <SuggestionMenu {...emoji} className={className} side={side} />;\n}\n",
+      "content": "import type { Editor } from \"@tiptap/react\";\nimport type { EmojiTypeaheadOptions } from \"emoji-components\";\nimport { useTiptapEmojiTypeahead } from \"@/hooks/use-emoji-tiptap\";\nimport { EmojiSuggestions, type EmojiSuggestionsProps } from \"@/components/ui/emoji-suggestions\";\nimport { emojiContent } from \"./emoji-node\";\n\nexport function EmojiSuggestionMenu({ editor, className, side, ...options }: EmojiSuggestionsProps & EmojiTypeaheadOptions & { editor: Editor | null }) {\n  const emoji = useTiptapEmojiTypeahead(editor, {\n    ...options,\n    content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),\n  });\n  return <EmojiSuggestions {...emoji} className={className} side={side} />;\n}\n",
       "type": "registry:component",
       "target": "components/tiptap/emoji-suggestion.tsx"
     },

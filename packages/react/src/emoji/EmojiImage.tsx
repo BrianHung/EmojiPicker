@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { EmojiRecord } from "@emoji-components/core";
 import { useStore } from "../utils/useStore";
+import * as EmojiCssVars from "./EmojiCssVars";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 
@@ -20,7 +21,7 @@ const usePrefersReducedMotion = (): boolean => useStore(reducedMotion);
 const DEFAULT_SIZE = 64;
 
 // contain: layout drops the text baseline so the box sits on the line like an <img>; start-aligned because Apple Color Emoji pads its advance on the trailing side below 24px
-export const NATIVE: React.CSSProperties = { display: "inline-flex", alignItems: "center", lineHeight: 1, whiteSpace: "nowrap", contain: "layout", fontFamily: "var(--emoji-font-family)" };
+export const NATIVE: React.CSSProperties = { display: "inline-flex", alignItems: "center", lineHeight: 1, whiteSpace: "nowrap", contain: "layout", fontFamily: `var(${EmojiCssVars.fontFamily})` };
 
 type EmojiImageProps = Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "alt" | "width" | "height"> & {
   src: string;

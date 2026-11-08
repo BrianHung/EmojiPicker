@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiSuggestionsRootProps } from "../../../popover/utils/types";
+import type { EmojiSuggestionsRootProps } from "../../utils/types";
 
 export type EmojiSuggestionsRootContext = Pick<EmojiSuggestionsRootProps, "open" | "onOpenChange" | "onOpenChangeComplete">;
 

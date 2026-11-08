@@ -1,16 +1,16 @@
 import { Emoji, useEmojiStore, type EmojiTypeahead } from "emoji-components";
-import { EmojiSuggestions } from "emoji-components/floating-ui";
+import { EmojiSuggestions as EmojiSuggestionsPrimitive } from "emoji-components/floating-ui";
 import { cn } from "@/lib/utils";
 
-export type SuggestionMenuProps = { className?: string; side?: "top" | "bottom" };
+export type EmojiSuggestionsProps = { className?: string; side?: "top" | "bottom" };
 
-export function SuggestionMenu({ open, anchor, dismiss, suggestions: menu, className, side }: EmojiTypeahead & SuggestionMenuProps) {
+export function EmojiSuggestions({ open, anchor, dismiss, suggestions: menu, className, side }: EmojiTypeahead & EmojiSuggestionsProps) {
   const store = useEmojiStore();
   return (
-    <EmojiSuggestions.Root open={open} onOpenChange={(next) => !next && dismiss()}>
-      <EmojiSuggestions.Portal>
-        <EmojiSuggestions.Positioner anchor={anchor} side={side} sideOffset={6}>
-          <EmojiSuggestions.Popup>
+    <EmojiSuggestionsPrimitive.Root open={open} onOpenChange={(next) => !next && dismiss()}>
+      <EmojiSuggestionsPrimitive.Portal>
+        <EmojiSuggestionsPrimitive.Positioner anchor={anchor} side={side} sideOffset={6}>
+          <EmojiSuggestionsPrimitive.Popup>
             <ul {...menu.getListProps()} aria-label="Emoji suggestions" className={cn("w-64 overflow-hidden rounded-lg border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg", className)}>
               {menu.suggestions.map((s, i) => {
                 const [start, end] = s.match ?? [0, 0];
@@ -26,9 +26,9 @@ export function SuggestionMenu({ open, anchor, dismiss, suggestions: menu, class
                 );
               })}
             </ul>
-          </EmojiSuggestions.Popup>
-        </EmojiSuggestions.Positioner>
-      </EmojiSuggestions.Portal>
-    </EmojiSuggestions.Root>
+          </EmojiSuggestionsPrimitive.Popup>
+        </EmojiSuggestionsPrimitive.Positioner>
+      </EmojiSuggestionsPrimitive.Portal>
+    </EmojiSuggestionsPrimitive.Root>
   );
 }

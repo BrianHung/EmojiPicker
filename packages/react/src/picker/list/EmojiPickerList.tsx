@@ -12,7 +12,8 @@ import { useGridSections } from "./utils/useGridSections";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { EmojiPickerViewportContext } from "../viewport/EmojiPickerViewportContext";
 import { mergePartProps } from "../../internals/mergePartProps";
-import type { EmojiPickerHandlers, EmojiPickerOrientation, EmojiPickerPartProps } from "../../internals/types";
+import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
 import { useLatest } from "../../utils/useLatest";
 import { renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
@@ -34,8 +35,8 @@ export type EmojiPickerListEmptyState = { status: "loading" | "error" | "empty";
 
 export type EmojiPickerListState = { orientation: EmojiPickerOrientation; searching: boolean; empty: boolean };
 
-export type EmojiPickerListProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
-  EmojiPickerPartProps<EmojiPickerListState, HTMLDivElement> & {
+export type EmojiPickerListProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">> &
+  EmojiComponentsPartProps<EmojiPickerListState, HTMLDivElement> & {
     children?: (section: EmojiSection) => React.ReactNode;
     orientation?: EmojiPickerOrientation;
     rows?: number;

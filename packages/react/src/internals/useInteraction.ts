@@ -7,7 +7,7 @@ import { useFocusRing } from "react-aria/useFocusRing";
 import { useHover } from "react-aria/useHover";
 import { usePress } from "react-aria/usePress";
 import { stateAttributes } from "./renderElement";
-import type { EmojiPickerInteractionState } from "./types";
+import type { EmojiComponentsInteractionState } from "./types";
 
 export type Clickable = { onClick?: (e: React.MouseEvent) => void };
 
@@ -26,6 +26,6 @@ export function useInteraction({ disabled = false, pressed, preventFocusOnPress,
   const { hoverProps, isHovered } = useHover({ isDisabled: disabled });
   const { pressProps, isPressed } = usePress({ isDisabled: disabled, preventFocusOnPress, onPress, onClick });
   const { focusProps, isFocused, isFocusVisible } = useFocusRing();
-  const state: EmojiPickerInteractionState = { hovered: isHovered, focused: isFocused, focusVisible: isFocusVisible, pressed: pressed ?? isPressed, disabled };
+  const state: EmojiComponentsInteractionState = { hovered: isHovered, focused: isFocused, focusVisible: isFocusVisible, pressed: pressed ?? isPressed, disabled };
   return { state, props: mergeProps(hoverProps, pressed === undefined ? pressProps : { onClick }, focusProps, stateAttributes(state, ATTRIBUTES)) };
 }

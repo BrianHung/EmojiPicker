@@ -32,7 +32,7 @@ export default function App() {
 }
 ```
 
-For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-aria.json` (`--base aria`).
+For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-picker-popover-react-aria.json` (`--base aria`).
 
 </TabPanel>
 
@@ -121,13 +121,13 @@ export default function Page() {
 
 ### Styled
 
-Import `emoji-components/theme.css` for Tailwind utilities on the tokens, such as `bg-picker-background`. Every part takes `className` and `style` as a value or a function of its state, and writes its state as data attributes.
+Import `emoji-components/theme.css` for Tailwind utilities on the tokens, such as `bg-emoji-picker-background`. Every part takes `className` and `style` as a value or a function of its state, and writes its state as data attributes.
 
 ```tsx title="picker.tsx"
-<EmojiPicker.Root className="w-80 rounded-picker bg-picker-background shadow-picker [--emoji-size:24px]">
+<EmojiPicker.Root className="w-80 rounded-emoji-picker bg-emoji-picker-background shadow-emoji-picker [--emoji-picker-emoji-size:24px]">
   <EmojiPicker.Viewport className="h-80">
     <EmojiPicker.List>
-      {() => <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className="rounded-md data-highlighted:bg-picker-selected" />}</EmojiPicker.ListItems>}
+      {() => <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className="rounded-md data-highlighted:bg-emoji-picker-selected" />}</EmojiPicker.ListItems>}
     </EmojiPicker.List>
   </EmojiPicker.Viewport>
 </EmojiPicker.Root>
@@ -179,7 +179,7 @@ Parts and hooks use the nearest `EmojiProvider`; without one they share one stor
 
 ### Search
 
-`search` takes any `EmojiSearch`; the default, `lexical()`, ranks names, shortcodes, and tags with typo correction.
+`search` takes any `EmojiSearch`; the default, `lexicalSearch()`, ranks names, shortcodes, and tags with typo correction.
 
 <Demo name="search" className="flex-col gap-3">
   <Code title="search.ts" label="Recipes" code={recipes} />
@@ -213,11 +213,11 @@ Native emoji draw in `--emoji-font-family`. Images come from `imageUrl`: Twemoji
 
 <DefList rows={api.hooks} />
 
-Types: `EmojiTypeahead`, `EmojiTypeaheadOptions`, `EmojiSearchState`, `FrequentEmoji`, `ResolvedEmoji`, `EmojiStoreStatus`, `EmojiPickerRootActions`, `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiGridOptions`, `UseEmojiGridResult`, `UseEmojiCellResult`.
+Types: `EmojiTypeahead`, `EmojiTypeaheadOptions`, `EmojiSearchState`, `FrequentEmoji`, `ResolvedEmoji`, `EmojiStoreStatus`, `EmojiPickerRootActions`, `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridResult`, `UseEmojiPickerCellResult`.
 
 ### Custom popover {#custom-popover}
 
-In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `pickerInitialFocus` from the main entry as the popover's initial focus.
+In another popover, close it from `onSelect` and give the search field `autoFocus`. Without a search field, pass `emojiPickerInitialFocus` from the main entry as the popover's initial focus.
 
 ```tsx title="emoji-button.tsx"
 <Popover open={open} onOpenChange={setOpen}>
@@ -237,7 +237,7 @@ In another popover, close it from `onSelect` and give the search field `autoFocu
 
 ### Custom virtualizer
 
-Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Virtual, react-window, or your own list. See [Custom virtualizer](/examples/virtualizer/).
+Inside `Root`, `useEmojiPickerGrid` and `useEmojiPickerCell` replace `List` for TanStack Virtual, react-window, or your own list. See [Custom virtualizer](/examples/virtualizer/).
 
 </Section>
 
@@ -245,7 +245,7 @@ Inside `Root`, `useEmojiGrid` and `useEmojiCell` replace `List` for TanStack Vir
 
 ## API reference
 
-Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiPickerHandler()` skips the part's. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them (`EmojiPicker.SearchInput`, `EmojiPopover.Positioner`). Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component's function.
+Each part forwards its ref, spreads other props onto its element, and takes `render`, `className`, and `style`. Your handlers run before the part's; `event.preventEmojiComponentsHandler()` skips the part's. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them (`EmojiPicker.SearchInput`, `EmojiPopover.Positioner`). Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component's function.
 
 <PropsTable rows={api.part} />
 
@@ -395,6 +395,8 @@ One emoji, drawn as the pickers draw it, with `role="img"`. It forwards its ref.
 
 <AttrTable head={["Data attribute", "Type", "Description"]} rows={ref.emojiAttributes} />
 
+<AttrTable head={["CSS variable", "Default", "Description"]} rows={ref.emojiVariables} />
+
 Types: `Emoji.Props`.
 
 ### Design tokens {#api-tokens}
@@ -403,6 +405,6 @@ Defined in `tokens.css`; set them on `Root` or an ancestor.
 
 <AttrTable head={["Token", "Default (light / dark)", "Description"]} rows={api.tokens} />
 
-Domain types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `ImageUrl`, `EmojiStore`, `EmojiTypeahead`, `EmojiTypeaheadOptions`, `ShortcodeCompletion`, `EmojiGridState`.
+Domain types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `EmojiImageUrl`, `EmojiStore`, `EmojiTypeahead`, `EmojiTypeaheadOptions`, `ShortcodeCompletion`, `EmojiPickerGridState`.
 
 </Section>

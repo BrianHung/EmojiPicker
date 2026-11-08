@@ -3,6 +3,7 @@
 import * as React from "react";
 import { type EmojiRecord, unifiedToNative } from "@emoji-components/core";
 import * as EmojiPickerRootCssVars from "../picker/root/EmojiPickerRootCssVars";
+import * as EmojiCssVars from "./EmojiCssVars";
 import { EmojiImage } from "./EmojiImage";
 import { useEmojiContext } from "../provider/EmojiProviderContext";
 
@@ -17,7 +18,7 @@ const TEXT: React.CSSProperties = {
   alignSelf: "center",
   justifySelf: "center",
   padding: `${TOP} var(--ep-glyph-pad) calc(2 * var(--ep-glyph-pad) - ${TOP})`,
-  fontFamily: "var(--emoji-font-family)",
+  fontFamily: `var(${EmojiCssVars.fontFamily})`,
   fontSize: "var(--ep-size)",
   lineHeight: "100%",
   textAlign: "center",

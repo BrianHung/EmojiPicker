@@ -1,4 +1,4 @@
-import { pickerInitialFocus } from "../../picker/utils/pickerInitialFocus";
+import { emojiPickerInitialFocus } from "../../picker/utils/emojiPickerInitialFocus";
 import type { PopoverState } from "../root/EmojiPopoverRootContext";
 import type { EmojiPopoverFinalFocus, EmojiPopoverInitialFocus, EmojiPopoverInteractionType } from "./types";
 
@@ -19,7 +19,7 @@ const resolveFocus = (focus: EmojiPopoverInitialFocus | EmojiPopoverFinalFocus |
 export function initialFocusTarget(state: PopoverState, initialFocus: EmojiPopoverInitialFocus | undefined, content: Element | null): HTMLElement | false | null {
   const target = resolveFocus(initialFocus, state.interaction.current);
   state.focusGrid.current = target === true;
-  return target === true ? pickerInitialFocus(content) : target;
+  return target === true ? emojiPickerInitialFocus(content) : target;
 }
 
 export const finalFocusTarget = (state: PopoverState, finalFocus: EmojiPopoverFinalFocus | undefined) => resolveFocus(finalFocus, state.interaction.current);

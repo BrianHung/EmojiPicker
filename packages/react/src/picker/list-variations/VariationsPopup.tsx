@@ -73,7 +73,7 @@ const VariationsRow = React.forwardRef<HTMLDivElement, EmojiPickerListVariations
         {
           ...mergePartProps({ ...props, onKeyDown }, listBoxProps, { onKeyDown: keys, onBlur: (e: React.FocusEvent) => !e.currentTarget.contains(e.relatedTarget as Node | null) && close(false) }),
           ref: row,
-          "data-slot": SLOTS.variations,
+          "data-slot": SLOTS.listVariations,
           style: (s: EmojiPickerListVariationsState) => ({ ...ROW, ...overlay.style, ...resolve(style, s) }),
           children: items.map(({ tone }) => (
             <EmojiPickerListVariationsToneContext.Provider key={tone} value={tone}>

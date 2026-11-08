@@ -4,15 +4,15 @@ import * as React from "react";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { renderElement } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useInteraction } from "../../internals/useInteraction";
 import { EmojiPickerCategoryNavContext, EmojiPickerCategoryNavTabContext } from "../category-nav/EmojiPickerCategoryNavContext";
-import type { EmojiPickerNavCategory } from "../root/utils/useCategoryNavigation";
-import { DefaultCategoryIcon } from "./DefaultCategoryIcon";
+import type { EmojiPickerNavCategory } from "../root/utils/useEmojiPickerCategoryNavigation";
+import { EmojiPickerCategoryIcon } from "./EmojiPickerCategoryIcon";
 
 export type EmojiPickerCategoryNavTabState = { category: EmojiPickerNavCategory; selected: boolean; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
 
-export type EmojiPickerCategoryNavTabProps = EmojiPickerPartElementProps<EmojiPickerCategoryNavTabState, HTMLDivElement, "role">;
+export type EmojiPickerCategoryNavTabProps = EmojiComponentsPartElementProps<EmojiPickerCategoryNavTabState, HTMLDivElement, "role">;
 
 export const EmojiPickerCategoryNavTab = React.forwardRef<HTMLDivElement, EmojiPickerCategoryNavTabProps>(function EmojiPickerCategoryNavTab({ children, ...props }, ref) {
   const nav = React.useContext(EmojiPickerCategoryNavContext);
@@ -25,7 +25,7 @@ export const EmojiPickerCategoryNavTab = React.forwardRef<HTMLDivElement, EmojiP
   return renderElement(
     "div",
     {
-      "data-slot": SLOTS.categoryTab,
+      "data-slot": SLOTS.categoryNavTab,
       id: `${id}-tab-${c.id}`,
       role: "button",
       "aria-label": c.name,
@@ -37,7 +37,7 @@ export const EmojiPickerCategoryNavTab = React.forwardRef<HTMLDivElement, EmojiP
       ...mergePartProps(props, interaction.props),
       ref,
       "data-key": c.id,
-      children: children ?? c.icon ?? <DefaultCategoryIcon category={c.id} />,
+      children: children ?? c.icon ?? <EmojiPickerCategoryIcon category={c.id} />,
     },
     state,
     ["focused", "active"],

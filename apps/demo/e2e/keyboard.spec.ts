@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { PAGE_SCROLLS } from "./known-issues";
 import { fieldText, show, surface, type Kind, type Surface } from "./surfaces";
-import { expect, fileName, probe, quiet, slot, test, viewportOf, visit, type Probe } from "./support";
+import { expect, fileName, probe, quiet, emojiItem, slot, test, viewportOf, visit, type Probe } from "./support";
 
 const REPRESENTATIVE = [
   "home/inline-tailwind",
@@ -24,7 +24,7 @@ const KEYS: Record<Kind, string[]> = {
   bar: ["ArrowRight", "ArrowRight", "ArrowLeft", "End", "Home", "ArrowDown", "ArrowUp"],
 };
 const CONTINUE: Record<Kind, string> = { picker: "ArrowRight", menu: "ArrowDown", bar: "ArrowRight" };
-const ITEM: Record<Kind, string> = { picker: slot("emoji"), menu: '[role="option"]', bar: "button" };
+const ITEM: Record<Kind, string> = { picker: emojiItem, menu: '[role="option"]', bar: "button" };
 const FOCUS_MOVES = ["gallery/apple/scene-tapback-more", "home/tapback-more"];
 
 type Step = Probe & { key: string; scrolled: number };
@@ -85,7 +85,7 @@ const mark = (root: Locator, name: string) =>
       item?.setAttribute("data-e2e", name);
       return item?.getAttribute("aria-label") ?? item?.textContent?.trim() ?? null;
     },
-    [name, slot("emoji")] as const,
+    [name, emojiItem] as const,
   );
 
 const highlightLook = (page: Page) =>
@@ -144,10 +144,7 @@ async function fromKeyboard(page: Page, s: Surface) {
     back = s.trigger(page);
     await back.focus();
     await page.keyboard.press("Enter");
-    await root
-      .locator(`${slot("emoji")}, [role="option"]`)
-      .first()
-      .waitFor();
+    await root.locator(`${emojiItem}, [role="option"]`).first().waitFor();
   } else back = await s.open(page);
   await quiet(page);
   await page.mouse.move(0, 0);
@@ -263,12 +260,12 @@ test("Shift+Space on a result opens its skin tones, and Enter picks the toned em
   await root.locator(slot("searchInput")).fill("thumbs up");
   await expect.poll(async () => (await probe(page, root)).highlight).toContain("thumbs up");
   await page.keyboard.press("Shift+Space");
-  await expect(root.locator(`${slot("variations")} [role="option"]`)).toHaveCount(6);
+  await expect(root.locator(`${slot("listVariations")} [role="option"]`)).toHaveCount(6);
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText("👍🏼");
-  await expect(root.locator(slot("variations"))).toHaveCount(0);
+  await expect(root.locator(slot("listVariations"))).toHaveCount(0);
   await expect(root.locator(slot("searchInput"))).toBeFocused();
 });
 

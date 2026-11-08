@@ -10,15 +10,15 @@ import { mergePartProps } from "../../internals/mergePartProps";
 import { useInteraction } from "../../internals/useInteraction";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
 
 import { EmojiPickerListVariationsContext, EmojiPickerListVariationsToneContext } from "../list-variations/EmojiPickerListVariationsContext";
 import * as EmojiPickerListVariationsOptionDataAttributes from "./EmojiPickerListVariationsOptionDataAttributes";
 
-export type EmojiPickerListVariationsOptionState = EmojiPickerInteractionState & { emoji: EmojiRecord; unified: string; tone: SkinToneValue; selected: boolean; highlighted: boolean };
+export type EmojiPickerListVariationsOptionState = EmojiComponentsInteractionState & { emoji: EmojiRecord; unified: string; tone: SkinToneValue; selected: boolean; highlighted: boolean };
 
-export type EmojiPickerListVariationsOptionProps = EmojiPickerPartElementProps<EmojiPickerListVariationsOptionState, HTMLDivElement, "role"> & {
+export type EmojiPickerListVariationsOptionProps = EmojiComponentsPartElementProps<EmojiPickerListVariationsOptionState, HTMLDivElement, "role"> & {
   tone?: SkinToneValue;
 };
 
@@ -53,7 +53,7 @@ export const EmojiPickerListVariationsOption = React.forwardRef<HTMLDivElement, 
       "data-key": unified,
       ...mergePartProps(props, interaction.props, { onFocus: () => manager.setFocusedKey(unified), onClick: (e: React.MouseEvent) => row.pick(unified, e.nativeEvent) }),
       ref: own,
-      "data-slot": SLOTS.variation,
+      "data-slot": SLOTS.listVariationsOption,
       [EmojiPickerListVariationsOptionDataAttributes.unified]: unified,
       [EmojiPickerListVariationsOptionDataAttributes.selected]: flag(selected),
       [EmojiPickerListVariationsOptionDataAttributes.highlighted]: flag(state.highlighted),

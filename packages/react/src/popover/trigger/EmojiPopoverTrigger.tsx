@@ -9,7 +9,7 @@ import { SLOTS } from "../../internals/slots";
 import { type Clickable, useInteraction } from "../../internals/useInteraction";
 import { useEmojiPopoverRootContext } from "../root/EmojiPopoverRootContext";
 import * as CommonTriggerDataAttributes from "../utils/CommonTriggerDataAttributes";
-import type { EmojiPopoverTriggerProps, EmojiPopoverTriggerState } from "../utils/types";
+import type { EmojiPopoverTriggerProps } from "../utils/types";
 
 export const EmojiPopoverTrigger: React.ForwardRefExoticComponent<EmojiPopoverTriggerProps & React.RefAttributes<HTMLButtonElement>> = React.forwardRef<HTMLButtonElement, EmojiPopoverTriggerProps>(function EmojiPopoverTrigger(
   { render, className, style, children, ...props },
@@ -26,8 +26,3 @@ export const EmojiPopoverTrigger: React.ForwardRefExoticComponent<EmojiPopoverTr
   const merged = triggerProps(mergeProps(own, interaction.props));
   return renderElement("button", { ...merged, ref: refs, render, className, style, children }, { ...interaction.state, open: state.open });
 });
-
-export declare namespace EmojiPopoverTrigger {
-  type Props = EmojiPopoverTriggerProps;
-  type State = EmojiPopoverTriggerState;
-}

@@ -1,13 +1,13 @@
 import * as React from "react";
 import en from "@emoji-components/data/en/iamcal.json?url";
-import { EmojiProvider, lexical, type EmojiPicker, type EmojiSearch, type EmojiSelection } from "emoji-components";
+import { EmojiProvider, lexicalSearch, type EmojiPicker, type EmojiSearch, type EmojiSelection } from "emoji-components";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { frequentFirst, withFuzzy } from "@/docs/snippets/search";
 
 const slow: EmojiSearch = (query, context) =>
   new Promise((resolve, reject) => {
-    const timer = setTimeout(() => resolve(lexical()(query, context)), 400);
+    const timer = setTimeout(() => resolve(lexicalSearch()(query, context)), 400);
     context.signal.addEventListener("abort", () => {
       clearTimeout(timer);
       reject(new DOMException("aborted", "AbortError"));
@@ -15,8 +15,8 @@ const slow: EmojiSearch = (query, context) =>
   });
 
 const ENGINES = {
-  default: { label: "Lexical", search: lexical() },
-  exact: { label: "No Typos", search: lexical({ typos: false }) },
+  default: { label: "Lexical", search: lexicalSearch() },
+  exact: { label: "No Typos", search: lexicalSearch({ typos: false }) },
   fuse: { label: "Fuse", search: withFuzzy },
   frequent: { label: "Frequents", search: frequentFirst },
   remote: { label: "Async", search: slow },

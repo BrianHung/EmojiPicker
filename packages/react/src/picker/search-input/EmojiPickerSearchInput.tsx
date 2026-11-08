@@ -6,7 +6,7 @@ import { mergeRefs } from "react-aria/mergeRefs";
 import { Input } from "react-aria-components/Input";
 import { racParts } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerHandlers, EmojiPickerInteractionState, EmojiPickerPartProps } from "../../internals/types";
+import type { EmojiComponentsHandlers, EmojiComponentsInteractionState, EmojiComponentsPartProps } from "../../internals/types";
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
@@ -14,12 +14,12 @@ import { EmojiPickerSearchClear } from "../search-clear/EmojiPickerSearchClear";
 import { EmojiPickerSearchField } from "../search-field/EmojiPickerSearchField";
 import { EmojiPickerSearchFieldContext } from "../search-field/EmojiPickerSearchFieldContext";
 
-export type EmojiPickerSearchInputState = Omit<EmojiPickerInteractionState, "pressed">;
+export type EmojiPickerSearchInputState = Omit<EmojiComponentsInteractionState, "pressed">;
 
-export type EmojiPickerSearchInputProps = EmojiPickerHandlers<
+export type EmojiPickerSearchInputProps = EmojiComponentsHandlers<
   Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">
 > &
-  EmojiPickerPartProps<EmojiPickerSearchInputState, HTMLInputElement> & {
+  EmojiComponentsPartProps<EmojiPickerSearchInputState, HTMLInputElement> & {
     children?: React.ReactNode;
   };
 

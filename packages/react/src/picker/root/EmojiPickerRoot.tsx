@@ -7,7 +7,7 @@ import { VisuallyHidden } from "react-aria/VisuallyHidden";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@emoji-components/core";
 import { createChangeDetails } from "@emoji-components/core/internal";
-import { useCollapse } from "./utils/useCollapsedCategories";
+import { useCollapse } from "./utils/useEmojiPickerCollapsedCategories";
 import {
   EmojiPickerRootContext,
   type EmojiPickerRootActions,
@@ -32,7 +32,7 @@ import { EmojiProviderContext, useEmojiContext } from "../../provider/EmojiProvi
 import { SharedProvider } from "../../provider/EmojiProvider";
 import { BUTTONS } from "../reactions/ReactionBar";
 import { mergePartProps } from "../../internals/mergePartProps";
-import type { EmojiPickerHandlers, EmojiPickerPartProps } from "../../internals/types";
+import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
 import { useActiveWithin } from "../../utils/useActiveWithin";
 import { hasModifier, usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { useLatest } from "../../utils/useLatest";
@@ -47,8 +47,8 @@ export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 
 export type EmojiPickerRootState = { searching: boolean; reactionsOpen: boolean };
 
-export type EmojiPickerRootProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "className" | "style" | "defaultValue">> &
-  EmojiPickerPartProps<EmojiPickerRootState> & {
+export type EmojiPickerRootProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "className" | "style" | "defaultValue">> &
+  EmojiComponentsPartProps<EmojiPickerRootState> & {
     onSelect?: (selection: EmojiSelection, details: EmojiPickerRootSelectEventDetails) => void;
     actionsRef?: React.Ref<EmojiPickerRootActions>;
     keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;

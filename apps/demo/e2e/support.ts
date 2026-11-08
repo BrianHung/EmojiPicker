@@ -11,6 +11,8 @@ const REMOTE_IMAGE = readFileSync(`${DIR}fixtures/remote-image.png`);
 export { expect, SLOTS };
 
 export const slot = (name: keyof typeof SLOTS) => `[data-slot="${SLOTS[name]}"]`;
+// A picker emoji: a list cell or a reaction
+export const emojiItem = `:is(${slot("listCell")}, ${slot("reactionsItem")})`;
 
 export type Viewport = "desktop" | "mobile";
 export const viewportOf = (info: TestInfo): Viewport => (info.project.use.isMobile ? "mobile" : "desktop");

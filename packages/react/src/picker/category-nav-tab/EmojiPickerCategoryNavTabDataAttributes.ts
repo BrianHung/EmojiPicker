@@ -2,7 +2,7 @@ import * as InteractionDataAttributes from "../../internals/InteractionDataAttri
 
 /**
  * Identifies a category tab.
- * @type {'emoji-picker-category-tab'}
+ * @type {'emoji-picker-category-nav-tab'}
  */
 export const slot = "data-slot";
 /**

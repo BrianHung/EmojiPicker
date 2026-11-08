@@ -33,14 +33,14 @@ describe("dataset", () => {
     const [heart, frog] = expandDataset(
       toDataset({
         locale: "en",
-        groups: [{ id: "animals_nature", label: "Animals" }],
+        groups: [{ id: "animals-nature", name: "Animals" }],
         emojis: [
-          { emoji: "❤️", label: "heart", group: "smileys_people" },
-          { unified: "1F438", label: "frog", tags: ["toad"], shortcodes: ["frog"], group: "animals_nature", version: 0.6 },
+          { emoji: "❤️", name: "heart", group: "smileys-people" },
+          { unified: "1F438", name: "frog", tags: ["toad"], shortcodes: ["frog"], group: "animals-nature", version: 0.6 },
         ],
       }),
     );
-    expect(heart).toMatchObject({ unified: "2764-fe0f", emoji: "❤️", group: "smileys_people", version: 0, tones: [] });
-    expect(frog).toMatchObject({ unified: "1f438", emoji: "🐸", tags: ["toad"], shortcodes: ["frog"], group: "animals_nature", version: 0.6 });
+    expect(heart).toMatchObject({ unified: "2764-fe0f", emoji: "❤️", group: "smileys-people", version: 0, tones: [] });
+    expect(frog).toMatchObject({ unified: "1f438", emoji: "🐸", tags: ["toad"], shortcodes: ["frog"], group: "animals-nature", version: 0.6 });
   });
 });

@@ -4,14 +4,14 @@ import { I18nProvider } from "react-aria/I18nProvider";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, useSkinTone, type EmojiGridState, type EmojiItem } from "../..";
+import { EmojiPicker, EmojiProvider, useEmojiPickerCell, useEmojiPickerGrid, useEmojiSkinTone, type EmojiPickerGridState, type EmojiItem } from "../..";
 
-function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
-  return <div {...useEmojiCell(state, item).cellProps} />;
+function Cell({ state, item }: { state: EmojiPickerGridState; item: EmojiItem }) {
+  return <div {...useEmojiPickerCell(state, item).cellProps} />;
 }
 
 function Grid() {
-  const grid = useEmojiGrid({ rowHeight: 40, columns: 8 });
+  const grid = useEmojiPickerGrid({ rowHeight: 40, columns: 8 });
   return <div {...grid.getGridProps()}>{grid.rows.slice(0, 3).flatMap((row) => (row.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : []))}</div>;
 }
 
@@ -73,7 +73,7 @@ describe("Root keyboard", () => {
     const onHighlightChange = vi.fn();
     const { input, host } = mount({ onHighlightChange });
     press(input, "ArrowRight");
-    expect(onHighlightChange).toHaveBeenLastCalledWith("1f600", expect.objectContaining({ reason: "keyboard", key: "smileys_people:1f600" }));
+    expect(onHighlightChange).toHaveBeenLastCalledWith("1f600", expect.objectContaining({ reason: "keyboard", key: "smileys-people:1f600" }));
     React.act(() => void host.querySelector('[data-unified="1f604"]')!.dispatchEvent(new MouseEvent("pointermove", { bubbles: true, clientX: 9, clientY: 9 })));
     expect(onHighlightChange).toHaveBeenLastCalledWith("1f604", expect.objectContaining({ reason: "pointer" }));
   });
@@ -91,9 +91,9 @@ describe("Root keyboard", () => {
 
   it("leaves a controlled highlight to its owner", () => {
     const onHighlightChange = vi.fn();
-    const { input, host } = mount({ highlight: "smileys_people:1f600", onHighlightChange });
+    const { input, host } = mount({ highlight: "smileys-people:1f600", onHighlightChange });
     press(input, "ArrowRight");
-    expect(onHighlightChange).toHaveBeenLastCalledWith("1f603", expect.objectContaining({ reason: "keyboard", key: "smileys_people:1f603" }));
+    expect(onHighlightChange).toHaveBeenLastCalledWith("1f603", expect.objectContaining({ reason: "keyboard", key: "smileys-people:1f603" }));
     expect(highlighted(host)).toBe("1f600");
     expect(host.querySelector("aside")!.hasAttribute("highlight")).toBe(false);
   });
@@ -117,18 +117,18 @@ describe("Root keyboard", () => {
       React.act(() =>
         root.render(
           <EmojiProvider data={en} prepare={false}>
-            <EmojiPicker.Root categories={[{ id: "smileys_people", name }, { id: "animals_nature" }]}>{parts}</EmojiPicker.Root>
+            <EmojiPicker.Root categories={[{ id: "smileys-people", name }, { id: "animals-nature" }]}>{parts}</EmojiPicker.Root>
           </EmojiProvider>,
         ),
       );
     show("Faces");
     show("People");
-    expect(host.querySelector('[data-slot="emoji-picker-category-tab"]')?.getAttribute("aria-label")).toBe("People");
+    expect(host.querySelector('[data-slot="emoji-picker-category-nav-tab"]')?.getAttribute("aria-label")).toBe("People");
   });
 
-  it("runs onKeyDown first, and preventEmojiPickerHandler skips the picker's handler", () => {
+  it("runs onKeyDown first, and preventEmojiComponentsHandler skips the picker's handler", () => {
     const onQueryChange = vi.fn();
-    const { host } = mount({ defaultQuery: "smile", onQueryChange, onKeyDown: (e) => e.shiftKey || e.preventEmojiPickerHandler() });
+    const { host } = mount({ defaultQuery: "smile", onQueryChange, onKeyDown: (e) => e.shiftKey || e.preventEmojiComponentsHandler() });
     const root = host.querySelector("aside")!;
     press(root, "Escape");
     expect(onQueryChange).not.toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe("Root keyboard", () => {
     const onSelect = vi.fn();
     const setTone = { current: (_: 0 | 1 | 2 | 3 | 4 | 5) => {} };
     function ToneSetter() {
-      const [, set] = useSkinTone();
+      const [, set] = useEmojiSkinTone();
       setTone.current = (t) => set(t);
       return null;
     }
@@ -165,7 +165,7 @@ describe("Root keyboard", () => {
     );
     input.focus();
     React.act(() => actions.current!.highlight("1f44d"));
-    expect(onHighlightChange).toHaveBeenLastCalledWith("1f44d", expect.objectContaining({ key: "smileys_people:1f44d" }));
+    expect(onHighlightChange).toHaveBeenLastCalledWith("1f44d", expect.objectContaining({ key: "smileys-people:1f44d" }));
     React.act(() => setTone.current(2));
     onHighlightChange.mockClear();
     const arrow = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true });
@@ -180,7 +180,7 @@ describe("Root keyboard", () => {
     });
   });
 
-  it("skips a cell's pick when its onClick calls preventEmojiPickerHandler", () => {
+  it("skips a cell's pick when its onClick calls preventEmojiComponentsHandler", () => {
     const onSelect = vi.fn();
     render(
       <EmojiProvider data={en} prepare={false}>
@@ -189,7 +189,7 @@ describe("Root keyboard", () => {
             <EmojiPicker.List>
               {() => (
                 <EmojiPicker.ListSection>
-                  <EmojiPicker.ListItems>{(emoji) => <EmojiPicker.ListCell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiPickerHandler()} />}</EmojiPicker.ListItems>
+                  <EmojiPicker.ListItems>{(emoji) => <EmojiPicker.ListCell onClick={(e) => emoji.unified === "1f600" && e.preventEmojiComponentsHandler()} />}</EmojiPicker.ListItems>
                 </EmojiPicker.ListSection>
               )}
             </EmojiPicker.List>
@@ -254,8 +254,8 @@ describe("Root keyboard", () => {
     React.act(() => search.focus());
     React.act(() => actions.current!.highlight("1f44d"));
     press(search, " ", { shiftKey: true });
-    const popups = document.querySelectorAll('[data-slot="emoji-picker-variations"]');
-    expect([popups.length, popups[0]?.className, popups[0]?.querySelectorAll('[data-slot="emoji-picker-variation"]').length]).toEqual([1, "tones-1f44d", 6]);
+    const popups = document.querySelectorAll('[data-slot="emoji-picker-list-variations"]');
+    expect([popups.length, popups[0]?.className, popups[0]?.querySelectorAll('[data-slot="emoji-picker-list-variations-option"]').length]).toEqual([1, "tones-1f44d", 6]);
   });
 
   it("moves through the skin tones with RTL arrows, Home and End, and picks with Enter", () => {

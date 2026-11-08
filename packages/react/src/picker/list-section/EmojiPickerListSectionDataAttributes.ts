@@ -1,6 +1,6 @@
 /**
  * Identifies a section.
- * @type {'emoji-picker-section'}
+ * @type {'emoji-picker-list-section'}
  */
 export const slot = "data-slot";
 /**

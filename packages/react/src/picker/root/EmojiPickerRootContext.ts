@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import type { ChangeDetails, EmojiLabels, EmojiPicker, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@emoji-components/core";
+import type { ChangeDetails, EmojiLabels, EmojiPickerStore, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@emoji-components/core";
 import type { EmojiGridMove } from "@emoji-components/core/grid";
-import type { EmojiPickerCollapsedCategories } from "./utils/useCollapsedCategories";
+import type { EmojiPickerCollapsedCategories } from "./utils/useEmojiPickerCollapsedCategories";
 
 export type { HighlightChangeDetails, SearchResultsMode };
 
@@ -50,7 +50,7 @@ export interface ListHandle {
 
 export interface EmojiPickerRootContext {
   store: EmojiStore;
-  state: EmojiPicker<React.ReactNode>;
+  state: EmojiPickerStore<React.ReactNode>;
   labels: EmojiLabels;
   inPopover: boolean;
   columns?: number;

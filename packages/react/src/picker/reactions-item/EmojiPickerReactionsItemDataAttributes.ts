@@ -2,7 +2,7 @@ import * as InteractionDataAttributes from "../../internals/InteractionDataAttri
 
 /**
  * Identifies a reaction.
- * @type {'emoji-picker-emoji'}
+ * @type {'emoji-picker-reactions-item'}
  */
 export const slot = "data-slot";
 /**
@@ -15,7 +15,7 @@ export const unified = "data-unified";
  */
 export const selected = "data-selected";
 /**
- * Present when imageUrl replaces the native glyph.
+ * Present when the provider's imageUrl draws its Unicode emoji as an image while the renderer is native.
  */
 export const overridden = "data-overridden";
 /**

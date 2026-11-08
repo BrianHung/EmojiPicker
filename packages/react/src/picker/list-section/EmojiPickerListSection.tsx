@@ -5,7 +5,7 @@ import { createBranchComponent } from "react-aria/CollectionBuilder";
 import type { EmojiSection } from "@emoji-components/core";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useCells } from "../list/EmojiPickerListContext";
 import { VirtualBranch } from "../list/utils/VirtualCollection";
 import * as EmojiPickerListSectionDataAttributes from "./EmojiPickerListSectionDataAttributes";
@@ -13,7 +13,7 @@ import { SECTION, useEmojiPickerListSectionContext } from "./EmojiPickerListSect
 
 export type EmojiPickerListSectionState = { section: EmojiSection; collapsed: boolean };
 
-export type EmojiPickerListSectionProps = Omit<EmojiPickerPartElementProps<EmojiPickerListSectionState, HTMLElement>, "children"> & {
+export type EmojiPickerListSectionProps = Omit<EmojiComponentsPartElementProps<EmojiPickerListSectionState, HTMLElement>, "children"> & {
   children?: React.ReactNode;
 };
 
@@ -26,7 +26,7 @@ export const EmojiPickerListSection = createBranchComponent(SECTION, function Em
     {
       ...groupProps,
       id: cells.sectionDomId(section.id),
-      "data-slot": SLOTS.section,
+      "data-slot": SLOTS.listSection,
       [EmojiPickerListSectionDataAttributes.category]: section.category,
       [EmojiPickerListSectionDataAttributes.collapsed]: flag(section.collapsed),
       ...props,

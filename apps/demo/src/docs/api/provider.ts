@@ -9,7 +9,7 @@ export const provider = rowsOf<EmojiProvider.Props>()([
     description: "Custom emoji, or a loader for them: { id, name, imageUrl, shortcodes?, tags?, group?, base?, width?, height?, animated?, stillUrl? }.",
   },
   { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Excludes emoji, custom emoji included, from the picker and search." },
-  { name: "search", type: "EmojiSearch", default: "lexical()", description: "The search function. See Search." },
+  { name: "search", type: "EmojiSearch", default: "lexicalSearch()", description: "The search function. See Search." },
   { name: "renderer", type: '"auto" | "native" | "image"', default: '"auto"', description: "auto draws images where the system cannot draw an emoji natively." },
   {
     name: "imageUrl",

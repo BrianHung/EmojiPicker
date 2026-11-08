@@ -6,7 +6,7 @@ import { createChangeDetails } from "@emoji-components/core/internal";
 import { SLOTS } from "../../../internals/slots";
 import { positioned } from "../../../popover/floating-ui/utils/positioned";
 import { reasonOf, usePlacement } from "../../../popover/floating-ui/utils/usePlacement";
-import type { EmojiSuggestionsPositionerProps, EmojiSuggestionsPositionerState } from "../../../popover/utils/types";
+import type { EmojiSuggestionsPositionerProps, EmojiSuggestionsPositionerState } from "../../utils/types";
 import { useEmojiSuggestionsRootContext } from "../root/EmojiSuggestionsRootContext";
 
 export const EmojiSuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsPositionerProps>(function EmojiSuggestionsPositioner(

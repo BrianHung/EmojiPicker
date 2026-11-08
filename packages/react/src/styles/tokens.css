@@ -8,19 +8,20 @@
 }
 
 :where(:root) {
-  --emoji-picker-background: var(--color-background-primary, light-dark(#ffffff, #171717));
-  --emoji-picker-foreground: var(--color-text-primary, light-dark(#171717, #fafafa));
-  --emoji-picker-muted: var(--color-text-secondary, light-dark(#737373, #a3a3a3));
-  --emoji-picker-subtle: var(--color-text-tertiary, light-dark(#a3a3a3, #737373));
-  --emoji-picker-border: var(--color-border-primary, light-dark(#e5e5e5, #2e2e2e));
-  --emoji-picker-input: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
-  --emoji-picker-input-border: var(--color-border-secondary, light-dark(#d4d4d4, #404040));
-  --emoji-picker-panel: var(--color-background-secondary, light-dark(#f5f5f5, #262626));
-  --emoji-picker-hover: var(--color-background-tertiary, light-dark(#f0f0f0, #2a2a2a));
-  --emoji-picker-selected: var(--color-background-tertiary, light-dark(#ebebeb, #333333));
-  --emoji-picker-accent: var(--color-ring-primary, light-dark(#171717, #fafafa));
-  --emoji-picker-ring: var(--color-ring-primary, light-dark(#a3a3a3, #737373));
-  --emoji-picker-radius: var(--border-radius-lg, 10px);
+  --emoji-picker-background: light-dark(#ffffff, #171717);
+  --emoji-picker-foreground: light-dark(#171717, #fafafa);
+  --emoji-picker-muted: light-dark(#737373, #a3a3a3);
+  --emoji-picker-subtle: light-dark(#a3a3a3, #737373);
+  --emoji-picker-border: light-dark(#e5e5e5, #2e2e2e);
+  --emoji-picker-input: light-dark(#f5f5f5, #262626);
+  --emoji-picker-input-border: light-dark(#d4d4d4, #404040);
+  --emoji-picker-panel: light-dark(#f5f5f5, #262626);
+  --emoji-picker-hover: light-dark(#f0f0f0, #2a2a2a);
+  --emoji-picker-selected: light-dark(#ebebeb, #333333);
+  --emoji-picker-accent: light-dark(#171717, #fafafa);
+  --emoji-picker-ring: light-dark(#a3a3a3, #737373);
+  --emoji-picker-radius: 10px;
+  /* --shadow-lg and --font-sans are Tailwind's theme variables, when the page has them */
   --emoji-picker-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
   --emoji-picker-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
   /* A color emoji font first, so text-default symbols (keycaps, ‼) draw as emoji */

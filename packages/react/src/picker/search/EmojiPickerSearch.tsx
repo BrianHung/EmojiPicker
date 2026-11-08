@@ -3,7 +3,7 @@
 import * as React from "react";
 import { flag, renderElement } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { EmojiPickerSearchInput } from "../search-input/EmojiPickerSearchInput";
 import { useQueryEmpty } from "../utils/useQueryEmpty";
@@ -11,7 +11,7 @@ import * as EmojiPickerSearchDataAttributes from "./EmojiPickerSearchDataAttribu
 
 export type EmojiPickerSearchState = { empty: boolean };
 
-export type EmojiPickerSearchProps = EmojiPickerPartElementProps<EmojiPickerSearchState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">;
+export type EmojiPickerSearchProps = EmojiComponentsPartElementProps<EmojiPickerSearchState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">;
 
 export const EmojiPickerSearch = React.forwardRef<HTMLDivElement, EmojiPickerSearchProps>(function EmojiPickerSearch({ onKeyDown, children, ...props }, ref) {
   const empty = useQueryEmpty("EmojiPicker.Search");

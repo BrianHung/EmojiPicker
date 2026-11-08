@@ -6,13 +6,13 @@ import { ReactionsContext, useEmojiPickerRootContext } from "../root/EmojiPicker
 import { mergePartProps } from "../../internals/mergePartProps";
 import { useInteraction, type Clickable } from "../../internals/useInteraction";
 import { renderElement } from "../../internals/renderElement";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
 
 import { useEmojiPickerReactionsContext } from "../reactions/EmojiPickerReactionsContext";
 
-export type EmojiPickerReactionsExpandState = EmojiPickerInteractionState;
-export type EmojiPickerReactionsExpandProps = EmojiPickerPartElementProps<EmojiPickerReactionsExpandState, HTMLButtonElement>;
+export type EmojiPickerReactionsExpandState = EmojiComponentsInteractionState;
+export type EmojiPickerReactionsExpandProps = EmojiComponentsPartElementProps<EmojiPickerReactionsExpandState, HTMLButtonElement>;
 
 export const EmojiPickerReactionsExpand = React.forwardRef<HTMLButtonElement, EmojiPickerReactionsExpandProps>(function EmojiPickerReactionsExpand({ children, ...props }, ref) {
   const { labels } = useEmojiPickerRootContext("EmojiPicker.ReactionsExpand");

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { type EmojiPicker, isComposingKey } from "@emoji-components/core";
+import { type EmojiPickerStore, isComposingKey } from "@emoji-components/core";
 import { KEY_MOVES } from "@emoji-components/core/grid";
 import { syncAriaAttributes } from "@emoji-components/core/internal";
 import type { ListHandle } from "../EmojiPickerRootContext";
@@ -11,7 +11,7 @@ import { hasModifier } from "../../../internals/usePickerKeyDown";
 const accepts = (el: HTMLElement) => el.getAttribute("aria-expanded") === "true";
 
 // An editor the app renders drives the grid: its arrows move the highlight, Enter picks, and it carries the listbox's ARIA while mounted
-export function useKeyboardTarget(target: () => HTMLElement | null, state: EmojiPicker<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
+export function useKeyboardTarget(target: () => HTMLElement | null, state: EmojiPickerStore<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
   React.useEffect(() => {
     const el = target();
     if (!el) return;

@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { Collection, Node } from "@react-types/shared";
 import type { EmojiItem } from "@emoji-components/core";
-import type { Cells } from "../list-cell/utils/useEmojiCell";
+import type { Cells } from "../list-cell/utils/useEmojiPickerCell";
 
 export const CellsContext = React.createContext<Cells | null>(null);
 export const HorizontalContext = React.createContext(false);

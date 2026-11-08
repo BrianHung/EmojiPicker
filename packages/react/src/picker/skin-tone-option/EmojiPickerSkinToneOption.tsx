@@ -6,7 +6,7 @@ import { mergeProps } from "react-aria/mergeProps";
 import type { SkinToneValue } from "@emoji-components/core";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { useInteraction, type Clickable } from "../../internals/useInteraction";
 import { SLOTS } from "../../internals/slots";
 
@@ -14,9 +14,9 @@ import * as EmojiPickerSkinToneOptionDataAttributes from "./EmojiPickerSkinToneO
 import { swatch } from "../skin-tone/utils/swatch";
 import { EmojiPickerSkinToneOptionContext, useEmojiPickerSkinToneContext } from "../skin-tone/EmojiPickerSkinToneContext";
 
-export type EmojiPickerSkinToneOptionState = EmojiPickerInteractionState & { tone: SkinToneValue; selected: boolean };
+export type EmojiPickerSkinToneOptionState = EmojiComponentsInteractionState & { tone: SkinToneValue; selected: boolean };
 
-export type EmojiPickerSkinToneOptionProps = EmojiPickerPartElementProps<EmojiPickerSkinToneOptionState, HTMLButtonElement, "role"> & {
+export type EmojiPickerSkinToneOptionProps = EmojiComponentsPartElementProps<EmojiPickerSkinToneOptionState, HTMLButtonElement, "role"> & {
   tone?: SkinToneValue;
 };
 

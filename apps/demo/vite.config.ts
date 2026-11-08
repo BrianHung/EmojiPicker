@@ -56,8 +56,8 @@ document.head.append(link);`;
     conditions: [...(workspace ? ["@emoji-components/source"] : []), ...defaultClientConditions],
     alias: [
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
-      { find: /^@\/components\/ui\/(emoji-picker|emoji-reaction-bar)$/, replacement: fileURLToPath(new URL("./registry/$1.tsx", import.meta.url)) },
-      { find: /^@\/(?:hooks|lib)\/(emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },
+      { find: /^@\/components\/ui\/(emoji-picker|emoji-reaction-bar|emoji-suggestions)$/, replacement: fileURLToPath(new URL("./registry/$1.tsx", import.meta.url)) },
+      { find: /^@\/(?:hooks|lib)\/((?:use-)?emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
   },

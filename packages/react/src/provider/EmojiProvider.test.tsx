@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { render, trackRoot } from "../../test/render";
 import { en } from "../../test/en";
-import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useSkinTone } from "..";
+import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useEmojiSkinTone } from "..";
 
 const fallback = vi.hoisted(() => ({ images: false }));
 vi.mock("@emoji-components/core/native", async (original) => ({ ...(await original<typeof import("@emoji-components/core/native")>()), needsImageFallback: () => fallback.images }));
@@ -17,7 +17,7 @@ function mount(node: React.ReactNode) {
 describe("EmojiProvider", () => {
   it("hydrates without mismatch when a skin tone is stored", async () => {
     function Tone() {
-      const [tone] = useSkinTone();
+      const [tone] = useEmojiSkinTone();
       return <span>tone {tone}</span>;
     }
     const app = () => (
@@ -94,7 +94,7 @@ describe("EmojiProvider", () => {
 
   it("shares one store between parts outside every provider", () => {
     function Tone() {
-      const [tone, setTone] = useSkinTone();
+      const [tone, setTone] = useEmojiSkinTone();
       return (
         <button type="button" onClick={() => setTone(4)}>
           {tone}
@@ -117,7 +117,7 @@ describe("EmojiProvider", () => {
     fallback.images = true;
     mount(<Emoji emoji="🇺🇸" />);
     fallback.images = false;
-    expect(document.querySelector("img[data-emoji]")?.getAttribute("src")).toContain("1f1fa-1f1f8");
+    expect(document.querySelector('img[data-slot="emoji"]')?.getAttribute("src")).toContain("1f1fa-1f1f8");
   });
 
   it("drops an aria-hidden Emoji's role and name, and forwards its ref", () => {

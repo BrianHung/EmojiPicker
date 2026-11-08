@@ -11,13 +11,14 @@ import { createChangeDetails } from "@emoji-components/core/internal";
 import { useStableCallback } from "../../utils/useLatest";
 import { useChangeState } from "../../utils/useChangeState";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
-import { useSkinTone } from "../../provider/utils/useSkinTone";
+import { useEmojiSkinTone } from "../../provider/utils/useEmojiSkinTone";
 import { EmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { useEmojiContext } from "../../provider/EmojiProviderContext";
 import { flag, renderElement } from "../../internals/renderElement";
-import type { EmojiPickerOrientation, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
 import { SLOTS } from "../../internals/slots";
 
 import { EmojiPickerSkinToneOptions } from "../skin-tone-options/EmojiPickerSkinToneOptions";
@@ -27,7 +28,7 @@ import { type EmojiPickerSkinToneContext as Context, EmojiPickerSkinToneContext 
 
 export type EmojiPickerSkinToneState = { open: boolean; tone: SkinToneValue };
 
-export type EmojiPickerSkinToneProps = EmojiPickerPartElementProps<EmojiPickerSkinToneState> & {
+export type EmojiPickerSkinToneProps = EmojiComponentsPartElementProps<EmojiPickerSkinToneState> & {
   orientation?: EmojiPickerOrientation;
   open?: boolean;
   defaultOpen?: boolean;
@@ -41,7 +42,7 @@ export const EmojiPickerSkinTone = React.forwardRef<HTMLDivElement, EmojiPickerS
   { orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props },
   ref,
 ) {
-  const [tone, setTone] = useSkinTone();
+  const [tone, setTone] = useEmojiSkinTone();
   const [open, change] = useChangeState(openProp, defaultOpen, onOpenChange);
   const rootRef = useObjectRef(ref);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);

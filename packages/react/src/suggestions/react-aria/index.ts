@@ -1,10 +1,5 @@
 export * as EmojiSuggestions from "./index.parts";
 
-export type * from "./root/EmojiSuggestionsRoot";
-export type * from "./portal/EmojiSuggestionsPortal";
-export type * from "./positioner/EmojiSuggestionsPositioner";
-export type * from "./popup/EmojiSuggestionsPopup";
-
 export type {
   EmojiSuggestionsPopupProps,
   EmojiSuggestionsPopupState,
@@ -12,7 +7,7 @@ export type {
   EmojiSuggestionsPositionerProps,
   EmojiSuggestionsPositionerState,
   EmojiSuggestionsRootProps,
-} from "../../popover/utils/types";
+} from "../utils/types";
 
 export * as EmojiSuggestionsPositionerDataAttributes from "../positioner/EmojiSuggestionsPositionerDataAttributes";
 export * as EmojiSuggestionsPositionerCssVariables from "../positioner/EmojiSuggestionsPositionerCssVars";

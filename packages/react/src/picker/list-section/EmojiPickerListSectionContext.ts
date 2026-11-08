@@ -5,10 +5,10 @@ import type { Collection, Key, Node } from "@react-types/shared";
 import type { EmojiSection } from "@emoji-components/core";
 
 // Collection node types for a section's parts, built by React Aria's CollectionBuilder from List's children
-export const SECTION = "emoji-picker-section";
-export const TITLE = "emoji-picker-section-title";
-export const ITEMS = "emoji-picker-items";
-export const ACTIONS = "emoji-picker-section-actions";
+export const SECTION = "emoji-picker-list-section";
+export const TITLE = "emoji-picker-list-section-title";
+export const ITEMS = "emoji-picker-list-items";
+export const ACTIONS = "emoji-picker-list-section-actions";
 
 export type SectionParts = { title?: Node<unknown>; items?: Node<unknown>; actions?: Node<unknown> };
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
 import { mergeRefs } from "react-aria/mergeRefs";
-import type { ElementProps, EmojiPickerInteractionState, EmojiPickerPartProps, RenderProp } from "./types";
+import type { ElementProps, EmojiComponentsInteractionState, EmojiComponentsPartProps, RenderProp } from "./types";
 
 // Base UI's convention: a present state attribute is empty, an absent one is undefined
 export const flag = (on: unknown): "" | undefined => (on ? "" : undefined);
@@ -11,7 +11,7 @@ export const flag = (on: unknown): "" | undefined => (on ? "" : undefined);
 type Children<S> = { children?: React.ReactNode | ((state: S) => React.ReactNode) };
 
 type DataAttributes = { [data: `data-${string}`]: unknown };
-type Input<S, E extends Element> = Omit<React.AllHTMLAttributes<E>, "className" | "style" | "children"> & { ref?: React.Ref<E> } & EmojiPickerPartProps<S, E> & Children<S> & DataAttributes;
+type Input<S, E extends Element> = Omit<React.AllHTMLAttributes<E>, "className" | "style" | "children"> & { ref?: React.Ref<E> } & EmojiComponentsPartProps<S, E> & Children<S> & DataAttributes;
 
 type RefCarrier<E> = { ref?: React.Ref<E>; props: { ref?: React.Ref<E> } };
 // React 19 moved an element's ref into its props
@@ -49,13 +49,13 @@ export function renderElement<S, E extends Element = HTMLElement>(tag: keyof Rea
 
 type RacState = { isHovered: boolean; isFocused: boolean; isFocusVisible: boolean; isDisabled: boolean };
 
-const racState = (r: RacState): EmojiPickerInteractionState => ({ hovered: r.isHovered, focused: r.isFocused, focusVisible: r.isFocusVisible, pressed: false, disabled: r.isDisabled });
+const racState = (r: RacState): EmojiComponentsInteractionState => ({ hovered: r.isHovered, focused: r.isFocused, focusVisible: r.isFocusVisible, pressed: false, disabled: r.isDisabled });
 
 // React Aria writes its state attributes as "true"
 const presence = (props: object) => Object.fromEntries(Object.entries(props).map(([k, v]) => [k, k.startsWith("data-") && v === true ? "" : v]));
 
 // A part's className, style, and render mapped onto a React Aria component's render props
-export function racParts<E extends Element>(tag: keyof React.JSX.IntrinsicElements, { className, style, render }: EmojiPickerPartProps<EmojiPickerInteractionState, E>) {
+export function racParts<E extends Element>(tag: keyof React.JSX.IntrinsicElements, { className, style, render }: EmojiComponentsPartProps<EmojiComponentsInteractionState, E>) {
   const custom = toRenderFunction(render);
   return {
     className: (r: RacState) => resolve(className, racState(r)) ?? "",

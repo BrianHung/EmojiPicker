@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker } from "@emoji-components/core";
+import type { EmojiPickerStore } from "@emoji-components/core";
 import type { CellElement } from "./types";
 
 // The skin tone row a long press or Shift+Space opens; closing it can hand focus back
-export function useVariations(core: EmojiPicker<React.ReactNode>, cellElement: CellElement, setHighlight: (key: Key | null) => void) {
+export function useVariations(core: EmojiPickerStore<React.ReactNode>, cellElement: CellElement, setHighlight: (key: Key | null) => void) {
   const back = React.useRef<HTMLElement | null>(null);
   const open = (id: Key | null) => {
     const active = document.activeElement;

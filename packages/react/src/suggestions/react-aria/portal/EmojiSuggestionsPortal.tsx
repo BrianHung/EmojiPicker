@@ -1,7 +1,7 @@
 "use client";
 
 import { EmojiPopoverPortal } from "../../../popover/react-aria/portal/EmojiPopoverPortal";
-import type { EmojiSuggestionsPortalProps } from "../../../popover/utils/types";
+import type { EmojiSuggestionsPortalProps } from "../../utils/types";
 
 export function EmojiSuggestionsPortal(props: EmojiSuggestionsPortalProps) {
   return <EmojiPopoverPortal {...props} />;

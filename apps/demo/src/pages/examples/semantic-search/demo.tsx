@@ -1,6 +1,6 @@
 import * as React from "react";
 import enUrl from "@emoji-components/data/en/iamcal.json?url";
-import { EmojiProvider, lexical, type CustomEmoji, type EmojiSearch } from "emoji-components";
+import { EmojiProvider, lexicalSearch, type CustomEmoji, type EmojiSearch } from "emoji-components";
 import { useRenderer } from "@/components/site/shell";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +15,7 @@ const LIMIT = 48;
 const EMPTY_BEFORE_DOWNLOAD = "Download the model to search by meaning.";
 
 type Tab = "device" | "vector" | "decision";
-const exact = lexical();
+const exact = lexicalSearch();
 // The meaning-based hits first, then lexical ones when there are fewer than 8
 const withLexical =
   (search: EmojiSearch): EmojiSearch =>

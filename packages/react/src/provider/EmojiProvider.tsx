@@ -5,11 +5,11 @@ import { I18nProvider, useLocale } from "react-aria/I18nProvider";
 import { createEmojiStore, type EmojiLabels, type EmojiStore, type EmojiStoreOptions, type FrequentsChangeDetails, type Renderer, type SkinToneChangeDetails } from "@emoji-components/core";
 import { localizeLabels, TWEMOJI_EMOJI_VERSION } from "@emoji-components/core/internal";
 import { useLayoutEffect } from "../utils/useLayoutEffect";
-import { contextValue, EmojiProviderContext, type ImageUrl, twemoji, useEmojiContext, useHydrating, useRenderer } from "./EmojiProviderContext";
+import { contextValue, EmojiProviderContext, type EmojiImageUrl, twemoji, useEmojiContext, useHydrating, useRenderer } from "./EmojiProviderContext";
 
 export type EmojiProviderProps = Omit<EmojiStoreOptions, "deferStorage"> & {
   renderer?: Renderer | "auto";
-  imageUrl?: ImageUrl;
+  imageUrl?: EmojiImageUrl;
   imageVersion?: number;
   prepare?: boolean;
   children: React.ReactNode;

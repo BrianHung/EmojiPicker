@@ -6,7 +6,7 @@ import type { EmojiPickerRootContext } from "../../root/EmojiPickerRootContext";
 import { SLOTS } from "../../../internals/slots";
 import type { Highlight } from "./useHighlight";
 import type { CellElement } from "./types";
-import { cellOf, keyOf } from "../../list-cell/utils/useEmojiCell";
+import { cellOf, keyOf } from "../../list-cell/utils/useEmojiPickerCell";
 
 // Hover moves the keyboard position only on a real pointer move into another cell: a keyboard scroll slides cells under a resting pointer, and VoiceOver puts the pointer back on the cell it last read, behind focus
 const pointer = { x: NaN, y: NaN, moved: false, list: null as Element | null, within: false, cell: null as Element | null, entered: false };

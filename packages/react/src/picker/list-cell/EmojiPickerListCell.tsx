@@ -4,14 +4,14 @@ import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { CellsContext, HorizontalContext, ItemContext } from "../list/EmojiPickerListContext";
 import type { EmojiItem } from "@emoji-components/core";
-import { useCell } from "./utils/useEmojiCell";
+import { useCell } from "./utils/useEmojiPickerCell";
 
 export type EmojiPickerListCellState = { emoji: EmojiItem; row: number; column: number; highlighted: boolean; hovered: boolean; focused: boolean; focusVisible: boolean; pressed: boolean; selected: boolean };
 
-export type EmojiPickerListCellProps = EmojiPickerPartElementProps<EmojiPickerListCellState>;
+export type EmojiPickerListCellProps = EmojiComponentsPartElementProps<EmojiPickerListCellState>;
 
 const CELL: React.CSSProperties = { width: "var(--ep-cell)", height: "var(--ep-cell)", maxWidth: "var(--ep-cell)", maxHeight: "var(--ep-cell)" };
 const FILL: React.CSSProperties = { width: "100%", height: "100%" };

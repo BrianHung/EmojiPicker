@@ -4,12 +4,12 @@ import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { ReactionsContext } from "../root/EmojiPickerRootContext";
 import { renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 
 export type EmojiPickerPanelState = { hidden: boolean };
-export type EmojiPickerPanelProps = EmojiPickerPartElementProps<EmojiPickerPanelState, HTMLDivElement, "hidden">;
+export type EmojiPickerPanelProps = EmojiComponentsPartElementProps<EmojiPickerPanelState, HTMLDivElement, "hidden">;
 
 export const EmojiPickerPanel = React.forwardRef<HTMLDivElement, EmojiPickerPanelProps>(function EmojiPickerPanel({ style, ...props }, ref) {
   const state = React.useContext(ReactionsContext);

@@ -76,7 +76,7 @@ export interface EmojiPickerSnapshot<Icon = unknown> {
   pressed: string | null;
 }
 
-export interface EmojiPicker<Icon = unknown> {
+export interface EmojiPickerStore<Icon = unknown> {
   getSnapshot(): EmojiPickerSnapshot<Icon>;
   subscribe: Subscribe;
   setOptions(options: EmojiPickerOptions<Icon>): void;
@@ -162,7 +162,7 @@ function retain(kept: Retained, sections: readonly EmojiSection[], query: string
   return { kept: { query, unified: target?.unified }, target };
 }
 
-export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: EmojiPickerOptions<Icon> = {}): EmojiPicker<Icon> {
+export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: EmojiPickerOptions<Icon> = {}): EmojiPickerStore<Icon> {
   const ui = createStore<Ui, Partial<Ui>>(
     {
       query: options.defaultQuery ?? "",

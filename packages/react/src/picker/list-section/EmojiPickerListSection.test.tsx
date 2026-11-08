@@ -33,10 +33,10 @@ it("renders section parts given through a wrapper component or a lazy element", 
       </EmojiProvider>,
     ),
   );
-  const titles = [...host.querySelectorAll('[data-slot="emoji-picker-section-title"]')];
+  const titles = [...host.querySelectorAll('[data-slot="emoji-picker-list-section-title"]')];
   expect(titles.length).toBeGreaterThan(0);
   expect(titles.every((t) => t.classList.contains("title") && t.textContent?.endsWith("!"))).toBe(true);
-  const cells = host.querySelectorAll('[data-slot="emoji-picker-emoji"]');
+  const cells = host.querySelectorAll('[data-slot="emoji-picker-list-cell"]');
   expect(cells.length).toBeGreaterThan(0);
   expect([...cells].every((c) => c.classList.contains("cell"))).toBe(true);
 });

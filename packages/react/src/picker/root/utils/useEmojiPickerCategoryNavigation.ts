@@ -16,8 +16,8 @@ export interface EmojiPickerCategoryNavigation {
   jumpToCategory(id: string, options?: { instant?: boolean }): void;
 }
 
-export function useCategoryNavigation(): EmojiPickerCategoryNavigation {
-  const picker = useEmojiPickerRootContext("useCategoryNavigation");
+export function useEmojiPickerCategoryNavigation(): EmojiPickerCategoryNavigation {
+  const picker = useEmojiPickerRootContext("useEmojiPickerCategoryNavigation");
   const view = useStore(picker.state, ({ categories, categorySections, searching, activeSection }) => ({ categories, categorySections, searching, activeSection }), shallowEqual);
   const categories = React.useMemo(() => {
     const shown = new Set(view.categorySections.map((s) => s.id));

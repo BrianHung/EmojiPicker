@@ -7,7 +7,7 @@ export const list = rowsOf<EmojiPicker.List.Props>()([
   { name: "orientation", type: '"vertical" | "horizontal"', default: '"vertical"' },
   { name: "rows", type: "number", default: "5", description: "Horizontal only: rows per section." },
   { name: "renderEmptyState", type: "(state: EmojiPicker.List.EmptyState) => ReactNode", description: "Shown in the list while data loads, after it fails, and when nothing matches." },
-  { name: "onKeyDown", type: "(event: PickerEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiPickerHandler() skips it." },
+  { name: "onKeyDown", type: "(event: EmojiComponentsEvent<KeyboardEvent>) => void", description: "Runs before the picker's handler; event.preventEmojiComponentsHandler() skips it." },
 ]);
 
 export const listParts: PropRow[] = [
@@ -18,7 +18,7 @@ export const listParts: PropRow[] = [
     name: "ListCell",
     type: "{ emoji, row, column, highlighted, hovered, focused, focusVisible, pressed, selected }",
     default: "the glyph",
-    description: "An option. Re-renders only when its own state changes. onClick and pointer handlers can call event.preventEmojiPickerHandler().",
+    description: "An option. Re-renders only when its own state changes. onClick and pointer handlers can call event.preventEmojiComponentsHandler().",
   },
   { name: "ListSectionActions", type: "{ section, collapsed, toggle, toggleProps }", description: "Controls over the title, outside the listbox." },
   {

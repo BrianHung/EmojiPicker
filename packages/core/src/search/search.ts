@@ -46,7 +46,7 @@ export type LexicalOptions = {
   tokenize?: Tokenizer;
 };
 
-export function lexical({ typos = true, typoThreshold = 8, locale, segmenter, tokenize }: LexicalOptions = {}): (query: string, context: SearchContext) => SearchHits {
+export function lexicalSearch({ typos = true, typoThreshold = 8, locale, segmenter, tokenize }: LexicalOptions = {}): (query: string, context: SearchContext) => SearchHits {
   const tokenizers = new Map<string, Tokenizer>();
   const tokenizerOf = (tag: string | undefined) => tokenize ?? (segmenter === undefined ? tokenizerFor(tag) : cached(tokenizers, tag ?? "", () => createTokenizer({ locale: tag, segmenter })));
   return (query, context) => {

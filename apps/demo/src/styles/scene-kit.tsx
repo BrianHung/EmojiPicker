@@ -190,7 +190,7 @@ export function PickerSheet({ appStyle: style, onSelect, label, children, title,
       ) : null}
       <DrawerContent
         data-style={style.id}
-        className="border-picker-border bg-picker-background font-picker text-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-picker-muted/40"
+        className="border-emoji-picker-border bg-emoji-picker-background font-emoji-picker text-emoji-picker-foreground [--drawer-bleed-background:var(--emoji-picker-background)] *:data-[slot=drawer-swipe-handle]:after:bg-emoji-picker-muted/40"
         style={{ ...tokensOf(style), fontFamily: font }}
         initialFocus={(type) => (type === "touch" ? true : (body.current?.querySelector("input") ?? true))}
       >

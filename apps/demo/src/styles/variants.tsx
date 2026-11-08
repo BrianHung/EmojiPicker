@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Emoji, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "emoji-components";
-import { ReactionBar } from "@/components/ui/emoji-reaction-bar";
+import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
 import { cn } from "@/lib/utils";
 import { PickerPopover, type PickerPopoverProps } from "@/components/picker-popover";
 import { SmilePlus } from "./icons";
@@ -55,7 +55,7 @@ export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: {
   const frequent = useFrequentEmoji({ limit: count }).items;
   const top = appStyle.tapback.pinned ?? frequent;
   return (
-    <ReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">
+    <EmojiReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">
       <div className={appStyle.tapback.reactions}>
         {top.map((u) => {
           const unified = store.withSkinTone(u);
@@ -78,7 +78,7 @@ export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: {
           {appStyle.tapback.more?.icon ?? <SmilePlus size={20} />}
         </StyleDropdown>
       </div>
-    </ReactionBar>
+    </EmojiReactionBar>
   );
 }
 

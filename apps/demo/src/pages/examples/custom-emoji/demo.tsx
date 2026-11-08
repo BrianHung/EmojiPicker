@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { BUFO_PACK_URL, loadPack, usePack } from "@/lib/packs";
 import { EmojiPickerCard } from "@/registry/emoji-picker";
 
-const STANDARD: CategoryOption[] = [{ id: "smileys_people" }, { id: "animals_nature" }, { id: "food_drink" }, { id: "travel_places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
+const STANDARD: CategoryOption[] = [{ id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "travel-places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
 
 type Pack = { key: string; label: string; emoji: CustomEmoji[] };
 type Status = { pending?: boolean; error?: string; count?: number };

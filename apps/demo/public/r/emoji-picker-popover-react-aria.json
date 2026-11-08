@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
-  "name": "emoji-picker-popover-aria",
+  "name": "emoji-picker-popover-react-aria",
   "title": "Emoji Picker Popover (React Aria)",
   "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
   "registryDependencies": [

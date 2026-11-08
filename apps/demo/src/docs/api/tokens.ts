@@ -2,7 +2,7 @@ type Rows = [string, string, string][];
 
 export const tokens: Rows = [
   ["--emoji-font-family", "system emoji fonts", "Font for native emoji."],
-  ["--emoji-picker-background", "#fff / #171717", "Surface (bg-picker-background)."],
+  ["--emoji-picker-background", "#fff / #171717", "Surface (bg-emoji-picker-background)."],
   ["--emoji-picker-foreground", "#171717 / #fafafa", "Text."],
   ["--emoji-picker-muted", "#737373 / #a3a3a3", "Section titles and secondary text."],
   ["--emoji-picker-subtle", "#a3a3a3 / #737373", "Placeholders and icons."],
@@ -14,9 +14,9 @@ export const tokens: Rows = [
   ["--emoji-picker-selected", "#ebebeb / #333333", "Highlighted cell and active tab."],
   ["--emoji-picker-accent", "#171717 / #fafafa", "Active indicators."],
   ["--emoji-picker-ring", "#a3a3a3 / #737373", "Focus ring."],
-  ["--emoji-picker-radius", "10px", "Corner radius (rounded-picker)."],
-  ["--emoji-picker-shadow", "shadow-lg", "Shadow (shadow-picker)."],
-  ["--emoji-picker-font", "--font-sans", "Text font (font-picker)."],
+  ["--emoji-picker-radius", "10px", "Corner radius (rounded-emoji-picker)."],
+  ["--emoji-picker-shadow", "shadow-lg", "Shadow (shadow-emoji-picker)."],
+  ["--emoji-picker-font", "--font-sans", "Text font (font-emoji-picker)."],
 ];
 
 export const rendering: Rows = [

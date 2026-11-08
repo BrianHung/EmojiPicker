@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Mount } from "../../../popover/floating-ui/root/EmojiPopoverRootContext";
-import type { EmojiSuggestionsRootProps } from "../../../popover/utils/types";
+import type { EmojiSuggestionsRootProps } from "../../utils/types";
 
 export type EmojiSuggestionsRootContext = Mount & Pick<EmojiSuggestionsRootProps, "open" | "onOpenChange">;
 

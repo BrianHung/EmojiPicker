@@ -31,10 +31,10 @@ const stop = typeahead.syncCombobox(input);
 
 | Import | Contents |
 |---|---|
-| `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexical`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
+| `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexicalSearch`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
 | `/grid` | Grid layout and keyboard moves, for your own virtualizer |
 | `/native` | Whether the system font draws an emoji |
-| `/build` | `buildDataset` from `emojibase-data`, also as the `emoji-components build-data <locale>` CLI |
+| `/build` | `buildDataset` from `emojibase-data`, also as the `npx @emoji-components/core build-data <locale>` CLI |
 
 ## Docs
 

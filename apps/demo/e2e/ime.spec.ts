@@ -1,6 +1,6 @@
 import type { CDPSession, Page } from "@playwright/test";
 import { clearTextField, EDITORS, fieldText, firstPicker, listbox, openEditorMenu, surface, tiptapField } from "./surfaces";
-import { expect, frames, quiet, slot, test, visit } from "./support";
+import { emojiItem, expect, frames, quiet, test, visit } from "./support";
 
 async function ime(page: Page) {
   const cdp = await page.context().newCDPSession(page);
@@ -36,7 +36,7 @@ test("picker search: arrows, Enter and Escape during a composition stay with the
   await picker.scrollIntoViewIfNeeded();
   const search = picker.locator("input").first();
   await search.click();
-  const highlighted = () => picker.evaluate((p, cell) => p.querySelector(`${cell}[data-highlighted]`)?.getAttribute("aria-label") ?? null, slot("emoji"));
+  const highlighted = () => picker.evaluate((p, cell) => p.querySelector(`${cell}[data-highlighted]`)?.getAttribute("aria-label") ?? null, emojiItem);
   const keys = await ime(page);
   await keys.compose("smile");
   await quiet(page);

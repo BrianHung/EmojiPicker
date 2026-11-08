@@ -3,7 +3,7 @@
 import type * as React from "react";
 import { mergePartProps } from "../../../internals/mergePartProps";
 import { renderElement, resolve } from "../../../internals/renderElement";
-import type { EmojiPickerPartElementProps } from "../../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../../internals/types";
 import { EmojiPopoverPositionerContext } from "../positioner/EmojiPopoverPositionerContext";
 import { closedPointerEvents, positionerAttributes } from "../../utils/popupAttributes";
 import type { EmojiPopoverPositionerState, TransitionStatus } from "../../utils/types";
@@ -14,7 +14,7 @@ export function positioned(
   status: TransitionStatus,
   floatingProps: FloatingProps,
   slot: string,
-  { className, style: own, render, children, ...props }: EmojiPickerPartElementProps<EmojiPopoverPositionerState>,
+  { className, style: own, render, children, ...props }: EmojiComponentsPartElementProps<EmojiPopoverPositionerState>,
   ref: React.Ref<HTMLDivElement>,
 ) {
   return (

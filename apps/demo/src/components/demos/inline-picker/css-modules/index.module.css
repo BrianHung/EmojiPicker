@@ -1,8 +1,8 @@
 .root {
-  --emoji-size: 24px;
-  --emoji-cell-size: 36px;
-  --emoji-header-height: 32px;
-  --emoji-list-padding: 8px;
+  --emoji-picker-emoji-size: 24px;
+  --emoji-picker-cell-size: 36px;
+  --emoji-picker-header-height: 32px;
+  --emoji-picker-list-padding: 8px;
   display: flex;
   flex-direction: column;
   width: 352px;

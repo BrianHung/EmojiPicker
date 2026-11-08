@@ -5,7 +5,7 @@ import { createLeafComponent } from "react-aria/CollectionBuilder";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import type { EmojiPickerListSectionState } from "../list-section/EmojiPickerListSection";
 import { ACTIONS } from "../list-section/EmojiPickerListSectionContext";
 import * as EmojiPickerListSectionActionsDataAttributes from "./EmojiPickerListSectionActionsDataAttributes";
@@ -16,7 +16,7 @@ export type EmojiPickerListSectionActionsState = EmojiPickerListSectionState & {
   toggleProps: { "aria-expanded": boolean };
 };
 
-export type EmojiPickerListSectionActionsProps = EmojiPickerPartElementProps<EmojiPickerListSectionActionsState>;
+export type EmojiPickerListSectionActionsProps = EmojiComponentsPartElementProps<EmojiPickerListSectionActionsState>;
 
 // A collection leaf: List renders it over the list, outside the listbox, pinned with its section's sticky title
 export const EmojiPickerListSectionActions = createLeafComponent(ACTIONS, function EmojiPickerListSectionActions({ style, children, ...props }: EmojiPickerListSectionActionsProps, ref: React.ForwardedRef<HTMLDivElement>) {
@@ -33,7 +33,7 @@ export const EmojiPickerListSectionActions = createLeafComponent(ACTIONS, functi
         {
           ...props,
           ref: refs,
-          "data-slot": SLOTS.sectionActions,
+          "data-slot": SLOTS.listSectionActions,
           [EmojiPickerListSectionActionsDataAttributes.section]: section.id,
           [EmojiPickerListSectionActionsDataAttributes.collapsed]: flag(section.collapsed),
           style: (s: EmojiPickerListSectionActionsState) => ({ position: "sticky", top: "var(--ep-sticky-offset, 0px)", height: headerHeight, zIndex: 3, pointerEvents: "auto", ...resolve(style, s) }),

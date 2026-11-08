@@ -1,7 +1,7 @@
 "use client";
 
 import { portal } from "../../../popover/floating-ui/utils/portal";
-import type { EmojiSuggestionsPortalProps } from "../../../popover/utils/types";
+import type { EmojiSuggestionsPortalProps } from "../../utils/types";
 import { useEmojiSuggestionsRootContext } from "../root/EmojiSuggestionsRootContext";
 
 export function EmojiSuggestionsPortal({ container, children }: EmojiSuggestionsPortalProps) {

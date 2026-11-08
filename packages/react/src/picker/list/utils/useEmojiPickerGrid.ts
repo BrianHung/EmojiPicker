@@ -16,9 +16,9 @@ import { scrollParent } from "../../../utils/dom";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
 import { gridKeyboardDelegate } from "./navigation";
 import { HIDDEN_OVERLAY, variationsOverlay } from "./overlay";
-import { gridStateOf, type EmojiGridState } from "../../list-cell/utils/useEmojiCell";
+import { gridStateOf, type EmojiPickerGridState } from "../../list-cell/utils/useEmojiPickerCell";
 
-export interface UseEmojiGridOptions {
+export interface UseEmojiPickerGridOptions {
   columns?: number;
   rowHeight: number;
   headerHeight?: number;
@@ -28,10 +28,10 @@ export interface UseEmojiGridOptions {
 
 type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement> };
 
-export type UseEmojiGridResult = EmojiGrid<EmojiSection> & {
+export type UseEmojiPickerGridResult = EmojiGrid<EmojiSection> & {
   getGridProps(props?: React.HTMLAttributes<HTMLElement>): GridElementProps;
   getHeaderProps(section: EmojiSection, props?: React.HTMLAttributes<HTMLElement>): React.HTMLAttributes<HTMLElement>;
-  state: EmojiGridState;
+  state: EmojiPickerGridState;
   variations: React.ReactNode;
 };
 
@@ -44,8 +44,8 @@ function windowOf(list: HTMLElement | null) {
 }
 
 // The grid inside an app's own virtualizer: rows to render, and geometry read from the DOM
-export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiGridOptions): UseEmojiGridResult {
-  const picker = useEmojiPickerRootContext("useEmojiGrid");
+export function useEmojiPickerGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiPickerGridOptions): UseEmojiPickerGridResult {
+  const picker = useEmojiPickerRootContext("useEmojiPickerGrid");
   const { sections, request, probeRoot } = useGridSections(false);
   const grid = React.useMemo(() => createEmojiGrid(sections, { columns: columns ?? picker.columns ?? DEFAULT_COLUMNS, rowHeight, headerHeight }), [sections, columns, picker.columns, rowHeight, headerHeight]);
   const listRef = React.useRef<HTMLElement | null>(null);
@@ -113,7 +113,7 @@ export function useEmojiGrid({ columns, rowHeight, headerHeight = rowHeight, scr
   return {
     ...grid,
     getGridProps: (props = {}) => mergePartProps(props, controller.gridProps),
-    getHeaderProps: (section, props = {}) => mergeProps(props, { role: "presentation", "data-slot": SLOTS.sectionTitle, children: section.name }),
+    getHeaderProps: (section, props = {}) => mergeProps(props, { role: "presentation", "data-slot": SLOTS.listSectionTitle, children: section.name }),
     state,
     variations: controller.variations,
   };

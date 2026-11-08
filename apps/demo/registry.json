@@ -38,7 +38,7 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-aria.",
+      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-react-aria.",
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [
         {
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "name": "emoji-picker-popover-aria",
+      "name": "emoji-picker-popover-react-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
       "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
@@ -87,16 +87,16 @@
       ]
     },
     {
-      "name": "emoji-suggestion-menu",
-      "type": "registry:component",
-      "title": "Emoji Suggestion Menu",
+      "name": "emoji-suggestions",
+      "type": "registry:ui",
+      "title": "Emoji Suggestions",
       "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
       "dependencies": ["emoji-components"],
       "registryDependencies": ["utils"],
       "files": [
         {
-          "path": "src/components/suggestion-menu.tsx",
-          "type": "registry:component"
+          "path": "registry/emoji-suggestions.tsx",
+          "type": "registry:ui"
         }
       ]
     },
@@ -106,10 +106,10 @@
       "title": "Emoji Tiptap",
       "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
       "dependencies": ["emoji-components", "@tiptap/core", "@tiptap/pm", "@tiptap/react"],
-      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json", "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"],
+      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-prosemirror.json", "https://emoji.brianhung.me/r/emoji-suggestions.json"],
       "files": [
         {
-          "path": "registry/emoji-tiptap.ts",
+          "path": "registry/use-emoji-tiptap.ts",
           "type": "registry:hook"
         },
         {
@@ -132,7 +132,7 @@
       "dependencies": ["emoji-components", "lexical", "@lexical/react"],
       "files": [
         {
-          "path": "registry/emoji-lexical.ts",
+          "path": "registry/use-emoji-lexical.ts",
           "type": "registry:hook"
         },
         {
@@ -146,7 +146,7 @@
           "target": "components/lexical/emoji-node.tsx"
         }
       ],
-      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-suggestion-menu.json"]
+      "registryDependencies": ["https://emoji.brianhung.me/r/emoji-suggestions.json"]
     }
   ]
 }

@@ -13,7 +13,7 @@ describe("custom emoji", () => {
   });
 
   it("indexes id words not already in the name, and inherits a base emoji's tags", () => {
-    const bread = { unified: "1f35e", name: "bread", tags: ["loaf"], shortcodes: [], emoji: "🍞", group: "food_drink" as const, version: 0.6, tones: [], order: 0 };
+    const bread = { unified: "1f35e", name: "bread", tags: ["loaf"], shortcodes: [], emoji: "🍞", group: "food-drink" as const, version: 0.6, tones: [], order: 0 };
     const [record] = customRecords([frog("frogBreadParty", { name: "Frog bread party", base: "1f35e" })], 100, (u) => (u === "1f35e" ? bread : undefined));
     expect(record).toMatchObject({ unified: "frogBreadParty", order: 100, group: "custom" });
     expect(record!.tags).toContain("loaf");

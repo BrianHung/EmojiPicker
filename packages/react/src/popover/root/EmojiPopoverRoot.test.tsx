@@ -3,14 +3,14 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "../..";
+import { EmojiPicker, EmojiProvider, useEmojiPickerCell, useEmojiPickerGrid, type EmojiPickerGridState, type EmojiItem } from "../..";
 
-function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
-  return <div {...useEmojiCell(state, item).cellProps} />;
+function Cell({ state, item }: { state: EmojiPickerGridState; item: EmojiItem }) {
+  return <div {...useEmojiPickerCell(state, item).cellProps} />;
 }
 
 function Grid() {
-  const grid = useEmojiGrid({ rowHeight: 40, columns: 8 });
+  const grid = useEmojiPickerGrid({ rowHeight: 40, columns: 8 });
   return <div {...grid.getGridProps()}>{grid.rows.slice(0, 2).flatMap((row) => (row.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : []))}</div>;
 }
 import * as floating from "../../floating-ui";

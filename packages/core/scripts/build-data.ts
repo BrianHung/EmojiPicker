@@ -54,10 +54,10 @@ export const defaultShortcodeSets = (locale: string) => (isEnglish(locale) ? ["i
 
 const GROUP_OF: Record<number, number> = { 0: 0, 1: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7 };
 const MESSAGE_KEY: Record<(typeof GROUPS)[number], GroupKey> = {
-  smileys_people: GROUP_KEY_PEOPLE_BODY,
-  animals_nature: GROUP_KEY_ANIMALS_NATURE,
-  food_drink: GROUP_KEY_FOOD_DRINK,
-  travel_places: GROUP_KEY_TRAVEL_PLACES,
+  "smileys-people": GROUP_KEY_PEOPLE_BODY,
+  "animals-nature": GROUP_KEY_ANIMALS_NATURE,
+  "food-drink": GROUP_KEY_FOOD_DRINK,
+  "travel-places": GROUP_KEY_TRAVEL_PLACES,
   activities: GROUP_KEY_ACTIVITIES,
   objects: GROUP_KEY_OBJECTS,
   symbols: GROUP_KEY_SYMBOLS,

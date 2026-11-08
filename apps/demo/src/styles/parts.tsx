@@ -3,7 +3,7 @@ import { EmojiPicker, type CategoryOption } from "emoji-components";
 import { cn } from "@/lib/utils";
 import type * as I from "./icons";
 
-const DEFAULT_ORDER: CategoryOption["id"][] = ["suggested", "custom", "smileys_people", "animals_nature", "food_drink", "travel_places", "activities", "objects", "symbols", "flags"];
+const DEFAULT_ORDER: CategoryOption["id"][] = ["suggested", "custom", "smileys-people", "animals-nature", "food-drink", "travel-places", "activities", "objects", "symbols", "flags"];
 
 export const noEmoji = ({ status }: EmojiPicker.List.EmptyState) => (status === "empty" ? <div className="py-10 text-center text-sm opacity-60">No emoji found</div> : null);
 
@@ -35,7 +35,7 @@ export function HandTone({ emoji, className }: { emoji?: string; className: stri
 }
 
 export function SearchClear() {
-  return <EmojiPicker.SearchClear className="absolute end-[var(--emoji-list-padding,10px)] top-1/2 flex size-[30px] -translate-y-1/2 items-center justify-center" />;
+  return <EmojiPicker.SearchClear className="absolute end-[var(--emoji-picker-list-padding,10px)] top-1/2 flex size-[30px] -translate-y-1/2 items-center justify-center" />;
 }
 
 export function Tabs({ items, active, className, tab, activeTab, inactiveTab, right }: { items: React.ReactNode[]; active: number; className: string; tab: string; activeTab: string; inactiveTab?: string; right?: React.ReactNode }) {

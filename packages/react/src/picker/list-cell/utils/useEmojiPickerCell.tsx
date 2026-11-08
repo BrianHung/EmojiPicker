@@ -5,7 +5,7 @@ import * as EmojiPickerListCellDataAttributes from "../EmojiPickerListCellDataAt
 import * as React from "react";
 import type { Key } from "@react-types/shared";
 import type { ListState } from "react-stately/useListState";
-import type { EmojiItem, EmojiPicker, EmojiPickerSnapshot } from "@emoji-components/core";
+import type { EmojiItem, EmojiPickerStore, EmojiPickerSnapshot } from "@emoji-components/core";
 import { Glyph, useOverridden } from "../../../emoji/Glyph";
 import { flag, stateAttributes } from "../../../internals/renderElement";
 import { SLOTS } from "../../../internals/slots";
@@ -24,7 +24,7 @@ const flagsOf = ({ hovered, highlighted, tabStop, pressed }: EmojiPickerSnapshot
   (hovered === key ? ((highlighted ?? key) === key ? HIGHLIGHTED | HOVERED : HOVERED) : 0) | (highlighted === key ? FOCUSED : 0) | (tabStop === key ? STOP : 0) | (pressed === key ? PRESSED : 0);
 
 // Handlers are delegated from the list: one set for every mounted cell
-export const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.emoji}"]`) : null);
+export const cellOf = (target: EventTarget | null) => (target instanceof Element ? target.closest(`[data-slot="${SLOTS.listCell}"]`) : null);
 export const keyOf = (e: React.SyntheticEvent) => cellOf(e.target)?.getAttribute("data-key") ?? null;
 
 export type CellPosition = readonly [posinset: number, setsize: number, index: number, row: number, column: number];
@@ -38,7 +38,7 @@ export interface Cells {
   virtual: boolean;
   elements: Map<Key, HTMLElement>;
   headers: Set<HTMLElement>;
-  picker: EmojiPicker<React.ReactNode>;
+  picker: EmojiPickerStore<React.ReactNode>;
   target(): Element | null;
   reveal(id: Key): void;
   sectionDomId(id: string): string;
@@ -73,7 +73,7 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
     "aria-setsize": position?.[1],
     "aria-keyshortcuts": variations ? "Shift+Space" : undefined,
     tabIndex: flags & STOP ? 0 : -1,
-    "data-slot": SLOTS.emoji,
+    "data-slot": SLOTS.listCell,
     "data-key": item.id,
     "data-collection": cells.collectionId,
     [EmojiPickerListCellDataAttributes.unified]: unified,
@@ -88,26 +88,27 @@ function cellProps(cells: Cells, item: EmojiItem, flags: number, overridden: boo
   return { props, state };
 }
 
-let cellsOf: (state: EmojiGridState) => Cells;
-export let gridStateOf: (cells: Cells) => EmojiGridState;
-// What useEmojiGrid hands its cells; opaque outside the package
-export class EmojiGridState {
+let cellsOf: (state: EmojiPickerGridState) => Cells;
+export let gridStateOf: (cells: Cells) => EmojiPickerGridState;
+// What useEmojiPickerGrid hands its cells; opaque outside the package
+export type EmojiPickerGridState = GridState;
+class GridState {
   readonly #cells: Cells;
   private constructor(cells: Cells) {
     this.#cells = cells;
   }
   static {
     cellsOf = (state) => state.#cells;
-    gridStateOf = (cells) => new EmojiGridState(cells);
+    gridStateOf = (cells) => new GridState(cells);
   }
 }
 
-export interface UseEmojiCellResult {
+export interface UseEmojiPickerCellResult {
   cellProps: React.HTMLAttributes<HTMLElement> & { ref: (el: HTMLElement | null) => void; [data: `data-${string}`]: string | number | true | undefined };
   state: EmojiPickerListCellState;
 }
 
-export function useCell(grid: Cells, item: EmojiItem): UseEmojiCellResult {
+export function useCell(grid: Cells, item: EmojiItem): UseEmojiPickerCellResult {
   const overridden = useOverridden(item.unified, item.record);
   const flags = useStore(grid.picker, (s) => flagsOf(s, item.id));
   const element = React.useRef<HTMLElement | null>(null);
@@ -134,4 +135,4 @@ export function useCell(grid: Cells, item: EmojiItem): UseEmojiCellResult {
   return { cellProps: { ...props, ref }, state };
 }
 
-export const useEmojiCell = (state: EmojiGridState, item: EmojiItem): UseEmojiCellResult => useCell(cellsOf(state), item);
+export const useEmojiPickerCell = (state: EmojiPickerGridState, item: EmojiItem): UseEmojiPickerCellResult => useCell(cellsOf(state), item);

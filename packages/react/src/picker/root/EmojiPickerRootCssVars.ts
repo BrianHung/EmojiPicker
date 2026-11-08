@@ -3,31 +3,31 @@
  * @type {length}
  * @default 30px
  */
-export const emojiSize = "--emoji-size";
+export const emojiSize = "--emoji-picker-emoji-size";
 /**
  * The size of image emoji.
  * @type {length}
- * @default --emoji-size
+ * @default --emoji-picker-emoji-size
  */
-export const emojiImageSize = "--emoji-image-size";
+export const emojiImageSize = "--emoji-picker-emoji-image-size";
 /**
  * The grid pitch: each cell's width and height.
  * @type {length}
- * @default --emoji-size + 10px
+ * @default --emoji-picker-emoji-size + 10px
  */
-export const emojiCellSize = "--emoji-cell-size";
+export const emojiCellSize = "--emoji-picker-cell-size";
 /**
  * The cell width, when it differs from the height.
  * @type {length}
- * @default --emoji-cell-size
+ * @default --emoji-picker-cell-size
  */
-export const emojiCellWidth = "--emoji-cell-width";
+export const emojiCellWidth = "--emoji-picker-cell-width";
 /**
  * The cell height, when it differs from the width.
  * @type {length}
- * @default --emoji-cell-size
+ * @default --emoji-picker-cell-size
  */
-export const emojiCellHeight = "--emoji-cell-height";
+export const emojiCellHeight = "--emoji-picker-cell-height";
 /**
  * Set by List to the grid's width.
  * @type {number}

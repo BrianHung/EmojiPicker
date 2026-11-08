@@ -1,15 +1,15 @@
 import * as React from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { EmojiPicker, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "emoji-components";
+import { EmojiPicker, useEmojiPickerCell, useEmojiPickerGrid, type EmojiPickerGridState, type EmojiItem } from "emoji-components";
 
-const Cell = React.memo(function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
-  const { cellProps } = useEmojiCell(state, item);
+const Cell = React.memo(function Cell({ state, item }: { state: EmojiPickerGridState; item: EmojiItem }) {
+  const { cellProps } = useEmojiPickerCell(state, item);
   return <div {...cellProps} className="flex size-9 cursor-default items-center justify-center rounded-md outline-none hover:bg-accent focus-visible:bg-accent data-[highlighted]:bg-accent" />;
 });
 
 export function TanStackList() {
   const scrollRef = React.useRef<HTMLDivElement>(null);
-  const grid = useEmojiGrid({
+  const grid = useEmojiPickerGrid({
     columns: 8,
     rowHeight: 36,
     headerHeight: 28,

@@ -3,14 +3,14 @@
 import * as React from "react";
 import type { EmojiRecord, SkinToneValue } from "@emoji-components/core";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 
 import { VariationsPopup } from "./VariationsPopup";
 
 export type EmojiPickerListVariationsState = { emoji: EmojiRecord; tone: SkinToneValue };
 
-export type EmojiPickerListVariationsProps = Omit<EmojiPickerPartElementProps<EmojiPickerListVariationsState, HTMLDivElement, "role">, "children"> & {
+export type EmojiPickerListVariationsProps = Omit<EmojiComponentsPartElementProps<EmojiPickerListVariationsState, HTMLDivElement, "role">, "children"> & {
   children?: (tone: SkinToneValue) => React.ReactNode;
 };
 

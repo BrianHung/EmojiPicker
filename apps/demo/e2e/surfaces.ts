@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { hold, quiet, slot, SLOTS, type Viewport, visit } from "./support";
+import { hold, quiet, emojiItem, slot, SLOTS, type Viewport, visit } from "./support";
 
 export type Kind = "picker" | "menu" | "bar";
 
@@ -52,7 +52,7 @@ function popover(id: string, path: string, trigger: (p: Page) => Locator, extra:
       if (extra.root) await extra.root(p).waitFor();
       else
         await layer(p)
-          .locator(`${slot("emoji")}, ${slot("searchInput")}`)
+          .locator(`${emojiItem}, ${slot("searchInput")}`)
           .first()
           .waitFor();
       await p.mouse.move(0, 0);
@@ -129,7 +129,7 @@ function inline(id: string, path: string, scope: (p: Page) => Locator, extra: Ex
     open: async (p) => {
       const root = pickerIn(scope(p));
       const search = root.locator(slot("searchInput"));
-      const target = (await search.count()) ? search.first() : root.locator(slot("emoji")).first();
+      const target = (await search.count()) ? search.first() : root.locator(emojiItem).first();
       await target.click();
       return target;
     },
@@ -292,7 +292,7 @@ const searchFor =
       await p.keyboard.press("Enter");
     }
     await preview(p, "search").locator(slot("searchInput")).fill("smile");
-    await preview(p, "search").locator(slot("emoji")).first().waitFor();
+    await preview(p, "search").locator(emojiItem).first().waitFor();
   };
 
 export const SHOTS: Shot[] = [

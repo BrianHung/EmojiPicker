@@ -6,9 +6,10 @@ import { mergeRefs } from "react-aria/mergeRefs";
 
 import type { SkinToneValue } from "@emoji-components/core";
 import { SKIN_TONE_VALUES } from "@emoji-components/core/internal";
-import { ToolbarPart } from "../../internals/ToolbarPart";
+import { ToolbarPart } from "../utils/ToolbarPart";
 import { resolve } from "../../internals/renderElement";
-import type { EmojiPickerOrientation, EmojiPickerPartElementProps, EmojiPickerPartProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps, EmojiComponentsPartProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
 import { SLOTS } from "../../internals/slots";
 
 import { EmojiPickerSkinToneOptionContext, useEmojiPickerSkinToneContext } from "../skin-tone/EmojiPickerSkinToneContext";
@@ -16,8 +17,8 @@ import { EmojiPickerSkinToneOption } from "../skin-tone-option/EmojiPickerSkinTo
 
 export type EmojiPickerSkinToneOptionsState = { orientation: EmojiPickerOrientation; tone: SkinToneValue };
 
-export type EmojiPickerSkinToneOptionsProps = Omit<EmojiPickerPartElementProps<EmojiPickerSkinToneOptionsState>, "children" | "role" | keyof EmojiPickerPartProps<EmojiPickerSkinToneOptionsState>> &
-  EmojiPickerPartProps<EmojiPickerSkinToneOptionsState, HTMLDivElement> & {
+export type EmojiPickerSkinToneOptionsProps = Omit<EmojiComponentsPartElementProps<EmojiPickerSkinToneOptionsState>, "children" | "role" | keyof EmojiComponentsPartProps<EmojiPickerSkinToneOptionsState>> &
+  EmojiComponentsPartProps<EmojiPickerSkinToneOptionsState, HTMLDivElement> & {
     children?: (tone: SkinToneValue) => React.ReactNode;
   };
 

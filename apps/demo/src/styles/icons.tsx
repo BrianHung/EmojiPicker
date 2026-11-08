@@ -168,8 +168,8 @@ export function PlusCircleFilled({ size = 20 }: { size?: number }) {
 export type IconSet = Partial<Record<string, React.ComponentType<IconProps>>>;
 
 export const ICONS = {
-  apple: { suggested: Clock, smileys_people: Smile, animals_nature: Paw, food_drink: Apple, activities: Ball, travel_places: Car, objects: Bulb, symbols: Heart, flags: Flag, custom: Grid },
-  notion: { suggested: Clock, smileys_people: Smile, animals_nature: Leaf, food_drink: Carrot, activities: Ball, travel_places: Plane, objects: Bulb, symbols: CheckCircle, flags: Flag, custom: Grid },
-  slack: { suggested: Clock, smileys_people: Smile, animals_nature: Leaf, food_drink: Burger, activities: Football, travel_places: Plane, objects: Bulb, symbols: Peace, flags: Flag, custom: Grid },
-  instagram: { suggested: Clock, smileys_people: Smile, animals_nature: Paw, food_drink: Utensils, activities: Ball, travel_places: Car, objects: Bulb, symbols: Symbols, flags: Flag, custom: Grid },
+  apple: { suggested: Clock, "smileys-people": Smile, "animals-nature": Paw, "food-drink": Apple, activities: Ball, "travel-places": Car, objects: Bulb, symbols: Heart, flags: Flag, custom: Grid },
+  notion: { suggested: Clock, "smileys-people": Smile, "animals-nature": Leaf, "food-drink": Carrot, activities: Ball, "travel-places": Plane, objects: Bulb, symbols: CheckCircle, flags: Flag, custom: Grid },
+  slack: { suggested: Clock, "smileys-people": Smile, "animals-nature": Leaf, "food-drink": Burger, activities: Football, "travel-places": Plane, objects: Bulb, symbols: Peace, flags: Flag, custom: Grid },
+  instagram: { suggested: Clock, "smileys-people": Smile, "animals-nature": Paw, "food-drink": Utensils, activities: Ball, "travel-places": Car, objects: Bulb, symbols: Symbols, flags: Flag, custom: Grid },
 } satisfies Record<string, IconSet>;

@@ -6,7 +6,7 @@ import { localizeLabels, type EmojiLabels } from "./labels";
 import { DEFAULT_DATA_URL } from "./platform";
 import { cached, createStore, fetchJson, memo, toError } from "./reactive";
 import type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./search/search-index";
-import { indexFor, isThenable, lexical, type EmojiSearch, type SearchHit } from "./search/search";
+import { indexFor, isThenable, lexicalSearch, type EmojiSearch, type SearchHit } from "./search/search";
 import { formatShortcode, replaceShortcodes, toneOf } from "./shortcodes";
 
 export type EmojiDataSource = Dataset | EmojiDataInput | string | ((options: { signal: AbortSignal }) => Promise<Dataset | EmojiDataInput>);
@@ -116,7 +116,7 @@ const reduce = (state: State, action: Action): State => {
 
 type Source = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "search" | "locale">;
 
-const defaultEngine = lexical();
+const defaultEngine = lexicalSearch();
 const CODEPOINTS = /^[\da-f-]+$/i;
 const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customGroups: new Map(), packErrors: [] };
 

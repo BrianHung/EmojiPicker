@@ -14,7 +14,7 @@ describe("createEmojiPicker", () => {
   it("searches, moves through the grid, and chooses", async () => {
     const picker = createEmojiPicker(await ready(), { frequent: false });
     const off = picker.subscribe(() => {});
-    expect(picker.getSnapshot().sections[0]!.id).toBe("smileys_people");
+    expect(picker.getSnapshot().sections[0]!.id).toBe("smileys-people");
 
     picker.setQuery("heart");
     const { searching, sections } = picker.getSnapshot();

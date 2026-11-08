@@ -1,6 +1,6 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import { firstPicker, homePopover, preview } from "./surfaces";
-import { expect, frames, quiet, slot, test, visit } from "./support";
+import { expect, frames, quiet, emojiItem, slot, test, visit } from "./support";
 
 const BUDGET = { heapMB: 6, commits: 3, renders: 7, autocomplete: 7 };
 const STEPS = 20;
@@ -78,7 +78,7 @@ async function perStep(page: Page, step: (i: number) => Promise<void>) {
   return { commits: (commits - start[0]!) / STEPS, renders: (renders - start[1]!) / STEPS, by };
 }
 
-const CELL = `${slot("list")} ${slot("emoji")}`;
+const CELL = `${slot("list")} ${emojiItem}`;
 
 async function steps(page: Page, root: Locator) {
   await root.scrollIntoViewIfNeeded();
@@ -132,7 +132,7 @@ test("home: popover picker heap on open", async ({ page }) => {
   const delta = await openDelta(page, async () => {
     await trigger.click();
     await page
-      .locator(`${slot("popoverPopup")} ${slot("emoji")}`)
+      .locator(`${slot("popoverPopup")} ${emojiItem}`)
       .first()
       .waitFor();
   });

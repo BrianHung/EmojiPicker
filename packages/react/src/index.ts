@@ -3,7 +3,7 @@ export * from "./emoji";
 export * from "./provider";
 export * from "./use-emoji-typeahead";
 
-export { findShortcodeTrigger, isComposingKey, lexical, localeData } from "@emoji-components/core";
+export { findShortcodeTrigger, isComposingKey, lexicalSearch, localeData } from "@emoji-components/core";
 export type {
   CustomEmoji,
   Dataset,

@@ -4,8 +4,8 @@ export { useEmojiSearch } from "./utils/useEmojiSearch";
 export { useEmojiStatus } from "./utils/useEmojiStatus";
 export { useEmojiStore } from "./utils/useEmojiStore";
 export { useFrequentEmoji } from "./utils/useFrequentEmoji";
-export { useSkinTone } from "./utils/useSkinTone";
+export { useEmojiSkinTone } from "./utils/useEmojiSkinTone";
 
 export type { EmojiProviderProps } from "./EmojiProvider";
-export type { ImageUrl } from "./EmojiProviderContext";
+export type { EmojiImageUrl } from "./EmojiProviderContext";
 export type { FrequentEmoji } from "./utils/useFrequentEmoji";

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { Key } from "@react-types/shared";
-import type { EmojiPicker, EmojiSection } from "@emoji-components/core";
+import type { EmojiPickerStore, EmojiSection } from "@emoji-components/core";
 import type { HighlightSource } from "../../root/EmojiPickerRootContext";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
 import type { GridLatest } from "./types";
@@ -10,7 +10,7 @@ import type { GridLatest } from "./types";
 const NONE: HighlightSource = {};
 
 // The highlight and the grid's keyboard position; the highlighted cell stays mounted off screen
-export function useHighlight(core: EmojiPicker<React.ReactNode>, latest: { readonly current: GridLatest }, sections: readonly EmojiSection[], ownsFocus: (el: Element | null) => boolean) {
+export function useHighlight(core: EmojiPickerStore<React.ReactNode>, latest: { readonly current: GridLatest }, sections: readonly EmojiSection[], ownsFocus: (el: Element | null) => boolean) {
   const [persisted] = React.useState(() => new Set<Key>());
   const position = React.useRef<Key | null>(null);
   const pending = React.useRef<{ key: Key | null } | null>(null);

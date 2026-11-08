@@ -10,15 +10,15 @@ import { useStoreSnapshot } from "../../provider/EmojiProviderContext";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { useInteraction, type Clickable } from "../../internals/useInteraction";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
 
 import { useEmojiPickerReactionsContext } from "../reactions/EmojiPickerReactionsContext";
 import * as EmojiPickerReactionsItemDataAttributes from "./EmojiPickerReactionsItemDataAttributes";
 
-export type EmojiPickerReactionsItemState = EmojiPickerInteractionState & { selected: boolean };
+export type EmojiPickerReactionsItemState = EmojiComponentsInteractionState & { selected: boolean };
 
-export type EmojiPickerReactionsItemProps = EmojiPickerPartElementProps<EmojiPickerReactionsItemState, HTMLButtonElement, "onChange"> & {
+export type EmojiPickerReactionsItemProps = EmojiComponentsPartElementProps<EmojiPickerReactionsItemState, HTMLButtonElement, "onChange"> & {
   emoji: string;
 };
 
@@ -38,7 +38,7 @@ export const EmojiPickerReactionsItem = React.forwardRef<HTMLButtonElement, Emoj
       "aria-pressed": row.pressed ? selected : undefined,
       ...mergeProps(own, interaction.props),
       ref,
-      "data-slot": SLOTS.emoji,
+      "data-slot": SLOTS.reactionsItem,
       [EmojiPickerReactionsItemDataAttributes.unified]: unified,
       [EmojiPickerReactionsItemDataAttributes.overridden]: flag(overridden),
       [EmojiPickerReactionsItemDataAttributes.selected]: flag(selected),

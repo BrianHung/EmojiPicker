@@ -4,7 +4,7 @@ import * as React from "react";
 import { SearchField as AriaSearchField } from "react-aria-components/SearchField";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import type { EmojiPickerSearchState } from "../search/EmojiPickerSearch";
 import { useQueryEmpty } from "../utils/useQueryEmpty";
@@ -13,7 +13,7 @@ import { EmojiPickerSearchFieldContext } from "./EmojiPickerSearchFieldContext";
 
 export type EmojiPickerSearchFieldState = EmojiPickerSearchState;
 
-export type EmojiPickerSearchFieldProps = Omit<EmojiPickerPartElementProps<EmojiPickerSearchFieldState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">, "children"> & { children?: React.ReactNode };
+export type EmojiPickerSearchFieldProps = Omit<EmojiComponentsPartElementProps<EmojiPickerSearchFieldState, HTMLDivElement, "role" | "dangerouslySetInnerHTML">, "children"> & { children?: React.ReactNode };
 
 const FIELD: React.CSSProperties = { position: "relative", flex: "1 1 auto", alignSelf: "stretch", display: "flex", alignItems: "center", minWidth: 0 };
 

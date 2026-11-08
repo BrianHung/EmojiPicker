@@ -44,6 +44,7 @@ const SECTIONS: Record<string, { kind: "DataAttributes" | "CssVars"; parts: stri
   popoverPositionerVariables: { kind: "CssVars", parts: ["popover/positioner/EmojiPopoverPositioner", "suggestions/positioner/EmojiSuggestionsPositioner"] },
   popoverPopupAttributes: { kind: "DataAttributes", parts: ["popover/popup/EmojiPopoverPopup", "suggestions/popup/EmojiSuggestionsPopup"] },
   emojiAttributes: { kind: "DataAttributes", parts: ["emoji/Emoji"] },
+  emojiVariables: { kind: "CssVars", parts: ["emoji/Emoji"] },
 };
 
 const tagText = (tag: ts.JSDocTag) => (ts.getTextOfJSDocComment(tag.comment) ?? "").trim();

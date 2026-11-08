@@ -15,14 +15,14 @@ import { useSlottedContext } from "react-aria-components/slots";
 import { withoutTone, type EmojiSection } from "@emoji-components/core";
 import { flipForRtl, KEY_MOVES } from "@emoji-components/core/grid";
 import { EmojiCollection } from "./collection";
-import { cellOf, type Cells } from "../../list-cell/utils/useEmojiCell";
+import { cellOf, type Cells } from "../../list-cell/utils/useEmojiPickerCell";
 import { usePointerHighlight } from "./usePointerHighlight";
 import { VariationsPopup } from "../../list-variations/VariationsPopup";
 import { useEmojiPickerRootContext, type HighlightSource, type ListHandle, type Overlay, type EmojiPickerRootChangeEventReason } from "../../root/EmojiPickerRootContext";
 import { usePickerKeyDown, type KeyResult } from "../../../internals/usePickerKeyDown";
 import { useLatest } from "../../../utils/useLatest";
 import { flag } from "../../../internals/renderElement";
-import type { EmojiPickerOrientation } from "../../../internals/types";
+import type { EmojiPickerOrientation } from "../../utils/types";
 import { SLOTS } from "../../../internals/slots";
 import { shallowEqual, useStore } from "../../../utils/useStore";
 import { useLayoutEffect } from "../../../utils/useLayoutEffect";
@@ -49,7 +49,7 @@ interface ControllerOptions {
 
 type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement>; [data: `data-${string}`]: string | undefined };
 
-// The grid's behavior for both the List and useEmojiGrid: the highlight, keys, pointer, virtual focus, and React Aria's listbox
+// The grid's behavior for both the List and useEmojiPickerGrid: the highlight, keys, pointer, virtual focus, and React Aria's listbox
 export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, request, ...aria }: ControllerOptions) {
   const picker = useEmojiPickerRootContext("EmojiPicker.List");
   const { labels, value, state: core } = picker;

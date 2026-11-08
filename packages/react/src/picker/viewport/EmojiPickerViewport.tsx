@@ -5,13 +5,14 @@ import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { EmojiPickerViewportContext } from "./EmojiPickerViewportContext";
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { renderElement, resolve } from "../../internals/renderElement";
-import type { EmojiPickerOrientation, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
 import { SLOTS } from "../../internals/slots";
 import { useStore } from "../../utils/useStore";
 
 export type EmojiPickerViewportState = { searching: boolean; orientation: EmojiPickerOrientation };
 
-export type EmojiPickerViewportProps = EmojiPickerPartElementProps<EmojiPickerViewportState, HTMLDivElement>;
+export type EmojiPickerViewportProps = EmojiComponentsPartElementProps<EmojiPickerViewportState, HTMLDivElement>;
 
 const SCROLL: Record<EmojiPickerOrientation, React.CSSProperties> = {
   vertical: { overflowX: "hidden", overflowY: "scroll", overscrollBehavior: "contain" },

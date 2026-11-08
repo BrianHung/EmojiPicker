@@ -28,11 +28,11 @@ const tokens: Tokens = {
 
 export const NOTION_SECTIONS = [
   { id: "suggested", name: "Recent" },
-  { id: "smileys_people", name: "People" },
-  { id: "animals_nature", name: "Animals and nature" },
-  { id: "food_drink", name: "Food and drink" },
+  { id: "smileys-people", name: "People" },
+  { id: "animals-nature", name: "Animals and nature" },
+  { id: "food-drink", name: "Food and drink" },
   { id: "activities", name: "Activity" },
-  { id: "travel_places", name: "Travel and places" },
+  { id: "travel-places", name: "Travel and places" },
   { id: "objects", name: "Objects" },
   { id: "symbols", name: "Symbols" },
   { id: "flags", name: "Flags" },
@@ -47,7 +47,7 @@ function Shuffle({ onPick }: { onPick: (s: EmojiSelection) => void }) {
     <button
       type="button"
       title="Random"
-      className="flex size-7 shrink-0 items-center justify-center rounded-[6px] border border-(--notion-edge) text-(--notion-control) hover:bg-picker-hover [&_svg]:size-3.5"
+      className="flex size-7 shrink-0 items-center justify-center rounded-[6px] border border-(--notion-edge) text-(--notion-control) hover:bg-emoji-picker-hover [&_svg]:size-3.5"
       onClick={() => {
         const all = store.records().filter((r) => !r.imageUrl);
         const r = all[Math.floor(Math.random() * all.length)];
@@ -73,7 +73,7 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
       className={cn(
         ROOT,
         reaction ? "h-[356px]" : "h-[390px]",
-        "w-[408px] rounded-picker bg-picker-background text-picker-foreground shadow-picker [--emoji-cell-size:32px] [--emoji-header-height:34px] [--emoji-image-size:24px] [--emoji-list-padding:12px] [--emoji-size:24px]",
+        "w-[408px] rounded-emoji-picker bg-emoji-picker-background text-emoji-picker-foreground shadow-emoji-picker [--emoji-picker-cell-size:32px] [--emoji-picker-header-height:34px] [--emoji-picker-emoji-image-size:24px] [--emoji-picker-list-padding:12px] [--emoji-picker-emoji-size:24px]",
         className,
       )}
     >
@@ -83,9 +83,9 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
           active={0}
           className="flex h-10 shrink-0 items-center px-2 text-[14px] leading-[1.2] shadow-[inset_0_-1px_0_var(--emoji-picker-border)]"
           tab="relative flex h-7 items-center px-2"
-          activeTab="text-picker-foreground after:absolute after:inset-x-2 after:-bottom-1.5 after:h-0.5 after:bg-picker-foreground"
-          inactiveTab="text-picker-subtle"
-          right={<span className="ml-auto flex h-7 items-center px-2 text-picker-subtle">Remove</span>}
+          activeTab="text-emoji-picker-foreground after:absolute after:inset-x-2 after:-bottom-1.5 after:h-0.5 after:bg-emoji-picker-foreground"
+          inactiveTab="text-emoji-picker-subtle"
+          right={<span className="ml-auto flex h-7 items-center px-2 text-emoji-picker-subtle">Remove</span>}
         />
       )}
       {search ? (
@@ -98,30 +98,30 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
           <EmojiPicker.SearchInput
             placeholder="Filter…"
             autoFocus={autoFocus}
-            className="h-7 w-full rounded-[6px] bg-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]"
+            className="h-7 w-full rounded-[6px] bg-emoji-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]"
           >
             <SearchClear />
           </EmojiPicker.SearchInput>
-          <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-picker-subtle" />
-          <HandTone className="flex size-7 items-center justify-center rounded-[6px] text-[20px] leading-none hover:bg-picker-hover" />
+          <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-emoji-picker-subtle" />
+          <HandTone className="flex size-7 items-center justify-center rounded-[6px] text-[20px] leading-none hover:bg-emoji-picker-hover" />
           {reaction ? null : <Shuffle onPick={(s) => onSelect?.(s)} />}
         </EmojiPicker.Search>
       ) : null}
-      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-list-padding-end:-3px]", !search && "pt-[var(--emoji-list-padding,8px)]")}>
+      <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-picker-list-padding-end:-3px]", !search && "pt-[var(--emoji-picker-list-padding,8px)]")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.ListSection>
-              <EmojiPicker.ListSectionTitle className="flex items-start bg-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-picker-muted" />
-              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[4px] hover:bg-picker-hover data-focus-visible:bg-picker-selected data-[focused]:bg-picker-selected")} />}</EmojiPicker.ListItems>
+              <EmojiPicker.ListSectionTitle className="flex items-start bg-emoji-picker-background px-2 pt-3 text-[12px] leading-3 font-medium text-emoji-picker-muted" />
+              <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-[4px] hover:bg-emoji-picker-hover data-focus-visible:bg-emoji-picker-selected data-[focused]:bg-emoji-picker-selected")} />}</EmojiPicker.ListItems>
             </EmojiPicker.ListSection>
           )}
         </EmojiPicker.List>
       </EmojiPicker.Viewport>
       <div className="flex h-[51px] shrink-0 items-center border-t border-(--notion-bar-rule) px-3 pt-2 pb-2.5">
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-start gap-[3.2px] overflow-x-auto [scrollbar-width:none]">
-          {() => <EmojiPicker.CategoryNavTab className="relative flex size-8 shrink-0 items-center justify-center rounded-[6px] text-picker-subtle hover:bg-picker-hover data-active:bg-picker-selected" />}
+          {() => <EmojiPicker.CategoryNavTab className="relative flex size-8 shrink-0 items-center justify-center rounded-[6px] text-emoji-picker-subtle hover:bg-emoji-picker-hover data-active:bg-emoji-picker-selected" />}
         </EmojiPicker.CategoryNav>
-        <span className="flex size-8 shrink-0 items-center justify-center text-picker-subtle">
+        <span className="flex size-8 shrink-0 items-center justify-center text-emoji-picker-subtle">
           <I.PlusCircleFilled size={22} />
         </span>
       </div>
@@ -140,20 +140,20 @@ export const notion: Style = {
   ReactionPicker: NotionReactionPicker,
   size: { width: 408, height: 390 },
   tapback: {
-    className: "flex w-fit flex-col overflow-hidden rounded-lg bg-picker-background shadow-picker",
-    reactions: "flex items-center gap-0.5 p-1 [--emoji-image-size:20px] [&_button]:flex [&_button]:size-8 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[5px] [&_button]:text-[20px] [&_button:hover]:bg-picker-hover",
+    className: "flex w-fit flex-col overflow-hidden rounded-lg bg-emoji-picker-background shadow-emoji-picker",
+    reactions: "flex items-center gap-0.5 p-1 [--emoji-picker-emoji-image-size:20px] [&_button]:flex [&_button]:size-8 [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[5px] [&_button]:text-[20px] [&_button:hover]:bg-emoji-picker-hover",
   },
   autocomplete: {
-    className: "rounded-picker bg-picker-background p-1 text-picker-foreground shadow-picker",
-    item: "h-7 rounded-md px-2 text-[14px] data-[highlighted]:bg-picker-selected",
+    className: "rounded-emoji-picker bg-emoji-picker-background p-1 text-emoji-picker-foreground shadow-emoji-picker",
+    item: "h-7 rounded-md px-2 text-[14px] data-[highlighted]:bg-emoji-picker-selected",
     match: "font-semibold",
     showName: true,
   },
   pill: {
-    base: "h-[25px] rounded-[100px] bg-(--notion-pill) px-2 py-0.5 text-[12px] text-picker-subtle",
+    base: "h-[25px] rounded-[100px] bg-(--notion-pill) px-2 py-0.5 text-[12px] text-emoji-picker-subtle",
     mine: "aria-pressed:bg-(--notion-mine) aria-pressed:text-(--notion-mine-foreground)",
     count: "leading-[14.4px] font-medium",
-    add: "h-[25px] w-8 justify-center rounded-[100px] bg-(--notion-pill) text-picker-subtle hover:bg-picker-hover",
+    add: "h-[25px] w-8 justify-center rounded-[100px] bg-(--notion-pill) text-emoji-picker-subtle hover:bg-emoji-picker-hover",
     addIcon: <I.SmilePlus size={16} strokeWidth={1.75} />,
   },
 };

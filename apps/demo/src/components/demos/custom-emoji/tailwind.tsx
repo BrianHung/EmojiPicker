@@ -5,9 +5,9 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 const categories: CategoryOption[] = [
   { id: "suggested", name: "Frequently used" },
   { id: "custom:Bufo", name: "Bufo" },
-  { id: "smileys_people" },
-  { id: "animals_nature" },
-  { id: "food_drink" },
+  { id: "smileys-people" },
+  { id: "animals-nature" },
+  { id: "food-drink" },
   { id: "activities" },
   { id: "objects" },
   { id: "symbols" },

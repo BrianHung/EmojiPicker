@@ -1,6 +1,6 @@
 .root {
-  --emoji-size: 26px;
-  --emoji-cell-size: 44px;
+  --emoji-picker-emoji-size: 26px;
+  --emoji-picker-cell-size: 44px;
   height: 420px;
 }
 

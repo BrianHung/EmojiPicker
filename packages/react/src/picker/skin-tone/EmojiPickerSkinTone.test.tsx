@@ -3,14 +3,14 @@ import * as React from "react";
 import { expect, it } from "vitest";
 import { render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiCell, useEmojiGrid, type EmojiGridState, type EmojiItem } from "../..";
+import { EmojiPicker, EmojiProvider, useEmojiPickerCell, useEmojiPickerGrid, type EmojiPickerGridState, type EmojiItem } from "../..";
 
-function Cell({ state, item }: { state: EmojiGridState; item: EmojiItem }) {
-  return <div {...useEmojiCell(state, item).cellProps} />;
+function Cell({ state, item }: { state: EmojiPickerGridState; item: EmojiItem }) {
+  return <div {...useEmojiPickerCell(state, item).cellProps} />;
 }
 
 function Suggested() {
-  const grid = useEmojiGrid({ rowHeight: 40, columns: 8 });
+  const grid = useEmojiPickerGrid({ rowHeight: 40, columns: 8 });
   const row = grid.rows.find((r) => r.type === "emojis");
   return <div {...grid.getGridProps()}>{row?.type === "emojis" ? row.items.map((item) => <Cell key={item.id} state={grid.state} item={item} />) : null}</div>;
 }
@@ -58,5 +58,5 @@ it("opens on the current tone, moves with the arrows, and applies the tone with 
   press("Enter");
   expect(trigger.getAttribute("aria-label")).toBe("Medium-light skin tone");
   expect(document.activeElement).toBe(trigger);
-  expect(host.querySelector("[data-slot=emoji-picker-emoji]")?.getAttribute("data-unified")).toBe("1f44d-1f3fc");
+  expect(host.querySelector("[data-slot=emoji-picker-list-cell]")?.getAttribute("data-unified")).toBe("1f44d-1f3fc");
 });

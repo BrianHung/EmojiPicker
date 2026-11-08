@@ -42,7 +42,7 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-aria.",
+      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-react-aria.",
       "registryDependencies": [
         "button",
         "popover",
@@ -56,7 +56,7 @@
       ]
     },
     {
-      "name": "emoji-picker-popover-aria",
+      "name": "emoji-picker-popover-react-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
       "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
@@ -106,9 +106,9 @@
       ]
     },
     {
-      "name": "emoji-suggestion-menu",
-      "type": "registry:component",
-      "title": "Emoji Suggestion Menu",
+      "name": "emoji-suggestions",
+      "type": "registry:ui",
+      "title": "Emoji Suggestions",
       "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
       "dependencies": [
         "emoji-components@1.0.0-alpha.0"
@@ -118,8 +118,8 @@
       ],
       "files": [
         {
-          "path": "src/components/suggestion-menu.tsx",
-          "type": "registry:component"
+          "path": "registry/emoji-suggestions.tsx",
+          "type": "registry:ui"
         }
       ]
     },
@@ -136,11 +136,11 @@
       ],
       "registryDependencies": [
         "https://emoji.brianhung.me/r/emoji-prosemirror.json",
-        "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"
+        "https://emoji.brianhung.me/r/emoji-suggestions.json"
       ],
       "files": [
         {
-          "path": "registry/emoji-tiptap.ts",
+          "path": "registry/use-emoji-tiptap.ts",
           "type": "registry:hook"
         },
         {
@@ -167,7 +167,7 @@
       ],
       "files": [
         {
-          "path": "registry/emoji-lexical.ts",
+          "path": "registry/use-emoji-lexical.ts",
           "type": "registry:hook"
         },
         {
@@ -182,7 +182,7 @@
         }
       ],
       "registryDependencies": [
-        "https://emoji.brianhung.me/r/emoji-suggestion-menu.json"
+        "https://emoji.brianhung.me/r/emoji-suggestions.json"
       ]
     }
   ]

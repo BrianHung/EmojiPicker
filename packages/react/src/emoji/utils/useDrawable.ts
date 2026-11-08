@@ -6,6 +6,7 @@ import { onNativeSupportChange, PROBE_BATCH } from "@emoji-components/core/inter
 import { drawsNatively, isNativeSupported, nativeProbe, nativeSupport, type NativeSupport } from "@emoji-components/core/native";
 import { useEmojiContext, useStoreSnapshot } from "../../provider/EmojiProviderContext";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
+import * as EmojiCssVars from "../EmojiCssVars";
 
 type Drawable = (record: EmojiRecord, unified: string) => boolean;
 
@@ -23,7 +24,7 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
 
   useLayoutEffect(() => {
     if (!native || typeof window === "undefined") return setSupport(null);
-    const font = (root.current && getComputedStyle(root.current).getPropertyValue("--emoji-font-family").trim()) || undefined;
+    const font = (root.current && getComputedStyle(root.current).getPropertyValue(EmojiCssVars.fontFamily).trim()) || undefined;
     const samples = new Map<number, string>();
     for (const r of records) if (!r.imageUrl && !samples.has(r.version)) samples.set(r.version, r.unified);
     let current: NativeSupport | null = null;

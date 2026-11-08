@@ -4,19 +4,20 @@
 import * as React from "react";
 import { flag, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import { ToolbarPart } from "../../internals/ToolbarPart";
-import type { EmojiPickerHandlers, EmojiPickerOrientation, EmojiPickerPartProps } from "../../internals/types";
+import { ToolbarPart } from "../utils/ToolbarPart";
+import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
+import type { EmojiPickerOrientation } from "../utils/types";
 import { useStore } from "../../utils/useStore";
 import { EmojiPickerCategoryNavTab } from "../category-nav-tab/EmojiPickerCategoryNavTab";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
-import { type EmojiPickerNavCategory, useCategoryNavigation } from "../root/utils/useCategoryNavigation";
+import { type EmojiPickerNavCategory, useEmojiPickerCategoryNavigation } from "../root/utils/useEmojiPickerCategoryNavigation";
 import * as EmojiPickerCategoryNavDataAttributes from "./EmojiPickerCategoryNavDataAttributes";
 import { type EmojiPickerCategoryNavContext as NavContext, EmojiPickerCategoryNavContext, EmojiPickerCategoryNavTabContext } from "./EmojiPickerCategoryNavContext";
 
 export type EmojiPickerCategoryNavState = { orientation: EmojiPickerOrientation; disabled: boolean };
 
-export type EmojiPickerCategoryNavProps = EmojiPickerHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "className" | "style" | "dangerouslySetInnerHTML">> &
-  EmojiPickerPartProps<EmojiPickerCategoryNavState, HTMLDivElement> & {
+export type EmojiPickerCategoryNavProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "children" | "className" | "style" | "dangerouslySetInnerHTML">> &
+  EmojiComponentsPartProps<EmojiPickerCategoryNavState, HTMLDivElement> & {
     orientation?: EmojiPickerOrientation;
     children?: (category: EmojiPickerNavCategory) => React.ReactNode;
   };
@@ -24,7 +25,7 @@ export type EmojiPickerCategoryNavProps = EmojiPickerHandlers<Omit<React.HTMLAtt
 export const EmojiPickerCategoryNav = React.forwardRef<HTMLDivElement, EmojiPickerCategoryNavProps>(function EmojiPickerCategoryNav({ orientation = "horizontal", style, children, ...props }, ref) {
   const picker = useEmojiPickerRootContext("EmojiPicker.CategoryNav");
   const disabled = useStore(picker.state, (s) => s.searching);
-  const { categories, activeCategory, jumpToCategory } = useCategoryNavigation();
+  const { categories, activeCategory, jumpToCategory } = useEmojiPickerCategoryNavigation();
   const id = React.useId();
   if (categories.length <= 1) return null;
   const selected = activeCategory != null && categories.some((c) => c.id === activeCategory) ? activeCategory : categories[0]!.id;

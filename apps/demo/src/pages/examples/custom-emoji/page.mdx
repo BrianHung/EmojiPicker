@@ -15,7 +15,7 @@ Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes`, `t
 const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
 
 <EmojiProvider customEmojis={bufo}>
-  <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys_people" }]}>
+  <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys-people" }]}>
     …
   </EmojiPicker.Root>
 </EmojiProvider>

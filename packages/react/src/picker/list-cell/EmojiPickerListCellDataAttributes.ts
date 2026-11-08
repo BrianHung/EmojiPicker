@@ -2,7 +2,7 @@ import * as InteractionDataAttributes from "../../internals/InteractionDataAttri
 
 /**
  * Identifies an emoji cell.
- * @type {'emoji-picker-emoji'}
+ * @type {'emoji-picker-list-cell'}
  */
 export const slot = "data-slot";
 /**
@@ -42,7 +42,7 @@ export const selected = "data-selected";
  */
 export const hasVariations = "data-has-variations";
 /**
- * Present on cells whose imageUrl replaces the native glyph.
+ * Present when the provider's imageUrl draws the cell's Unicode emoji as an image while the renderer is native.
  */
 export const overridden = "data-overridden";
 /**

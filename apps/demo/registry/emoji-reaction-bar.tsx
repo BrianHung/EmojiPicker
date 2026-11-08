@@ -5,7 +5,7 @@ import { FocusScope, useFocusManager, type FocusManager } from "react-aria/Focus
 import { mergeProps } from "react-aria/mergeProps";
 import { Toolbar, type ToolbarProps } from "react-aria-components/Toolbar";
 
-export type ReactionBarProps = Omit<ToolbarProps, "children"> & { children: React.ReactNode };
+export type EmojiReactionBarProps = Omit<ToolbarProps, "children"> & { children: React.ReactNode };
 
 function Manager({ into }: { into: React.RefObject<FocusManager | undefined> }) {
   const manager = useFocusManager();
@@ -16,7 +16,7 @@ function Manager({ into }: { into: React.RefObject<FocusManager | undefined> }) 
 }
 
 // React Aria's Toolbar moves focus with the arrows and Tab; Home and End go to the ends, and once focus is inside, the pointer carries it
-export function ReactionBar({ orientation = "horizontal", children, ...props }: ReactionBarProps) {
+export function EmojiReactionBar({ orientation = "horizontal", children, ...props }: EmojiReactionBarProps) {
   const focus = React.useRef<FocusManager | undefined>(undefined);
   const across = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
   const handlers: React.HTMLAttributes<HTMLDivElement> = {

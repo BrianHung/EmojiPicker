@@ -3,4 +3,4 @@
  * @type {length}
  * @default 15px
  */
-export const skinToneSize = "--emoji-skin-tone-size";
+export const skinToneSize = "--emoji-picker-skin-tone-size";

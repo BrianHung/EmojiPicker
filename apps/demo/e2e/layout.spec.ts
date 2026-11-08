@@ -1,9 +1,9 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
-import { expect, frames, quiet, settle, slot, test, visit } from "./support";
+import { expect, frames, quiet, settle, emojiItem, slot, test, visit } from "./support";
 
-const highlighted = (page: Page) => picker(page).locator(`${slot("emoji")}[data-highlighted]`);
+const highlighted = (page: Page) => picker(page).locator(`${emojiItem}[data-highlighted]`);
 
 async function focusSearch(page: Page) {
   await picker(page).scrollIntoViewIfNeeded();
@@ -28,7 +28,7 @@ test.describe("right-to-left", () => {
   });
 });
 
-const SELECTORS = { emoji: slot("emoji"), viewport: slot("viewport"), title: slot("sectionTitle") };
+const SELECTORS = { emoji: emojiItem, viewport: slot("viewport"), title: slot("listSectionTitle") };
 
 const hidden = (page: Page) =>
   picker(page).evaluate((root, { emoji, viewport, title }) => {
@@ -92,7 +92,7 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover", "h
       const top = el.getBoundingClientRect().top;
       const pinned = [...el.querySelectorAll(title)].map((h) => h.getBoundingClientRect()).find((r) => r.top <= top + 12 && r.bottom > top);
       return pinned ? pinned.top - top : null;
-    }, slot("sectionTitle"));
+    }, slot("listSectionTitle"));
     expect(gap).toBeLessThanOrEqual(0);
     expect(gap).toBeGreaterThan(-1);
     const box = (await viewport.boundingBox())!;
@@ -108,7 +108,7 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
   await visit(page, "/examples/lexical/");
   await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
   const root = page.locator(`${slot("popoverPopup")} ${slot("root")}`);
-  await root.locator(slot("emoji")).first().waitFor();
+  await root.locator(emojiItem).first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
   expect(
@@ -120,7 +120,7 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
 test("a native emoji takes the image's box whatever the font", async ({ page }) => {
   await visit(page, "/");
   const section = page.locator("section:has(> h3#rendering)");
-  const glyph = section.locator("[data-emoji]").filter({ visible: true }).first();
+  const glyph = section.locator('[data-slot="emoji"]').filter({ visible: true }).first();
   const box = async (renderer: string, font: string) => {
     await section.getByRole("tablist", { name: "Renderer" }).getByRole("tab", { name: renderer }).click();
     await section.getByRole("tablist", { name: "Font" }).getByRole("tab", { name: font }).click();
@@ -141,7 +141,7 @@ test("first paint in Twemoji fetches one font subset", async ({ page }) => {
     if (file) fonts.add(file);
   });
   await visit(page, "/e2e/pages/fonts/");
-  await expect(picker(page).locator(slot("emoji")).first()).toBeVisible();
+  await expect(picker(page).locator(emojiItem).first()).toBeVisible();
   await settle(page);
   expect([...fonts]).toEqual(["twemoji-0"]);
 });
@@ -151,11 +151,11 @@ async function pressUntilFocused(page: Page, target: Locator, key: string) {
   await expect(target).toBeFocused();
 }
 
-test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategoryNavigation, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
+test("swapped parts: a shadcn menu on useEmojiSkinTone and Base UI tabs on useEmojiPickerCategoryNavigation, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
   await visit(page, "/e2e/pages/seams/");
   const root = page.locator(slot("root"));
   const search = root.locator(slot("searchInput"));
-  await root.locator(slot("emoji")).first().waitFor();
+  await root.locator(emojiItem).first().waitFor();
 
   await search.focus();
   await page.keyboard.press("Tab");
@@ -167,7 +167,7 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
   await page.keyboard.press("Enter");
   await expect(root.getByRole("button", { name: "Medium skin tone" })).toBeFocused();
   await search.fill("thumbs up");
-  await expect(root.locator(slot("emoji")).first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
+  await expect(root.locator(emojiItem).first()).toHaveAttribute("data-unified", "1f44d-1f3fd");
   await search.fill("");
 
   await page.keyboard.press("Tab");
@@ -184,7 +184,7 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
         const title = [...viewport.querySelectorAll(selector!)].find((t) => t.textContent === name);
         return title ? Math.round(title.getBoundingClientRect().top - viewport.getBoundingClientRect().top) : null;
       },
-      [name, slot("sectionTitle")],
+      [name, slot("listSectionTitle")],
     );
   await expect.poll(() => offset("Animals & Nature")).toBe(0);
 
@@ -192,7 +192,7 @@ test("swapped parts: a shadcn menu on useSkinTone and Base UI tabs on useCategor
   await pressUntilFocused(page, flags, "ArrowRight");
   await page.keyboard.press("Enter");
   await expect.poll(() => offset("Flags")).toBe(0);
-  await expect(root.locator(`${slot("emoji")}[data-unified="1f3c1"]`)).toBeVisible();
+  await expect(root.locator(`${emojiItem}[data-unified="1f3c1"]`)).toBeVisible();
 });
 
 test("Slack: the reaction picker fades out where it was when its hover toolbar hides on pick", async ({ page }) => {
@@ -202,7 +202,7 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
   await scene.getByText(/^yep/).hover();
   await scene.getByRole("button", { name: "Add reaction" }).last().click();
   const positioner = page.locator(slot("popoverPositioner"));
-  await positioner.locator(slot("emoji")).first().waitFor();
+  await positioner.locator(emojiItem).first().waitFor();
   await settle(page);
   // The placed offsets, not the rect: the exit animation's own transform is fine
   const sampling = positioner.evaluate(async (el) => {
@@ -215,7 +215,7 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
     return [...seen];
   });
   const at = await positioner.evaluate((el) => `${getComputedStyle(el).left} ${getComputedStyle(el).top}`);
-  await positioner.locator(slot("emoji")).nth(5).click();
+  await positioner.locator(emojiItem).nth(5).click();
   expect(await sampling).toEqual([at]);
 });
 

@@ -10,13 +10,13 @@ describe("sections", () => {
   const categories = [
     { id: "suggested", name: "Frequently Used", nav: true },
     { id: "flags", name: "Flags", nav: true },
-    { id: "smileys_people", name: "Smileys & People", nav: true },
+    { id: "smileys-people", name: "Smileys & People", nav: true },
   ];
   const item = itemFactory(defaultLabels);
 
   it("follows the picker's category order, with frequents first", () => {
     const out = categorySections({ categories, records, suggested: ["1f44d-1f3fd", "nope"], customGroup: () => undefined, collapsed: [], get, tone: 0, item });
-    expect(out.map((s) => s.id)).toEqual(["suggested", "flags", "smileys_people"]);
+    expect(out.map((s) => s.id)).toEqual(["suggested", "flags", "smileys-people"]);
     expect(out[0]!.items.map((i) => i.unified)).toEqual(["1f44d-1f3fd"]);
     expect(out[0]!.items[0]!.record.unified).toBe("1f44d");
     expect(out[1]!.items.every((i) => i.record.group === "flags")).toBe(true);
@@ -36,7 +36,7 @@ describe("sections", () => {
     });
     expect(out.map((s) => [s.id, s.collapsed, s.items.length > 0])).toEqual([
       ["flags", true, false],
-      ["smileys_people", false, true],
+      ["smileys-people", false, true],
     ]);
     const items = out[1]!.items;
     expect(items.every((i) => i.record.version <= 12)).toBe(true);
@@ -76,13 +76,13 @@ describe("sections", () => {
     expect(ranked[0]!.items.map((i) => i.record)).toEqual(hits);
     const grouped = resultSections(hits, "grouped", (g) => g.toUpperCase(), 0, item, "Results");
     expect(grouped.map((s) => [s.name, s.category, s.items.map((i) => hits.indexOf(i.record))])).toEqual([
-      ["SMILEYS_PEOPLE", "smileys_people", [1]],
+      ["SMILEYS-PEOPLE", "smileys-people", [1]],
       ["FLAGS", "flags", [0, 2]],
     ]);
     expect(resultSections(hits, "ranked", (g) => g, 0, item, "Results")[0]!.items[0]).toBe(ranked[0]!.items[0]);
   });
 
   it("appends custom sections the categories don't list", () => {
-    expect(categoryList([{ id: "smileys_people" }, { id: "custom:frogs" }], [], defaultLabels, ["frogs", "cats"]).map((c) => c.id)).toEqual(["smileys_people", "custom:frogs", "custom", "custom:cats"]);
+    expect(categoryList([{ id: "smileys-people" }, { id: "custom:frogs" }], [], defaultLabels, ["frogs", "cats"]).map((c) => c.id)).toEqual(["smileys-people", "custom:frogs", "custom", "custom:cats"]);
   });
 });

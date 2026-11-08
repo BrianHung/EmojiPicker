@@ -5,13 +5,13 @@ import { mergeProps } from "react-aria/mergeProps";
 import { mergePartProps } from "../../internals/mergePartProps";
 import { renderElement } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { type Clickable, useInteraction } from "../../internals/useInteraction";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { useQueryEmpty } from "../utils/useQueryEmpty";
 
-export type EmojiPickerSearchClearState = EmojiPickerInteractionState;
-export type EmojiPickerSearchClearProps = EmojiPickerPartElementProps<EmojiPickerSearchClearState, HTMLButtonElement>;
+export type EmojiPickerSearchClearState = EmojiComponentsInteractionState;
+export type EmojiPickerSearchClearProps = EmojiComponentsPartElementProps<EmojiPickerSearchClearState, HTMLButtonElement>;
 
 // Clears the query from anywhere in Root, and keeps focus in the search field
 export const EmojiPickerSearchClear = React.forwardRef<HTMLButtonElement, EmojiPickerSearchClearProps>(function EmojiPickerSearchClear({ children, ...props }, ref) {

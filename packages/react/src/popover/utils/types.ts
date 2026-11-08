@@ -1,6 +1,6 @@
 import type * as React from "react";
 import type { ChangeDetails } from "@emoji-components/core";
-import type { EmojiPickerInteractionState, EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 
 export type EmojiPopoverSide = "top" | "bottom" | "left" | "right" | "inline-start" | "inline-end";
 export type EmojiPopoverAlign = "start" | "center" | "end";
@@ -26,9 +26,9 @@ export type EmojiPopoverRootProps = {
   children: React.ReactNode;
 };
 
-export type EmojiPopoverTriggerState = EmojiPickerInteractionState & { open: boolean };
+export type EmojiPopoverTriggerState = EmojiComponentsInteractionState & { open: boolean };
 
-export type EmojiPopoverTriggerProps = EmojiPickerPartElementProps<EmojiPopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
+export type EmojiPopoverTriggerProps = EmojiComponentsPartElementProps<EmojiPopoverTriggerState, HTMLButtonElement> & Pick<React.ButtonHTMLAttributes<HTMLButtonElement>, "disabled" | "name" | "value">;
 
 export type EmojiPopoverInitialFocus = boolean | React.RefObject<HTMLElement | null> | ((openType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
 export type EmojiPopoverFinalFocus = boolean | React.RefObject<HTMLElement | null> | ((closeType: EmojiPopoverInteractionType) => HTMLElement | boolean | null | undefined);
@@ -41,7 +41,7 @@ export type EmojiPopoverPortalProps = {
 
 export type EmojiPopoverPositionerState = { open: boolean; side: EmojiPopoverSide; align: EmojiPopoverAlign };
 
-export type EmojiPopoverPositionerProps = EmojiPickerPartElementProps<EmojiPopoverPositionerState> & {
+export type EmojiPopoverPositionerProps = EmojiComponentsPartElementProps<EmojiPopoverPositionerState> & {
   side?: EmojiPopoverSide;
   align?: EmojiPopoverAlign;
   sideOffset?: number;
@@ -54,26 +54,9 @@ export type Placement = Required<Pick<EmojiPopoverPositionerProps, "side" | "ali
 
 export type EmojiPopoverPopupState = EmojiPopoverPositionerState & { transitionStatus: "starting" | "ending" | "idle" | undefined };
 
-export type EmojiPopoverPopupProps = EmojiPickerPartElementProps<EmojiPopoverPopupState> & {
+export type EmojiPopoverPopupProps = EmojiComponentsPartElementProps<EmojiPopoverPopupState> & {
   initialFocus?: EmojiPopoverInitialFocus;
   finalFocus?: EmojiPopoverFinalFocus;
 };
 
 export type TransitionStatus = NonNullable<EmojiPopoverPopupState["transitionStatus"]>;
-
-export type EmojiSuggestionsRootProps = {
-  open: boolean;
-  onOpenChange?: (open: boolean, details: EmojiPopoverRootChangeEventDetails) => void;
-  onOpenChangeComplete?: (open: boolean) => void;
-  children: React.ReactNode;
-};
-
-export type EmojiSuggestionsPortalProps = EmojiPopoverPortalProps;
-
-export type EmojiSuggestionsPositionerState = EmojiPopoverPositionerState;
-
-export type EmojiSuggestionsPositionerProps = Omit<EmojiPopoverPositionerProps, "anchor"> & { anchor: EmojiPopoverAnchor };
-
-export type EmojiSuggestionsPopupState = EmojiPopoverPopupState;
-
-export type EmojiSuggestionsPopupProps = EmojiPickerPartElementProps<EmojiSuggestionsPopupState>;

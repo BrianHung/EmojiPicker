@@ -5,7 +5,7 @@ import { createLeafComponent } from "react-aria/CollectionBuilder";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
-import type { EmojiPickerPartElementProps } from "../../internals/types";
+import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useCells } from "../list/EmojiPickerListContext";
 import type { EmojiPickerListSectionState } from "../list-section/EmojiPickerListSection";
 import { TITLE, useEmojiPickerListSectionContext } from "../list-section/EmojiPickerListSectionContext";
@@ -13,7 +13,7 @@ import * as EmojiPickerListSectionTitleDataAttributes from "./EmojiPickerListSec
 
 export type EmojiPickerListSectionTitleState = EmojiPickerListSectionState;
 
-export type EmojiPickerListSectionTitleProps = EmojiPickerPartElementProps<EmojiPickerListSectionTitleState, HTMLElement>;
+export type EmojiPickerListSectionTitleProps = EmojiComponentsPartElementProps<EmojiPickerListSectionTitleState, HTMLElement>;
 
 // A collection leaf, as React Aria's Header: List renders it in the section's sticky title
 export const EmojiPickerListSectionTitle = createLeafComponent(TITLE, function EmojiPickerListSectionTitle({ children, style, ...props }: EmojiPickerListSectionTitleProps, ref: React.ForwardedRef<HTMLElement>) {
@@ -35,7 +35,7 @@ export const EmojiPickerListSectionTitle = createLeafComponent(TITLE, function E
       ...headingProps,
       // Before the slot, so the rendered attributes keep their order
       className: props.className,
-      "data-slot": SLOTS.sectionTitle,
+      "data-slot": SLOTS.listSectionTitle,
       [EmojiPickerListSectionTitleDataAttributes.collapsed]: flag(section.collapsed),
       ...props,
       style: (s: EmojiPickerListSectionTitleState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),

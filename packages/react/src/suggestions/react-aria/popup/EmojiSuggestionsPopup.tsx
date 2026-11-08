@@ -6,7 +6,7 @@ import { renderElement } from "../../../internals/renderElement";
 import { SLOTS } from "../../../internals/slots";
 import { useEmojiPopoverPositionerContext } from "../../../popover/react-aria/positioner/EmojiPopoverPositionerContext";
 import { popupAttributes } from "../../../popover/utils/popupAttributes";
-import type { EmojiSuggestionsPopupProps, EmojiSuggestionsPopupState } from "../../../popover/utils/types";
+import type { EmojiSuggestionsPopupProps, EmojiSuggestionsPopupState } from "../../utils/types";
 
 export const EmojiSuggestionsPopup = React.forwardRef<HTMLDivElement, EmojiSuggestionsPopupProps>(function EmojiSuggestionsPopup({ className, style, render, children, ...props }, ref) {
   const { state: placed, status } = useEmojiPopoverPositionerContext("EmojiSuggestions");
