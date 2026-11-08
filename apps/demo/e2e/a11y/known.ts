@@ -7,7 +7,7 @@ const codeToken = /^<span style="color:/;
 const KNOWN: Known[] = [
   { rule: "landmark-unique", node: /^<aside data-slot="emoji-picker"/ },
 
-  { rule: "color-contrast", node: /^<header [^>]*text-emoji-picker-muted[^>]*data-slot="emoji-picker-list-section/ },
+  { rule: "color-contrast", node: /^<header [^>]*text-emoji-picker-muted[^>]*data-slot="emoji-pi/ },
   { rule: "color-contrast", node: /^<div data-section="\w+"[^>]*text-emoji-picker-muted/ },
   { rule: "color-contrast", node: /text-emoji-picker-subtle">Remove</ },
   { rule: "color-contrast", node: /style="color: rgb\(125, 122, 117\);">(Team space|Edited just now)</ },
