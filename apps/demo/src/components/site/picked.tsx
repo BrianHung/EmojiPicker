@@ -10,7 +10,8 @@ export function copyEmoji(selection: EmojiSelection) {
       <Emoji emoji={selection} size={32} />
     </span>
   );
-  toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, data: { icon } });
+  // High priority is announced assertively, so a pick that returns focus to its trigger is still read
+  toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, priority: "high", data: { icon } });
 }
 
 export function usePickedEmoji() {

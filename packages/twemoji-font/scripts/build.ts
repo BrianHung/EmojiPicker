@@ -49,7 +49,8 @@ function squareViewBoxes() {
 function ensureVenv() {
   const requirements = fs.readFileSync(path.join(root, "requirements.txt"));
   const stamp = path.join(venv, ".requirements");
-  const hash = createHash("sha256").update(requirements).digest("hex");
+  // A venv hard-codes its own path, so one restored to another checkout path is rebuilt
+  const hash = createHash("sha256").update(requirements).update(venv).digest("hex");
   if (fs.existsSync(stamp) && fs.readFileSync(stamp, "utf8") === hash) return;
   fs.rmSync(venv, { recursive: true, force: true });
   run(process.env.PYTHON ?? "python3", ["-m", "venv", venv]);
