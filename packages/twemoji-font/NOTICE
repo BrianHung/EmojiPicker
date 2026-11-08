@@ -1,4 +1,4 @@
-Twemoji font for @brianhung/emoji-picker-react
+Twemoji font for emoji-components
 
 The font files (dist/*.woff2, dist/Twemoji.ttf) are built from the SVG
 graphics of Twemoji (https://github.com/jdecked/twemoji), Copyright 2019

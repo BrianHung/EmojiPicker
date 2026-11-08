@@ -4,10 +4,10 @@
 
 | Path | Contents |
 |---|---|
-| `packages/core` | [`@brianhung/emoji-picker-core`](packages/core/README.md): data, search, and stores, with no dependencies |
-| `packages/react` | [`@brianhung/emoji-picker-react`](packages/react/README.md): the React parts and hooks |
-| `packages/data` | [`@brianhung/emoji-picker-data`](packages/data/README.md): datasets for every Emojibase locale and shortcode set, built at pack time |
-| `packages/twemoji-font` | [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md): Twemoji as a COLRv0 web font, built with nanoemoji (Python 3.12) in CI, at pack time, or by `npm run build:font`. Without a local build, the site loads the published CSS from jsDelivr. |
+| `packages/core` | [`@emoji-components/core`](packages/core/README.md): data, search, and stores, with no dependencies |
+| `packages/react` | [`emoji-components`](packages/react/README.md): the React parts and hooks |
+| `packages/data` | [`@emoji-components/data`](packages/data/README.md): datasets for every Emojibase locale and shortcode set, built at pack time |
+| `packages/twemoji-font` | [`@emoji-components/twemoji-font`](packages/twemoji-font/README.md): Twemoji as a COLRv0 web font, built with nanoemoji (Python 3.12) in CI, at pack time, or by `npm run build:font`. Without a local build, the site loads the published CSS from jsDelivr. |
 | `apps/demo` | The site, the shadcn registry items, the e2e, axe, and screen reader suites, and the site's Cloudflare Worker ([README](apps/demo/README.md)) |
 | `.changeset` | Pending release notes |
 
@@ -31,7 +31,7 @@ npm run release:check  # .github/release-steps.mjs: everything above, plus visua
 npm run changeset      # describe a change for the next release
 ```
 
-In the workspace, the site resolves the packages to their TypeScript source through the `@brianhung/source` export condition, so library edits reload without a build.
+In the workspace, the site resolves the packages to their TypeScript source through the `@emoji-components/source` export condition, so library edits reload without a build.
 
 The e2e, axe, and screen reader suites serve the site on port 5199 (5198 with `E2E_BUILD=1`); set `E2E_PORT` to use another, for example beside a running dev server or a second checkout. With `E2E_PORT` set, the suites start their own server and never reuse one.
 
@@ -96,13 +96,13 @@ To publish:
 4. Check the dist-tags. `latest` must be the new version for all four packages.
 
    ```bash
-   for p in core data react twemoji-font; do npm view @brianhung/emoji-picker-$p dist-tags; done
-   npm dist-tag add @brianhung/emoji-picker-<package>@<version> latest   # if latest is missing or behind
+   for p in emoji-components @emoji-components/{core,data,twemoji-font}; do npm view $p dist-tags; done
+   npm dist-tag add <package>@<version> latest   # if latest is missing or behind
    ```
 
 5. Check the CDN and a fresh install.
 
    ```bash
-   curl -sI https://cdn.jsdelivr.net/npm/@brianhung/emoji-picker-data@<version>/data/en/iamcal.json | head -1
+   curl -sI https://cdn.jsdelivr.net/npm/@emoji-components/data@<version>/data/en/iamcal.json | head -1
    npm run onboarding -- --from-npm   # docs.md's steps against npm, the hosted registry, and jsDelivr
    ```

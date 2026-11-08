@@ -1,17 +1,17 @@
-# @brianhung/emoji-picker-twemoji-font
+# @emoji-components/twemoji-font
 
 [Twemoji](https://github.com/jdecked/twemoji) as a COLRv0 color font, split into `unicode-range` subsets.
 
 ## Installation
 
 ```sh
-npm i @brianhung/emoji-picker-twemoji-font
+npm i @emoji-components/twemoji-font
 ```
 
 ## Usage
 
 ```css
-@import "@brianhung/emoji-picker-twemoji-font/twemoji.css";
+@import "@emoji-components/twemoji-font/twemoji.css";
 
 [data-slot="emoji-picker"] { --emoji-font-family: Twemoji; }
 ```
@@ -25,7 +25,7 @@ npm i @brianhung/emoji-picker-twemoji-font
 
 ## System font
 
-`dist/Twemoji.ttf` (export `@brianhung/emoji-picker-twemoji-font/Twemoji.ttf`) is the whole font in one file.
+`dist/Twemoji.ttf` (export `@emoji-components/twemoji-font/Twemoji.ttf`) is the whole font in one file.
 
 - **Linux.** Copy the file to `~/.local/share/fonts` and run `fc-cache -f` (color needs FreeType 2.10+). To prefer it for emoji, save as `~/.config/fontconfig/conf.d/50-twemoji.conf`:
 

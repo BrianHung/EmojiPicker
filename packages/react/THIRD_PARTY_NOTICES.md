@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-The emoji data ships in `@brianhung/emoji-picker-core`; see its notices.
+The emoji data ships in `@emoji-components/core`; see its notices.
 
 ## emoji-picker-react
 

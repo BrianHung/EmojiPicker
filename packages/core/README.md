@@ -1,17 +1,17 @@
-# @brianhung/emoji-picker-core
+# @emoji-components/core
 
 Framework-neutral data, search, and state for emoji pickers, with no dependencies.
 
 ## Installation
 
 ```bash
-npm i @brianhung/emoji-picker-core
+npm i @emoji-components/core
 ```
 
 ## Usage
 
 ```ts
-import { createEmojiPicker, createEmojiStore, createEmojiSuggestions } from "@brianhung/emoji-picker-core";
+import { createEmojiPicker, createEmojiStore, createEmojiSuggestions } from "@emoji-components/core";
 
 const store = createEmojiStore();
 await store.load();
@@ -25,16 +25,16 @@ input.addEventListener("keydown", (e) => typeahead.keydown(e));
 const stop = typeahead.syncCombobox(input);
 ```
 
-`data` defaults to the English dataset of [`@brianhung/emoji-picker-data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.packErrors()` reports a custom emoji loader that failed.
+`data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.packErrors()` reports a custom emoji loader that failed.
 
 ## Entry points
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexical`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
+| `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexical`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
 | `/grid` | Grid layout and keyboard moves, for your own virtualizer |
 | `/native` | Whether the system font draws an emoji |
-| `/build` | `buildDataset` from `emojibase-data`, also as the `emoji-picker build-data <locale>` CLI |
+| `/build` | `buildDataset` from `emojibase-data`, also as the `emoji-components build-data <locale>` CLI |
 
 ## Docs
 

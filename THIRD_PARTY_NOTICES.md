@@ -4,7 +4,7 @@ Each package lists its own notices: [core](packages/core/THIRD_PARTY_NOTICES.md)
 
 ## Twemoji font
 
-`@brianhung/emoji-picker-twemoji-font` ships a font built from the [jdecked/twemoji](https://github.com/jdecked/twemoji) SVGs, Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Its `LICENSE` and `NOTICE` carry the license and the changes made. The build scripts are MIT.
+`@emoji-components/twemoji-font` ships a font built from the [jdecked/twemoji](https://github.com/jdecked/twemoji) SVGs, Copyright 2019 Twitter, Inc and other contributors, licensed under [CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/). Its `LICENSE` and `NOTICE` carry the license and the changes made. The build scripts are MIT.
 
 ## Demo site
 

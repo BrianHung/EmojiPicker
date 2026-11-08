@@ -1,4 +1,4 @@
-# @brianhung/emoji-picker-react
+# emoji-components
 
 <img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/EmojiPicker/main/.github/assets/picker.svg" width="680">
 
@@ -7,7 +7,7 @@ Unstyled React components for emoji pickers, reaction rows, and shortcode typeah
 ## Installation
 
 ```bash
-npm i @brianhung/emoji-picker-react
+npm i emoji-components
 ```
 
 Or the shadcn/ui component: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json`.
@@ -15,7 +15,7 @@ Or the shadcn/ui component: `npx shadcn@latest add https://emoji.brianhung.me/r/
 ## Usage
 
 ```tsx
-import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "emoji-components";
 
 <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
   <EmojiPicker.Search>
@@ -31,7 +31,7 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 | Import | Contents |
 |---|---|
-| `@brianhung/emoji-picker-react` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `pickerInitialFocus` |
+| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `pickerInitialFocus` |
 | `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
 | `/picker`, `/emoji`, `/provider` | One component each: `EmojiPicker` with its hooks, `Emoji`, and `EmojiProvider` with its hooks |
 | `/popover/floating-ui`, `/popover/react-aria`, `/suggestions/floating-ui`, `/suggestions/react-aria` | `EmojiPopover` or `EmojiSuggestions` alone |

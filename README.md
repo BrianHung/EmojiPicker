@@ -24,13 +24,13 @@ import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 ### npm
 
 ```bash
-npm i @brianhung/emoji-picker-react
+npm i emoji-components
 ```
 
 ## Usage
 
 ```tsx
-import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "emoji-components";
 
 <EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
   <EmojiPicker.Search />
@@ -44,10 +44,10 @@ import { EmojiPicker } from "@brianhung/emoji-picker-react";
 
 | Package | Description |
 |---|---|
-| [`@brianhung/emoji-picker-react`](packages/react/README.md) | React parts and hooks |
-| [`@brianhung/emoji-picker-core`](packages/core/README.md) | Data, search, and state, with no dependencies |
-| [`@brianhung/emoji-picker-data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set; core loads its English one by default |
-| [`@brianhung/emoji-picker-twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
+| [`emoji-components`](packages/react/README.md) | React parts and hooks |
+| [`@emoji-components/core`](packages/core/README.md) | Data, search, and state, with no dependencies |
+| [`@emoji-components/data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set; core loads its English one by default |
+| [`@emoji-components/twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
 
 [Contributing](CONTRIBUTING.md)
 
