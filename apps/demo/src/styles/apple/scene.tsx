@@ -661,6 +661,19 @@ function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect
   const cx0 = Math.min(Math.max(anchor + 28.7 * s, pillX + 44), pillX + PILL.w - 44);
 
   const [p, setP] = React.useState(0);
+  const row = React.useRef<HTMLDivElement>(null);
+  // A mouse wheel scrolls vertically; the row only scrolls sideways
+  React.useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const wheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    };
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => el.removeEventListener("wheel", wheel);
+  }, []);
   const lerp = (a: number, b: number) => a + (b - a) * p;
   const R = lerp(22.3, 11.7);
   const cx = cx0 + lerp(0, -11) * s;
@@ -730,6 +743,7 @@ function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect
         <Grin size={23.4} className="text-[#9d9da1] dark:text-[#8d8d93]" />
       </motion.button>
       <motion.div
+        ref={row}
         role="toolbar"
         aria-label="Tapbacks"
         className="absolute overflow-x-auto overflow-y-hidden rounded-full [scrollbar-width:none]"

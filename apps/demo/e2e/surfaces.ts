@@ -282,7 +282,7 @@ export async function show(page: Page, s: Surface, { interact = false } = {}) {
 
 export type Shot = { id: string; path: string; only?: Viewport; prepare?: (page: Page) => Promise<void>; frame: (page: Page) => Locator; mask?: (page: Page) => Locator[] };
 
-const ENGINES = ["lexical()", "No typos", "+ Fuse", "+ Frequents", "Async"];
+const ENGINES = ["Lexical", "No Typos", "Fuse", "Frequents", "Async"];
 const searchFor =
   (engine: string, mode = "Ranked") =>
   async (p: Page) => {
@@ -328,7 +328,7 @@ export const SHOTS: Shot[] = [
   { id: "home/tapback", path: "/", frame: (p) => preview(p, "tapback") },
   { id: "home/rendering", path: "/", frame: (p) => preview(p, "rendering") },
   ...ENGINES.map((e): Shot => ({ id: `home/search-${e.replace(/\W+/g, "").toLowerCase()}`, path: "/", prepare: searchFor(e), frame: (p) => preview(p, "search") })),
-  { id: "home/search-grouped", path: "/", prepare: searchFor("lexical()", "Grouped"), frame: (p) => preview(p, "search") },
+  { id: "home/search-grouped", path: "/", prepare: searchFor("Lexical", "Grouped"), frame: (p) => preview(p, "search") },
   { id: "examples/index", path: "/examples/", frame: (p) => p.locator("main") },
   { id: "examples/semantic-search-on-device", path: "/examples/semantic-search/", frame: (p) => p.getByTestId("status").locator("xpath=.."), mask: (p) => [p.getByTestId("status")] },
 ];

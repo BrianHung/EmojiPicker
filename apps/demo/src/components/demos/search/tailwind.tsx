@@ -15,10 +15,10 @@ const slow: EmojiSearch = (query, context) =>
   });
 
 const ENGINES = {
-  default: { label: "lexical()", search: lexical() },
-  exact: { label: "No typos", search: lexical({ typos: false }) },
-  fuse: { label: "+ Fuse", search: withFuzzy },
-  frequent: { label: "+ Frequents", search: frequentFirst },
+  default: { label: "Lexical", search: lexical() },
+  exact: { label: "No Typos", search: lexical({ typos: false }) },
+  fuse: { label: "Fuse", search: withFuzzy },
+  frequent: { label: "Frequents", search: frequentFirst },
   remote: { label: "Async", search: slow },
 } satisfies Record<string, { label: string; search: EmojiSearch }>;
 type Engine = keyof typeof ENGINES;
