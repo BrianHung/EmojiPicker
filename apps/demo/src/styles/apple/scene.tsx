@@ -179,6 +179,7 @@ export function IMessageScreen({
   const close = React.useCallback(() => setMode("idle"), []);
   const [compose, setCompose] = React.useState(false);
   const fromKeyboard = React.useRef(false);
+  const keyboard = React.useRef<HTMLDivElement>(null);
   const opener = (open: () => void) => (e?: React.MouseEvent) => {
     fromKeyboard.current = e?.detail === 0;
     open();
@@ -313,7 +314,12 @@ export function IMessageScreen({
       >
         <DrawerContent
           container={screen}
-          initialFocus={() => fromKeyboard.current || matchMedia("(pointer: fine)").matches}
+          ref={keyboard}
+          // Base UI focuses the first tabbable without preventScroll, which scrolls the screen while the sheet slides in
+          initialFocus={() => {
+            if (fromKeyboard.current || matchMedia("(pointer: fine)").matches) keyboard.current?.querySelector<HTMLElement>("input")?.focus({ preventScroll: true });
+            return false;
+          }}
           finalFocus={false}
           className="top-auto! right-[0.3px]! bottom-0! left-[0.3px]! h-[388.7px]! max-h-none! border-0! bg-transparent! text-base text-black dark:text-white duration-[380ms] ease-[cubic-bezier(0.2,1.1,0.32,1)] after:hidden data-ending-style:duration-[140ms]"
         >
