@@ -1,5 +1,5 @@
-import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
-import { EmojiSuggestions, type EmojiPopoverContainer } from "@brianhung/emoji-picker-react/floating-ui";
+import { EmojiPicker, useActiveEmoji, useCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "emoji-components";
+import { EmojiSuggestions, type EmojiPopoverContainer } from "emoji-components/floating-ui";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "./picker";
 import { CELL, OPTION, tokensOf } from "@/styles/style";

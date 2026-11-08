@@ -1,4 +1,4 @@
-import type { EmojiItem, EmojiSelection } from "@brianhung/emoji-picker-react";
+import type { EmojiItem, EmojiSelection } from "emoji-components";
 import { EmojiPickerCard, EmojiPickerCell } from "@/components/ui/emoji-picker";
 
 const roundCell = (emoji: EmojiItem) => <EmojiPickerCell render={<button title={`:${emoji.record.shortcodes[0] ?? emoji.record.name}:`} />} className="leading-none hover:scale-125 focus-visible:ring-2 focus-visible:ring-ring" />;

@@ -1,4 +1,4 @@
-import type { Emoji } from "@brianhung/emoji-picker-react";
+import type { Emoji } from "emoji-components";
 import { rowsOf } from "./rows";
 
 export const emoji = rowsOf<Emoji.Props>()([

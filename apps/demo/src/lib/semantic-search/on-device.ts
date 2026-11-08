@@ -1,4 +1,4 @@
-import type { EmojiSearch } from "@brianhung/emoji-picker-react";
+import type { EmojiSearch } from "emoji-components";
 import type { WorkerRequest, WorkerResponse } from "./on-device.worker";
 
 const MODEL = "Xenova/bge-small-en-v1.5";

@@ -1,7 +1,7 @@
 import * as React from "react";
-import en from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider, type EmojiSelection, type ImageUrl } from "@brianhung/emoji-picker-react";
-import { twemojiUrl, withoutTone } from "@brianhung/emoji-picker-core";
+import en from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider, type EmojiSelection, type ImageUrl } from "emoji-components";
+import { twemojiUrl, withoutTone } from "@emoji-components/core";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
   const [font, setFont] = React.useState<Font>("system");
   const [custom, setCustom] = React.useState(true);
   React.useEffect(() => {
-    if (font === "twemoji") import("@brianhung/emoji-picker-twemoji-font/twemoji.css");
+    if (font === "twemoji") import("@emoji-components/twemoji-font/twemoji.css");
   }, [font]);
   return (
     <>

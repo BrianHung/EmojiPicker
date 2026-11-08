@@ -1,5 +1,5 @@
 import * as React from "react";
-import { EmojiPicker, type CategoryOption } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type CategoryOption } from "emoji-components";
 import { cn } from "@/lib/utils";
 import type * as I from "./icons";
 

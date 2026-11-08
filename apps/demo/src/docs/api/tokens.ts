@@ -21,7 +21,7 @@ export const tokens: Rows = [
 
 export const rendering: Rows = [
   ["System font", "tokens.css sets --emoji-font-family", 'The default. renderer="auto" draws an image wherever the font can\'t.'],
-  ["Twemoji font", '@import "@brianhung/emoji-picker-twemoji-font/twemoji.css"; --emoji-font-family: Twemoji', "Subsets load as they are drawn. Twemoji is CC-BY 4.0: credit it."],
+  ["Twemoji font", '@import "@emoji-components/twemoji-font/twemoji.css"; --emoji-font-family: Twemoji', "Subsets load as they are drawn. Twemoji is CC-BY 4.0: credit it."],
   ["Any font", '--emoji-font-family: "Noto Color Emoji"', "Any color emoji font, such as one from Google Fonts."],
   ["Images", '<EmojiProvider renderer="image">', "Twemoji images from jsDelivr."],
   ["Custom art", "<EmojiProvider imageUrl={(unified) => art[unified]}>", "undefined keeps the default for the other emoji."],

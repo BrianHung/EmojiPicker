@@ -1,4 +1,4 @@
-import type { EmojiTypeahead, EmojiTypeaheadOptions } from "@brianhung/emoji-picker-react";
+import type { EmojiTypeahead, EmojiTypeaheadOptions } from "emoji-components";
 import { cn } from "@/lib/utils";
 import { slack } from "./picker";
 import { StyleTypeahead } from "@/styles/variants";

@@ -1,5 +1,5 @@
-import en from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider, type CategoryOption, type CustomEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import en from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider, type CategoryOption, type CustomEmoji, type EmojiSelection } from "emoji-components";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 
 const categories: CategoryOption[] = [

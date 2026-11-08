@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AnimatePresence, MotionGlobalConfig, motion, type Transition } from "motion/react";
 import { useSmoothCorners } from "@lisse/react";
-import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "emoji-components";
 import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";

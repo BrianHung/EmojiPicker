@@ -1,4 +1,4 @@
-import { EmojiPicker, useEmojiStore, type CategoryOption, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, useEmojiStore, type CategoryOption, type EmojiSelection } from "emoji-components";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { HandTone, noEmoji, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";

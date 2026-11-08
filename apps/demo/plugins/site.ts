@@ -5,7 +5,7 @@ import { EXAMPLES } from "../src/lib/examples";
 export const SITE = "https://emoji.brianhung.me";
 const NAME = "Emoji Picker";
 const TAGLINE = "A virtualized, unstyled, and composable emoji picker for React.";
-const PACKAGE = "@brianhung/emoji-picker-react";
+const PACKAGE = "emoji-components";
 
 type Page = { entry: string; heading: string; description: string; title?: string };
 

@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
-import en from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider } from "@brianhung/emoji-picker-react";
-import "@brianhung/emoji-picker-twemoji-font/twemoji.css";
+import en from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider } from "emoji-components";
+import "@emoji-components/twemoji-font/twemoji.css";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import "@/globals.css";
 

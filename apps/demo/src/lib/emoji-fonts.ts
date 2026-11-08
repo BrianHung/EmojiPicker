@@ -11,7 +11,7 @@ const stylesheet = (href: string) =>
   });
 
 async function twemoji() {
-  await import("@brianhung/emoji-picker-twemoji-font/twemoji.css");
+  await import("@emoji-components/twemoji-font/twemoji.css");
   const link = [...document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')].find((l) => l.href.includes("twemoji") && !l.sheet);
   if (link) await new Promise((done) => (link.onload = link.onerror = done));
 }

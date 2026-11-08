@@ -24,7 +24,7 @@ export default defineConfig({
       name: "react-aria-demos",
       enforce: "pre",
       resolveId(source, importer) {
-        if (source === "@brianhung/emoji-picker-react/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("@brianhung/emoji-picker-react/react-aria", importer, { skipSelf: true });
+        if (source === "emoji-components/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("emoji-components/react-aria", importer, { skipSelf: true });
       },
     },
     {
@@ -32,7 +32,7 @@ export default defineConfig({
       name: "twemoji-font-cdn",
       enforce: "pre",
       resolveId(source) {
-        if (source === "@brianhung/emoji-picker-twemoji-font/twemoji.css" && !existsSync(new URL("dist/twemoji.css", twemojiFont))) return "\0twemoji-cdn";
+        if (source === "@emoji-components/twemoji-font/twemoji.css" && !existsSync(new URL("dist/twemoji.css", twemojiFont))) return "\0twemoji-cdn";
       },
       load(id) {
         if (id !== "\0twemoji-cdn") return;
@@ -53,7 +53,7 @@ document.head.append(link);`;
     cloudflare({ remoteBindings: process.env.CLOUDFLARE_REMOTE_BINDINGS === "1", inspectorPort: false }),
   ],
   resolve: {
-    conditions: [...(workspace ? ["@brianhung/source"] : []), ...defaultClientConditions],
+    conditions: [...(workspace ? ["@emoji-components/source"] : []), ...defaultClientConditions],
     alias: [
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
       { find: /^@\/components\/ui\/(emoji-picker|emoji-reaction-bar)$/, replacement: fileURLToPath(new URL("./registry/$1.tsx", import.meta.url)) },

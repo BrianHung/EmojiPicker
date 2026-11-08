@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { lexical, type EmojiRecord, type EmojiSearch } from "@brianhung/emoji-picker-react";
+import { lexical, type EmojiRecord, type EmojiSearch } from "emoji-components";
 
 const exact = lexical();
 const fuses = new WeakMap<readonly EmojiRecord[], Fuse<EmojiRecord>>();

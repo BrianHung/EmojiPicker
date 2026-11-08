@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Emoji, EmojiPicker, type EmojiItem, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, EmojiPicker, type EmojiItem, type EmojiSelection } from "emoji-components";
 import { cn } from "@/lib/utils";
 
 const root =

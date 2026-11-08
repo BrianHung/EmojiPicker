@@ -1,4 +1,4 @@
-import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "emoji-components";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { noEmoji, SearchClear, useActiveTabInView, withIcons } from "@/styles/parts";

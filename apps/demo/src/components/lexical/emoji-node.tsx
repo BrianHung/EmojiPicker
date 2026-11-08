@@ -1,7 +1,7 @@
 import * as React from "react";
 import { $applyNodeReplacement, DecoratorNode, TextNode, type EditorConfig, type NodeKey, type SerializedLexicalNode, type Spread } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { Emoji, useEmojiStore, type EmojiStore } from "@brianhung/emoji-picker-react";
+import { Emoji, useEmojiStore, type EmojiStore } from "emoji-components";
 
 export type EmojiAttrs = {
   unified: string;

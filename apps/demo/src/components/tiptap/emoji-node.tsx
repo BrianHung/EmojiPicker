@@ -1,5 +1,5 @@
 import { InputRule, Node, NodeViewWrapper, ReactNodeViewRenderer, mergeAttributes, type NodeViewProps } from "@tiptap/react";
-import { Emoji, type EmojiStore } from "@brianhung/emoji-picker-react";
+import { Emoji, type EmojiStore } from "emoji-components";
 
 export type EmojiNodeAttrs = {
   unified: string;

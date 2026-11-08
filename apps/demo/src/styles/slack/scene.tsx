@@ -2,7 +2,7 @@ import * as React from "react";
 import { BoldIcon, CodeIcon, ItalicIcon, LinkIcon, ListIcon, ListOrderedIcon, PlusIcon, SquareCodeIcon, StrikethroughIcon } from "lucide-react";
 import { UNSAFE_PortalProvider } from "react-aria";
 import { Focusable, OverlayArrow, Tooltip, TooltipTrigger } from "react-aria-components";
-import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "emoji-components";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SlackEmojiMenu, slackEmojiOptions } from "./menu";
 import { copyEmoji } from "@/components/site/picked";

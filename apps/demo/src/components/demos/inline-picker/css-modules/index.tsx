@@ -1,4 +1,4 @@
-import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiSelection } from "emoji-components";
 import styles from "./index.module.css";
 
 export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {

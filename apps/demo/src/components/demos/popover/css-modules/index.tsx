@@ -1,6 +1,6 @@
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker-react";
-import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
+import type { EmojiSelection } from "emoji-components";
+import { EmojiPopover } from "emoji-components/floating-ui";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import styles from "./index.module.css";
 

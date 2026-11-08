@@ -20,7 +20,7 @@ import menu from "@/components/suggestion-menu.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-tiptap.json" />
 
-Adds `hooks/emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/suggestion-menu.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `@brianhung/emoji-picker-react`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/suggestion-menu.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
 </Step>
 
@@ -39,7 +39,7 @@ Adds `hooks/emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/suggestion
 ```tsx title="editor.tsx"
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { EmojiProvider, useEmojiStore } from "@brianhung/emoji-picker-react";
+import { EmojiProvider, useEmojiStore } from "emoji-components";
 import { EmojiNode } from "@/components/tiptap/emoji-node";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 

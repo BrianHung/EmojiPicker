@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiSelection } from "@brianhung/emoji-picker-react";
+import type { EmojiSelection } from "emoji-components";
 import { buttonVariants } from "@/components/ui/button";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";

@@ -1,6 +1,6 @@
 import { Plugin, PluginKey, type EditorState } from "prosemirror-state";
 import type { EditorView } from "prosemirror-view";
-import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type ShortcodeCompletion, type EmojiSuggestionsOptions } from "@brianhung/emoji-picker-core";
+import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type ShortcodeCompletion, type EmojiSuggestionsOptions } from "@emoji-components/core";
 
 type Node = EditorState["doc"];
 

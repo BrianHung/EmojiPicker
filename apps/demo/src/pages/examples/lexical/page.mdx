@@ -15,7 +15,7 @@ import menu from "@/components/suggestion-menu.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
 
-Adds `hooks/emoji-lexical.ts`, `components/suggestion-menu.tsx`, `components/lexical/emoji-typeahead-plugin.tsx`, and `components/lexical/emoji-node.tsx`. Installs `@brianhung/emoji-picker-react`, `lexical`, and `@lexical/react`.
+Adds `hooks/emoji-lexical.ts`, `components/suggestion-menu.tsx`, `components/lexical/emoji-typeahead-plugin.tsx`, and `components/lexical/emoji-node.tsx`. Installs `emoji-components`, `lexical`, and `@lexical/react`.
 
 ## Usage
 
@@ -26,7 +26,7 @@ import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { EmojiProvider } from "@brianhung/emoji-picker-react";
+import { EmojiProvider } from "emoji-components";
 import { EmojiNode } from "@/components/lexical/emoji-node";
 import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
 

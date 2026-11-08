@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { EmojiSelection, EmojiPicker } from "@brianhung/emoji-picker-react";
+import type { EmojiSelection, EmojiPicker } from "emoji-components";
 
 export type Tokens = React.CSSProperties & Record<`--${string}`, string>;
 

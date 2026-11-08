@@ -1,4 +1,4 @@
-import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiSelection } from "emoji-components";
 
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-picker-hover";
 

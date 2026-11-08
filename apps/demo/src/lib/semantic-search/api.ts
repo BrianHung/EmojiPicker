@@ -1,4 +1,4 @@
-import type { EmojiSearch } from "@brianhung/emoji-picker-react";
+import type { EmojiSearch } from "emoji-components";
 
 const API = (import.meta.env.VITE_SEARCH_API_URL ?? "").replace(/\/$/, "");
 

@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
-import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider } from "@brianhung/emoji-picker-react";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider } from "emoji-components";
 import { SiteShell, useRenderer } from "@/components/site/shell";
 import { GalleryPage } from "./gallery";
 import "@/globals.css";

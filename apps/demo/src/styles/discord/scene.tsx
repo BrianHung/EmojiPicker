@@ -1,6 +1,6 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "@brianhung/emoji-picker-react";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { Emoji, EmojiProvider, isComposingKey, useEmojiStatus, useEmojiStore } from "emoji-components";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { discord, discordAutocompleteOptions } from "./picker";

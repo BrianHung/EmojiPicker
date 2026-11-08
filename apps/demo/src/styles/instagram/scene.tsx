@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "@brianhung/emoji-picker-react";
-import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
+import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "emoji-components";
+import { EmojiPopover } from "emoji-components/floating-ui";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";

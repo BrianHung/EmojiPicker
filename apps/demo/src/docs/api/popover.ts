@@ -1,4 +1,4 @@
-import type { EmojiPopover, EmojiSuggestions } from "@brianhung/emoji-picker-react/floating-ui";
+import type { EmojiPopover, EmojiSuggestions } from "emoji-components/floating-ui";
 import { inPart, rowsOf } from "./rows";
 
 const onOpenChange = {

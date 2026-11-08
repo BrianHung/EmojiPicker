@@ -1,5 +1,5 @@
-import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiPicker, EmojiProvider } from "@brianhung/emoji-picker-react";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiPicker, EmojiProvider } from "emoji-components";
 import { usePickedEmoji } from "@/components/site/picked";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmojiPickerFooter } from "@/registry/emoji-picker";

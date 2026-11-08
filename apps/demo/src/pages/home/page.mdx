@@ -38,11 +38,11 @@ For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-pic
 
 <TabPanel label="Manual">
 
-<PackageManagers install="@brianhung/emoji-picker-react" />
+<PackageManagers install="emoji-components" />
 
 ```css title="app/globals.css"
 @import "tailwindcss";
-@import "@brianhung/emoji-picker-react/tokens.css";
+@import "emoji-components/tokens.css";
 ```
 
 <CodeTabs collapse={10}>
@@ -60,8 +60,8 @@ For a popover, add `emoji-picker-popover.json` (Base UI and Radix) or `emoji-pic
 ## Anatomy
 
 ```tsx title="anatomy.tsx"
-import { Emoji, EmojiPicker, EmojiProvider } from "@brianhung/emoji-picker-react";
-import { EmojiPopover } from "@brianhung/emoji-picker-react/floating-ui";
+import { Emoji, EmojiPicker, EmojiProvider } from "emoji-components";
+import { EmojiPopover } from "emoji-components/floating-ui";
 
 <EmojiProvider>
   <EmojiPicker.Root>
@@ -103,7 +103,7 @@ Parts render with no provider and no CSS. `Root` loads the English dataset from 
 ```tsx title="app/page.tsx"
 "use client";
 
-import { EmojiPicker } from "@brianhung/emoji-picker-react";
+import { EmojiPicker } from "emoji-components";
 
 export default function Page() {
   return (
@@ -121,7 +121,7 @@ export default function Page() {
 
 ### Styled
 
-Import `@brianhung/emoji-picker-react/theme.css` for Tailwind utilities on the tokens, such as `bg-picker-background`. Every part takes `className` and `style` as a value or a function of its state, and writes its state as data attributes.
+Import `emoji-components/theme.css` for Tailwind utilities on the tokens, such as `bg-picker-background`. Every part takes `className` and `style` as a value or a function of its state, and writes its state as data attributes.
 
 ```tsx title="picker.tsx"
 <EmojiPicker.Root className="w-80 rounded-picker bg-picker-background shadow-picker [--emoji-size:24px]">
@@ -173,7 +173,7 @@ Parts and hooks use the nearest `EmojiProvider`; without one they share one stor
 
 ### Data and localization {#data}
 
-`data` defaults to the English dataset of `@brianhung/emoji-picker-data` on jsDelivr, and takes a URL, a loader, or the dataset; `filter` removes emoji. `localeData(locale, { shortcodes, baseUrl })` is a dataset's URL, and `"cldr"` gives shortcodes in the locale's language. `labels` overrides the strings.
+`data` defaults to the English dataset of `@emoji-components/data` on jsDelivr, and takes a URL, a loader, or the dataset; `filter` removes emoji. `localeData(locale, { shortcodes, baseUrl })` is a dataset's URL, and `"cldr"` gives shortcodes in the locale's language. `labels` overrides the strings.
 
 <Code title="app/providers.tsx" code={localization} />
 

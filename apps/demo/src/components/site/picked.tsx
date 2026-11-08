@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Emoji, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { Emoji, type EmojiSelection } from "emoji-components";
 import { toast } from "@/components/ui/toast";
 
 export function copyEmoji(selection: EmojiSelection) {

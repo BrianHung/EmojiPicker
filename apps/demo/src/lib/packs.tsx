@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { CustomEmoji } from "@brianhung/emoji-picker-react";
+import type { CustomEmoji } from "emoji-components";
 
 const cache = new Map<string, Promise<CustomEmoji[]>>();
 

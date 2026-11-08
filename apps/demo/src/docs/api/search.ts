@@ -1,4 +1,4 @@
-import type { EmojiPicker } from "@brianhung/emoji-picker-react";
+import type { EmojiPicker } from "emoji-components";
 import { inPart, rowsOf } from "./rows";
 
 export const search = rowsOf<EmojiPicker.Search.Props>()([

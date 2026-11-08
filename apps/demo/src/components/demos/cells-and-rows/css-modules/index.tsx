@@ -1,4 +1,4 @@
-import type { EmojiItem, EmojiSelection } from "@brianhung/emoji-picker-react";
+import type { EmojiItem, EmojiSelection } from "emoji-components";
 import { EmojiPickerCard, EmojiPickerCell } from "@/components/ui/emoji-picker";
 import styles from "./index.module.css";
 

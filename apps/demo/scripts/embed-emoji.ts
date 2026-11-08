@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { pipeline } from "@huggingface/transformers";
-import type { CustomEmoji, Dataset } from "@brianhung/emoji-picker-react";
+import type { CustomEmoji, Dataset } from "emoji-components";
 import { emojiText } from "../src/lib/semantic-search/emoji-text";
 import { encodeIndex } from "../src/lib/semantic-search/vectors";
 
@@ -22,7 +22,7 @@ if (values.custom) {
   items = list;
 } else {
   const require = createRequire(import.meta.url);
-  const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@brianhung/emoji-picker-data/en/iamcal.json"), "utf8"));
+  const dataset: Dataset = JSON.parse(readFileSync(require.resolve("@emoji-components/data/en/iamcal.json"), "utf8"));
   items = dataset.emojis.map(([id, name, tags, shortcodes]) => ({ id, name, tags, shortcodes }));
 }
 const out = resolve(values.out ?? resolve(here, "../public/embeddings", values.custom ? "custom.i8" : "emoji.i8"));

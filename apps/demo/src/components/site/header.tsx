@@ -96,7 +96,7 @@ export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { pag
           <IconLink href="https://github.com/BrianHung/EmojiPicker" label="GitHub">
             <GitHubIcon />
           </IconLink>
-          <IconLink href="https://www.npmjs.com/package/@brianhung/emoji-picker-react" label="npm" className="max-sm:hidden">
+          <IconLink href="https://www.npmjs.com/package/emoji-components" label="npm" className="max-sm:hidden">
             <NpmIcon />
           </IconLink>
           <Tooltip>
@@ -151,7 +151,7 @@ function MobileMenu({ page, open, onOpenChange, renderer, onRenderer }: { page: 
               Renderer
               <RendererSelect renderer={renderer} onRenderer={onRenderer} />
             </div>
-            <a href="https://www.npmjs.com/package/@brianhung/emoji-picker-react" target="_blank" rel="noreferrer" className="text-base text-foreground/80 hover:text-foreground">
+            <a href="https://www.npmjs.com/package/emoji-components" target="_blank" rel="noreferrer" className="text-base text-foreground/80 hover:text-foreground">
               npm
             </a>
           </div>

@@ -1,6 +1,6 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider, lexical, type CustomEmoji, type EmojiSearch } from "@brianhung/emoji-picker-react";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider, lexical, type CustomEmoji, type EmojiSearch } from "emoji-components";
 import { useRenderer } from "@/components/site/shell";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";

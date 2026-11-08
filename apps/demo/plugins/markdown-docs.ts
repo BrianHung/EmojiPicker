@@ -95,7 +95,7 @@ export const ROUTES: Record<string, Route> = {
     type: "text/plain",
     render: () => `# Emoji Picker
 
-> ${docs().description.replace(/\.$/, "")} (@brianhung/emoji-picker-react).
+> ${docs().description.replace(/\.$/, "")} (emoji-components).
 
 ## Docs
 

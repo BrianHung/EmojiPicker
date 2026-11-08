@@ -1,4 +1,4 @@
-import { EmojiPicker, type EmojiSelection } from "@brianhung/emoji-picker-react";
+import { EmojiPicker, type EmojiSelection } from "emoji-components";
 
 const tone = "flex size-8 shrink-0 items-center justify-center rounded-md text-lg leading-none outline-none hover:bg-picker-hover focus-visible:bg-picker-hover";
 

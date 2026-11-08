@@ -1,6 +1,6 @@
 import * as React from "react";
-import enUrl from "@brianhung/emoji-picker-data/en/iamcal.json?url";
-import { EmojiProvider } from "@brianhung/emoji-picker-react";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider } from "emoji-components";
 import { Toaster } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { type EmojiFont, loadEmojiFont } from "@/lib/emoji-fonts";

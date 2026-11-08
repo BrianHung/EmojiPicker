@@ -1,4 +1,4 @@
-import type { EmojiTypeahead } from "@brianhung/emoji-picker-react";
+import type { EmojiTypeahead } from "emoji-components";
 import { cn } from "@/lib/utils";
 import { discord } from "./picker";
 import { useFontStylesheet } from "@/styles/scene-kit";

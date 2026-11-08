@@ -1,7 +1,7 @@
 import * as React from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { Emoji } from "@brianhung/emoji-picker-react";
+import { Emoji } from "emoji-components";
 import { notion } from "./picker";
 import { useTiptapEmojiTypeahead } from "@/hooks/emoji-tiptap";
 import { NotionEmojiMenu, notionEmojiOptions } from "./menu";

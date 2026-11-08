@@ -1,4 +1,4 @@
-import dataset from "@brianhung/emoji-picker-data/en/iamcal.json";
+import dataset from "@emoji-components/data/en/iamcal.json";
 import customEmoji from "../src/lib/semantic-search/custom-emoji.json";
 
 export { emojiText, QUERY_PREFIX } from "../src/lib/semantic-search/emoji-text";

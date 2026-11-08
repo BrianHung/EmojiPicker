@@ -3,7 +3,7 @@
 import * as React from "react";
 import { $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH, KEY_DOWN_COMMAND, type LexicalNode, type NodeKey } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { findShortcodeTrigger, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "@brianhung/emoji-picker-react";
+import { findShortcodeTrigger, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "emoji-components";
 
 export type LexicalEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
   node?: (text: string, suggestion: ShortcodeCompletion) => LexicalNode;
