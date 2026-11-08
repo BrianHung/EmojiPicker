@@ -21,7 +21,7 @@ Workers AI and Vectorize have no local mode, so `.env.development` points the de
 | `src/pages/` | Each page's `main.tsx`. Example pages are a `page.mdx` and a live demo. |
 | `src/styles/<app>/` | An app style: a `picker.tsx` layout and a `scene.tsx` mockup. |
 | `src/components/` | shadcn/ui components (`ui/`), site chrome (`site/`), and the Tiptap, Lexical, and typeahead integrations. |
-| `registry/` | The shadcn registry items. `aria/` holds the React Aria popover, which `tsc` skips because it needs that base. `npm run build:registry` writes the items to `public/r/`. |
+| `registry/` | The shadcn registry items. `aria/` holds the React Aria popover, which `tsc` skips because it needs that base. `npm run build:registry` writes the items to `public/r/` for the site and to `packages/react/r/`, which `emoji-components` ships for installs from jsDelivr. |
 | `plugins/` | MDX, and the Markdown routes `/docs.md`, `/examples/*.md`, and `/llms.txt`, generated from the pages' MDX. |
 | `worker/` | The Worker for `/api/*`. |
 | `scripts/og/` | OG image and video generator (`npm run og`). |

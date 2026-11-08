@@ -10,7 +10,7 @@ Unstyled React components for emoji pickers, reaction rows, and shortcode typeah
 npm i emoji-components
 ```
 
-Or the shadcn/ui component: `npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json`.
+Or the shadcn/ui component, from the registry items this package ships in `r/`: `npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json`.
 
 ## Usage
 

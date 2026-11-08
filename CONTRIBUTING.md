@@ -104,5 +104,12 @@ To publish:
 
    ```bash
    curl -sI https://cdn.jsdelivr.net/npm/@emoji-components/data@<version>/data/en/iamcal.json | head -1
-   npm run onboarding -- --from-npm   # docs.md's steps against npm, the hosted registry, and jsDelivr
+   curl -sI https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json | grep -i "^HTTP\|x-jsd-version"
+   npm run onboarding -- --from-npm   # docs.md's steps against npm, the registry on jsDelivr, and jsDelivr data
    ```
+
+### shadcn registry
+
+`emoji-components` ships the registry items in `r/`, built by its `prepack` (`apps/demo/scripts/build-registry.mjs`). Items pin the packages to the release (`emoji-components@<version>`) and depend on each other through that release's jsDelivr URLs. The site keeps serving the same items at `/r/` for URL installs.
+
+The docs install from `https://cdn.jsdelivr.net/npm/emoji-components@latest/r/<item>.json`, which follows the `latest` dist-tag, so step 4 matters: `emoji-components@latest` was `0.0.0`, which has no `r/`. jsDelivr caches `@latest` for up to 7 days unless it is purged, and items pin their own release, so a stale cache installs an older but consistent release. A range such as `@1` excludes prereleases. The URL needs no change at 1.0.0. At 2.0.0, `latest` moves to 2.x.

@@ -55,7 +55,7 @@ for (const p of paths) {
   p.steps.forEach((s, i) => console.log(`  ${i + 1}. ${typeof s === "string" ? s : `write ${s[0]} (${s[1].split("\n").length} lines from docs.md)`}`));
   if (p.steps.length > MAX_STEPS) throw new Error(`${p.name} takes ${p.steps.length} steps; the docs claim ${MAX_STEPS}`);
 }
-console.log(`\nsource: ${fromNpm ? "npm and the hosted registry" : "packed tarballs and the local registry"}`);
+console.log(`\nsource: ${fromNpm ? "npm and the registry on jsDelivr" : "packed tarballs and the local registry"}`);
 if (dryRun) process.exit(0);
 
 const tmp = mkdtempSync(join(tmpdir(), "emoji-picker-onboarding-"));
@@ -64,7 +64,6 @@ const routed = [];
 let registry;
 if (!fromNpm) {
   run("npm", ["run", "build", "-w", "@emoji-components/core", "-w", "emoji-components"]);
-  run("npm", ["run", "build:registry", "-w", "demo"]);
   run("npm", ["pack", "-w", "@emoji-components/core", "-w", "emoji-components", "-w", "@emoji-components/data", "--pack-destination", tmp, "--silent"]);
   for (const f of readdirSync(tmp).filter((f) => f.endsWith(".tgz"))) {
     const scoped = f.match(/^emoji-components-([a-z-]+?)-\d/)?.[1];
@@ -72,13 +71,21 @@ if (!fromNpm) {
   }
   mkdirSync(join(tmp, "data"));
   run("tar", ["-xzf", tarballs["@emoji-components/data"], "-C", join(tmp, "data")]);
-  // The registry item from the local build, with its packages pointing at the tarballs
-  const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker.json"), "utf8"));
-  item.dependencies = [...item.dependencies.map((d) => `${d.replace(/@[^@/]+$/, "")}@file:${tarballs[d.replace(/@[^@/]+$/, "")]}`), `@emoji-components/core@file:${tarballs["@emoji-components/core"]}`];
-  writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
-  registry = await serve(tmp, `node -e 'require("node:http").createServer((q, s) => s.end(require("node:fs").readFileSync("emoji-picker.json"))).listen(${PORT})'`, PORT);
+  // The registry items from the packed package, with their packages pointing at the tarballs
+  const items = join(tmp, "registry");
+  mkdirSync(items);
+  run("tar", ["-xzf", tarballs["emoji-components"], "-C", items, "--strip-components", "2", "package/r"]);
+  for (const file of readdirSync(items)) {
+    const item = JSON.parse(readFileSync(join(items, file), "utf8"));
+    const ours = (item.dependencies ?? []).map((d) => d.replace(/@[^@/]+$/, "")).filter((d) => tarballs[d]);
+    if (!ours.length) continue;
+    item.dependencies = [...item.dependencies.filter((d) => !tarballs[d.replace(/@[^@/]+$/, "")]), ...new Set([...ours, "@emoji-components/core"])].map((d) => (tarballs[d] ? `${d}@file:${tarballs[d]}` : d));
+    writeFileSync(join(items, file), JSON.stringify(item));
+  }
+  registry = await serve(items, `node -e 'require("node:http").createServer((q, s) => q.url === "/" ? s.end() : require("node:fs").readFile("." + q.url, (e, b) => (e ? ((s.statusCode = 404), s.end()) : s.end(b)))).listen(${PORT})'`, PORT);
 }
-const local = (command) => (fromNpm ? command : command.replace(SITE, `http://localhost:${PORT}`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
+const JSDELIVR = /https:\/\/cdn\.jsdelivr\.net\/npm\/emoji-components@[^/]+\/r\//;
+const local = (command) => (fromNpm ? command : command.replace(JSDELIVR, `http://localhost:${PORT}/`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
 
 async function serve(cwd, command, port) {
   const child = spawn("sh", ["-c", `exec ${command}`], { cwd, env: { ...env, PORT: String(port) }, detached: true, stdio: ["ignore", "pipe", "pipe"] });

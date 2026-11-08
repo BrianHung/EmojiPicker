@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:registry": "shadcn build registry.json --output public/r",
+    "build:registry": "node scripts/build-registry.mjs",
     "build": "npm run build:registry && vite build",
     "typecheck": "tsc --noEmit && tsc --noEmit -p worker",
     "og": "node scripts/og/render-og.mjs",
