@@ -23,6 +23,7 @@
     "format": "biome format --write .",
     "check": "biome check .",
     "size": "size-limit",
+    "api": "node .github/api.mjs",
     "smoke": "node .github/smoke/run.mjs",
     "onboarding": "node .github/onboarding/run.mjs",
     "readme:hero": "npm run readme:hero -w demo",

@@ -25,6 +25,7 @@ npm run typecheck      # every workspace
 npm run check          # Biome lint and format check; `npm run format` formats
 npm run build          # core, the React package, then the site and registry
 npm run size           # bundle-size budgets on the library build (.size-limit.json)
+npm run api            # after `npm run build`: rewrite packages/core/api.md and packages/react/api.md, and check exports and names
 npm run smoke          # packed tarballs in fresh Vite, React 18, Next.js, and shadcn apps
 npm run onboarding     # docs.md's install and usage in apps from the Vite, Next.js, and shadcn CLIs; --from-npm after publishing
 npm run release:check  # .github/release-steps.mjs: everything above, plus visual and axe on a production build
@@ -47,11 +48,15 @@ Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 
 `packages/react/src` follows Base UI's: a folder per component (`picker`, `popover`, `suggestions`, `emoji`, `provider`), a folder per part named after it (`picker/list-cell/EmojiPickerListCell.tsx`), and beside each part its context (`…Context.ts`), its data attributes (`…DataAttributes.ts`), and its CSS variables (`…CssVars.ts`). A component's `index.parts.ts` lists its one-level parts and its `index.ts` exports the namespace, the types, and the attribute constants. Hooks live in the folder of the part they serve (`picker/root/utils/useEmojiPickerActions.ts`); code shared across components is in `internals` and `utils`. `EmojiPopover` and `EmojiSuggestions` keep adapter-neutral parts, types, and attribute files in `popover/` and `suggestions/`, and one folder per positioning library (`popover/floating-ui`, `popover/react-aria`), as Base UI's `ContextMenu` builds on `Menu`.
 
+`packages/core/api.md` and `packages/react/api.md` list each entry's value and type exports, part props, `data-slot` values, data attributes, CSS variables, stylesheets, storage keys, and registry items. `npm run api` ([.github/api.mjs](.github/api.mjs)) regenerates them from the built dist. The `check` step of `release:check` fails when a `.d.ts` value export is missing at runtime (or the reverse), when a consumer's declaration emit hits TS2742, when a name breaks the rules under [API conventions](#api-conventions), or when the committed reports differ from the build.
+
 The docs' data attribute and CSS variable tables are generated from the `…DataAttributes.ts` and `…CssVars.ts` files ([apps/demo/plugins/api-reference.ts](apps/demo/plugins/api-reference.ts)): a constant's JSDoc is its description, `@type` its type, and `@default` its default. A new attribute file needs a section there, or the site build fails.
 
 ## API conventions
 
 The API shape follows Base UI. Behavior follows React Aria.
+
+A name belongs to the code that defines and reads it. Code only one component uses takes that component's name: `EmojiPicker*`, `useEmojiPicker*`, and `emoji-picker-*` in `picker/`; `EmojiPopover*` and `emoji-popover-*` in `popover/`; `EmojiSuggestions*` and `emoji-suggestions-*` in `suggestions/`; `Emoji*` and `emoji` in `emoji/`. Code several components share (`internals/`) takes `EmojiComponents*`, as Base UI's `BaseUIEvent` and `preventBaseUIHandler`; storage keys and the default event type use `emoji-components`. Names in `provider/` and `use-emoji-typeahead/` serve the whole library and only need to say `Emoji`. A part's `data-slot` is its component and part names in kebab case (`emoji-picker-list-cell`), and a Root's is its component's. `.github/api.mjs` checks these rules, and its allowlist says why each exception exists.
 
 | Rule | Source |
 |---|---|
@@ -60,7 +65,7 @@ The API shape follows Base UI. Behavior follows React Aria.
 | State is `x` / `defaultX` / `onXChange(value, details)`; `details` is `{ reason, event, cancel(), isCanceled, allowPropagation(), isPropagationAllowed }` | Base UI |
 | Reasons use Base UI's names: `trigger-press`, `outside-press`, `escape-key`, `item-press`, `focus-out`, `input-change`, `clear-press`, `imperative-action`, `none`; a highlight moves by `keyboard`, `pointer`, or `none`, as in `onItemHighlighted` | Base UI |
 | A popover that closes because the page scrolls reports `scroll`; frequently used emoji report `pick`, `remove`, and `clear`. Base UI has no counterpart for these. | This package |
-| Imperative calls go through `actionsRef`; `event.preventEmojiPickerHandler()`, on every handler a part composes with its own, skips the part's handler | Base UI |
+| Imperative calls go through `actionsRef`; `event.preventEmojiComponentsHandler()`, on every handler a part composes with its own, skips the part's handler | Base UI |
 | State attributes: `data-highlighted` (keyboard or pointer), `data-selected`, `data-pressed`, `data-disabled`, `data-open` / `data-closed`, `data-popup-open`, `data-starting-style` / `data-ending-style`, present as `""` or absent | Base UI |
 | Emoji values are unified codes; a highlight's section-scoped key is `details.key` | Base UI (item values) |
 | ARIA patterns, focus management, virtual focus (`aria-activedescendant`), and keyboard delegates | React Aria |

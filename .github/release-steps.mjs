@@ -8,6 +8,9 @@ const STEPS = {
     "npm test -w demo",
     "node .github/build-package.mjs @emoji-components/core",
     "node .github/build-package.mjs emoji-components",
+    // Export parity, a declaration-emitting consumer, the naming rules, and the committed API reports
+    "node .github/api.mjs",
+    "git diff --exit-code -- packages/core/api.md packages/react/api.md",
     "npm run size",
     "npm run build -w @emoji-components/data",
     "npm test -w @emoji-components/data",
