@@ -1,6 +1,12 @@
 {
-  "name": "emoji-picker-monorepo",
+  "name": "emoji-components-monorepo",
   "private": true,
+  "homepage": "https://emoji.brianhung.me",
+  "bugs": "https://github.com/BrianHung/emoji-components/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianHung/emoji-components.git"
+  },
   "type": "module",
   "workspaces": [
     "packages/*",

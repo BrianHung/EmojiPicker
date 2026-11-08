@@ -1,6 +1,6 @@
 # emoji-components
 
-<img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/EmojiPicker/main/.github/assets/picker.svg" width="680">
+<img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/emoji-components/main/.github/assets/picker.svg" width="680">
 
 Unstyled React components for emoji pickers, reaction rows, and shortcode typeahead, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 

@@ -93,7 +93,7 @@ export function SiteHeader({ page, theme, onTheme, renderer, onRenderer }: { pag
         <div className="ml-auto flex items-center gap-1 sm:gap-1.5">
           <RendererSelect renderer={renderer} onRenderer={onRenderer} className="max-sm:hidden" />
           <Separator orientation="vertical" className="mx-1 h-4 self-center max-sm:hidden" />
-          <IconLink href="https://github.com/BrianHung/EmojiPicker" label="GitHub">
+          <IconLink href="https://github.com/BrianHung/emoji-components" label="GitHub">
             <GitHubIcon />
           </IconLink>
           <IconLink href="https://www.npmjs.com/package/emoji-components" label="npm" className="max-sm:hidden">

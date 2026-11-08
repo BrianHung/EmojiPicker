@@ -13,11 +13,11 @@
   "license": "CC-BY-4.0",
   "author": "Brian Hung",
   "homepage": "https://emoji.brianhung.me",
-  "bugs": "https://github.com/BrianHung/EmojiPicker/issues",
+  "bugs": "https://github.com/BrianHung/emoji-components/issues",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BrianHung/EmojiPicker.git",
+    "url": "git+https://github.com/BrianHung/emoji-components.git",
     "directory": "packages/twemoji-font"
   },
   "config": {

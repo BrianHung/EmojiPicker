@@ -28,7 +28,7 @@ Workers AI and Vectorize have no local mode, so `.env.development` points the de
 
 ## Deploy
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/BrianHung/EmojiPicker/tree/main/apps/demo)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/BrianHung/emoji-components/tree/main/apps/demo)
 
 Or, from `apps/demo` with Wrangler:
 

@@ -37,7 +37,7 @@ NAMES = {
     8: "Brian Hung",
     9: "Twitter, Inc and other contributors",
     10: "Twemoji {version} graphics as a COLRv0 color font. Twitter and the Twemoji contributors do not endorse this font.",
-    11: "https://github.com/BrianHung/EmojiPicker",
+    11: "https://github.com/BrianHung/emoji-components",
     12: "https://github.com/jdecked/twemoji",
     13: "The graphics are licensed under CC-BY 4.0.",
     14: "https://creativecommons.org/licenses/by/4.0/",
