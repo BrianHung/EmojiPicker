@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { appendFileSync, cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -20,6 +21,18 @@ else console.log("Skipped the Twemoji font package: run `npm run build:font` fir
 const tarballs = readdirSync(tmp)
   .filter((f) => f.endsWith(".tgz"))
   .map((f) => join(tmp, f));
+
+// The registry items emoji-components ships for jsDelivr are the site's, pinned to this release
+const { version } = JSON.parse(readFileSync(join(root, "packages/react/package.json"), "utf8"));
+run("tar", ["-xzf", tarballs.find((t) => /[/\\]emoji-components-\d/.test(t)), "-C", tmp, "package/r"]);
+const packed = join(tmp, "package/r");
+const site = join(root, "apps/demo/public/r");
+assert.deepEqual(readdirSync(packed).sort(), readdirSync(site).sort(), "emoji-components r/ and the site's r/ list different items");
+for (const file of readdirSync(site)) {
+  const item = JSON.parse(readFileSync(join(site, file), "utf8").replaceAll("https://emoji.brianhung.me/r/", `https://cdn.jsdelivr.net/npm/emoji-components@${version}/r/`));
+  assert.deepEqual(JSON.parse(readFileSync(join(packed, file), "utf8")), item, `emoji-components r/${file} differs from the site's`);
+  for (const dep of [item, ...(item.items ?? [])].flatMap((i) => i.dependencies ?? [])) if (/^(emoji-components|@emoji-components\/)/.test(dep)) assert.ok(dep.endsWith(`@${version}`), `r/${file} depends on ${dep}, not ${version}`);
+}
 
 function app(name, deps) {
   const dir = join(tmp, name);
@@ -47,9 +60,8 @@ run("npx", ["next", "build"], next);
 
 // The packages are preinstalled from the tarballs. Without a version range, shadcn skips installed
 // dependencies, so it only fetches its `utils` item.
-run("npm", ["run", "build:registry", "-w", "demo"]);
 const shadcn = app("shadcn", ["react", "react-dom", "@types/react", "@types/react-dom", "typescript", "vite", "tailwindcss", "@tailwindcss/vite", "shadcn@4"]);
-const item = JSON.parse(readFileSync(join(root, "apps/demo/public/r/emoji-picker.json"), "utf8"));
+const item = JSON.parse(readFileSync(join(packed, "emoji-picker.json"), "utf8"));
 item.dependencies = item.dependencies.map((dep) => dep.replace(/^(emoji-components|@emoji-components\/[^@]+)@.+$/, "$1"));
 writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
 run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);

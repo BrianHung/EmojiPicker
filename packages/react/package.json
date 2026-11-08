@@ -31,6 +31,7 @@
   ],
   "files": [
     "dist",
+    "r",
     "src/styles",
     "THIRD_PARTY_NOTICES.md"
   ],
@@ -92,6 +93,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "prepack": "node ../../apps/demo/scripts/build-registry.mjs",
     "prepublishOnly": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"

@@ -12,7 +12,7 @@
 ### shadcn/ui
 
 ```bash
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
+npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json
 ```
 
 ```tsx

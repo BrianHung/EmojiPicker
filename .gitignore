@@ -10,5 +10,6 @@ apps/demo/capture/ref
 .claude/worktrees/
 
 packages/data/data/
+packages/react/r/
 packages/twemoji-font/.cache/
 packages/twemoji-font/test/.results/

@@ -4,7 +4,7 @@
   "title": "Emoji Tiptap",
   "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
   "dependencies": [
-    "emoji-components@^1.0.0-alpha.0",
+    "emoji-components@1.0.0-alpha.0",
     "@tiptap/core",
     "@tiptap/pm",
     "@tiptap/react"
