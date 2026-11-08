@@ -11,7 +11,7 @@ document.documentElement.classList.toggle("dark", matchMedia("(prefers-color-sch
 createRoot(document.getElementById("root")!).render(
   <main className="p-6">
     <EmojiProvider data={en} renderer="native">
-      <EmojiPickerCard className="shadow-none" />
+      <EmojiPickerCard className="h-[390px] shadow-none" />
     </EmojiProvider>
   </main>,
 );
