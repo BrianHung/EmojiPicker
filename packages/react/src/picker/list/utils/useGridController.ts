@@ -70,12 +70,10 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const { persisted, highlighted, lastKey, setHighlight, applyHighlight } = highlight;
   const { lastFocused, syncStop } = useFocusStop(core, listRef, latest, cellElement);
   const variations = useVariations(core, cellElement, setHighlight);
-  const setStop = (key: Key | null) => core.setTabStop(key == null ? null : String(key));
 
-  const moveTo = (key: Key, dom: boolean, details = NONE, from?: Key) => {
+  const moveTo = (key: Key, details = NONE, from?: Key) => {
     geometry.reveal(key, from);
     setHighlight(key, details);
-    if (dom) setStop(key);
   };
   const pick = (key: Key, event?: Event, reason?: EmojiPickerRootChangeEventReason) => {
     const it = latest.current.collection.emoji(key);
@@ -96,7 +94,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (current == null) {
         const start = move === "first" ? navigation.getFirstKey() : move === "last" ? navigation.getLastKey() : move === "down" || move === "right" || move === "page-down" ? geometry.firstVisible() : null;
         if (start == null) return false;
-        moveTo(start, dom, details);
+        moveTo(start, details);
         return true;
       }
       const next = navigation.move(current, move, geometry.viewport());
@@ -107,7 +105,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         }
         return true;
       }
-      moveTo(next, dom, details, move === "page-down" || move === "page-up" ? current : undefined);
+      moveTo(next, details, move === "page-down" || move === "page-up" ? current : undefined);
       return true;
     },
     pick(event, reason) {
@@ -136,7 +134,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       const key = latest.current.collection.emoji(last) ? last : geometry.firstVisible();
       if (key == null) return false;
       core.setDomFocus(true);
-      moveTo(key, true);
+      moveTo(key);
       return true;
     },
     jump(id, { instant = false, afterRender = false } = {}) {
@@ -146,7 +144,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
       if (!section || !geometry.jump(section.id, instant)) return;
       core.setActiveSection(section.id);
       const first = section.items[0]?.id;
-      if (first != null) setStop(first);
+      if (first != null) core.setTabStop(String(first));
     },
     atStart() {
       const key = highlighted();
@@ -245,7 +243,6 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         if (!cell || e.target !== document.activeElement) return;
         const id = cell.getAttribute("data-key");
         lastFocused.current = id;
-        setStop(id);
         setHighlight(id);
         core.setDomFocus(true);
       },

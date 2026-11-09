@@ -64,6 +64,13 @@ describe("Root keyboard", () => {
     expect(document.activeElement).toBe(input);
   });
 
+  it("moves the grid's tab stop with the highlight, so Tab lands on the highlighted cell", () => {
+    const { input, host } = mount({});
+    press(input, "ArrowRight");
+    press(input, "ArrowRight");
+    expect(host.querySelector('[tabindex="0"]')?.getAttribute("data-unified")).toBe("1f603");
+  });
+
   it("binds a keyboard target ref that attaches after Root mounts", () => {
     const onSelect = vi.fn();
     let show = () => {};
