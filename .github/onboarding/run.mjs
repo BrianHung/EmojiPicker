@@ -112,7 +112,9 @@ const logged = async (page, logs, n) => {
   if (logs.length <= n) throw new Error("onSelect logged nothing");
 };
 
-// The first cells render before the Viewport is measured
+// The list's emoji cells: its loading and empty states are an unnamed role="option" too, as in React Aria's ListBox
+const CELLS = '[role="listbox"] [role="option"][aria-label]';
+
 const settled = async (page, locator) => {
   for (let last = -1, count = await locator.count(); ; last = count, count = await locator.count()) {
     if (count === last) return count;
@@ -135,15 +137,18 @@ async function check(url, effect) {
   page.on("requestfailed", (r) => problems.push(`${r.url()} ${r.failure()?.errorText}`));
   page.on("response", (r) => r.status() >= 400 && problems.push(`${r.url()} ${r.status()}`));
   await page.goto(url);
-  const options = page.locator('[role="listbox"] [role="option"]');
+  const options = page.locator(CELLS);
   await options.first().waitFor({ timeout: 15000 });
   const all = await settled(page, options);
   if (all > 1000) throw new Error(`${url}: ${all} cells rendered, so the list is not virtualized: the Viewport has no height`);
   await page.getByRole("searchbox").fill("smile");
-  await page.waitForFunction((n) => {
-    const count = document.querySelectorAll('[role="listbox"] [role="option"]').length;
-    return count > 0 && count < n;
-  }, all);
+  await page.waitForFunction(
+    ([n, cells]) => {
+      const count = document.querySelectorAll(cells).length;
+      return count > 0 && count < n;
+    },
+    [all, CELLS],
+  );
   const found = await options.count();
   const before = logs.length;
   const clicked = await options.first().getAttribute("aria-label");
