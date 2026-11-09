@@ -34,20 +34,34 @@ Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emo
 
 ## Usage
 
-`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out.
+`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out. The picker button needs the `emoji-picker-popover.json` item from [Installation](/#installation).
 
 ```tsx title="editor.tsx"
+"use client";
+
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { EmojiProvider, useEmojiStore } from "emoji-components";
-import { EmojiNode } from "@/components/tiptap/emoji-node";
+import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
+import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
 import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
 
 function TiptapEditor() {
   const store = useEmojiStore();
-  const editor = useEditor({ extensions: [StarterKit, EmojiNode.configure({ store })] });
+  const editor = useEditor({ extensions: [StarterKit, EmojiNode.configure({ store })], immediatelyRender: false });
+  if (!editor) return null;
   return (
     <>
+      <EmojiPickerPopover
+        aria-label="Insert emoji"
+        onSelect={(selection) => {
+          const attrs = selection.isCustom ? emojiAttrs(store, selection.unified) : null;
+          if (attrs) editor.chain().focus().insertEmoji(attrs).run();
+          else editor.chain().focus().insertContent(selection.emoji).run();
+        }}
+      >
+        🙂
+      </EmojiPickerPopover>
       <EditorContent editor={editor} />
       <EmojiSuggestionMenu editor={editor} />
     </>
@@ -62,6 +76,8 @@ export function Editor() {
   );
 }
 ```
+
+`immediatelyRender: false` renders the editor after hydration, as Tiptap requires with server rendering. With Next.js Cache Components, render `<Editor />` inside `<Suspense>`, since Tiptap calls `Math.random()` while it renders.
 
 ## How it works
 

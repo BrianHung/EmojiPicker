@@ -45,6 +45,31 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 </EmojiPickerPopover>
 ```
 
+For `:shortcode` suggestions in a text field, add the suggestions item and pass it the typeahead:
+
+<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-suggestions.json" />
+
+```tsx title="composer.tsx"
+"use client";
+
+import * as React from "react";
+import { useTextFieldEmojiTypeahead } from "emoji-components";
+import { EmojiSuggestions } from "@/components/ui/emoji-suggestions";
+
+export function Composer() {
+  const ref = React.useRef<HTMLTextAreaElement>(null);
+  const typeahead = useTextFieldEmojiTypeahead(ref);
+  return (
+    <>
+      <textarea ref={ref} aria-label="Message" />
+      <EmojiSuggestions {...typeahead} />
+    </>
+  );
+}
+```
+
+`emoji-reaction-bar.json` adds a row of reaction buttons where the arrow keys move focus, and the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples add their editors' items.
+
 </TabPanel>
 
 <TabPanel label="Manual">
@@ -74,7 +99,11 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 </Step>
 
-<Step title="Update the import paths to match your project setup." />
+<Step title="Set up shadcn/ui's theme and utilities.">
+
+The component uses shadcn/ui's color classes, such as `bg-popover` and `border-border`, and `cn` from `@/lib/utils`. `npx shadcn@latest init` adds both; then update the import paths to match your project.
+
+</Step>
 
 </Steps>
 
@@ -142,6 +171,12 @@ import { EmojiPicker } from "emoji-components";
 ### Styling the parts {#inline}
 
 Each part takes `className` and `style` as a value or a function of its state, and `emoji-components/theme.css` adds Tailwind utilities for the tokens, such as `bg-emoji-picker-background`.
+
+```css title="app/globals.css"
+@import "tailwindcss";
+@import "emoji-components/tokens.css";
+@import "emoji-components/theme.css";
+```
 
 <Demo name="inline-picker" />
 
@@ -218,6 +253,10 @@ Every part forwards its ref, spreads other props onto its element, and takes the
 A handler you pass to a part runs before the part's own, and `event.preventEmojiComponentsHandler()` skips the part's. Each controllable state takes `x`, `defaultX`, and `onXChange(value, details)`: `details.cancel()` keeps the current state, and `details.allowPropagation()` lets an Escape reach the page. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them; parts that a function child renders, such as `ListCell` inside `List`, belong in a Client Component.
 
 Shared types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `EmojiImageUrl`, `EmojiStore`.
+
+`onSelect` receives an `EmojiSelection`. Insert `emoji` as text, or, for a custom emoji, draw `imageUrl` or keep `shortcode`.
+
+<DefList rows={api.selection} />
 
 ### EmojiProvider {#api-provider}
 
@@ -565,7 +604,7 @@ Types: `Emoji.Props`, `EmojiInput`, `ResolvedEmoji`.
 
 ### Design tokens {#api-tokens}
 
-Defined in `tokens.css`. Set them on `Root` or an ancestor.
+Defined in `tokens.css`. Set them on `Root` or an ancestor. The defaults use `light-dark()`, so dark mode needs `color-scheme: dark`, such as `.dark { color-scheme: dark; }`. `shadcn.css` sets the tokens from shadcn/ui's theme variables instead.
 
 <AttrTable head={["Token", "Default (light / dark)", "Description"]} rows={api.tokens} />
 

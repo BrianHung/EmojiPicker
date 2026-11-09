@@ -1,4 +1,3 @@
-import en from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, type CategoryOption, type CustomEmoji, type EmojiSelection } from "emoji-components";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 
@@ -17,7 +16,7 @@ const bufo = async ({ signal }: { signal: AbortSignal }): Promise<CustomEmoji[]>
 
 export function CustomEmojiPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
-    <EmojiProvider data={en} customEmojis={bufo}>
+    <EmojiProvider customEmojis={bufo}>
       <EmojiPickerCard onSelect={onSelect} categories={categories} />
     </EmojiProvider>
   );
