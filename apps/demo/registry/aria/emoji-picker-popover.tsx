@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiSelection } from "emoji-components";
+import { useEmojiLabels, type EmojiSelection } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
@@ -22,12 +22,13 @@ function EmojiPickerPopover({
   "aria-label"?: string;
 }) {
   const [open, setOpen] = React.useState(false);
+  const labels = useEmojiLabels();
   return (
     <PopoverTrigger isOpen={open} onOpenChange={setOpen}>
       <Button variant="outline" aria-label={ariaLabel} className={className}>
         {children}
       </Button>
-      <Popover placement={align === "center" ? side : `${side} ${align}`} aria-label="Emoji picker" className="w-auto overflow-hidden p-0">
+      <Popover placement={align === "center" ? side : `${side} ${align}`} aria-label={labels.picker} className="w-auto overflow-hidden p-0">
         <EmojiPickerCard
           autoFocus
           onSelect={(selection) => {
