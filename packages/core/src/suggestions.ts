@@ -183,7 +183,7 @@ export function createEmojiSuggestions(store: EmojiStore, options: EmojiSuggesti
       const direction = move === "up" || move === "down" || move === "left" || move === "right" ? move : undefined;
       if (direction) {
         if (!self.move(direction)) return false;
-      } else if ((event.key === "Enter" && !event.shiftKey) || event.key === "Tab") self.choose();
+      } else if ((event.key === "Enter" || event.key === "Tab") && !event.shiftKey) self.choose();
       else if (event.key === "Escape") self.dismiss();
       else return false;
       event.preventDefault();
