@@ -7,6 +7,11 @@ import { Hero } from "./hero";
 import Content, { frontmatter } from "./page.mdx";
 import "@/globals.css";
 
+const MOVED: Record<string, string> = { parts: "#usage", "custom-virtualizer": "/examples/virtualizer/" };
+const moved = MOVED[location.hash.slice(1)];
+if (moved?.startsWith("#")) history.replaceState(null, "", moved);
+else if (moved) location.replace(moved);
+
 createRoot(document.getElementById("root")!).render(
   <SiteShell page="docs">
     <DocsLayout toc>

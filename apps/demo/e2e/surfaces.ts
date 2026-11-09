@@ -246,9 +246,7 @@ const home: Surface[] = [
       return button(preview(p, "tapback"), "More emoji");
     },
   },
-  inline("home/search", "/", (p) => preview(p, "search")),
   inline("home/custom-emoji", "/", (p) => preview(p, "custom-emoji")),
-  inline("home/custom-cells", "/", (p) => preview(p, "custom-cells")),
   menu("home/autocomplete", "/", (p) => example(p, "headless").getByLabel("Message", { exact: true }), ":smi", { frame: (p) => preview(p, "headless") }),
 ];
 
@@ -282,19 +280,6 @@ export async function show(page: Page, s: Surface, { interact = false } = {}) {
 
 export type Shot = { id: string; path: string; only?: Viewport; prepare?: (page: Page) => Promise<void>; frame: (page: Page) => Locator; mask?: (page: Page) => Locator[] };
 
-const ENGINES = ["Lexical", "No Typos", "Fuse", "Frequents", "Async"];
-const searchFor =
-  (engine: string, mode = "Ranked") =>
-  async (p: Page) => {
-    const ex = example(p, "search");
-    for (const name of [engine, mode]) {
-      await ex.getByRole("tab", { name, exact: true }).focus();
-      await p.keyboard.press("Enter");
-    }
-    await preview(p, "search").locator(slot("searchInput")).fill("smile");
-    await preview(p, "search").locator(emojiItem).first().waitFor();
-  };
-
 export const SHOTS: Shot[] = [
   ...STYLES.flatMap((s): Shot[] => {
     const path = `/gallery/#${s}`;
@@ -326,9 +311,6 @@ export const SHOTS: Shot[] = [
   { id: "home/mobile-menu", path: "/", only: "mobile", prepare: async (p) => p.getByRole("button", { name: "Menu" }).click(), frame: (p) => p.getByRole("dialog") },
   { id: "home/hero-apple", path: "/", frame: hero },
   { id: "home/tapback", path: "/", frame: (p) => preview(p, "tapback") },
-  { id: "home/rendering", path: "/", frame: (p) => preview(p, "rendering") },
-  ...ENGINES.map((e): Shot => ({ id: `home/search-${e.replace(/\W+/g, "").toLowerCase()}`, path: "/", prepare: searchFor(e), frame: (p) => preview(p, "search") })),
-  { id: "home/search-grouped", path: "/", prepare: searchFor("Lexical", "Grouped"), frame: (p) => preview(p, "search") },
   { id: "examples/index", path: "/examples/", frame: (p) => p.locator("main") },
   { id: "examples/semantic-search-on-device", path: "/examples/semantic-search/", frame: (p) => p.getByTestId("status").locator("xpath=.."), mask: (p) => [p.getByTestId("status")] },
 ];

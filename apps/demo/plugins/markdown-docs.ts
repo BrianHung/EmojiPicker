@@ -125,7 +125,7 @@ type Route = { type: "text/markdown" | "text/plain" | "application/xml"; render:
 
 export const ROUTES: Record<string, Route> = {
   "docs.md": { type: "text/markdown", render: () => document(docs(), `Live docs: ${SITE}/`) },
-  "examples.md": { type: "text/markdown", render: () => `# Examples\n\nIntegrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
+  "examples.md": { type: "text/markdown", render: () => `# Examples\n\nRecipes and integrations to copy into your app.\n\n${index((name) => `${SITE}/examples/${name}.md`)}\n` },
   ...Object.fromEntries(NAMES.map((name) => [`examples/${name}.md`, { type: "text/markdown", render: () => document(example(name), `Live example: ${SITE}/examples/${name}/`) } satisfies Route])),
   "llms.txt": {
     type: "text/plain",
@@ -135,12 +135,13 @@ export const ROUTES: Record<string, Route> = {
 
 ## Docs
 
-- [Emoji Components](${SITE}/docs.md): installation, anatomy, examples, and the API reference of every part.
+- [Emoji Components](${SITE}/docs.md): installation, usage, anatomy, examples, and the API reference of every part.
 
 ## Examples
 
-- [Examples](${SITE}/examples.md): index of the integrations.
+- [Examples](${SITE}/examples.md): index of the recipes and integrations.
 ${index((name) => `${SITE}/examples/${name}.md`)}
+- [Source examples](https://github.com/BrianHung/emoji-components/tree/main/examples): popovers, providers, search, rendering, and cells, as files to copy.
 `,
   },
   "robots.txt": { type: "text/plain", render: () => `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n` },
