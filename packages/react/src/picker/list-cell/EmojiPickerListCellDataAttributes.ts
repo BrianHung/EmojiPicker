@@ -30,7 +30,7 @@ export const index = "data-index";
  */
 export const highlighted = "data-highlighted";
 /**
- * Present on the cell at the keyboard position, by DOM focus or the search field's aria-activedescendant.
+ * Present on the cell at the keyboard position, by DOM focus or the search field's `aria-activedescendant`.
  */
 export const focused = "data-focused";
 /**
@@ -42,7 +42,7 @@ export const selected = "data-selected";
  */
 export const hasVariations = "data-has-variations";
 /**
- * Present when the provider's imageUrl draws the cell's Unicode emoji as an image while the renderer is native.
+ * Present when the provider's `imageUrl` draws the cell's Unicode emoji as an image while the renderer is `native`.
  */
 export const overridden = "data-overridden";
 /**

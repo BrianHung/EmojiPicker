@@ -8,7 +8,7 @@ export const slot = "data-slot";
  */
 export const searching = "data-searching";
 /**
- * The List's orientation.
+ * The orientation of `List`.
  * @type {'horizontal' | 'vertical'}
  */
 export const orientation = "data-orientation";

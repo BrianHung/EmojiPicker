@@ -8,7 +8,7 @@ export const slot = "data-slot";
  */
 export const searching = "data-searching";
 /**
- * The columns prop, when it is a number.
+ * The `columns` prop, when it is a number.
  * @type {number}
  */
 export const columns = "data-columns";

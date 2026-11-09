@@ -1,5 +1,5 @@
 /**
- * The swatch size of SkinToneTrigger and SkinToneOption.
+ * The swatch size of `SkinToneTrigger` and `SkinToneOption`.
  * @type {length}
  * @default 15px
  */

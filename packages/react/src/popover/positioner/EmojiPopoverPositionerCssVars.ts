@@ -9,12 +9,12 @@ export const anchorWidth = "--anchor-width";
  */
 export const anchorHeight = "--anchor-height";
 /**
- * The width left between the anchor and the edge of the viewport, less collisionPadding.
+ * The width left between the anchor and the edge of the viewport, less `collisionPadding`.
  * @type {number}
  */
 export const availableWidth = "--available-width";
 /**
- * The height left between the anchor and the edge of the viewport, less collisionPadding.
+ * The height left between the anchor and the edge of the viewport, less `collisionPadding`.
  * @type {number}
  */
 export const availableHeight = "--available-height";

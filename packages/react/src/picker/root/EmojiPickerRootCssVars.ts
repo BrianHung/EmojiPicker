@@ -29,7 +29,7 @@ export const emojiCellWidth = "--emoji-picker-cell-width";
  */
 export const emojiCellHeight = "--emoji-picker-cell-height";
 /**
- * Set by List to the grid's width.
+ * Set by `List` to the grid's width.
  * @type {number}
  */
 export const contentWidth = "--emoji-picker-content-width";

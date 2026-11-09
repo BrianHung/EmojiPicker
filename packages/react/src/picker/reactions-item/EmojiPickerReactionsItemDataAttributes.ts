@@ -15,7 +15,7 @@ export const unified = "data-unified";
  */
 export const selected = "data-selected";
 /**
- * Present when the provider's imageUrl draws its Unicode emoji as an image while the renderer is native.
+ * Present when the provider's `imageUrl` draws its Unicode emoji as an image while the renderer is `native`.
  */
 export const overridden = "data-overridden";
 /**
