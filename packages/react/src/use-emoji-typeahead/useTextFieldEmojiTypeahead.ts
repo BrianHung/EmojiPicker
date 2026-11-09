@@ -15,7 +15,11 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement
   const typeahead = useEmojiTypeahead(
     match && {
       query: match.query,
-      anchor: () => (ref.current ? new InputRange(ref.current, match.from, match.to).getBoundingClientRect() : null),
+      // A controlled field re-renders inside its input event, before the match syncs to the new value
+      anchor: () => {
+        const el = ref.current;
+        return el ? new InputRange(el, Math.min(match.from, el.value.length), Math.min(match.to, el.value.length)).getBoundingClientRect() : null;
+      },
       replace(text) {
         ref.current?.setSelectionRange(match.from, match.to);
         document.execCommand("insertText", false, `${text} `);
