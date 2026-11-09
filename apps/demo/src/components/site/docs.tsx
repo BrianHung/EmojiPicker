@@ -31,6 +31,15 @@ export function H3({ id, children, className }: { id: string; children: React.Re
   );
 }
 
+export function H4({ id, children, className }: { id: string; children: React.ReactNode; className?: string }) {
+  return (
+    <h4 id={id} className={cn("group scroll-mt-20 text-base font-semibold tracking-tight", className)}>
+      {children}
+      <Anchor id={id} />
+    </h4>
+  );
+}
+
 export function P({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <p

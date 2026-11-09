@@ -292,7 +292,7 @@ Holds the data, search, frequently used emoji, and skin tone for the parts and h
 
 Types: `EmojiProvider.Props`, `.SkinToneChangeEventDetails`, `.SkinToneChangeEventReason`, `.FrequentsChangeEventDetails`, `.FrequentsChangeEventReason`.
 
-### Provider hooks {#api-provider-hooks}
+#### Provider hooks {#api-provider-hooks}
 
 <DefList rows={api.providerHooks} />
 
@@ -300,7 +300,9 @@ Types: `EmojiProvider.Props`, `.SkinToneChangeEventDetails`, `.SkinToneChangeEve
 
 Types: `EmojiSearchState`, `FrequentEmoji`, `EmojiStoreStatus`.
 
-### EmojiPicker.Root {#api-root}
+### EmojiPicker {#api-emoji-picker}
+
+#### EmojiPicker.Root {#api-root}
 
 Groups the parts of a picker. Renders an `<aside>` element.
 
@@ -308,7 +310,7 @@ Groups the parts of a picker. Renders an `<aside>` element.
 
 Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.ChangeEventReason`, `.SelectEventDetails`, `.QueryChangeEventDetails`, `.QueryChangeEventReason`, `.HighlightChangeEventDetails`, `.HighlightChangeEventReason`, `.CollapsedCategoriesChangeEventDetails`, `.CollapsedCategoriesChangeEventReason`, `.ReactionsOpenChangeEventDetails`, `.ReactionsOpenChangeEventReason`.
 
-### EmojiPicker.Search {#api-search}
+#### EmojiPicker.Search {#api-search}
 
 The row around the search field. Renders a `<div>` element.
 
@@ -316,7 +318,7 @@ The row around the search field. Renders a `<div>` element.
 
 Types: `EmojiPicker.Search.Props`, `.State`.
 
-### EmojiPicker.SearchField {#api-search-field}
+#### EmojiPicker.SearchField {#api-search-field}
 
 React Aria's `SearchField`, around `SearchInput` and `SearchClear`; `SearchInput` renders one when it isn't inside a `SearchField`. Renders a `<div>` element.
 
@@ -324,7 +326,7 @@ React Aria's `SearchField`, around `SearchInput` and `SearchClear`; `SearchInput
 
 Types: `EmojiPicker.SearchField.Props`, `.State`.
 
-### EmojiPicker.SearchInput {#api-search-input}
+#### EmojiPicker.SearchInput {#api-search-input}
 
 A searchbox that points to the highlighted emoji with `aria-activedescendant`. Renders an `<input>` element.
 
@@ -332,7 +334,7 @@ A searchbox that points to the highlighted emoji with `aria-activedescendant`. R
 
 Types: `EmojiPicker.SearchInput.Props`, `.State`.
 
-### EmojiPicker.SearchClear {#api-search-clear}
+#### EmojiPicker.SearchClear {#api-search-clear}
 
 Clears the query, and renders only while there is one. Renders a `<button>` element.
 
@@ -340,7 +342,7 @@ Clears the query, and renders only while there is one. Renders a `<button>` elem
 
 Types: `EmojiPicker.SearchClear.Props`, `.State`.
 
-### EmojiPicker.SearchStatus {#api-search-status}
+#### EmojiPicker.SearchStatus {#api-search-status}
 
 A polite live region with the result count, as Base UI's `Combobox.Status`; without it, `Root` renders a visually hidden one. Renders a `<span>` element.
 
@@ -348,7 +350,7 @@ A polite live region with the result count, as Base UI's `Combobox.Status`; with
 
 Types: `EmojiPicker.SearchStatus.Props`, `.State`.
 
-### EmojiPicker.SkinTone {#api-skin-tone}
+#### EmojiPicker.SkinTone {#api-skin-tone}
 
 A disclosure for the skin tones, closed when focus leaves it. Renders a `<div>` element.
 
@@ -356,7 +358,7 @@ A disclosure for the skin tones, closed when focus leaves it. Renders a `<div>` 
 
 Types: `EmojiPicker.SkinTone.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`.
 
-### EmojiPicker.SkinToneTrigger {#api-skin-tone-trigger}
+#### EmojiPicker.SkinToneTrigger {#api-skin-tone-trigger}
 
 Opens and closes the skin tones. Renders a `<button>` element.
 
@@ -364,7 +366,7 @@ Opens and closes the skin tones. Renders a `<button>` element.
 
 Types: `EmojiPicker.SkinToneTrigger.Props`, `.State`.
 
-### EmojiPicker.SkinToneOptions {#api-skin-tone-options}
+#### EmojiPicker.SkinToneOptions {#api-skin-tone-options}
 
 A toolbar of tones. Renders a `<div>` element.
 
@@ -372,7 +374,7 @@ A toolbar of tones. Renders a `<div>` element.
 
 Types: `EmojiPicker.SkinToneOptions.Props`, `.State`.
 
-### EmojiPicker.SkinToneOption {#api-skin-tone-option}
+#### EmojiPicker.SkinToneOption {#api-skin-tone-option}
 
 One tone, pressed while it is the current one. Renders a `<button>` element.
 
@@ -380,7 +382,7 @@ One tone, pressed while it is the current one. Renders a `<button>` element.
 
 Types: `EmojiPicker.SkinToneOption.Props`, `.State`.
 
-### EmojiPicker.SkinToneGlyph {#api-skin-tone-glyph}
+#### EmojiPicker.SkinToneGlyph {#api-skin-tone-glyph}
 
 An emoji drawn in a tone, for a trigger or an option. Renders an `Emoji`.
 
@@ -388,7 +390,7 @@ An emoji drawn in a tone, for a trigger or an option. Renders an `Emoji`.
 
 Types: `EmojiPicker.SkinToneGlyph.Props`.
 
-### EmojiPicker.Viewport {#api-viewport}
+#### EmojiPicker.Viewport {#api-viewport}
 
 The scroll container, which needs a height to virtualize the list. Renders a `<div>` element.
 
@@ -396,7 +398,7 @@ The scroll container, which needs a height to virtualize the list. Renders a `<d
 
 Types: `EmojiPicker.Viewport.Props`, `.State`.
 
-### EmojiPicker.List {#api-list}
+#### EmojiPicker.List {#api-list}
 
 A virtualized listbox with a group for each section. Renders a `<div>` element.
 
@@ -404,7 +406,7 @@ A virtualized listbox with a group for each section. Renders a `<div>` element.
 
 Types: `EmojiPicker.List.Props`, `.State`, `.EmptyState`.
 
-### EmojiPicker.ListSection {#api-list-section}
+#### EmojiPicker.ListSection {#api-list-section}
 
 A section, which `List` renders in place of each section in view. Renders a `<section>` element.
 
@@ -412,7 +414,7 @@ A section, which `List` renders in place of each section in view. Renders a `<se
 
 Types: `EmojiPicker.ListSection.Props`, `.State`.
 
-### EmojiPicker.ListSectionTitle {#api-list-section-title}
+#### EmojiPicker.ListSectionTitle {#api-list-section-title}
 
 The section's title, inside the listbox, pinned to the top of a vertical list and to the start of a horizontal one. Renders a `<header>` element.
 
@@ -420,7 +422,7 @@ The section's title, inside the listbox, pinned to the top of a vertical list an
 
 Types: `EmojiPicker.ListSectionTitle.Props`, `.State`.
 
-### EmojiPicker.ListSectionActions {#api-list-section-actions}
+#### EmojiPicker.ListSectionActions {#api-list-section-actions}
 
 Controls over the section's title, outside the listbox. Renders a `<div>` element.
 
@@ -428,7 +430,7 @@ Controls over the section's title, outside the listbox. Renders a `<div>` elemen
 
 Types: `EmojiPicker.ListSectionActions.Props`, `.State`.
 
-### EmojiPicker.ListItems {#api-list-items}
+#### EmojiPicker.ListItems {#api-list-items}
 
 Calls its children for each emoji of the section in view. Renders no element.
 
@@ -436,7 +438,7 @@ Calls its children for each emoji of the section in view. Renders no element.
 
 Types: `EmojiPicker.ListItems.Props`.
 
-### EmojiPicker.ListCell {#api-list-cell}
+#### EmojiPicker.ListCell {#api-list-cell}
 
 An option, which re-renders only when its own state changes. Renders a `<div>` element.
 
@@ -444,7 +446,7 @@ An option, which re-renders only when its own state changes. Renders a `<div>` e
 
 Types: `EmojiPicker.ListCell.Props`, `.State`.
 
-### EmojiPicker.ListVariations {#api-list-variations}
+#### EmojiPicker.ListVariations {#api-list-variations}
 
 An emoji's skin tones, opened by a long press or Shift+Space. `List` renders one; to style it, render it in `Viewport` beside `List`. Renders a `<div>` element.
 
@@ -452,7 +454,7 @@ An emoji's skin tones, opened by a long press or Shift+Space. `List` renders one
 
 Types: `EmojiPicker.ListVariations.Props`, `.State`.
 
-### EmojiPicker.ListVariationsOption {#api-list-variations-option}
+#### EmojiPicker.ListVariationsOption {#api-list-variations-option}
 
 One tone of the emoji. Renders a `<div>` element.
 
@@ -460,7 +462,7 @@ One tone of the emoji. Renders a `<div>` element.
 
 Types: `EmojiPicker.ListVariationsOption.Props`, `.State`.
 
-### EmojiPicker.CategoryNav {#api-category-nav}
+#### EmojiPicker.CategoryNav {#api-category-nav}
 
 A toolbar of tabs that scroll to a section. Renders a `<div>` element.
 
@@ -468,7 +470,7 @@ A toolbar of tabs that scroll to a section. Renders a `<div>` element.
 
 Types: `EmojiPicker.CategoryNav.Props`, `.State`.
 
-### EmojiPicker.CategoryNavTab {#api-category-nav-tab}
+#### EmojiPicker.CategoryNavTab {#api-category-nav-tab}
 
 Scrolls to its section, and has `aria-current` while the section is in view. Renders a `<div>` element.
 
@@ -476,7 +478,7 @@ Scrolls to its section, and has `aria-current` while the section is in view. Ren
 
 Types: `EmojiPicker.CategoryNavTab.Props`, `.State`, `EmojiPickerCategoryIcon.Props`.
 
-### EmojiPicker.Preview {#api-preview}
+#### EmojiPicker.Preview {#api-preview}
 
 The highlighted emoji and its name. Renders a `<div>` element.
 
@@ -484,7 +486,7 @@ The highlighted emoji and its name. Renders a `<div>` element.
 
 Types: `EmojiPicker.Preview.Props`, `.State`.
 
-### EmojiPicker.Reactions {#api-tapback}
+#### EmojiPicker.Reactions {#api-tapback}
 
 A toolbar of reactions, which are toggle buttons when the row has a value. Renders a `<div>` element.
 
@@ -492,7 +494,7 @@ A toolbar of reactions, which are toggle buttons when the row has a value. Rende
 
 Types: `EmojiPicker.Reactions.Props`, `.State`, `.ChangeEventDetails`, `.ChangeEventReason`.
 
-### EmojiPicker.ReactionsItems {#api-reactions-items}
+#### EmojiPicker.ReactionsItems {#api-reactions-items}
 
 Calls its children for each reaction. Renders no element.
 
@@ -500,7 +502,7 @@ Calls its children for each reaction. Renders no element.
 
 Types: `EmojiPicker.ReactionsItems.Props`.
 
-### EmojiPicker.ReactionsItem {#api-reactions-item}
+#### EmojiPicker.ReactionsItem {#api-reactions-item}
 
 One reaction. Renders a `<button>` element.
 
@@ -508,7 +510,7 @@ One reaction. Renders a `<button>` element.
 
 Types: `EmojiPicker.ReactionsItem.Props`, `.State`.
 
-### EmojiPicker.ReactionsExpand {#api-reactions-expand}
+#### EmojiPicker.ReactionsExpand {#api-reactions-expand}
 
 Hides the row to show `Panel`, and renders only while there is a `Panel`; Escape with an empty query brings the row back. Renders a `<button>` element.
 
@@ -516,7 +518,7 @@ Hides the row to show `Panel`, and renders only while there is a `Panel`; Escape
 
 Types: `EmojiPicker.ReactionsExpand.Props`, `.State`.
 
-### EmojiPicker.Panel {#api-panel}
+#### EmojiPicker.Panel {#api-panel}
 
 The full picker, hidden while the reaction row shows. Renders a `<div>` element.
 
@@ -524,7 +526,7 @@ The full picker, hidden while the reaction row shows. Renders a `<div>` element.
 
 Types: `EmojiPicker.Panel.Props`, `.State`.
 
-### Picker hooks {#api-picker-hooks}
+#### Picker hooks {#api-picker-hooks}
 
 Call them inside `Root`.
 
@@ -532,7 +534,9 @@ Call them inside `Root`.
 
 Types: `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridResult`, `UseEmojiPickerCellResult`, `EmojiPickerGridState`.
 
-### EmojiPopover.Root {#api-popover}
+### EmojiPopover {#api-emoji-popover}
+
+#### EmojiPopover.Root {#api-popover}
 
 Groups the parts of a popover, which is non-modal from `/floating-ui` and modal from `/react-aria`. Renders no element.
 
@@ -540,7 +544,7 @@ Groups the parts of a popover, which is non-modal from `/floating-ui` and modal 
 
 Types: `EmojiPopover.Root.Props`, `.Actions`, `.ChangeEventDetails`, `.ChangeEventReason`.
 
-### EmojiPopover.Trigger {#api-popover-trigger}
+#### EmojiPopover.Trigger {#api-popover-trigger}
 
 Opens the popover. Renders a `<button>` element.
 
@@ -548,7 +552,7 @@ Opens the popover. Renders a `<button>` element.
 
 Types: `EmojiPopover.Trigger.Props`, `.State`.
 
-### EmojiPopover.Portal {#api-popover-portal}
+#### EmojiPopover.Portal {#api-popover-portal}
 
 Renders the positioner into `<body>`, or into `container`, while the popup is mounted.
 
@@ -556,7 +560,7 @@ Renders the positioner into `<body>`, or into `container`, while the popup is mo
 
 Types: `EmojiPopover.Portal.Props`.
 
-### EmojiPopover.Positioner {#api-popover-positioner}
+#### EmojiPopover.Positioner {#api-popover-positioner}
 
 Places the popup against the `Trigger` or `anchor`. Renders a `<div>` element.
 
@@ -564,7 +568,7 @@ Places the popup against the `Trigger` or `anchor`. Renders a `<div>` element.
 
 Types: `EmojiPopover.Positioner.Props`, `.State`.
 
-### EmojiPopover.Popup {#api-popover-popup}
+#### EmojiPopover.Popup {#api-popover-popup}
 
 The dialog. Renders a `<div>` element.
 
@@ -572,7 +576,9 @@ The dialog. Renders a `<div>` element.
 
 Types: `EmojiPopover.Popup.Props`, `.State`.
 
-### EmojiSuggestions.Root {#api-suggestions}
+### EmojiSuggestions {#api-emoji-suggestions}
+
+#### EmojiSuggestions.Root {#api-suggestions}
 
 Groups the parts of a typeahead menu at the caret, which never takes focus; the parts follow Base UI's Combobox popup. Renders no element.
 
@@ -580,7 +586,7 @@ Groups the parts of a typeahead menu at the caret, which never takes focus; the 
 
 Types: `EmojiSuggestions.Root.Props`, `.ChangeEventDetails`, `.ChangeEventReason`.
 
-### EmojiSuggestions.Portal {#api-suggestions-portal}
+#### EmojiSuggestions.Portal {#api-suggestions-portal}
 
 Renders the positioner into `<body>`, or into `container`, while the menu is mounted.
 
@@ -588,7 +594,7 @@ Renders the positioner into `<body>`, or into `container`, while the menu is mou
 
 Types: `EmojiSuggestions.Portal.Props`.
 
-### EmojiSuggestions.Positioner {#api-suggestions-positioner}
+#### EmojiSuggestions.Positioner {#api-suggestions-positioner}
 
 Places the menu at the typeahead's `anchor`. Renders a `<div>` element.
 
@@ -596,7 +602,7 @@ Places the menu at the typeahead's `anchor`. Renders a `<div>` element.
 
 Types: `EmojiSuggestions.Positioner.Props`, `.State`.
 
-### EmojiSuggestions.Popup {#api-suggestions-popup}
+#### EmojiSuggestions.Popup {#api-suggestions-popup}
 
 The menu. Renders a `<div>` element.
 
@@ -604,7 +610,7 @@ The menu. Renders a `<div>` element.
 
 Types: `EmojiSuggestions.Popup.Props`, `.State`.
 
-### Typeahead hooks {#api-typeahead-hooks}
+#### Typeahead hooks {#api-typeahead-hooks}
 
 <DefList rows={api.typeaheadHooks} />
 
