@@ -18,7 +18,10 @@ export const frequentFirst: EmojiSearch = (query, context) => {
   const hits = exact(query, context);
   const top = Math.max(1, ...hits.map((h) => context.frequency(h.unified)));
   const rank = (unified: string, i: number) => (i + 1) * (1 - 0.6 * (context.frequency(unified) / top));
-  return hits.map((hit, i) => ({ hit, key: rank(hit.unified, i) })).sort((a, b) => a.key - b.key).map((x) => x.hit);
+  return hits
+    .map((hit, i) => ({ hit, key: rank(hit.unified, i) }))
+    .sort((a, b) => a.key - b.key)
+    .map((x) => x.hit);
 };
 
 // A server's ranking, with the default when it fails or finds little

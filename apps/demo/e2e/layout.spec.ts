@@ -118,7 +118,7 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
 });
 
 test("a native emoji takes the image's box whatever the font", async ({ page }) => {
-  await visit(page, "/examples/rendering/");
+  await visit(page, "/e2e/pages/rendering/");
   const section = page.locator("main");
   const glyph = section.locator('[data-slot="emoji"]').filter({ visible: true }).first();
   const box = async (renderer: string, font: string) => {

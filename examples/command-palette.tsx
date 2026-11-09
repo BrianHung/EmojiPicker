@@ -2,7 +2,7 @@ import * as React from "react";
 import { Emoji, useEmojiSearch, useEmojiStore } from "emoji-components";
 
 export function CommandPalette() {
-  const [query, setQuery] = React.useState("party");
+  const [query, setQuery] = React.useState("");
   const { results } = useEmojiSearch(query, { limit: 24 });
   const [copied, setCopied] = React.useState<string | null>(null);
   const store = useEmojiStore();

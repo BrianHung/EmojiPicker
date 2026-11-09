@@ -7,17 +7,7 @@ import { Hero } from "./hero";
 import Content, { frontmatter } from "./page.mdx";
 import "@/globals.css";
 
-const MOVED: Record<string, string> = {
-  parts: "#usage",
-  "keep-open": "/examples/keep-open/",
-  "custom-popover": "/examples/custom-popover/",
-  provider: "/examples/provider/",
-  search: "/examples/search/",
-  "command-palette": "/examples/command-palette/",
-  rendering: "/examples/rendering/",
-  "custom-cells": "/examples/custom-cells/",
-  "custom-virtualizer": "/examples/virtualizer/",
-};
+const MOVED: Record<string, string> = { parts: "#usage", "custom-virtualizer": "/examples/virtualizer/" };
 const moved = MOVED[location.hash.slice(1)];
 if (moved?.startsWith("#")) history.replaceState(null, "", moved);
 else if (moved) location.replace(moved);
