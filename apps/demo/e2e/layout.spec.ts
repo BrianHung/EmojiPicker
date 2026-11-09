@@ -115,6 +115,16 @@ test("registry card: one cell looks highlighted when results change under a rest
   expect(await filled).toBe(1);
 });
 
+test("a closing popover can't take focus while it animates out", async ({ page }) => {
+  await visit(page, "/");
+  await homePopover(page).click();
+  const input = page.locator(`${slot("popoverPopup")} ${slot("searchInput")}`);
+  await expect(input).toBeFocused();
+  await page.keyboard.press("Escape");
+  const focused = await input.evaluate((el) => (el.focus(), [el.closest("[data-ending-style]") !== null, document.activeElement === el]));
+  expect(focused).toEqual([true, false]);
+});
+
 test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
   await visit(page, "/examples/lexical/");
