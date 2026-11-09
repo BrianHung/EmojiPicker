@@ -30,7 +30,7 @@ export function SearchPicker({ onSelect }: { onSelect: (selection: EmojiSelectio
   return (
     <>
       <Tabs value={engine} onValueChange={setEngine}>
-        <TabsList aria-label="Search engine" className="max-w-full flex-wrap">
+        <TabsList aria-label="Search engine" className="max-w-full justify-start overflow-x-auto [scrollbar-width:none]">
           {Object.entries(ENGINES).map(([id, e]) => (
             <TabsTrigger key={id} value={id}>
               {e.label}
