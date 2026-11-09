@@ -43,14 +43,13 @@ interface ControllerOptions {
   orientation: EmojiPickerOrientation;
   listRef: React.RefObject<HTMLElement | null>;
   ref?: React.Ref<HTMLElement>;
-  probeRoot?: React.Ref<HTMLElement>;
   request(unifieds: Iterable<string>): void;
 }
 
 type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement>; [data: `data-${string}`]: string | undefined };
 
 // The grid's behavior for both the List and useEmojiPickerGrid: the highlight, keys, pointer, virtual focus, and React Aria's listbox
-export function useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, request, ...aria }: ControllerOptions) {
+export function useGridController({ sections, geometry, orientation, listRef, ref, request, ...aria }: ControllerOptions) {
   const picker = useEmojiPickerRootContext("EmojiPicker.List");
   const { labels, value, state: core } = picker;
   const { searching, virtual, pending } = useStore(core, (s) => ({ searching: s.searching, virtual: s.focus === "virtual", pending: s.pending }), shallowEqual);
@@ -224,9 +223,9 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   const selectable = useSlottedContext(SelectableCollectionContext);
   const { ref: fieldRef, filter: _filter, ...collectionProps } = (virtual && selectable) || {};
   const merged = React.useMemo((): React.RefCallback<HTMLElement> => {
-    const refs = mergeRefs(listRef, probeRoot, ref, fieldRef);
+    const refs = mergeRefs(listRef, ref, fieldRef);
     return (el) => (typeof refs === "function" ? refs(el) : undefined);
-  }, [listRef, probeRoot, ref, fieldRef]);
+  }, [listRef, ref, fieldRef]);
   const { listBoxProps } = useListBox(
     {
       ...mergeProps(collectionProps, {

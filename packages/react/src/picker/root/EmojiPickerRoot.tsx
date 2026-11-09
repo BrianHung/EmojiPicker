@@ -8,6 +8,7 @@ import { Autocomplete } from "react-aria-components/Autocomplete";
 import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@emoji-components/core";
 import { createChangeDetails } from "@emoji-components/core/internal";
 import { useCollapse } from "./utils/useCollapse";
+import { useDrawable } from "../../emoji/utils/useDrawable";
 import {
   EmojiPickerRootContext,
   type EmojiPickerRootActions,
@@ -143,12 +144,14 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const popover = React.useContext(PopoverContext);
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = useObjectRef(ref);
+  const native = useDrawable(rootRef);
   const state = usePickerEngine(store, {
     labels,
     categories,
     frequent,
     suggested,
     emojiVersion,
+    drawable: native.drawable,
     searchResults,
     searchLimit,
     query: queryProp,
@@ -276,8 +279,9 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       listId,
       variations: { custom: variations > 0, register: registerVariations },
       registerStatus,
+      native,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, rootRef, listId, variations, registerVariations, registerStatus],
+    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, rootRef, listId, variations, registerVariations, registerStatus, native],
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(

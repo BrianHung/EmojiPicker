@@ -36,6 +36,13 @@ function mount(props: Partial<EmojiPicker.Root.Props>) {
 const press = (el: Element, key: string, init: KeyboardEventInit = {}) => React.act(() => void el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init })));
 const highlighted = (host: Element) => host.querySelector("[data-highlighted]")?.getAttribute("data-unified");
 
+it("hides results this system can't draw, from the grid and the result count", () => {
+  const { host } = mount({ defaultQuery: "medical" });
+  const shown = [...host.querySelectorAll("[data-unified]")].map((c) => c.getAttribute("data-unified"));
+  const status = host.querySelector('[data-slot="emoji-picker-search-status"]')?.textContent;
+  expect({ shown, status }).toEqual({ shown: ["1f637", "1fa7b"], status: "2 results" });
+});
+
 describe("Root keyboard", () => {
   it("drives the grid from the keyboard target and actionsRef while focus stays there", () => {
     const onSelect = vi.fn();
