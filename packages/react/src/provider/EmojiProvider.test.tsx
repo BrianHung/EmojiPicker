@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { render, trackRoot } from "../../test/render";
 import { en } from "../../test/en";
-import { Emoji, EmojiPicker, EmojiProvider, useEmojiStatus, useEmojiSkinTone } from "..";
+import { Emoji, EmojiPicker, EmojiProvider, useCustomEmojiErrors, useEmojiStatus, useEmojiSkinTone, useEmojiStore } from "..";
 
 const fallback = vi.hoisted(() => ({ images: false }));
 vi.mock("@emoji-components/core/native", async (original) => ({ ...(await original<typeof import("@emoji-components/core/native")>()), needsImageFallback: () => fallback.images }));
@@ -69,6 +69,29 @@ describe("EmojiProvider", () => {
     await React.act(async () => {});
     for (let i = 0; i < 3; i++) await React.act(async () => bump());
     expect(calls).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a failed custom emoji loader until a retry loads it", async () => {
+    let online = false;
+    function Errors() {
+      const store = useEmojiStore();
+      return (
+        <button type="button" onClick={() => void store.load()}>
+          {useEmojiStatus()} {useCustomEmojiErrors().map((e) => e.message)} {store.get("lily")?.name}
+        </button>
+      );
+    }
+    mount(
+      <EmojiProvider data={en} prepare={false} customEmojis={async () => (online ? [{ id: "lily", name: "Lily", imageUrl: "/lily.png" }] : Promise.reject(new Error("offline")))}>
+        <Errors />
+      </EmojiProvider>,
+    );
+    await React.act(async () => {});
+    const button = document.querySelector("button")!;
+    expect(button.textContent).toBe("ready offline ");
+    online = true;
+    await React.act(async () => button.click());
+    expect(button.textContent).toBe("ready  Lily");
   });
 
   it("keeps children mounted when locale goes from undefined to a value", async () => {

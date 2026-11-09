@@ -74,9 +74,17 @@ describe("custom emoji in the store", () => {
     expect(store.status()).toBe("loading");
     await loading;
     expect([store.status(), store.get("lily")?.imageUrl]).toEqual(["ready", "/frogs/lily.png"]);
-    const failing = storeWith(async () => Promise.reject(new Error("offline")));
+  });
+
+  it("loads a failed loader again, keeping the dataset", async () => {
+    let online = false;
+    const failing = storeWith(async () => (online ? [frog("lily")] : Promise.reject(new Error("offline"))));
     await failing.load();
-    expect([failing.status(), failing.packErrors()[0]?.message]).toEqual(["ready", "offline"]);
+    expect([failing.status(), failing.customEmojiErrors()[0]?.message, failing.get("lily")]).toEqual(["ready", "offline", undefined]);
+    const records = failing.records().length;
+    online = true;
+    await failing.load();
+    expect([failing.status(), failing.customEmojiErrors(), failing.get("lily")?.imageUrl, failing.records().length]).toEqual(["ready", [], "/frogs/lily.png", records + 1]);
   });
 
   it("keeps size and animation fields on the record", async () => {

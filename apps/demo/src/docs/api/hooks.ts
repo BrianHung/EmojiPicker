@@ -28,6 +28,7 @@ export const providerHooks: Rows = [
   ["useEmojiLabels()", "The provider's `EmojiLabels`."],
   ["useEmojiStore()", "The provider's `EmojiStore`, for `store.select(unified)`, `store.withSkinTone(unified)`, and the rest of core's store API."],
   ["useEmojiStatus()", 'The data status: `"idle"`, `"loading"`, `"ready"`, or `"error"`. Calling it starts loading the data.'],
+  ["useCustomEmojiErrors()", "The errors from a `customEmojis` loader that failed; the rest of the data still loads. `useEmojiStore().load()` runs the loader again."],
 ];
 
 export const providerFunctions: Rows = [
