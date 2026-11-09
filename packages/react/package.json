@@ -1,6 +1,6 @@
 {
   "name": "emoji-components",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "Unstyled, composable emoji components for React.",
   "keywords": [
     "react",
@@ -103,7 +103,7 @@
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "dependencies": {
-    "@emoji-components/core": "1.0.0-alpha.0",
+    "@emoji-components/core": "1.0.0-alpha.1",
     "@floating-ui/react": "^0.27.20",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",

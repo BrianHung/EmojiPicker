@@ -24,13 +24,13 @@ try {
   git("add", "-A");
   git("commit", "-q", "--no-verify", "-m", "base");
   changeset("status", "--output", "status.json");
-  const [version, ...others] = new Set(
-    json("status.json")
-      .releases.map((r) => r.newVersion)
-      .filter(Boolean),
-  );
-  if (others.length || !/-alpha\.\d+$/.test(version)) throw new Error(`expected one next alpha, got ${[version, ...others]}`);
-  changeset("version");
+  const pending = json("status.json")
+    .releases.map((r) => r.newVersion)
+    .filter(Boolean);
+  // Right after `changeset version` nothing is pending; the packages must already share one alpha
+  const [version, ...others] = new Set(pending.length ? pending : packages.map((name) => json(`packages/${name}/package.json`).version));
+  if (others.length || !/-alpha\.\d+$/.test(version)) throw new Error(`expected one alpha, got ${[version, ...others]}`);
+  if (pending.length) changeset("version");
   for (const name of packages) {
     const pkg = json(`packages/${name}/package.json`);
     if (pkg.version !== version) throw new Error(`${pkg.name} is ${pkg.version}, expected ${version}`);
