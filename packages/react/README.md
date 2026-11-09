@@ -6,6 +6,8 @@ Unstyled, composable emoji components for React: a virtualized picker, reaction 
 
 ## Installation
 
+The packages are in prerelease (`1.0.0-alpha`); the API can change between alphas.
+
 ```bash
 npm i emoji-components
 ```

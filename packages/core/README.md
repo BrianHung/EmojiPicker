@@ -13,14 +13,15 @@ npm i @emoji-components/core
 ```ts
 import { createEmojiPicker, createEmojiStore, createEmojiSuggestions } from "@emoji-components/core";
 
+const input = document.querySelector("input")!;
 const store = createEmojiStore();
 await store.load();
 
 const picker = createEmojiPicker(store, { frequent: 16 });
-picker.subscribe(() => render(picker.getSnapshot().sections));
+picker.subscribe(() => console.log(picker.getSnapshot().sections));
 picker.setQuery("cat");
 
-const typeahead = createEmojiSuggestions(store, { onChoose: (s) => insert(typeahead.textFor(s)) });
+const typeahead = createEmojiSuggestions(store, { onChoose: (s) => console.log(typeahead.textFor(s)) });
 input.addEventListener("keydown", (e) => typeahead.keydown(e));
 const stop = typeahead.syncCombobox(input);
 ```
@@ -34,7 +35,7 @@ const stop = typeahead.syncCombobox(input);
 | `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexicalSearch`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
 | `/grid` | Grid layout and keyboard moves, for your own virtualizer |
 | `/native` | Whether the system font draws an emoji |
-| `/build` | `buildDataset` from `emojibase-data`, also as the `npx @emoji-components/core build-data <locale>` CLI |
+| `/build` | `buildDataset` from `emojibase-data` (install it alongside), also as the `npx @emoji-components/core build-data <locale>` CLI |
 
 ## Docs
 

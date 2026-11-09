@@ -9,6 +9,8 @@
 
 ## Installation
 
+The packages are in prerelease (`1.0.0-alpha`); the API can change between alphas.
+
 ### shadcn/ui
 
 ```bash
@@ -18,7 +20,9 @@ npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emo
 ```tsx
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 
-<EmojiPickerCard onSelect={(selection) => console.log(selection.emoji)} />
+export default function App() {
+  return <EmojiPickerCard onSelect={(selection) => console.log(selection.emoji)} />;
+}
 ```
 
 ### npm
@@ -30,14 +34,22 @@ npm i emoji-components
 ## Usage
 
 ```tsx
+"use client";
+
 import { EmojiPicker } from "emoji-components";
 
-<EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
-  <EmojiPicker.Search />
-  <EmojiPicker.Viewport style={{ height: 320 }}>
-    <EmojiPicker.List />
-  </EmojiPicker.Viewport>
-</EmojiPicker.Root>
+export default function Page() {
+  return (
+    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPicker.Search>
+        <EmojiPicker.SearchInput />
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport style={{ height: 320 }}>
+        <EmojiPicker.List />
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
 ```
 
 ## Packages
@@ -49,7 +61,9 @@ import { EmojiPicker } from "emoji-components";
 | [`@emoji-components/data`](packages/data/README.md) | Datasets for every Emojibase locale and shortcode set; core loads its English one by default |
 | [`@emoji-components/twemoji-font`](packages/twemoji-font/README.md) | Twemoji as a COLRv0 color font for the native renderer |
 
-[Contributing](CONTRIBUTING.md)
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

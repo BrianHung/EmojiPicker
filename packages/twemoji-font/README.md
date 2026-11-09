@@ -4,7 +4,7 @@
 
 ## Installation
 
-```sh
+```bash
 npm i @emoji-components/twemoji-font
 ```
 

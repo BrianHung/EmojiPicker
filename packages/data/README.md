@@ -8,12 +8,13 @@ Prebuilt [Emojibase](https://emojibase.dev) datasets, one per locale and shortco
 npm i @emoji-components/data
 ```
 
-Only needed to self-host or bundle: core loads `en/iamcal.json` from jsDelivr by default, and `localeData` the others.
+Only needed to self-host or bundle: core loads `en/iamcal.json` from jsDelivr by default, and `localeData` points at the others.
 
 ## Usage
 
 ```tsx
 import { localeData } from "@emoji-components/core";
+import { EmojiProvider } from "emoji-components";
 
 <EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">…</EmojiProvider>
 ```
@@ -35,4 +36,4 @@ Files are core's `Dataset` format, built from `emojibase-data` with core's `buil
 
 ## License
 
-MIT. The data comes from emojibase-data; see `THIRD_PARTY_NOTICES.md`.
+MIT. The data comes from emojibase-data; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
