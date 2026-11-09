@@ -15,7 +15,7 @@ function Manager({ into }: { into: React.RefObject<FocusManager | undefined> }) 
   return null;
 }
 
-// React Aria's Toolbar moves focus with the arrows and Tab; Home and End go to the ends
+// React Aria's Toolbar moves focus with the arrows and Tab; Home and End go to the ends, and once focus is inside, the pointer carries it
 export function EmojiReactionBar({ orientation = "horizontal", children, ...props }: EmojiReactionBarProps) {
   const focus = React.useRef<FocusManager | undefined>(undefined);
   const across = orientation === "vertical" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];
@@ -26,6 +26,12 @@ export function EmojiReactionBar({ orientation = "horizontal", children, ...prop
       else if (event.key === "End") focus.current?.focusLast();
       else if (!across.includes(event.key)) return;
       event.preventDefault();
+    },
+    onPointerOver(event) {
+      const button = event.target instanceof Element ? event.target.closest<HTMLElement>("button:not([disabled])") : null;
+      const active = document.activeElement;
+      const row = event.currentTarget;
+      if (button && button !== active && row.contains(button) && active instanceof HTMLElement && row.contains(active)) button.focus({ preventScroll: true });
     },
   };
   return (
