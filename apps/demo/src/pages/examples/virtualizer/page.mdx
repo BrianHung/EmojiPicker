@@ -1,0 +1,25 @@
+---
+title: Custom virtualizer
+description: The picker's grid on TanStack Virtual, react-window, Virtuoso, or your own virtual list.
+---
+
+import { TanStackPicker } from "./demo";
+import tanstackList from "./tanstack-list.tsx?raw";
+
+<TanStackPicker />
+
+## How it works
+
+`EmojiPicker.List` virtualizes with React Aria. To use another virtualizer, call `useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })` inside `EmojiPicker.Root` in place of `List`. It returns `rows`, each a section title or a row of emoji with its `size`, `getGridProps`, `getHeaderProps`, and `variations`, the skin-tone popup to render in the scroll container. `useEmojiPickerCell(grid.state, item)` returns a cell's `cellProps`. Keyboard, highlight, hover, long press, and skin-tone variations work as in `List`. Pass `scrollToIndex` so the arrow keys scroll your virtualizer.
+
+A bundle that does not use `List` leaves out React Aria's `Virtualizer` when the bundler drops unused properties of the `EmojiPicker` namespace, as Vite does. esbuild keeps every part of a namespace it imports.
+
+## TanStack Virtual
+
+<Code title="tanstack-list.tsx" code={tanstackList} />
+
+Put it inside `EmojiPicker.Root` where `EmojiPicker.List` would go. `grid.stickyIndexes` lists the title rows, for TanStack's sticky-item pattern.
+
+## react-window and Virtuoso
+
+The same `rows` feed react-window's `rowComponent` and Virtuoso's `itemContent`. Render `grid.rows[index]` with the same props, and call their `scrollToRow` or `scrollToIndex` from `scrollToIndex`.

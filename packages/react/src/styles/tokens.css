@@ -1,0 +1,29 @@
+/* Chromium and WebKit report a size-dependent ascent for Apple Color Emoji; fixed metrics centre its ink in the 1em box */
+@font-face {
+  font-family: "Emoji Components Apple";
+  src: local("Apple Color Emoji");
+  ascent-override: 87.75%;
+  descent-override: 12.25%;
+  line-gap-override: 0%;
+}
+
+:where(:root) {
+  --emoji-picker-background: light-dark(#ffffff, #171717);
+  --emoji-picker-foreground: light-dark(#171717, #fafafa);
+  --emoji-picker-muted: light-dark(#737373, #a3a3a3);
+  --emoji-picker-subtle: light-dark(#a3a3a3, #737373);
+  --emoji-picker-border: light-dark(#e5e5e5, #2e2e2e);
+  --emoji-picker-input: light-dark(#f5f5f5, #262626);
+  --emoji-picker-input-border: light-dark(#d4d4d4, #404040);
+  --emoji-picker-panel: light-dark(#f5f5f5, #262626);
+  --emoji-picker-hover: light-dark(#f0f0f0, #2a2a2a);
+  --emoji-picker-selected: light-dark(#ebebeb, #333333);
+  --emoji-picker-accent: light-dark(#171717, #fafafa);
+  --emoji-picker-ring: light-dark(#a3a3a3, #737373);
+  --emoji-picker-radius: 10px;
+  /* --shadow-lg and --font-sans are Tailwind's theme variables, when the page has them */
+  --emoji-picker-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1));
+  --emoji-picker-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  /* A color emoji font first, so text-default symbols (keycaps, ‼) draw as emoji */
+  --emoji-font-family: "Emoji Components Apple", "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji";
+}

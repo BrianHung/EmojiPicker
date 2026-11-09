@@ -1,0 +1,75 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**", "!**/package-lock.json", "!packages/data/data", "!apps/demo/public", "!apps/demo/e2e/fixtures", "!apps/demo/e2e/__snapshots__"]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 240
+  },
+  "javascript": {
+    "formatter": { "quoteStyle": "double", "semicolons": "always", "trailingCommas": "all", "arrowParentheses": "always" }
+  },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "assist": { "enabled": false },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "noAssignInExpressions": "off",
+        "useIterableCallbackReturn": "off",
+        "noArrayIndexKey": "off",
+        "noControlCharactersInRegex": "off",
+        "noThenProperty": "off"
+      },
+      "complexity": {
+        "noCommaOperator": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": { "level": "error", "options": { "hooks": [{ "name": "useLayoutEffect", "closureIndex": 0, "dependenciesIndex": 1 }] } },
+        "noComponentHookFactories": "off",
+        "usePlaywrightValidDescribeCallback": "off"
+      },
+      "performance": {
+        "useDomNodeTextContent": "off"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "off"
+      },
+      "a11y": {
+        "useSemanticElements": "off",
+        "useFocusableInteractive": "off",
+        "useAriaPropsSupportedByRole": "off",
+        "useKeyWithClickEvents": "off",
+        "noLabelWithoutControl": "off",
+        "useValidAnchor": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/demo/registry/**",
+        "apps/demo/src/styles/*/picker.tsx",
+        "apps/demo/src/styles/*/scene.tsx",
+        "apps/demo/src/styles/variants.tsx",
+        "apps/demo/src/components/demos/**",
+        "apps/demo/src/docs/snippets/**",
+        "apps/demo/src/pages/examples/virtualizer/tanstack-list.tsx"
+      ],
+      "formatter": { "enabled": false },
+      "linter": { "enabled": false }
+    },
+    {
+      "includes": ["**/*.md"],
+      "formatter": { "enabled": false }
+    }
+  ]
+}

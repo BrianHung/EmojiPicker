@@ -1,0 +1,11 @@
+dist/
+.cloudflare/
+.wrangler/
+.dev.vars*
+!.dev.vars.example
+
+e2e/.cache/
+e2e/.results/
+e2e/.report/
+
+e2e/__snapshots__/visual.spec.ts/

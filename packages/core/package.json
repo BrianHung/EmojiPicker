@@ -1,0 +1,88 @@
+{
+  "name": "@emoji-components/core",
+  "version": "1.0.0-alpha.0",
+  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state.",
+  "keywords": [
+    "emoji",
+    "emoji-picker",
+    "headless",
+    "shortcodes",
+    "search",
+    "skin-tone",
+    "autocomplete"
+  ],
+  "license": "MIT",
+  "author": "Brian Hung",
+  "homepage": "https://emoji.brianhung.me",
+  "bugs": "https://github.com/BrianHung/emoji-components/issues",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianHung/emoji-components.git",
+    "directory": "packages/core"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "bin": {
+    "emoji-components": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    ".": {
+      "@emoji-components/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./grid": {
+      "@emoji-components/source": "./src/grid.ts",
+      "types": "./dist/grid.d.ts",
+      "default": "./dist/grid.js"
+    },
+    "./native": {
+      "@emoji-components/source": "./src/native.ts",
+      "types": "./dist/native.d.ts",
+      "default": "./dist/native.js"
+    },
+    "./internal": {
+      "@emoji-components/source": "./src/internal.ts",
+      "types": "./dist/internal.d.ts",
+      "default": "./dist/internal.js"
+    },
+    "./build": {
+      "@emoji-components/source": "./scripts/build-data.ts",
+      "types": "./dist/build.d.ts",
+      "default": "./dist/build.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "emojibase-data": ">=16.0.0"
+  },
+  "peerDependenciesMeta": {
+    "emojibase-data": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@emoji-components/twemoji-font": "^1.0.0-alpha.0",
+    "@types/node": "^22.20.5",
+    "emojibase": "^18.0.0",
+    "emojibase-data": "^18.0.0",
+    "jsdom": "^26.1.0",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

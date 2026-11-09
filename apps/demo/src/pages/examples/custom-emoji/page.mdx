@@ -1,0 +1,58 @@
+---
+title: Custom emoji
+description: Image emoji in their own sections, searchable by name and shortcode.
+---
+
+import { BufoPicker, LoadPack } from "./demo";
+
+<BufoPicker />
+
+## Usage
+
+Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes`, `tags`, `width`, `height`, `animated`, `stillUrl`, and `base` (a unified code whose name and tags also find it), and a `group` that becomes its own section.
+
+```tsx title="app.tsx"
+const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
+
+<EmojiProvider customEmojis={bufo}>
+  <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys-people" }]}>
+    …
+  </EmojiPicker.Root>
+</EmojiProvider>
+```
+
+## Host a pack
+
+A pack is a `pack.json` served as a static file and fetched at runtime. A pack served from your own origin needs no CORS headers. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
+
+`customEmojis` also takes a loader, `({ signal }) => Promise<CustomEmoji[]>`, such as one that fetches through your own API. Images load as `<img>` elements and need no CORS. Under a strict Content Security Policy, self-host the images and set each emoji's `imageUrl` to your copy.
+
+```json title="pack.json"
+[
+  {
+    "id": "bufo-party",
+    "name": "bufo party",
+    "imageUrl": "https://all-the.bufo.zone/bufo-party.gif",
+    "shortcodes": ["bufo-party"],
+    "group": "Bufo",
+    "width": 128,
+    "height": 128,
+    "animated": true,
+    "stillUrl": "/api/bufo-still/bufo-party.gif"
+  }
+]
+```
+
+## Load a pack by URL
+
+Enter a `pack.json` URL to load it. A pack on another origin must be served with CORS. This loader resolves relative `imageUrl`s against the pack's URL.
+
+<LoadPack />
+
+## Large packs
+
+- Fetch the pack by URL after the page loads, and keep it out of the bundle.
+- Ship small thumbnails (64px WebP is about 2 KB each).
+- Only visible cells request images.
+- Animated GIFs play in the grid. Mark them `animated: true`, and add a `stillUrl` to show under reduced motion.
+- Give each emoji a readable `name` (“party parrot”, not `partyParrot`); search matches each word.

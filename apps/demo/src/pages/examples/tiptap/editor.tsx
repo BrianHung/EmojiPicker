@@ -1,0 +1,47 @@
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import enUrl from "@emoji-components/data/en/iamcal.json?url";
+import { EmojiProvider, useEmojiStore } from "emoji-components";
+import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
+import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
+import { PickerPopover } from "@/components/picker-popover";
+
+function TiptapEditor() {
+  const store = useEmojiStore();
+  const editor = useEditor({
+    extensions: [StarterKit, EmojiNode.configure({ store })],
+    content:
+      "<p>Type <code>:</code> followed by a shortcode, such as <code>:tada</code> or <code>:rocket</code>. Use the arrow keys to move, Enter or Tab to insert, and Escape to close. A complete <code>:rocket:</code> also converts.</p><p></p>",
+    editorProps: { attributes: { class: "min-h-[180px] px-4 py-3 outline-none [&_p]:my-2 [&_code]:rounded [&_code]:bg-muted [&_code]:px-1 [&_code]:text-[0.9em]" } },
+  });
+  if (!editor) return null;
+  return (
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-1 border-b border-border px-2 py-1.5">
+        <PickerPopover
+          label="Insert emoji"
+          triggerClassName="rounded-md px-2 py-1"
+          focusAfterPick={() => editor.view.dom}
+          onSelect={(s) => {
+            const attrs = s.emoji ? null : emojiAttrs(store, s.unified);
+            if (attrs) editor.commands.insertEmoji(attrs);
+            else editor.commands.insertContent(s.emoji);
+          }}
+        >
+          <span aria-hidden>🙂</span>
+          <span className="text-muted-foreground">Emoji</span>
+        </PickerPopover>
+      </div>
+      <EditorContent editor={editor} />
+      <EmojiSuggestionMenu editor={editor} />
+    </div>
+  );
+}
+
+export function Editor() {
+  return (
+    <EmojiProvider data={enUrl}>
+      <TiptapEditor />
+    </EmojiProvider>
+  );
+}

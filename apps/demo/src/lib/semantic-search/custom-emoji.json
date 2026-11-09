@@ -1,0 +1,90 @@
+[
+  {
+    "id": "ship-it",
+    "name": "ship it",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%232563eb%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%9A%A2%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["shipit", "ship_it"],
+    "group": "Team",
+    "description": "Release the change to production now."
+  },
+  {
+    "id": "nit",
+    "name": "nit",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23a855f7%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2220%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3Enit%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["nit", "nitpick"],
+    "group": "Team",
+    "description": "A minor, optional code review comment about style."
+  },
+  {
+    "id": "this-is-fine",
+    "name": "this is fine",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23ea580c%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%94%A5%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["this_is_fine", "everything_is_fine"],
+    "group": "Team",
+    "description": "Staying calm while everything is going wrong around you."
+  },
+  {
+    "id": "rubber-duck",
+    "name": "rubber duck",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23eab308%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23111%22%3E%F0%9F%A6%86%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["rubber_duck", "rubberduck"],
+    "group": "Team",
+    "description": "Debugging by explaining the problem out loud to someone else."
+  },
+  {
+    "id": "bikeshed",
+    "name": "bikeshed",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%230891b2%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%9A%B2%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["bikeshed", "bikeshedding"],
+    "group": "Team",
+    "description": "Long debate over a trivial detail instead of the important decision."
+  },
+  {
+    "id": "yak-shave",
+    "name": "yak shave",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%2378716c%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%90%83%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["yak_shave", "yak_shaving"],
+    "group": "Team",
+    "description": "A chain of side tasks you had to finish before the real task."
+  },
+  {
+    "id": "big-brain",
+    "name": "big brain",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23db2777%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%A7%A0%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["big_brain", "galaxy_brain"],
+    "group": "Team",
+    "description": "A very clever idea, sometimes said sarcastically."
+  },
+  {
+    "id": "on-call",
+    "name": "on call",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23dc2626%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%93%9F%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["oncall", "pager"],
+    "group": "Team",
+    "description": "Currently responsible for responding to production incidents."
+  },
+  {
+    "id": "ooo",
+    "name": "out of office",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%23475569%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2220%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3EOOO%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["ooo", "out_of_office"],
+    "group": "Team",
+    "description": "Away from work and not responding to messages."
+  },
+  {
+    "id": "focus",
+    "name": "focus time",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%230d9488%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%F0%9F%8E%A7%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["focus", "heads_down"],
+    "group": "Team",
+    "description": "Heads-down deep work; please don't interrupt."
+  },
+  {
+    "id": "revert",
+    "name": "revert",
+    "imageUrl": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%2364748b%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2242%22%20font-family%3D%22system-ui%2Csans-serif%22%20font-size%3D%2228%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%20fill%3D%22%23fff%22%3E%E2%86%A9%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "shortcodes": ["revert", "rollback"],
+    "group": "Team",
+    "description": "Undo the last change or deploy because it broke something."
+  }
+]

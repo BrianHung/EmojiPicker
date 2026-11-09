@@ -1,0 +1,100 @@
+{
+  "opened": {
+    "focus": "option \"red heart\" 2764-fe0f",
+    "highlight": null
+  },
+  "keys": [
+    {
+      "key": "ArrowDown",
+      "focus": "option \"grinning face\" 1f600",
+      "highlight": "option \"grinning face\" 1f600",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "option \"grinning face with big eyes\" 1f603",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "option \"grinning face with smiling eyes\" 1f604",
+      "highlight": "option \"grinning face with smiling eyes\" 1f604",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowDown",
+      "focus": "option \"winking face\" 1f609",
+      "highlight": "option \"winking face\" 1f609",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowLeft",
+      "focus": "option \"melting face\" 1fae0",
+      "highlight": "option \"melting face\" 1fae0",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowUp",
+      "focus": "option \"grinning face with big eyes\" 1f603",
+      "highlight": "option \"grinning face with big eyes\" 1f603",
+      "scrolled": 0
+    },
+    {
+      "key": "End",
+      "focus": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "highlight": "option \"flag: wales\" 1f3f4-e0067-e0062-e0077-e006c-e0073-e007f",
+      "scrolled": 0
+    },
+    {
+      "key": "Home",
+      "focus": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    },
+    {
+      "key": "PageDown",
+      "focus": "option \"zipper-mouth face\" 1f910",
+      "highlight": "option \"zipper-mouth face\" 1f910",
+      "scrolled": 0
+    },
+    {
+      "key": "PageUp",
+      "focus": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    }
+  ],
+  "enter": {
+    "open": false,
+    "focus": "button \"Open emoji picker\"",
+    "focusReturned": true,
+    "toast": "❤️ :heart: red heart"
+  },
+  "hover": {
+    "hovered": {
+      "focus": "option \"grinning face with sweat\" 1f605",
+      "highlight": "option \"grinning face with sweat\" 1f605"
+    },
+    "then": {
+      "key": "ArrowRight",
+      "focus": "option \"rolling on the floor laughing\" 1f923",
+      "highlight": "option \"rolling on the floor laughing\" 1f923",
+      "scrolled": 0
+    }
+  },
+  "escape": [
+    {
+      "open": false,
+      "focus": "button \"Open emoji picker\"",
+      "focusReturned": true,
+      "toast": null
+    }
+  ],
+  "tab": {
+    "focus": "button \"People\"",
+    "highlight": null,
+    "open": true,
+    "inside": true
+  }
+}

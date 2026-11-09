@@ -1,0 +1,49 @@
+{
+  "name": "@emoji-components/data",
+  "version": "1.0.0-alpha.0",
+  "description": "Emoji datasets for emoji-components in every emojibase locale and shortcode set.",
+  "keywords": [
+    "emoji",
+    "emoji-picker",
+    "emojibase",
+    "shortcodes",
+    "i18n"
+  ],
+  "license": "MIT",
+  "author": "Brian Hung",
+  "homepage": "https://emoji.brianhung.me",
+  "bugs": "https://github.com/BrianHung/emoji-components/issues",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrianHung/emoji-components.git",
+    "directory": "packages/data"
+  },
+  "files": [
+    "data",
+    "dataset.d.cts",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "exports": {
+    "./*.json": {
+      "types": "./data/*.json.d.cts",
+      "default": "./data/*.json"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsx --conditions=@emoji-components/source scripts/build.ts",
+    "prepare": "npm run build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@emoji-components/core": "^1.0.0-alpha.0",
+    "emojibase": "18.0.0",
+    "emojibase-data": "18.0.0",
+    "tsx": "^4.23.15",
+    "vitest": "^5.0.5",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3"
+  }
+}

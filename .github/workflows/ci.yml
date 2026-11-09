@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v3]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# onnxruntime-node (under @huggingface/transformers) otherwise fetches CUDA binaries from NuGet on Linux
+env:
+  ONNXRUNTIME_NODE_INSTALL: skip
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      # The same groups release:check runs, from .github/release-steps.mjs
+      - run: node .github/release-steps.mjs check
+
+  smoke:
+    needs: twemoji-font
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
+      # Packed tarballs in fresh Vite, React 18, Next.js App Router and shadcn add apps
+      - run: node .github/release-steps.mjs smoke
+
+  twemoji-font:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/twemoji-*
+          key: twemoji-svg-${{ hashFiles('packages/twemoji-font/package.json') }}
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/venv
+          key: twemoji-venv-${{ runner.os }}-py3.12-${{ hashFiles('packages/twemoji-font/requirements.txt') }}
+      # nanoemoji's ninja build is incremental, so a stale build dir only rebuilds what changed
+      - uses: actions/cache@v4
+        with:
+          path: packages/twemoji-font/.cache/build
+          key: twemoji-build-${{ runner.os }}-${{ hashFiles('packages/twemoji-font/package.json', 'packages/twemoji-font/requirements.txt', 'packages/twemoji-font/scripts/build.ts') }}
+          restore-keys: twemoji-build-${{ runner.os }}-
+      - run: npm run build:font
+      - run: test -f packages/twemoji-font/dist/Twemoji.ttf && npm run check -w @emoji-components/twemoji-font
+      - id: playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-all-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - if: steps.playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium webkit firefox
+      - if: steps.playwright.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit firefox
+      - run: npm test -w @emoji-components/twemoji-font
+      - run: npx publint packages/twemoji-font
+      - uses: actions/upload-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist, if-no-files-found: error }
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: twemoji-font-results, path: packages/twemoji-font/test/.results, if-no-files-found: ignore }
+
+  e2e:
+    needs: twemoji-font
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/3, 2/3, 3/3]
+    env:
+      E2E_VISUAL: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
+      - id: playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - if: steps.playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium webkit
+      - if: steps.playwright.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium webkit
+      - uses: actions/cache@v4
+        with:
+          path: apps/demo/e2e/.cache
+          key: e2e-remote-${{ github.run_id }}
+          restore-keys: e2e-remote-
+      - run: node .github/release-steps.mjs e2e -- --shard ${{ matrix.shard }}
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ strategy.job-index }}
+          path: |
+            apps/demo/e2e/.results
+            apps/demo/e2e/.report
+          if-no-files-found: ignore
+
+  a11y:
+    needs: twemoji-font
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with: { name: twemoji-font, path: packages/twemoji-font/dist }
+      - id: playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - if: steps.playwright.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - if: steps.playwright.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - run: node .github/release-steps.mjs a11y
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: a11y-results, path: apps/demo/e2e/a11y/.results, if-no-files-found: ignore }
