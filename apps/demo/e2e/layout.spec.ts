@@ -120,10 +120,10 @@ test("a closing popover can't take focus while it animates out", async ({ page }
   await homePopover(page).click();
   const input = page.locator(`${slot("popoverPopup")} ${slot("searchInput")}`);
   await expect(input).toBeFocused();
-  // Escape and focus in one task, before the exit animation can end
+  // Escape, then focus in the first frame of the exit animation
   const focused = await input.evaluate(async (el) => {
     el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-    await new Promise(requestAnimationFrame);
+    for (let i = 0; i < 30 && !el.closest("[data-ending-style]"); i++) await new Promise(requestAnimationFrame);
     el.focus();
     return [el.closest("[data-ending-style]") !== null, document.activeElement === el];
   });
