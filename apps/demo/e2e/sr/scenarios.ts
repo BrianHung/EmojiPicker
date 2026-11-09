@@ -72,7 +72,7 @@ class Ear {
   }
 }
 
-const homeTapbackAnchor = (p: Page) => p.locator("section:has(> h3#tapback)").getByRole("link", { name: "Link to this section" });
+const homeTapbackAnchor = (p: Page) => p.locator("section:has(> h3#tapback)").getByRole("button", { name: "Copy code" }).first();
 const discordNoSearch = (p: Page) => surface("gallery/discord/popover-no-search").trigger!(p);
 const searchField = (p: Page) => p.getByRole("dialog", { name: "Emoji picker" }).getByLabel("Type to search for an emoji");
 

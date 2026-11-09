@@ -91,78 +91,22 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 ## Anatomy
 
-Import the parts and assemble them.
-
 ```tsx title="anatomy.tsx"
-import { Emoji, EmojiPicker, EmojiProvider } from "emoji-components";
-import { EmojiPopover, EmojiSuggestions } from "emoji-components/floating-ui";
+import { EmojiPicker } from "emoji-components";
 
-<EmojiProvider>
-  <EmojiPicker.Root>
-    <EmojiPicker.Search>
-      <EmojiPicker.SearchField>
-        <EmojiPicker.SearchInput />
-        <EmojiPicker.SearchClear />
-      </EmojiPicker.SearchField>
-      <EmojiPicker.SkinTone>
-        <EmojiPicker.SkinToneTrigger />
-        <EmojiPicker.SkinToneOptions>
-          <EmojiPicker.SkinToneOption>
-            <EmojiPicker.SkinToneGlyph />
-          </EmojiPicker.SkinToneOption>
-        </EmojiPicker.SkinToneOptions>
-      </EmojiPicker.SkinTone>
-      <EmojiPicker.SearchStatus />
-    </EmojiPicker.Search>
-    <EmojiPicker.Viewport>
-      <EmojiPicker.List>
-        <EmojiPicker.ListSection>
-          <EmojiPicker.ListSectionTitle />
-          <EmojiPicker.ListSectionActions />
-          <EmojiPicker.ListItems>
-            <EmojiPicker.ListCell />
-          </EmojiPicker.ListItems>
-        </EmojiPicker.ListSection>
-      </EmojiPicker.List>
-      <EmojiPicker.ListVariations>
-        <EmojiPicker.ListVariationsOption />
-      </EmojiPicker.ListVariations>
-    </EmojiPicker.Viewport>
-    <EmojiPicker.CategoryNav>
-      <EmojiPicker.CategoryNavTab />
-    </EmojiPicker.CategoryNav>
-    <EmojiPicker.Preview />
-  </EmojiPicker.Root>
-
-  <EmojiPicker.Root reactions={6}>
-    <EmojiPicker.Reactions>
-      <EmojiPicker.ReactionsItems>
-        <EmojiPicker.ReactionsItem />
-      </EmojiPicker.ReactionsItems>
-      <EmojiPicker.ReactionsExpand />
-    </EmojiPicker.Reactions>
-    <EmojiPicker.Panel />
-  </EmojiPicker.Root>
-
-  <EmojiPopover.Root>
-    <EmojiPopover.Trigger />
-    <EmojiPopover.Portal>
-      <EmojiPopover.Positioner>
-        <EmojiPopover.Popup />
-      </EmojiPopover.Positioner>
-    </EmojiPopover.Portal>
-  </EmojiPopover.Root>
-
-  <EmojiSuggestions.Root>
-    <EmojiSuggestions.Portal>
-      <EmojiSuggestions.Positioner>
-        <EmojiSuggestions.Popup />
-      </EmojiSuggestions.Positioner>
-    </EmojiSuggestions.Portal>
-  </EmojiSuggestions.Root>
-
-  <Emoji />
-</EmojiProvider>
+<EmojiPicker.Root>
+  <EmojiPicker.Search>
+    <EmojiPicker.SearchInput />
+    <EmojiPicker.SkinTone />
+  </EmojiPicker.Search>
+  <EmojiPicker.Viewport>
+    <EmojiPicker.List />
+  </EmojiPicker.Viewport>
+  <EmojiPicker.CategoryNav>
+    <EmojiPicker.CategoryNavTab />
+  </EmojiPicker.CategoryNav>
+  <EmojiPicker.Preview />
+</EmojiPicker.Root>
 ```
 
 </Section>
@@ -204,6 +148,17 @@ Each part takes `className` and `style` as a value or a function of its state, a
 
 `EmojiPopover` comes from `emoji-components/floating-ui`, or from `emoji-components/react-aria`, where it is modal by default.
 
+```tsx title="popover.tsx"
+<EmojiPopover.Root>
+  <EmojiPopover.Trigger />
+  <EmojiPopover.Portal>
+    <EmojiPopover.Positioner>
+      <EmojiPopover.Popup>…</EmojiPopover.Popup>
+    </EmojiPopover.Positioner>
+  </EmojiPopover.Portal>
+</EmojiPopover.Root>
+```
+
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" adapters />
 
 ### Keeping the popover open {#keep-open}
@@ -238,11 +193,28 @@ In your own popover, close it from `onSelect` and give `SearchInput` `autoFocus`
 
 `reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`.
 
+```tsx title="reactions.tsx"
+<EmojiPicker.Root reactions={5}>
+  <EmojiPicker.Reactions />
+  <EmojiPicker.Panel>…</EmojiPicker.Panel>
+</EmojiPicker.Root>
+```
+
 <Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
 
 ### Suggesting shortcodes {#headless}
 
 `useTextFieldEmojiTypeahead(ref)` finds a `:shortcode` as you type, and `EmojiSuggestions` shows the matches at the caret; for an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+
+```tsx title="suggestions.tsx"
+<EmojiSuggestions.Root open={open} onOpenChange={(next) => !next && dismiss()}>
+  <EmojiSuggestions.Portal>
+    <EmojiSuggestions.Positioner anchor={anchor}>
+      <EmojiSuggestions.Popup>…</EmojiSuggestions.Popup>
+    </EmojiSuggestions.Positioner>
+  </EmojiSuggestions.Portal>
+</EmojiSuggestions.Root>
+```
 
 <Demo name="autocomplete" className="min-h-[360px] items-end pb-14 sm:pb-14" />
 
