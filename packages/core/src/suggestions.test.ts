@@ -30,6 +30,8 @@ describe("suggestions", () => {
     expect(typeahead.keydown(key("ArrowDown"))).toBe(true);
     expect(typeahead.getOptionProps(1)).toMatchObject({ id: "ta-option-1", "aria-selected": true, "data-highlighted": "" });
     expect(typeahead.keydown({ ...key("Enter"), isComposing: true })).toBe(false);
+    expect(typeahead.keydown({ ...key("Tab"), shiftKey: true })).toBe(false);
+    expect(chosen).toEqual([]);
     expect(typeahead.keydown(key("Enter"))).toBe(true);
     expect(chosen).toEqual(["👎"]);
     expect(selected).toEqual(["1f44e"]);

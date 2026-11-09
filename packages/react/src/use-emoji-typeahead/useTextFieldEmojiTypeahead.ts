@@ -8,7 +8,7 @@ import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } fr
 type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
-const EVENTS = ["selectionchange", "click", "keyup"];
+const EVENTS = ["selectionchange", "click", "keyup", "focus"];
 
 export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement | null>, options?: EmojiTypeaheadOptions): EmojiTypeahead {
   const [match, setMatch] = React.useState<Match | null>(null);
@@ -32,25 +32,21 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement
       const found = to == null ? null : findShortcodeTrigger(el.value.slice(0, to));
       setMatch((prev) => (found && to != null ? (prev && prev.query === found.query && prev.from === found.offset ? prev : { query: found.query, from: found.offset, to }) : null));
     };
-    const sync = () => matchAt(el.selectionEnd === el.selectionStart ? el.selectionStart : null);
+    const sync = () => matchAt(el.ownerDocument.activeElement === el && el.selectionEnd === el.selectionStart ? el.selectionStart : null);
     // Before React's handlers (at the root): a key the menu handled never reaches the app's own (Enter to send)
     const keydown = (event: Event) => void (onKeyDown(event as KeyboardEvent) && event.stopPropagation());
     const input = (event: Event) => event.target === el && sync();
+    const blur = () => matchAt(null);
     for (const type of EVENTS) el.addEventListener(type, sync);
+    el.addEventListener("blur", blur);
     el.addEventListener("keydown", keydown);
     el.ownerDocument.addEventListener("input", input);
-    const elsewhere = (event: FocusEvent) => {
-      el.ownerDocument.removeEventListener("focusin", elsewhere);
-      if (event.target !== el) matchAt(null);
-    };
-    if (el.ownerDocument.activeElement === el) sync();
-    else matchAt(el.value.length);
-    el.ownerDocument.addEventListener("focusin", elsewhere);
+    sync();
     return () => {
       for (const type of EVENTS) el.removeEventListener(type, sync);
+      el.removeEventListener("blur", blur);
       el.removeEventListener("keydown", keydown);
       el.ownerDocument.removeEventListener("input", input);
-      el.ownerDocument.removeEventListener("focusin", elsewhere);
     };
   }, [ref, onKeyDown]);
   return typeahead;

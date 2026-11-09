@@ -37,8 +37,9 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       view.focus();
     },
   });
+  const key = new PluginKey("emojiTypeahead");
   const plugin = new Plugin({
-    key: new PluginKey("emojiTypeahead"),
+    key,
     view(editor) {
       mounted = editor;
       store.load().catch(() => {});
@@ -65,6 +66,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
 
   return {
     plugin,
+    key,
     suggestions,
     anchor(): DOMRect | null {
       const at = current();

@@ -3,6 +3,7 @@ import { en } from "../test/en";
 import type { CustomEmoji } from "./custom";
 import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { defaultLabels } from "./labels";
+import { createSearch } from "./search/query";
 import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
 const dataset = en;
@@ -74,9 +75,17 @@ describe("custom emoji in the store", () => {
     expect(store.status()).toBe("loading");
     await loading;
     expect([store.status(), store.get("lily")?.imageUrl]).toEqual(["ready", "/frogs/lily.png"]);
-    const failing = storeWith(async () => Promise.reject(new Error("offline")));
+  });
+
+  it("loads a failed loader again, keeping the dataset", async () => {
+    let online = false;
+    const failing = storeWith(async () => (online ? [frog("lily")] : Promise.reject(new Error("offline"))));
     await failing.load();
-    expect([failing.status(), failing.packErrors()[0]?.message]).toEqual(["ready", "offline"]);
+    expect([failing.status(), failing.customEmojiErrors()[0]?.message, failing.get("lily")]).toEqual(["ready", "offline", undefined]);
+    const records = failing.records().length;
+    online = true;
+    await failing.load();
+    expect([failing.status(), failing.customEmojiErrors(), failing.get("lily")?.imageUrl, failing.records().length]).toEqual(["ready", [], "/frogs/lily.png", records + 1]);
   });
 
   it("keeps size and animation fields on the record", async () => {
@@ -124,6 +133,16 @@ describe("store.query", () => {
     await store.load();
     expect((await store.query("shipit")).map((r) => r.unified)).toEqual(["shipit"]);
     expect(store.query("   ")).toEqual([]);
+  });
+
+  it("carries a rejected search as an error, and runs the same query again", async () => {
+    let online = false;
+    const store = createEmojiStore({ data: dataset, search: async (q, { records }) => (online ? records.filter((r) => r.name === q).map((r) => ({ unified: r.unified })) : Promise.reject(new Error("offline"))) });
+    const search = createSearch(store, { query: "fire", limit: 5 });
+    await vi.waitFor(() => expect(search.getSnapshot()).toMatchObject({ pending: false, results: [], error: { message: "offline" } }));
+    online = true;
+    search.setQuery("fire", 5);
+    await vi.waitFor(() => expect(search.getSnapshot()).toMatchObject({ pending: false, results: [{ emoji: "🔥" }], error: null }));
   });
 
   it("defaults to lexicalSearch, synchronously", async () => {

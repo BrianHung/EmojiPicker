@@ -60,3 +60,19 @@ it("opens on the current tone, moves with the arrows, and applies the tone with 
   expect(document.activeElement).toBe(trigger);
   expect(host.querySelector("[data-slot=emoji-picker-list-cell]")?.getAttribute("data-unified")).toBe("1f44d-1f3fc");
 });
+
+it("asks once to close on an outside press", () => {
+  const changes: string[] = [];
+  render(
+    <EmojiProvider data={en} prepare={false}>
+      <EmojiPicker.Root frequent={false}>
+        <EmojiPicker.SkinTone defaultOpen onOpenChange={(open, d) => (changes.push(`${open} ${d.reason}`), d.cancel())} />
+      </EmojiPicker.Root>
+    </EmojiProvider>,
+  );
+  React.act(() => {
+    document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }));
+    document.body.dispatchEvent(new MouseEvent("mouseup", { bubbles: true, button: 0 }));
+  });
+  expect(changes).toEqual(["false outside-press"]);
+});

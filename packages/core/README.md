@@ -26,7 +26,7 @@ input.addEventListener("keydown", (e) => typeahead.keydown(e));
 const stop = typeahead.syncCombobox(input);
 ```
 
-`data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.packErrors()` reports a custom emoji loader that failed.
+`data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.customEmojiErrors()` reports a custom emoji loader that failed, and `store.load()` runs it again.
 
 ## Entry points
 

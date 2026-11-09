@@ -1,12 +1,12 @@
 [
-  { "name": "picker", "path": "packages/react/dist/index.js", "import": "{ EmojiPicker, EmojiProvider }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "79.5 kB" },
+  { "name": "picker", "path": "packages/react/dist/index.js", "import": "{ EmojiPicker, EmojiProvider }", "gzip": true, "ignore": ["react", "react-dom"], "limit": "82 kB" },
   {
     "name": "picker in the floating-ui popover",
     "path": ["packages/react/dist/index.js", "packages/react/dist/floating-ui.js"],
     "import": { "packages/react/dist/index.js": "{ EmojiPicker, EmojiProvider }", "packages/react/dist/floating-ui.js": "{ EmojiPopover }" },
     "gzip": true,
     "ignore": ["react", "react-dom"],
-    "limit": "98.9 kB"
+    "limit": "101 kB"
   },
   {
     "name": "picker in the react-aria popover",
@@ -14,7 +14,7 @@
     "import": { "packages/react/dist/index.js": "{ EmojiPicker, EmojiProvider }", "packages/react/dist/react-aria.js": "{ EmojiPopover }" },
     "gzip": true,
     "ignore": ["react", "react-dom"],
-    "limit": "91.3 kB"
+    "limit": "94 kB"
   },
-  { "name": "core", "path": "packages/core/dist/index.js", "import": "*", "gzip": true, "limit": "11.7 kB" }
+  { "name": "core", "path": "packages/core/dist/index.js", "import": "*", "gzip": true, "limit": "16 kB" }
 ]

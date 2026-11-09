@@ -61,7 +61,7 @@ export interface EmojiStore {
   records(): readonly EmojiRecord[];
   groupNames(): readonly string[];
   customGroups(): ReadonlyMap<string, string | undefined>;
-  packErrors(): readonly Error[];
+  customEmojiErrors(): readonly Error[];
   locale(): string | undefined;
   labels(): EmojiLabels;
   get(unified: string): EmojiRecord | undefined;
@@ -82,7 +82,7 @@ type EmojiData = {
   groupNames: readonly string[];
   locale: string | undefined;
   customGroups: ReadonlyMap<string, string | undefined>;
-  packErrors: readonly Error[];
+  customEmojiErrors: readonly Error[];
 };
 
 type State = {
@@ -102,7 +102,7 @@ const reduce = (state: State, action: Action): State => {
     case "load":
       return { ...state, status: state.status === "ready" ? "ready" : action.loading ? "loading" : "idle", loading: action.loading };
     case "loaded":
-      return { ...state, status: "ready", error: null, data: action.data, version: state.version + 1 };
+      return { ...state, status: "ready", error: null, loading: null, data: action.data, version: state.version + 1 };
     case "failed":
       return { ...state, status: "error", error: action.error, loading: null };
     case "tone":
@@ -118,7 +118,7 @@ type Source = Pick<EmojiStoreOptions, "data" | "customEmojis" | "filter" | "sear
 
 const defaultEngine = lexicalSearch();
 const CODEPOINTS = /^[\da-f-]+$/i;
-const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customGroups: new Map(), packErrors: [] };
+const NO_DATA: EmojiData = { records: [], byUnified: new Map(), groupNames: [], locale: undefined, customGroups: new Map(), customEmojiErrors: [] };
 
 type Raw = [dataset: Dataset, packs: { emojis: readonly CustomEmoji[]; errors: readonly Error[] }];
 
@@ -164,7 +164,7 @@ export function createEmojiStore({
     const every = [...all, ...customRecords(emojis, all.length, (u) => byCode.get(u.toLowerCase()))];
     const records = (base = config.filter ? every.filter(config.filter) : every);
     const byUnified = new Map(records.flatMap((r) => [[r.unified, r] as const, ...r.tones.map((t) => [t, r] as const)]));
-    return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customGroups: new Map(emojis.map((c) => [c.id, c.group])), packErrors: errors };
+    return { records, byUnified, groupNames: dataset.groups, locale: config.locale ?? dataset.locale, customGroups: new Map(emojis.map((c) => [c.id, c.group])), customEmojiErrors: errors };
   };
   const storedTone = () => clampTone(Number(skinToneStorage.read() ?? defaultSkinTone));
   const state = createStore<State, Action>({ status: "idle", error: null, loading: null, data: { ...NO_DATA, locale: config.locale }, version: 0, ownTone: deferStorage ? clampTone(defaultSkinTone) : storedTone(), controlledTone }, reduce);
@@ -198,14 +198,16 @@ export function createEmojiStore({
   const store: EmojiStore = {
     frequents,
     customGroups: (): ReadonlyMap<string, string | undefined> => loaded().customGroups,
-    packErrors: (): readonly Error[] => loaded().packErrors,
+    customEmojiErrors: (): readonly Error[] => loaded().customEmojiErrors,
 
     load(): Promise<void> {
       const { loading } = state.getSnapshot();
-      if (loading || raw) return loading ?? Promise.resolve();
+      if (loading || (raw && !raw[1].errors.length)) return loading ?? Promise.resolve();
       const current = (controller = new AbortController());
       const { signal } = current;
-      const pending = Promise.all([resolve(config.data ?? DEFAULT_DATA_URL, signal).then(toDataset), loadCustomEmojis(config.customEmojis, signal)]).then(
+      // A failed custom emoji loader runs again; the dataset it loaded with is kept
+      const dataset = raw ? Promise.resolve(raw[0]) : resolve(config.data ?? DEFAULT_DATA_URL, signal).then(toDataset);
+      const pending = Promise.all([dataset, loadCustomEmojis(config.customEmojis, signal)]).then(
         (next) => {
           if (controller === current) publish(next);
         },
@@ -310,7 +312,7 @@ const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 &
 function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset | EmojiDataInput> {
   if (typeof source === "function") return source({ signal });
   if (typeof source !== "string") return Promise.resolve(source);
-  return fetchJson<Dataset | EmojiDataInput>(source, "emoji data");
+  return fetchJson<Dataset | EmojiDataInput>(source, "emoji data", signal);
 }
 
 function idle(fn: () => void) {

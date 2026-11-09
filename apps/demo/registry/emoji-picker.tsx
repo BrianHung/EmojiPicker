@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Emoji, EmojiPicker, type EmojiItem, type EmojiSelection } from "emoji-components";
+import { Emoji, EmojiPicker, type EmojiItem, type EmojiPickerListEmptyState, type EmojiSelection } from "emoji-components";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -63,13 +63,9 @@ function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, emp
       <EmojiPicker.Viewport className="relative flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]">
         <EmojiPicker.List
           className="outline-none"
-          renderEmptyState={({ status, retry }) => (
+          renderEmptyState={(state) => (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              {status === "empty" ? empty : status === "loading" ? "Loading…" : (
-                <button type="button" className="underline" onClick={retry}>
-                  Could not load emoji. Try again
-                </button>
-              )}
+              <EmojiPickerEmpty {...state} empty={empty} />
             </div>
           )}
         >
@@ -84,6 +80,21 @@ function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, emp
       {footer ? <EmojiPickerFooter /> : null}
     </>
   );
+}
+
+function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyState & { empty: React.ReactNode }) {
+  switch (status) {
+    case "loading":
+      return "Loading…";
+    case "empty":
+      return empty;
+    case "error":
+      return (
+        <button type="button" className="underline" onClick={retry}>
+          {query ? "Search failed." : "Could not load emoji."} Try again
+        </button>
+      );
+  }
 }
 
 function EmojiPickerFooter({ className }: { className?: string }) {

@@ -5,15 +5,13 @@ import { createChangeDetails } from "@emoji-components/core/internal";
 import { SLOTS } from "../../../internals/slots";
 import { type Overlay, usePositioner } from "../../../popover/react-aria/utils/usePositioner";
 import type { EmojiSuggestionsPositionerProps, EmojiSuggestionsPositionerState } from "../../utils/types";
-import { EmojiSuggestionsRootContext } from "../root/EmojiSuggestionsRootContext";
+import { useEmojiSuggestionsRootContext } from "../root/EmojiSuggestionsRootContext";
 
 export const EmojiSuggestionsPositioner = React.forwardRef<HTMLDivElement, EmojiSuggestionsPositionerProps>(function EmojiSuggestionsPositioner(
   { side = "bottom", align = "start", sideOffset = 4, alignOffset = 0, collisionPadding = 8, ...props },
   ref,
 ) {
-  const suggestions = React.useContext(EmojiSuggestionsRootContext);
-  if (!suggestions) throw new Error("EmojiSuggestions.Positioner must be inside EmojiSuggestions.Root");
-  const { open, onOpenChange, onOpenChangeComplete } = suggestions;
+  const { open, onOpenChange, onOpenChangeComplete } = useEmojiSuggestionsRootContext("Positioner");
   const overlay: Overlay = {
     open,
     modal: false,

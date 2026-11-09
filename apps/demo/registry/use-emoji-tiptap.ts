@@ -13,8 +13,10 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
   const store = useEmojiStore();
   const id = React.useId();
   const latest = React.useRef({ content, onSelect });
-  latest.current = { content, onSelect };
-  const { plugin, suggestions, anchor } = React.useMemo(
+  React.useLayoutEffect(() => {
+    latest.current = { content, onSelect };
+  });
+  const { plugin, key, suggestions, anchor } = React.useMemo(
     () =>
       emojiTypeahead(store, {
         id,
@@ -34,7 +36,7 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
   React.useEffect(() => {
     if (!editor || editor.isDestroyed) return;
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
-    return () => void (editor.isDestroyed || editor.unregisterPlugin(plugin.spec.key!));
-  }, [editor, plugin]);
+    return () => void (editor.isDestroyed || editor.unregisterPlugin(key));
+  }, [editor, plugin, key]);
   return useEmojiTypeahead(suggestions, { anchor });
 }

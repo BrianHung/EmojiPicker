@@ -109,6 +109,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     const el = list && scroller(list);
     if (!el || !list) return;
     // A stacking context, so iOS clips the sticky titles with the cells instead of with a separately rounded ancestor clip
+    const { isolation } = el.style;
     el.style.isolation = "isolate";
     sync(false);
     const onScroll = () => sync(true);
@@ -117,6 +118,7 @@ export const VirtualCollection = React.memo(function VirtualCollection(options: 
     observer?.observe(el);
     observer?.observe(list);
     return () => {
+      el.style.isolation = isolation;
       el.removeEventListener("scroll", onScroll);
       observer?.disconnect();
     };

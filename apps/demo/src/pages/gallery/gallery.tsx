@@ -1,6 +1,7 @@
 import * as React from "react";
 import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
-import { Emoji, useTextFieldEmojiTypeahead } from "emoji-components";
+import type { EmojiTrigger } from "@emoji-components/core";
+import { Emoji, useEmojiTypeahead, useTextFieldEmojiTypeahead } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
@@ -66,15 +67,27 @@ function GalleryCard({
 }
 
 const DRAFT = ":smi";
+// The draft's suggestions, shown until the field is first focused; the live menu only opens while the field has focus
+const PREVIEW: EmojiTrigger = { query: DRAFT.slice(1), anchor: () => null, replace: () => {} };
 
 function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
-  const emoji = useTextFieldEmojiTypeahead(ref, { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}), onSelect: copyEmoji });
+  const [touched, setTouched] = React.useState(false);
+  const options = { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) } as const;
+  const emoji = useTextFieldEmojiTypeahead(ref, { ...options, onSelect: copyEmoji });
+  const preview = useEmojiTypeahead(touched ? null : PREVIEW, options);
   return (
     <div className="relative w-full max-w-[380px]">
-      <StyleTypeahead appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
+      {touched ? (
+        <StyleTypeahead appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
+      ) : (
+        <div inert aria-hidden className="absolute inset-x-0 bottom-full mb-1.5">
+          <StyleTypeahead appStyle={appStyle} {...preview} />
+        </div>
+      )}
       <input
         ref={ref}
+        onFocus={() => setTouched(true)}
         aria-label="Message"
         defaultValue={DRAFT}
         placeholder="Type :smiling or :tad"

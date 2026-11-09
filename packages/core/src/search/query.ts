@@ -1,10 +1,11 @@
 import type { EmojiRecord } from "../dataset";
-import { createStore, type Subscribe } from "../reactive";
+import { createStore, toError, type Subscribe } from "../reactive";
 import type { EmojiStore } from "../store";
 
 export interface EmojiSearchState {
   results: readonly EmojiRecord[];
   pending: boolean;
+  error: Error | null;
 }
 
 export interface EmojiSearchQuery {
@@ -20,18 +21,21 @@ export interface EmojiSearchRunner {
 }
 
 const NONE: readonly EmojiRecord[] = [];
-const IDLE: EmojiSearchState = { results: NONE, pending: false };
+const IDLE: EmojiSearchState = { results: NONE, pending: false, error: null };
 
-// key is null once aborted, so the next query runs even when it is the same
+// key is null once aborted or failed, so the next query runs even when it is the same
 type Run = { key: string | null; version: number; state: EmojiSearchState; controller: AbortController | null; settled: readonly EmojiRecord[] };
-type RunAction = { type: "start"; key: string; version: number; state: EmojiSearchState; controller: AbortController | null } | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[] } | { type: "abort" };
+type RunAction =
+  | { type: "start"; key: string; version: number; state: EmojiSearchState; controller: AbortController | null }
+  | { type: "settle"; controller: AbortController; results: readonly EmojiRecord[]; error: Error | null }
+  | { type: "abort" };
 
 const reduce = (run: Run, action: RunAction): Run => {
   switch (action.type) {
     case "start":
       return { ...run, key: action.key, version: action.version, state: action.state, controller: action.controller };
     case "settle":
-      return run.controller === action.controller ? { ...run, state: { results: action.results, pending: false }, settled: action.results, controller: null } : run;
+      return run.controller === action.controller ? { ...run, key: action.error ? null : run.key, state: { results: action.results, pending: false, error: action.error }, settled: action.results, controller: null } : run;
     case "abort":
       return run.controller ? { ...run, key: null, controller: null } : run;
     default:
@@ -56,11 +60,11 @@ export function createSearch(store: EmojiStore, initial: EmojiSearchQuery = { qu
     if (!key) return run.dispatch({ type: "start", key, version, state: IDLE, controller: null });
     const controller = new AbortController();
     const out = store.query(query, { limit, signal: controller.signal });
-    if (Array.isArray(out)) return run.dispatch({ type: "start", key, version, state: { results: out, pending: false }, controller: null });
-    run.dispatch({ type: "start", key, version, state: { results: current.settled, pending: true }, controller });
+    if (Array.isArray(out)) return run.dispatch({ type: "start", key, version, state: { results: out, pending: false, error: null }, controller: null });
+    run.dispatch({ type: "start", key, version, state: { results: current.settled, pending: true, error: null }, controller });
     out.then(
-      (results) => run.dispatch({ type: "settle", controller, results }),
-      () => run.dispatch({ type: "settle", controller, results: NONE }),
+      (results) => run.dispatch({ type: "settle", controller, results, error: null }),
+      (e: unknown) => run.dispatch({ type: "settle", controller, results: NONE, error: toError(e) }),
     );
   };
 

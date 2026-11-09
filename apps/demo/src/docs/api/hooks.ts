@@ -22,12 +22,13 @@ export const typeaheadFunctions: Rows = [
 ];
 
 export const providerHooks: Rows = [
-  ["useEmojiSearch(query, { limit })", "`{ results, pending }` from the provider's search, outside a picker."],
+  ["useEmojiSearch(query, { limit })", "`{ results, pending, error }` from the provider's search, outside a picker; `error` is set when an async search rejects."],
   ["useFrequentEmoji({ limit })", "`{ items, pick, remove, clear }` for the frequently used emoji."],
   ["useEmojiSkinTone()", "`[tone, setTone]` for the shared skin tone."],
   ["useEmojiLabels()", "The provider's `EmojiLabels`."],
   ["useEmojiStore()", "The provider's `EmojiStore`, for `store.select(unified)`, `store.withSkinTone(unified)`, and the rest of core's store API."],
   ["useEmojiStatus()", 'The data status: `"idle"`, `"loading"`, `"ready"`, or `"error"`. Calling it starts loading the data.'],
+  ["useCustomEmojiErrors()", "The errors from a `customEmojis` loader that failed; the rest of the data still loads. `useEmojiStore().load()` runs the loader again."],
 ];
 
 export const providerFunctions: Rows = [

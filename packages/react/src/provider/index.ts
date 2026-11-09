@@ -1,4 +1,5 @@
 export { EmojiProvider } from "./EmojiProvider";
+export { useCustomEmojiErrors } from "./utils/useCustomEmojiErrors";
 export { useEmojiLabels } from "./utils/useEmojiLabels";
 export { useEmojiSearch } from "./utils/useEmojiSearch";
 export { useEmojiStatus } from "./utils/useEmojiStatus";

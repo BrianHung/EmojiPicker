@@ -67,6 +67,12 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
     core.press(null);
     if (longPress.current) clearTimeout(longPress.current.timer);
   };
+  React.useEffect(
+    () => () => {
+      if (longPress.current) clearTimeout(longPress.current.timer);
+    },
+    [],
+  );
   return {
     onPointerDown(e) {
       const key = keyOf(e);
