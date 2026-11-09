@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPopoverRootChangeEventDetails, EmojiPopoverRootChangeEventReason } from "../../../popover/utils/types";
-import type { EmojiSuggestionsRootProps } from "../../utils/types";
+import type { EmojiSuggestionsRootChangeEventDetails, EmojiSuggestionsRootChangeEventReason, EmojiSuggestionsRootProps } from "../../utils/types";
 import { EmojiSuggestionsRootContext } from "./EmojiSuggestionsRootContext";
 
 export function EmojiSuggestionsRoot({ open, onOpenChange, onOpenChangeComplete, children }: EmojiSuggestionsRootProps) {
@@ -12,6 +11,6 @@ export function EmojiSuggestionsRoot({ open, onOpenChange, onOpenChangeComplete,
 
 export declare namespace EmojiSuggestionsRoot {
   type Props = EmojiSuggestionsRootProps;
-  type ChangeEventReason = EmojiPopoverRootChangeEventReason;
-  type ChangeEventDetails = EmojiPopoverRootChangeEventDetails;
+  type ChangeEventReason = EmojiSuggestionsRootChangeEventReason;
+  type ChangeEventDetails = EmojiSuggestionsRootChangeEventDetails;
 }

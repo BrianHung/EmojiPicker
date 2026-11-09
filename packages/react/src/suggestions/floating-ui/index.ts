@@ -6,6 +6,8 @@ export type {
   EmojiSuggestionsPortalProps,
   EmojiSuggestionsPositionerProps,
   EmojiSuggestionsPositionerState,
+  EmojiSuggestionsRootChangeEventDetails,
+  EmojiSuggestionsRootChangeEventReason,
   EmojiSuggestionsRootProps,
 } from "../utils/types";
 

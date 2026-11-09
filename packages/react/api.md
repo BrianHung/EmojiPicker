@@ -27,7 +27,7 @@ Types: `CategoryOption`, `CustomEmoji`, `Dataset`, `EmojiComponentsEvent`, `Emoj
 
 Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`, `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
 
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootProps`
+Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`
 
 | Props | Own props |
 |---|---|
@@ -43,7 +43,7 @@ Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `Emoj
 
 Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`, `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
 
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootProps`
+Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`
 
 | Props | Own props |
 |---|---|
@@ -124,7 +124,7 @@ Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `Emoj
 
 Values: `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
 
-Types: `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootProps`
+Types: `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`
 
 | Props | Own props |
 |---|---|
@@ -136,7 +136,7 @@ Types: `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggest
 
 Values: `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
 
-Types: `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootProps`
+Types: `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`
 
 | Props | Own props |
 |---|---|

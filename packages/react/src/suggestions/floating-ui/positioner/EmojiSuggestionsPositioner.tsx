@@ -14,7 +14,10 @@ export const EmojiSuggestionsPositioner = React.forwardRef<HTMLDivElement, Emoji
   ref,
 ) {
   const { open, onOpenChange, status } = useEmojiSuggestionsRootContext("Positioner");
-  const placement = usePlacement({ side, align, sideOffset, alignOffset, collisionPadding, anchor }, { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason), event)) });
+  const placement = usePlacement(
+    { side, align, sideOffset, alignOffset, collisionPadding, anchor },
+    { open, onOpenChange: (next, event, reason) => onOpenChange?.(next, createChangeDetails(reasonOf(reason) === "outside-press" ? "outside-press" : "none", event)) },
+  );
   const { getFloatingProps } = useInteractions([useDismiss(placement.context, { escapeKey: false })]);
   const refs = useMergeRefs([placement.setFloating, ref]);
   return status && positioned(placement, status, getFloatingProps, SLOTS.suggestionsPositioner, props, refs);
