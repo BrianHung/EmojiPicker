@@ -4,7 +4,7 @@
   "title": "Emoji Lexical",
   "description": "Shortcode typeahead for a Lexical editor: the useLexicalEmojiTypeahead hook, the EmojiTypeaheadPlugin component, and an EmojiNode for custom emoji.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.0",
+    "emoji-components@1.0.0-alpha.1",
     "lexical",
     "@lexical/react"
   ],

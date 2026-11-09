@@ -4,7 +4,7 @@
   "title": "Emoji Suggestions",
   "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.0"
+    "emoji-components@1.0.0-alpha.1"
   ],
   "registryDependencies": [
     "utils"
