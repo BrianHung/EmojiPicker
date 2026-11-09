@@ -1,0 +1,10 @@
+---
+title: Keeping the popover open
+description: Keep the popover open after a pick, to add several emoji in a row.
+---
+
+A pick closes the popover with reason `"item-press"`, and canceling that change keeps it open.
+
+```tsx title="picker-popover.tsx"
+<EmojiPopover.Root onOpenChange={(open, details) => details.reason === "item-press" && details.cancel()}>
+```

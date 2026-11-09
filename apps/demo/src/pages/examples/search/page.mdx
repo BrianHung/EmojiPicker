@@ -1,0 +1,13 @@
+---
+title: Replacing the search
+description: The default search without typo correction, with fuzzy matches, with frequently used emoji first, or from a server.
+---
+
+import { Demo } from "@/components/site/demo";
+import recipes from "@/docs/snippets/search.ts?raw";
+
+`search` on `EmojiProvider` takes any `EmojiSearch`, and the default, `lexicalSearch()`, ranks names, shortcodes, and tags, and corrects typos.
+
+<Demo name="search" className="flex-col gap-3">
+  <Code title="search.ts" label="Recipes" code={recipes} />
+</Demo>

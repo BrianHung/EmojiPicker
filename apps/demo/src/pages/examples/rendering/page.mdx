@@ -1,0 +1,14 @@
+---
+title: Drawing emoji
+description: Native emoji in the font of your choice, or images where the font can't draw them.
+---
+
+import * as api from "@/docs/api";
+import { Demo } from "@/components/site/demo";
+import { AttrTable } from "@/components/site/docs";
+
+Native emoji draw in `--emoji-font-family`, images come from `imageUrl` (Twemoji by default), and `renderer="auto"` draws an image wherever the font can't.
+
+<Demo name="rendering" className="flex-col gap-4" />
+
+<AttrTable head={["Rendering", "Snippet", "Notes"]} rows={api.rendering} />

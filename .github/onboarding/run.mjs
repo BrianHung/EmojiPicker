@@ -41,7 +41,7 @@ const cli = section(installation, "### Command");
 const manual = section(installation, "### Manual");
 const install = code(manual, "bash");
 const add = code(cli, "bash");
-const usage = module(code(section(docs, "### Composing a picker"), "tsx"), "Examples › Composing a picker");
+const usage = module(code(section(docs, "## Usage"), "tsx"), "Usage");
 const cardUsage = module(code(cli, "tsx"), "Installation › Command");
 
 const paths = [

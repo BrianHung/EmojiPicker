@@ -4,10 +4,7 @@ description: Unstyled, composable emoji components for React.
 ---
 
 import * as api from "@/docs/api";
-import providers from "@/docs/snippets/providers.tsx?raw";
 import localization from "@/docs/snippets/localization.tsx?raw";
-import recipes from "@/docs/snippets/search.ts?raw";
-import virtualizer from "@/pages/examples/virtualizer/tanstack-list.tsx?raw";
 import registry from "@/registry/emoji-picker.tsx?raw";
 
 <Section>
@@ -89,6 +86,33 @@ import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
 <Section>
 
+## Usage
+
+The parts render without a provider or CSS, `Root` loads the English dataset from jsDelivr, and `Viewport` needs a height to virtualize the list.
+
+```tsx title="app/page.tsx"
+"use client";
+
+import { EmojiPicker } from "emoji-components";
+
+export default function Page() {
+  return (
+    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPicker.Search>
+        <EmojiPicker.SearchInput />
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport style={{ height: 320 }}>
+        <EmojiPicker.List />
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
+```
+
+</Section>
+
+<Section>
+
 ## Anatomy
 
 ```tsx title="anatomy.tsx"
@@ -115,29 +139,6 @@ import { EmojiPicker } from "emoji-components";
 
 ## Examples
 
-### Composing a picker {#parts}
-
-The parts render without a provider or CSS, `Root` loads the English dataset from jsDelivr, and `Viewport` needs a height to virtualize the list.
-
-```tsx title="app/page.tsx"
-"use client";
-
-import { EmojiPicker } from "emoji-components";
-
-export default function Page() {
-  return (
-    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
-      <EmojiPicker.Search>
-        <EmojiPicker.SearchInput />
-      </EmojiPicker.Search>
-      <EmojiPicker.Viewport style={{ height: 320 }}>
-        <EmojiPicker.List />
-      </EmojiPicker.Viewport>
-    </EmojiPicker.Root>
-  );
-}
-```
-
 ### Styling the parts {#inline}
 
 Each part takes `className` and `style` as a value or a function of its state, and `emoji-components/theme.css` adds Tailwind utilities for the tokens, such as `bg-emoji-picker-background`.
@@ -161,47 +162,6 @@ Each part takes `className` and `style` as a value or a function of its state, a
 
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" adapters />
 
-### Keeping the popover open {#keep-open}
-
-A pick closes the popover with reason `"item-press"`, and canceling that change keeps it open.
-
-```tsx title="picker-popover.tsx"
-<EmojiPopover.Root onOpenChange={(open, details) => details.reason === "item-press" && details.cancel()}>
-```
-
-### Using another popover {#custom-popover}
-
-In your own popover, close it from `onSelect` and give `SearchInput` `autoFocus`, or, without a search field, pass `emojiPickerInitialFocus` as the popover's initial focus.
-
-```tsx title="emoji-button.tsx"
-<Popover open={open} onOpenChange={setOpen}>
-  <PopoverTrigger aria-label="Add emoji">😀</PopoverTrigger>
-  <PopoverContent aria-label="Emoji picker" className="w-80 p-0">
-    <EmojiPicker.Root onSelect={({ emoji }) => (onEmoji(emoji), setOpen(false))}>
-      <EmojiPicker.Search>
-        <EmojiPicker.SearchInput autoFocus />
-      </EmojiPicker.Search>
-      <EmojiPicker.Viewport className="h-72">
-        <EmojiPicker.List />
-      </EmojiPicker.Viewport>
-    </EmojiPicker.Root>
-  </PopoverContent>
-</Popover>
-```
-
-### Showing a reaction row {#tapback}
-
-`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`.
-
-```tsx title="reactions.tsx"
-<EmojiPicker.Root reactions={5}>
-  <EmojiPicker.Reactions />
-  <EmojiPicker.Panel>…</EmojiPicker.Panel>
-</EmojiPicker.Root>
-```
-
-<Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
-
 ### Suggesting shortcodes {#headless}
 
 `useTextFieldEmojiTypeahead(ref)` finds a `:shortcode` as you type, and `EmojiSuggestions` shows the matches at the caret; for an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
@@ -218,11 +178,24 @@ In your own popover, close it from `onSelect` and give `SearchInput` `autoFocus`
 
 <Demo name="autocomplete" className="min-h-[360px] items-end pb-14 sm:pb-14" />
 
-### Sharing state with a provider {#provider}
+### Showing a reaction row {#tapback}
 
-Parts and hooks read the nearest `EmojiProvider`, and without one they share a single store.
+`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`.
 
-<Code title="app/providers.tsx" code={providers} />
+```tsx title="reactions.tsx"
+<EmojiPicker.Root reactions={5}>
+  <EmojiPicker.Reactions />
+  <EmojiPicker.Panel>…</EmojiPicker.Panel>
+</EmojiPicker.Root>
+```
+
+<Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
+
+### Adding custom emoji {#custom-emoji}
+
+`customEmojis` on `EmojiProvider` takes a list or a loader, and each `group` becomes a section; to host a pack, see the [Custom emoji](/examples/custom-emoji/) example.
+
+<Demo name="custom-emoji" className="flex-col gap-3" />
 
 ### Loading another locale {#data}
 
@@ -230,45 +203,7 @@ Parts and hooks read the nearest `EmojiProvider`, and without one they share a s
 
 <Code title="app/providers.tsx" code={localization} />
 
-### Replacing the search {#search}
-
-`search` on `EmojiProvider` takes any `EmojiSearch`, and the default, `lexicalSearch()`, ranks names, shortcodes, and tags, and corrects typos.
-
-<Demo name="search" className="flex-col gap-3">
-  <Code title="search.ts" label="Recipes" code={recipes} />
-</Demo>
-
-### Searching outside a picker {#command-palette}
-
-`useEmojiSearch(query)` returns the provider's results for a list of your own, such as a command palette.
-
-<Demo name="command-palette" />
-
-### Adding custom emoji {#custom-emoji}
-
-`customEmojis` on `EmojiProvider` takes a list or a loader, and each `group` becomes a section.
-
-<Demo name="custom-emoji" className="flex-col gap-3" />
-
-### Drawing emoji {#rendering}
-
-Native emoji draw in `--emoji-font-family`, images come from `imageUrl` (Twemoji by default), and `renderer="auto"` draws an image wherever the font can't.
-
-<Demo name="rendering" className="flex-col gap-4" />
-
-<AttrTable head={["Rendering", "Snippet", "Notes"]} rows={api.rendering} />
-
-### Customizing cells {#custom-cells}
-
-The registry's `EmojiPickerCard` takes a `cell` function, here one that renders each `EmojiPickerCell` as a larger button titled with its shortcode.
-
-<Demo name="cells-and-rows" className="flex-col gap-3" />
-
-### Using another virtualizer {#custom-virtualizer}
-
-Inside `Root`, `useEmojiPickerGrid` and `useEmojiPickerCell` replace `List` for TanStack Virtual, react-window, or a list of your own, as in [Custom virtualizer](/examples/virtualizer/).
-
-<Code title="tanstack-list.tsx" code={virtualizer} />
+More examples, such as replacing the search and drawing emoji as images, are in [Examples](/examples/).
 
 </Section>
 

@@ -31,7 +31,7 @@ export const PAGES = {
   examples: {
     entry: "examples/index.html",
     heading: "Examples",
-    description: "React emoji picker integrations to copy into your app: Tiptap, Lexical, semantic search, custom emoji, and custom virtualizers.",
+    description: "React emoji picker recipes and integrations to copy into your app: popovers, search, rendering, custom emoji, custom virtualizers, Tiptap, and Lexical.",
   },
   ...Object.fromEntries(EXAMPLE_IDS.map((name) => [name, example(name)])),
 } satisfies Record<string, Page>;

@@ -10,7 +10,7 @@ import "@/globals.css";
 function Examples() {
   return (
     <DocsLayout>
-      <PageHeader title="Examples" description="Integrations to copy into your app." className="mb-8" />
+      <PageHeader title="Examples" description="Recipes and integrations to copy into your app." className="mb-8" />
       <div className="grid gap-4 sm:grid-cols-2">
         {EXAMPLES.map((e) => (
           <a key={e.href} href={e.href} className="group rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50">

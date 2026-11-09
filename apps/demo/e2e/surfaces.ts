@@ -35,6 +35,7 @@ const button = (scope: Page | Locator, name: string) => scope.getByRole("button"
 export const card = (page: Page, title?: string) => (title ? page.locator('[data-slot="card"]').filter({ has: page.getByRole("heading", { name: title, exact: true }) }) : page.locator('[data-slot="card"]').first());
 export const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
 export const preview = (page: Page, id: string) => example(page, id).locator("div.relative").first();
+export const demo = (page: Page) => page.locator("main div.relative").first();
 export const homePopover = (page: Page) => button(example(page, "popover"), "Open emoji picker");
 const hero = (page: Page) => page.getByRole("tablist", { name: "App" }).locator("xpath=../following-sibling::div[1]");
 
@@ -246,13 +247,13 @@ const home: Surface[] = [
       return button(preview(p, "tapback"), "More emoji");
     },
   },
-  inline("home/search", "/", (p) => preview(p, "search")),
   inline("home/custom-emoji", "/", (p) => preview(p, "custom-emoji")),
-  inline("home/custom-cells", "/", (p) => preview(p, "custom-cells")),
   menu("home/autocomplete", "/", (p) => example(p, "headless").getByLabel("Message", { exact: true }), ":smi", { frame: (p) => preview(p, "headless") }),
 ];
 
 const examples: Surface[] = [
+  inline("examples/search", "/examples/search/", demo),
+  inline("examples/custom-cells", "/examples/custom-cells/", demo),
   menu("examples/tiptap/menu", "/examples/tiptap/", tiptapField, ":smi"),
   popover("examples/tiptap/insert", "/examples/tiptap/", (p) => button(p, "Insert emoji")),
   menu("examples/lexical/menu", "/examples/lexical/", lexicalField, ":smi"),
@@ -286,13 +287,13 @@ const ENGINES = ["Lexical", "No Typos", "Fuse", "Frequents", "Async"];
 const searchFor =
   (engine: string, mode = "Ranked") =>
   async (p: Page) => {
-    const ex = example(p, "search");
+    const ex = p.locator("main");
     for (const name of [engine, mode]) {
       await ex.getByRole("tab", { name, exact: true }).focus();
       await p.keyboard.press("Enter");
     }
-    await preview(p, "search").locator(slot("searchInput")).fill("smile");
-    await preview(p, "search").locator(emojiItem).first().waitFor();
+    await demo(p).locator(slot("searchInput")).fill("smile");
+    await demo(p).locator(emojiItem).first().waitFor();
   };
 
 export const SHOTS: Shot[] = [
@@ -326,9 +327,9 @@ export const SHOTS: Shot[] = [
   { id: "home/mobile-menu", path: "/", only: "mobile", prepare: async (p) => p.getByRole("button", { name: "Menu" }).click(), frame: (p) => p.getByRole("dialog") },
   { id: "home/hero-apple", path: "/", frame: hero },
   { id: "home/tapback", path: "/", frame: (p) => preview(p, "tapback") },
-  { id: "home/rendering", path: "/", frame: (p) => preview(p, "rendering") },
-  ...ENGINES.map((e): Shot => ({ id: `home/search-${e.replace(/\W+/g, "").toLowerCase()}`, path: "/", prepare: searchFor(e), frame: (p) => preview(p, "search") })),
-  { id: "home/search-grouped", path: "/", prepare: searchFor("Lexical", "Grouped"), frame: (p) => preview(p, "search") },
   { id: "examples/index", path: "/examples/", frame: (p) => p.locator("main") },
+  { id: "examples/rendering", path: "/examples/rendering/", frame: demo },
+  ...ENGINES.map((e): Shot => ({ id: `examples/search-${e.replace(/\W+/g, "").toLowerCase()}`, path: "/examples/search/", prepare: searchFor(e), frame: demo })),
+  { id: "examples/search-grouped", path: "/examples/search/", prepare: searchFor("Lexical", "Grouped"), frame: demo },
   { id: "examples/semantic-search-on-device", path: "/examples/semantic-search/", frame: (p) => p.getByTestId("status").locator("xpath=.."), mask: (p) => [p.getByTestId("status")] },
 ];
