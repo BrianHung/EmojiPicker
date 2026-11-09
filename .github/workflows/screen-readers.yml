@@ -20,11 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 24, cache: npm }
       - run: npm ci
       - run: npx playwright install chromium
       - name: Set up VoiceOver for automation
         run: npx @guidepup/setup setup --ci
+      - uses: actions/cache@v4
+        with: { path: ~/Library/Caches/guidepup, key: guidepup-voiceover-${{ hashFiles('package-lock.json') }} }
       - name: Install Guidepup's VoiceOver assets
         working-directory: apps/demo
         run: npx @guidepup/setup install voiceover
@@ -48,11 +50,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with: { node-version: 24, cache: npm }
       - run: npm ci
       - run: npx playwright install chromium
       - name: Set up the runner for NVDA
         run: npx @guidepup/setup setup --ci
+      - uses: actions/cache@v4
+        with: { path: ~/AppData/Local/guidepup, key: guidepup-nvda-${{ hashFiles('package-lock.json') }} }
       - name: Install Guidepup's NVDA
         working-directory: apps/demo
         run: npx @guidepup/setup install nvda
