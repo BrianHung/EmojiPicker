@@ -22,6 +22,12 @@ export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | 
 
   const ids = React.useMemo(() => items.map((item) => item.id), [items]);
   const active = useActiveHeading(ids);
+  const sections = React.useMemo(() => {
+    let section = "";
+    return items.map((item) => (item.depth === 2 ? (section = item.id) : section));
+  }, [items]);
+  const section = sections[ids.indexOf(active ?? "")];
+  const shown = items.filter((item, i) => item.depth === 2 || sections[i] === section);
 
   const list = React.useRef<HTMLDivElement>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: scrolls the newly active link into view
@@ -49,7 +55,7 @@ export function TableOfContents({ root }: { root: React.RefObject<HTMLElement | 
       </a>
       <div ref={list} className="relative max-h-[calc(100vh-10rem)] overflow-y-auto [scrollbar-width:none]">
         <ul className="flex flex-col border-l border-border">
-          {items.map((item) => {
+          {shown.map((item) => {
             const on = item.id === active;
             return (
               <li key={item.id}>
