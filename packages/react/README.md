@@ -2,7 +2,7 @@
 
 <img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/emoji-components/main/.github/assets/picker.svg" width="680">
 
-Unstyled React components for emoji pickers, reaction rows, and shortcode typeahead, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
+Unstyled, composable emoji components for React: a virtualized picker, reaction rows, and shortcode typeahead, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 
 ## Installation
 
@@ -10,21 +10,31 @@ Unstyled React components for emoji pickers, reaction rows, and shortcode typeah
 npm i emoji-components
 ```
 
-Or the shadcn/ui component, from the registry items this package ships in `r/`: `npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json`.
+Or add the shadcn/ui component:
+
+```bash
+npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json
+```
 
 ## Usage
 
 ```tsx
+"use client";
+
 import { EmojiPicker } from "emoji-components";
 
-<EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
-  <EmojiPicker.Search>
-    <EmojiPicker.SearchInput />
-  </EmojiPicker.Search>
-  <EmojiPicker.Viewport style={{ height: 320 }}>
-    <EmojiPicker.List />
-  </EmojiPicker.Viewport>
-</EmojiPicker.Root>
+export default function Page() {
+  return (
+    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPicker.Search>
+        <EmojiPicker.SearchInput />
+      </EmojiPicker.Search>
+      <EmojiPicker.Viewport style={{ height: 320 }}>
+        <EmojiPicker.List />
+      </EmojiPicker.Viewport>
+    </EmojiPicker.Root>
+  );
+}
 ```
 
 ## Entry points

@@ -18,7 +18,7 @@ npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emo
 ```tsx
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
 
-<EmojiPickerCard onSelect={(selection) => insert(selection.emoji)} />
+<EmojiPickerCard onSelect={(selection) => console.log(selection.emoji)} />
 ```
 
 ### npm
@@ -32,7 +32,7 @@ npm i emoji-components
 ```tsx
 import { EmojiPicker } from "emoji-components";
 
-<EmojiPicker.Root onSelect={(selection) => insert(selection.emoji)}>
+<EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
   <EmojiPicker.Search />
   <EmojiPicker.Viewport style={{ height: 320 }}>
     <EmojiPicker.List />
