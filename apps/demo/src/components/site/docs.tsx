@@ -279,7 +279,7 @@ function TableShell({ head, children }: { head: string[]; children: React.ReactN
         <TableHeader className="bg-muted/50 max-sm:hidden">
           <TableRow className="hover:bg-transparent">
             {head.map((h) => (
-              <TableHead key={h} className="h-10 px-4 text-[13px] whitespace-normal text-muted-foreground max-sm:px-3">
+              <TableHead key={h} className="h-10 px-4 text-[13px] whitespace-nowrap text-muted-foreground max-sm:px-3">
                 {h}
               </TableHead>
             ))}
@@ -291,28 +291,40 @@ function TableShell({ head, children }: { head: string[]; children: React.ReactN
   );
 }
 
-const nameCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[13px] text-foreground sm:whitespace-nowrap max-sm:whitespace-normal max-sm:[overflow-wrap:anywhere]";
-const typeCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[12.5px] whitespace-normal text-[color:var(--type)]";
+const nameCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[13px] leading-5 text-foreground sm:whitespace-nowrap max-sm:whitespace-normal max-sm:[overflow-wrap:anywhere]";
+const typeCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[12.5px] leading-5 whitespace-normal text-[color:var(--type)]";
 const textCell = "px-4 py-3 align-top text-[13px] leading-5 whitespace-normal text-muted-foreground max-sm:px-3";
 const tableCode = "bg-transparent px-0 py-0 text-[12.5px]";
 const descriptionCode = "px-1 py-px text-[12.5px]";
+const defaultCode = `${tableCode} whitespace-nowrap`;
 
+// A description spans the row below its prop on wider screens, and stacks under the name on phones
 export function PropsTable({ rows }: { rows: PropRow[] }) {
+  const description = (text: string, className: string) => (
+    <div className={cn("font-sans text-[13px] leading-6 font-normal whitespace-normal text-muted-foreground", className)}>
+      <Inline text={text} codeClassName={descriptionCode} />
+    </div>
+  );
   return (
     <TableShell head={["Prop", "Type", "Default"]}>
       {rows.map((r) => (
-        <TableRow key={r.name} className="hover:bg-transparent">
-          <TableCell className={nameCell}>
-            {r.name}
-            {r.description ? (
-              <div className="mt-1 font-sans text-[13px] leading-6 font-normal whitespace-normal text-muted-foreground sm:max-w-[280px]">
-                <Inline text={r.description} codeClassName={descriptionCode} />
-              </div>
-            ) : null}
-          </TableCell>
-          <TableCell className={typeCell}>{words(r.type)}</TableCell>
-          <TableCell className={cn(textCell, "min-w-28", !r.default && "max-sm:!hidden", "max-sm:before:content-['Default:_']")}>{r.default ? <Inline text={r.default} codeClassName={tableCode} /> : "—"}</TableCell>
-        </TableRow>
+        <React.Fragment key={r.name}>
+          <TableRow className={cn("hover:bg-transparent", r.description && "sm:border-b-0")}>
+            <TableCell className={nameCell}>
+              {r.name}
+              {r.description ? description(r.description, "mt-1 sm:hidden") : null}
+            </TableCell>
+            <TableCell className={typeCell}>{words(r.type)}</TableCell>
+            <TableCell className={cn(textCell, "min-w-28", !r.default && "max-sm:!hidden", "max-sm:before:content-['Default:_']")}>{r.default ? <Inline text={r.default} codeClassName={defaultCode} /> : "—"}</TableCell>
+          </TableRow>
+          {r.description ? (
+            <TableRow className="hover:bg-transparent max-sm:!hidden">
+              <TableCell colSpan={3} className="px-4 pt-0 pb-3">
+                {description(r.description, "max-w-2xl")}
+              </TableCell>
+            </TableRow>
+          ) : null}
+        </React.Fragment>
       ))}
     </TableShell>
   );
