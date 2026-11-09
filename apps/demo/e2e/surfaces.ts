@@ -257,8 +257,8 @@ const examples: Surface[] = [
   popover("examples/tiptap/insert", "/examples/tiptap/", (p) => button(p, "Insert emoji")),
   menu("examples/lexical/menu", "/examples/lexical/", lexicalField, ":smi"),
   popover("examples/lexical/insert", "/examples/lexical/", (p) => button(p, "Insert emoji")),
-  inline("examples/custom-emoji", "/examples/custom-emoji/", (p) => p.locator("main").getByRole("complementary").first()),
-  inline("examples/semantic-search", "/examples/semantic-search/", (p) => p.locator("main").getByRole("complementary").first(), {
+  inline("examples/custom-emoji", "/examples/custom-emoji/", (p) => p.locator("main [data-slot=emoji-picker]").first()),
+  inline("examples/semantic-search", "/examples/semantic-search/", (p) => p.locator("main [data-slot=emoji-picker]").first(), {
     prepare: async (p) => button(p.locator("main"), "Clear").click(),
   }),
 ];

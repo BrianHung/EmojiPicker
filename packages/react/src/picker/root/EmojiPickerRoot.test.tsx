@@ -62,9 +62,9 @@ describe("Root keyboard", () => {
     const { host } = mount({ query: "smile", onQueryChange: (_, details) => allow && details.allowPropagation() });
     const reached = vi.fn();
     document.addEventListener("keydown", reached);
-    press(host.querySelector("aside")!, "Escape");
+    press(host.querySelector<HTMLElement>('[data-slot="emoji-picker"]')!, "Escape");
     allow = true;
-    press(host.querySelector("aside")!, "Escape");
+    press(host.querySelector<HTMLElement>('[data-slot="emoji-picker"]')!, "Escape");
     document.removeEventListener("keydown", reached);
     expect(reached).toHaveBeenCalledTimes(1);
   });
@@ -95,7 +95,7 @@ describe("Root keyboard", () => {
     press(input, "ArrowRight");
     expect(onHighlightChange).toHaveBeenLastCalledWith("1f603", expect.objectContaining({ reason: "keyboard", key: "smileys-people:1f603" }));
     expect(highlighted(host)).toBe("1f600");
-    expect(host.querySelector("aside")!.hasAttribute("highlight")).toBe(false);
+    expect(host.querySelector<HTMLElement>('[data-slot="emoji-picker"]')!.hasAttribute("highlight")).toBe(false);
   });
 
   it("keeps the highlight where it is when onHighlightChange cancels", () => {
@@ -129,7 +129,7 @@ describe("Root keyboard", () => {
   it("runs onKeyDown first, and preventEmojiComponentsHandler skips the picker's handler", () => {
     const onQueryChange = vi.fn();
     const { host } = mount({ defaultQuery: "smile", onQueryChange, onKeyDown: (e) => e.shiftKey || e.preventEmojiComponentsHandler() });
-    const root = host.querySelector("aside")!;
+    const root = host.querySelector<HTMLElement>('[data-slot="emoji-picker"]')!;
     press(root, "Escape");
     expect(onQueryChange).not.toHaveBeenCalled();
     press(root, "Escape", { shiftKey: true });

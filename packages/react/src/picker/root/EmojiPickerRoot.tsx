@@ -299,9 +299,10 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const rootState: EmojiPickerRootState = { searching, reactionsOpen };
 
   return renderElement(
-    "aside",
+    "div",
     {
       ref: rootRef,
+      role: "group",
       "data-slot": SLOTS.root,
       "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
       ...mergePartProps(rest, activeWithin),
