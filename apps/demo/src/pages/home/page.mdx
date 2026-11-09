@@ -76,6 +76,12 @@ export function Composer() {
 
 <Steps>
 
+<Step title="Set up shadcn/ui.">
+
+The component uses Tailwind CSS v4, shadcn/ui's color classes, such as `bg-popover` and `border-border`, and `cn` from `@/lib/utils`. `npx shadcn@latest init` sets up all three.
+
+</Step>
+
 <Step title="Install the package.">
 
 <PackageManagers install="emoji-components" />
@@ -99,11 +105,7 @@ export function Composer() {
 
 </Step>
 
-<Step title="Set up shadcn/ui's theme and utilities.">
-
-The component uses shadcn/ui's color classes, such as `bg-popover` and `border-border`, and `cn` from `@/lib/utils`. `npx shadcn@latest init` adds both; then update the import paths to match your project.
-
-</Step>
+<Step title="Update the import paths to match your project setup." />
 
 </Steps>
 

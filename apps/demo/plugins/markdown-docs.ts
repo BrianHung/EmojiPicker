@@ -141,7 +141,7 @@ export const ROUTES: Record<string, Route> = {
 
 - [Examples](${SITE}/examples.md): index of the recipes and integrations.
 ${index((name) => `${SITE}/examples/${name}.md`)}
-- [Source examples](https://github.com/BrianHung/emoji-components/tree/main/examples): popovers, providers, search, rendering, and cells, as files to copy.
+- [Source examples](https://github.com/BrianHung/emoji-components/tree/main/examples): a popover that stays open, a provider, search, a command palette, rendering, and cells, as files to copy.
 `,
   },
   "robots.txt": { type: "text/plain", render: () => `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${SITE}/sitemap.xml\n` },
