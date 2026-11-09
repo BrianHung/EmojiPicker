@@ -28,8 +28,9 @@ const ROW: React.CSSProperties = { zIndex: 4, display: "flex", background: "var(
 // The popup a long press or Shift+Space opens on a cell; List renders one unless a ListVariations is in Root
 export const VariationsPopup = React.forwardRef<HTMLDivElement, EmojiPickerListVariationsProps>(function VariationsPopup(props, ref) {
   const { state, list } = useEmojiPickerRootContext("EmojiPicker.ListVariations");
-  useStore(state, (s) => s.variations);
-  const overlay = list.current?.overlay();
+  const open = useStore(state, (s) => s.variations);
+  const [overlay, setOverlay] = React.useState<Overlay | null>(null);
+  useLayoutEffect(() => setOverlay(open == null ? null : (list.current?.overlay() ?? null)), [open, list]);
   if (!overlay) return null;
   return <VariationsRow {...props} key={overlay.record.unified} overlay={overlay} ref={ref} />;
 });
