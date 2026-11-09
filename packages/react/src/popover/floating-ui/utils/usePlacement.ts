@@ -80,10 +80,12 @@ export function usePlacement({ side, align, sideOffset, alignOffset, collisionPa
   // floatingStyles rounds to whole device pixels, so the popup's glyphs rasterize the same at any fractional offset
   const { position, top, left } = floating.floatingStyles;
   const live: Placed = { placement: floating.placement, position, top, left, origin };
-  // Closing (the exit animation) and a hidden reference keep the last position: React's state from a previous render
+  // Closing (the exit animation) and a hidden reference keep the last position a fresh commit showed
   const [held, setHeld] = React.useState(live);
   const fresh = options.open && !floating.middlewareData.transformOrigin?.detached;
-  if (fresh && !shallowEqual(held, live)) setHeld(live);
+  useLayoutEffect(() => {
+    if (fresh) setHeld((prev) => (shallowEqual(prev, live) ? prev : live));
+  });
   const shown = fresh ? live : held;
   const state: EmojiPopoverPositionerState = { open: !!options.open, side: placedSide(side, shown.placement.split("-")[0], rtl), align };
   return {
