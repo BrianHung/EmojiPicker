@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
-import { card, clearTextField, firstPicker as picker, show, surface } from "./surfaces";
+import { card, clearTextField, firstPicker as picker, homePopover, show, surface } from "./surfaces";
 import { expect, frames, quiet, settle, emojiItem, slot, test, visit } from "./support";
 
 const highlighted = (page: Page) => picker(page).locator(`${emojiItem}[data-highlighted]`);
@@ -102,6 +102,18 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover", "h
     for (let i = 0; i < data.length; i += info.channels) if (Math.max(data[i]!, data[i + 1]!, data[i + 2]!) - Math.min(data[i]!, data[i + 1]!, data[i + 2]!) > 60) leaked++;
     expect(leaked, "emoji pixels above the pinned title").toBe(0);
   });
+
+test("registry card: one cell looks highlighted when results change under a resting pointer", async ({ page }) => {
+  await visit(page, "/");
+  await homePopover(page).click();
+  const root = page.locator(`${slot("popoverPopup")} ${slot("root")}`);
+  await root.locator(emojiItem).first().waitFor();
+  await root.locator(emojiItem).nth(1).hover();
+  await page.keyboard.type("cat");
+  await expect(root.locator(`${emojiItem}[data-highlighted]`)).toHaveAccessibleName("cat face");
+  const filled = root.locator(emojiItem).evaluateAll((cells) => cells.filter((c) => getComputedStyle(c).backgroundColor !== "rgba(0, 0, 0, 0)").length);
+  expect(await filled).toBe(1);
+});
 
 test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
