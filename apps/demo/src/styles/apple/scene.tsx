@@ -650,6 +650,13 @@ function useReactionItems(message: Message, recentCount: number) {
 
 type ReactHandler = (unified: string, tapback: boolean) => void;
 
+// The row scrolls: an edge with more emoji past it fades, so the next one reads as a scroll hint rather than cut off
+const fade = ({ start, end }: { start: boolean; end: boolean }): React.CSSProperties => {
+  if (!start && !end) return {};
+  const mask = `linear-gradient(to right, ${start ? "transparent, #000 24px" : "#000"}, ${end ? "#000 calc(100% - 32px), transparent" : "#000"})`;
+  return { maskImage: mask, WebkitMaskImage: mask };
+};
+
 function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect; message: Message; onReact: ReactHandler; onEmoji: () => void; onClose: () => void }) {
   const items = useReactionItems(message, 6);
   const top = tapbackTop(rect);
@@ -661,7 +668,10 @@ function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect
   const cx0 = Math.min(Math.max(anchor + 28.7 * s, pillX + 44), pillX + PILL.w - 44);
 
   const [p, setP] = React.useState(0);
+  const [edges, setEdges] = React.useState({ start: false, end: true });
   const row = React.useRef<HTMLDivElement>(null);
+  const measure = (el: HTMLDivElement) => setEdges({ start: el.scrollLeft > 1, end: el.scrollLeft + el.clientWidth < el.scrollWidth - 1 });
+  React.useLayoutEffect(() => void (row.current && measure(row.current)), []);
   // A mouse wheel scrolls vertically; the row only scrolls sideways
   React.useEffect(() => {
     const el = row.current;
@@ -747,8 +757,11 @@ function TapbackLayer({ rect, message, onReact, onEmoji, onClose }: { rect: Rect
         role="toolbar"
         aria-label="Tapbacks"
         className="absolute overflow-x-auto overflow-y-hidden rounded-full [scrollbar-width:none]"
-        style={{ left: pillX, top: pillY, width: PILL.w, height: PILL.h }}
-        onScroll={(e) => setP(Math.min(1, e.currentTarget.scrollLeft / 70))}
+        style={{ left: pillX, top: pillY, width: PILL.w, height: PILL.h, ...fade(edges) }}
+        onScroll={(e) => {
+          setP(Math.min(1, e.currentTarget.scrollLeft / 70));
+          measure(e.currentTarget);
+        }}
         initial={{ clipPath: `inset(0 ${PILL.w - 60}px 0 0 round 32px)` }}
         animate={{ clipPath: "inset(0 0px 0 0 round 32px)" }}
         transition={{ ...SPRING, delay: 0.06 }}
