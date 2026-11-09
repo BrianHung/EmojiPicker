@@ -49,7 +49,7 @@ export const EmojiPickerSkinTone = React.forwardRef<HTMLDivElement, EmojiPickerS
   const setOpen = (next: boolean, reason: EmojiPickerSkinToneChangeEventReason, event?: Event) => change(next, createChangeDetails(reason, event, triggerRef.current ?? undefined));
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const outside = (event: PointerEvent) => setOpen(false, "outside-press", event);
-  useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutsideStart: outside, onInteractOutside: outside });
+  useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutside: outside });
 
   const { labels } = useEmojiContext();
   const optionsId = React.useId();

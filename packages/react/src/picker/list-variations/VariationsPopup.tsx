@@ -56,7 +56,7 @@ const VariationsRow = React.forwardRef<HTMLDivElement, EmojiPickerListVariations
     listState.selectionManager.setFocusedKey(items[current]!.unified);
   }, []);
   const dismiss = () => close(false);
-  useInteractOutside({ ref: row, onInteractOutsideStart: dismiss, onInteractOutside: dismiss });
+  useInteractOutside({ ref: row, onInteractOutside: dismiss });
 
   const keys = usePickerKeyDown(undefined, (e) => {
     const unified = e.target instanceof HTMLElement ? e.target.dataset.unified : undefined;
