@@ -21,7 +21,16 @@ export function positioned(
     <EmojiPopoverPositionerContext.Provider value={{ context, state, status, floatingProps }}>
       {renderElement(
         "div",
-        { ...mergePartProps(props), ...positionerAttributes(state, slot), inert: !state.open || undefined, ref, className, style: (s: EmojiPopoverPositionerState) => ({ ...style, ...closedPointerEvents(state.open), ...resolve(own, s) }), render, children },
+        {
+          ...mergePartProps(props),
+          ...positionerAttributes(state, slot),
+          inert: !state.open || undefined,
+          ref,
+          className,
+          style: (s: EmojiPopoverPositionerState) => ({ ...style, ...closedPointerEvents(state.open), ...resolve(own, s) }),
+          render,
+          children,
+        },
         state,
       )}
     </EmojiPopoverPositionerContext.Provider>
