@@ -70,16 +70,17 @@ export const subscribeAll =
 
 export const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));
 
-const byUrl = new Map<string, Promise<unknown>>();
+const byUrl = new Map<string, { pending: Promise<unknown>; signal?: AbortSignal }>();
 
-// One request per URL; a failure is forgotten so a retry fetches again
-export function fetchJson<T>(url: string, label: string): Promise<T> {
-  return cached(byUrl, url, () => {
-    const pending = fetch(url, { priority: "low" }).then((response) => {
+// One request per URL; a failure or abort is forgotten, and a caller that shared an aborted request fetches again
+export function fetchJson<T>(url: string, label: string, signal?: AbortSignal): Promise<T> {
+  const request = cached(byUrl, url, () => {
+    const pending = fetch(url, { priority: "low", signal }).then((response) => {
       if (!response.ok) throw new Error(`${label}: ${response.status} ${response.statusText}`);
       return response.json();
     });
     pending.catch(() => byUrl.delete(url));
-    return pending;
-  }) as Promise<T>;
+    return { pending, signal };
+  });
+  return request.pending.catch((e: unknown) => (request.signal?.aborted && !signal?.aborted ? fetchJson(url, label, signal) : Promise.reject(e))) as Promise<T>;
 }

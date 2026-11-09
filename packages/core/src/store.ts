@@ -312,7 +312,7 @@ const clampTone = (n: number): SkinToneValue => (Number.isInteger(n) && n >= 0 &
 function resolve(source: EmojiDataSource, signal: AbortSignal): Promise<Dataset | EmojiDataInput> {
   if (typeof source === "function") return source({ signal });
   if (typeof source !== "string") return Promise.resolve(source);
-  return fetchJson<Dataset | EmojiDataInput>(source, "emoji data");
+  return fetchJson<Dataset | EmojiDataInput>(source, "emoji data", signal);
 }
 
 function idle(fn: () => void) {
