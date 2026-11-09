@@ -1,5 +1,4 @@
-import { localeData } from "@emoji-components/core";
-import { EmojiProvider, type EmojiLabels } from "emoji-components";
+import { EmojiProvider, localeData, type EmojiLabels } from "emoji-components";
 
 const labels: Partial<EmojiLabels> = {
   picker: "絵文字ピッカー",

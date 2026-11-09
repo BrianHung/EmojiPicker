@@ -1,22 +1,38 @@
-export const hooks: [string, string][] = [
-  ["useTextFieldEmojiTypeahead(ref, options)", "Shortcode typeahead for an <input> or <textarea>. Returns an EmojiTypeahead: query, open, anchor, suggestions, dismiss, and onKeyDown."],
-  [
-    "useEmojiTypeahead({ query, anchor, replace }, options, element)",
-    "Shortcode typeahead for any editor. findShortcodeTrigger(textBeforeCaret) finds the query; isComposingKey(event) is true during IME composition. element is the editor's element, a ref to it, or a function that returns it.",
-  ],
-  ["useEmojiTypeahead(suggestions, { anchor })", "The same, around core's createEmojiSuggestions(store, options) for an editor plugin that owns the keys, such as ProseMirror."],
-  ["useEmojiSearch(query, { limit })", "{ results, pending } from the provider's search, outside a picker."],
-  ["useFrequentEmoji({ limit })", "{ items, pick, remove, clear } for the frequently used emoji."],
-  ["useEmojiSkinTone()", "[tone, setTone] for the shared skin tone."],
-  ["useEmoji(input)", "Resolves a native emoji, shortcode, unified code, or custom emoji id, or returns null."],
-  ["useEmojiLabels()", "The provider's EmojiLabels."],
-  ["useEmojiStore()", "The provider's EmojiStore, for store.select(unified), store.withSkinTone(unified), and the rest of core's store API."],
-  ["useEmojiStatus()", 'The data status: "idle", "loading", "ready", or "error". It starts loading the data.'],
-  ["useEmojiPickerActions()", "Inside Root: move, pick, highlight, focusSearch, clearSearch, close, and toggleSkinTone."],
-  ["useEmojiPickerActiveEmoji()", "Inside Root: the highlighted emoji."],
-  ["useEmojiPickerSearch()", "Inside Root: the query and the result count."],
-  ["useEmojiPickerCategoryNavigation()", "Inside Root: the category tabs."],
-  ["useEmojiPickerCollapsedCategories()", "Inside Root: the collapsed sections."],
-  ["useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "Inside Root, in place of List: rows, stickyIndexes, getGridProps, getHeaderProps, state, and variations for your own virtualizer."],
-  ["useEmojiPickerCell(grid.state, item)", "{ cellProps, state } for one cell of useEmojiPickerGrid."],
+type Rows = [string, string][];
+
+export const pickerHooks: Rows = [
+  ["useEmojiPickerActions()", "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`, as `actionsRef` gives them."],
+  ["useEmojiPickerActiveEmoji()", "The highlighted `EmojiRecord`, or `null`."],
+  ["useEmojiPickerSearch()", "`{ query, resultCount }`. `resultCount` is `null` while not searching."],
+  ["useEmojiPickerCategoryNavigation()", "`{ categories, activeCategory, jumpToCategory(id) }` for your own category tabs."],
+  ["useEmojiPickerCollapsedCategories()", "`{ collapsed, isCollapsed(id), toggle(id), setCollapsed(id, collapsed) }`."],
+  ["useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "In place of `List`: `rows`, `stickyIndexes`, `getGridProps`, `getHeaderProps`, `state`, and `variations`, for your own virtualizer."],
+  ["useEmojiPickerCell(grid.state, item)", "`{ cellProps, state }` for one cell of `useEmojiPickerGrid`."],
 ];
+
+export const typeaheadHooks: Rows = [
+  ["useTextFieldEmojiTypeahead(ref, options)", "Shortcode typeahead for an `<input>` or `<textarea>`. Returns an `EmojiTypeahead`: `query`, `open`, `anchor`, `suggestions`, `dismiss`, and `onKeyDown`."],
+  ["useEmojiTypeahead({ query, anchor, replace }, options, element)", "Shortcode typeahead for any editor. `element` is the editor's element, a ref to it, or a function that returns it."],
+  ["useEmojiTypeahead(suggestions, { anchor })", "The same, around core's `createEmojiSuggestions(store, options)`, for an editor plugin that handles the keys itself, such as the ProseMirror item."],
+];
+
+export const typeaheadFunctions: Rows = [
+  ["findShortcodeTrigger(textBeforeCaret)", "`{ query, offset }` for a `:query` that ends at the caret, or `null`."],
+  ["isComposingKey(event)", "`true` for a key event during IME composition."],
+];
+
+export const providerHooks: Rows = [
+  ["useEmojiSearch(query, { limit })", "`{ results, pending }` from the provider's search, outside a picker."],
+  ["useFrequentEmoji({ limit })", "`{ items, pick, remove, clear }` for the frequently used emoji."],
+  ["useEmojiSkinTone()", "`[tone, setTone]` for the shared skin tone."],
+  ["useEmojiLabels()", "The provider's `EmojiLabels`."],
+  ["useEmojiStore()", "The provider's `EmojiStore`, for `store.select(unified)`, `store.withSkinTone(unified)`, and the rest of core's store API."],
+  ["useEmojiStatus()", 'The data status: `"idle"`, `"loading"`, `"ready"`, or `"error"`. Calling it starts loading the data.'],
+];
+
+export const providerFunctions: Rows = [
+  ["lexicalSearch({ typos, typoThreshold, locale, segmenter, tokenize })", "The default `search`. It ranks names, shortcodes, and tags, and corrects typos."],
+  ["localeData(locale, { shortcodes, baseUrl })", 'The URL of a dataset on jsDelivr. `shortcodes: "cldr"` gives shortcodes in the locale\'s language.'],
+];
+
+export const emojiHooks: Rows = [["useEmoji(input)", "`{ unified, record, imageUrl, name, native }` for a native emoji, shortcode, unified code, or custom emoji id, or `null`."]];

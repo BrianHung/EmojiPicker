@@ -37,12 +37,12 @@ const module = (snippet, where) => {
 };
 
 const installation = section(docs, "## Installation");
-const cli = section(installation, "### CLI");
+const cli = section(installation, "### Command");
 const manual = section(installation, "### Manual");
 const install = code(manual, "bash");
 const add = code(cli, "bash");
-const usage = module(code(section(docs, "## Usage"), "tsx"), "Usage");
-const cardUsage = module(code(cli, "tsx"), "Installation › CLI");
+const usage = module(code(section(docs, "### Composing a picker"), "tsx"), "Examples › Composing a picker");
+const cardUsage = module(code(cli, "tsx"), "Installation › Command");
 
 const paths = [
   { name: "vite", scaffold: "npm create vite@latest app -- --template react-ts", steps: [install, ["src/App.tsx", usage], "npm run dev"], dev: true },

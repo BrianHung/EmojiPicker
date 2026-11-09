@@ -3,14 +3,13 @@ import { posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 import * as api from "../src/docs/api";
-import { apiReference } from "./api-reference";
+import { apiReference, type PartReference } from "./api-reference";
 import type { PropRow } from "../src/components/site/docs";
 import { EXAMPLES } from "../src/lib/examples";
 import { PAGES, pageUrl, SITE } from "./site";
 
 const NAMES = EXAMPLES.map((e) => e.id);
-// Read on each render, so edits to a part's attribute files show in dev
-const tables = (): Record<string, PropRow[] | string[][]> => ({ ...(api as unknown as Record<string, PropRow[] | string[][]>), ...apiReference() });
+const tables = api as unknown as Record<string, PropRow[] | string[][]>;
 
 const read = (path: string) => readFileSync(fileURLToPath(new URL(`../${path}`, import.meta.url)), "utf8");
 
@@ -18,19 +17,45 @@ const sourcePath = (dir: string, path: string) => (path.startsWith("@/registry/"
 
 const cell = (text = "") => text.replace(/\|/g, "\\|").replace(/\n/g, " ");
 const table = (head: string[], rows: string[][]) => [head, head.map(() => "---"), ...rows].map((r) => `| ${r.map(cell).join(" | ")} |`).join("\n");
+const code = (text: string) => `\`${text}\``;
 
-function propsTable(rows: PropRow[]) {
-  return table(
+// Descriptions and defaults are Markdown already: they write their code in backticks
+const propsTable = (rows: PropRow[]) =>
+  table(
     ["Prop", "Type", "Default", "Description"],
-    rows.map((r) => [`\`${r.name}\``, `\`${r.type}\``, r.default ? `\`${r.default}\`` : "", String(r.description ?? "")]),
+    rows.map((r) => [code(r.name), code(r.type), r.default ?? "", r.description ?? ""]),
   );
+
+function partApi(part: string, rows: PropRow[] | undefined, reference: PartReference | undefined) {
+  if (!rows && !reference) throw new Error(`markdown-docs: no API reference for ${part}`);
+  return [
+    ...(rows?.length ? [propsTable(rows)] : []),
+    ...(reference?.attributes.length
+      ? [
+          table(
+            ["Data attribute", "Type", "Description"],
+            reference.attributes.map(([name, type, description]) => [code(name!), type === "—" ? type : code(type!), description!]),
+          ),
+        ]
+      : []),
+    ...(reference?.variables.length
+      ? [
+          table(
+            ["CSS variable", "Default", "Description"],
+            reference.variables.map(([name, value, description]) => [code(name!), value!, description!]),
+          ),
+        ]
+      : []),
+  ];
 }
 
 // MDX components become Markdown: tables from docs/api and the generated API reference, code from ?raw imports, and layout wrappers dropped
-function toMarkdown(dir: string, mdx: string) {
-  const TABLES = tables();
+function toMarkdown(dir: string, mdx: string, used: Set<string>) {
+  // Read on each render, so edits to a part's attribute files show in dev
+  const parts = apiReference();
   const files = Object.fromEntries([...mdx.matchAll(/^import (\w+) from "((?:\.|@\/)[^"]+)\?raw";$/gm)].map(([, id, path]) => [id!, sourcePath(dir, path!)]));
   let fenced = false;
+  let step = 0;
   return mdx
     .split("\n")
     .flatMap((line) => {
@@ -42,17 +67,21 @@ function toMarkdown(dir: string, mdx: string) {
       if ((m = trimmed.match(/^<Demo name="([\w-]+)"[^>]*>$/))) return ['```tsx title="index.tsx"', read(`src/components/demos/${m[1]}/tailwind.tsx`).trim(), "```"];
       if ((m = trimmed.match(/^<PackageManagers dlx="([^"]+)" \/>$/))) return ["```bash", `npx ${m[1]}`, "```"];
       if ((m = trimmed.match(/^<PackageManagers install="([^"]+)" \/>$/))) return ["```bash", `npm install ${m[1]}`, "```"];
-      if ((m = trimmed.match(/^<PropsTable rows=\{(?:api|ref)\.(\w+)\} \/>$/))) return [propsTable(TABLES[m[1]!] as PropRow[])];
-      if ((m = trimmed.match(/^<AttrTable head=\{(\[.*\])\} rows=\{(?:api|ref)\.(\w+)\} \/>$/)))
+      if ((m = trimmed.match(/^<PropsTable rows=\{api\.(\w+)\} \/>$/))) return [propsTable(tables[m[1]!] as PropRow[])];
+      if ((m = trimmed.match(/^<PartApi part="(\w+)"(?: props=\{api\.(\w+)\})? \/>$/))) {
+        used.add(m[1]!);
+        return partApi(m[1]!, m[2] ? (tables[m[2]] as PropRow[]) : undefined, parts[m[1]!]).flatMap((t) => [t, ""]);
+      }
+      if ((m = trimmed.match(/^<AttrTable head=\{(\[.*\])\} rows=\{api\.(\w+)\} \/>$/)))
         return [
           table(
             JSON.parse(m[1]!),
-            // As in AttrTable: the first column, and the second of three, are code
-            (TABLES[m[2]!] as string[][]).map(([first, ...rest]) => [`\`${first}\``, ...(rest.length === 2 ? [`\`${rest[0]}\``, rest[1]!] : rest)]),
+            (tables[m[2]!] as string[][]).map(([first, ...rest]) => [code(first!), ...rest]),
           ),
         ];
-      if ((m = trimmed.match(/^<DefList rows=\{api\.(\w+)\} \/>$/))) return (TABLES[m[1]!] as string[][]).map(([term, description]) => `- \`${term}\`: ${description}`);
-      if ((m = trimmed.match(/^<Step title="([^"]+)">$/))) return [`**${m[1]}**`];
+      if ((m = trimmed.match(/^<DefList rows=\{api\.(\w+)\} \/>$/))) return (tables[m[1]!] as string[][]).map(([term, description]) => `- ${code(term!)}: ${description}`);
+      if (trimmed === "<Steps>") step = 0;
+      if ((m = trimmed.match(/^<Step title="([^"]+)"\s*\/?>$/))) return [`${++step}. ${m[1]}`];
       if ((m = trimmed.match(/^<TabPanel label="([^"]+)">$/))) return [`### ${m[1]}`];
       if (/^(import|export) /.test(line) || /^<\/?[A-Za-z][\w.]*(\s[^>]*)?\/?>$/.test(trimmed)) return [];
       return [line.replace(/\s*\{#[\w-]+\}$/, "").replace(/<span [^>]*\/>/g, "")];
@@ -65,14 +94,21 @@ function toMarkdown(dir: string, mdx: string) {
 
 type Page = { title: string; description: string; body: string };
 
-function page(dir: string): Page {
+function page(dir: string, used = new Set<string>()): Page {
   const source = read(`${dir}/page.mdx`);
   const [, yaml = "", rest = source] = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/) ?? [];
   const meta = Object.fromEntries(yaml.split("\n").map((line) => line.split(/:\s*(.*)/s).slice(0, 2)));
-  return { title: meta.title ?? dir, description: meta.description ?? "", body: toMarkdown(dir, rest) };
+  return { title: meta.title ?? dir, description: meta.description ?? "", body: toMarkdown(dir, rest, used) };
 }
 
-const docs = () => page("src/pages/home");
+// Every part with data attributes or CSS variables has a block on the docs page
+function docs() {
+  const used = new Set<string>();
+  const home = page("src/pages/home", used);
+  const missing = Object.keys(apiReference()).filter((part) => !used.has(part));
+  if (missing.length) throw new Error(`markdown-docs: no API reference block for ${missing.join(", ")}`);
+  return home;
+}
 const example = (name: string) => page(`src/pages/examples/${name}`);
 
 function document(p: Page, url: string) {
@@ -99,7 +135,7 @@ export const ROUTES: Record<string, Route> = {
 
 ## Docs
 
-- [Emoji Components](${SITE}/docs.md): installation, anatomy, usage, examples, API reference, and accessibility.
+- [Emoji Components](${SITE}/docs.md): installation, anatomy, examples, and the API reference of every part.
 
 ## Examples
 

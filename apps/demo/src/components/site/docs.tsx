@@ -35,7 +35,7 @@ export function P({ children, className }: { children: React.ReactNode; classNam
   return (
     <p
       className={cn(
-        "text-[15px] leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:decoration-foreground/25 [&_a]:underline-offset-[5px] [&_a]:transition-colors [&_a:hover]:decoration-foreground [&_a:has(>code)]:underline-offset-[7px] [&_code]:rounded-md [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-foreground",
+        "text-[15px] leading-7 text-muted-foreground [&_a]:font-medium [&_a]:text-foreground [&_a]:underline [&_a]:decoration-foreground/25 [&_a]:underline-offset-[5px] [&_a]:transition-colors [&_a:hover]:decoration-foreground [&_a:has(>code)]:underline-offset-[7px]",
         className,
       )}
     >
@@ -44,8 +44,33 @@ export function P({ children, className }: { children: React.ReactNode; classNam
   );
 }
 
-export function C({ children }: { children: React.ReactNode }) {
-  return <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px] text-foreground">{children}</code>;
+// Breaks only between the words of a code span, never inside an identifier or after its hyphens
+const words = (text: string) =>
+  text.split(/( +)/).map((w, i) =>
+    i % 2 ? (
+      w
+    ) : (
+      <span key={i} className="whitespace-nowrap">
+        {w}
+      </span>
+    ),
+  );
+
+export function C({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <code className={cn("rounded-md bg-muted px-1.5 py-0.5 font-mono text-[13px] text-foreground [overflow-wrap:normal] [box-decoration-break:clone]", className)}>{typeof children === "string" ? words(children) : children}</code>;
+}
+
+// Prose with `code` spans, as the API tables write their descriptions
+export function Inline({ text, codeClassName }: { text: string; codeClassName?: string }) {
+  return text.split(/`([^`]+)`/).map((part, i) =>
+    i % 2 ? (
+      <C key={i} className={codeClassName}>
+        {part}
+      </C>
+    ) : (
+      part
+    ),
+  );
 }
 
 export type TabItem<T extends string> = { value: T; label: React.ReactNode };
@@ -245,7 +270,7 @@ export function Step({ title, children }: { title: React.ReactNode; children?: R
   );
 }
 
-export type PropRow = { name: string; type: string; default?: string; description?: React.ReactNode };
+export type PropRow = { name: string; type: string; default?: string; description?: string };
 
 function TableShell({ head, children }: { head: string[]; children: React.ReactNode }) {
   return (
@@ -267,7 +292,10 @@ function TableShell({ head, children }: { head: string[]; children: React.ReactN
 }
 
 const nameCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[13px] text-foreground sm:whitespace-nowrap max-sm:whitespace-normal max-sm:[overflow-wrap:anywhere]";
-const typeCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-[color:var(--type)]";
+const typeCell = "px-4 max-sm:px-3 py-3 align-top font-mono text-[12.5px] whitespace-normal text-[color:var(--type)]";
+const textCell = "px-4 py-3 align-top text-[13px] leading-5 whitespace-normal text-muted-foreground max-sm:px-3";
+const tableCode = "bg-transparent px-0 py-0 text-[12.5px]";
+const descriptionCode = "px-1 py-px text-[12.5px]";
 
 export function PropsTable({ rows }: { rows: PropRow[] }) {
   return (
@@ -276,31 +304,29 @@ export function PropsTable({ rows }: { rows: PropRow[] }) {
         <TableRow key={r.name} className="hover:bg-transparent">
           <TableCell className={nameCell}>
             {r.name}
-            {r.description ? <div className="mt-1 font-sans sm:max-w-[260px] text-[13px] font-normal whitespace-normal text-muted-foreground">{r.description}</div> : null}
+            {r.description ? (
+              <div className="mt-1 font-sans text-[13px] leading-6 font-normal whitespace-normal text-muted-foreground sm:max-w-[280px]">
+                <Inline text={r.description} codeClassName={descriptionCode} />
+              </div>
+            ) : null}
           </TableCell>
-          <TableCell className={typeCell}>{r.type}</TableCell>
-          <TableCell
-            className={cn(
-              "px-4 py-3 align-top font-mono text-[12.5px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3 max-sm:before:font-sans max-sm:before:content-['Default:_']",
-              !r.default && "max-sm:!hidden",
-            )}
-          >
-            {r.default ?? "—"}
-          </TableCell>
+          <TableCell className={typeCell}>{words(r.type)}</TableCell>
+          <TableCell className={cn(textCell, "min-w-28", !r.default && "max-sm:!hidden", "max-sm:before:content-['Default:_']")}>{r.default ? <Inline text={r.default} codeClassName={tableCode} /> : "—"}</TableCell>
         </TableRow>
       ))}
     </TableShell>
   );
 }
 
-export function AttrTable({ head, rows }: { head: [string, string] | [string, string, string]; rows: (string | React.ReactNode)[][] }) {
+// The first column is code, a type column is code, and every other cell is prose with `code` spans
+export function AttrTable({ head, rows, type = false }: { head: string[]; rows: string[][]; type?: boolean }) {
   return (
     <TableShell head={head}>
       {rows.map((r, i) => (
         <TableRow key={i} className="hover:bg-transparent">
           {r.map((cell, j) => (
-            <TableCell key={j} className={j === 0 ? nameCell : j === 1 && head.length === 3 ? typeCell : "px-4 py-3 align-top text-[13px] whitespace-normal [overflow-wrap:anywhere] text-muted-foreground max-sm:px-3"}>
-              {cell}
+            <TableCell key={j} className={j === 0 ? nameCell : type && j === 1 ? typeCell : cn(textCell, j === 1 && "min-w-28")}>
+              {j === 0 ? cell : type && j === 1 ? words(cell) : <Inline text={cell} codeClassName={j === 1 ? tableCode : descriptionCode} />}
             </TableCell>
           ))}
         </TableRow>
@@ -315,7 +341,9 @@ export function DefList({ rows }: { rows: [string, string][] }) {
       {rows.map(([term, description]) => (
         <div key={term} className="flex flex-col gap-1.5 px-4 py-3">
           <dt className="font-mono text-[13px] [overflow-wrap:anywhere] text-foreground">{term}</dt>
-          <dd className="text-[13px] leading-6 text-muted-foreground">{description}</dd>
+          <dd className="text-[13px] leading-6 text-muted-foreground">
+            <Inline text={description} codeClassName={descriptionCode} />
+          </dd>
         </div>
       ))}
     </dl>

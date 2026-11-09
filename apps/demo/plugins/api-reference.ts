@@ -4,48 +4,12 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import type { Plugin } from "vite";
 
-// The data attribute and CSS variable tables, read from each part's *DataAttributes.ts and *CssVars.ts, as Base UI's docs read theirs
+// Each part's data attribute and CSS variable tables, read from its *DataAttributes.ts and *CssVars.ts, as Base UI's docs read theirs
 const SRC = fileURLToPath(new URL("../../../packages/react/src/", import.meta.url));
 
 type Entry = { value: string; description: string; type?: string; default?: string };
 type Module = Map<string, Entry>;
-
-const SECTIONS: Record<string, { kind: "DataAttributes" | "CssVars"; parts: string[] }> = {
-  rootAttributes: { kind: "DataAttributes", parts: ["picker/root/EmojiPickerRoot"] },
-  rootVariables: { kind: "CssVars", parts: ["picker/root/EmojiPickerRoot"] },
-  searchAttributes: {
-    kind: "DataAttributes",
-    parts: ["picker/search/EmojiPickerSearch", "picker/search-field/EmojiPickerSearchField", "picker/search-input/EmojiPickerSearchInput", "picker/search-clear/EmojiPickerSearchClear", "picker/search-status/EmojiPickerSearchStatus"],
-  },
-  categoryNavAttributes: { kind: "DataAttributes", parts: ["picker/category-nav/EmojiPickerCategoryNav", "picker/category-nav-tab/EmojiPickerCategoryNavTab"] },
-  listAttributes: {
-    kind: "DataAttributes",
-    parts: [
-      "picker/viewport/EmojiPickerViewport",
-      "picker/list/EmojiPickerList",
-      "picker/list-section/EmojiPickerListSection",
-      "picker/list-section-title/EmojiPickerListSectionTitle",
-      "picker/list-section-actions/EmojiPickerListSectionActions",
-      "picker/list-cell/EmojiPickerListCell",
-      "picker/list-variations/EmojiPickerListVariations",
-      "picker/list-variations-option/EmojiPickerListVariationsOption",
-    ],
-  },
-  listVariables: { kind: "CssVars", parts: ["picker/list/EmojiPickerList"] },
-  skinToneAttributes: {
-    kind: "DataAttributes",
-    parts: ["picker/skin-tone/EmojiPickerSkinTone", "picker/skin-tone-trigger/EmojiPickerSkinToneTrigger", "picker/skin-tone-options/EmojiPickerSkinToneOptions", "picker/skin-tone-option/EmojiPickerSkinToneOption"],
-  },
-  skinToneVariables: { kind: "CssVars", parts: ["picker/skin-tone/EmojiPickerSkinTone"] },
-  previewAttributes: { kind: "DataAttributes", parts: ["picker/preview/EmojiPickerPreview"] },
-  reactionsAttributes: { kind: "DataAttributes", parts: ["picker/reactions/EmojiPickerReactions", "picker/reactions-item/EmojiPickerReactionsItem", "picker/reactions-expand/EmojiPickerReactionsExpand", "picker/panel/EmojiPickerPanel"] },
-  popoverTriggerAttributes: { kind: "DataAttributes", parts: ["popover/trigger/EmojiPopoverTrigger"] },
-  popoverPositionerAttributes: { kind: "DataAttributes", parts: ["popover/positioner/EmojiPopoverPositioner", "suggestions/positioner/EmojiSuggestionsPositioner"] },
-  popoverPositionerVariables: { kind: "CssVars", parts: ["popover/positioner/EmojiPopoverPositioner", "suggestions/positioner/EmojiSuggestionsPositioner"] },
-  popoverPopupAttributes: { kind: "DataAttributes", parts: ["popover/popup/EmojiPopoverPopup", "suggestions/popup/EmojiSuggestionsPopup"] },
-  emojiAttributes: { kind: "DataAttributes", parts: ["emoji/Emoji"] },
-  emojiVariables: { kind: "CssVars", parts: ["emoji/Emoji"] },
-};
+export type PartReference = { attributes: string[][]; variables: string[][] };
 
 const tagText = (tag: ts.JSDocTag) => (ts.getTextOfJSDocComment(tag.comment) ?? "").trim();
 
@@ -91,33 +55,25 @@ function readModule(file: string, cache: Map<string, Module>): Module {
   return entries;
 }
 
-// EmojiPickerSearchField → SearchField; EmojiPopoverPositioner → EmojiPopover.Positioner
-const partName = (path: string) => {
-  const name = path.split("/").pop()!;
-  const match = name.match(/^(EmojiPicker|EmojiPopover|EmojiSuggestions)(.+)$/);
-  if (!match) return name;
-  return match[1] === "EmojiPicker" ? match[2]! : `${match[1]}.${match[2]}`;
-};
+const code = (text: string) => (text.includes("`") ? text : `\`${text}\``);
 
-export function apiReference(): Record<string, string[][]> {
+// Keyed by part, such as EmojiPickerRoot or EmojiSuggestionsPositioner
+export function apiReference(): Record<string, PartReference> {
   const cache = new Map<string, Module>();
-  const files = readdirSync(SRC, { recursive: true, encoding: "utf8" }).filter((f) => /(DataAttributes|CssVars)\.ts$/.test(f) && !/(Common|Interaction)\w*DataAttributes/.test(f));
-  const documented = new Set(Object.values(SECTIONS).flatMap(({ kind, parts }) => parts.map((p) => `${p}${kind}.ts`)));
-  const missing = files.filter((f) => !documented.has(f.split("\\").join("/")));
-  if (missing.length) throw new Error(`api-reference: no docs section for ${missing.join(", ")}`);
-  return Object.fromEntries(
-    Object.entries(SECTIONS).map(([key, { kind, parts }]) => {
-      const rows = new Map<string, { entry: Entry; parts: string[] }>();
-      for (const part of parts)
-        for (const entry of readModule(join(SRC, `${part}${kind}.ts`), cache).values()) {
-          const id = JSON.stringify([entry.value, entry.type, entry.description, entry.default]);
-          const row = rows.get(id) ?? rows.set(id, { entry, parts: [] }).get(id)!;
-          row.parts.push(partName(part));
-        }
-      const label = (row: { parts: string[]; entry: Entry }) => (parts.length > 1 && row.parts.length < parts.length ? `${row.parts.join(", ")}: ${row.entry.description}` : row.entry.description);
-      return [key, [...rows.values()].map((row) => (kind === "CssVars" ? [row.entry.value, row.entry.default ?? "—", label(row)] : [row.entry.value, row.entry.type ?? "—", label(row)]))];
-    }),
-  );
+  const parts: Record<string, PartReference> = {};
+  const files = readdirSync(SRC, { recursive: true, encoding: "utf8" })
+    .map((f) => f.split("\\").join("/"))
+    .filter((f) => /(DataAttributes|CssVars)\.ts$/.test(f) && !/(Common|Interaction)\w*DataAttributes/.test(f))
+    .sort();
+  for (const file of files) {
+    const [, part, kind] = file.match(/(\w+?)(DataAttributes|CssVars)\.ts$/)!;
+    const entry = (parts[part!] ??= { attributes: [], variables: [] });
+    for (const e of readModule(join(SRC, file), cache).values()) {
+      if (kind === "CssVars") entry.variables.push([e.value, e.default ? code(e.default) : "—", e.description]);
+      else entry.attributes.push([e.value, e.type ?? "—", e.description]);
+    }
+  }
+  return parts;
 }
 
 const ID = "virtual:api-reference";
@@ -129,9 +85,7 @@ export function apiReferencePlugin(): Plugin {
     load(id) {
       if (id !== `\0${ID}`) return;
       for (const f of readdirSync(SRC, { recursive: true, encoding: "utf8" })) if (/(DataAttributes|CssVars)\.ts$/.test(f)) this.addWatchFile(join(SRC, f));
-      return Object.entries(apiReference())
-        .map(([key, rows]) => `export const ${key} = ${JSON.stringify(rows)};`)
-        .join("\n");
+      return `export default ${JSON.stringify(apiReference())};`;
     },
   };
 }

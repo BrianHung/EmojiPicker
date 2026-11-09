@@ -3,6 +3,6 @@ declare module "*.mdx" {
 }
 
 declare module "virtual:api-reference" {
-  const tables: Record<string, string[][]>;
-  export = tables;
+  const parts: Record<string, { attributes: string[][]; variables: string[][] }>;
+  export default parts;
 }
