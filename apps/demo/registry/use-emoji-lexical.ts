@@ -11,6 +11,16 @@ export type LexicalEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
 
 type Match = { query: string; key: NodeKey; from: number; to: number };
 
+function $matchAtSelection(): Match | null {
+  const selection = $getSelection();
+  if (!$isRangeSelection(selection) || !selection.isCollapsed()) return null;
+  const { offset } = selection.anchor;
+  const text = selection.anchor.getNode();
+  if (!$isTextNode(text) || !text.isSimpleText()) return null;
+  const found = findShortcodeTrigger(text.getTextContent().slice(0, offset));
+  return found && { query: found.query, key: text.getKey(), from: found.offset, to: offset };
+}
+
 export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypeaheadOptions = {}): EmojiTypeahead {
   const [editor] = useLexicalComposerContext();
   const [match, setMatch] = React.useState<Match | null>(null);
@@ -20,9 +30,10 @@ export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypea
       anchor() {
         const text = editor.getElementByKey(match.key)?.firstChild;
         if (!text) return null;
+        const length = text.textContent?.length ?? 0;
         const range = document.createRange();
-        range.setStart(text, match.from);
-        range.setEnd(text, Math.min(match.to, text.textContent?.length ?? 0));
+        range.setStart(text, Math.min(match.from, length));
+        range.setEnd(text, Math.min(match.to, length));
         return range.getBoundingClientRect();
       },
       replace: (text, s) =>
@@ -40,15 +51,7 @@ export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypea
   const { onKeyDown } = typeahead;
   React.useEffect(
     () =>
-      editor.registerUpdateListener(({ editorState }) =>
-        editorState.read(() => {
-          const selection = $getSelection();
-          const anchor = $isRangeSelection(selection) && selection.isCollapsed() ? selection.anchor : null;
-          const text = anchor?.type === "text" ? anchor.getNode() : null;
-          const found = text?.isSimpleText() ? findShortcodeTrigger(text.getTextContent().slice(0, anchor!.offset)) : null;
-          setMatch(found && { query: found.query, key: text!.getKey(), from: found.offset, to: anchor!.offset });
-        }),
-      ),
+      editor.registerUpdateListener(({ editorState }) => editorState.read(() => setMatch($matchAtSelection()))),
     [editor],
   );
   React.useEffect(() => editor.registerCommand(KEY_DOWN_COMMAND, onKeyDown, COMMAND_PRIORITY_HIGH), [editor, onKeyDown]);

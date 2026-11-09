@@ -1,3 +1,5 @@
+"use client";
+
 import { Emoji, useEmojiStore, type EmojiTypeahead } from "emoji-components";
 import { EmojiSuggestions as EmojiSuggestionsPrimitive } from "emoji-components/floating-ui";
 import { cn } from "@/lib/utils";
