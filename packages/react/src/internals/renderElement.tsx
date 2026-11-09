@@ -8,6 +8,10 @@ import type { ElementProps, EmojiComponentsInteractionState, EmojiComponentsPart
 // Base UI's convention: a present state attribute is empty, an absent one is undefined
 export const flag = (on: unknown): "" | undefined => (on ? "" : undefined);
 
+// React 18 sets inert only from a string, as Base UI's inertValue does
+const REACT_19 = Number(React.version.split(".")[0]) >= 19;
+export const inert = (on: boolean): boolean | undefined => (on ? REACT_19 || ("true" as unknown as boolean) : undefined);
+
 type Children<S> = { children?: React.ReactNode | ((state: S) => React.ReactNode) };
 
 type DataAttributes = { [data: `data-${string}`]: unknown };
@@ -17,7 +21,7 @@ type RefCarrier<E> = { ref?: React.Ref<E>; props: { ref?: React.Ref<E> } };
 // React 19 moved an element's ref into its props
 export const elementRef = <E,>(element: React.ReactElement): React.Ref<E> | undefined => {
   const carrier: RefCarrier<E> = element as React.ReactElement & RefCarrier<E>;
-  return Number(React.version.split(".")[0]) >= 19 ? carrier.props.ref : carrier.ref;
+  return REACT_19 ? carrier.props.ref : carrier.ref;
 };
 
 export function toRenderFunction<S, E extends Element>(render: RenderProp<S, E> | undefined): ((props: ElementProps<E>, state: S) => React.ReactElement) | undefined {

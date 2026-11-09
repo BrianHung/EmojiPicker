@@ -3,7 +3,7 @@
 import * as React from "react";
 import { mergeRefs } from "react-aria/mergeRefs";
 import { ReactionsContext } from "../root/EmojiPickerRootContext";
-import { renderElement, resolve } from "../../internals/renderElement";
+import { inert, renderElement, resolve } from "../../internals/renderElement";
 import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
@@ -19,7 +19,7 @@ export const EmojiPickerPanel = React.forwardRef<HTMLDivElement, EmojiPickerPane
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
   return renderElement(
     "div",
-    { "data-slot": SLOTS.panel, id: state?.panelId, ...props, ref: refs, hidden, inert: hidden || undefined, style: (s: EmojiPickerPanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) },
+    { "data-slot": SLOTS.panel, id: state?.panelId, ...props, ref: refs, hidden, inert: inert(hidden), style: (s: EmojiPickerPanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) },
     { hidden },
   );
 });
