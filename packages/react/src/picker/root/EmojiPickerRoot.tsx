@@ -187,15 +187,17 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const [value, setValue] = useChangeState(valueProp, defaultValue ?? null, onValueChange);
   const [open, setOpen] = useChangeState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
-  // Back to the reaction row; focus follows when it was in the panel, which hides
+  // Back to the reaction row; focus follows when it was in the panel, which hides, and its search resets as a closed popover's does
   const showReactions = React.useCallback(
     (reason: EmojiPickerRootReactionsOpenChangeEventReason, event?: Event) => {
       const details = flushSync(() => setOpen(true, createChangeDetails(reason, event)));
+      if (!details || details.isCanceled) return details;
+      state.setQuery("");
       const active = document.activeElement;
-      if (details && !details.isCanceled && (!active || active === document.body || panel.current?.contains(active))) row.current?.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
+      if (!active || active === document.body || panel.current?.contains(active)) row.current?.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
       return details;
     },
-    [setOpen],
+    [setOpen, state],
   );
   const expand = React.useCallback(
     (event?: Event) => {
