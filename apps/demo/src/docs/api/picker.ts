@@ -108,7 +108,7 @@ export const list = rowsOf<EmojiPicker.List.Props>()([
   {
     name: "renderEmptyState",
     type: "(state: { status, query, error, retry }) => ReactNode",
-    description: 'Shown while the data loads, after it fails, and when nothing matches. `status` is `"loading"`, `"error"`, or `"empty"`; `retry()` loads the data again.',
+    description: 'Shown while the data loads, after it or a search fails, and when nothing matches. `status` is `"loading"`, `"error"`, or `"empty"`; `error` is what failed, and `retry()` loads the data or runs the search again.',
   },
   className("{ orientation, searching, empty }"),
 ]);

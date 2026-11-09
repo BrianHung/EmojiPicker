@@ -22,7 +22,7 @@ export const typeaheadFunctions: Rows = [
 ];
 
 export const providerHooks: Rows = [
-  ["useEmojiSearch(query, { limit })", "`{ results, pending }` from the provider's search, outside a picker."],
+  ["useEmojiSearch(query, { limit })", "`{ results, pending, error }` from the provider's search, outside a picker; `error` is set when an async search rejects."],
   ["useFrequentEmoji({ limit })", "`{ items, pick, remove, clear }` for the frequently used emoji."],
   ["useEmojiSkinTone()", "`[tone, setTone]` for the shared skin tone."],
   ["useEmojiLabels()", "The provider's `EmojiLabels`."],

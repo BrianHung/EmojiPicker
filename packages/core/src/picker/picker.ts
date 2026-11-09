@@ -59,6 +59,7 @@ export interface EmojiPickerSnapshot<Icon = unknown> {
   searching: boolean;
   results: readonly EmojiRecord[];
   pending: boolean;
+  searchError: Error | null;
   categories: readonly Category<Icon>[];
   categorySections: readonly EmojiSection[];
   sections: readonly EmojiSection[];
@@ -244,6 +245,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
         searching,
         results,
         pending: found.pending,
+        searchError: found.error,
         categories,
         categorySections,
         sections,

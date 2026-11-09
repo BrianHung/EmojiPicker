@@ -3,6 +3,7 @@ import { en } from "../test/en";
 import type { CustomEmoji } from "./custom";
 import type { Dataset, DatasetEmoji, EmojiRecord } from "./dataset";
 import { defaultLabels } from "./labels";
+import { createSearch } from "./search/query";
 import { createEmojiStore, type EmojiStoreOptions } from "./store";
 
 const dataset = en;
@@ -132,6 +133,16 @@ describe("store.query", () => {
     await store.load();
     expect((await store.query("shipit")).map((r) => r.unified)).toEqual(["shipit"]);
     expect(store.query("   ")).toEqual([]);
+  });
+
+  it("carries a rejected search as an error, and runs the same query again", async () => {
+    let online = false;
+    const store = createEmojiStore({ data: dataset, search: async (q, { records }) => (online ? records.filter((r) => r.name === q).map((r) => ({ unified: r.unified })) : Promise.reject(new Error("offline"))) });
+    const search = createSearch(store, { query: "fire", limit: 5 });
+    await vi.waitFor(() => expect(search.getSnapshot()).toMatchObject({ pending: false, results: [], error: { message: "offline" } }));
+    online = true;
+    search.setQuery("fire", 5);
+    await vi.waitFor(() => expect(search.getSnapshot()).toMatchObject({ pending: false, results: [{ emoji: "🔥" }], error: null }));
   });
 
   it("defaults to lexicalSearch, synchronously", async () => {
