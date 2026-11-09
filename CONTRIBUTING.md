@@ -92,11 +92,11 @@ To publish:
 
    ```bash
    npm whoami
-   npx changeset publish          # add --otp <code> with 2FA
+   PYTHON=python3.12 npx changeset publish   # any Python 3.12+; add --otp <code> with 2FA
    git push origin --follow-tags
    ```
 
-   `changeset publish` is not atomic. If a package fails to publish, run it again: it skips versions that are already published. `prepublishOnly` builds core and the React package. The data package and the Twemoji font build when they are packed.
+   `changeset publish` is not atomic. If a package fails to publish, run it again: it skips versions that are already published. `prepublishOnly` builds core and the React package. The data package and the Twemoji font build when they are packed; the font needs Python 3.12 or later, so set `PYTHON` if `python3` is older (macOS ships 3.9).
 
 4. Check the dist-tags. `latest` must be the new version for all four packages.
 
