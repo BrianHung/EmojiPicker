@@ -100,10 +100,10 @@ function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyS
 function EmojiPickerFooter({ className }: { className?: string }) {
   return (
     <EmojiPicker.Preview className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)}>
-      {({ emoji }) =>
-        emoji ? (
+      {({ emoji, unified }) =>
+        emoji && unified ? (
           <>
-            <Emoji emoji={emoji} aria-hidden className="text-lg" />
+            <Emoji emoji={unified} aria-hidden className="text-lg" />
             <span className="truncate font-medium">{emoji.name}</span>
             {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>

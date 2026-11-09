@@ -39,6 +39,7 @@ Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emo
 ```tsx title="editor.tsx"
 "use client";
 
+import { Suspense } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { EmojiProvider, useEmojiStore } from "emoji-components";
@@ -71,13 +72,15 @@ function TiptapEditor() {
 export function Editor() {
   return (
     <EmojiProvider>
-      <TiptapEditor />
+      <Suspense>
+        <TiptapEditor />
+      </Suspense>
     </EmojiProvider>
   );
 }
 ```
 
-`immediatelyRender: false` renders the editor after hydration, as Tiptap requires with server rendering. With Next.js Cache Components, render `<Editor />` inside `<Suspense>`, since Tiptap calls `Math.random()` while it renders.
+`immediatelyRender: false` renders the editor after hydration, as Tiptap requires with server rendering, and `<Suspense>` lets Next.js Cache Components prerender the page, since Tiptap calls `Math.random()` while it renders.
 
 ## How it works
 

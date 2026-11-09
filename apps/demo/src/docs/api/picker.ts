@@ -155,7 +155,12 @@ export const categoryNavTab = rowsOf<EmojiPicker.CategoryNavTab.Props>()([
 ]);
 
 export const preview = rowsOf<EmojiPicker.Preview.Props>()([
-  { name: "children", type: "ReactNode | ({ emoji }) => ReactNode", default: "the emoji and its name, or `labels.previewCaption`", description: "`emoji` is the highlighted `EmojiRecord`, or `null`." },
+  {
+    name: "children",
+    type: "ReactNode | ({ emoji, unified }) => ReactNode",
+    default: "the emoji and its name, or `labels.previewCaption`",
+    description: "`emoji` is the highlighted `EmojiRecord`, or `null`, and `unified` its code points with the skin tone the cell shows.",
+  },
   className("{ emoji }"),
 ]);
 

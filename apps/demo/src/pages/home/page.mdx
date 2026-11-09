@@ -68,7 +68,24 @@ export function Composer() {
 }
 ```
 
-`emoji-reaction-bar.json` adds a row of reaction buttons where the arrow keys move focus, and the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples add their editors' items.
+For the reactions under a message, `emoji-reaction-bar.json` adds a React Aria toolbar around your own buttons: the arrow keys, Home, and End move focus between them.
+
+<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-reaction-bar.json" />
+
+```tsx title="reactions.tsx"
+import { Emoji } from "emoji-components";
+import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
+
+<EmojiReactionBar aria-label="Reactions">
+  {message.reactions.map((r) => (
+    <button key={r.unified} type="button" aria-pressed={r.mine} onClick={() => toggle(message.id, r.unified)}>
+      <Emoji emoji={r.unified} /> {r.count}
+    </button>
+  ))}
+</EmojiReactionBar>
+```
+
+For an editor, the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples add their items.
 
 </TabPanel>
 

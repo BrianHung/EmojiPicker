@@ -71,6 +71,24 @@ describe("Root keyboard", () => {
     expect(host.querySelector('[tabindex="0"]')?.getAttribute("data-unified")).toBe("1f603");
   });
 
+  it("previews the highlighted emoji with its skin tone", () => {
+    const input = document.body.appendChild(document.createElement("input"));
+    const host = document.body.appendChild(document.createElement("div"));
+    React.act(() =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false} skinTone={5}>
+          <EmojiPicker.Root frequent={false} defaultQuery="waving hand" keyboardTarget={input}>
+            <Grid />
+            <EmojiPicker.Preview />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    input.focus();
+    press(input, "ArrowRight");
+    expect(host.querySelector('[data-slot="emoji-picker-preview"]')?.textContent).toBe("👋🏿 waving hand");
+  });
+
   it("binds a keyboard target ref that attaches after Root mounts", () => {
     const onSelect = vi.fn();
     let show = () => {};
