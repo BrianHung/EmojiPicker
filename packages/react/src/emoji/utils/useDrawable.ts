@@ -60,13 +60,16 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
     },
     [support, store],
   );
+  // biome-ignore lint/correctness/useExhaustiveDependencies: a batch queued for one probe never runs against the next
   React.useEffect(
     () => () => {
+      pending.current.clear();
       if (timer.current == null) return;
       if (typeof cancelIdleCallback === "function") cancelIdleCallback(timer.current);
       else clearTimeout(timer.current);
+      timer.current = null;
     },
-    [],
+    [support],
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: the probe's results are mutable; version counts the batches that changed a verdict
