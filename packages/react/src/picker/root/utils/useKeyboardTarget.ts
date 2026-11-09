@@ -11,9 +11,8 @@ import { hasModifier } from "../../../internals/usePickerKeyDown";
 const accepts = (el: HTMLElement) => el.getAttribute("aria-expanded") === "true";
 
 // An editor the app renders drives the grid: its arrows move the highlight, Enter picks, and it carries the listbox's ARIA while mounted
-export function useKeyboardTarget(target: () => HTMLElement | null, state: EmojiPickerStore<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
+export function useKeyboardTarget(el: HTMLElement | null, state: EmojiPickerStore<React.ReactNode>, list: React.RefObject<ListHandle | null>) {
   React.useEffect(() => {
-    const el = target();
     if (!el) return;
     const unregister = state.registerInput();
     const onKeyDown = (event: KeyboardEvent) => {
@@ -40,5 +39,5 @@ export function useKeyboardTarget(target: () => HTMLElement | null, state: Emoji
       unsync();
       unregister();
     };
-  }, [target, state, list]);
+  }, [el, state, list]);
 }

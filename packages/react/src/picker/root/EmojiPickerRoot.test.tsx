@@ -57,6 +57,31 @@ describe("Root keyboard", () => {
     expect(document.activeElement).toBe(input);
   });
 
+  it("binds a keyboard target ref that attaches after Root mounts", () => {
+    const onSelect = vi.fn();
+    let show = () => {};
+    function App() {
+      const ref = React.useRef<HTMLInputElement>(null);
+      const [shown, setShown] = React.useState(false);
+      show = () => setShown(true);
+      return (
+        <EmojiProvider data={en} prepare={false}>
+          <EmojiPicker.Root frequent={false} keyboardTarget={ref} onSelect={onSelect}>
+            <Grid />
+          </EmojiPicker.Root>
+          {shown ? <input ref={ref} /> : null}
+        </EmojiProvider>
+      );
+    }
+    render(<App />);
+    React.act(() => show());
+    const input = document.querySelector("input")!;
+    press(input, "ArrowRight");
+    press(input, "ArrowRight");
+    press(input, "Enter");
+    expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f603" }), expect.anything());
+  });
+
   it("stops the Escape that clears the query unless onQueryChange allows propagation", () => {
     let allow = false;
     const { host } = mount({ query: "smile", onQueryChange: (_, details) => allow && details.allowPropagation() });

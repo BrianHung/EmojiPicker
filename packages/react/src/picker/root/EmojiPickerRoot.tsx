@@ -253,7 +253,10 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => elementOf(keyboardTarget), [keyboardTarget]);
-  useKeyboardTarget(target, state, list);
+  const [targetElement, setTargetElement] = React.useState<HTMLElement | null>(null);
+  // A ref can attach after Root mounts, so it's read again after every commit
+  React.useEffect(() => setTargetElement(target()));
+  useKeyboardTarget(targetElement, state, list);
 
   const context = React.useMemo<EmojiPickerRootContext>(
     () => ({
