@@ -4,7 +4,9 @@ const STEPS = {
   check: [
     "npx biome ci .",
     "npm run typecheck",
+    "node .github/snippets.mjs",
     "npm test",
+    "npm run test:react18 -w emoji-components",
     "npm test -w demo",
     "node .github/build-package.mjs @emoji-components/core",
     "node .github/build-package.mjs emoji-components",

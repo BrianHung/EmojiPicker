@@ -96,7 +96,8 @@
     "prepack": "node ../../apps/demo/scripts/build-registry.mjs",
     "prepublishOnly": "npm run build",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:react18": "npm install --no-save --no-audit --no-fund --prefix ../../node_modules/.react18 react@18.3.1 react-dom@18.3.1 && vitest run -c vitest.react18.config.mts"
   },
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
