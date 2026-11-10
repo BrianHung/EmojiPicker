@@ -1,7 +1,6 @@
 import * as React from "react";
 import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
-import type { EmojiTrigger } from "@emoji-components/core";
-import { Emoji, useEmojiTypeahead, useTextFieldEmojiTypeahead } from "emoji-components";
+import { Emoji, useEmojiTypeahead, useTextFieldEmojiTypeahead, type EmojiTrigger } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
