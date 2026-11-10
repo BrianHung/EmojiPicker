@@ -4,7 +4,7 @@ import { EmojiProvider, lexicalSearch, type EmojiSearch } from "emoji-components
 import { InlinePicker } from "@/components/demos/inline-picker/tailwind";
 import { PopoverPicker } from "@/components/demos/popover/tailwind";
 import { ReactionBar } from "@/components/demos/tapback/tailwind";
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 import { Composer } from "@/docs/snippets/composer";
 import "@/globals.css";
 
@@ -31,7 +31,10 @@ createRoot(document.getElementById("root")!).render(
     </EmojiProvider>
     <EmojiProvider data={en} search={search}>
       <section aria-label="Search">
-        <EmojiPickerCard />
+        <EmojiPicker>
+          <EmojiPickerSearch />
+          <EmojiPickerContent />
+        </EmojiPicker>
       </section>
     </EmojiProvider>
   </main>,

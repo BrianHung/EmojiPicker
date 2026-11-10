@@ -3,7 +3,7 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider } from "../..";
+import { EmojiPicker, EmojiProvider, useEmojiPickerGrid } from "../..";
 
 function mount(children: React.ReactNode) {
   const host = render(
