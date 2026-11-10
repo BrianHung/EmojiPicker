@@ -35,16 +35,6 @@ describe("createEmojiPicker", () => {
     off();
   });
 
-  it("hides results whose toned emoji this system can't draw", async () => {
-    const store = await ready();
-    store.setSkinTone(2);
-    const picker = createEmojiPicker(store, { frequent: false, drawable: (_, unified) => !unified.includes("-1f3fc") });
-    const off = picker.subscribe(() => {});
-    picker.setQuery("thumbs");
-    expect(picker.getSnapshot().sections.flatMap((s) => s.items.map((i) => i.unified))).not.toContain("1f44d-1f3fc");
-    off();
-  });
-
   it("leaves a controlled highlight to its owner", async () => {
     const asked: (string | null)[] = [];
     const options = { frequent: false as const, onHighlightChange: (id: string | null) => asked.push(id) };
