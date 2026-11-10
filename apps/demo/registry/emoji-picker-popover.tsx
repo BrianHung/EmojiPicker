@@ -27,7 +27,7 @@ function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange,
   const labels = useEmojiLabels();
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger data-slot="emoji-picker-popover-trigger" aria-label={ariaLabel} className={cn(buttonVariants({ variant: "outline" }), className)}>
+      <PopoverTrigger aria-label={ariaLabel} className={cn(buttonVariants({ variant: "outline" }), className)}>
         {children}
       </PopoverTrigger>
       <PopoverContent side={side} align={align} aria-label={labels.picker} className="w-auto overflow-hidden p-0">

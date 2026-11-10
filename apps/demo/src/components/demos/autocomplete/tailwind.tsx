@@ -2,7 +2,7 @@ import * as React from "react";
 import { Emoji, useTextFieldEmojiSuggestions } from "emoji-components";
 import { EmojiSuggestions } from "emoji-components/floating-ui";
 
-export function ShortcodeTypeahead() {
+export function ShortcodeSuggestions() {
   const ref = React.useRef<HTMLInputElement>(null);
   const menu = useTextFieldEmojiSuggestions(ref, { limit: 6 });
   const { open, anchor, dismiss } = menu;
