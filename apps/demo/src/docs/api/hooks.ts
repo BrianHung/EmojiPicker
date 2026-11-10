@@ -3,6 +3,7 @@ type Rows = [string, string][];
 export const pickerHooks: Rows = [
   ["useEmojiPickerActions()", "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`, as `actionsRef` gives them."],
   ["useEmojiPickerActiveEmoji()", "The highlighted `EmojiRecord`, or `null`."],
+  ["emojiPickerInitialFocus(element)", "The element to focus in a picker inside `element`, for a popover this package doesn't render, such as from Radix's `onOpenAutoFocus`."],
   ["useEmojiPickerSearch()", "`{ query, resultCount }`. `resultCount` is `null` while not searching."],
   ["useEmojiPickerCategoryNavigation()", "`{ categories, activeCategory, jumpToCategory(id) }` for your own category tabs."],
   ["useEmojiPickerCollapsedCategories()", "`{ collapsed, isCollapsed(id), toggle(id), setCollapsed(id, collapsed) }`."],
@@ -11,7 +12,7 @@ export const pickerHooks: Rows = [
 ];
 
 export const typeaheadHooks: Rows = [
-  ["useTextFieldEmojiTypeahead(ref, options)", "Shortcode typeahead for an `<input>` or `<textarea>`. Returns an `EmojiTypeahead`: `query`, `open`, `anchor`, `suggestions`, `dismiss`, and `onKeyDown`."],
+  ["useTextFieldEmojiTypeahead(ref, options)", "Shortcode typeahead for an `<input>` or `<textarea>`. It handles the field's keys. Returns an `EmojiTypeahead`: `query`, `open`, `anchor`, `suggestions`, `dismiss`, and `onKeyDown`."],
   ["useEmojiTypeahead({ query, anchor, replace }, options, element)", "Shortcode typeahead for any editor. `element` is the editor's element, a ref to it, or a function that returns it."],
   ["useEmojiTypeahead(suggestions, { anchor })", "The same, around core's `createEmojiSuggestions(store, options)`, for an editor plugin that handles the keys itself, such as the ProseMirror item."],
 ];

@@ -1,16 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useDrawable } from "../../../emoji/utils/useDrawable";
 import { useEmojiPickerRootContext } from "../../root/EmojiPickerRootContext";
 import { shallowEqual, useStore } from "../../../utils/useStore";
 
-// The sections the grid shows: results as they are, and categories without emoji this system can't draw (or a tone's duplicate)
+// The sections the grid shows: results as they are (the engine hides what this system can't draw), and categories without those emoji (or a tone's duplicate)
 export function useGridSections(horizontal: boolean) {
   const picker = useEmojiPickerRootContext("EmojiPicker.List");
   const { searching, categorySections, sections } = useStore(picker.state, ({ searching, categorySections, sections }) => ({ searching, categorySections, sections }), shallowEqual);
-  const probeRoot = React.useRef<HTMLElement | null>(null);
-  const { drawable, request } = useDrawable(probeRoot);
+  const { drawable, request } = picker.native;
   const categories = React.useMemo(
     () =>
       horizontal
@@ -23,5 +21,5 @@ export function useGridSections(horizontal: boolean) {
           }),
     [horizontal, categorySections, drawable],
   );
-  return { sections: searching ? sections : categories, request, probeRoot };
+  return { sections: searching ? sections : categories, request };
 }

@@ -46,7 +46,7 @@ function windowOf(list: HTMLElement | null) {
 // The grid inside an app's own virtualizer: rows to render, and geometry read from the DOM
 export function useEmojiPickerGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiPickerGridOptions): UseEmojiPickerGridResult {
   const picker = useEmojiPickerRootContext("useEmojiPickerGrid");
-  const { sections, request, probeRoot } = useGridSections(false);
+  const { sections, request } = useGridSections(false);
   const grid = React.useMemo(() => createEmojiGrid(sections, { columns: columns ?? picker.columns ?? DEFAULT_COLUMNS, rowHeight, headerHeight }), [sections, columns, picker.columns, rowHeight, headerHeight]);
   const listRef = React.useRef<HTMLElement | null>(null);
   const latest = useLatest({ grid, rowHeight, headerHeight, scrollToIndex });
@@ -93,7 +93,7 @@ export function useEmojiPickerGrid({ columns, rowHeight, headerHeight = rowHeigh
       },
     };
   }, [grid, headerHeight, navigation, latest]);
-  const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, probeRoot, request, "aria-label": label });
+  const controller = useGridController({ sections, geometry, orientation: "vertical", listRef, request, "aria-label": label });
 
   const sync = useStableCallback(() => {
     const v = windowOf(listRef.current);

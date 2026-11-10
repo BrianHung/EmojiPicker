@@ -77,5 +77,5 @@ export function useDrawable(root: React.RefObject<HTMLElement | null>): { drawab
     if (!native) return always;
     return (record, unified) => record.imageUrl != null || image(unified) !== undefined || drawsNatively(support, record, unified);
   }, [native, support, version, image]);
-  return { drawable, request };
+  return React.useMemo(() => ({ drawable, request }), [drawable, request]);
 }

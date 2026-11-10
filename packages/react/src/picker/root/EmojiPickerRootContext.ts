@@ -3,6 +3,7 @@
 import * as React from "react";
 import type { ChangeDetails, EmojiLabels, EmojiPickerStore, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@emoji-components/core";
 import type { EmojiGridMove } from "@emoji-components/core/grid";
+import type { useDrawable } from "../../emoji/utils/useDrawable";
 import type { EmojiPickerCollapsedCategories } from "./utils/useEmojiPickerCollapsedCategories";
 
 export type { HighlightChangeDetails, SearchResultsMode };
@@ -69,6 +70,7 @@ export interface EmojiPickerRootContext {
   listId: string;
   variations: { custom: boolean; register(): () => void };
   registerStatus(): () => void;
+  native: ReturnType<typeof useDrawable>;
 }
 
 export const EmojiPickerRootContext = React.createContext<EmojiPickerRootContext | null>(null);

@@ -58,7 +58,6 @@ export function usePointerHighlight({ picker: { state: core, ownsFocus }, highli
       if (keyed.current && !pointer.within) return;
       keyed.current = false;
       setHighlight(key, { reason: "pointer", event });
-      core.setTabStop(String(key));
     } else if (virtual && ownsFocus(active)) setHighlight(key, { reason: "pointer", event });
   };
   // Not useLongPress: its press focuses the target and stops the click, and cells delegate from the list; it also has no move threshold

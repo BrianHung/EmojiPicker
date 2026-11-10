@@ -2,7 +2,7 @@
 
 import type * as React from "react";
 import { mergePartProps } from "../../../internals/mergePartProps";
-import { renderElement, resolve } from "../../../internals/renderElement";
+import { inert, renderElement, resolve } from "../../../internals/renderElement";
 import type { EmojiComponentsPartElementProps } from "../../../internals/types";
 import { EmojiPopoverPositionerContext } from "../positioner/EmojiPopoverPositionerContext";
 import { closedPointerEvents, positionerAttributes } from "../../utils/popupAttributes";
@@ -21,7 +21,16 @@ export function positioned(
     <EmojiPopoverPositionerContext.Provider value={{ context, state, status, floatingProps }}>
       {renderElement(
         "div",
-        { ...mergePartProps(props), ...positionerAttributes(state, slot), ref, className, style: (s: EmojiPopoverPositionerState) => ({ ...style, ...closedPointerEvents(state.open), ...resolve(own, s) }), render, children },
+        {
+          ...mergePartProps(props),
+          ...positionerAttributes(state, slot),
+          inert: inert(!state.open),
+          ref,
+          className,
+          style: (s: EmojiPopoverPositionerState) => ({ ...style, ...closedPointerEvents(state.open), ...resolve(own, s) }),
+          render,
+          children,
+        },
         state,
       )}
     </EmojiPopoverPositionerContext.Provider>

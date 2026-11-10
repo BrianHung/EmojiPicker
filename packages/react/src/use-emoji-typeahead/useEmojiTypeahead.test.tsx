@@ -34,8 +34,15 @@ const keydown = (el: Element, key: string, init: KeyboardEventInit = {}) => {
   return event.defaultPrevented;
 };
 
-// jsdom has no execCommand; the text field inserts with it
+// jsdom has no execCommand, ResizeObserver or Range layout; the text field inserts and measures with them
 Object.assign(document, { execCommand: () => true });
+Object.assign(globalThis, {
+  ResizeObserver: class {
+    observe() {}
+    disconnect() {}
+  },
+});
+Object.assign(Range.prototype, { getBoundingClientRect: () => new DOMRect() });
 
 function mountTextField(onSelect = vi.fn()) {
   const host = render(
@@ -87,4 +94,28 @@ it("dismisses when the editor blurs, until the query changes", () => {
   expect(editor.textContent).toBe("closed");
   React.act(() => setQuery("fire"));
   expect(editor.textContent).toBe("fire");
+});
+
+it("inserts into a controlled field whose anchor is measured on every render", () => {
+  function Controlled() {
+    const ref = React.useRef<HTMLInputElement>(null);
+    const [value, setValue] = React.useState("ok :thumbs");
+    const { anchor } = useTextFieldEmojiTypeahead(ref);
+    React.useLayoutEffect(() => void anchor());
+    return <input ref={ref} aria-label="Message" value={value} onChange={(e) => setValue(e.target.value)} />;
+  }
+  const input = render(
+    <EmojiProvider data={en} prepare={false}>
+      <Controlled />
+    </EmojiProvider>,
+  ).querySelector("input")!;
+  input.setSelectionRange(10, 10);
+  React.act(() => input.focus());
+  const insertText = (_: string, __: boolean, text: string) => {
+    input.setRangeText(text, input.selectionStart!, input.selectionEnd!, "end");
+    return input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+  };
+  Object.assign(document, { execCommand: insertText });
+  keydown(input, "Enter");
+  expect(input.value).toBe("ok 👍 ");
 });

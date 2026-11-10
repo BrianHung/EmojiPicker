@@ -36,6 +36,13 @@ function mount(props: Partial<EmojiPicker.Root.Props>) {
 const press = (el: Element, key: string, init: KeyboardEventInit = {}) => React.act(() => void el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init })));
 const highlighted = (host: Element) => host.querySelector("[data-highlighted]")?.getAttribute("data-unified");
 
+it("hides results this system can't draw, from the grid and the result count", () => {
+  const { host } = mount({ defaultQuery: "medical" });
+  const shown = [...host.querySelectorAll("[data-unified]")].map((c) => c.getAttribute("data-unified"));
+  const status = host.querySelector('[data-slot="emoji-picker-search-status"]')?.textContent;
+  expect({ shown, status }).toEqual({ shown: ["1f637", "1fa7b"], status: "2 results" });
+});
+
 describe("Root keyboard", () => {
   it("drives the grid from the keyboard target and actionsRef while focus stays there", () => {
     const onSelect = vi.fn();
@@ -55,6 +62,67 @@ describe("Root keyboard", () => {
     React.act(() => void actions.pick());
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f600" }), expect.anything());
     expect(document.activeElement).toBe(input);
+  });
+
+  it("moves the grid's tab stop with the highlight, so Tab lands on the highlighted cell", () => {
+    const { input, host } = mount({});
+    press(input, "ArrowRight");
+    press(input, "ArrowRight");
+    expect(host.querySelector('[tabindex="0"]')?.getAttribute("data-unified")).toBe("1f603");
+  });
+
+  it("previews the highlighted emoji with its skin tone", () => {
+    const input = document.body.appendChild(document.createElement("input"));
+    const host = document.body.appendChild(document.createElement("div"));
+    React.act(() =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false} skinTone={5}>
+          <EmojiPicker.Root frequent={false} defaultQuery="waving hand" keyboardTarget={input}>
+            <Grid />
+            <EmojiPicker.Preview />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    input.focus();
+    press(input, "ArrowRight");
+    expect(host.querySelector('[data-slot="emoji-picker-preview"]')?.textContent).toBe("👋🏿 waving hand");
+  });
+
+  it("clears the search field's highlight when focus leaves the picker", () => {
+    const outside = document.body.appendChild(document.createElement("button"));
+    const host = document.body.appendChild(document.createElement("div"));
+    React.act(() =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false}>
+          <EmojiPicker.Root frequent={false}>
+            <EmojiPicker.SearchInput />
+            <Grid />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    const input = host.querySelector("input")!;
+    React.act(() => input.focus());
+    press(input, "ArrowDown");
+    expect(highlighted(host)).toBeDefined();
+    React.act(() => outside.focus());
+    expect(highlighted(host)).toBeUndefined();
+  });
+
+  it("announces no count when the search fails", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    await React.act(async () =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false} search={() => Promise.reject(new Error("offline"))}>
+          <EmojiPicker.Root frequent={false} defaultQuery="cat">
+            <Grid />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    await React.act(async () => {});
+    expect(host.querySelector('[data-slot="emoji-picker-search-status"]')?.textContent).toBe("");
   });
 
   it("binds a keyboard target ref that attaches after Root mounts", () => {

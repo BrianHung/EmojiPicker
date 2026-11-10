@@ -13,7 +13,7 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
   const store = useEmojiStore();
   const id = React.useId();
   const latest = React.useRef({ content, onSelect });
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     latest.current = { content, onSelect };
   });
   const { plugin, key, suggestions, anchor } = React.useMemo(

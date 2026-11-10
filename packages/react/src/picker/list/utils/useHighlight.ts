@@ -9,7 +9,7 @@ import type { GridLatest } from "./types";
 
 const NONE: HighlightSource = {};
 
-// The highlight and the grid's keyboard position; the highlighted cell stays mounted off screen
+// The highlight and the grid's keyboard position, which is also its tab stop; the highlighted cell stays mounted off screen
 export function useHighlight(core: EmojiPickerStore<React.ReactNode>, latest: { readonly current: GridLatest }, sections: readonly EmojiSection[], ownsFocus: (el: Element | null) => boolean) {
   const [persisted] = React.useState(() => new Set<Key>());
   const position = React.useRef<Key | null>(null);
@@ -22,6 +22,7 @@ export function useHighlight(core: EmojiPickerStore<React.ReactNode>, latest: { 
     if (key == null) return;
     persisted.add(key);
     position.current = key;
+    core.setTabStop(String(key));
   };
   // A key not in the collection yet waits for the render that adds it; without focus in the field, only the position moves
   const applyHighlight = () => {

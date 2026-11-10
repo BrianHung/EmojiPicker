@@ -19,21 +19,48 @@ Adds `hooks/use-emoji-lexical.ts`, `components/ui/emoji-suggestions.tsx`, `compo
 
 ## Usage
 
-`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out of `nodes`.
+`EmojiNode` draws custom emoji, which are images, in the document. Without custom emoji, leave it out of `nodes`. The picker button needs the `emoji-picker-popover.json` item from [Installation](/#installation).
 
 ```tsx title="editor.tsx"
+"use client";
+
+import { $getRoot, $getSelection, $insertNodes, $isRangeSelection } from "lexical";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { EmojiProvider } from "emoji-components";
-import { EmojiNode } from "@/components/lexical/emoji-node";
+import { EmojiProvider, useEmojiStore } from "emoji-components";
+import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
+import { $createEmojiNode, EmojiNode, emojiAttrs } from "@/components/lexical/emoji-node";
 import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
+
+function InsertEmoji() {
+  const [editor] = useLexicalComposerContext();
+  const store = useEmojiStore();
+  return (
+    <EmojiPickerPopover
+      aria-label="Insert emoji"
+      onSelect={(selection) => {
+        editor.focus();
+        editor.update(() => {
+          const range = $getSelection();
+          const attrs = selection.isCustom ? emojiAttrs(store, selection.unified) : null;
+          if (attrs) $insertNodes([$createEmojiNode(attrs)]);
+          else ($isRangeSelection(range) ? range : $getRoot().selectEnd()).insertText(selection.emoji);
+        });
+      }}
+    >
+      🙂
+    </EmojiPickerPopover>
+  );
+}
 
 export function Editor() {
   return (
     <EmojiProvider>
       <LexicalComposer initialConfig={{ namespace: "editor", nodes: [EmojiNode], onError: console.error }}>
+        <InsertEmoji />
         <RichTextPlugin contentEditable={<ContentEditable />} ErrorBoundary={LexicalErrorBoundary} />
         <EmojiTypeaheadPlugin />
       </LexicalComposer>

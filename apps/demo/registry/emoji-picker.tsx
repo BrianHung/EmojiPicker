@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Emoji, EmojiPicker, type EmojiItem, type EmojiPickerListEmptyState, type EmojiSelection } from "emoji-components";
+import { Emoji, EmojiPicker, useEmojiStatus, type EmojiItem, type EmojiPickerListEmptyState, type EmojiSelection } from "emoji-components";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -9,7 +9,7 @@ const root =
 const tone =
   "flex size-7 shrink-0 items-center justify-center rounded-md text-base leading-none outline-none hover:bg-accent focus-visible:bg-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary data-[selected]:bg-accent";
 const cell =
-  "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[focus-visible]:outline-2 data-[focus-visible]:-outline-offset-2 data-[focus-visible]:outline-primary";
+  "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px] focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[focus-visible]:outline-2 data-[focus-visible]:-outline-offset-2 data-[focus-visible]:outline-primary";
 const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform duration-150 ease-out [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
 
 function EmojiPickerSearch({ autoFocus }: { autoFocus?: boolean }) {
@@ -82,7 +82,8 @@ function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, emp
   );
 }
 
-function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyState & { empty: React.ReactNode }) {
+function EmojiPickerEmpty({ status, retry, empty }: EmojiPickerListEmptyState & { empty: React.ReactNode }) {
+  const data = useEmojiStatus();
   switch (status) {
     case "loading":
       return "Loading…";
@@ -91,7 +92,7 @@ function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyS
     case "error":
       return (
         <button type="button" className="underline" onClick={retry}>
-          {query ? "Search failed." : "Could not load emoji."} Try again
+          {data === "error" ? "Could not load emoji." : "Search failed."} Try again
         </button>
       );
   }
@@ -100,10 +101,10 @@ function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyS
 function EmojiPickerFooter({ className }: { className?: string }) {
   return (
     <EmojiPicker.Preview className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)}>
-      {({ emoji }) =>
-        emoji ? (
+      {({ emoji, unified }) =>
+        emoji && unified ? (
           <>
-            <Emoji emoji={emoji} aria-hidden className="text-lg" />
+            <Emoji emoji={unified} aria-hidden className="text-lg" />
             <span className="truncate font-medium">{emoji.name}</span>
             {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>

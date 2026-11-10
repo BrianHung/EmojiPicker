@@ -7,7 +7,7 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
     type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), collapse? }) => void',
-    description: "Runs when an emoji is picked. `details.cancel()` keeps the value and keeps an enclosing `EmojiPopover` open; inside `Reactions`, `details.collapse()` shows the reaction row again.",
+    description: "Runs when the user selects an emoji. `details.cancel()` keeps the value and keeps an enclosing `EmojiPopover` open; inside `Reactions`, `details.collapse()` shows the reaction row again.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
@@ -155,7 +155,12 @@ export const categoryNavTab = rowsOf<EmojiPicker.CategoryNavTab.Props>()([
 ]);
 
 export const preview = rowsOf<EmojiPicker.Preview.Props>()([
-  { name: "children", type: "ReactNode | ({ emoji }) => ReactNode", default: "the emoji and its name, or `labels.previewCaption`", description: "`emoji` is the highlighted `EmojiRecord`, or `null`." },
+  {
+    name: "children",
+    type: "ReactNode | ({ emoji, unified }) => ReactNode",
+    default: "the emoji and its name, or `labels.previewCaption`",
+    description: "`emoji` is the highlighted `EmojiRecord`, or `null`, and `unified` its code points with the skin tone the cell shows.",
+  },
   className("{ emoji }"),
 ]);
 

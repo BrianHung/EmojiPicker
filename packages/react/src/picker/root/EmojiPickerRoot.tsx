@@ -2,12 +2,14 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
+import { useFocusWithin } from "react-aria/useFocusWithin";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { VisuallyHidden } from "react-aria/VisuallyHidden";
 import { Autocomplete } from "react-aria-components/Autocomplete";
 import type { CategoryOption as CoreCategoryOption, CollapsedCategoriesChangeDetails, EmojiSelection, HighlightChangeDetails, QueryChangeDetails } from "@emoji-components/core";
 import { createChangeDetails } from "@emoji-components/core/internal";
 import { useCollapse } from "./utils/useCollapse";
+import { useDrawable } from "../../emoji/utils/useDrawable";
 import {
   EmojiPickerRootContext,
   type EmojiPickerRootActions,
@@ -25,6 +27,7 @@ import * as EmojiPickerRootCssVars from "./EmojiPickerRootCssVars";
 import * as EmojiPickerRootDataAttributes from "./EmojiPickerRootDataAttributes";
 import * as EmojiPickerListCssVars from "../list/EmojiPickerListCssVars";
 import { useKeyboardTarget } from "./utils/useKeyboardTarget";
+import { useResultCount } from "./utils/useEmojiPickerSearch";
 import { usePickerEngine } from "./utils/usePickerEngine";
 import { PopoverContext } from "../../popover/root/EmojiPopoverRootContext";
 import type { EmojiPopoverRootChangeEventReason } from "../../popover/utils/types";
@@ -143,12 +146,14 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const popover = React.useContext(PopoverContext);
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = useObjectRef(ref);
+  const native = useDrawable(rootRef);
   const state = usePickerEngine(store, {
     labels,
     categories,
     frequent,
     suggested,
     emojiVersion,
+    drawable: native.drawable,
     searchResults,
     searchLimit,
     query: queryProp,
@@ -163,13 +168,13 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     disableVariations,
     reactions,
   });
-  const view = useStore(state, ({ query, searching, results, pending, collapsed, reactions }) => ({ query, searching, results, pending, collapsed, reactions }), shallowEqual);
+  const view = useStore(state, ({ query, searching, collapsed, reactions }) => ({ query, searching, collapsed, reactions }), shallowEqual);
   React.useEffect(() => state.mount(), [state]);
   const activeWithin = useActiveWithin(state.hold);
   useClippedScrollGuard(rootRef);
 
   const collapse = useCollapse(state, view.collapsed);
-  const { searching, results, pending } = view;
+  const { searching } = view;
   // A controlled query shows in the field this render; the engine takes it in the layout effect
   const query = queryProp ?? view.query;
   const list = React.useRef<ListHandle | null>(null);
@@ -184,15 +189,17 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const [value, setValue] = useChangeState(valueProp, defaultValue ?? null, onValueChange);
   const [open, setOpen] = useChangeState(reactionsOpenProp, defaultReactionsOpen, onReactionsOpenChange);
   const reactionsOpen = Boolean(reactions) && open;
-  // Back to the reaction row; focus follows when it was in the panel, which hides
+  // Back to the reaction row; focus follows when it was in the panel, which hides, and its search resets as a closed popover's does
   const showReactions = React.useCallback(
     (reason: EmojiPickerRootReactionsOpenChangeEventReason, event?: Event) => {
       const details = flushSync(() => setOpen(true, createChangeDetails(reason, event)));
+      if (!details || details.isCanceled) return details;
+      state.setQuery("");
       const active = document.activeElement;
-      if (details && !details.isCanceled && (!active || active === document.body || panel.current?.contains(active))) row.current?.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
+      if (!active || active === document.body || panel.current?.contains(active)) row.current?.querySelector<HTMLElement>(BUTTONS)?.focus({ preventScroll: true });
       return details;
     },
-    [setOpen],
+    [setOpen, state],
   );
   const expand = React.useCallback(
     (event?: Event) => {
@@ -253,6 +260,9 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => elementOf(keyboardTarget), [keyboardTarget]);
+  const ownsFocus = React.useCallback((el: Element | null) => el != null && (el === searchInput.current || el === target()), [target]);
+  // The search field's highlight ends when focus leaves the picker, as the grid's does
+  const { focusWithinProps } = useFocusWithin({ onBlurWithin: (e) => !ownsFocus(e.relatedTarget as Element | null) && state.highlight(null) });
   useKeyboardTarget(target, state, list);
 
   const context = React.useMemo<EmojiPickerRootContext>(
@@ -267,7 +277,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       value: selects ? value : undefined,
       pick,
       actions,
-      ownsFocus: (el) => el != null && (el === searchInput.current || el === target()),
+      ownsFocus,
       target,
       skinTone,
       list,
@@ -276,8 +286,9 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       listId,
       variations: { custom: variations > 0, register: registerVariations },
       registerStatus,
+      native,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, rootRef, listId, variations, registerVariations, registerStatus],
+    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, ownsFocus, target, rootRef, listId, variations, registerVariations, registerStatus, native],
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
@@ -295,7 +306,8 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });
-  const count = !searching || pending ? "" : labels.resultCount(results.length);
+  const resultCount = useResultCount(state);
+  const count = resultCount === null ? "" : labels.resultCount(resultCount);
   const rootState: EmojiPickerRootState = { searching, reactionsOpen };
 
   return renderElement(
@@ -305,7 +317,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       role: "group",
       "data-slot": SLOTS.root,
       "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
-      ...mergePartProps(rest, activeWithin),
+      ...mergePartProps(rest, activeWithin, focusWithinProps),
       [EmojiPickerRootDataAttributes.columns]: columns ?? undefined,
       onKeyDown: keys,
       className,

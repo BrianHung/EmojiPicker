@@ -9,7 +9,7 @@ export type PickerEngineOptions = EmojiPickerOptions<React.ReactNode>;
 
 // One headless picker for the component's life, as the AI SDK's useChat holds a Chat: values sync in a layout effect keyed on them, and callbacks are read at call time
 export function usePickerEngine(store: EmojiStore, options: PickerEngineOptions): EmojiPickerStore<React.ReactNode> {
-  const { labels, categories, frequent, suggested, emojiVersion, searchResults, searchLimit, query, collapsedCategories, highlight, disableVariations, reactions } = options;
+  const { labels, categories, frequent, suggested, emojiVersion, drawable, searchResults, searchLimit, query, collapsedCategories, highlight, disableVariations, reactions } = options;
   const onQueryChange = useStableCallback((value: string, details: QueryChangeDetails) => options.onQueryChange?.(value, details));
   const onHighlightChange = useStableCallback((unified: string | null, details: HighlightChangeDetails) => options.onHighlightChange?.(unified, details));
   const onCollapsedCategoriesChange = useStableCallback((ids: readonly string[], details: CollapsedCategoriesChangeDetails) => options.onCollapsedCategoriesChange?.(ids, details));
@@ -22,6 +22,7 @@ export function usePickerEngine(store: EmojiStore, options: PickerEngineOptions)
         frequent,
         suggested,
         emojiVersion,
+        drawable,
         searchResults,
         searchLimit,
         query,
@@ -33,7 +34,7 @@ export function usePickerEngine(store: EmojiStore, options: PickerEngineOptions)
         onHighlightChange,
         onCollapsedCategoriesChange,
       }),
-    [picker, labels, categories, frequent, suggested, emojiVersion, searchResults, searchLimit, query, collapsedCategories, highlight, disableVariations, reactions, onQueryChange, onHighlightChange, onCollapsedCategoriesChange],
+    [picker, labels, categories, frequent, suggested, emojiVersion, drawable, searchResults, searchLimit, query, collapsedCategories, highlight, disableVariations, reactions, onQueryChange, onHighlightChange, onCollapsedCategoriesChange],
   );
   return picker;
 }

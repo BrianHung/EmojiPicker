@@ -76,7 +76,7 @@ const ListInner = React.forwardRef<HTMLDivElement, InnerProps>(function ListInne
   const setViewportOrientation = React.useContext(EmojiPickerViewportContext);
   useLayoutEffect(() => setViewportOrientation?.(orientation), [setViewportOrientation, orientation]);
 
-  const { sections, request, probeRoot } = gridSections;
+  const { sections, request } = gridSections;
   const layout = React.useMemo<EmojiGridLayout>(() => (horizontal ? new HorizontalLayout() : new VerticalLayout()), [horizontal]);
   const navigation = React.useMemo(() => gridKeyboardDelegate(() => layout), [layout]);
   const [metrics, setMetrics] = React.useState<GridMetrics>(layout.metrics);
@@ -92,7 +92,7 @@ const ListInner = React.forwardRef<HTMLDivElement, InnerProps>(function ListInne
   // The Viewport's ref isn't attached yet when the list's first layout effects run
   const scroller = React.useCallback((list: HTMLElement | null = listRef.current) => list?.closest<HTMLElement>(`[data-slot="${SLOTS.viewport}"]`) ?? list?.parentElement ?? null, []);
   const { geometry, settled } = useListGeometry(layout, navigation, listRef, scroller, rtl);
-  const grid = useGridController({ sections, geometry, orientation, listRef, ref, probeRoot, request, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
+  const grid = useGridController({ sections, geometry, orientation, listRef, ref, request, "aria-label": rest["aria-label"], "aria-labelledby": rest["aria-labelledby"] });
   const { collection, persisted, cells } = grid;
   const { elements, headers } = cells;
 

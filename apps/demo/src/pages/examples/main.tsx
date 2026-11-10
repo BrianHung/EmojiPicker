@@ -7,7 +7,7 @@ import { SiteShell } from "@/components/site/shell";
 import { EXAMPLES } from "@/lib/examples";
 import "@/globals.css";
 
-const ALL = { title: "All examples", href: "https://github.com/BrianHung/emoji-components/tree/main/examples", description: "Popovers, providers, search, rendering, and cells, as source files on GitHub." };
+const ALL = { title: "All examples", href: "https://github.com/BrianHung/emoji-components/tree/main/examples", description: "A popover that stays open, search, a command palette, rendering, and cells, as source files on GitHub." };
 
 function Examples() {
   return (
