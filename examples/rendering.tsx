@@ -1,3 +1,5 @@
+"use client";
+
 import { EmojiProvider, type EmojiImageUrl } from "emoji-components";
 import { twemojiUrl } from "@emoji-components/core";
 import "@emoji-components/twemoji-font/twemoji.css";

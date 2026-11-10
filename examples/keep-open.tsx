@@ -1,3 +1,5 @@
+"use client";
+
 import type { EmojiSelection } from "emoji-components";
 import { EmojiPopover } from "emoji-components/floating-ui";
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";

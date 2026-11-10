@@ -7,7 +7,7 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
     type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), collapse? }) => void',
-    description: "Runs when an emoji is picked. `details.cancel()` keeps the value and keeps an enclosing `EmojiPopover` open; inside `Reactions`, `details.collapse()` shows the reaction row again.",
+    description: "Runs when the user selects an emoji. `details.cancel()` keeps the value and keeps an enclosing `EmojiPopover` open; inside `Reactions`, `details.collapse()` shows the reaction row again.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {

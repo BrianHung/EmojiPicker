@@ -13,8 +13,8 @@ export const provider = rowsOf<EmojiProvider.Props>()([
     type: "CustomEmoji[] | (({ signal }) => Promise<CustomEmoji[]>)",
     description: "Custom emoji, or a loader for them. Each is `{ id, name, imageUrl, shortcodes?, tags?, group?, base?, width?, height?, animated?, stillUrl? }`.",
   },
-  { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Removes emoji, custom emoji included, from the pickers and search." },
-  { name: "search", type: "EmojiSearch", default: "`lexicalSearch()`", description: "Ranks the emoji for a query." },
+  { name: "filter", type: "(record: EmojiRecord) => boolean", description: "Removes emoji, custom emoji included, from the pickers and search. Pass a stable function, defined outside the component or memoized." },
+  { name: "search", type: "EmojiSearch", default: "`lexicalSearch()`", description: "Ranks the emoji for a query. Pass a stable function, defined outside the component or memoized; a new function runs the current query again." },
   { name: "renderer", type: '"auto" | "native" | "image"', default: '`"auto"`', description: '`"auto"` draws an image wherever the system cannot draw an emoji natively.' },
   {
     name: "imageUrl",
@@ -30,6 +30,6 @@ export const provider = rowsOf<EmojiProvider.Props>()([
   { name: "defaultSkinTone", type: "SkinToneValue", default: "`0`" },
   { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "item-press" | "none", event, cancel() }) => void' },
   { name: "locale", type: "string", default: "the dataset's", description: "A BCP 47 tag for search, A–Z order, result counts, and text direction." },
-  { name: "labels", type: "Partial<EmojiLabels>", default: "`defaultLabels`", description: "Every string the pickers show or announce." },
+  { name: "labels", type: "Partial<EmojiLabels>", default: "English", description: "Every string the pickers show or announce." },
   { name: "prepare", type: "boolean", default: "`true`", description: "Loads the data and builds the search index while the browser is idle." },
 ]);

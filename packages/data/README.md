@@ -13,10 +13,15 @@ Only needed to self-host or bundle: core loads `en/iamcal.json` from jsDelivr by
 ## Usage
 
 ```tsx
-import { localeData } from "@emoji-components/core";
-import { EmojiProvider } from "emoji-components";
+import { EmojiProvider, localeData } from "emoji-components";
 
-<EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">…</EmojiProvider>
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja">
+      {children}
+    </EmojiProvider>
+  );
+}
 ```
 
 | Source | `data` |

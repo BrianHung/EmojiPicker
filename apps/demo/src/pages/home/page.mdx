@@ -19,7 +19,7 @@ The packages are in prerelease (`1.0.0-alpha`), and the API can change between a
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json" />
 
-The command adds `components/ui/emoji-picker.tsx` to your project, and the emoji font stack and the picker tokens to your CSS.
+The command adds `components/ui/emoji-picker.tsx`, installs `emoji-components`, and adds the emoji font stack and the picker's background, radius, and shadow tokens to your CSS.
 
 ```tsx title="App.tsx"
 import { EmojiPickerCard } from "@/components/ui/emoji-picker";
@@ -29,6 +29,8 @@ export default function App() {
 }
 ```
 
+`EmojiPickerCard` takes the props of `EmojiPicker.Root`, plus `cell`, `footer`, and `empty`. The file also exports `EmojiTapback`, a reaction row that expands into the picker.
+
 To open the picker from your shadcn/ui popover, add the popover item too:
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker-popover.json" />
@@ -37,15 +39,21 @@ With the React Aria base (`--base aria`), add this item instead:
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker-popover-react-aria.json" />
 
-```tsx title="message.tsx"
+```tsx title="add-reaction.tsx"
+"use client";
+
 import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 
-<EmojiPickerPopover onSelect={(selection) => react(message.id, selection.unified)}>
-  🙂 Add reaction
-</EmojiPickerPopover>
+export function AddReaction({ onAdd }: { onAdd: (unified: string) => void }) {
+  return (
+    <EmojiPickerPopover aria-label="Add reaction" onSelect={(selection) => onAdd(selection.unified)}>
+      🙂
+    </EmojiPickerPopover>
+  );
+}
 ```
 
-For `:shortcode` suggestions in a text field, add the suggestions item and pass it the typeahead:
+For shortcode suggestions in a text field, add the suggestions item and pass it the typeahead:
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-suggestions.json" />
 
@@ -73,16 +81,24 @@ For the reactions under a message, `emoji-reaction-bar.json` adds a React Aria t
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-reaction-bar.json" />
 
 ```tsx title="reactions.tsx"
+"use client";
+
 import { Emoji } from "emoji-components";
 import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
 
-<EmojiReactionBar aria-label="Reactions">
-  {message.reactions.map((r) => (
-    <button key={r.unified} type="button" aria-pressed={r.mine} onClick={() => toggle(message.id, r.unified)}>
-      <Emoji emoji={r.unified} /> {r.count}
-    </button>
-  ))}
-</EmojiReactionBar>
+type Reaction = { unified: string; count: number; mine: boolean };
+
+export function Reactions({ reactions, onToggle }: { reactions: Reaction[]; onToggle: (unified: string) => void }) {
+  return (
+    <EmojiReactionBar aria-label="Reactions">
+      {reactions.map((r) => (
+        <button key={r.unified} type="button" aria-pressed={r.mine} onClick={() => onToggle(r.unified)}>
+          <Emoji emoji={r.unified} /> {r.count}
+        </button>
+      ))}
+    </EmojiReactionBar>
+  );
+}
 ```
 
 For an editor, the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples add their items.
@@ -107,9 +123,12 @@ The component uses Tailwind CSS v4, shadcn/ui's color classes, such as `bg-popov
 
 <Step title="Import the tokens into your CSS.">
 
+`shadcn.css` sets the tokens from your shadcn/ui theme, so the picker follows its light and dark colors.
+
 ```css title="app/globals.css"
 @import "tailwindcss";
 @import "emoji-components/tokens.css";
+@import "emoji-components/shadcn.css";
 ```
 
 </Step>
@@ -136,7 +155,7 @@ The component uses Tailwind CSS v4, shadcn/ui's color classes, such as `bg-popov
 
 ## Usage
 
-The parts render without a provider or CSS, `Root` loads the English dataset from jsDelivr, and `Viewport` needs a height to virtualize the list.
+The parts work without an `EmojiProvider` or CSS. `Root` loads the English dataset from jsDelivr, and `Viewport` needs a fixed height to virtualize the list. Add `EmojiProvider` to change the data, locale, search, renderer, labels, or custom emoji; without one, the parts share a default store.
 
 ```tsx title="app/page.tsx"
 "use client";
@@ -174,9 +193,7 @@ import { EmojiPicker } from "emoji-components";
   <EmojiPicker.Viewport>
     <EmojiPicker.List />
   </EmojiPicker.Viewport>
-  <EmojiPicker.CategoryNav>
-    <EmojiPicker.CategoryNavTab />
-  </EmojiPicker.CategoryNav>
+  <EmojiPicker.CategoryNav>{() => <EmojiPicker.CategoryNavTab />}</EmojiPicker.CategoryNav>
   <EmojiPicker.Preview />
 </EmojiPicker.Root>
 ```
@@ -187,9 +204,11 @@ import { EmojiPicker } from "emoji-components";
 
 ## Examples
 
+Imports from `@/components/ui/*` are the registry items from [Installation](#installation).
+
 ### Styling the parts {#inline}
 
-Each part takes `className` and `style` as a value or a function of its state, and `emoji-components/theme.css` adds Tailwind utilities for the tokens, such as `bg-emoji-picker-background`.
+Each part takes `className` and `style` as a value or a function of its state. `emoji-components/theme.css` adds Tailwind utilities for the tokens, such as `bg-emoji-picker-background`.
 
 ```css title="app/globals.css"
 @import "tailwindcss";
@@ -201,7 +220,7 @@ Each part takes `className` and `style` as a value or a function of its state, a
 
 ### Opening in a popover {#popover}
 
-`EmojiPopover` comes from `emoji-components/floating-ui`, or from `emoji-components/react-aria`, where it is modal by default.
+Import `EmojiPopover` from `emoji-components/floating-ui` or `emoji-components/react-aria`. The React Aria popover is modal by default.
 
 ```tsx title="popover.tsx"
 <EmojiPopover.Root>
@@ -218,7 +237,7 @@ Each part takes `className` and `style` as a value or a function of its state, a
 
 ### Suggesting shortcodes {#headless}
 
-`useTextFieldEmojiTypeahead(ref)` finds a `:shortcode` as you type, and `EmojiSuggestions` shows the matches at the caret; for an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+`useTextFieldEmojiTypeahead(ref)` finds the `:query` before the caret in an `<input>` or `<textarea>` and handles the field's keys. `EmojiSuggestions`, from `emoji-components/floating-ui`, shows the matches at the caret. For an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
 
 ```tsx title="suggestions.tsx"
 <EmojiSuggestions.Root open={open} onOpenChange={(next) => !next && dismiss()}>
@@ -269,7 +288,11 @@ Every part forwards its ref, spreads other props onto its element, and takes the
 
 <PropsTable rows={api.part} />
 
-A handler you pass to a part runs before the part's own, and `event.preventEmojiComponentsHandler()` skips the part's. Each controllable state takes `x`, `defaultX`, and `onXChange(value, details)`: `details.cancel()` keeps the current state, and `details.allowPropagation()` lets an Escape reach the page. `EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them; parts that a function child renders, such as `ListCell` inside `List`, belong in a Client Component.
+A handler you pass to a part runs before the part's own. Call `event.preventEmojiComponentsHandler()` to skip the part's handler.
+
+Each controllable state has three props, such as `query`, `defaultQuery`, and `onQueryChange(value, details)`. `details.cancel()` keeps the current state. Callbacks that Escape can trigger also have `details.allowPropagation()`, which lets the key event reach the page.
+
+`EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are namespaces, as in Base UI, so a Server Component can render their parts. A function child can't come from a Server Component, so render parts that need one, such as `ListCell` inside `List`, in a Client Component.
 
 Shared types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `EmojiImageUrl`, `EmojiStore`.
 

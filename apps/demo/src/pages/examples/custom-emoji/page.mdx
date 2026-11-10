@@ -11,14 +11,24 @@ import { BufoPicker, LoadPack } from "./demo";
 
 Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes`, `tags`, `width`, `height`, `animated`, `stillUrl`, and `base` (a unified code whose name and tags also find it), and a `group` that becomes its own section.
 
-```tsx title="app.tsx"
-const bufo = await fetch("/packs/bufo/pack.json").then((r) => r.json());
+```tsx title="picker.tsx"
+"use client";
 
-<EmojiProvider customEmojis={bufo}>
-  <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys-people" }]}>
-    …
-  </EmojiPicker.Root>
-</EmojiProvider>
+import { EmojiPicker, EmojiProvider, type CustomEmoji } from "emoji-components";
+
+const bufo = async ({ signal }: { signal: AbortSignal }): Promise<CustomEmoji[]> => (await fetch("/packs/bufo/pack.json", { signal })).json();
+
+export function Picker() {
+  return (
+    <EmojiProvider customEmojis={bufo}>
+      <EmojiPicker.Root categories={[{ id: "custom:Bufo" }, { id: "smileys-people" }]}>
+        <EmojiPicker.Viewport style={{ height: 320 }}>
+          <EmojiPicker.List />
+        </EmojiPicker.Viewport>
+      </EmojiPicker.Root>
+    </EmojiProvider>
+  );
+}
 ```
 
 ## Host a pack

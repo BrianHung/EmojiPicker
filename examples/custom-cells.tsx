@@ -1,3 +1,5 @@
+"use client";
+
 import type { EmojiItem } from "emoji-components";
 import { EmojiPickerCard, EmojiPickerCell } from "@/components/ui/emoji-picker";
 

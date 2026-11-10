@@ -10,7 +10,7 @@ import { Demo } from "./demo";
 
 ## Approaches
 
-Each approach is an `EmojiSearch`, wrapped so keyword results fill in when it returns fewer than eight hits:
+Each approach is an `EmojiSearch`, wrapped so keyword results fill in when it returns fewer than eight hits. Define the search outside the component, since a new function runs the query again. The snippets are excerpts; the full source is in [apps/demo](https://github.com/BrianHung/emoji-components/tree/main/apps/demo/src/pages/examples/semantic-search).
 
 ```ts title="with-lexical.ts"
 import { lexicalSearch, type EmojiSearch } from "emoji-components";
@@ -62,7 +62,9 @@ const onDeviceSearch: EmojiSearch = (query, { limit }) =>
     worker.postMessage({ id, query, limit });
   });
 
-<EmojiProvider search={withLexical(onDeviceSearch)}>
+const search = withLexical(onDeviceSearch);
+
+<EmojiProvider search={search}>
 ```
 
 ```bash title="Terminal"
@@ -90,7 +92,9 @@ const embeddings: EmojiSearch = (query, { limit, signal }) =>
     .then((r) => r.json())
     .then((r) => r.hits);
 
-<EmojiProvider search={withLexical(embeddings)}>
+const search = withLexical(embeddings);
+
+<EmojiProvider search={search}>
 ```
 
 ```bash title="Terminal"
@@ -128,7 +132,9 @@ const decision: EmojiSearch = (query, { limit, signal }) =>
     .then((r) => r.json())
     .then((r) => r.hits);
 
-<EmojiProvider search={withLexical(decision)}>
+const search = withLexical(decision);
+
+<EmojiProvider search={search}>
 ```
 
 ### Your own emoji

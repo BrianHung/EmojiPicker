@@ -1,3 +1,5 @@
+"use client";
+
 import { EmojiProvider, localeData, type EmojiLabels } from "emoji-components";
 
 const labels: Partial<EmojiLabels> = {
