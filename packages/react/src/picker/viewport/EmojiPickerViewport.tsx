@@ -8,6 +8,7 @@ import { renderElement, resolve } from "../../internals/renderElement";
 import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import type { EmojiPickerOrientation } from "../utils/types";
 import { SLOTS } from "../../internals/slots";
+import { EmojiPickerList } from "../list/EmojiPickerList";
 import { useStore } from "../../utils/useStore";
 
 export type EmojiPickerViewportState = { searching: boolean; orientation: EmojiPickerOrientation };
@@ -20,7 +21,7 @@ const SCROLL: Record<EmojiPickerOrientation, React.CSSProperties> = {
 };
 const FIXED_GUTTER: React.CSSProperties = { scrollbarGutter: "stable" };
 
-export const EmojiPickerViewport = React.forwardRef<HTMLDivElement, EmojiPickerViewportProps>(function EmojiPickerViewport({ onKeyDown, style, ...props }, ref) {
+export const EmojiPickerViewport = React.forwardRef<HTMLDivElement, EmojiPickerViewportProps>(function EmojiPickerViewport({ onKeyDown, style, children, ...props }, ref) {
   const { state, columns } = useEmojiPickerRootContext("EmojiPicker.Viewport");
   const searching = useStore(state, (s) => s.searching);
   const [orientation, setOrientation] = React.useState<EmojiPickerOrientation>("vertical");
@@ -34,6 +35,7 @@ export const EmojiPickerViewport = React.forwardRef<HTMLDivElement, EmojiPickerV
           "data-slot": SLOTS.viewport,
           ref,
           onKeyDown: keys,
+          children: children ?? <EmojiPickerList />,
           style: (s: EmojiPickerViewportState) => ({ ...SCROLL[s.orientation], ...(columns ? FIXED_GUTTER : null), ...resolve(style, s) }),
         },
         { searching, orientation },

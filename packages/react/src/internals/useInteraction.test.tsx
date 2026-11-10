@@ -4,8 +4,6 @@ import { expect, it } from "vitest";
 import { cleanupRoots, render } from "../../test/render";
 import { en } from "../../test/en";
 import { EmojiPicker, EmojiProvider } from "..";
-import * as floating from "../floating-ui";
-import * as aria from "../react-aria";
 
 function SkinToneTrigger() {
   return (
@@ -17,23 +15,10 @@ function SkinToneTrigger() {
   );
 }
 
-const popoverTrigger = ({ EmojiPopover }: typeof floating | typeof aria) =>
-  function PopoverTrigger() {
-    return (
-      <EmojiPopover.Root>
-        <EmojiPopover.Trigger>Open</EmojiPopover.Trigger>
-      </EmojiPopover.Root>
-    );
-  };
-
 // usePress cancels a button's native keyboard click outside macOS, and jsdom isn't macOS
-it.each([
-  ["SkinToneTrigger", SkinToneTrigger],
-  ["EmojiPopover.Trigger from /floating-ui", popoverTrigger(floating)],
-  ["EmojiPopover.Trigger from /react-aria", popoverTrigger(aria)],
-])("%s opens with Enter and Space", (_, Trigger) => {
+it("SkinToneTrigger opens with Enter and Space", () => {
   for (const key of ["Enter", " "]) {
-    render(<Trigger />);
+    render(<SkinToneTrigger />);
     const el = document.querySelector("button")!;
     React.act(() => {
       el.focus();

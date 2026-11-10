@@ -41,16 +41,6 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./floating-ui": {
-      "@emoji-components/source": "./src/floating-ui.ts",
-      "types": "./dist/floating-ui.d.ts",
-      "default": "./dist/floating-ui.js"
-    },
-    "./react-aria": {
-      "@emoji-components/source": "./src/react-aria.ts",
-      "types": "./dist/react-aria.d.ts",
-      "default": "./dist/react-aria.js"
-    },
     "./picker": {
       "@emoji-components/source": "./src/picker/index.ts",
       "types": "./dist/picker/index.d.ts",
@@ -65,31 +55,6 @@
       "@emoji-components/source": "./src/provider/index.ts",
       "types": "./dist/provider/index.d.ts",
       "default": "./dist/provider/index.js"
-    },
-    "./reaction-bar": {
-      "@emoji-components/source": "./src/reaction-bar/index.ts",
-      "types": "./dist/reaction-bar/index.d.ts",
-      "default": "./dist/reaction-bar/index.js"
-    },
-    "./popover/floating-ui": {
-      "@emoji-components/source": "./src/popover/floating-ui/index.ts",
-      "types": "./dist/popover/floating-ui/index.d.ts",
-      "default": "./dist/popover/floating-ui/index.js"
-    },
-    "./popover/react-aria": {
-      "@emoji-components/source": "./src/popover/react-aria/index.ts",
-      "types": "./dist/popover/react-aria/index.d.ts",
-      "default": "./dist/popover/react-aria/index.js"
-    },
-    "./suggestions/floating-ui": {
-      "@emoji-components/source": "./src/suggestions/floating-ui/index.ts",
-      "types": "./dist/suggestions/floating-ui/index.d.ts",
-      "default": "./dist/suggestions/floating-ui/index.js"
-    },
-    "./suggestions/react-aria": {
-      "@emoji-components/source": "./src/suggestions/react-aria/index.ts",
-      "types": "./dist/suggestions/react-aria/index.d.ts",
-      "default": "./dist/suggestions/react-aria/index.js"
     },
     "./tokens.css": "./src/styles/tokens.css",
     "./theme.css": "./src/styles/theme.css",
@@ -110,7 +75,6 @@
   },
   "dependencies": {
     "@emoji-components/core": "1.0.0-alpha.2",
-    "@floating-ui/react": "^0.27.20",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",

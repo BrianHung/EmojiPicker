@@ -1,7 +1,6 @@
 export const SLOTS = {
   root: "emoji-picker",
   search: "emoji-picker-search",
-  searchInputGroup: "emoji-picker-search-input-group",
   searchInput: "emoji-picker-search-input",
   searchClear: "emoji-picker-search-clear",
   searchStatus: "emoji-picker-search-status",
@@ -21,14 +20,8 @@ export const SLOTS = {
   reactions: "emoji-picker-reactions",
   reactionsItem: "emoji-picker-reactions-item",
   reactionsExpand: "emoji-picker-reactions-expand",
-  reactionBar: "emoji-reaction-bar",
   preview: "emoji-picker-preview",
   panel: "emoji-picker-panel",
   listVariations: "emoji-picker-list-variations",
   listVariationsOption: "emoji-picker-list-variations-option",
-  popoverTrigger: "emoji-popover-trigger",
-  popoverPositioner: "emoji-popover-positioner",
-  popoverPopup: "emoji-popover-popup",
-  suggestionsPositioner: "emoji-suggestions-positioner",
-  suggestionsPopup: "emoji-suggestions-popup",
 } as const;

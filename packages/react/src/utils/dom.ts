@@ -18,6 +18,8 @@ export function moveVirtualFocus(to: Element, owner?: Element | null) {
   to.dispatchEvent(new FocusEvent("focusin", { bubbles: true, relatedTarget: from }));
 }
 
+export const BUTTONS = "button:not([disabled])";
+
 // From React Aria's isFocusable (Apache-2.0, see THIRD_PARTY_NOTICES.md)
 export const TABBABLE = [
   "input:not([disabled]):not([type=hidden])",

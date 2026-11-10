@@ -1,5 +1,4 @@
 import * as InteractionDataAttributes from "../../internals/InteractionDataAttributes";
-import * as CommonTriggerDataAttributes from "../../popover/utils/CommonTriggerDataAttributes";
 
 /**
  * Identifies the trigger.
@@ -9,7 +8,7 @@ export const slot = "data-slot";
 /**
  * Present while the options are open.
  */
-export const popupOpen = CommonTriggerDataAttributes.popupOpen;
+export const popupOpen = "data-popup-open";
 /**
  * Present while it is pressed.
  */

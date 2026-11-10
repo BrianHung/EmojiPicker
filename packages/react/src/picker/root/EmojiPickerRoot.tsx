@@ -28,11 +28,8 @@ import * as EmojiPickerListCssVars from "../list/EmojiPickerListCssVars";
 import { useKeyboardTarget } from "./utils/useKeyboardTarget";
 import { useResultCount } from "./utils/useEmojiPickerSearch";
 import { usePickerEngine } from "./utils/usePickerEngine";
-import { PopoverContext } from "../../popover/root/EmojiPopoverRootContext";
-import type { EmojiPopoverRootChangeEventReason } from "../../popover/utils/types";
 import { EmojiProviderContext, useEmojiContext } from "../../provider/EmojiProviderContext";
 import { SharedProvider } from "../../provider/EmojiProvider";
-import { BUTTONS } from "../../reaction-bar/EmojiReactionBar";
 import { mergePartProps } from "../../internals/mergePartProps";
 import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
 import { useActiveWithin } from "../../utils/useActiveWithin";
@@ -43,7 +40,7 @@ import { useClippedScrollGuard } from "../../utils/useClippedScrollGuard";
 import { SLOTS } from "../../internals/slots";
 import { useChangeState } from "../../utils/useChangeState";
 import { shallowEqual, useStore } from "../../utils/useStore";
-import { elementOf } from "../../utils/dom";
+import { BUTTONS, elementOf } from "../../utils/dom";
 
 export type CategoryOption = CoreCategoryOption<React.ReactNode>;
 
@@ -140,7 +137,6 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   } = props;
   const { store, labels, maxVersion } = useEmojiContext();
   const columns = columnsProp === "fit" ? undefined : columnsProp;
-  const popover = React.useContext(PopoverContext);
   const emojiVersion = maxVersion == null ? emojiVersionProp : Math.min(emojiVersionProp ?? Infinity, maxVersion);
   const rootRef = useObjectRef(ref);
   const native = useDrawable(rootRef);
@@ -206,32 +202,23 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     },
     [setOpen],
   );
-  const latest = useLatest({ onSelect, popover, selects, reactionsOpen });
+  const latest = useLatest({ onSelect, selects, reactionsOpen });
   const pick = React.useCallback(
     (unified: string, event?: Event, reason: EmojiPickerRootChangeEventReason = "item-press") => {
       const selection = state.choose(unified);
       if (!selection) return undefined;
-      const { onSelect, popover, selects, reactionsOpen } = latest.current;
+      const { onSelect, selects, reactionsOpen } = latest.current;
       const details = createChangeDetails(reason, event);
       onSelect?.(selection, details);
       if (details.isCanceled) return selection;
       if (selects) setValue(selection.unified, createChangeDetails(reason, event));
       if (reactions && !reactionsOpen) showReactions("item-press", event);
-      popover?.close("item-press", event);
       return selection;
     },
     [state, latest, reactions, showReactions, setValue],
   );
   const [variations, registerVariations] = useMounted();
   const [statuses, registerStatus] = useMounted();
-  const closePopover = React.useCallback(
-    (reason: EmojiPopoverRootChangeEventReason, event?: Event) => {
-      const { popover } = latest.current;
-      popover?.close(reason, event);
-      return Boolean(popover);
-    },
-    [latest],
-  );
   const skinTone = React.useRef<(() => void) | null>(null);
   const actions = React.useMemo<EmojiPickerRootActions>(
     () => ({
@@ -246,13 +233,12 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
         state.setQuery("", IMPERATIVE);
         list.current?.clear();
       },
-      close: () => closePopover("imperative-action"),
       toggleSkinTone() {
         skinTone.current?.();
         return Boolean(skinTone.current);
       },
     }),
-    [state, closePopover],
+    [state],
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => elementOf(keyboardTarget), [keyboardTarget]);
@@ -266,7 +252,6 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       store,
       state,
       labels,
-      inPopover: Boolean(popover),
       columns,
       collapse,
       searchResults,
@@ -284,7 +269,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       registerStatus,
       native,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, ownsFocus, target, rootRef, listId, variations, registerVariations, registerStatus, native],
+    [store, state, labels, columns, collapse, searchResults, selects, value, pick, actions, ownsFocus, target, rootRef, listId, variations, registerVariations, registerStatus, native],
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
@@ -294,8 +279,8 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {
     if (e.key === "Escape") {
-      // With no query, Escape leaves the highlight, then the expanded picker for its reaction row, then the popover
-      if (!query) return Boolean(list.current?.clear()) || Boolean(reactions && !reactionsOpen && panels && showReactions("escape-key", e.nativeEvent)) || closePopover("escape-key", e.nativeEvent);
+      // With no query, Escape leaves the highlight, then the expanded picker for its reaction row, then goes on to an enclosing popover
+      if (!query) return Boolean(list.current?.clear()) || Boolean(reactions && !reactionsOpen && panels && showReactions("escape-key", e.nativeEvent));
       const details = state.setQuery("", { reason: "escape-key", event: e.nativeEvent });
       list.current?.clear();
       return !details?.isPropagationAllowed;

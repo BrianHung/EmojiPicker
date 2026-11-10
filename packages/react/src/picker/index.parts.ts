@@ -3,7 +3,6 @@ export { EmojiPickerViewport as Viewport } from "./viewport/EmojiPickerViewport"
 export { EmojiPickerPreview as Preview } from "./preview/EmojiPickerPreview";
 export { EmojiPickerPanel as Panel } from "./panel/EmojiPickerPanel";
 export { EmojiPickerSearch as Search } from "./search/EmojiPickerSearch";
-export { EmojiPickerSearchInputGroup as SearchInputGroup } from "./search-input-group/EmojiPickerSearchInputGroup";
 export { EmojiPickerSearchInput as SearchInput } from "./search-input/EmojiPickerSearchInput";
 export { EmojiPickerSearchClear as SearchClear } from "./search-clear/EmojiPickerSearchClear";
 export { EmojiPickerSearchStatus as SearchStatus } from "./search-status/EmojiPickerSearchStatus";

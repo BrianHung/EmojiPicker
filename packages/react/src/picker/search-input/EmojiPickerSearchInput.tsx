@@ -10,7 +10,7 @@ import type { EmojiComponentsHandlers, EmojiComponentsInteractionState, EmojiCom
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
-import { EmojiPickerSearchInputGroupContext } from "../search-input-group/EmojiPickerSearchInputGroupContext";
+import { EmojiPickerSearchContext } from "../search/EmojiPickerSearchContext";
 
 export type EmojiPickerSearchInputState = Omit<EmojiComponentsInteractionState, "pressed">;
 
@@ -28,8 +28,7 @@ export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPi
   useLayoutEffect(() => registerInput(), [registerInput]);
   const own = React.useRef<HTMLInputElement | null>(null);
   const refs = React.useMemo(() => mergeRefs<HTMLInputElement>(own, picker.searchInput, ref), [picker.searchInput, ref]);
-  const focusOnMount = autoFocus ?? picker.inPopover;
-  const inGroup = React.useContext(EmojiPickerSearchInputGroupContext);
+  const inSearch = React.useContext(EmojiPickerSearchContext);
   const rtl = useLocale().direction === "rtl";
 
   // Capture: React Aria's Autocomplete forwards keys to the list from the input's own keydown
@@ -52,10 +51,10 @@ export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPi
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: autoFocus, once on mount
   React.useEffect(() => {
-    if (focusOnMount && !picker.inPopover) own.current?.focus({ preventScroll: true });
+    if (autoFocus) own.current?.focus({ preventScroll: true });
   }, []);
 
-  if (!inGroup) throw new Error("EmojiPicker.SearchInput must be inside EmojiPicker.SearchInputGroup.");
+  if (!inSearch) throw new Error("EmojiPicker.SearchInput must be inside EmojiPicker.Search.");
   return (
     <Input
       {...props}
@@ -67,8 +66,8 @@ export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPi
       placeholder={placeholder ?? labels.searchPlaceholder}
       aria-label={props["aria-label"] ?? labels.searchLabel}
       data-slot={SLOTS.searchInput}
-      // autoFocus misses a field that is still hidden while the popover opens
-      {...(focusOnMount ? { "data-autofocus": "" } : {})}
+      // For emojiPickerInitialFocus: a popover that is still hidden on mount focuses the field once it shows
+      {...(autoFocus ? { "data-autofocus": "" } : {})}
     />
   );
 });

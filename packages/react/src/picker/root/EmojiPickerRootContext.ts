@@ -16,7 +16,6 @@ export interface EmojiPickerRootActions {
   highlight(emoji: string | null): void;
   focusSearch(): boolean;
   clearSearch(): void;
-  close(): boolean;
   toggleSkinTone(): boolean;
 }
 
@@ -49,7 +48,6 @@ export interface EmojiPickerRootContext {
   store: EmojiStore;
   state: EmojiPickerStore<React.ReactNode>;
   labels: EmojiLabels;
-  inPopover: boolean;
   columns?: number;
   collapse: EmojiPickerCollapsedCategories;
   searchResults: SearchResultsMode;

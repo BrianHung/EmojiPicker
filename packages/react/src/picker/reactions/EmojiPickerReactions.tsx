@@ -12,20 +12,36 @@ import { useChangeState } from "../../utils/useChangeState";
 import { EmojiPickerReactionsExpand } from "../reactions-expand/EmojiPickerReactionsExpand";
 import { EmojiPickerReactionsItems } from "../reactions-items/EmojiPickerReactionsItems";
 import { EmojiPickerReactionsContext } from "../reactions/EmojiPickerReactionsContext";
-import { ReactionBar, type EmojiReactionBarProps, type EmojiReactionBarState } from "../../reaction-bar/EmojiReactionBar";
+import { BUTTONS } from "../../utils/dom";
+import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
+import { ToolbarPart } from "../utils/ToolbarPart";
+import type { EmojiPickerOrientation } from "../utils/types";
 
 const NONE: readonly string[] = [];
 
 export type EmojiPickerReactionsChangeEventReason = "item-press";
 export type EmojiPickerReactionsChangeEventDetails = ChangeDetails<EmojiPickerReactionsChangeEventReason> & { emoji: string; pressed: boolean };
 
-export type EmojiPickerReactionsState = EmojiReactionBarState;
+export type EmojiPickerReactionsState = { orientation: EmojiPickerOrientation };
 
-export type EmojiPickerReactionsProps = Omit<EmojiReactionBarProps, "children" | "orientation" | "defaultValue"> & {
-  value?: readonly string[];
-  defaultValue?: readonly string[];
-  onValueChange?: (value: readonly string[], details: EmojiPickerReactionsChangeEventDetails) => void;
-  children?: React.ReactNode | ((emoji: string) => React.ReactNode);
+export type EmojiPickerReactionsProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLDivElement>, "role" | "className" | "style" | "children" | "defaultValue">> &
+  EmojiComponentsPartProps<EmojiPickerReactionsState, HTMLDivElement> & {
+    value?: readonly string[];
+    defaultValue?: readonly string[];
+    onValueChange?: (value: readonly string[], details: EmojiPickerReactionsChangeEventDetails) => void;
+    children?: React.ReactNode | ((emoji: string) => React.ReactNode);
+  };
+
+const HORIZONTAL: EmojiPickerReactionsState = { orientation: "horizontal" };
+
+// Once focus is inside, the pointer carries it from button to button
+const POINTER: React.HTMLAttributes<HTMLElement> = {
+  onPointerOver(event) {
+    const button = event.target instanceof Element ? event.target.closest<HTMLElement>(BUTTONS) : null;
+    const active = document.activeElement;
+    const row = event.currentTarget;
+    if (button && button !== active && row.contains(button) && active instanceof HTMLElement && row.contains(active)) button.focus({ preventScroll: true });
+  },
 };
 
 export const EmojiPickerReactions = React.forwardRef<HTMLDivElement, EmojiPickerReactionsProps>(function EmojiPickerReactions({ value: valueProp, defaultValue, onValueChange, children, ...props }, ref) {
@@ -67,9 +83,9 @@ export const EmojiPickerReactions = React.forwardRef<HTMLDivElement, EmojiPicker
     );
   return (
     <EmojiPickerReactionsContext.Provider value={{ shown, pressed, press }}>
-      <ReactionBar aria-label={labels.reactions} {...props} ref={refs} slot={SLOTS.reactions}>
+      <ToolbarPart aria-label={labels.reactions} {...props} data-slot={SLOTS.reactions} toolbarRef={refs} orientation="horizontal" state={HORIZONTAL} handlers={POINTER}>
         {content}
-      </ReactionBar>
+      </ToolbarPart>
     </EmojiPickerReactionsContext.Provider>
   );
 });

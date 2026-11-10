@@ -1,5 +1,5 @@
 /**
- * Identifies the search row.
+ * Identifies the search field.
  * @type {'emoji-picker-search'}
  */
 export const slot = "data-slot";

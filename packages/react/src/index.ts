@@ -1,7 +1,6 @@
 export * from "./picker";
 export * from "./emoji";
 export * from "./provider";
-export * from "./reaction-bar";
 export * from "./use-emoji-suggestions";
 
 export { findShortcodeTrigger, isComposingKey, lexicalSearch, localeData } from "@emoji-components/core";

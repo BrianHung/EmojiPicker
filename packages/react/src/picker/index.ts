@@ -5,7 +5,6 @@ export type { EmojiPickerViewportProps, EmojiPickerViewportState } from "./viewp
 export type { EmojiPickerPreviewProps, EmojiPickerPreviewState } from "./preview/EmojiPickerPreview";
 export type { EmojiPickerPanelProps, EmojiPickerPanelState } from "./panel/EmojiPickerPanel";
 export type { EmojiPickerSearchProps, EmojiPickerSearchState } from "./search/EmojiPickerSearch";
-export type { EmojiPickerSearchInputGroupProps, EmojiPickerSearchInputGroupState } from "./search-input-group/EmojiPickerSearchInputGroup";
 export type { EmojiPickerSearchInputProps, EmojiPickerSearchInputState } from "./search-input/EmojiPickerSearchInput";
 export type { EmojiPickerSearchClearProps, EmojiPickerSearchClearState } from "./search-clear/EmojiPickerSearchClear";
 export type { EmojiPickerSearchStatusProps, EmojiPickerSearchStatusState } from "./search-status/EmojiPickerSearchStatus";
@@ -54,7 +53,6 @@ export * as EmojiPickerViewportDataAttributes from "./viewport/EmojiPickerViewpo
 export * as EmojiPickerPreviewDataAttributes from "./preview/EmojiPickerPreviewDataAttributes";
 export * as EmojiPickerPanelDataAttributes from "./panel/EmojiPickerPanelDataAttributes";
 export * as EmojiPickerSearchDataAttributes from "./search/EmojiPickerSearchDataAttributes";
-export * as EmojiPickerSearchInputGroupDataAttributes from "./search-input-group/EmojiPickerSearchInputGroupDataAttributes";
 export * as EmojiPickerSearchInputDataAttributes from "./search-input/EmojiPickerSearchInputDataAttributes";
 export * as EmojiPickerSearchClearDataAttributes from "./search-clear/EmojiPickerSearchClearDataAttributes";
 export * as EmojiPickerSearchStatusDataAttributes from "./search-status/EmojiPickerSearchStatusDataAttributes";
