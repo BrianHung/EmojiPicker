@@ -18,10 +18,16 @@ npx shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emo
 ```
 
 ```tsx
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 
 export default function App() {
-  return <EmojiPickerCard onSelect={(selection) => console.log(selection.emoji)} />;
+  return (
+    <EmojiPicker onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPickerSearch />
+      <EmojiPickerContent />
+      <EmojiPickerFooter />
+    </EmojiPicker>
+  );
 }
 ```
 
@@ -41,9 +47,7 @@ import { EmojiPicker } from "emoji-components";
 export default function Page() {
   return (
     <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
-      <EmojiPicker.Search>
-        <EmojiPicker.SearchInput />
-      </EmojiPicker.Search>
+      <EmojiPicker.Search />
       <EmojiPicker.Viewport style={{ height: 320 }}>
         <EmojiPicker.List />
       </EmojiPicker.Viewport>

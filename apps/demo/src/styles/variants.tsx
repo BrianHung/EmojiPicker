@@ -81,7 +81,7 @@ export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: {
   );
 }
 
-export function StyleTypeahead({ appStyle, className, ...menu }: UseEmojiSuggestionsReturnValue & { appStyle: Style; className?: string }) {
+export function StyleSuggestions({ appStyle, className, ...menu }: UseEmojiSuggestionsReturnValue & { appStyle: Style; className?: string }) {
   const { open } = menu;
   const store = useEmojiStore();
   const a = appStyle.autocomplete;

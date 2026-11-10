@@ -24,7 +24,7 @@ function $matchAtSelection(): Match | null {
 export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
   const [editor] = useLexicalComposerContext();
   const [match, setMatch] = React.useState<Match | null>(null);
-  const typeahead = useEmojiSuggestions(
+  const suggestions = useEmojiSuggestions(
     match && {
       query: match.query,
       anchor() {
@@ -48,12 +48,12 @@ export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSug
     options,
     () => editor.getRootElement(),
   );
-  const { onKeyDown } = typeahead;
+  const { onKeyDown } = suggestions;
   React.useEffect(
     () =>
       editor.registerUpdateListener(({ editorState }) => editorState.read(() => setMatch($matchAtSelection()))),
     [editor],
   );
   React.useEffect(() => editor.registerCommand(KEY_DOWN_COMMAND, onKeyDown, COMMAND_PRIORITY_HIGH), [editor, onKeyDown]);
-  return typeahead;
+  return suggestions;
 }

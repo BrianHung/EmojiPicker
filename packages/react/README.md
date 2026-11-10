@@ -2,7 +2,7 @@
 
 <img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/emoji-components/main/.github/assets/picker.svg" width="680">
 
-Unstyled, composable emoji components for React: a virtualized picker, reaction rows, and shortcode typeahead, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
+Unstyled, composable emoji components for React: a virtualized picker, reaction rows, and shortcode suggestions, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 
 ## Installation
 
@@ -28,9 +28,7 @@ import { EmojiPicker } from "emoji-components";
 export default function Page() {
   return (
     <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
-      <EmojiPicker.Search>
-        <EmojiPicker.SearchInput />
-      </EmojiPicker.Search>
+      <EmojiPicker.Search />
       <EmojiPicker.Viewport style={{ height: 320 }}>
         <EmojiPicker.List />
       </EmojiPicker.Viewport>
@@ -43,9 +41,9 @@ export default function Page() {
 
 | Import | Contents |
 |---|---|
-| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, typeahead hooks, `emojiPickerInitialFocus` |
+| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, `EmojiReactionBar`, hooks, suggestions hooks, `emojiPickerInitialFocus` |
 | `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
-| `/picker`, `/emoji`, `/provider` | One component each: `EmojiPicker` with its hooks, `Emoji`, and `EmojiProvider` with its hooks |
+| `/picker`, `/emoji`, `/provider`, `/reaction-bar` | One component each: `EmojiPicker` with its hooks, `Emoji`, `EmojiProvider` with its hooks, and `EmojiReactionBar` |
 | `/popover/floating-ui`, `/popover/react-aria`, `/suggestions/floating-ui`, `/suggestions/react-aria` | `EmojiPopover` or `EmojiSuggestions` alone |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind utilities for them, and a mapping to a shadcn/ui theme |
 

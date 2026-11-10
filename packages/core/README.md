@@ -21,9 +21,9 @@ const picker = createEmojiPicker(store, { frequent: 16 });
 picker.subscribe(() => console.log(picker.getSnapshot().sections));
 picker.setQuery("cat");
 
-const typeahead = createEmojiSuggestions(store, { onChoose: (s) => console.log(typeahead.textFor(s)) });
-input.addEventListener("keydown", (e) => typeahead.keydown(e));
-const stop = typeahead.syncCombobox(input);
+const suggestions = createEmojiSuggestions(store, { onChoose: (s) => console.log(suggestions.textFor(s)) });
+input.addEventListener("keydown", (e) => suggestions.keydown(e));
+const stop = suggestions.syncCombobox(input);
 ```
 
 `data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.customEmojiErrors()` reports a custom emoji loader that failed, and `store.load()` runs it again.
@@ -32,7 +32,7 @@ const stop = typeahead.syncCombobox(input);
 
 | Import | Contents |
 |---|---|
-| `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createSearch`, `lexicalSearch`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
+| `@emoji-components/core` | `createEmojiStore`, `createEmojiPicker`, `createEmojiSuggestions`, `createEmojiSearch`, `lexicalSearch`, `resolveEmoji`, `findShortcodeTrigger`, `isComposingKey`, `localeData`, `twemojiUrl`, unified-code helpers |
 | `/grid` | Grid layout and keyboard moves, for your own virtualizer |
 | `/native` | Whether the system font draws an emoji |
 | `/build` | `buildDataset` from `emojibase-data` (install it alongside), also as the `npx @emoji-components/core build-data <locale>` CLI |

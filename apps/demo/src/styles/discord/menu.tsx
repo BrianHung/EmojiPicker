@@ -2,9 +2,9 @@ import type { UseEmojiSuggestionsReturnValue } from "emoji-components";
 import { cn } from "@/lib/utils";
 import { discord } from "./picker";
 import { useFontStylesheet } from "@/styles/scene-kit";
-import { StyleTypeahead } from "@/styles/variants";
+import { StyleSuggestions } from "@/styles/variants";
 
-export function DiscordEmojiMenu({ className, ...typeahead }: UseEmojiSuggestionsReturnValue & { className?: string }) {
+export function DiscordEmojiMenu({ className, ...suggestions }: UseEmojiSuggestionsReturnValue & { className?: string }) {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap");
-  return <StyleTypeahead appStyle={discord} {...typeahead} className={cn("absolute inset-x-0 bottom-full z-10 mb-2", className)} />;
+  return <StyleSuggestions appStyle={discord} {...suggestions} className={cn("absolute inset-x-0 bottom-full z-10 mb-2", className)} />;
 }

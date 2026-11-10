@@ -287,9 +287,9 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     const attrs = emojiAttrs(store, unified);
     if (attrs) editor.chain().focus().insertEmoji(attrs).run();
   };
-  const typeahead = useTiptapEmojiSuggestions(editor, { ...discordAutocompleteOptions, onSelect: copyEmoji, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
+  const suggestions = useTiptapEmojiSuggestions(editor, { ...discordAutocompleteOptions, onSelect: copyEmoji, content: (_, s) => emojiContent(emojiAttrs(store, s.record.unified)!) });
   const menuOpen = React.useRef(false);
-  menuOpen.current = typeahead.open;
+  menuOpen.current = suggestions.open;
   const submit = React.useRef(() => {});
   submit.current = () => {
     const text = editor.getText().trim();
@@ -314,7 +314,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
   if (compact)
     return (
       <div className="relative mx-3 mb-3 flex shrink-0 items-center gap-2">
-        <DiscordEmojiMenu {...typeahead} />
+        <DiscordEmojiMenu {...suggestions} />
         <span className="flex size-10 shrink-0 items-center justify-center rounded-full" style={{ background: C.composer, color: C.icon }} aria-hidden>
           <Plus />
         </span>
@@ -326,7 +326,7 @@ function Composer({ onSend, compact = false }: { onSend: (text: string) => void;
     );
   return (
     <div className="relative mx-2 mb-4 shrink-0">
-      <DiscordEmojiMenu {...typeahead} />
+      <DiscordEmojiMenu {...suggestions} />
       <div className="flex items-start rounded-[8px]" style={{ background: C.composer }}>
         <span className="flex h-14 w-14 shrink-0 items-center justify-center" style={{ color: C.icon }} aria-hidden>
           <PlusCircle />
