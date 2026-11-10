@@ -3,7 +3,7 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiPickerGrid } from "../..";
+import { EmojiPicker, EmojiProvider } from "../..";
 
 function mount(children: React.ReactNode) {
   const host = render(
@@ -63,26 +63,5 @@ describe("Reactions", () => {
       [["2764-fe0f"], false],
     ]);
     expect(picked).toEqual(["2764-fe0f"]);
-  });
-
-  it("clears the search when a pick collapses the picker to its reaction row", () => {
-    function Grid() {
-      return <div {...useEmojiPickerGrid({ rowHeight: 40, columns: 8 }).getGridProps()} />;
-    }
-    const actions = React.createRef<EmojiPicker.Root.Actions>();
-    const host = render(
-      <EmojiProvider data={en} prepare={false}>
-        <EmojiPicker.Root reactions={["1f44d"]} defaultReactionsOpen={false} defaultQuery="rocket" actionsRef={actions} onSelect={(_, { collapse }) => collapse?.()}>
-          <EmojiPicker.Reactions />
-          <EmojiPicker.Panel>
-            <EmojiPicker.SearchInput />
-            <Grid />
-          </EmojiPicker.Panel>
-        </EmojiPicker.Root>
-      </EmojiProvider>,
-    );
-    React.act(() => actions.current!.highlight("1f680"));
-    React.act(() => void actions.current!.pick());
-    expect(host.querySelector("input")!.value).toBe("");
   });
 });

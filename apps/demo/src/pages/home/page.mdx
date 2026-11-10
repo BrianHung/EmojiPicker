@@ -4,6 +4,7 @@ description: Unstyled, composable emoji components for React.
 ---
 
 import * as api from "@/docs/api";
+import composer from "@/docs/snippets/composer.tsx?raw";
 import localization from "@/docs/snippets/localization.tsx?raw";
 import registry from "@/registry/emoji-picker.tsx?raw";
 
@@ -57,24 +58,7 @@ For shortcode suggestions in a text field, add the suggestions item and pass it 
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-suggestions.json" />
 
-```tsx title="composer.tsx"
-"use client";
-
-import * as React from "react";
-import { useTextFieldEmojiTypeahead } from "emoji-components";
-import { EmojiSuggestions } from "@/components/ui/emoji-suggestions";
-
-export function Composer() {
-  const ref = React.useRef<HTMLTextAreaElement>(null);
-  const typeahead = useTextFieldEmojiTypeahead(ref);
-  return (
-    <>
-      <textarea ref={ref} aria-label="Message" />
-      <EmojiSuggestions {...typeahead} />
-    </>
-  );
-}
-```
+<Code title="composer.tsx" code={composer} />
 
 For the reactions under a message, `emoji-reaction-bar.json` adds a React Aria toolbar around your own buttons: the arrow keys, Home, and End move focus between them.
 

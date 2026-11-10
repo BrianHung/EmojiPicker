@@ -48,6 +48,7 @@ export default defineConfig({
     project("keyboard", "keyboard.spec.ts", { ...desktop, colorScheme: "light" }),
     project("keyboard-mobile", "keyboard.spec.ts", { ...mobile, colorScheme: "light" }),
     project("editors", "editors.spec.ts", { ...desktop, colorScheme: "light" }),
+    project("contracts", "contracts.spec.ts", { ...desktop, colorScheme: "light" }),
     project("layout", "layout.spec.ts", { ...desktop, colorScheme: "light" }),
     { ...project("layout-webkit-mobile", "layout.spec.ts", { ...mobile, deviceScaleFactor: 3, colorScheme: "dark", browserName: "webkit", launchOptions: {} }), grep: /pinned section title/ },
     project("ime", "ime.spec.ts", { ...desktop, colorScheme: "light" }),
