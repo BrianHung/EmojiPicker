@@ -29,25 +29,23 @@ export default function Page() {
   return (
     <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
       <EmojiPicker.Search />
-      <EmojiPicker.Viewport style={{ height: 320 }}>
-        <EmojiPicker.List />
-      </EmojiPicker.Viewport>
+      <EmojiPicker.Viewport style={{ height: 320 }} />
     </EmojiPicker.Root>
   );
 }
 ```
 
+Each part renders a default with no children. Hooks cover custom UI: `useEmojiPickerGrid` for your own virtualizer, `useTextFieldEmojiSuggestions` for a suggestions menu. The package renders no popovers or positioned menus; the shadcn/ui registry has them for shadcn/ui, React Aria, and Floating UI, as files you own.
+
 ## Entry points
 
 | Import | Contents |
 |---|---|
-| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, `EmojiReactionBar`, hooks, suggestions hooks, `emojiPickerInitialFocus` |
-| `/floating-ui`, `/react-aria` | `EmojiPopover` and `EmojiSuggestions` (`Root`, `Portal`, `Positioner`, `Popup`) on either positioning library |
-| `/picker`, `/emoji`, `/provider`, `/reaction-bar` | One component each: `EmojiPicker` with its hooks, `Emoji`, `EmojiProvider` with its hooks, and `EmojiReactionBar` |
-| `/popover/floating-ui`, `/popover/react-aria`, `/suggestions/floating-ui`, `/suggestions/react-aria` | `EmojiPopover` or `EmojiSuggestions` alone |
+| `emoji-components` | `EmojiPicker.*` parts, `EmojiProvider`, `Emoji`, hooks, suggestions hooks, `emojiPickerInitialFocus` |
+| `/picker`, `/emoji`, `/provider` | One component each: `EmojiPicker` with its hooks, `Emoji`, and `EmojiProvider` with its hooks |
 | `/tokens.css`, `/theme.css`, `/shadcn.css` | Design tokens, Tailwind utilities for them, and a mapping to a shadcn/ui theme |
 
-`EmojiPicker`, `EmojiPopover`, and `EmojiSuggestions` are one-level namespaces, as in Base UI, so a Server Component can render any part through them: `EmojiPicker.SearchInput`, `EmojiPopover.Positioner`. Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component.
+`EmojiPicker` is a one-level namespace, as in Base UI, so a Server Component can render any part through it: `EmojiPicker.SearchInput`. Parts that a function child renders, such as `ListCell` inside `List`, go in a Client Component.
 
 Each part's data attributes and CSS variables are also exported as constants, as in Base UI: `EmojiPickerListCellDataAttributes.highlighted` is `"data-highlighted"`.
 
