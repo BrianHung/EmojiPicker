@@ -15,7 +15,7 @@ test("composer: a controlled textarea takes a suggestion, survives Backspace und
   const field = page.getByRole("region", { name: "Composer" }).getByLabel("Message");
   const menu = page.getByRole("listbox", { name: "Emoji suggestions" });
   await field.click();
-  await page.keyboard.type("ok :tadd");
+  await page.keyboard.type("ok :tada");
   await expect(menu).toBeVisible();
   await page.keyboard.press("Backspace");
   await expect(menu.getByRole("option").first()).toContainText(":tada:");
