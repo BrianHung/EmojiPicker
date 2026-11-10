@@ -4,9 +4,9 @@
 
 ## `emoji-components`
 
-Values: `Emoji`, `EmojiCssVariables`, `EmojiDataAttributes`, `EmojiPicker`, `EmojiPickerCategoryNavDataAttributes`, `EmojiPickerCategoryNavTabDataAttributes`, `EmojiPickerListCellDataAttributes`, `EmojiPickerListCssVariables`, `EmojiPickerListDataAttributes`, `EmojiPickerListSectionActionsDataAttributes`, `EmojiPickerListSectionDataAttributes`, `EmojiPickerListSectionTitleDataAttributes`, `EmojiPickerListVariationsDataAttributes`, `EmojiPickerListVariationsOptionDataAttributes`, `EmojiPickerPanelDataAttributes`, `EmojiPickerPreviewDataAttributes`, `EmojiPickerReactionsDataAttributes`, `EmojiPickerReactionsExpandDataAttributes`, `EmojiPickerReactionsItemDataAttributes`, `EmojiPickerRootCssVariables`, `EmojiPickerRootDataAttributes`, `EmojiPickerSearchClearDataAttributes`, `EmojiPickerSearchDataAttributes`, `EmojiPickerSearchInputDataAttributes`, `EmojiPickerSearchInputGroupDataAttributes`, `EmojiPickerSearchStatusDataAttributes`, `EmojiPickerSkinToneCssVariables`, `EmojiPickerSkinToneDataAttributes`, `EmojiPickerSkinToneOptionDataAttributes`, `EmojiPickerSkinToneOptionsDataAttributes`, `EmojiPickerSkinToneTriggerDataAttributes`, `EmojiPickerViewportDataAttributes`, `EmojiProvider`, `EmojiReactionBar`, `EmojiReactionBarDataAttributes`, `emojiPickerInitialFocus`, `findShortcodeTrigger`, `isComposingKey`, `lexicalSearch`, `localeData`, `useCustomEmojiErrors`, `useEmoji`, `useEmojiFrequents`, `useEmojiLabels`, `useEmojiPickerActions`, `useEmojiPickerCategoryNavigation`, `useEmojiPickerCell`, `useEmojiPickerCollapsedCategories`, `useEmojiPickerGrid`, `useEmojiPickerHighlightedEmoji`, `useEmojiPickerSearch`, `useEmojiSearch`, `useEmojiSkinTone`, `useEmojiStatus`, `useEmojiStore`, `useEmojiSuggestions`, `useTextFieldEmojiSuggestions`
+Values: `Emoji`, `EmojiCssVariables`, `EmojiDataAttributes`, `EmojiPicker`, `EmojiPickerCategoryNavDataAttributes`, `EmojiPickerCategoryNavTabDataAttributes`, `EmojiPickerListCellDataAttributes`, `EmojiPickerListCssVariables`, `EmojiPickerListDataAttributes`, `EmojiPickerListSectionActionsDataAttributes`, `EmojiPickerListSectionDataAttributes`, `EmojiPickerListSectionTitleDataAttributes`, `EmojiPickerListVariationsDataAttributes`, `EmojiPickerListVariationsOptionDataAttributes`, `EmojiPickerPanelDataAttributes`, `EmojiPickerPreviewDataAttributes`, `EmojiPickerReactionsDataAttributes`, `EmojiPickerReactionsExpandDataAttributes`, `EmojiPickerReactionsItemDataAttributes`, `EmojiPickerRootCssVariables`, `EmojiPickerRootDataAttributes`, `EmojiPickerSearchClearDataAttributes`, `EmojiPickerSearchDataAttributes`, `EmojiPickerSearchInputDataAttributes`, `EmojiPickerSearchStatusDataAttributes`, `EmojiPickerSkinToneCssVariables`, `EmojiPickerSkinToneDataAttributes`, `EmojiPickerSkinToneOptionDataAttributes`, `EmojiPickerSkinToneOptionsDataAttributes`, `EmojiPickerSkinToneTriggerDataAttributes`, `EmojiPickerViewportDataAttributes`, `EmojiProvider`, `emojiPickerInitialFocus`, `findShortcodeTrigger`, `isComposingKey`, `lexicalSearch`, `localeData`, `useCustomEmojiErrors`, `useEmoji`, `useEmojiFrequents`, `useEmojiLabels`, `useEmojiPickerActions`, `useEmojiPickerCategoryNavigation`, `useEmojiPickerCell`, `useEmojiPickerCollapsedCategories`, `useEmojiPickerGrid`, `useEmojiPickerHighlightedEmoji`, `useEmojiPickerSearch`, `useEmojiSearch`, `useEmojiSkinTone`, `useEmojiStatus`, `useEmojiStore`, `useEmojiSuggestions`, `useTextFieldEmojiSuggestions`
 
-Types: `CategoryOption`, `CustomEmoji`, `Dataset`, `EmojiComponentsEvent`, `EmojiComponentsHandlers`, `EmojiComponentsInteractionState`, `EmojiComponentsPartElementProps`, `EmojiComponentsPartProps`, `EmojiDataInput`, `EmojiImageUrl`, `EmojiInput`, `EmojiItem`, `EmojiLabels`, `EmojiPickerCategoryNavIconProps`, `EmojiPickerCategoryNavProps`, `EmojiPickerCategoryNavState`, `EmojiPickerCategoryNavTabProps`, `EmojiPickerCategoryNavTabState`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `EmojiPickerGridState`, `EmojiPickerListCellProps`, `EmojiPickerListCellState`, `EmojiPickerListEmptyState`, `EmojiPickerListItemsProps`, `EmojiPickerListProps`, `EmojiPickerListSectionActionsProps`, `EmojiPickerListSectionActionsState`, `EmojiPickerListSectionProps`, `EmojiPickerListSectionState`, `EmojiPickerListSectionTitleProps`, `EmojiPickerListSectionTitleState`, `EmojiPickerListState`, `EmojiPickerListVariationsOptionProps`, `EmojiPickerListVariationsOptionState`, `EmojiPickerListVariationsProps`, `EmojiPickerListVariationsState`, `EmojiPickerNavCategory`, `EmojiPickerOrientation`, `EmojiPickerPanelProps`, `EmojiPickerPanelState`, `EmojiPickerPreviewProps`, `EmojiPickerPreviewState`, `EmojiPickerReactionsChangeEventDetails`, `EmojiPickerReactionsChangeEventReason`, `EmojiPickerReactionsExpandProps`, `EmojiPickerReactionsExpandState`, `EmojiPickerReactionsItemProps`, `EmojiPickerReactionsItemState`, `EmojiPickerReactionsItemsProps`, `EmojiPickerReactionsProps`, `EmojiPickerReactionsState`, `EmojiPickerRootActions`, `EmojiPickerRootProps`, `EmojiPickerRootState`, `EmojiPickerSearchClearProps`, `EmojiPickerSearchClearState`, `EmojiPickerSearchInputGroupProps`, `EmojiPickerSearchInputGroupState`, `EmojiPickerSearchInputProps`, `EmojiPickerSearchInputState`, `EmojiPickerSearchProps`, `EmojiPickerSearchState`, `EmojiPickerSearchStatusProps`, `EmojiPickerSearchStatusState`, `EmojiPickerSearchSummary`, `EmojiPickerSkinToneGlyphProps`, `EmojiPickerSkinToneOpenChangeEventDetails`, `EmojiPickerSkinToneOpenChangeEventReason`, `EmojiPickerSkinToneOptionProps`, `EmojiPickerSkinToneOptionState`, `EmojiPickerSkinToneOptionsProps`, `EmojiPickerSkinToneOptionsState`, `EmojiPickerSkinToneProps`, `EmojiPickerSkinToneState`, `EmojiPickerSkinToneTriggerProps`, `EmojiPickerSkinToneTriggerState`, `EmojiPickerViewportProps`, `EmojiPickerViewportState`, `EmojiProps`, `EmojiProviderProps`, `EmojiReactionBarProps`, `EmojiReactionBarState`, `EmojiRecord`, `EmojiSearch`, `EmojiSearchState`, `EmojiSection`, `EmojiSelection`, `EmojiStore`, `EmojiStoreStatus`, `EmojiSuggestionsStore`, `EmojiTrigger`, `Frequents`, `KeyLike`, `Renderer`, `ResolvedEmoji`, `SearchResultsMode`, `ShortcodeCompletion`, `SkinToneValue`, `UseEmojiFrequentsReturnValue`, `UseEmojiPickerCellReturnValue`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`, `UseEmojiSuggestionsOptions`, `UseEmojiSuggestionsReturnValue`
+Types: `CategoryOption`, `CustomEmoji`, `Dataset`, `EmojiComponentsEvent`, `EmojiComponentsHandlers`, `EmojiComponentsInteractionState`, `EmojiComponentsPartElementProps`, `EmojiComponentsPartProps`, `EmojiDataInput`, `EmojiImageUrl`, `EmojiInput`, `EmojiItem`, `EmojiLabels`, `EmojiPickerCategoryNavIconProps`, `EmojiPickerCategoryNavProps`, `EmojiPickerCategoryNavState`, `EmojiPickerCategoryNavTabProps`, `EmojiPickerCategoryNavTabState`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `EmojiPickerGridState`, `EmojiPickerListCellProps`, `EmojiPickerListCellState`, `EmojiPickerListEmptyState`, `EmojiPickerListItemsProps`, `EmojiPickerListProps`, `EmojiPickerListSectionActionsProps`, `EmojiPickerListSectionActionsState`, `EmojiPickerListSectionProps`, `EmojiPickerListSectionState`, `EmojiPickerListSectionTitleProps`, `EmojiPickerListSectionTitleState`, `EmojiPickerListState`, `EmojiPickerListVariationsOptionProps`, `EmojiPickerListVariationsOptionState`, `EmojiPickerListVariationsProps`, `EmojiPickerListVariationsState`, `EmojiPickerNavCategory`, `EmojiPickerOrientation`, `EmojiPickerPanelProps`, `EmojiPickerPanelState`, `EmojiPickerPreviewProps`, `EmojiPickerPreviewState`, `EmojiPickerReactionsChangeEventDetails`, `EmojiPickerReactionsChangeEventReason`, `EmojiPickerReactionsExpandProps`, `EmojiPickerReactionsExpandState`, `EmojiPickerReactionsItemProps`, `EmojiPickerReactionsItemState`, `EmojiPickerReactionsItemsProps`, `EmojiPickerReactionsProps`, `EmojiPickerReactionsState`, `EmojiPickerRootActions`, `EmojiPickerRootProps`, `EmojiPickerRootState`, `EmojiPickerSearchClearProps`, `EmojiPickerSearchClearState`, `EmojiPickerSearchInputProps`, `EmojiPickerSearchInputState`, `EmojiPickerSearchProps`, `EmojiPickerSearchState`, `EmojiPickerSearchStatusProps`, `EmojiPickerSearchStatusState`, `EmojiPickerSearchSummary`, `EmojiPickerSkinToneGlyphProps`, `EmojiPickerSkinToneOpenChangeEventDetails`, `EmojiPickerSkinToneOpenChangeEventReason`, `EmojiPickerSkinToneOptionProps`, `EmojiPickerSkinToneOptionState`, `EmojiPickerSkinToneOptionsProps`, `EmojiPickerSkinToneOptionsState`, `EmojiPickerSkinToneProps`, `EmojiPickerSkinToneState`, `EmojiPickerSkinToneTriggerProps`, `EmojiPickerSkinToneTriggerState`, `EmojiPickerViewportProps`, `EmojiPickerViewportState`, `EmojiProps`, `EmojiProviderProps`, `EmojiRecord`, `EmojiSearch`, `EmojiSearchState`, `EmojiSection`, `EmojiSelection`, `EmojiStore`, `EmojiStoreStatus`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsStore`, `EmojiTrigger`, `Frequents`, `KeyLike`, `Renderer`, `ResolvedEmoji`, `SearchResultsMode`, `ShortcodeCompletion`, `SkinToneValue`, `UseEmojiFrequentsReturnValue`, `UseEmojiPickerCellReturnValue`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`, `UseEmojiSuggestionsOptions`, `UseEmojiSuggestionsReturnValue`
 
 | Props | Own props |
 |---|---|
@@ -20,47 +20,14 @@ Types: `CategoryOption`, `CustomEmoji`, `Dataset`, `EmojiComponentsEvent`, `Emoj
 | `EmojiPickerSkinToneGlyphProps` | `animate`, `emoji`, `renderer`, `size` |
 | `EmojiPickerSkinToneOptionProps` | `tone` |
 | `EmojiPickerSkinToneProps` | `defaultOpen`, `onOpenChange`, `open`, `orientation` |
-| `EmojiReactionBarProps` | `orientation` |
 | `EmojiProps` | `animate`, `emoji`, `renderer`, `size` |
 | `EmojiProviderProps` | `customEmojis`, `data`, `defaultFrequents`, `defaultSkinTone`, `filter`, `frequents`, `imageUrl`, `imageVersion`, `labels`, `locale`, `onFrequentsChange`, `onSkinToneChange`, `prepare`, `renderer`, `search`, `skinTone` |
 
-## `emoji-components/floating-ui`
-
-Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`, `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
-
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsContainer`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`, `EmojiSuggestionsSide`
-
-| Props | Own props |
-|---|---|
-| `EmojiPopoverPopupProps` | `finalFocus`, `initialFocus` |
-| `EmojiPopoverPortalProps` | `container` |
-| `EmojiPopoverPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiPopoverRootProps` | `actionsRef`, `defaultOpen`, `modal`, `onOpenChange`, `onOpenChangeComplete`, `open` |
-| `EmojiSuggestionsPortalProps` | `container` |
-| `EmojiSuggestionsPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiSuggestionsRootProps` | `onOpenChange`, `onOpenChangeComplete`, `open` |
-
-## `emoji-components/react-aria`
-
-Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`, `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
-
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`, `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsContainer`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`, `EmojiSuggestionsSide`
-
-| Props | Own props |
-|---|---|
-| `EmojiPopoverPopupProps` | `finalFocus`, `initialFocus` |
-| `EmojiPopoverPortalProps` | `container` |
-| `EmojiPopoverPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiPopoverRootProps` | `actionsRef`, `defaultOpen`, `modal`, `onOpenChange`, `onOpenChangeComplete`, `open` |
-| `EmojiSuggestionsPortalProps` | `container` |
-| `EmojiSuggestionsPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiSuggestionsRootProps` | `onOpenChange`, `onOpenChangeComplete`, `open` |
-
 ## `emoji-components/picker`
 
-Values: `EmojiPicker`, `EmojiPickerCategoryNavDataAttributes`, `EmojiPickerCategoryNavTabDataAttributes`, `EmojiPickerListCellDataAttributes`, `EmojiPickerListCssVariables`, `EmojiPickerListDataAttributes`, `EmojiPickerListSectionActionsDataAttributes`, `EmojiPickerListSectionDataAttributes`, `EmojiPickerListSectionTitleDataAttributes`, `EmojiPickerListVariationsDataAttributes`, `EmojiPickerListVariationsOptionDataAttributes`, `EmojiPickerPanelDataAttributes`, `EmojiPickerPreviewDataAttributes`, `EmojiPickerReactionsDataAttributes`, `EmojiPickerReactionsExpandDataAttributes`, `EmojiPickerReactionsItemDataAttributes`, `EmojiPickerRootCssVariables`, `EmojiPickerRootDataAttributes`, `EmojiPickerSearchClearDataAttributes`, `EmojiPickerSearchDataAttributes`, `EmojiPickerSearchInputDataAttributes`, `EmojiPickerSearchInputGroupDataAttributes`, `EmojiPickerSearchStatusDataAttributes`, `EmojiPickerSkinToneCssVariables`, `EmojiPickerSkinToneDataAttributes`, `EmojiPickerSkinToneOptionDataAttributes`, `EmojiPickerSkinToneOptionsDataAttributes`, `EmojiPickerSkinToneTriggerDataAttributes`, `EmojiPickerViewportDataAttributes`, `emojiPickerInitialFocus`, `useEmojiPickerActions`, `useEmojiPickerCategoryNavigation`, `useEmojiPickerCell`, `useEmojiPickerCollapsedCategories`, `useEmojiPickerGrid`, `useEmojiPickerHighlightedEmoji`, `useEmojiPickerSearch`
+Values: `EmojiPicker`, `EmojiPickerCategoryNavDataAttributes`, `EmojiPickerCategoryNavTabDataAttributes`, `EmojiPickerListCellDataAttributes`, `EmojiPickerListCssVariables`, `EmojiPickerListDataAttributes`, `EmojiPickerListSectionActionsDataAttributes`, `EmojiPickerListSectionDataAttributes`, `EmojiPickerListSectionTitleDataAttributes`, `EmojiPickerListVariationsDataAttributes`, `EmojiPickerListVariationsOptionDataAttributes`, `EmojiPickerPanelDataAttributes`, `EmojiPickerPreviewDataAttributes`, `EmojiPickerReactionsDataAttributes`, `EmojiPickerReactionsExpandDataAttributes`, `EmojiPickerReactionsItemDataAttributes`, `EmojiPickerRootCssVariables`, `EmojiPickerRootDataAttributes`, `EmojiPickerSearchClearDataAttributes`, `EmojiPickerSearchDataAttributes`, `EmojiPickerSearchInputDataAttributes`, `EmojiPickerSearchStatusDataAttributes`, `EmojiPickerSkinToneCssVariables`, `EmojiPickerSkinToneDataAttributes`, `EmojiPickerSkinToneOptionDataAttributes`, `EmojiPickerSkinToneOptionsDataAttributes`, `EmojiPickerSkinToneTriggerDataAttributes`, `EmojiPickerViewportDataAttributes`, `emojiPickerInitialFocus`, `useEmojiPickerActions`, `useEmojiPickerCategoryNavigation`, `useEmojiPickerCell`, `useEmojiPickerCollapsedCategories`, `useEmojiPickerGrid`, `useEmojiPickerHighlightedEmoji`, `useEmojiPickerSearch`
 
-Types: `CategoryOption`, `EmojiComponentsEvent`, `EmojiComponentsHandlers`, `EmojiComponentsInteractionState`, `EmojiComponentsPartElementProps`, `EmojiComponentsPartProps`, `EmojiPickerCategoryNavIconProps`, `EmojiPickerCategoryNavProps`, `EmojiPickerCategoryNavState`, `EmojiPickerCategoryNavTabProps`, `EmojiPickerCategoryNavTabState`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `EmojiPickerGridState`, `EmojiPickerListCellProps`, `EmojiPickerListCellState`, `EmojiPickerListEmptyState`, `EmojiPickerListItemsProps`, `EmojiPickerListProps`, `EmojiPickerListSectionActionsProps`, `EmojiPickerListSectionActionsState`, `EmojiPickerListSectionProps`, `EmojiPickerListSectionState`, `EmojiPickerListSectionTitleProps`, `EmojiPickerListSectionTitleState`, `EmojiPickerListState`, `EmojiPickerListVariationsOptionProps`, `EmojiPickerListVariationsOptionState`, `EmojiPickerListVariationsProps`, `EmojiPickerListVariationsState`, `EmojiPickerNavCategory`, `EmojiPickerOrientation`, `EmojiPickerPanelProps`, `EmojiPickerPanelState`, `EmojiPickerPreviewProps`, `EmojiPickerPreviewState`, `EmojiPickerReactionsChangeEventDetails`, `EmojiPickerReactionsChangeEventReason`, `EmojiPickerReactionsExpandProps`, `EmojiPickerReactionsExpandState`, `EmojiPickerReactionsItemProps`, `EmojiPickerReactionsItemState`, `EmojiPickerReactionsItemsProps`, `EmojiPickerReactionsProps`, `EmojiPickerReactionsState`, `EmojiPickerRootActions`, `EmojiPickerRootProps`, `EmojiPickerRootState`, `EmojiPickerSearchClearProps`, `EmojiPickerSearchClearState`, `EmojiPickerSearchInputGroupProps`, `EmojiPickerSearchInputGroupState`, `EmojiPickerSearchInputProps`, `EmojiPickerSearchInputState`, `EmojiPickerSearchProps`, `EmojiPickerSearchState`, `EmojiPickerSearchStatusProps`, `EmojiPickerSearchStatusState`, `EmojiPickerSearchSummary`, `EmojiPickerSkinToneGlyphProps`, `EmojiPickerSkinToneOpenChangeEventDetails`, `EmojiPickerSkinToneOpenChangeEventReason`, `EmojiPickerSkinToneOptionProps`, `EmojiPickerSkinToneOptionState`, `EmojiPickerSkinToneOptionsProps`, `EmojiPickerSkinToneOptionsState`, `EmojiPickerSkinToneProps`, `EmojiPickerSkinToneState`, `EmojiPickerSkinToneTriggerProps`, `EmojiPickerSkinToneTriggerState`, `EmojiPickerViewportProps`, `EmojiPickerViewportState`, `UseEmojiPickerCellReturnValue`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`
+Types: `CategoryOption`, `EmojiComponentsEvent`, `EmojiComponentsHandlers`, `EmojiComponentsInteractionState`, `EmojiComponentsPartElementProps`, `EmojiComponentsPartProps`, `EmojiPickerCategoryNavIconProps`, `EmojiPickerCategoryNavProps`, `EmojiPickerCategoryNavState`, `EmojiPickerCategoryNavTabProps`, `EmojiPickerCategoryNavTabState`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `EmojiPickerGridState`, `EmojiPickerListCellProps`, `EmojiPickerListCellState`, `EmojiPickerListEmptyState`, `EmojiPickerListItemsProps`, `EmojiPickerListProps`, `EmojiPickerListSectionActionsProps`, `EmojiPickerListSectionActionsState`, `EmojiPickerListSectionProps`, `EmojiPickerListSectionState`, `EmojiPickerListSectionTitleProps`, `EmojiPickerListSectionTitleState`, `EmojiPickerListState`, `EmojiPickerListVariationsOptionProps`, `EmojiPickerListVariationsOptionState`, `EmojiPickerListVariationsProps`, `EmojiPickerListVariationsState`, `EmojiPickerNavCategory`, `EmojiPickerOrientation`, `EmojiPickerPanelProps`, `EmojiPickerPanelState`, `EmojiPickerPreviewProps`, `EmojiPickerPreviewState`, `EmojiPickerReactionsChangeEventDetails`, `EmojiPickerReactionsChangeEventReason`, `EmojiPickerReactionsExpandProps`, `EmojiPickerReactionsExpandState`, `EmojiPickerReactionsItemProps`, `EmojiPickerReactionsItemState`, `EmojiPickerReactionsItemsProps`, `EmojiPickerReactionsProps`, `EmojiPickerReactionsState`, `EmojiPickerRootActions`, `EmojiPickerRootProps`, `EmojiPickerRootState`, `EmojiPickerSearchClearProps`, `EmojiPickerSearchClearState`, `EmojiPickerSearchInputProps`, `EmojiPickerSearchInputState`, `EmojiPickerSearchProps`, `EmojiPickerSearchState`, `EmojiPickerSearchStatusProps`, `EmojiPickerSearchStatusState`, `EmojiPickerSearchSummary`, `EmojiPickerSkinToneGlyphProps`, `EmojiPickerSkinToneOpenChangeEventDetails`, `EmojiPickerSkinToneOpenChangeEventReason`, `EmojiPickerSkinToneOptionProps`, `EmojiPickerSkinToneOptionState`, `EmojiPickerSkinToneOptionsProps`, `EmojiPickerSkinToneOptionsState`, `EmojiPickerSkinToneProps`, `EmojiPickerSkinToneState`, `EmojiPickerSkinToneTriggerProps`, `EmojiPickerSkinToneTriggerState`, `EmojiPickerViewportProps`, `EmojiPickerViewportState`, `UseEmojiPickerCellReturnValue`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`
 
 | Props | Own props |
 |---|---|
@@ -95,66 +62,6 @@ Types: `EmojiImageUrl`, `EmojiProviderProps`, `UseEmojiFrequentsReturnValue`
 |---|---|
 | `EmojiProviderProps` | `customEmojis`, `data`, `defaultFrequents`, `defaultSkinTone`, `filter`, `frequents`, `imageUrl`, `imageVersion`, `labels`, `locale`, `onFrequentsChange`, `onSkinToneChange`, `prepare`, `renderer`, `search`, `skinTone` |
 
-## `emoji-components/reaction-bar`
-
-Values: `EmojiReactionBar`, `EmojiReactionBarDataAttributes`
-
-Types: `EmojiReactionBarProps`, `EmojiReactionBarState`
-
-| Props | Own props |
-|---|---|
-| `EmojiReactionBarProps` | `orientation` |
-
-## `emoji-components/popover/floating-ui`
-
-Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`
-
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`
-
-| Props | Own props |
-|---|---|
-| `EmojiPopoverPopupProps` | `finalFocus`, `initialFocus` |
-| `EmojiPopoverPortalProps` | `container` |
-| `EmojiPopoverPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiPopoverRootProps` | `actionsRef`, `defaultOpen`, `modal`, `onOpenChange`, `onOpenChangeComplete`, `open` |
-
-## `emoji-components/popover/react-aria`
-
-Values: `EmojiPopover`, `EmojiPopoverPopupDataAttributes`, `EmojiPopoverPositionerCssVariables`, `EmojiPopoverPositionerDataAttributes`, `EmojiPopoverTriggerDataAttributes`
-
-Types: `EmojiPopoverAlign`, `EmojiPopoverAnchor`, `EmojiPopoverContainer`, `EmojiPopoverFinalFocus`, `EmojiPopoverInitialFocus`, `EmojiPopoverInteractionType`, `EmojiPopoverPopupProps`, `EmojiPopoverPopupState`, `EmojiPopoverPortalProps`, `EmojiPopoverPositionerProps`, `EmojiPopoverPositionerState`, `EmojiPopoverRootActions`, `EmojiPopoverRootChangeEventDetails`, `EmojiPopoverRootChangeEventReason`, `EmojiPopoverRootProps`, `EmojiPopoverSide`, `EmojiPopoverTriggerProps`, `EmojiPopoverTriggerState`
-
-| Props | Own props |
-|---|---|
-| `EmojiPopoverPopupProps` | `finalFocus`, `initialFocus` |
-| `EmojiPopoverPortalProps` | `container` |
-| `EmojiPopoverPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiPopoverRootProps` | `actionsRef`, `defaultOpen`, `modal`, `onOpenChange`, `onOpenChangeComplete`, `open` |
-
-## `emoji-components/suggestions/floating-ui`
-
-Values: `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
-
-Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsContainer`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`, `EmojiSuggestionsSide`
-
-| Props | Own props |
-|---|---|
-| `EmojiSuggestionsPortalProps` | `container` |
-| `EmojiSuggestionsPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiSuggestionsRootProps` | `onOpenChange`, `onOpenChangeComplete`, `open` |
-
-## `emoji-components/suggestions/react-aria`
-
-Values: `EmojiSuggestions`, `EmojiSuggestionsPopupDataAttributes`, `EmojiSuggestionsPositionerCssVariables`, `EmojiSuggestionsPositionerDataAttributes`
-
-Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsContainer`, `EmojiSuggestionsPopupProps`, `EmojiSuggestionsPopupState`, `EmojiSuggestionsPortalProps`, `EmojiSuggestionsPositionerProps`, `EmojiSuggestionsPositionerState`, `EmojiSuggestionsRootChangeEventDetails`, `EmojiSuggestionsRootChangeEventReason`, `EmojiSuggestionsRootProps`, `EmojiSuggestionsSide`
-
-| Props | Own props |
-|---|---|
-| `EmojiSuggestionsPortalProps` | `container` |
-| `EmojiSuggestionsPositionerProps` | `align`, `alignOffset`, `anchor`, `collisionPadding`, `side`, `sideOffset` |
-| `EmojiSuggestionsRootProps` | `onOpenChange`, `onOpenChangeComplete`, `open` |
-
 ## data-slot
 
 | Attributes | data-slot |
@@ -177,7 +84,6 @@ Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsConta
 | `EmojiPickerSearchClearDataAttributes` | `emoji-picker-search-clear` |
 | `EmojiPickerSearchDataAttributes` | `emoji-picker-search` |
 | `EmojiPickerSearchInputDataAttributes` | `emoji-picker-search-input` |
-| `EmojiPickerSearchInputGroupDataAttributes` | `emoji-picker-search-input-group` |
 | `EmojiPickerSearchStatusDataAttributes` | `emoji-picker-search-status` |
 | `EmojiPickerSkinToneDataAttributes` | `emoji-picker-skin-tone` |
 | `EmojiPickerSkinToneOptionDataAttributes` | `emoji-picker-skin-tone-option` |
@@ -185,12 +91,6 @@ Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsConta
 | `EmojiPickerSkinToneTriggerDataAttributes` | `emoji-picker-skin-tone-trigger` |
 | `EmojiPickerViewportDataAttributes` | `emoji-picker-viewport` |
 | `EmojiDataAttributes` | `emoji` |
-| `EmojiReactionBarDataAttributes` | `emoji-reaction-bar` |
-| `EmojiPopoverPopupDataAttributes` | `emoji-popover-popup` |
-| `EmojiPopoverPositionerDataAttributes` | `emoji-popover-positioner` |
-| `EmojiPopoverTriggerDataAttributes` | `emoji-popover-trigger` |
-| `EmojiSuggestionsPopupDataAttributes` | `emoji-suggestions-popup` |
-| `EmojiSuggestionsPositionerDataAttributes` | `emoji-suggestions-positioner` |
 
 ## Data attributes
 
@@ -215,19 +115,12 @@ Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsConta
 | `EmojiPickerSearchClearDataAttributes` | `data-focus-visible`, `data-hovered`, `data-pressed`, `data-slot` |
 | `EmojiPickerSearchDataAttributes` | `data-empty`, `data-slot` |
 | `EmojiPickerSearchInputDataAttributes` | `data-focus-visible`, `data-focused`, `data-hovered`, `data-slot` |
-| `EmojiPickerSearchInputGroupDataAttributes` | `data-empty`, `data-slot` |
 | `EmojiPickerSearchStatusDataAttributes` | `data-slot` |
 | `EmojiPickerSkinToneDataAttributes` | `data-closed`, `data-open`, `data-slot` |
 | `EmojiPickerSkinToneOptionDataAttributes` | `data-focus-visible`, `data-hovered`, `data-pressed`, `data-selected`, `data-slot` |
 | `EmojiPickerSkinToneOptionsDataAttributes` | `data-orientation`, `data-slot` |
 | `EmojiPickerSkinToneTriggerDataAttributes` | `data-focus-visible`, `data-hovered`, `data-popup-open`, `data-pressed`, `data-slot` |
 | `EmojiPickerViewportDataAttributes` | `data-orientation`, `data-searching`, `data-slot` |
-| `EmojiPopoverPopupDataAttributes` | `data-align`, `data-closed`, `data-ending-style`, `data-open`, `data-side`, `data-slot`, `data-starting-style` |
-| `EmojiPopoverPositionerDataAttributes` | `data-align`, `data-closed`, `data-open`, `data-side`, `data-slot` |
-| `EmojiPopoverTriggerDataAttributes` | `data-disabled`, `data-focus-visible`, `data-hovered`, `data-popup-open`, `data-pressed`, `data-slot` |
-| `EmojiReactionBarDataAttributes` | `data-orientation`, `data-slot` |
-| `EmojiSuggestionsPopupDataAttributes` | `data-align`, `data-closed`, `data-ending-style`, `data-open`, `data-side`, `data-slot`, `data-starting-style` |
-| `EmojiSuggestionsPositionerDataAttributes` | `data-align`, `data-closed`, `data-open`, `data-side`, `data-slot` |
 
 ## CSS variables
 
@@ -237,8 +130,6 @@ Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsConta
 | `EmojiPickerListCssVariables` | `--emoji-picker-content-width`, `--emoji-picker-header-height`, `--emoji-picker-list-padding`, `--emoji-picker-list-padding-end`, `--emoji-picker-section-gap`, `--emoji-picker-section-min-width` |
 | `EmojiPickerRootCssVariables` | `--emoji-picker-cell-height`, `--emoji-picker-cell-size`, `--emoji-picker-cell-width`, `--emoji-picker-emoji-image-size`, `--emoji-picker-emoji-size` |
 | `EmojiPickerSkinToneCssVariables` | `--emoji-picker-skin-tone-size` |
-| `EmojiPopoverPositionerCssVariables` | `--anchor-height`, `--anchor-width`, `--available-height`, `--available-width`, `--transform-origin` |
-| `EmojiSuggestionsPositionerCssVariables` | `--anchor-height`, `--anchor-width`, `--available-height`, `--available-width`, `--transform-origin` |
 
 ## Stylesheets
 
@@ -255,7 +146,8 @@ Types: `EmojiSuggestionsAlign`, `EmojiSuggestionsAnchor`, `EmojiSuggestionsConta
 | `emoji-picker` | `components/ui/emoji-picker.tsx` | `EmojiPicker`, `EmojiPickerCell`, `EmojiPickerContent`, `EmojiPickerEmpty`, `EmojiPickerFooter`, `EmojiPickerPanel`, `EmojiPickerReactions`, `EmojiPickerSearch`, `EmojiPickerSkinTone` |
 | `emoji-picker-popover` | `components/ui/emoji-picker-popover.tsx` | `EmojiPickerPopover`, `EmojiPickerPopoverProps` |
 | `emoji-picker-popover-react-aria` | `components/ui/emoji-picker-popover.tsx` | `EmojiPickerPopover`, `EmojiPickerPopoverProps` |
-| `emoji-reaction-bar` | `components/ui/emoji-reaction-bar.tsx` | `EmojiReactionBar` |
+| `emoji-picker-popover-floating-ui` | `components/ui/emoji-picker-popover.tsx` | `EmojiPickerPopover`, `EmojiPickerPopoverProps` |
+| `emoji-reaction-bar` | `components/ui/emoji-reaction-bar.tsx` | `EmojiReactionBar`, `EmojiReactionBarProps` |
 | `emoji-prosemirror` | `lib/emoji-prosemirror.ts` | `ProseMirrorEmojiSuggestionsOptions`, `emojiSuggestions`, `ProseMirrorEmojiSuggestions` |
 | `emoji-suggestions` | `components/ui/emoji-suggestions.tsx` | `EmojiSuggestions`, `EmojiSuggestionsProps` |
 | `emoji-tiptap` | `hooks/use-emoji-tiptap.ts` | `TiptapEmojiSuggestionsOptions`, `useTiptapEmojiSuggestions` |

@@ -102,7 +102,7 @@ for (const entry of entries) {
 }
 
 // Ownership: a flat name belongs to the component folder that defines it
-const sourceProgram = ts.createProgram([join(root, "packages/react/src/index.ts"), join(root, "packages/react/src/floating-ui.ts"), join(root, "packages/react/src/react-aria.ts")], {
+const sourceProgram = ts.createProgram([join(root, "packages/react/src/index.ts")], {
   strict: true,
   jsx: ts.JsxEmit.ReactJSX,
   module: ts.ModuleKind.ESNext,
@@ -113,7 +113,7 @@ const sourceProgram = ts.createProgram([join(root, "packages/react/src/index.ts"
 });
 const sourceChecker = sourceProgram.getTypeChecker();
 const owners = new Map();
-for (const file of ["index.ts", "floating-ui.ts", "react-aria.ts"]) {
+for (const file of ["index.ts"]) {
   const module = sourceChecker.getSymbolAtLocation(sourceProgram.getSourceFile(join(root, "packages/react/src", file)));
   for (const s of sourceChecker.getExportsOfModule(module)) {
     const decl = (s.flags & ts.SymbolFlags.Alias ? sourceChecker.getAliasedSymbol(s) : s).declarations?.[0];
@@ -124,10 +124,7 @@ for (const file of ["index.ts", "floating-ui.ts", "react-aria.ts"]) {
 // Owner prefix per source folder. Library-wide code (internals) is EmojiComponents; provider and suggestions hook names only need to say Emoji.
 const OWNERS = [
   [/^packages\/react\/src\/picker\//, "EmojiPicker"],
-  [/^packages\/react\/src\/popover\//, "EmojiPopover"],
-  [/^packages\/react\/src\/suggestions\//, "EmojiSuggestions"],
   [/^packages\/react\/src\/internals\//, "EmojiComponents"],
-  [/^packages\/react\/src\/reaction-bar\//, "EmojiReactionBar"],
   [/^packages\/react\/src\/emoji\//, "Emoji"],
 ];
 const LIBRARY = /^packages\/react\/src\/(provider|use-emoji-suggestions)\//;
