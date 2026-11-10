@@ -11,6 +11,9 @@ const REMOTE_IMAGE = readFileSync(`${DIR}fixtures/remote-image.png`);
 export { expect, SLOTS };
 
 export const slot = (name: keyof typeof SLOTS) => `[data-slot="${SLOTS[name]}"]`;
+// A popover's popup, from any of the recipes or the gallery's Base UI popover
+export const POPUP = '[role="dialog"]';
+export const SUGGESTIONS = '[data-slot="emoji-suggestions"]';
 // A picker emoji: a list cell or a reaction
 export const emojiItem = `:is(${slot("listCell")}, ${slot("reactionsItem")})`;
 

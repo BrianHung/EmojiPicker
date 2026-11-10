@@ -49,12 +49,12 @@ createRoot(document.getElementById("root")!).render(
     <EmojiProvider data={en}>
       <EmojiPicker.Root defaultCollapsedCategories={["flags"]} className="flex h-[420px] flex-col gap-2 rounded-xl border border-border bg-popover p-2 text-popover-foreground [--emoji-picker-emoji-size:24px]">
         <div className="flex items-center gap-2">
-          <EmojiPicker.Search className="flex-1">
-            <EmojiPicker.SearchInputGroup>
+          <div className="flex-1">
+            <EmojiPicker.Search>
               <EmojiPicker.SearchInput className="h-8 w-full rounded-md border border-input bg-transparent px-2 text-sm outline-none" />
               <EmojiPicker.SearchClear />
-            </EmojiPicker.SearchInputGroup>
-          </EmojiPicker.Search>
+            </EmojiPicker.Search>
+          </div>
           <SkinToneMenu />
         </div>
         <CategoryTabs />

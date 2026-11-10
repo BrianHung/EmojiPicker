@@ -54,22 +54,36 @@ test("reaction row: a pick from a search collapses the row, and expanding again 
   await expect(search).toHaveValue("");
 });
 
-test("popover: Escape closes it and returns focus to the trigger, and the closing popup can't take focus", async ({ page }) => {
-  const trigger = page.getByRole("region", { name: "Popover" }).getByRole("button", { name: "Open emoji picker" });
-  await trigger.click();
-  const input = page.locator(`${slot("popoverPopup")} ${slot("searchInput")}`);
-  await expect(input).toBeFocused();
-  // Escape, then focus in the first frame of the exit animation
-  const focused = await input.evaluate(async (el) => {
-    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
-    for (let i = 0; i < 30 && !el.closest("[data-ending-style]"); i++) await new Promise(requestAnimationFrame);
-    el.focus();
-    return [el.closest("[data-ending-style]") !== null, document.activeElement === el];
+for (const name of ["Base UI", "React Aria", "Floating UI"])
+  test(`${name} popover item: focus starts in the search field, the first Escape clears the query and the next closes, a pick closes, and focus returns to the trigger`, async ({ page }) => {
+    const trigger = page.getByRole("region", { name: `${name} popover` }).getByRole("button", { name: "Open emoji picker" });
+    const popup = page.getByRole("dialog");
+    const search = popup.getByRole("searchbox");
+    await trigger.click();
+    await expect(search).toBeFocused();
+    await page.keyboard.type("rocket");
+    await page.keyboard.press("Escape");
+    await expect(search).toHaveValue("");
+    await expect(search).toBeFocused();
+    // Once focus leaves the closing popup, it can't come back while the popup animates out
+    const field = (await search.elementHandle())!;
+    await page.keyboard.press("Escape");
+    const refocused = await field.evaluate(async (el) => {
+      for (let i = 0; i < 30 && document.activeElement === el; i++) await new Promise(requestAnimationFrame);
+      el.focus();
+      return document.activeElement === el;
+    });
+    expect(refocused).toBe(false);
+    await expect(trigger).toBeFocused();
+    await expect(popup).toHaveCount(0);
+    await trigger.press("Enter");
+    await expect(search).toBeFocused();
+    await page.keyboard.type("rocket");
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#picked")).toHaveText("🚀");
+    await expect(popup).toHaveCount(0);
+    await expect(trigger).toBeFocused();
   });
-  expect(focused).toEqual([true, false]);
-  await expect(trigger).toBeFocused();
-  await expect(page.locator(slot("popoverPopup"))).toHaveCount(0);
-});
 
 test("search failure: the empty state offers a retry, the live region gives no count, and the retry recovers", async ({ page }) => {
   const root = page.getByRole("region", { name: "Search" });

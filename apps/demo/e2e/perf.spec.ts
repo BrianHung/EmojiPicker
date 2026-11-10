@@ -1,6 +1,6 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import { firstPicker, homePopover, preview } from "./surfaces";
-import { expect, frames, quiet, emojiItem, slot, test, visit } from "./support";
+import { expect, frames, quiet, emojiItem, POPUP, slot, test, visit } from "./support";
 
 const BUDGET = { heapMB: 6, commits: 3, renders: 7, autocomplete: 7 };
 const STEPS = 20;
@@ -131,10 +131,7 @@ test("home: popover picker heap on open", async ({ page }) => {
   await trigger.scrollIntoViewIfNeeded();
   const delta = await openDelta(page, async () => {
     await trigger.click();
-    await page
-      .locator(`${slot("popoverPopup")} ${emojiItem}`)
-      .first()
-      .waitFor();
+    await page.locator(`${POPUP} ${emojiItem}`).first().waitFor();
   });
   record("home-popover-heapMB", +delta.toFixed(2));
   expect(delta).toBeLessThanOrEqual(BUDGET.heapMB);
