@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Emoji, EmojiPicker, type EmojiItem, type EmojiPickerListEmptyState, type EmojiSelection } from "emoji-components";
+import { Emoji, EmojiPicker, useEmojiStatus, type EmojiItem, type EmojiPickerListEmptyState, type EmojiSelection } from "emoji-components";
 import { cn } from "@/lib/utils";
 
 const root =
@@ -82,7 +82,8 @@ function EmojiPickerBody({ autoFocus, rows, cell: renderCell, footer = true, emp
   );
 }
 
-function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyState & { empty: React.ReactNode }) {
+function EmojiPickerEmpty({ status, retry, empty }: EmojiPickerListEmptyState & { empty: React.ReactNode }) {
+  const data = useEmojiStatus();
   switch (status) {
     case "loading":
       return "Loading…";
@@ -91,7 +92,7 @@ function EmojiPickerEmpty({ status, query, retry, empty }: EmojiPickerListEmptyS
     case "error":
       return (
         <button type="button" className="underline" onClick={retry}>
-          {query ? "Search failed." : "Could not load emoji."} Try again
+          {data === "error" ? "Could not load emoji." : "Search failed."} Try again
         </button>
       );
   }

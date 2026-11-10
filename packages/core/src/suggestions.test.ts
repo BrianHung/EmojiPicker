@@ -31,6 +31,8 @@ describe("suggestions", () => {
     expect(typeahead.getOptionProps(1)).toMatchObject({ id: "ta-option-1", "aria-selected": true, "data-highlighted": "" });
     expect(typeahead.keydown({ ...key("Enter"), isComposing: true })).toBe(false);
     expect(typeahead.keydown({ ...key("Tab"), shiftKey: true })).toBe(false);
+    for (const modifier of ["metaKey", "ctrlKey", "altKey"]) expect(typeahead.keydown({ ...key("Enter"), [modifier]: true })).toBe(false);
+    expect(typeahead.keydown({ ...key("ArrowDown"), shiftKey: true })).toBe(false);
     expect(chosen).toEqual([]);
     expect(typeahead.keydown(key("Enter"))).toBe(true);
     expect(chosen).toEqual(["👎"]);

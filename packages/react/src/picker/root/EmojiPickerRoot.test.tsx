@@ -89,6 +89,42 @@ describe("Root keyboard", () => {
     expect(host.querySelector('[data-slot="emoji-picker-preview"]')?.textContent).toBe("👋🏿 waving hand");
   });
 
+  it("clears the search field's highlight when focus leaves the picker", () => {
+    const outside = document.body.appendChild(document.createElement("button"));
+    const host = document.body.appendChild(document.createElement("div"));
+    React.act(() =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false}>
+          <EmojiPicker.Root frequent={false}>
+            <EmojiPicker.SearchInput />
+            <Grid />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    const input = host.querySelector("input")!;
+    React.act(() => input.focus());
+    press(input, "ArrowDown");
+    expect(highlighted(host)).toBeDefined();
+    React.act(() => outside.focus());
+    expect(highlighted(host)).toBeUndefined();
+  });
+
+  it("announces no count when the search fails", async () => {
+    const host = document.body.appendChild(document.createElement("div"));
+    await React.act(async () =>
+      createTestRoot(host).render(
+        <EmojiProvider data={en} prepare={false} search={() => Promise.reject(new Error("offline"))}>
+          <EmojiPicker.Root frequent={false} defaultQuery="cat">
+            <Grid />
+          </EmojiPicker.Root>
+        </EmojiProvider>,
+      ),
+    );
+    await React.act(async () => {});
+    expect(host.querySelector('[data-slot="emoji-picker-search-status"]')?.textContent).toBe("");
+  });
+
   it("binds a keyboard target ref that attaches after Root mounts", () => {
     const onSelect = vi.fn();
     let show = () => {};

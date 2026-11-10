@@ -10,6 +10,9 @@ import { syncAriaAttributes } from "./sync-attributes";
 export interface KeyLike {
   key: string;
   shiftKey?: boolean;
+  metaKey?: boolean;
+  ctrlKey?: boolean;
+  altKey?: boolean;
   isComposing?: boolean;
   keyCode?: number;
   preventDefault(): void;
@@ -178,12 +181,13 @@ export function createEmojiSuggestions(store: EmojiStore, options: EmojiSuggesti
       opts().onDismiss?.();
     },
     keydown(event) {
-      if (!snapshot().open || isComposingKey(event)) return false;
+      // Modified keys, such as Cmd+Enter to send or Shift+ArrowDown to select, belong to the field
+      if (!snapshot().open || isComposingKey(event) || event.metaKey || event.ctrlKey || event.altKey || (event.shiftKey && event.key !== "Escape")) return false;
       const move = KEY_MOVES[event.key];
       const direction = move === "up" || move === "down" || move === "left" || move === "right" ? move : undefined;
       if (direction) {
         if (!self.move(direction)) return false;
-      } else if ((event.key === "Enter" || event.key === "Tab") && !event.shiftKey) self.choose();
+      } else if (event.key === "Enter" || event.key === "Tab") self.choose();
       else if (event.key === "Escape") self.dismiss();
       else return false;
       event.preventDefault();

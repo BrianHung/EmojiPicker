@@ -13,6 +13,7 @@ import {
   resultSections,
   setCategoryCollapsed,
   shownIn,
+  toned,
   type Category,
   type CategoryOption,
   type EmojiItem,
@@ -216,9 +217,9 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       item: ItemFactory,
     ) => (ready ? categorySections({ categories, records, suggested, customGroup: (u) => customGroups.get(u), collapsed, emojiVersion, get: store.get, tone, item }) : NO_SECTIONS),
   );
-  const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined, drawable: EmojiPickerOptions["drawable"]) => {
+  const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined, drawable: EmojiPickerOptions["drawable"], tone: SkinToneValue) => {
     const shown = emojiVersion == null ? results : results.filter(shownIn(emojiVersion));
-    return drawable ? shown.filter((r) => drawable(r, r.unified)) : shown;
+    return drawable ? shown.filter((r) => drawable(r, toned(r, tone))) : shown;
   });
   const resultSectionsOf = memo((results: readonly EmojiRecord[], mode: SearchResultsMode, categories: readonly Category<Icon>[], labels: EmojiLabels, groupNames: readonly string[], tone: SkinToneValue, item: ItemFactory) => {
     const name = (group: string) => categories.find((c) => c.id === group)?.name ?? (group === "custom" ? labels.custom : groupName(groupNames, group));
@@ -237,7 +238,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       const customGroups = store.customGroups();
       const query = queryOf(state, current);
       const searching = query.trim().length > 0;
-      const results = resultsOf(found.results, current.emojiVersion, current.drawable);
+      const results = resultsOf(found.results, current.emojiVersion, current.drawable, tone);
       const categories = categoriesOf(groupNames, customGroups, current.categories, labels);
       const suggested = current.suggested ?? (current.frequent === false ? NO_IDS : frequent);
       const collapsed = collapsedOf(state, current);

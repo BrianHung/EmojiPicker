@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { flushSync } from "react-dom";
+import { useFocusWithin } from "react-aria/useFocusWithin";
 import { useObjectRef } from "react-aria/useObjectRef";
 import { VisuallyHidden } from "react-aria/VisuallyHidden";
 import { Autocomplete } from "react-aria-components/Autocomplete";
@@ -26,6 +27,7 @@ import * as EmojiPickerRootCssVars from "./EmojiPickerRootCssVars";
 import * as EmojiPickerRootDataAttributes from "./EmojiPickerRootDataAttributes";
 import * as EmojiPickerListCssVars from "../list/EmojiPickerListCssVars";
 import { useKeyboardTarget } from "./utils/useKeyboardTarget";
+import { useResultCount } from "./utils/useEmojiPickerSearch";
 import { usePickerEngine } from "./utils/usePickerEngine";
 import { PopoverContext } from "../../popover/root/EmojiPopoverRootContext";
 import type { EmojiPopoverRootChangeEventReason } from "../../popover/utils/types";
@@ -166,13 +168,13 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     disableVariations,
     reactions,
   });
-  const view = useStore(state, ({ query, searching, results, pending, collapsed, reactions }) => ({ query, searching, results, pending, collapsed, reactions }), shallowEqual);
+  const view = useStore(state, ({ query, searching, collapsed, reactions }) => ({ query, searching, collapsed, reactions }), shallowEqual);
   React.useEffect(() => state.mount(), [state]);
   const activeWithin = useActiveWithin(state.hold);
   useClippedScrollGuard(rootRef);
 
   const collapse = useCollapse(state, view.collapsed);
-  const { searching, results, pending } = view;
+  const { searching } = view;
   // A controlled query shows in the field this render; the engine takes it in the layout effect
   const query = queryProp ?? view.query;
   const list = React.useRef<ListHandle | null>(null);
@@ -258,6 +260,9 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   );
   React.useImperativeHandle(actionsRef, () => actions, [actions]);
   const target = React.useCallback(() => elementOf(keyboardTarget), [keyboardTarget]);
+  const ownsFocus = React.useCallback((el: Element | null) => el != null && (el === searchInput.current || el === target()), [target]);
+  // The search field's highlight ends when focus leaves the picker, as the grid's does
+  const { focusWithinProps } = useFocusWithin({ onBlurWithin: (e) => !ownsFocus(e.relatedTarget as Element | null) && state.highlight(null) });
   useKeyboardTarget(target, state, list);
 
   const context = React.useMemo<EmojiPickerRootContext>(
@@ -272,7 +277,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       value: selects ? value : undefined,
       pick,
       actions,
-      ownsFocus: (el) => el != null && (el === searchInput.current || el === target()),
+      ownsFocus,
       target,
       skinTone,
       list,
@@ -283,7 +288,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       registerStatus,
       native,
     }),
-    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, target, rootRef, listId, variations, registerVariations, registerStatus, native],
+    [store, state, labels, popover, columns, collapse, searchResults, selects, value, pick, actions, ownsFocus, target, rootRef, listId, variations, registerVariations, registerStatus, native],
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
@@ -301,7 +306,8 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     }
     return e.key === "/" && !hasModifier(e) && !isTextField(e.target) && actions.focusSearch();
   });
-  const count = !searching || pending ? "" : labels.resultCount(results.length);
+  const resultCount = useResultCount(state);
+  const count = resultCount === null ? "" : labels.resultCount(resultCount);
   const rootState: EmojiPickerRootState = { searching, reactionsOpen };
 
   return renderElement(
@@ -311,7 +317,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
       role: "group",
       "data-slot": SLOTS.root,
       "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
-      ...mergePartProps(rest, activeWithin),
+      ...mergePartProps(rest, activeWithin, focusWithinProps),
       [EmojiPickerRootDataAttributes.columns]: columns ?? undefined,
       onKeyDown: keys,
       className,
