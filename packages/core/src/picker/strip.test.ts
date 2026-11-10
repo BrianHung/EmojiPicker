@@ -4,7 +4,7 @@ import { columnsPerPage, layoutStrip, moveInStrip, placeCell, sectionOf, type St
 const IOS: StripMetrics = { rows: 5, cellWidth: 46, cellHeight: 38.4, headerHeight: 19.6, padding: 2.9, sectionGap: 13.8, sectionMinWidth: 150 };
 const strip = layoutStrip(
   [
-    { id: "suggested", count: 30 },
+    { id: "frequent", count: 30 },
     { id: "empty", count: 0 },
     { id: "smileys", count: 12 },
     { id: "short", count: 2 },
@@ -14,7 +14,7 @@ const strip = layoutStrip(
 
 describe("layoutStrip", () => {
   it("places sections side by side and skips empty ones", () => {
-    expect(strip.sections.map((s) => s.id)).toEqual(["suggested", "smileys", "short"]);
+    expect(strip.sections.map((s) => s.id)).toEqual(["frequent", "smileys", "short"]);
     const [a, b, c] = strip.sections;
     expect(a).toMatchObject({ start: 0, count: 30, columns: 6, x: 2.9, width: 276 });
     expect(b!.x).toBeCloseTo(2.9 + 276 + 13.8);

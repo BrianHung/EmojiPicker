@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { BUFO_PACK_URL, loadPack, usePack } from "@/lib/packs";
-import { EmojiPickerCard } from "@/registry/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/registry/emoji-picker";
 
 const STANDARD: CategoryOption[] = [{ id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "travel-places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
 
@@ -47,7 +47,7 @@ export function BufoPicker() {
   const customEmojis = React.useMemo(() => packs.flatMap((p) => p.emoji), [packs]);
   const categories = React.useMemo<CategoryOption[]>(() => {
     const groups = [...new Set(customEmojis.map((e) => e.group ?? "Custom"))];
-    return [{ id: "suggested", name: "Frequently used" }, ...groups.map((g) => ({ id: `custom:${g}` as const, name: g })), ...STANDARD];
+    return [{ id: "frequent", name: "Frequently used" }, ...groups.map((g) => ({ id: `custom:${g}` as const, name: g })), ...STANDARD];
   }, [customEmojis]);
 
   return (
@@ -56,7 +56,11 @@ export function BufoPicker() {
         <div ref={pickerRef} className="flex shrink-0 flex-col items-center gap-3">
           {bufo ? (
             <EmojiProvider data={enUrl} customEmojis={customEmojis}>
-              <EmojiPickerCard onSelect={setPicked} categories={categories} />
+              <EmojiPicker onSelect={setPicked} categories={categories}>
+                <EmojiPickerSearch />
+                <EmojiPickerContent />
+                <EmojiPickerFooter />
+              </EmojiPicker>
             </EmojiProvider>
           ) : (
             <div className="h-[420px] w-[352px] animate-pulse rounded-xl bg-muted" />

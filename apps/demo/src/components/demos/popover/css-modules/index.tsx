@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { EmojiSelection } from "emoji-components";
 import { EmojiPopover } from "emoji-components/floating-ui";
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 import styles from "./index.module.css";
 
 export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
@@ -14,12 +14,16 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
       <EmojiPopover.Portal>
         <EmojiPopover.Positioner>
           <EmojiPopover.Popup aria-label="Emoji picker" className={styles.popup}>
-            <EmojiPickerCard
+            <EmojiPicker
               onSelect={(selection) => {
                 setPicked(selection);
                 onSelect(selection);
               }}
-            />
+            >
+              <EmojiPickerSearch />
+              <EmojiPickerContent />
+              <EmojiPickerFooter />
+            </EmojiPicker>
           </EmojiPopover.Popup>
         </EmojiPopover.Positioner>
       </EmojiPopover.Portal>

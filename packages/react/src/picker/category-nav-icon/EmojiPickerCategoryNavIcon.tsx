@@ -1,11 +1,12 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
+import { EmojiPickerCategoryNavTabContext } from "../category-nav/EmojiPickerCategoryNavContext";
 
 const dot = (cx: number, cy: number) => <circle cx={cx} cy={cy} r={1.1} fill="currentColor" stroke="none" />;
 
 const ICONS: Record<string, React.ReactNode> = {
-  suggested: (
+  frequent: (
     <>
       <circle cx={12} cy={12} r={9} />
       <path d="M12 7v5l3.2 2" />
@@ -67,13 +68,11 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 };
 
-export type EmojiPickerCategoryIconProps = React.SVGAttributes<SVGSVGElement> & { category: string };
+export type EmojiPickerCategoryNavIconProps = React.SVGAttributes<SVGSVGElement> & { category?: string };
 
-export declare namespace EmojiPickerCategoryIcon {
-  type Props = EmojiPickerCategoryIconProps;
-}
-
-export function EmojiPickerCategoryIcon({ category, style, ...props }: EmojiPickerCategoryIconProps) {
+export function EmojiPickerCategoryNavIcon({ category: categoryProp, style, ...props }: EmojiPickerCategoryNavIconProps) {
+  const tab = React.useContext(EmojiPickerCategoryNavTabContext);
+  const category = categoryProp ?? tab?.id ?? "";
   return (
     <svg
       data-default-icon=""
@@ -92,4 +91,8 @@ export function EmojiPickerCategoryIcon({ category, style, ...props }: EmojiPick
       {ICONS[category.startsWith("custom:") ? "custom" : category] ?? ICONS["smileys-people"]}
     </svg>
   );
+}
+
+export declare namespace EmojiPickerCategoryNavIcon {
+  type Props = EmojiPickerCategoryNavIconProps;
 }

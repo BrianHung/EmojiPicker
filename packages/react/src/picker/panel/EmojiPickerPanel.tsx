@@ -19,7 +19,7 @@ export const EmojiPickerPanel = React.forwardRef<HTMLDivElement, EmojiPickerPane
   const refs = React.useMemo(() => mergeRefs<HTMLDivElement>(ref, state?.panel), [ref, state?.panel]);
   return renderElement(
     "div",
-    { "data-slot": SLOTS.panel, id: state?.panelId, ...props, ref: refs, hidden, inert: inert(hidden), style: (s: EmojiPickerPanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) },
+    { id: state?.panelId, ...props, "data-slot": SLOTS.panel, ref: refs, hidden, inert: inert(hidden), style: (s: EmojiPickerPanelState) => (s.hidden ? { ...resolve(style, s), display: "none" } : resolve(style, s)) },
     { hidden },
   );
 });

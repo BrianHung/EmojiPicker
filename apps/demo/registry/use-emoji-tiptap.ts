@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
-import { useEmojiStore, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "emoji-components";
-import { emojiTypeahead } from "@/lib/emoji-prosemirror";
+import { useEmojiStore, useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from "emoji-components";
+import { emojiSuggestions } from "@/lib/emoji-prosemirror";
 
-export type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
+export type TiptapEmojiSuggestionsOptions = UseEmojiSuggestionsOptions & {
   content?: (text: string, suggestion: ShortcodeCompletion) => Content;
 };
 
-export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {
+export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
   const store = useEmojiStore();
   const id = React.useId();
   const latest = React.useRef({ content, onSelect });
@@ -18,7 +18,7 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
   });
   const { plugin, key, suggestions, anchor } = React.useMemo(
     () =>
-      emojiTypeahead(store, {
+      emojiSuggestions(store, {
         id,
         insert,
         limit,
@@ -38,5 +38,5 @@ export function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSele
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
     return () => void (editor.isDestroyed || editor.unregisterPlugin(key));
   }, [editor, plugin, key]);
-  return useEmojiTypeahead(suggestions, { anchor });
+  return useEmojiSuggestions(suggestions, { anchor });
 }

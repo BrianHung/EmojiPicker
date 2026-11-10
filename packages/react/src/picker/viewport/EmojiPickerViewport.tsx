@@ -30,8 +30,8 @@ export const EmojiPickerViewport = React.forwardRef<HTMLDivElement, EmojiPickerV
       {renderElement(
         "div",
         {
-          "data-slot": SLOTS.viewport,
           ...props,
+          "data-slot": SLOTS.viewport,
           ref,
           onKeyDown: keys,
           style: (s: EmojiPickerViewportState) => ({ ...SCROLL[s.orientation], ...(columns ? FIXED_GUTTER : null), ...resolve(style, s) }),

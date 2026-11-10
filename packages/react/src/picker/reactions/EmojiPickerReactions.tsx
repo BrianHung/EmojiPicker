@@ -12,16 +12,16 @@ import { useChangeState } from "../../utils/useChangeState";
 import { EmojiPickerReactionsExpand } from "../reactions-expand/EmojiPickerReactionsExpand";
 import { EmojiPickerReactionsItems } from "../reactions-items/EmojiPickerReactionsItems";
 import { EmojiPickerReactionsContext } from "../reactions/EmojiPickerReactionsContext";
-import { ReactionBar, type ReactionBarProps, type ReactionBarState } from "./ReactionBar";
+import { ReactionBar, type EmojiReactionBarProps, type EmojiReactionBarState } from "../../reaction-bar/EmojiReactionBar";
 
 const NONE: readonly string[] = [];
 
 export type EmojiPickerReactionsChangeEventReason = "item-press";
 export type EmojiPickerReactionsChangeEventDetails = ChangeDetails<EmojiPickerReactionsChangeEventReason> & { emoji: string; pressed: boolean };
 
-export type EmojiPickerReactionsState = ReactionBarState;
+export type EmojiPickerReactionsState = EmojiReactionBarState;
 
-export type EmojiPickerReactionsProps = Omit<ReactionBarProps, "children" | "orientation" | "defaultValue"> & {
+export type EmojiPickerReactionsProps = Omit<EmojiReactionBarProps, "children" | "orientation" | "defaultValue"> & {
   value?: readonly string[];
   defaultValue?: readonly string[];
   onValueChange?: (value: readonly string[], details: EmojiPickerReactionsChangeEventDetails) => void;
@@ -67,7 +67,7 @@ export const EmojiPickerReactions = React.forwardRef<HTMLDivElement, EmojiPicker
     );
   return (
     <EmojiPickerReactionsContext.Provider value={{ shown, pressed, press }}>
-      <ReactionBar {...props} ref={refs} aria-label={labels.reactions} data-slot={SLOTS.reactions}>
+      <ReactionBar aria-label={labels.reactions} {...props} ref={refs} slot={SLOTS.reactions}>
         {content}
       </ReactionBar>
     </EmojiPickerReactionsContext.Provider>

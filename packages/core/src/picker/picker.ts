@@ -2,7 +2,7 @@ import { type ChangeDetails, controllable, createChangeDetails } from "../change
 import { withoutTone, type EmojiRecord, type SkinToneValue } from "../dataset";
 import type { EmojiLabels } from "../labels";
 import { createStore, memo, patch, shallowEqual, stable, subscribeAll, type Subscribe } from "../reactive";
-import { createSearch, type EmojiSearchState } from "../search/query";
+import { createEmojiSearch, type EmojiSearchState } from "../search/query";
 import type { EmojiSelection, EmojiStore } from "../store";
 import {
   categoryList,
@@ -34,8 +34,7 @@ export interface ChangeSource<D extends ChangeDetails> {
 export interface EmojiPickerOptions<Icon = unknown> {
   labels?: EmojiLabels;
   categories?: readonly CategoryOption<Icon>[];
-  frequent?: number | false;
-  suggested?: readonly string[];
+  frequent?: number | false | readonly string[];
   emojiVersion?: number;
   // Results it rejects are hidden, as an emoji the system can't draw
   drawable?: (record: EmojiRecord, unified: string) => boolean;
@@ -102,11 +101,11 @@ export interface EmojiPickerStore<Icon = unknown> {
   registerInput(): () => void;
   mount(): void;
   setDomFocus(focused: boolean): void;
-  // Freezes the suggested and reaction rows while the pointer or focus is inside, so a pick doesn't reorder them
+  // Freezes the frequent and reaction rows while the pointer or focus is inside, so a pick doesn't reorder them
   hold(held: boolean): void;
 }
 
-type Held = { suggested: readonly string[]; reactions: readonly string[] | undefined };
+type Held = { frequent: readonly string[]; reactions: readonly string[] | undefined };
 
 type Ui = {
   query: string;
@@ -188,7 +187,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
   const opts = () => input.getSnapshot().options;
   const searchOf = (state: Ui, current: EmojiPickerOptions<Icon>) => ({ query: queryOf(state, current), limit: current.searchLimit ?? DEFAULT_SEARCH_LIMIT });
   const initial = searchOf(ui.getSnapshot(), options);
-  const search = createSearch(store, initial);
+  const search = createEmojiSearch(store, initial);
   const syncSearch = () => {
     const { query, limit } = searchOf(ui.getSnapshot(), opts());
     search.setQuery(query, limit);
@@ -210,12 +209,12 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       customGroups: ReadonlyMap<string, string | undefined>,
       ready: boolean,
       categories: readonly Category<Icon>[],
-      suggested: readonly string[],
+      frequent: readonly string[],
       collapsed: readonly string[],
       emojiVersion: number | undefined,
       tone: SkinToneValue,
       item: ItemFactory,
-    ) => (ready ? categorySections({ categories, records, suggested, customGroup: (u) => customGroups.get(u), collapsed, emojiVersion, get: store.get, tone, item }) : NO_SECTIONS),
+    ) => (ready ? categorySections({ categories, records, frequent, customGroup: (u) => customGroups.get(u), collapsed, emojiVersion, get: store.get, tone, item }) : NO_SECTIONS),
   );
   const resultsOf = memo((results: readonly EmojiRecord[], emojiVersion: number | undefined, drawable: EmojiPickerOptions["drawable"], tone: SkinToneValue) => {
     const shown = emojiVersion == null ? results : results.filter(shownIn(emojiVersion));
@@ -227,7 +226,10 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
   });
   const activeOf = memo(findItem);
   const keep = stable<EmojiPickerSnapshot<Icon>>();
-  const frequentCount = () => (opts().frequent ?? DEFAULT_FREQUENT) || 1;
+  const frequentCount = () => {
+    const { frequent = DEFAULT_FREQUENT } = opts();
+    return typeof frequent === "number" ? frequent || 1 : 1;
+  };
   const reactionsOf = (reactions: EmojiPickerOptions<Icon>["reactions"]) => (typeof reactions === "number" ? store.frequent(reactions) : reactions);
 
   const select = memo(
@@ -240,9 +242,9 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       const searching = query.trim().length > 0;
       const results = resultsOf(found.results, current.emojiVersion, current.drawable, tone);
       const categories = categoriesOf(groupNames, customGroups, current.categories, labels);
-      const suggested = current.suggested ?? (current.frequent === false ? NO_IDS : frequent);
+      const shownFrequent = Array.isArray(current.frequent) ? current.frequent : current.frequent === false ? NO_IDS : frequent;
       const collapsed = collapsedOf(state, current);
-      const categorySections = sectionsOf(records, customGroups, ready, categories, suggested, collapsed, current.emojiVersion, tone, item);
+      const categorySections = sectionsOf(records, customGroups, ready, categories, shownFrequent, collapsed, current.emojiVersion, tone, item);
       const sections = searching ? resultSectionsOf(results, current.searchResults ?? "ranked", categories, labels, groupNames, tone, item) : categorySections;
       const highlighted = resolveKey(sections, current.highlight === undefined ? state.highlighted : current.highlight, state.highlighted);
       const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
@@ -272,7 +274,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
 
   function getSnapshot(): EmojiPickerSnapshot<Icon> {
     const state = ui.getSnapshot();
-    return select(state, opts(), store.status() === "ready", store.records(), store.skinTone(), state.held?.suggested ?? store.frequent(frequentCount()), search.getSnapshot(), store.labels());
+    return select(state, opts(), store.status() === "ready", store.records(), store.skinTone(), state.held?.frequent ?? store.frequent(frequentCount()), search.getSnapshot(), store.labels());
   }
 
   const set = (fields: Partial<Ui>) => ui.dispatch(fields);
@@ -358,7 +360,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
     setDomFocus: (value) => set({ domFocus: value }),
     hold(value) {
       if (Boolean(ui.getSnapshot().held) === value) return;
-      set({ held: value ? { suggested: store.frequent(frequentCount()), reactions: reactionsOf(opts().reactions) } : null });
+      set({ held: value ? { frequent: store.frequent(frequentCount()), reactions: reactionsOf(opts().reactions) } : null });
     },
   };
 }

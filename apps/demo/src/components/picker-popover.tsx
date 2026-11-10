@@ -2,7 +2,7 @@ import * as React from "react";
 import type { EmojiSelection } from "emoji-components";
 import { EmojiPopover } from "emoji-components/floating-ui";
 import { cn } from "@/lib/utils";
-import { EmojiPickerCard } from "@/registry/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/registry/emoji-picker";
 
 export type PickerPopoverProps = {
   onSelect: (selection: EmojiSelection) => void;
@@ -38,7 +38,13 @@ export function PickerPopover({ onSelect, children, side = "bottom", align = "st
             finalFocus={() => (picked.current && focusAfterPick?.()) || true}
             className="origin-(--transform-origin) transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] data-starting-style:opacity-0 data-ending-style:opacity-0 data-ending-style:duration-100 motion-safe:data-starting-style:scale-95 motion-safe:data-ending-style:scale-95"
           >
-            {picker ?? <EmojiPickerCard onSelect={onSelect} />}
+            {picker ?? (
+              <EmojiPicker onSelect={onSelect}>
+                <EmojiPickerSearch />
+                <EmojiPickerContent />
+                <EmojiPickerFooter />
+              </EmojiPicker>
+            )}
           </EmojiPopover.Popup>
         </EmojiPopover.Positioner>
       </EmojiPopover.Portal>

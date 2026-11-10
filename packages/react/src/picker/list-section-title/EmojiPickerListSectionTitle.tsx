@@ -33,11 +33,9 @@ export const EmojiPickerListSectionTitle = createLeafComponent(TITLE, function E
     "header",
     {
       ...headingProps,
-      // Before the slot, so the rendered attributes keep their order
-      className: props.className,
-      "data-slot": SLOTS.listSectionTitle,
       [EmojiPickerListSectionTitleDataAttributes.collapsed]: flag(section.collapsed),
       ...props,
+      "data-slot": SLOTS.listSectionTitle,
       style: (s: EmojiPickerListSectionTitleState) => ({ height: "var(--ep-header)", ...resolve(style, s) }),
       ref: refs,
       children: children ?? section.name,

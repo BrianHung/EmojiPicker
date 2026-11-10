@@ -12,7 +12,7 @@ export const popoverRoot = rowsOf<EmojiPopover.Root.Props>()([
     description: "`details.cancel()` keeps the current state. `details.trigger` is the `Trigger` element.",
   },
   onOpenChangeComplete,
-  { name: "modal", type: "boolean", default: "`false` from `/floating-ui`, `true` from `/react-aria`", description: "Traps focus and hides the rest of the page from assistive technology." },
+  { name: "modal", type: "boolean", default: "`false`", description: "Traps focus and hides the rest of the page from assistive technology." },
   { name: "actionsRef", type: "Ref<{ close(): void }>", description: '`close()` closes the popover with reason `"imperative-action"`.' },
 ]);
 
@@ -65,11 +65,11 @@ export const popoverPopup = rowsOf<EmojiPopover.Popup.Props>()([
 ]);
 
 export const suggestionsRoot = rowsOf<EmojiSuggestions.Root.Props>()([
-  { name: "open", type: "boolean", description: "Whether the menu is open, usually the typeahead's `open`. Controlled; required." },
+  { name: "open", type: "boolean", description: "Whether the menu is open, usually the `open` of `useEmojiSuggestions`. Controlled; required." },
   {
     name: "onOpenChange",
     type: '(open: boolean, details: { reason: "outside-press" | "none", event, cancel() }) => void',
-    description: 'Runs when the menu asks to close, such as on a press outside it (`"outside-press"`). Call the typeahead\'s `dismiss()` to close it.',
+    description: 'Runs when the menu asks to close, such as on a press outside it (`"outside-press"`). Call `dismiss()` from `useEmojiSuggestions` to close it.',
   },
   onOpenChangeComplete,
 ]);
@@ -77,7 +77,7 @@ export const suggestionsRoot = rowsOf<EmojiSuggestions.Root.Props>()([
 export const suggestionsPortal = rowsOf<EmojiSuggestions.Portal.Props>()([{ name: "container", type: "HTMLElement | ShadowRoot | RefObject | null", default: "`document.body`", description: "The element to render the menu into." }]);
 
 export const suggestionsPositioner = rowsOf<EmojiSuggestions.Positioner.Props>()([
-  { name: "anchor", type: "EmojiPopoverAnchor", description: "The typeahead's `anchor`, at the caret. Required." },
+  { name: "anchor", type: "EmojiSuggestionsAnchor", description: "The `anchor` of `useEmojiSuggestions`, at the caret. Required." },
   side,
   { name: "sideOffset", type: "number", default: "`4`", description: "Distance from the anchor." },
   ...placement,

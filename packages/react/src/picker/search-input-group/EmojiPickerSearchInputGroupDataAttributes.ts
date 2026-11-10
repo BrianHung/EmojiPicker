@@ -1,6 +1,6 @@
 /**
- * Identifies the search field.
- * @type {'emoji-picker-search-field'}
+ * Identifies the group around the search input.
+ * @type {'emoji-picker-search-input-group'}
  */
 export const slot = "data-slot";
 /**

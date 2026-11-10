@@ -7,7 +7,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiStatus, decisionSearch, embeddingsSearch } from "@/lib/semantic-search/api";
 import customEmojiJson from "@/lib/semantic-search/custom-emoji.json";
 import { loadOnDevice, onDeviceSearch, onDeviceStatus } from "@/lib/semantic-search/on-device";
-import { EmojiPickerCard } from "@/registry/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerEmpty, EmojiPickerFooter, EmojiPickerSearch } from "@/registry/emoji-picker";
 
 const CUSTOM_EMOJI: CustomEmoji[] = customEmojiJson;
 const SAMPLES = ["jurassic park", "happy cat", "deploy to production"];
@@ -89,7 +89,17 @@ export function Demo() {
       </div>
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-8">
         <EmojiProvider data={enUrl} renderer={renderer} customEmojis={CUSTOM_EMOJI} search={search}>
-          <EmojiPickerCard query={query} onQueryChange={setQuery} searchLimit={LIMIT} empty={tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined} className="w-full max-w-[360px]" />
+          <EmojiPicker query={query} onQueryChange={setQuery} searchLimit={LIMIT} className="w-full max-w-[360px]">
+            <EmojiPickerSearch />
+            <EmojiPickerContent
+              renderEmptyState={({ status, retry }) => (
+                <EmojiPickerEmpty status={status} retry={retry}>
+                  {tab === "device" && device.state === "idle" ? EMPTY_BEFORE_DOWNLOAD : undefined}
+                </EmojiPickerEmpty>
+              )}
+            />
+            <EmojiPickerFooter />
+          </EmojiPicker>
         </EmojiProvider>
         <p className="min-h-5 text-sm text-muted-foreground tabular-nums" data-testid="status" aria-live="polite">
           {status}

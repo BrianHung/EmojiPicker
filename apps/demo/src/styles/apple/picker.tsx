@@ -42,9 +42,10 @@ export function ApplePicker({ onSelect, search = true, autoFocus = false, fluid 
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center gap-2 px-2.5 pt-2.5 pb-2 [--search-icon-x:22px]">
-          <EmojiPicker.SearchInput placeholder="Search Emoji" autoFocus={autoFocus} className="h-[34px] w-full rounded-full bg-emoji-picker-input pr-3 pl-9 text-[15px] outline-none placeholder:text-emoji-picker-subtle focus:ring-[3.5px] focus:ring-emoji-picker-ring/55">
+          <EmojiPicker.SearchInputGroup>
+            <EmojiPicker.SearchInput placeholder="Search Emoji" autoFocus={autoFocus} className="h-[34px] w-full rounded-full bg-emoji-picker-input pr-3 pl-9 text-[15px] outline-none placeholder:text-emoji-picker-subtle focus:ring-[3.5px] focus:ring-emoji-picker-ring/55" />
             <SearchClear />
-          </EmojiPicker.SearchInput>
+          </EmojiPicker.SearchInputGroup>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-emoji-picker-subtle" />
           <button type="button" title="Add emoji" className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-(--apple-control) text-(--apple-control-foreground)">
             <I.SmilePlus size={20} strokeWidth={1.9} />

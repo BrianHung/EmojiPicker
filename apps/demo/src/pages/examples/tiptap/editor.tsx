@@ -3,7 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import enUrl from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, useEmojiStore } from "emoji-components";
 import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
-import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
+import { EmojiSuggestionsMenu } from "@/components/tiptap/emoji-suggestions-menu";
 import { PickerPopover } from "@/components/picker-popover";
 
 function TiptapEditor() {
@@ -33,7 +33,7 @@ function TiptapEditor() {
         </PickerPopover>
       </div>
       <EditorContent editor={editor} />
-      <EmojiSuggestionMenu editor={editor} />
+      <EmojiSuggestionsMenu editor={editor} />
     </div>
   );
 }

@@ -10,22 +10,18 @@ import type { EmojiComponentsHandlers, EmojiComponentsInteractionState, EmojiCom
 import { usePickerKeyDown } from "../../internals/usePickerKeyDown";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
-import { EmojiPickerSearchClear } from "../search-clear/EmojiPickerSearchClear";
-import { EmojiPickerSearchField } from "../search-field/EmojiPickerSearchField";
-import { EmojiPickerSearchFieldContext } from "../search-field/EmojiPickerSearchFieldContext";
+import { EmojiPickerSearchInputGroupContext } from "../search-input-group/EmojiPickerSearchInputGroupContext";
 
 export type EmojiPickerSearchInputState = Omit<EmojiComponentsInteractionState, "pressed">;
 
 export type EmojiPickerSearchInputProps = EmojiComponentsHandlers<
   Omit<React.InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "defaultValue" | "onChange" | "aria-controls" | "role" | "children" | "dangerouslySetInnerHTML" | "className" | "style">
 > &
-  EmojiComponentsPartProps<EmojiPickerSearchInputState, HTMLInputElement> & {
-    children?: React.ReactNode;
-  };
+  EmojiComponentsPartProps<EmojiPickerSearchInputState, HTMLInputElement>;
 
 const caretAtEnd = (field: HTMLInputElement) => field.selectionStart === field.value.length && field.selectionEnd === field.value.length;
 
-export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPickerSearchInputProps>(function EmojiPickerSearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, children, ...props }, ref) {
+export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPickerSearchInputProps>(function EmojiPickerSearchInput({ onKeyDown, className, style, render, placeholder, autoFocus, ...props }, ref) {
   const picker = useEmojiPickerRootContext("EmojiPicker.SearchInput");
   const { labels } = picker;
   const { registerInput } = picker.state;
@@ -33,7 +29,7 @@ export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPi
   const own = React.useRef<HTMLInputElement | null>(null);
   const refs = React.useMemo(() => mergeRefs<HTMLInputElement>(own, picker.searchInput, ref), [picker.searchInput, ref]);
   const focusOnMount = autoFocus ?? picker.inPopover;
-  const inField = React.useContext(EmojiPickerSearchFieldContext);
+  const inGroup = React.useContext(EmojiPickerSearchInputGroupContext);
   const rtl = useLocale().direction === "rtl";
 
   // Capture: React Aria's Autocomplete forwards keys to the list from the input's own keydown
@@ -59,25 +55,22 @@ export const EmojiPickerSearchInput = React.forwardRef<HTMLInputElement, EmojiPi
     if (focusOnMount && !picker.inPopover) own.current?.focus({ preventScroll: true });
   }, []);
 
-  const input = (
-    <>
-      <Input
-        {...props}
-        ref={refs}
-        onKeyDownCapture={keys}
-        type="text"
-        role="searchbox"
-        {...racParts<HTMLInputElement>("input", { className, style, render })}
-        placeholder={placeholder ?? labels.searchPlaceholder}
-        aria-label={props["aria-label"] ?? labels.searchLabel}
-        data-slot={SLOTS.searchInput}
-        // autoFocus misses a field that is still hidden while the popover opens
-        {...(focusOnMount ? { "data-autofocus": "" } : {})}
-      />
-      {children ?? <EmojiPickerSearchClear />}
-    </>
+  if (!inGroup) throw new Error("EmojiPicker.SearchInput must be inside EmojiPicker.SearchInputGroup.");
+  return (
+    <Input
+      {...props}
+      ref={refs}
+      onKeyDownCapture={keys}
+      type="text"
+      role="searchbox"
+      {...racParts<HTMLInputElement>("input", { className, style, render })}
+      placeholder={placeholder ?? labels.searchPlaceholder}
+      aria-label={props["aria-label"] ?? labels.searchLabel}
+      data-slot={SLOTS.searchInput}
+      // autoFocus misses a field that is still hidden while the popover opens
+      {...(focusOnMount ? { "data-autofocus": "" } : {})}
+    />
   );
-  return inField ? input : <EmojiPickerSearchField>{input}</EmojiPickerSearchField>;
 });
 
 export declare namespace EmojiPickerSearchInput {

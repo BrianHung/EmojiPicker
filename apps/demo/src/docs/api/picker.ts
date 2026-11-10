@@ -6,18 +6,17 @@ const interaction = "hovered, focused, focusVisible, pressed, disabled";
 export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
-    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), collapse? }) => void',
-    description: "Runs when the user selects an emoji. `details.cancel()` keeps the value and keeps an enclosing `EmojiPopover` open; inside `Reactions`, `details.collapse()` shows the reaction row again.",
+    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel() }) => void',
+    description: "Runs when the user selects an emoji. A selection shows the reaction row again and closes an enclosing `EmojiPopover`; `details.cancel()` keeps the value, the expanded picker, and the popover as they are.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
     name: "categories",
     type: "readonly CategoryOption[]",
     description:
-      'The sections in order, each `{ id, name?, icon?, nav? }`. Ids are `"suggested"` (frequently used), a group id such as `"smileys-people"`, `"custom"` (custom emoji without a group), and `"custom:<group>"`. Custom sections that are not listed follow the listed ones.',
+      'The sections in order, each `{ id, name?, icon?, nav? }`. Ids are `"frequent"` (frequently used), a group id such as `"smileys-people"`, `"custom"` (custom emoji without a group), and `"custom:<group>"`. Custom sections that are not listed follow the listed ones.',
   },
-  { name: "frequent", type: "number | false", default: "`16`", description: "How many frequently used emoji to show. `false` hides the section." },
-  { name: "suggested", type: "readonly string[]", description: "Fixed emoji shown in place of the frequently used ones." },
+  { name: "frequent", type: "number | false | readonly string[]", default: "`16`", description: "How many frequently used emoji to show, or fixed unified codes to show in their place. `false` hides the section." },
   { name: "searchResults", type: '"ranked" | "grouped"', default: '`"ranked"`', description: "Search results in one ranked list, or in their sections." },
   { name: "searchLimit", type: "number", default: "`200`", description: "The most results a search shows." },
   { name: "query", type: "string", description: "The search text. Controlled." },
@@ -36,7 +35,11 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   { name: "reactions", type: "readonly string[] | number", description: "The unified codes `Reactions` shows. A number shows that many frequently used emoji." },
   { name: "reactionsOpen", type: "boolean", description: "Whether the reaction row shows in place of `Panel`. Controlled." },
   { name: "defaultReactionsOpen", type: "boolean", default: "`true`" },
-  { name: "onReactionsOpenChange", type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "escape-key" | "none", cancel() }) => void' },
+  {
+    name: "onReactionsOpenChange",
+    type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "escape-key" | "none", cancel() }) => void',
+    description: '`"item-press"` is a selection in `Panel`, which shows the row again; `details.cancel()` keeps `Panel` open.',
+  },
   { name: "actionsRef", type: "Ref<EmojiPicker.Root.Actions>", description: "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`. Inside `Root`, `useEmojiPickerActions()` returns the same." },
   {
     name: "keyboardTarget",
@@ -51,14 +54,16 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   className("{ searching, reactionsOpen }"),
 ]);
 
-export const search = rowsOf<EmojiPicker.Search.Props>()([{ name: "children", type: "ReactNode | ({ empty }) => ReactNode", default: "`<SearchInput />`", description: "The row's contents." }, className("{ empty }")]);
+export const search = rowsOf<EmojiPicker.Search.Props>()([
+  { name: "children", type: "ReactNode | ({ empty }) => ReactNode", default: "`SearchInputGroup` with `SearchInput` and `SearchClear`", description: "The row's contents." },
+  className("{ empty }"),
+]);
 
-export const searchField = rowsOf<EmojiPicker.SearchField.Props>()([{ name: "children", type: "ReactNode", description: "`SearchInput` and `SearchClear`." }, className("{ empty }")]);
+export const searchInputGroup = rowsOf<EmojiPicker.SearchInputGroup.Props>()([{ name: "children", type: "ReactNode", description: "`SearchInput`, `SearchClear`, and anything placed beside them, such as an icon." }, className("{ empty }")]);
 
 export const searchInput = rowsOf<EmojiPicker.SearchInput.Props>()([
   { name: "placeholder", type: "string", default: "`labels.searchPlaceholder`" },
   { name: "autoFocus", type: "boolean", default: "`true` inside an `EmojiPopover`" },
-  { name: "children", type: "ReactNode", default: "`<SearchClear />`", description: "Rendered in the field, after the input." },
   className("{ hovered, focused, focusVisible, disabled }"),
 ]);
 
@@ -150,9 +155,11 @@ export const categoryNav = rowsOf<EmojiPicker.CategoryNav.Props>()([
 ]);
 
 export const categoryNavTab = rowsOf<EmojiPicker.CategoryNavTab.Props>()([
-  { name: "children", type: "ReactNode | (state) => ReactNode", default: "the section's icon", description: "`EmojiPickerCategoryIcon` draws the built-in icons." },
-  className("{ category, selected, active, focused, focusVisible, hovered, pressed, disabled }"),
+  { name: "children", type: "ReactNode | (state) => ReactNode", default: "the section's icon, or `<CategoryNavIcon />`" },
+  className("{ category, active, focused, focusVisible, hovered, pressed, disabled }", "`active` is the tab for the section in view, while not searching."),
 ]);
+
+export const categoryNavIcon = rowsOf<EmojiPicker.CategoryNavIcon.Props>()([{ name: "category", type: "string", default: "its `CategoryNavTab`'s section", description: "The section id whose built-in icon to draw." }]);
 
 export const preview = rowsOf<EmojiPicker.Preview.Props>()([
   {

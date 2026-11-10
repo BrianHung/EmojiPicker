@@ -2,15 +2,17 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-reaction-bar",
   "title": "Emoji Reaction Bar",
-  "description": "A row of reaction buttons as a React Aria toolbar: arrows, Home and End move focus, and the pointer carries it once focus is inside.",
+  "description": "A row of reaction buttons as a toolbar: arrows, Home and End move focus, and the pointer carries it once focus is inside.",
   "dependencies": [
-    "react-aria",
-    "react-aria-components"
+    "emoji-components@1.0.0-alpha.2"
+  ],
+  "registryDependencies": [
+    "utils"
   ],
   "files": [
     {
       "path": "registry/emoji-reaction-bar.tsx",
-      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { FocusScope, useFocusManager, type FocusManager } from \"react-aria/FocusScope\";\nimport { mergeProps } from \"react-aria/mergeProps\";\nimport { Toolbar, type ToolbarProps } from \"react-aria-components/Toolbar\";\n\nexport type EmojiReactionBarProps = Omit<ToolbarProps, \"children\"> & { children: React.ReactNode };\n\nfunction Manager({ into }: { into: React.RefObject<FocusManager | undefined> }) {\n  const manager = useFocusManager();\n  React.useEffect(() => {\n    into.current = manager;\n  }, [into, manager]);\n  return null;\n}\n\n// React Aria's Toolbar moves focus with the arrows and Tab; Home and End go to the ends, and once focus is inside, the pointer carries it\nexport function EmojiReactionBar({ orientation = \"horizontal\", children, ...props }: EmojiReactionBarProps) {\n  const focus = React.useRef<FocusManager | undefined>(undefined);\n  const across = orientation === \"vertical\" ? [\"ArrowLeft\", \"ArrowRight\"] : [\"ArrowUp\", \"ArrowDown\"];\n  const handlers: React.HTMLAttributes<HTMLDivElement> = {\n    onKeyDown(event) {\n      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;\n      if (event.key === \"Home\") focus.current?.focusFirst();\n      else if (event.key === \"End\") focus.current?.focusLast();\n      else if (!across.includes(event.key)) return;\n      event.preventDefault();\n    },\n    onPointerOver(event) {\n      const button = event.target instanceof Element ? event.target.closest<HTMLElement>(\"button:not([disabled])\") : null;\n      const active = document.activeElement;\n      const row = event.currentTarget;\n      if (button && button !== active && row.contains(button) && active instanceof HTMLElement && row.contains(active)) button.focus({ preventScroll: true });\n    },\n  };\n  return (\n    <Toolbar {...props} orientation={orientation} render={(dom) => <div {...mergeProps(dom, handlers)} />}>\n      <FocusScope>\n        <Manager into={focus} />\n        {children}\n      </FocusScope>\n    </Toolbar>\n  );\n}\n",
+      "content": "\"use client\";\n\nimport { EmojiReactionBar as EmojiReactionBarPrimitive } from \"emoji-components\";\nimport { cn } from \"@/lib/utils\";\n\nfunction EmojiReactionBar({ className, ...props }: EmojiReactionBarPrimitive.Props) {\n  return <EmojiReactionBarPrimitive className={cn(\"flex flex-wrap items-center gap-1 data-[orientation=vertical]:flex-col\", className)} {...props} />;\n}\n\nexport { EmojiReactionBar };\n",
       "type": "registry:ui"
     }
   ],

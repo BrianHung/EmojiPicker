@@ -1,15 +1,25 @@
-import { EmojiPicker, useEmojiPickerActiveEmoji, useEmojiPickerCategoryNavigation, useEmojiPickerActions, useEmojiStore, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "emoji-components";
+import {
+  EmojiPicker,
+  useEmojiPickerHighlightedEmoji,
+  useEmojiPickerCategoryNavigation,
+  useEmojiPickerActions,
+  useEmojiStore,
+  type UseEmojiSuggestionsReturnValue,
+  type UseEmojiSuggestionsOptions,
+  type ShortcodeCompletion,
+} from "emoji-components";
 import { EmojiSuggestions, type EmojiPopoverContainer } from "emoji-components/floating-ui";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "./picker";
 import { CELL, OPTION, tokensOf } from "@/styles/style";
 
-export const notionEmojiOptions: EmojiTypeaheadOptions = { matchBy: "search", limit: 200 };
+export const notionEmojiOptions: UseEmojiSuggestionsOptions = { matchBy: "search", limit: 200 };
 
 const ICONS: I.IconSet = I.ICONS.notion;
-const CATEGORIES = NOTION_SECTIONS.filter((c) => c.id !== "suggested");
+const CATEGORIES = NOTION_SECTIONS.filter((c) => c.id !== "frequent");
 
-export function NotionEmojiMenu({ open, query, anchor, suggestions: menu, dismiss, editor, className, container }: EmojiTypeahead & { className?: string } & { editor: HTMLElement; container?: EmojiPopoverContainer }) {
+export function NotionEmojiMenu({ editor, className, container, ...menu }: UseEmojiSuggestionsReturnValue & { className?: string } & { editor: HTMLElement; container?: EmojiPopoverContainer }) {
+  const { open, query, anchor, dismiss } = menu;
   return (
     <EmojiSuggestions.Root open={open} onOpenChange={(next) => !next && dismiss()}>
       <EmojiSuggestions.Portal container={container}>
@@ -50,7 +60,7 @@ function Sections({ suggestions }: { suggestions: readonly ShortcodeCompletion[]
   const store = useEmojiStore();
   const actions = useEmojiPickerActions();
   const { jumpToCategory } = useEmojiPickerCategoryNavigation();
-  const active = useEmojiPickerActiveEmoji()?.group;
+  const active = useEmojiPickerHighlightedEmoji()?.group;
   const jump = (section: string) => {
     const first = suggestions.find((s) => s.record.group === section)?.record;
     if (!first) return;

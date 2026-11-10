@@ -3,12 +3,13 @@ export { EmojiPickerViewport as Viewport } from "./viewport/EmojiPickerViewport"
 export { EmojiPickerPreview as Preview } from "./preview/EmojiPickerPreview";
 export { EmojiPickerPanel as Panel } from "./panel/EmojiPickerPanel";
 export { EmojiPickerSearch as Search } from "./search/EmojiPickerSearch";
-export { EmojiPickerSearchField as SearchField } from "./search-field/EmojiPickerSearchField";
+export { EmojiPickerSearchInputGroup as SearchInputGroup } from "./search-input-group/EmojiPickerSearchInputGroup";
 export { EmojiPickerSearchInput as SearchInput } from "./search-input/EmojiPickerSearchInput";
 export { EmojiPickerSearchClear as SearchClear } from "./search-clear/EmojiPickerSearchClear";
 export { EmojiPickerSearchStatus as SearchStatus } from "./search-status/EmojiPickerSearchStatus";
 export { EmojiPickerCategoryNav as CategoryNav } from "./category-nav/EmojiPickerCategoryNav";
 export { EmojiPickerCategoryNavTab as CategoryNavTab } from "./category-nav-tab/EmojiPickerCategoryNavTab";
+export { EmojiPickerCategoryNavIcon as CategoryNavIcon } from "./category-nav-icon/EmojiPickerCategoryNavIcon";
 export { EmojiPickerList as List } from "./list/EmojiPickerList";
 export { EmojiPickerListSection as ListSection } from "./list-section/EmojiPickerListSection";
 export { EmojiPickerListSectionTitle as ListSectionTitle } from "./list-section-title/EmojiPickerListSectionTitle";

@@ -4,9 +4,9 @@
 
 ## `@emoji-components/core`
 
-Values: `createEmojiPicker`, `createEmojiStore`, `createEmojiSuggestions`, `createSearch`, `findShortcodeTrigger`, `isComposingKey`, `lexicalSearch`, `localeData`, `nativeToUnified`, `resolveEmoji`, `twemojiUrl`, `unifiedToNative`, `withTone`, `withoutTone`
+Values: `createEmojiPicker`, `createEmojiSearch`, `createEmojiStore`, `createEmojiSuggestions`, `findShortcodeTrigger`, `isComposingKey`, `lexicalSearch`, `localeData`, `nativeToUnified`, `resolveEmoji`, `twemojiUrl`, `unifiedToNative`, `withTone`, `withoutTone`
 
-Types: `Category`, `CategoryOption`, `ChangeDetails`, `CollapsedCategoriesChangeDetails`, `CompletionOrder`, `CustomEmoji`, `CustomEmojiLoader`, `CustomEmojiSource`, `Dataset`, `EmojiDataInput`, `EmojiDataSource`, `EmojiInput`, `EmojiItem`, `EmojiLabels`, `EmojiPickerOptions`, `EmojiPickerSnapshot`, `EmojiPickerStore`, `EmojiRecord`, `EmojiSearch`, `EmojiSearchState`, `EmojiSection`, `EmojiSelection`, `EmojiStore`, `EmojiStoreOptions`, `EmojiStoreStatus`, `EmojiSuggestionsOptions`, `EmojiSuggestionsStore`, `EmojiTrigger`, `Frequents`, `FrequentsChangeDetails`, `HighlightChangeDetails`, `KeyLike`, `QueryChangeDetails`, `Renderer`, `ResolvedEmoji`, `SearchResultsMode`, `ShortcodeCompletion`, `SkinToneChangeDetails`, `SkinToneValue`
+Types: `Category`, `CategoryOption`, `ChangeDetails`, `CollapsedCategoriesChangeDetails`, `CompletionOrder`, `CustomEmoji`, `CustomEmojiLoader`, `CustomEmojiSource`, `Dataset`, `EmojiDataInput`, `EmojiDataSource`, `EmojiInput`, `EmojiItem`, `EmojiLabels`, `EmojiPickerOptions`, `EmojiPickerSnapshot`, `EmojiPickerStore`, `EmojiRecord`, `EmojiSearch`, `EmojiSearchState`, `EmojiSearchStore`, `EmojiSection`, `EmojiSelection`, `EmojiStore`, `EmojiStoreOptions`, `EmojiStoreStatus`, `EmojiSuggestionsOptions`, `EmojiSuggestionsStore`, `EmojiTrigger`, `Frequents`, `FrequentsChangeDetails`, `HighlightChangeDetails`, `KeyLike`, `QueryChangeDetails`, `Renderer`, `ResolvedEmoji`, `SearchResultsMode`, `ShortcodeCompletion`, `SkinToneChangeDetails`, `SkinToneValue`
 
 ## `@emoji-components/core/grid`
 

@@ -5,12 +5,13 @@ export type { EmojiPickerViewportProps, EmojiPickerViewportState } from "./viewp
 export type { EmojiPickerPreviewProps, EmojiPickerPreviewState } from "./preview/EmojiPickerPreview";
 export type { EmojiPickerPanelProps, EmojiPickerPanelState } from "./panel/EmojiPickerPanel";
 export type { EmojiPickerSearchProps, EmojiPickerSearchState } from "./search/EmojiPickerSearch";
-export type { EmojiPickerSearchFieldProps, EmojiPickerSearchFieldState } from "./search-field/EmojiPickerSearchField";
+export type { EmojiPickerSearchInputGroupProps, EmojiPickerSearchInputGroupState } from "./search-input-group/EmojiPickerSearchInputGroup";
 export type { EmojiPickerSearchInputProps, EmojiPickerSearchInputState } from "./search-input/EmojiPickerSearchInput";
 export type { EmojiPickerSearchClearProps, EmojiPickerSearchClearState } from "./search-clear/EmojiPickerSearchClear";
 export type { EmojiPickerSearchStatusProps, EmojiPickerSearchStatusState } from "./search-status/EmojiPickerSearchStatus";
 export type { EmojiPickerCategoryNavProps, EmojiPickerCategoryNavState } from "./category-nav/EmojiPickerCategoryNav";
 export type { EmojiPickerCategoryNavTabProps, EmojiPickerCategoryNavTabState } from "./category-nav-tab/EmojiPickerCategoryNavTab";
+export type { EmojiPickerCategoryNavIconProps } from "./category-nav-icon/EmojiPickerCategoryNavIcon";
 export type { EmojiPickerListEmptyState, EmojiPickerListProps, EmojiPickerListState } from "./list/EmojiPickerList";
 export type { EmojiPickerListSectionProps, EmojiPickerListSectionState } from "./list-section/EmojiPickerListSection";
 export type { EmojiPickerListSectionTitleProps, EmojiPickerListSectionTitleState } from "./list-section-title/EmojiPickerListSectionTitle";
@@ -19,7 +20,7 @@ export type { EmojiPickerListItemsProps } from "./list-items/EmojiPickerListItem
 export type { EmojiPickerListCellProps, EmojiPickerListCellState } from "./list-cell/EmojiPickerListCell";
 export type { EmojiPickerListVariationsProps, EmojiPickerListVariationsState } from "./list-variations/EmojiPickerListVariations";
 export type { EmojiPickerListVariationsOptionProps, EmojiPickerListVariationsOptionState } from "./list-variations-option/EmojiPickerListVariationsOption";
-export type { EmojiPickerSkinToneChangeEventDetails, EmojiPickerSkinToneChangeEventReason, EmojiPickerSkinToneProps, EmojiPickerSkinToneState } from "./skin-tone/EmojiPickerSkinTone";
+export type { EmojiPickerSkinToneOpenChangeEventDetails, EmojiPickerSkinToneOpenChangeEventReason, EmojiPickerSkinToneProps, EmojiPickerSkinToneState } from "./skin-tone/EmojiPickerSkinTone";
 export type { EmojiPickerSkinToneTriggerProps, EmojiPickerSkinToneTriggerState } from "./skin-tone-trigger/EmojiPickerSkinToneTrigger";
 export type { EmojiPickerSkinToneOptionsProps, EmojiPickerSkinToneOptionsState } from "./skin-tone-options/EmojiPickerSkinToneOptions";
 export type { EmojiPickerSkinToneOptionProps, EmojiPickerSkinToneOptionState } from "./skin-tone-option/EmojiPickerSkinToneOption";
@@ -29,13 +30,11 @@ export type { EmojiPickerReactionsItemsProps } from "./reactions-items/EmojiPick
 export type { EmojiPickerReactionsItemProps, EmojiPickerReactionsItemState } from "./reactions-item/EmojiPickerReactionsItem";
 export type { EmojiPickerReactionsExpandProps, EmojiPickerReactionsExpandState } from "./reactions-expand/EmojiPickerReactionsExpand";
 
-export { EmojiPickerCategoryIcon } from "./category-nav-tab/EmojiPickerCategoryIcon";
-export type { EmojiPickerCategoryIconProps } from "./category-nav-tab/EmojiPickerCategoryIcon";
 export { useEmojiPickerCell } from "./list-cell/utils/useEmojiPickerCell";
-export type { EmojiPickerGridState, UseEmojiPickerCellResult } from "./list-cell/utils/useEmojiPickerCell";
+export type { EmojiPickerGridState, UseEmojiPickerCellReturnValue } from "./list-cell/utils/useEmojiPickerCell";
 export { useEmojiPickerGrid } from "./list/utils/useEmojiPickerGrid";
-export type { UseEmojiPickerGridOptions, UseEmojiPickerGridResult } from "./list/utils/useEmojiPickerGrid";
-export { useEmojiPickerActiveEmoji } from "./root/utils/useEmojiPickerActiveEmoji";
+export type { UseEmojiPickerGridOptions, UseEmojiPickerGridReturnValue } from "./list/utils/useEmojiPickerGrid";
+export { useEmojiPickerHighlightedEmoji } from "./root/utils/useEmojiPickerHighlightedEmoji";
 export { useEmojiPickerCategoryNavigation } from "./root/utils/useEmojiPickerCategoryNavigation";
 export type { EmojiPickerCategoryNavigation, EmojiPickerNavCategory } from "./root/utils/useEmojiPickerCategoryNavigation";
 export { useEmojiPickerCollapsedCategories } from "./root/utils/useEmojiPickerCollapsedCategories";
@@ -55,7 +54,7 @@ export * as EmojiPickerViewportDataAttributes from "./viewport/EmojiPickerViewpo
 export * as EmojiPickerPreviewDataAttributes from "./preview/EmojiPickerPreviewDataAttributes";
 export * as EmojiPickerPanelDataAttributes from "./panel/EmojiPickerPanelDataAttributes";
 export * as EmojiPickerSearchDataAttributes from "./search/EmojiPickerSearchDataAttributes";
-export * as EmojiPickerSearchFieldDataAttributes from "./search-field/EmojiPickerSearchFieldDataAttributes";
+export * as EmojiPickerSearchInputGroupDataAttributes from "./search-input-group/EmojiPickerSearchInputGroupDataAttributes";
 export * as EmojiPickerSearchInputDataAttributes from "./search-input/EmojiPickerSearchInputDataAttributes";
 export * as EmojiPickerSearchClearDataAttributes from "./search-clear/EmojiPickerSearchClearDataAttributes";
 export * as EmojiPickerSearchStatusDataAttributes from "./search-status/EmojiPickerSearchStatusDataAttributes";

@@ -8,15 +8,15 @@ describe("sections", () => {
   const records = createEmojiStore({ data: en }).records();
   const get = (u: string) => records.find((r) => r.unified === u || r.tones.includes(u));
   const categories = [
-    { id: "suggested", name: "Frequently Used", nav: true },
+    { id: "frequent", name: "Frequently Used", nav: true },
     { id: "flags", name: "Flags", nav: true },
     { id: "smileys-people", name: "Smileys & People", nav: true },
   ];
   const item = itemFactory(defaultLabels);
 
   it("follows the picker's category order, with frequents first", () => {
-    const out = categorySections({ categories, records, suggested: ["1f44d-1f3fd", "nope"], customGroup: () => undefined, collapsed: [], get, tone: 0, item });
-    expect(out.map((s) => s.id)).toEqual(["suggested", "flags", "smileys-people"]);
+    const out = categorySections({ categories, records, frequent: ["1f44d-1f3fd", "nope"], customGroup: () => undefined, collapsed: [], get, tone: 0, item });
+    expect(out.map((s) => s.id)).toEqual(["frequent", "flags", "smileys-people"]);
     expect(out[0]!.items.map((i) => i.unified)).toEqual(["1f44d-1f3fd"]);
     expect(out[0]!.items[0]!.record.unified).toBe("1f44d");
     expect(out[1]!.items.every((i) => i.record.group === "flags")).toBe(true);
@@ -26,7 +26,7 @@ describe("sections", () => {
     const out = categorySections({
       categories,
       records,
-      suggested: [],
+      frequent: [],
       customGroup: () => undefined,
       collapsed: ["flags"],
       emojiVersion: 12,
@@ -54,7 +54,7 @@ describe("sections", () => {
         { id: "custom:team", name: "Team", nav: true },
       ],
       records: [...records, ...custom],
-      suggested: [],
+      frequent: [],
       customGroup: (u) => (u === "shipit" ? "team" : undefined),
       collapsed: [],
       emojiVersion: 1,

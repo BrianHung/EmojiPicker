@@ -10,7 +10,7 @@ import { useEmojiTextField } from "@/components/emoji-text-field";
 import { LinearEmojiMenu, linearEmojiOptions } from "./menu";
 import { noEmoji, SearchClear } from "@/styles/parts";
 import { CELL, ROOT, tokensOf, type StylePickerProps } from "@/styles/style";
-import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
+import { EmojiSuggestionsMenu } from "@/components/tiptap/emoji-suggestions-menu";
 import { Avatar, EmojiText, FitViewport, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, type Reaction } from "@/styles/scene-kit";
 
 
@@ -499,7 +499,7 @@ function Description({ compact = false }: { compact?: boolean }) {
   return (
     <div style={{ color: C.text }}>
       <EditorContent editor={editor} />
-      <EmojiSuggestionMenu editor={editor} className={INLINE_MENU} limit={12} side="top" />
+      <EmojiSuggestionsMenu editor={editor} className={INLINE_MENU} limit={12} side="top" />
     </div>
   );
 }
@@ -517,9 +517,10 @@ function IconPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
       className={cn(ROOT, "h-[379.5px] w-[412px] bg-transparent font-emoji-picker text-emoji-picker-foreground [--emoji-picker-cell-size:28px] [--emoji-picker-header-height:28px] [--emoji-picker-emoji-image-size:20px] [--emoji-picker-list-padding:10.5px] [--emoji-picker-emoji-size:20px]", className)}
     >
       <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1">
-        <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-emoji-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-subtle">
+        <EmojiPicker.SearchInputGroup>
+          <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-emoji-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-subtle" />
           <SearchClear />
-        </EmojiPicker.SearchInput>
+        </EmojiPicker.SearchInputGroup>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1 [scrollbar-width:thin]">
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>

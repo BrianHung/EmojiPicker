@@ -28,3 +28,8 @@ export const sectionGap = "--emoji-picker-section-gap";
  * @default 0px
  */
 export const sectionMinWidth = "--emoji-picker-section-min-width";
+/**
+ * The grid's width, which `List` sets on `Root`.
+ * @type {length}
+ */
+export const contentWidth = "--emoji-picker-content-width";

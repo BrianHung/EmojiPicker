@@ -24,7 +24,7 @@ const tokens: Tokens = {
 
 const POPUP = "rounded-emoji-picker border-[0.5px] border-emoji-picker-border bg-emoji-picker-background shadow-emoji-picker";
 
-export const LINEAR_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently used" }, { id: "custom" }, { id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "travel-places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
+export const LINEAR_CATEGORIES: CategoryOption[] = [{ id: "frequent", name: "Frequently used" }, { id: "custom" }, { id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "travel-places" }, { id: "activities" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }];
 
 export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid = false, searchResults, className }: StylePickerProps) {
   return (
@@ -40,9 +40,10 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
-          <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-muted">
+          <EmojiPicker.SearchInputGroup>
+            <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-muted" />
             <SearchClear />
-          </EmojiPicker.SearchInput>
+          </EmojiPicker.SearchInputGroup>
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-2.5")}>

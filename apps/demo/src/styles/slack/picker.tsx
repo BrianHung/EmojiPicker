@@ -12,7 +12,7 @@ const GETTING_WORK_DONE = [
 
 const CATEGORIES = withIcons(I.ICONS.slack, {
   categories: [
-    { id: "suggested", name: "Getting Work Done" },
+    { id: "frequent", name: "Getting Work Done" },
     { id: "smileys-people" },
     { id: "animals-nature" },
     { id: "food-drink" },
@@ -25,7 +25,7 @@ const CATEGORIES = withIcons(I.ICONS.slack, {
   ],
   size: 22,
   strokeWidth: 1.7,
-  hide: ["suggested", "custom"],
+  hide: ["frequent", "custom"],
 });
 
 function CustomTabIcon() {
@@ -86,7 +86,7 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
     <EmojiPicker.Root
       columns={fluid ? "fit" : 9}
       categories={CATEGORIES}
-      suggested={GETTING_WORK_DONE}
+      frequent={GETTING_WORK_DONE}
       searchResults={searchResults}
       onSelect={onSelect}
       data-style="slack"
@@ -114,13 +114,14 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       </div>
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-[17.5px] pt-3.5 pb-[7px]">
-          <EmojiPicker.SearchInput
-            placeholder="Search all emoji"
-            autoFocus={autoFocus}
-            className="h-9 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
-          >
+          <EmojiPicker.SearchInputGroup>
+            <EmojiPicker.SearchInput
+              placeholder="Search all emoji"
+              autoFocus={autoFocus}
+              className="h-9 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
+            />
             <SearchClear />
-          </EmojiPicker.SearchInput>
+          </EmojiPicker.SearchInputGroup>
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport

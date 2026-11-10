@@ -103,12 +103,12 @@ class GridState {
   }
 }
 
-export interface UseEmojiPickerCellResult {
+export interface UseEmojiPickerCellReturnValue {
   cellProps: React.HTMLAttributes<HTMLElement> & { ref: (el: HTMLElement | null) => void; [data: `data-${string}`]: string | number | true | undefined };
   state: EmojiPickerListCellState;
 }
 
-export function useCell(grid: Cells, item: EmojiItem): UseEmojiPickerCellResult {
+export function useCell(grid: Cells, item: EmojiItem): UseEmojiPickerCellReturnValue {
   const overridden = useOverridden(item.unified, item.record);
   const flags = useStore(grid.picker, (s) => flagsOf(s, item.id));
   const element = React.useRef<HTMLElement | null>(null);
@@ -135,4 +135,4 @@ export function useCell(grid: Cells, item: EmojiItem): UseEmojiPickerCellResult 
   return { cellProps: { ...props, ref }, state };
 }
 
-export const useEmojiPickerCell = (state: EmojiPickerGridState, item: EmojiItem): UseEmojiPickerCellResult => useCell(cellsOf(state), item);
+export const useEmojiPickerCell = (state: EmojiPickerGridState, item: EmojiItem): UseEmojiPickerCellReturnValue => useCell(cellsOf(state), item);

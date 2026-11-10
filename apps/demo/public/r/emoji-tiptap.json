@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-tiptap",
   "title": "Emoji Tiptap",
-  "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
+  "description": "Shortcode suggestions for a Tiptap 3 editor: the useTiptapEmojiSuggestions hook on the ProseMirror plugin, the EmojiSuggestionsMenu component, and an EmojiNode for custom emoji.",
   "dependencies": [
     "emoji-components@1.0.0-alpha.2",
     "@tiptap/core",
@@ -16,14 +16,14 @@
   "files": [
     {
       "path": "registry/use-emoji-tiptap.ts",
-      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiStore, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from \"emoji-components\";\nimport { emojiTypeahead } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiTypeaheadOptions = EmojiTypeaheadOptions & {\n  content?: (text: string, suggestion: ShortcodeCompletion) => Content;\n};\n\nexport function useTiptapEmojiTypeahead(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiTypeaheadOptions = {}): EmojiTypeahead {\n  const store = useEmojiStore();\n  const id = React.useId();\n  const latest = React.useRef({ content, onSelect });\n  React.useEffect(() => {\n    latest.current = { content, onSelect };\n  });\n  const { plugin, key, suggestions, anchor } = React.useMemo(\n    () =>\n      emojiTypeahead(store, {\n        id,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        onSelect: (selection) => latest.current.onSelect?.(selection),\n        content(text, suggestion, schema) {\n          const replacement = latest.current.content?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [store, id, insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(key));\n  }, [editor, plugin, key]);\n  return useEmojiTypeahead(suggestions, { anchor });\n}\n",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { createNodeFromContent, type Content, type Editor } from \"@tiptap/core\";\nimport { useEmojiStore, useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from \"emoji-components\";\nimport { emojiSuggestions } from \"@/lib/emoji-prosemirror\";\n\nexport type TiptapEmojiSuggestionsOptions = UseEmojiSuggestionsOptions & {\n  content?: (text: string, suggestion: ShortcodeCompletion) => Content;\n};\n\nexport function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {\n  const store = useEmojiStore();\n  const id = React.useId();\n  const latest = React.useRef({ content, onSelect });\n  React.useEffect(() => {\n    latest.current = { content, onSelect };\n  });\n  const { plugin, key, suggestions, anchor } = React.useMemo(\n    () =>\n      emojiSuggestions(store, {\n        id,\n        insert,\n        limit,\n        matchBy,\n        order,\n        columns,\n        onSelect: (selection) => latest.current.onSelect?.(selection),\n        content(text, suggestion, schema) {\n          const replacement = latest.current.content?.(text, suggestion) ?? `${text} `;\n          return typeof replacement === \"string\" ? replacement : createNodeFromContent(replacement, schema);\n        },\n      }),\n    [store, id, insert, limit, matchBy, order, columns],\n  );\n  React.useEffect(() => {\n    if (!editor || editor.isDestroyed) return;\n    editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);\n    return () => void (editor.isDestroyed || editor.unregisterPlugin(key));\n  }, [editor, plugin, key]);\n  return useEmojiSuggestions(suggestions, { anchor });\n}\n",
       "type": "registry:hook"
     },
     {
-      "path": "src/components/tiptap/emoji-suggestion.tsx",
-      "content": "import type { Editor } from \"@tiptap/react\";\nimport type { EmojiTypeaheadOptions } from \"emoji-components\";\nimport { useTiptapEmojiTypeahead } from \"@/hooks/use-emoji-tiptap\";\nimport { EmojiSuggestions, type EmojiSuggestionsProps } from \"@/components/ui/emoji-suggestions\";\nimport { emojiContent } from \"./emoji-node\";\n\nexport function EmojiSuggestionMenu({ editor, className, side, ...options }: EmojiSuggestionsProps & EmojiTypeaheadOptions & { editor: Editor | null }) {\n  const emoji = useTiptapEmojiTypeahead(editor, {\n    ...options,\n    content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),\n  });\n  return <EmojiSuggestions {...emoji} className={className} side={side} />;\n}\n",
+      "path": "src/components/tiptap/emoji-suggestions-menu.tsx",
+      "content": "import type { Editor } from \"@tiptap/react\";\nimport type { UseEmojiSuggestionsOptions } from \"emoji-components\";\nimport { useTiptapEmojiSuggestions } from \"@/hooks/use-emoji-tiptap\";\nimport { EmojiSuggestions, type EmojiSuggestionsProps } from \"@/components/ui/emoji-suggestions\";\nimport { emojiContent } from \"./emoji-node\";\n\nexport function EmojiSuggestionsMenu({ editor, className, side, align, ...options }: Pick<EmojiSuggestionsProps, \"className\" | \"side\" | \"align\"> & UseEmojiSuggestionsOptions & { editor: Editor | null }) {\n  const emoji = useTiptapEmojiSuggestions(editor, {\n    ...options,\n    content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),\n  });\n  return <EmojiSuggestions {...emoji} className={className} side={side} align={align} />;\n}\n",
       "type": "registry:component",
-      "target": "components/tiptap/emoji-suggestion.tsx"
+      "target": "components/tiptap/emoji-suggestions-menu.tsx"
     },
     {
       "path": "src/components/tiptap/emoji-node.tsx",
@@ -32,5 +32,5 @@
       "target": "components/tiptap/emoji-node.tsx"
     }
   ],
-  "type": "registry:hook"
+  "type": "registry:block"
 }

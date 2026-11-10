@@ -17,7 +17,6 @@ import {
   type EmojiPickerRootChangeEventReason,
   type EmojiPickerRootReactionsOpenChangeEventDetails,
   type EmojiPickerRootReactionsOpenChangeEventReason,
-  type EmojiPickerRootSelectEventDetails,
   type ListHandle,
   type SearchResultsMode,
   ReactionsContext,
@@ -33,7 +32,7 @@ import { PopoverContext } from "../../popover/root/EmojiPopoverRootContext";
 import type { EmojiPopoverRootChangeEventReason } from "../../popover/utils/types";
 import { EmojiProviderContext, useEmojiContext } from "../../provider/EmojiProviderContext";
 import { SharedProvider } from "../../provider/EmojiProvider";
-import { BUTTONS } from "../reactions/ReactionBar";
+import { BUTTONS } from "../../reaction-bar/EmojiReactionBar";
 import { mergePartProps } from "../../internals/mergePartProps";
 import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
 import { useActiveWithin } from "../../utils/useActiveWithin";
@@ -52,16 +51,15 @@ export type EmojiPickerRootState = { searching: boolean; reactionsOpen: boolean 
 
 export type EmojiPickerRootProps = EmojiComponentsHandlers<Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children" | "role" | "className" | "style" | "defaultValue">> &
   EmojiComponentsPartProps<EmojiPickerRootState> & {
-    onSelect?: (selection: EmojiSelection, details: EmojiPickerRootSelectEventDetails) => void;
+    onSelect?: (selection: EmojiSelection, details: EmojiPickerRootChangeEventDetails) => void;
     actionsRef?: React.Ref<EmojiPickerRootActions>;
     keyboardTarget?: HTMLElement | React.RefObject<HTMLElement | null> | null;
     columns?: "fit" | number;
     categories?: readonly CategoryOption[];
-    frequent?: number | false;
+    frequent?: number | false | readonly string[];
     collapsedCategories?: readonly string[];
     defaultCollapsedCategories?: readonly string[];
     onCollapsedCategoriesChange?: (ids: readonly string[], details: CollapsedCategoriesChangeDetails) => void;
-    suggested?: readonly string[];
     searchResults?: SearchResultsMode;
     searchLimit?: number;
     query?: string;
@@ -109,7 +107,6 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const {
     onSelect,
     frequent,
-    suggested,
     emojiVersion: emojiVersionProp,
     categories,
     collapsedCategories,
@@ -151,7 +148,6 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     labels,
     categories,
     frequent,
-    suggested,
     emojiVersion,
     drawable: native.drawable,
     searchResults,
@@ -210,21 +206,21 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     },
     [setOpen],
   );
-  const collapseToReactions = React.useCallback(() => void showReactions("item-press"), [showReactions]);
-  const latest = useLatest({ onSelect, popover, selects });
+  const latest = useLatest({ onSelect, popover, selects, reactionsOpen });
   const pick = React.useCallback(
     (unified: string, event?: Event, reason: EmojiPickerRootChangeEventReason = "item-press") => {
       const selection = state.choose(unified);
       if (!selection) return undefined;
-      const { onSelect, popover, selects } = latest.current;
-      const details: EmojiPickerRootSelectEventDetails = Object.assign(createChangeDetails(reason, event), { collapse: reactions ? collapseToReactions : undefined });
+      const { onSelect, popover, selects, reactionsOpen } = latest.current;
+      const details = createChangeDetails(reason, event);
       onSelect?.(selection, details);
       if (details.isCanceled) return selection;
       if (selects) setValue(selection.unified, createChangeDetails(reason, event));
+      if (reactions && !reactionsOpen) showReactions("item-press", event);
       popover?.close("item-press", event);
       return selection;
     },
-    [state, latest, reactions, collapseToReactions, setValue],
+    [state, latest, reactions, showReactions, setValue],
   );
   const [variations, registerVariations] = useMounted();
   const [statuses, registerStatus] = useMounted();
@@ -315,9 +311,9 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     {
       ref: rootRef,
       role: "group",
-      "data-slot": SLOTS.root,
       "aria-label": rest["aria-labelledby"] ? undefined : labels.picker,
       ...mergePartProps(rest, activeWithin, focusWithinProps),
+      "data-slot": SLOTS.root,
       [EmojiPickerRootDataAttributes.columns]: columns ?? undefined,
       onKeyDown: keys,
       className,
@@ -354,7 +350,6 @@ export declare namespace EmojiPickerRoot {
   type Actions = EmojiPickerRootActions;
   type ChangeEventReason = EmojiPickerRootChangeEventReason;
   type ChangeEventDetails = EmojiPickerRootChangeEventDetails;
-  type SelectEventDetails = EmojiPickerRootSelectEventDetails;
   type QueryChangeEventReason = QueryChangeDetails["reason"];
   type QueryChangeEventDetails = QueryChangeDetails;
   type HighlightChangeEventReason = HighlightChangeDetails["reason"];

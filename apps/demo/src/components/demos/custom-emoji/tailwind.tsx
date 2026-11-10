@@ -1,8 +1,8 @@
 import { EmojiProvider, type CategoryOption, type CustomEmoji, type EmojiSelection } from "emoji-components";
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 
 const categories: CategoryOption[] = [
-  { id: "suggested", name: "Frequently used" },
+  { id: "frequent", name: "Frequently used" },
   { id: "custom:Bufo", name: "Bufo" },
   { id: "smileys-people" },
   { id: "animals-nature" },
@@ -17,7 +17,11 @@ const bufo = async ({ signal }: { signal: AbortSignal }): Promise<CustomEmoji[]>
 export function CustomEmojiPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
     <EmojiProvider customEmojis={bufo}>
-      <EmojiPickerCard onSelect={onSelect} categories={categories} />
+      <EmojiPicker onSelect={onSelect} categories={categories}>
+        <EmojiPickerSearch />
+        <EmojiPickerContent />
+        <EmojiPickerFooter />
+      </EmojiPicker>
     </EmojiProvider>
   );
 }

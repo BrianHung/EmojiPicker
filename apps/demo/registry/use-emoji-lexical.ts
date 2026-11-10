@@ -3,9 +3,9 @@
 import * as React from "react";
 import { $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode, COMMAND_PRIORITY_HIGH, KEY_DOWN_COMMAND, type LexicalNode, type NodeKey } from "lexical";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { findShortcodeTrigger, useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions, type ShortcodeCompletion } from "emoji-components";
+import { findShortcodeTrigger, useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from "emoji-components";
 
-export type LexicalEmojiTypeaheadOptions = EmojiTypeaheadOptions & {
+export type LexicalEmojiSuggestionsOptions = UseEmojiSuggestionsOptions & {
   node?: (text: string, suggestion: ShortcodeCompletion) => LexicalNode;
 };
 
@@ -21,10 +21,10 @@ function $matchAtSelection(): Match | null {
   return found && { query: found.query, key: text.getKey(), from: found.offset, to: offset };
 }
 
-export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypeaheadOptions = {}): EmojiTypeahead {
+export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
   const [editor] = useLexicalComposerContext();
   const [match, setMatch] = React.useState<Match | null>(null);
-  const typeahead = useEmojiTypeahead(
+  const suggestions = useEmojiSuggestions(
     match && {
       query: match.query,
       anchor() {
@@ -48,12 +48,12 @@ export function useLexicalEmojiTypeahead({ node, ...options }: LexicalEmojiTypea
     options,
     () => editor.getRootElement(),
   );
-  const { onKeyDown } = typeahead;
+  const { onKeyDown } = suggestions;
   React.useEffect(
     () =>
       editor.registerUpdateListener(({ editorState }) => editorState.read(() => setMatch($matchAtSelection()))),
     [editor],
   );
   React.useEffect(() => editor.registerCommand(KEY_DOWN_COMMAND, onKeyDown, COMMAND_PRIORITY_HIGH), [editor, onKeyDown]);
-  return typeahead;
+  return suggestions;
 }

@@ -3,7 +3,7 @@ import { EmojiPicker, type CategoryOption } from "emoji-components";
 import { cn } from "@/lib/utils";
 import type * as I from "./icons";
 
-const DEFAULT_ORDER: CategoryOption["id"][] = ["suggested", "custom", "smileys-people", "animals-nature", "food-drink", "travel-places", "activities", "objects", "symbols", "flags"];
+const DEFAULT_ORDER: CategoryOption["id"][] = ["frequent", "custom", "smileys-people", "animals-nature", "food-drink", "travel-places", "activities", "objects", "symbols", "flags"];
 
 export const noEmoji = ({ status }: EmojiPicker.List.EmptyState) => (status === "empty" ? <div className="py-10 text-center text-sm opacity-60">No emoji found</div> : null);
 

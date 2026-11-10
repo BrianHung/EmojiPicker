@@ -121,15 +121,16 @@ for (const file of ["index.ts", "floating-ui.ts", "react-aria.ts"]) {
   }
 }
 
-// Owner prefix per source folder. Library-wide code (internals) is EmojiComponents; provider and typeahead names only need to say Emoji.
+// Owner prefix per source folder. Library-wide code (internals) is EmojiComponents; provider and suggestions hook names only need to say Emoji.
 const OWNERS = [
   [/^packages\/react\/src\/picker\//, "EmojiPicker"],
   [/^packages\/react\/src\/popover\//, "EmojiPopover"],
   [/^packages\/react\/src\/suggestions\//, "EmojiSuggestions"],
   [/^packages\/react\/src\/internals\//, "EmojiComponents"],
+  [/^packages\/react\/src\/reaction-bar\//, "EmojiReactionBar"],
   [/^packages\/react\/src\/emoji\//, "Emoji"],
 ];
-const LIBRARY = /^packages\/react\/src\/(provider|use-emoji-typeahead)\//;
+const LIBRARY = /^packages\/react\/src\/(provider|use-emoji-suggestions)\//;
 // Justified exceptions
 const NAME_ALLOWLIST = new Set([
   // React's CategoryOption narrows core's CategoryOption to React icons and keeps its name

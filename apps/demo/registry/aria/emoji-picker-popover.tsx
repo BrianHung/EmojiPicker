@@ -1,45 +1,51 @@
 "use client";
 
 import * as React from "react";
-import { useEmojiLabels, type EmojiSelection } from "emoji-components";
+import { useEmojiLabels } from "emoji-components";
 import { Button } from "@/components/ui/button";
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
 
-function EmojiPickerPopover({
-  onSelect,
-  side = "bottom",
-  align = "start",
-  className,
-  children,
-  "aria-label": ariaLabel,
-}: {
-  onSelect: (selection: EmojiSelection) => void;
-  side?: "top" | "bottom";
-  align?: "start" | "center" | "end";
-  className?: string;
-  children: React.ReactNode;
-  "aria-label"?: string;
-}) {
-  const [open, setOpen] = React.useState(false);
+type EmojiPickerPopoverProps = Omit<React.ComponentProps<typeof EmojiPicker>, "children" | "className" | "aria-label"> &
+  Pick<React.ComponentProps<typeof Popover>, "placement"> & {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    className?: string;
+    "aria-label"?: string;
+    children: React.ReactNode;
+  };
+
+function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange, placement = "bottom start", onSelect, className, "aria-label": ariaLabel, children, ...props }: EmojiPickerPopoverProps) {
+  const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
+  const open = openProp ?? uncontrolled;
+  const setOpen = (next: boolean) => {
+    setUncontrolled(next);
+    onOpenChange?.(next);
+  };
   const labels = useEmojiLabels();
   return (
     <PopoverTrigger isOpen={open} onOpenChange={setOpen}>
       <Button variant="outline" aria-label={ariaLabel} className={className}>
         {children}
       </Button>
-      <Popover placement={align === "center" ? side : `${side} ${align}`} aria-label={labels.picker} className="w-auto overflow-hidden p-0">
-        <EmojiPickerCard
-          autoFocus
-          onSelect={(selection) => {
-            onSelect(selection);
-            setOpen(false);
+      <Popover placement={placement} aria-label={labels.picker} className="w-auto overflow-hidden p-0">
+        <EmojiPicker
+          {...props}
+          onSelect={(selection, details) => {
+            onSelect?.(selection, details);
+            if (!details.isCanceled) setOpen(false);
           }}
           className="rounded-none border-0 shadow-none"
-        />
+        >
+          <EmojiPickerSearch autoFocus />
+          <EmojiPickerContent />
+          <EmojiPickerFooter />
+        </EmojiPicker>
       </Popover>
     </PopoverTrigger>
   );
 }
 
 export { EmojiPickerPopover };
+export type { EmojiPickerPopoverProps };

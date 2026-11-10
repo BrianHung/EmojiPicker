@@ -1,7 +1,7 @@
 {
   "name": "@emoji-components/core",
   "version": "1.0.0-alpha.2",
-  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and typeahead state.",
+  "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and suggestions state.",
   "keywords": [
     "emoji",
     "emoji-picker",

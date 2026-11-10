@@ -25,7 +25,7 @@ describe.each([
   ["floating-ui", floating],
   ["react-aria", aria],
 ])("%s", (_, { EmojiPopover, EmojiSuggestions }) => {
-  it("stays open when onOpenChange cancels an outside press", async () => {
+  it("is non-modal by default, and stays open when onOpenChange cancels an outside press", async () => {
     const outside = document.body.appendChild(document.createElement("button"));
     const host = document.body.appendChild(document.createElement("div"));
     const root = createTestRoot(host);
@@ -44,6 +44,7 @@ describe.each([
         </EmojiPopover.Root>,
       ),
     );
+    expect(outside.closest("[aria-hidden], [inert]")).toBeNull();
     press(outside);
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: "outside-press", event: expect.any(Event) }));
     expect(document.querySelector('[role="dialog"]')?.hasAttribute("data-open")).toBe(true);
@@ -91,7 +92,9 @@ describe.each([
               <EmojiPopover.Positioner>
                 <EmojiPopover.Popup aria-label="Emoji">
                   <EmojiPicker.Root frequent={false} defaultQuery="smile" onQueryChange={onQueryChange}>
-                    <EmojiPicker.SearchInput ref={ref} />
+                    <EmojiPicker.SearchInputGroup>
+                      <EmojiPicker.SearchInput ref={ref} />
+                    </EmojiPicker.SearchInputGroup>
                     <Grid />
                   </EmojiPicker.Root>
                 </EmojiPopover.Popup>

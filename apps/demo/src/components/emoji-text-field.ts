@@ -1,10 +1,10 @@
 import * as React from "react";
-import { useTextFieldEmojiTypeahead, type EmojiTypeaheadOptions } from "emoji-components";
+import { useTextFieldEmojiSuggestions, type UseEmojiSuggestionsOptions } from "emoji-components";
 
-export function useEmojiTextField<T extends HTMLInputElement | HTMLTextAreaElement>(options?: EmojiTypeaheadOptions) {
+export function useEmojiTextField<T extends HTMLInputElement | HTMLTextAreaElement>(options?: UseEmojiSuggestionsOptions) {
   const ref = React.useRef<T>(null);
   const [value, setValue] = React.useState("");
-  const emoji = useTextFieldEmojiTypeahead(ref, options);
+  const emoji = useTextFieldEmojiSuggestions(ref, options);
   const setText = (next: string, at = next.length) => {
     setValue(next);
     requestAnimationFrame(() => {

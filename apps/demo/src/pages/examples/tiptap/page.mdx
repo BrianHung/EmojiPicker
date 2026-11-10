@@ -6,7 +6,7 @@ description: Shortcode suggestions and an emoji picker for the Tiptap editor.
 import { Editor } from "./editor";
 import tiptap from "@/registry/use-emoji-tiptap.ts?raw";
 import prosemirror from "@/registry/emoji-prosemirror.ts?raw";
-import suggestion from "@/components/tiptap/emoji-suggestion.tsx?raw";
+import suggestion from "@/components/tiptap/emoji-suggestions-menu.tsx?raw";
 import node from "@/components/tiptap/emoji-node.tsx?raw";
 import menu from "@/registry/emoji-suggestions.tsx?raw";
 
@@ -20,7 +20,7 @@ import menu from "@/registry/emoji-suggestions.tsx?raw";
 
 <PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-tiptap.json" />
 
-Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emoji-suggestions.tsx`, `components/tiptap/emoji-suggestion.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
+Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emoji-suggestions.tsx`, `components/tiptap/emoji-suggestions-menu.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
 </Step>
 
@@ -45,7 +45,7 @@ import StarterKit from "@tiptap/starter-kit";
 import { EmojiProvider, useEmojiStore } from "emoji-components";
 import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
 import { EmojiNode, emojiAttrs } from "@/components/tiptap/emoji-node";
-import { EmojiSuggestionMenu } from "@/components/tiptap/emoji-suggestion";
+import { EmojiSuggestionsMenu } from "@/components/tiptap/emoji-suggestions-menu";
 
 function TiptapEditor() {
   const store = useEmojiStore();
@@ -64,7 +64,7 @@ function TiptapEditor() {
         🙂
       </EmojiPickerPopover>
       <EditorContent editor={editor} />
-      <EmojiSuggestionMenu editor={editor} />
+      <EmojiSuggestionsMenu editor={editor} />
     </>
   );
 }
@@ -84,12 +84,12 @@ export function Editor() {
 
 ## How it works
 
-`useTiptapEmojiTypeahead` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
+`useTiptapEmojiSuggestions` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
 
-```tsx title="emoji-suggestion.tsx (excerpt)"
-import { useTiptapEmojiTypeahead } from "@/hooks/use-emoji-tiptap";
+```tsx title="emoji-suggestions-menu.tsx (excerpt)"
+import { useTiptapEmojiSuggestions } from "@/hooks/use-emoji-tiptap";
 
-const emoji = useTiptapEmojiTypeahead(editor, {
+const emoji = useTiptapEmojiSuggestions(editor, {
   content: (text, { record, shortcode }) => (record.imageUrl ? emojiContent({ unified: record.unified, shortcode, text: null }) : `${text} `),
 });
 
@@ -97,8 +97,8 @@ const emoji = useTiptapEmojiTypeahead(editor, {
   <EmojiSuggestions.Portal>
     <EmojiSuggestions.Positioner anchor={emoji.anchor}>
       <EmojiSuggestions.Popup>
-        <ul {...emoji.suggestions.getListProps()}>
-          {emoji.suggestions.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.suggestions.getOptionProps(i)}>:{s.shortcode}:</li>)}
+        <ul {...emoji.getListProps()}>
+          {emoji.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.getOptionProps(i)}>:{s.shortcode}:</li>)}
         </ul>
       </EmojiSuggestions.Popup>
     </EmojiSuggestions.Positioner>
@@ -112,7 +112,7 @@ const emoji = useTiptapEmojiTypeahead(editor, {
 
 <Code title="lib/emoji-prosemirror.ts" code={prosemirror} />
 
-<Code title="components/tiptap/emoji-suggestion.tsx" code={suggestion} />
+<Code title="components/tiptap/emoji-suggestions-menu.tsx" code={suggestion} />
 
 <Code title="components/tiptap/emoji-node.tsx" code={node} />
 

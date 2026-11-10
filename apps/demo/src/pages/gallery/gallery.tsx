@@ -1,6 +1,6 @@
 import * as React from "react";
 import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
-import { Emoji, useEmojiTypeahead, useTextFieldEmojiTypeahead, type EmojiTrigger } from "emoji-components";
+import { Emoji, useEmojiSuggestions, useTextFieldEmojiSuggestions, type EmojiTrigger } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { FitBox, Tabs } from "@/components/site/docs";
 import { SCENES, STYLES, sourceOf, type Style } from "@/styles";
 import { SceneSlot, toggleReaction, type Reaction } from "@/styles/scene-kit";
-import { StyleTypeahead, StyleDropdown, StylePills, StyleReactionRow } from "@/styles/variants";
+import { StyleSuggestions, StyleDropdown, StylePills, StyleReactionRow } from "@/styles/variants";
 import variants from "@/styles/variants.tsx?raw";
 import { discordAutocompleteOptions } from "@/styles/discord/picker";
 
@@ -73,15 +73,15 @@ function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
   const [touched, setTouched] = React.useState(false);
   const options = { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) } as const;
-  const emoji = useTextFieldEmojiTypeahead(ref, { ...options, onSelect: copyEmoji });
-  const preview = useEmojiTypeahead(touched ? null : PREVIEW, options);
+  const emoji = useTextFieldEmojiSuggestions(ref, { ...options, onSelect: copyEmoji });
+  const preview = useEmojiSuggestions(touched ? null : PREVIEW, options);
   return (
     <div className="relative w-full max-w-[380px]">
       {touched ? (
-        <StyleTypeahead appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
+        <StyleSuggestions appStyle={appStyle} {...emoji} className="absolute inset-x-0 bottom-full mb-1.5" />
       ) : (
         <div inert aria-hidden className="absolute inset-x-0 bottom-full mb-1.5">
-          <StyleTypeahead appStyle={appStyle} {...preview} />
+          <StyleSuggestions appStyle={appStyle} {...preview} />
         </div>
       )}
       <input
@@ -189,7 +189,7 @@ export function GalleryPage() {
         <GalleryCard title="Reaction counts" description="Reaction counts with an add button." code={extract(variants, "StylePills")} file="styles/variants.tsx">
           <PillsDemo appStyle={appStyle} />
         </GalleryCard>
-        <GalleryCard title="Shortcode typeahead" description="Shortcode suggestions for a text field." code={extract(variants, "StyleTypeahead")} file="styles/variants.tsx" previewClassName="items-end pt-72">
+        <GalleryCard title="Shortcode typeahead" description="Shortcode suggestions for a text field." code={extract(variants, "StyleSuggestions")} file="styles/variants.tsx" previewClassName="items-end pt-72">
           <TypeaheadDemo appStyle={appStyle} />
         </GalleryCard>
         <GalleryCard title="Sheet" description="A picker docked at full width." code={`<${appStyle.label}Picker className="h-[340px] w-full rounded-none border-0 shadow-none" />`} file={file} previewClassName="items-end p-0 pt-6">
