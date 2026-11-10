@@ -66,6 +66,11 @@
       "types": "./dist/provider/index.d.ts",
       "default": "./dist/provider/index.js"
     },
+    "./reaction-bar": {
+      "@emoji-components/source": "./src/reaction-bar/index.ts",
+      "types": "./dist/reaction-bar/index.d.ts",
+      "default": "./dist/reaction-bar/index.js"
+    },
     "./popover/floating-ui": {
       "@emoji-components/source": "./src/popover/floating-ui/index.ts",
       "types": "./dist/popover/floating-ui/index.d.ts",

@@ -20,7 +20,7 @@ export const EmojiPickerSearchStatus = React.forwardRef<HTMLDivElement, EmojiPic
   const state: EmojiPickerSearchStatusState = { resultCount };
   return renderElement(
     "div",
-    { role: "status", "aria-live": "polite", "aria-atomic": true, "data-slot": SLOTS.searchStatus, ...props, ref, children: children ?? (resultCount === null ? "" : picker.labels.resultCount(resultCount)) },
+    { role: "status", "aria-live": "polite", "aria-atomic": true, ...props, "data-slot": SLOTS.searchStatus, ref, children: children ?? (resultCount === null ? "" : picker.labels.resultCount(resultCount)) },
     state,
   );
 });

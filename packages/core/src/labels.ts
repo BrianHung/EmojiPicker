@@ -21,8 +21,9 @@ export type EmojiLabels = {
   emojiList: string;
   resultCount: (count: number) => string;
   categoryNavigation: string;
-  suggested: string;
+  frequent: string;
   custom: string;
+  suggestions: string;
   reactions: string;
   expandReactions: string;
   previewCaption: string;
@@ -49,8 +50,9 @@ export const defaultLabels: EmojiLabels = {
   emojiList: "Emoji",
   resultCount: plural("en", COUNT),
   categoryNavigation: "Category navigation",
-  suggested: "Frequently used",
+  frequent: "Frequently used",
   custom: "Custom",
+  suggestions: "Emoji suggestions",
   reactions: "Reactions",
   expandReactions: "More emoji",
   previewCaption: "What's your mood?",

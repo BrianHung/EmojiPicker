@@ -3,27 +3,27 @@ import * as React from "react";
 import { expect, it, vi } from "vitest";
 import { render } from "../../test/render";
 import { en } from "../../test/en";
-import { EmojiProvider, useEmojiTypeahead, useTextFieldEmojiTypeahead, type EmojiSelection, type EmojiTypeahead } from "..";
+import { EmojiProvider, useEmojiSuggestions, useTextFieldEmojiSuggestions, type EmojiSelection, type UseEmojiSuggestionsReturnValue } from "..";
 
-const shown = ({ open, suggestions }: EmojiTypeahead) => (open ? suggestions.suggestions[0]?.shortcode : "closed");
+const shown = ({ open, suggestions }: UseEmojiSuggestionsReturnValue) => (open ? suggestions[0]?.shortcode : "closed");
 
 function TextField({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {
   const ref = React.useRef<HTMLInputElement>(null);
-  const typeahead = useTextFieldEmojiTypeahead(ref, { onSelect });
+  const suggestions = useTextFieldEmojiSuggestions(ref, { onSelect });
   return (
     <>
       <input ref={ref} aria-label="Message" defaultValue=":thumbs" />
-      <output>{shown(typeahead)}</output>
+      <output>{shown(suggestions)}</output>
     </>
   );
 }
 
 function Editor({ query }: { query: string }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const typeahead = useEmojiTypeahead({ query, anchor: () => null, replace: () => {} }, {}, ref);
+  const suggestions = useEmojiSuggestions({ query, anchor: () => null, replace: () => {} }, {}, ref);
   return (
     <div ref={ref} contentEditable suppressContentEditableWarning>
-      {shown(typeahead)}
+      {shown(suggestions)}
     </div>
   );
 }
@@ -73,6 +73,18 @@ it("accepts with Enter and Tab, not Shift+Tab or a composing Enter", () => {
   expect(keydown(input, "Tab")).toBe(true);
   expect(keydown(input, "Enter")).toBe(true);
   expect(onSelect.mock.calls.map(([s]) => s.unified)).toEqual(["1f44d", "1f44d"]);
+});
+
+it("labels the list from labels.suggestions", () => {
+  function List() {
+    return <ul {...useEmojiSuggestions(null).getListProps()} />;
+  }
+  const host = render(
+    <EmojiProvider data={en} prepare={false} labels={{ suggestions: "Sugerencias de emoji" }}>
+      <List />
+    </EmojiProvider>,
+  );
+  expect(host.querySelector("ul")!.getAttribute("aria-label")).toBe("Sugerencias de emoji");
 });
 
 it("dismisses when the editor blurs, until the query changes", () => {

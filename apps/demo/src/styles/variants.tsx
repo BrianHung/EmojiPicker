@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Emoji, useEmojiStore, useFrequentEmoji, type EmojiSelection, type EmojiTypeahead } from "emoji-components";
-import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
+import { Emoji, EmojiReactionBar, useEmojiStore, useEmojiFrequents, type EmojiSelection, type UseEmojiSuggestionsReturnValue } from "emoji-components";
 import { cn } from "@/lib/utils";
 import { PickerPopover, type PickerPopoverProps } from "@/components/picker-popover";
 import { SmilePlus } from "./icons";
@@ -52,7 +51,7 @@ export function StyleDropdown({
 
 export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: { appStyle: Style; onSelect: (s: EmojiSelection) => void; count?: number; className?: string }) {
   const store = useEmojiStore();
-  const frequent = useFrequentEmoji({ limit: count }).items;
+  const frequent = useEmojiFrequents({ limit: count }).items;
   const top = appStyle.tapback.pinned ?? frequent;
   return (
     <EmojiReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">
@@ -82,7 +81,8 @@ export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: {
   );
 }
 
-export function StyleTypeahead({ appStyle, suggestions: menu, open, className }: Pick<EmojiTypeahead, "suggestions" | "open"> & { appStyle: Style; className?: string }) {
+export function StyleTypeahead({ appStyle, className, ...menu }: UseEmojiSuggestionsReturnValue & { appStyle: Style; className?: string }) {
+  const { open } = menu;
   const store = useEmojiStore();
   const a = appStyle.autocomplete;
   const list = React.useRef<HTMLUListElement>(null);
@@ -98,7 +98,7 @@ export function StyleTypeahead({ appStyle, suggestions: menu, open, className }:
   return (
     <div data-style={appStyle.id} style={tokensOf(appStyle)} onMouseDown={(e) => e.preventDefault()} className={cn("overflow-hidden", a.className, className)}>
       {a.header ? <div className={a.headerClassName ?? "border-b border-border px-3 py-1.5 text-xs text-muted-foreground"}>{a.header(menu.query)}</div> : null}
-      <ul ref={list} {...menu.getListProps()} aria-label="Emoji suggestions" className={cn("overflow-y-auto", a.list ?? "max-h-64 p-1")}>
+      <ul ref={list} {...menu.getListProps()} className={cn("overflow-y-auto", a.list ?? "max-h-64 p-1")}>
         {menu.suggestions.map((s, i) => {
           const highlighted = i === menu.highlightedIndex;
           const [start, end] = s.match ?? [0, 0];

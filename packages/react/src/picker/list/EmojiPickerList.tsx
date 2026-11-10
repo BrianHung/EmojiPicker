@@ -26,7 +26,7 @@ import { HorizontalLayout, VerticalLayout, type EmojiGridLayout, type EmojiGridL
 import { layoutUnits, PROBE, readProbe, sameMetrics } from "./utils/measure";
 import { gridKeyboardDelegate } from "./utils/navigation";
 import { defaultSection, ItemView, SectionHeader, SectionView } from "./utils/sections";
-import * as EmojiPickerRootCssVars from "../root/EmojiPickerRootCssVars";
+import * as EmojiPickerListCssVars from "./EmojiPickerListCssVars";
 import { ActionsLayer, hasActions, useActionsTab } from "./utils/ActionsLayer";
 import { useListGeometry } from "./utils/useListGeometry";
 import { VirtualCollection } from "./utils/VirtualCollection";
@@ -134,7 +134,7 @@ const ListInner = React.forwardRef<HTMLDivElement, InnerProps>(function ListInne
     const width = state?.size.width ?? 0;
     if (width !== contentWidth.current) {
       contentWidth.current = width;
-      picker.root.current?.style.setProperty(EmojiPickerRootCssVars.contentWidth, `${width}px`);
+      picker.root.current?.style.setProperty(EmojiPickerListCssVars.contentWidth, `${width}px`);
     }
     const shown = horizontal || !state ? [] : [...state.getVisibleLayoutInfos().keys()].flatMap((key) => latestGrid.current.collection.emoji(key)?.unified ?? []);
     const rect = state?.visibleRect;

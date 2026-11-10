@@ -32,11 +32,11 @@ export type EmojiPickerSkinToneProps = EmojiComponentsPartElementProps<EmojiPick
   orientation?: EmojiPickerOrientation;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean, details: EmojiPickerSkinToneChangeEventDetails) => void;
+  onOpenChange?: (open: boolean, details: EmojiPickerSkinToneOpenChangeEventDetails) => void;
 };
 
-export type EmojiPickerSkinToneChangeEventReason = "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none";
-export type EmojiPickerSkinToneChangeEventDetails = ChangeDetails<EmojiPickerSkinToneChangeEventReason>;
+export type EmojiPickerSkinToneOpenChangeEventReason = "trigger-press" | "outside-press" | "escape-key" | "item-press" | "focus-out" | "imperative-action" | "none";
+export type EmojiPickerSkinToneOpenChangeEventDetails = ChangeDetails<EmojiPickerSkinToneOpenChangeEventReason>;
 
 export const EmojiPickerSkinTone = React.forwardRef<HTMLDivElement, EmojiPickerSkinToneProps>(function EmojiPickerSkinTone(
   { orientation = "horizontal", open: openProp, defaultOpen = false, onOpenChange, onKeyDown, children, ...props },
@@ -46,14 +46,14 @@ export const EmojiPickerSkinTone = React.forwardRef<HTMLDivElement, EmojiPickerS
   const [open, change] = useChangeState(openProp, defaultOpen, onOpenChange);
   const rootRef = useObjectRef(ref);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
-  const setOpen = (next: boolean, reason: EmojiPickerSkinToneChangeEventReason, event?: Event) => change(next, createChangeDetails(reason, event, triggerRef.current ?? undefined));
+  const setOpen = (next: boolean, reason: EmojiPickerSkinToneOpenChangeEventReason, event?: Event) => change(next, createChangeDetails(reason, event, triggerRef.current ?? undefined));
   const optionsRef = React.useRef<HTMLDivElement | null>(null);
   const outside = (event: PointerEvent) => setOpen(false, "outside-press", event);
   useInteractOutside({ ref: rootRef, isDisabled: !open, onInteractOutside: outside });
 
   const { labels } = useEmojiContext();
   const optionsId = React.useId();
-  const close = (reason: EmojiPickerSkinToneChangeEventReason, event?: Event) => {
+  const close = (reason: EmojiPickerSkinToneOpenChangeEventReason, event?: Event) => {
     const inside = optionsRef.current?.contains(document.activeElement);
     const details = setOpen(false, reason, event);
     if (inside && details && !details.isCanceled) triggerRef.current?.focus();
@@ -118,6 +118,6 @@ export const EmojiPickerSkinTone = React.forwardRef<HTMLDivElement, EmojiPickerS
 export declare namespace EmojiPickerSkinTone {
   type Props = EmojiPickerSkinToneProps;
   type State = EmojiPickerSkinToneState;
-  type ChangeEventReason = EmojiPickerSkinToneChangeEventReason;
-  type ChangeEventDetails = EmojiPickerSkinToneChangeEventDetails;
+  type OpenChangeEventReason = EmojiPickerSkinToneOpenChangeEventReason;
+  type OpenChangeEventDetails = EmojiPickerSkinToneOpenChangeEventDetails;
 }

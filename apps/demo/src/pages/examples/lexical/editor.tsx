@@ -8,7 +8,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import enUrl from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, useEmojiStore } from "emoji-components";
 import { $createEmojiNode, EmojiNode, EmojiShortcodePlugin, emojiAttrs } from "@/components/lexical/emoji-node";
-import { EmojiTypeaheadPlugin } from "@/components/lexical/emoji-typeahead-plugin";
+import { EmojiSuggestionsPlugin } from "@/components/lexical/emoji-suggestions-plugin";
 import { PickerPopover } from "@/components/picker-popover";
 
 function Toolbar() {
@@ -52,7 +52,7 @@ function LexicalEditor() {
           />
         </div>
         <HistoryPlugin />
-        <EmojiTypeaheadPlugin />
+        <EmojiSuggestionsPlugin />
         <EmojiShortcodePlugin />
       </div>
     </LexicalComposer>

@@ -8,9 +8,9 @@ import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useInteraction } from "../../internals/useInteraction";
 import { EmojiPickerCategoryNavContext, EmojiPickerCategoryNavTabContext } from "../category-nav/EmojiPickerCategoryNavContext";
 import type { EmojiPickerNavCategory } from "../root/utils/useEmojiPickerCategoryNavigation";
-import { EmojiPickerCategoryIcon } from "./EmojiPickerCategoryIcon";
+import { EmojiPickerCategoryNavIcon } from "../category-nav-icon/EmojiPickerCategoryNavIcon";
 
-export type EmojiPickerCategoryNavTabState = { category: EmojiPickerNavCategory; selected: boolean; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
+export type EmojiPickerCategoryNavTabState = { category: EmojiPickerNavCategory; active: boolean; focused: boolean; focusVisible: boolean; hovered: boolean; pressed: boolean; disabled: boolean };
 
 export type EmojiPickerCategoryNavTabProps = EmojiComponentsPartElementProps<EmojiPickerCategoryNavTabState, HTMLDivElement, "role">;
 
@@ -21,11 +21,10 @@ export const EmojiPickerCategoryNavTab = React.forwardRef<HTMLDivElement, EmojiP
   const interaction = useInteraction({ disabled, onPress: (e) => c && choose?.(c.id, e.pointerType === "keyboard" || e.pointerType === "virtual") });
   if (!nav || !c) throw new Error("EmojiPicker.CategoryNavTab must be inside EmojiPicker.CategoryNav.");
   const selected = c.id === current;
-  const state: EmojiPickerCategoryNavTabState = { ...interaction.state, category: c, selected, active: selected && !disabled };
+  const state: EmojiPickerCategoryNavTabState = { ...interaction.state, category: c, active: selected && !disabled };
   return renderElement(
     "div",
     {
-      "data-slot": SLOTS.categoryNavTab,
       id: `${id}-tab-${c.id}`,
       role: "button",
       "aria-label": c.name,
@@ -36,8 +35,9 @@ export const EmojiPickerCategoryNavTab = React.forwardRef<HTMLDivElement, EmojiP
       className: "",
       ...mergePartProps(props, interaction.props),
       ref,
+      "data-slot": SLOTS.categoryNavTab,
       "data-key": c.id,
-      children: children ?? c.icon ?? <EmojiPickerCategoryIcon category={c.id} />,
+      children: children ?? c.icon ?? <EmojiPickerCategoryNavIcon />,
     },
     state,
     ["focused", "active"],

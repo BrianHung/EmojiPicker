@@ -27,7 +27,7 @@ const tokens: Tokens = {
 };
 
 export const NOTION_SECTIONS = [
-  { id: "suggested", name: "Recent" },
+  { id: "frequent", name: "Recent" },
   { id: "smileys-people", name: "People" },
   { id: "animals-nature", name: "Animals and nature" },
   { id: "food-drink", name: "Food and drink" },
@@ -95,13 +95,13 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
             reaction ? "pt-2 pb-[14.5px]" : "mt-1 mb-2.5 py-1 [&_[data-slot=emoji-picker-skin-tone]]:-ml-0.5",
           )}
         >
-          <EmojiPicker.SearchInput
+          <EmojiPicker.SearchInputGroup>
+<EmojiPicker.SearchInput
             placeholder="Filter…"
             autoFocus={autoFocus}
-            className="h-7 w-full rounded-[6px] bg-emoji-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]"
-          >
-            <SearchClear />
-          </EmojiPicker.SearchInput>
+            className="h-7 w-full rounded-[6px] bg-emoji-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]" />
+<SearchClear />
+</EmojiPicker.SearchInputGroup>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-emoji-picker-subtle" />
           <HandTone className="flex size-7 items-center justify-center rounded-[6px] text-[20px] leading-none hover:bg-emoji-picker-hover" />
           {reaction ? null : <Shuffle onPick={(s) => onSelect?.(s)} />}

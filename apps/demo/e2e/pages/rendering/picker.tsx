@@ -3,7 +3,7 @@ import en from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, type EmojiSelection, type EmojiImageUrl } from "emoji-components";
 import { twemojiUrl, withoutTone } from "@emoji-components/core";
 import { Checkbox } from "@/components/ui/checkbox";
-import { EmojiPickerCard, EmojiTapback } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerPanel, EmojiPickerReactions, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -57,8 +57,17 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
       {font === "noto" && <link rel="stylesheet" href={NOTO} precedence="default" />}
       <EmojiProvider data={en} renderer={renderer} imageUrl={custom ? tapbacks : twemoji}>
         <div className="flex flex-col items-center gap-4">
-          <EmojiTapback onSelect={onSelect} count={6} className={cn(FONTS[font])} />
-          <EmojiPickerCard footer={false} onSelect={onSelect} className={cn("h-[300px]", FONTS[font])} />
+          <EmojiPicker reactions={6} onSelect={onSelect} className={cn(FONTS[font])}>
+            <EmojiPickerReactions />
+            <EmojiPickerPanel>
+              <EmojiPickerSearch />
+              <EmojiPickerContent />
+            </EmojiPickerPanel>
+          </EmojiPicker>
+          <EmojiPicker onSelect={onSelect} className={cn("h-[300px]", FONTS[font])}>
+            <EmojiPickerSearch />
+            <EmojiPickerContent />
+          </EmojiPicker>
         </div>
       </EmojiProvider>
     </>

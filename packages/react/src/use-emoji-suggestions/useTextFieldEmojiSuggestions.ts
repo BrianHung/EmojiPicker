@@ -3,16 +3,16 @@
 import * as React from "react";
 import { InputRange } from "dom-input-range";
 import { findShortcodeTrigger } from "@emoji-components/core";
-import { useEmojiTypeahead, type EmojiTypeahead, type EmojiTypeaheadOptions } from "./useEmojiTypeahead";
+import { useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions } from "./useEmojiSuggestions";
 
 type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
 const EVENTS = ["selectionchange", "click", "keyup", "focus"];
 
-export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement | null>, options?: EmojiTypeaheadOptions): EmojiTypeahead {
+export function useTextFieldEmojiSuggestions(ref: React.RefObject<TextFieldElement | null>, options?: UseEmojiSuggestionsOptions): UseEmojiSuggestionsReturnValue {
   const [match, setMatch] = React.useState<Match | null>(null);
-  const typeahead = useEmojiTypeahead(
+  const suggestions = useEmojiSuggestions(
     match && {
       query: match.query,
       // A controlled field re-renders inside its input event, before the match syncs to the new value
@@ -28,7 +28,7 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement
     options,
     () => ref.current,
   );
-  const { onKeyDown } = typeahead;
+  const { onKeyDown } = suggestions;
   React.useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -53,5 +53,5 @@ export function useTextFieldEmojiTypeahead(ref: React.RefObject<TextFieldElement
       el.ownerDocument.removeEventListener("input", input);
     };
   }, [ref, onKeyDown]);
-  return typeahead;
+  return suggestions;
 }

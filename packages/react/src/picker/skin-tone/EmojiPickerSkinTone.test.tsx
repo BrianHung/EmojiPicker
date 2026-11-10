@@ -41,7 +41,7 @@ it("keeps focus in the skin tone options when onOpenChange cancels the close", (
 it("opens on the current tone, moves with the arrows, and applies the tone with Enter", () => {
   const host = render(
     <EmojiProvider data={en} prepare={false}>
-      <EmojiPicker.Root suggested={["1f44d"]}>
+      <EmojiPicker.Root frequent={["1f44d"]}>
         <EmojiPicker.SkinTone />
         <Suggested />
       </EmojiPicker.Root>

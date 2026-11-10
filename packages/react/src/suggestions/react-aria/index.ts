@@ -1,6 +1,10 @@
 export * as EmojiSuggestions from "./index.parts";
 
 export type {
+  EmojiSuggestionsAlign,
+  EmojiSuggestionsAnchor,
+  EmojiSuggestionsContainer,
+  EmojiSuggestionsSide,
   EmojiSuggestionsPopupProps,
   EmojiSuggestionsPopupState,
   EmojiSuggestionsPortalProps,

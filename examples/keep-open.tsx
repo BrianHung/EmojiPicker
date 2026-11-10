@@ -2,7 +2,7 @@
 
 import type { EmojiSelection } from "emoji-components";
 import { EmojiPopover } from "emoji-components/floating-ui";
-import { EmojiPickerCard } from "@/components/ui/emoji-picker";
+import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 
 export function EmojiButton({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (
@@ -11,7 +11,11 @@ export function EmojiButton({ onSelect }: { onSelect: (selection: EmojiSelection
       <EmojiPopover.Portal>
         <EmojiPopover.Positioner>
           <EmojiPopover.Popup aria-label="Emoji picker">
-            <EmojiPickerCard onSelect={onSelect} />
+            <EmojiPicker onSelect={onSelect}>
+              <EmojiPickerSearch />
+              <EmojiPickerContent />
+              <EmojiPickerFooter />
+            </EmojiPicker>
           </EmojiPopover.Popup>
         </EmojiPopover.Positioner>
       </EmojiPopover.Portal>

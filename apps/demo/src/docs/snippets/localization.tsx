@@ -11,7 +11,7 @@ const labels: Partial<EmojiLabels> = {
   emojiList: "絵文字",
   resultCount: (count) => (count ? `${count}件` : "見つかりません"),
   categoryNavigation: "カテゴリ",
-  suggested: "よく使う絵文字",
+  frequent: "よく使う絵文字",
   custom: "カスタム",
   reactions: "リアクション",
   expandReactions: "その他の絵文字",

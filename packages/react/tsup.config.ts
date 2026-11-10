@@ -10,6 +10,7 @@ const entries = {
   "picker/index": "src/picker/index.ts",
   "emoji/index": "src/emoji/index.ts",
   "provider/index": "src/provider/index.ts",
+  "reaction-bar/index": "src/reaction-bar/index.ts",
   "popover/floating-ui/index": "src/popover/floating-ui/index.ts",
   "popover/react-aria/index": "src/popover/react-aria/index.ts",
   "suggestions/floating-ui/index": "src/suggestions/floating-ui/index.ts",

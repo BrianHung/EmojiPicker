@@ -2,7 +2,7 @@ import * as React from "react";
 import { BoldIcon, CodeIcon, ItalicIcon, LinkIcon, ListIcon, ListOrderedIcon, PlusIcon, SquareCodeIcon, StrikethroughIcon } from "lucide-react";
 import { UNSAFE_PortalProvider } from "react-aria";
 import { Focusable, OverlayArrow, Tooltip, TooltipTrigger } from "react-aria-components";
-import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useFrequentEmoji, type EmojiSelection } from "emoji-components";
+import { Emoji, isComposingKey, useEmojiStatus, useEmojiStore, useEmojiFrequents, type EmojiSelection } from "emoji-components";
 import { useEmojiTextField } from "@/components/emoji-text-field";
 import { SlackEmojiMenu, slackEmojiOptions } from "./menu";
 import { copyEmoji } from "@/components/site/picked";
@@ -163,7 +163,7 @@ const BUTTON = "flex size-8 items-center justify-center rounded-[8px] hover:bg-[
 function SlackMessage({ message, onToggle, compact }: { message: Message; onToggle: (unified: string) => void; compact: boolean }) {
   const store = useEmojiStore();
   useEmojiStatus();
-  const quick = useFrequentEmoji({ limit: 3 }).items;
+  const quick = useEmojiFrequents({ limit: 3 }).items;
   const avatar = avatarFor(message.author);
   return (
     <div className="group relative flex gap-2 px-5 py-2 hover:bg-[#f8f8f8] dark:hover:bg-[#222529]">

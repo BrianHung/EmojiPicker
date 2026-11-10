@@ -26,10 +26,10 @@ export const EmojiPickerListSection = createBranchComponent(SECTION, function Em
     {
       ...groupProps,
       id: cells.sectionDomId(section.id),
-      "data-slot": SLOTS.listSection,
       [EmojiPickerListSectionDataAttributes.category]: section.category,
       [EmojiPickerListSectionDataAttributes.collapsed]: flag(section.collapsed),
       ...props,
+      "data-slot": SLOTS.listSection,
       style: (s: EmojiPickerListSectionState) => ({ height: "100%", ...resolve(style, s) }),
       ref,
       children: <VirtualBranch parent={section.id} />,

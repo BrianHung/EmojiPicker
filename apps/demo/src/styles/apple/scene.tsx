@@ -1,7 +1,7 @@
 import * as React from "react";
 import { AnimatePresence, MotionGlobalConfig, motion, type Transition } from "motion/react";
 import { useSmoothCorners } from "@lisse/react";
-import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useFrequentEmoji, type CategoryOption, type EmojiRecord, type EmojiSelection } from "emoji-components";
+import { Emoji, EmojiPicker, isComposingKey, useEmojiStore, useEmojiFrequents, type CategoryOption, type EmojiRecord, type EmojiSelection } from "emoji-components";
 import { copyEmoji } from "@/components/site/picked";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
@@ -640,7 +640,7 @@ const PILL = { w: 375, h: 64, inset: 16.3, gap: 68.4 };
 const tapbackTop = (rect: Rect) => Math.max(rect.top, 100 + PILL.gap);
 
 function useReactionItems(message: Message, recentCount: number) {
-  const recents = useFrequentEmoji({ limit: 16 }).items.slice(0, recentCount);
+  const recents = useEmojiFrequents({ limit: 16 }).items.slice(0, recentCount);
   const mine = (message.reactedBy ?? "me") === "me" ? message.reactions.at(-1) : undefined;
   return [
     ...TAPBACKS.map((t) => ({ key: `t${t.unified}`, unified: t.unified, label: t.label, tapback: true })),
@@ -1064,7 +1064,7 @@ const K = { col: 46, row: 38.4, rows: 5, left: 2.9, gap: 13.8, label: 61.6, grid
 const TAB = { first: 29 - 15 - 0.3, pitch: 37.84 };
 const MAX_VERSION = 16;
 
-const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "suggested", name: "Frequently Used", icon: <SFClock size={20} /> }, ...IOS_GROUPS.map((g) => ({ id: g.id, name: g.label, icon: g.icon }))];
+const KEYBOARD_CATEGORIES: CategoryOption[] = [{ id: "frequent", name: "Frequently Used", icon: <SFClock size={20} /> }, ...IOS_GROUPS.map((g) => ({ id: g.id, name: g.label, icon: g.icon }))];
 
 const KEYBOARD_SIZES = {
   "--emoji-picker-emoji-size": `${K.emoji}px`,
@@ -1101,9 +1101,10 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
         style={KEYBOARD_SIZES}
       >
         <EmojiPicker.Search className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px]" style={{ background: C.search }}>
-          <EmojiPicker.SearchInput aria-label="Search Emoji" placeholder="Search Emoji" className="h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]">
-            <EmojiPicker.SearchClear className="absolute top-1/2 right-[10px] flex size-[20px] -translate-y-1/2 items-center justify-center rounded-full bg-[#a5a7ac] text-white dark:bg-[#6c6c70] dark:text-[#2b2b2d]" />
-          </EmojiPicker.SearchInput>
+          <EmojiPicker.SearchInputGroup>
+<EmojiPicker.SearchInput aria-label="Search Emoji" placeholder="Search Emoji" className="h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]" />
+<EmojiPicker.SearchClear className="absolute top-1/2 right-[10px] flex size-[20px] -translate-y-1/2 items-center justify-center rounded-full bg-[#a5a7ac] text-white dark:bg-[#6c6c70] dark:text-[#2b2b2d]" />
+</EmojiPicker.SearchInputGroup>
           <SFMagnifyingglass size={17} className="pointer-events-none absolute top-[11.7px] left-[19.7px] text-[#838589] dark:text-[#98989f]" />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="absolute inset-x-0 [scrollbar-width:none]" style={{ top: K.label, height: K.grid - K.label + K.rows * K.row }}>

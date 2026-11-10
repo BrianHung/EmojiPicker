@@ -9,8 +9,8 @@ export type { Dataset, EmojiDataInput, EmojiRecord, SkinToneValue } from "./data
 export { lexicalSearch } from "./search/search";
 export type { EmojiSearch } from "./search/search";
 export type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
-export { createSearch } from "./search/query";
-export type { EmojiSearchState } from "./search/query";
+export { createEmojiSearch } from "./search/query";
+export type { EmojiSearchState, EmojiSearchStore } from "./search/query";
 export type { EmojiLabels } from "./labels";
 export { resolveEmoji } from "./resolve";
 export type { EmojiInput, ResolvedEmoji } from "./resolve";

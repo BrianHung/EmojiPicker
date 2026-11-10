@@ -26,10 +26,10 @@ const tokens: Tokens = {
 const REACTIONS = ["2764-fe0f", "1f602", "1f62e", "1f622", "1f621", "1f44d"];
 
 const CATEGORIES = withIcons(I.ICONS.instagram, {
-  categories: [{ id: "suggested", name: "Your Reactions" }, { id: "custom" }, { id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "activities" }, { id: "travel-places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
+  categories: [{ id: "frequent", name: "Your Reactions" }, { id: "custom" }, { id: "smileys-people" }, { id: "animals-nature" }, { id: "food-drink" }, { id: "activities" }, { id: "travel-places" }, { id: "objects" }, { id: "symbols" }, { id: "flags" }],
   size: 18,
   strokeWidth: 2,
-  hide: ["suggested", "custom"],
+  hide: ["frequent", "custom"],
 });
 
 export function InstagramPicker({ onSelect, search = true, autoFocus = false, fluid = false, columns, searchResults, className }: StylePickerProps) {
@@ -37,7 +37,7 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
   return (
     <EmojiPicker.Root
       columns={columns ?? (fluid ? "fit" : 8)}
-      suggested={REACTIONS}
+      frequent={REACTIONS}
       categories={CATEGORIES}
       searchResults={searchResults}
       onSelect={onSelect}
@@ -51,13 +51,13 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
     >
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
-          <EmojiPicker.SearchInput
+          <EmojiPicker.SearchInputGroup>
+<EmojiPicker.SearchInput
             placeholder="Search emoji"
             autoFocus={autoFocus}
-            className="h-10 w-full rounded-full border border-emoji-picker-input-border bg-emoji-picker-input pr-4 pl-[33.3px] text-[14px] text-emoji-picker-foreground outline-none placeholder:text-(--instagram-placeholder)"
-          >
-            <SearchClear />
-          </EmojiPicker.SearchInput>
+            className="h-10 w-full rounded-full border border-emoji-picker-input-border bg-emoji-picker-input pr-4 pl-[33.3px] text-[14px] text-emoji-picker-foreground outline-none placeholder:text-(--instagram-placeholder)" />
+<SearchClear />
+</EmojiPicker.SearchInputGroup>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-[calc(50%+6px)] left-[var(--search-icon-x,12px)] size-[14px] -translate-y-1/2 text-emoji-picker-subtle" />
         </EmojiPicker.Search>
       ) : null}
@@ -65,7 +65,7 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>
           {() => (
             <EmojiPicker.ListSection>
-              <EmojiPicker.ListSectionTitle className="flex h-[34px] items-center bg-emoji-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-emoji-picker-muted [[data-category=suggested]_&]:after:ml-auto [[data-category=suggested]_&]:after:text-(--instagram-link) [[data-category=suggested]_&]:after:content-['Customize']" />
+              <EmojiPicker.ListSectionTitle className="flex h-[34px] items-center bg-emoji-picker-background pt-[8.5px] pr-[14px] pl-[14px] text-[12px] leading-4 font-semibold text-emoji-picker-muted [[data-category=frequent]_&]:after:ml-auto [[data-category=frequent]_&]:after:text-(--instagram-link) [[data-category=frequent]_&]:after:content-['Customize']" />
               <EmojiPicker.ListItems>{() => <EmojiPicker.ListCell className={cn(CELL, "rounded-lg hover:bg-emoji-picker-hover data-focus-visible:bg-emoji-picker-selected data-[focused]:bg-emoji-picker-selected")} />}</EmojiPicker.ListItems>
             </EmojiPicker.ListSection>
           )}

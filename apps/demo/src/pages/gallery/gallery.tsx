@@ -1,6 +1,6 @@
 import * as React from "react";
 import { copyEmoji, usePickedEmoji } from "@/components/site/picked";
-import { Emoji, useEmojiTypeahead, useTextFieldEmojiTypeahead, type EmojiTrigger } from "emoji-components";
+import { Emoji, useEmojiSuggestions, useTextFieldEmojiSuggestions, type EmojiTrigger } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CodeBlock, CopyButton } from "@/components/site/code";
@@ -73,8 +73,8 @@ function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
   const [touched, setTouched] = React.useState(false);
   const options = { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) } as const;
-  const emoji = useTextFieldEmojiTypeahead(ref, { ...options, onSelect: copyEmoji });
-  const preview = useEmojiTypeahead(touched ? null : PREVIEW, options);
+  const emoji = useTextFieldEmojiSuggestions(ref, { ...options, onSelect: copyEmoji });
+  const preview = useEmojiSuggestions(touched ? null : PREVIEW, options);
   return (
     <div className="relative w-full max-w-[380px]">
       {touched ? (

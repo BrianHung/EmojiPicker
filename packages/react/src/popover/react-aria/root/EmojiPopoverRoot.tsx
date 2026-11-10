@@ -10,7 +10,7 @@ import { finalFocusTarget } from "../../utils/focus";
 import type { EmojiPopoverFinalFocus, EmojiPopoverRootActions, EmojiPopoverRootChangeEventDetails, EmojiPopoverRootChangeEventReason, EmojiPopoverRootProps } from "../../utils/types";
 import { usePopoverState } from "../../utils/usePopoverState";
 
-export function EmojiPopoverRoot({ children, modal = true, ...props }: EmojiPopoverRootProps) {
+export function EmojiPopoverRoot({ children, modal = false, ...props }: EmojiPopoverRootProps) {
   const [trigger, setTrigger] = React.useState<HTMLElement | null>(null);
   const state = usePopoverState(props, trigger);
   // Only closes for its trigger scrolling away; the Trigger part opens and closes on press itself

@@ -5,14 +5,14 @@ import { subscribeAll } from "@emoji-components/core/internal";
 import { useStore } from "../../utils/useStore";
 import { useEmojiContext } from "../EmojiProviderContext";
 
-export type FrequentEmoji = {
+export type UseEmojiFrequentsReturnValue = {
   items: readonly string[];
   pick(unified: string): void;
   remove(unified: string): void;
   clear(): void;
 };
 
-export function useFrequentEmoji({ limit = 5 }: { limit?: number } = {}): FrequentEmoji {
+export function useEmojiFrequents({ limit = 5 }: { limit?: number } = {}): UseEmojiFrequentsReturnValue {
   const { store } = useEmojiContext();
   const subscribe = React.useMemo(() => subscribeAll(store.frequents.subscribe, store.subscribe), [store]);
   const items = useStore({ subscribe, getSnapshot: () => store.frequent(limit) });

@@ -28,7 +28,7 @@ export interface UseEmojiPickerGridOptions {
 
 type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCallback<HTMLElement> };
 
-export type UseEmojiPickerGridResult = EmojiGrid<EmojiSection> & {
+export type UseEmojiPickerGridReturnValue = EmojiGrid<EmojiSection> & {
   getGridProps(props?: React.HTMLAttributes<HTMLElement>): GridElementProps;
   getHeaderProps(section: EmojiSection, props?: React.HTMLAttributes<HTMLElement>): React.HTMLAttributes<HTMLElement>;
   state: EmojiPickerGridState;
@@ -44,7 +44,7 @@ function windowOf(list: HTMLElement | null) {
 }
 
 // The grid inside an app's own virtualizer: rows to render, and geometry read from the DOM
-export function useEmojiPickerGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiPickerGridOptions): UseEmojiPickerGridResult {
+export function useEmojiPickerGrid({ columns, rowHeight, headerHeight = rowHeight, scrollToIndex, "aria-label": label }: UseEmojiPickerGridOptions): UseEmojiPickerGridReturnValue {
   const picker = useEmojiPickerRootContext("useEmojiPickerGrid");
   const { sections, request } = useGridSections(false);
   const grid = React.useMemo(() => createEmojiGrid(sections, { columns: columns ?? picker.columns ?? DEFAULT_COLUMNS, rowHeight, headerHeight }), [sections, columns, picker.columns, rowHeight, headerHeight]);

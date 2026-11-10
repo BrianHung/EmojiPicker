@@ -64,4 +64,25 @@ describe("Reactions", () => {
     ]);
     expect(picked).toEqual(["2764-fe0f"]);
   });
+
+  it.each([false, true])("collapses to the reaction row on a pick and clears the search, unless onReactionsOpenChange cancels (cancel: %s)", (cancel) => {
+    function Grid() {
+      return <div {...useEmojiPickerGrid({ rowHeight: 40, columns: 8 }).getGridProps()} />;
+    }
+    const actions = React.createRef<EmojiPicker.Root.Actions>();
+    const host = render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root reactions={["1f44d"]} defaultReactionsOpen={false} defaultQuery="rocket" actionsRef={actions} onReactionsOpenChange={(_, details) => cancel && details.cancel()}>
+          <EmojiPicker.Reactions />
+          <EmojiPicker.Panel>
+            <EmojiPicker.Search />
+            <Grid />
+          </EmojiPicker.Panel>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    React.act(() => actions.current!.highlight("1f680"));
+    React.act(() => void actions.current!.pick());
+    expect({ row: Boolean(host.querySelector('[data-slot="emoji-picker-reactions"]')), query: host.querySelector("input")!.value }).toEqual(cancel ? { row: false, query: "rocket" } : { row: true, query: "" });
+  });
 });

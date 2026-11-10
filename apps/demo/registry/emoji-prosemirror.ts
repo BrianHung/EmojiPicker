@@ -4,7 +4,7 @@ import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type Sho
 
 type Node = EditorState["doc"];
 
-export type ProseMirrorEmojiTypeaheadOptions = Pick<EmojiSuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
+export type ProseMirrorEmojiSuggestionsOptions = Pick<EmojiSuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
   insert?: "emoji" | "shortcode";
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
 };
@@ -18,7 +18,7 @@ function matchIn({ selection: { $from, empty } }: EditorState): Match | null {
 
 const keyOf = (match: Match | null) => (match ? `${match.from}:${match.query}` : "");
 
-export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiTypeaheadOptions = {}) {
+export function emojiSuggestions(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiSuggestionsOptions = {}) {
   let mounted: EditorView | null = null;
   const current = () => {
     const view = mounted;
@@ -37,7 +37,7 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
       view.focus();
     },
   });
-  const key = new PluginKey("emojiTypeahead");
+  const key = new PluginKey("emojiSuggestions");
   const plugin = new Plugin({
     key,
     view(editor) {
@@ -79,4 +79,4 @@ export function emojiTypeahead(store: EmojiStore, { insert = "emoji", content = 
   };
 }
 
-export type ProseMirrorEmojiTypeahead = ReturnType<typeof emojiTypeahead>;
+export type ProseMirrorEmojiSuggestions = ReturnType<typeof emojiSuggestions>;

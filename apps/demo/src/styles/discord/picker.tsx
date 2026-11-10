@@ -1,4 +1,4 @@
-import { Emoji, EmojiPicker, useEmojiPickerActiveEmoji, useEmojiStore, useFrequentEmoji, type EmojiTypeaheadOptions } from "emoji-components";
+import { Emoji, EmojiPicker, useEmojiPickerHighlightedEmoji, useEmojiStore, useEmojiFrequents, type UseEmojiSuggestionsOptions } from "emoji-components";
 import { cn } from "@/lib/utils";
 import * as I from "@/styles/icons";
 import { HandTone, noEmoji, SearchClear, Tabs, useActiveTabInView, withIcons } from "@/styles/parts";
@@ -41,13 +41,13 @@ const tokens: Tokens = {
   "--discord-autocomplete-shadow": "0 0 0 1px light-dark(rgb(0 0 0 / 0.08), rgb(255 255 255 / 0.08)), 0 12px 24px light-dark(transparent, rgb(0 0 0 / 0.24)), 0 12px 36px light-dark(rgb(0 0 0 / 0.12), transparent)",
 };
 
-export const discordAutocompleteOptions = { order: "alphabetical", limit: 14 } satisfies EmojiTypeaheadOptions;
+export const discordAutocompleteOptions = { order: "alphabetical", limit: 14 } satisfies UseEmojiSuggestionsOptions;
 
 const ICONS: I.IconSet = I.ICONS.apple;
 
 const CATEGORIES = withIcons(ICONS, {
   categories: [
-    { id: "suggested", name: "Frequently Used" },
+    { id: "frequent", name: "Frequently Used" },
     { id: "custom" },
     { id: "smileys-people", name: "People" },
     { id: "animals-nature", name: "Nature" },
@@ -63,9 +63,9 @@ const CATEGORIES = withIcons(ICONS, {
 });
 
 function Footer() {
-  const active = useEmojiPickerActiveEmoji();
+  const active = useEmojiPickerHighlightedEmoji();
   const store = useEmojiStore();
-  const first = useFrequentEmoji({ limit: 1 }).items[0];
+  const first = useEmojiFrequents({ limit: 1 }).items[0];
   const shown = active ?? (first ? store.get(first) : undefined);
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 border-t border-emoji-picker-input-border bg-emoji-picker-panel px-4">
@@ -102,13 +102,13 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
       />
       {search ? (
         <EmojiPicker.Search className="relative flex h-[53px] shrink-0 items-center gap-3 border-b border-emoji-picker-border px-4 pb-3 [--search-icon-x:28px]">
-          <EmojiPicker.SearchInput
+          <EmojiPicker.SearchInputGroup>
+<EmojiPicker.SearchInput
             placeholder="Find the perfect emoji"
             autoFocus={autoFocus}
-            className="h-10 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-emoji-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-emoji-picker-ring focus:outline-2 focus:outline-emoji-picker-ring"
-          >
-            <SearchClear />
-          </EmojiPicker.SearchInput>
+            className="h-10 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-emoji-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-emoji-picker-ring focus:outline-2 focus:outline-emoji-picker-ring" />
+<SearchClear />
+</EmojiPicker.SearchInputGroup>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-3 left-[var(--search-icon-x,12px)] translate-y-0 text-emoji-picker-muted" />
           <HandTone emoji="👏" className="flex size-[38px] items-center justify-center text-[28px] leading-none" />
           <button type="button" className="h-10 min-w-[100px] shrink-0 rounded-[8px] border border-(--discord-chip-border) bg-(--discord-chip) px-[15px] py-[7px] text-[16px] text-(--discord-strong)">

@@ -17,7 +17,7 @@ export const EmojiPickerPreview = React.forwardRef<HTMLDivElement, EmojiPickerPr
   const { labels, state } = useEmojiPickerRootContext("EmojiPicker.Preview");
   const active = useStore(state, (s) => s.active);
   const caption = active ? `${active.record.imageUrl ? "" : unifiedToNative(active.unified)} ${active.record.name}`.trim() : labels.previewCaption;
-  return renderElement("div", { "data-slot": SLOTS.preview, ...props, ref, children: children ?? caption }, { emoji: active?.record ?? null, unified: active?.unified ?? null });
+  return renderElement("div", { ...props, "data-slot": SLOTS.preview, ref, children: children ?? caption }, { emoji: active?.record ?? null, unified: active?.unified ?? null });
 });
 
 export declare namespace EmojiPickerPreview {

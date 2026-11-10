@@ -1,5 +1,5 @@
-import type { Emoji } from "emoji-components";
-import { rowsOf } from "./rows";
+import type { Emoji, EmojiReactionBar } from "emoji-components";
+import { className, rowsOf } from "./rows";
 
 export const emoji = rowsOf<Emoji.Props>()([
   {
@@ -11,6 +11,12 @@ export const emoji = rowsOf<Emoji.Props>()([
   { name: "renderer", type: '"native" | "image"', default: "the provider's" },
   { name: "animate", type: "boolean", default: "`true`", description: "Plays an animated custom emoji. Under reduced motion, its `stillUrl` shows instead." },
   { name: "aria-hidden", type: "boolean", description: "Hides the emoji from assistive technology, with no role or label. Use it next to text that names the emoji." },
+]);
+
+export const reactionBar = rowsOf<EmojiReactionBar.Props>()([
+  { name: "orientation", type: '"horizontal" | "vertical"', default: '`"horizontal"`' },
+  { name: "children", type: "ReactNode", description: "Your reaction buttons." },
+  className("{ orientation }"),
 ]);
 
 export const selection: [string, string][] = [

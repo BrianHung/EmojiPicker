@@ -13,7 +13,7 @@ export interface EmojiSearchQuery {
   limit: number;
 }
 
-export interface EmojiSearchRunner {
+export interface EmojiSearchStore {
   getSnapshot(): EmojiSearchState;
   subscribe: Subscribe;
   setQuery(query: string, limit: number): void;
@@ -44,7 +44,7 @@ const reduce = (run: Run, action: RunAction): Run => {
 };
 
 // The query is an input: setting it starts the run, and getSnapshot only reads; a new data version reruns it while anything listens
-export function createSearch(store: EmojiStore, initial: EmojiSearchQuery = { query: "", limit: 0 }): EmojiSearchRunner {
+export function createEmojiSearch(store: EmojiStore, initial: EmojiSearchQuery = { query: "", limit: 0 }): EmojiSearchStore {
   const run = createStore<Run, RunAction>({ key: "", version: -1, state: IDLE, controller: null, settled: NONE }, reduce);
   let input = initial;
   let watchers = 0;

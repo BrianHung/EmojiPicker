@@ -3,7 +3,7 @@ import type { EmojiLabels } from "../labels";
 import { cached } from "../reactive";
 import { nameWithTone } from "../shortcodes";
 
-export type CategoryId = Group | "suggested" | "custom" | `custom:${string}`;
+export type CategoryId = Group | "frequent" | "custom" | `custom:${string}`;
 
 export interface CategoryOption<Icon = unknown> {
   id: CategoryId;
@@ -40,13 +40,13 @@ export type SearchResultsMode = "ranked" | "grouped";
 
 export type ItemFactory = (section: string, record: EmojiRecord, unified: string) => EmojiItem;
 
-const DEFAULT_ORDER: readonly CategoryId[] = ["suggested", "custom", ...GROUPS];
+const DEFAULT_ORDER: readonly CategoryId[] = ["frequent", "custom", ...GROUPS];
 const RESULT_ORDER: readonly string[] = [...GROUPS, "custom"];
 
 export const groupName = (groupNames: readonly string[], id: string) => groupNames[(GROUPS as readonly string[]).indexOf(id)] ?? id;
 
 export function categoryList<Icon>(options: readonly CategoryOption<Icon>[] | undefined, groupNames: readonly string[], labels: EmojiLabels, customGroups: Iterable<string>): Category<Icon>[] {
-  const name = (id: string) => (id === "suggested" ? labels.suggested : id === "custom" ? labels.custom : id.startsWith("custom:") ? id.slice(7) : groupName(groupNames, id));
+  const name = (id: string) => (id === "frequent" ? labels.frequent : id === "custom" ? labels.custom : id.startsWith("custom:") ? id.slice(7) : groupName(groupNames, id));
   const chosen: readonly CategoryOption<Icon>[] = options?.length ? options : DEFAULT_ORDER.map((id) => ({ id }));
   const listed = chosen.map((o): Category<Icon> => ({ id: o.id, name: o.name ?? name(o.id), icon: o.icon, nav: o.nav !== false }));
   const ids = new Set(listed.map((c) => c.id));
@@ -78,7 +78,7 @@ const groupBy = <T>(values: Iterable<T>, keyOf: (value: T) => string) => {
 export interface CategorySectionsInput {
   categories: readonly Category<unknown>[];
   records: readonly EmojiRecord[];
-  suggested: readonly string[];
+  frequent: readonly string[];
   customGroup: (unified: string) => string | undefined;
   collapsed: readonly string[];
   emojiVersion?: number;
@@ -91,7 +91,7 @@ export const toned = (record: EmojiRecord, tone: SkinToneValue, unified = record
 
 export const shownIn = (emojiVersion: number | undefined) => (r: EmojiRecord) => emojiVersion == null || Boolean(r.imageUrl) || r.version <= emojiVersion;
 
-export function categorySections({ categories, records, suggested, customGroup, collapsed, emojiVersion, get, tone, item }: CategorySectionsInput): EmojiSection[] {
+export function categorySections({ categories, records, frequent, customGroup, collapsed, emojiVersion, get, tone, item }: CategorySectionsInput): EmojiSection[] {
   const shown = shownIn(emojiVersion);
   const byGroup = groupBy(records.filter(shown), (r) => {
     if (r.group !== "custom") return r.group;
@@ -99,8 +99,8 @@ export function categorySections({ categories, records, suggested, customGroup, 
     return group ? `custom:${group}` : "custom";
   });
   const itemsOf = (id: string): EmojiItem[] =>
-    id === "suggested"
-      ? suggested.flatMap((unified) => {
+    id === "frequent"
+      ? frequent.flatMap((unified) => {
           const record = get(unified);
           return record && shown(record) ? [item(id, record, toned(record, tone, unified))] : [];
         })

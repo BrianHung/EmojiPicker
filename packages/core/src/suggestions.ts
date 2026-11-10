@@ -1,7 +1,7 @@
 import { unifiedToNative, type EmojiRecord } from "./dataset";
 import { KEY_MOVES } from "./keys";
 import { createStore, memo, shallowEqual, stable, subscribeAll, type Subscribe } from "./reactive";
-import { createSearch } from "./search/query";
+import { createEmojiSearch } from "./search/query";
 import type { CompletionOrder, ShortcodeCompletion } from "./search/search-index";
 import { isComposingKey } from "./shortcodes";
 import type { EmojiSelection, EmojiStore } from "./store";
@@ -121,7 +121,7 @@ export function createEmojiSuggestions(store: EmojiStore, options: EmojiSuggesti
   const input = createStore<Input, EmojiSuggestionsOptions>({ options, resetKey: resetKeyOf(options), generation: 0 }, reduceInput);
   const ui = createStore<Ui, UiAction>({ highlight: { index: 0, generation: 0 }, dismissed: null }, reduceUi);
   const searchOf = ({ query = "", limit = DEFAULT_LIMIT, matchBy }: EmojiSuggestionsOptions) => ({ query: matchBy === "search" ? query : "", limit });
-  const search = createSearch(store, searchOf(options));
+  const search = createEmojiSearch(store, searchOf(options));
   const opts = () => input.getSnapshot().options;
   const id = (suffix: string) => `${opts().id ?? "emoji-suggestions"}-${suffix}`;
   const update = (next: EmojiSuggestionsOptions) => {
