@@ -29,7 +29,7 @@ export const withLexical =
 
 bge-small-en-v1.5 runs in a Web Worker with transformers.js. Emoji vectors are computed once at build time from each emoji's name, shortcodes, and tags, and stored as int8 (746 KB for 1,923 emoji). A search is one embedding and a dot product per emoji.
 
-```ts title="on-device.worker.ts"
+```ts title="on-device.worker.ts (excerpt)"
 import { pipeline } from "@huggingface/transformers";
 
 const extract = await pipeline("feature-extraction", "Xenova/bge-small-en-v1.5", { dtype: "q8" });

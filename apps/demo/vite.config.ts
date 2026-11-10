@@ -56,7 +56,7 @@ document.head.append(link);`;
     conditions: [...(workspace ? ["@emoji-components/source"] : []), ...defaultClientConditions],
     alias: [
       { find: /^@\/registry\//, replacement: fileURLToPath(new URL("./registry/", import.meta.url)) },
-      { find: /^@\/components\/ui\/(emoji-picker|emoji-reaction-bar|emoji-suggestions)$/, replacement: fileURLToPath(new URL("./registry/$1.tsx", import.meta.url)) },
+      { find: /^@\/components\/ui\/(emoji-picker|emoji-picker-popover|emoji-reaction-bar|emoji-suggestions)$/, replacement: fileURLToPath(new URL("./registry/$1.tsx", import.meta.url)) },
       { find: /^@\/(?:hooks|lib)\/((?:use-)?emoji-(?:tiptap|lexical|prosemirror))$/, replacement: fileURLToPath(new URL("./registry/$1.ts", import.meta.url)) },
       { find: /^@\//, replacement: fileURLToPath(new URL("./src/", import.meta.url)) },
     ],
@@ -64,7 +64,9 @@ document.head.append(link);`;
   environments: {
     client: {
       build: {
-        rollupOptions: { input: process.env.E2E_BUILD === "1" ? { ...pages, ...Object.fromEntries(["seams", "fonts", "hero", "rendering"].map((p) => [p, fileURLToPath(new URL(`./e2e/pages/${p}/index.html`, import.meta.url))])) } : pages },
+        rollupOptions: {
+          input: process.env.E2E_BUILD === "1" ? { ...pages, ...Object.fromEntries(["seams", "fonts", "hero", "rendering", "contracts"].map((p) => [p, fileURLToPath(new URL(`./e2e/pages/${p}/index.html`, import.meta.url))])) } : pages,
+        },
       },
     },
   },
