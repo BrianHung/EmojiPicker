@@ -9,7 +9,7 @@
       "title": "Emoji Picker",
       "description": "An emoji picker and reaction row with shortcodes, skin tones, custom emoji, and replaceable search, built on emoji-components.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.1"
+        "emoji-components@1.0.0-alpha.2"
       ],
       "registryDependencies": [
         "utils"
@@ -94,7 +94,7 @@
       "title": "Emoji ProseMirror",
       "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
       "dependencies": [
-        "@emoji-components/core@1.0.0-alpha.1",
+        "@emoji-components/core@1.0.0-alpha.2",
         "prosemirror-state",
         "prosemirror-view"
       ],
@@ -111,7 +111,7 @@
       "title": "Emoji Suggestions",
       "description": "The shortcode typeahead menu for any EmojiTypeahead, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.1"
+        "emoji-components@1.0.0-alpha.2"
       ],
       "registryDependencies": [
         "utils"
@@ -129,7 +129,7 @@
       "title": "Emoji Tiptap",
       "description": "Shortcode typeahead for a Tiptap 3 editor: the useTiptapEmojiTypeahead hook on the ProseMirror plugin, the EmojiSuggestionMenu component, and an EmojiNode for custom emoji.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.1",
+        "emoji-components@1.0.0-alpha.2",
         "@tiptap/core",
         "@tiptap/pm",
         "@tiptap/react"
@@ -161,7 +161,7 @@
       "title": "Emoji Lexical",
       "description": "Shortcode typeahead for a Lexical editor: the useLexicalEmojiTypeahead hook, the EmojiTypeaheadPlugin component, and an EmojiNode for custom emoji.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.1",
+        "emoji-components@1.0.0-alpha.2",
         "lexical",
         "@lexical/react"
       ],

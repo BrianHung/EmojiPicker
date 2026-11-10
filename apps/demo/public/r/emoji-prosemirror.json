@@ -4,7 +4,7 @@
   "title": "Emoji ProseMirror",
   "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
   "dependencies": [
-    "@emoji-components/core@1.0.0-alpha.1",
+    "@emoji-components/core@1.0.0-alpha.2",
     "prosemirror-state",
     "prosemirror-view"
   ],
