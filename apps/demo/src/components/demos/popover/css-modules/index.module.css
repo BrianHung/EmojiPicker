@@ -1,3 +1,7 @@
+.positioner {
+  z-index: 50;
+}
+
 .trigger {
   display: inline-flex;
   align-items: center;

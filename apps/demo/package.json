@@ -26,6 +26,7 @@
     "@emoji-components/core": "^1.0.0-alpha.2",
     "@emoji-components/data": "^1.0.0-alpha.2",
     "@emoji-components/twemoji-font": "^1.0.0-alpha.2",
+    "@floating-ui/react": "^0.27.20",
     "@huggingface/transformers": "^4.3.2",
     "@lexical/react": "^0.53.0",
     "@lisse/react": "^0.7.3",

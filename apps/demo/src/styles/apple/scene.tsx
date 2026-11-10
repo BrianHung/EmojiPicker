@@ -1100,13 +1100,13 @@ function EmojiKeyboard({ onPick, onDelete, className }: { onPick: (s: EmojiSelec
         className="absolute inset-0 flex flex-col overflow-clip"
         style={KEYBOARD_SIZES}
       >
-        <EmojiPicker.Search className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px]" style={{ background: C.search }}>
-          <EmojiPicker.SearchInputGroup>
+        <div className="absolute top-[10.7px] right-[9px] left-[9px] flex h-[40px] items-center rounded-[18px]" style={{ background: C.search }}>
+          <EmojiPicker.Search>
             <EmojiPicker.SearchInput aria-label="Search Emoji" placeholder="Search Emoji" className="h-full w-full rounded-[18px] bg-transparent pr-4 pl-[44px] text-[17px] tracking-[-0.01em] outline-none placeholder:text-[#838589] dark:placeholder:text-[#98989f]" />
             <EmojiPicker.SearchClear className="absolute top-1/2 right-[10px] flex size-[20px] -translate-y-1/2 items-center justify-center rounded-full bg-[#a5a7ac] text-white dark:bg-[#6c6c70] dark:text-[#2b2b2d]" />
-          </EmojiPicker.SearchInputGroup>
+          </EmojiPicker.Search>
           <SFMagnifyingglass size={17} className="pointer-events-none absolute top-[11.7px] left-[19.7px] text-[#838589] dark:text-[#98989f]" />
-        </EmojiPicker.Search>
+        </div>
         <EmojiPicker.Viewport className="absolute inset-x-0 [scrollbar-width:none]" style={{ top: K.label, height: K.grid - K.label + K.rows * K.row }}>
           <EmojiPicker.List orientation="horizontal" rows={K.rows} renderEmptyState={({ status }) => status === "empty" && <div className="absolute top-[60px] w-[396px] text-center text-[15px] text-[#8e8e93] dark:text-[#8d8d93]">No Emoji Found</div>}>
             {() => (

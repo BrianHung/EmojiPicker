@@ -6,12 +6,10 @@ export function Picker() {
   return (
     <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
       <EmojiPicker.Search>
-        <EmojiPicker.SearchInputGroup>
-          <EmojiPicker.SearchInput />
-          <EmojiPicker.SearchClear />
-        </EmojiPicker.SearchInputGroup>
-        <EmojiPicker.SkinTone />
+        <EmojiPicker.SearchInput />
+        <EmojiPicker.SearchClear />
       </EmojiPicker.Search>
+      <EmojiPicker.SkinTone />
       <EmojiPicker.Viewport>
         <EmojiPicker.List
           renderEmptyState={({ status, retry }) =>
