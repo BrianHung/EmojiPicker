@@ -68,7 +68,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
 
   const highlight = useHighlight(core, latest, sections, picker.ownsFocus);
   const { persisted, highlighted, lastKey, setHighlight, applyHighlight } = highlight;
-  const { lastFocused, syncStop } = useFocusStop(core, listRef, latest);
+  const { lastFocused, syncStop } = useFocusStop(core, listRef, latest, cellElement);
   const variations = useVariations(core, cellElement, setHighlight);
 
   const moveTo = (key: Key, details = NONE, from?: Key) => {
