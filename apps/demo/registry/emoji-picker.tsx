@@ -24,8 +24,8 @@ function EmojiPicker({ className, ...props }: EmojiPickerPrimitive.Root.Props) {
 
 function EmojiPickerSearch({ className, ...props }: EmojiPickerPrimitive.SearchInput.Props) {
   return (
-    <EmojiPickerPrimitive.Search className="flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3 has-[input:focus-visible]:border-primary forced-colors:has-[input:focus-visible]:outline-2 forced-colors:has-[input:focus-visible]:-outline-offset-2">
-      <EmojiPickerPrimitive.SearchInputGroup>
+    <div className="flex h-10 shrink-0 items-center gap-1 border-b border-border pr-1.5 pl-3 has-[input:focus-visible]:border-primary forced-colors:has-[input:focus-visible]:outline-2 forced-colors:has-[input:focus-visible]:-outline-offset-2">
+      <EmojiPickerPrimitive.Search>
         <svg viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-0 size-4 -translate-y-1/2 opacity-50" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
           <circle cx="11" cy="11" r="7" />
           <path d="m20 20-3.5-3.5" />
@@ -39,10 +39,10 @@ function EmojiPickerSearch({ className, ...props }: EmojiPickerPrimitive.SearchI
             <path d="M18 6 6 18M6 6l12 12" />
           </svg>
         </EmojiPickerPrimitive.SearchClear>
-      </EmojiPickerPrimitive.SearchInputGroup>
+      </EmojiPickerPrimitive.Search>
       <EmojiPickerSkinTone />
       <EmojiPickerPrimitive.SearchStatus className="sr-only" />
-    </EmojiPickerPrimitive.Search>
+    </div>
   );
 }
 

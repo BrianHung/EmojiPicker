@@ -38,7 +38,7 @@
       "name": "emoji-picker-popover",
       "type": "registry:ui",
       "title": "Emoji Picker Popover",
-      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, and a pick closes it. For --base aria, use emoji-picker-popover-react-aria.",
+      "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, a pick closes it, and focus returns to the trigger. For --base aria, use emoji-picker-popover-react-aria.",
       "dependencies": ["emoji-components"],
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [
@@ -52,7 +52,7 @@
       "name": "emoji-picker-popover-react-aria",
       "type": "registry:ui",
       "title": "Emoji Picker Popover (React Aria)",
-      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, and a pick closes it.",
+      "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, a pick closes it, and focus returns to the trigger.",
       "dependencies": ["emoji-components"],
       "registryDependencies": ["button", "popover", "https://emoji.brianhung.me/r/emoji-picker.json"],
       "files": [
@@ -63,11 +63,25 @@
       ]
     },
     {
+      "name": "emoji-picker-popover-floating-ui",
+      "type": "registry:ui",
+      "title": "Emoji Picker Popover (Floating UI)",
+      "description": "The emoji picker in a popover on Floating UI, without a shadcn/ui popover. A trigger opens it, a pick closes it, and focus returns to the trigger.",
+      "dependencies": ["emoji-components", "@floating-ui/react"],
+      "registryDependencies": ["button", "https://emoji.brianhung.me/r/emoji-picker.json"],
+      "files": [
+        {
+          "path": "registry/floating-ui/emoji-picker-popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
       "name": "emoji-reaction-bar",
       "type": "registry:ui",
       "title": "Emoji Reaction Bar",
-      "description": "A row of reaction buttons as a toolbar: arrows, Home and End move focus, and the pointer carries it once focus is inside.",
-      "dependencies": ["emoji-components"],
+      "description": "A row of reaction buttons on React Aria's useToolbar: the arrow keys move focus, Home and End go to the ends, and once focus is inside, the pointer carries it.",
+      "dependencies": ["react-aria"],
       "registryDependencies": ["utils"],
       "files": [
         {
@@ -93,8 +107,8 @@
       "name": "emoji-suggestions",
       "type": "registry:ui",
       "title": "Emoji Suggestions",
-      "description": "The shortcode suggestions menu for what useEmojiSuggestions returns, positioned at the caret with EmojiSuggestions. The Tiptap and Lexical items render it.",
-      "dependencies": ["emoji-components"],
+      "description": "The shortcode suggestions menu for what useEmojiSuggestions returns, at the caret on Floating UI. It never takes focus; the hook handles the keys. The Tiptap and Lexical items render it.",
+      "dependencies": ["emoji-components", "@floating-ui/react"],
       "registryDependencies": ["utils"],
       "files": [
         {

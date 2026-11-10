@@ -2,9 +2,9 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "emoji-reaction-bar",
   "title": "Emoji Reaction Bar",
-  "description": "A row of reaction buttons as a toolbar: arrows, Home and End move focus, and the pointer carries it once focus is inside.",
+  "description": "A row of reaction buttons on React Aria's useToolbar: the arrow keys move focus, Home and End go to the ends, and once focus is inside, the pointer carries it.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2"
+    "react-aria"
   ],
   "registryDependencies": [
     "utils"
@@ -12,7 +12,7 @@
   "files": [
     {
       "path": "registry/emoji-reaction-bar.tsx",
-      "content": "\"use client\";\n\nimport { EmojiReactionBar as EmojiReactionBarPrimitive } from \"emoji-components\";\nimport { cn } from \"@/lib/utils\";\n\nfunction EmojiReactionBar({ className, ...props }: EmojiReactionBarPrimitive.Props) {\n  return <EmojiReactionBarPrimitive className={cn(\"flex flex-wrap items-center gap-1 data-[orientation=vertical]:flex-col\", className)} {...props} />;\n}\n\nexport { EmojiReactionBar };\n",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { mergeProps } from \"react-aria/mergeProps\";\nimport { useToolbar } from \"react-aria/useToolbar\";\nimport { cn } from \"@/lib/utils\";\n\nconst BUTTONS = \"button:not([disabled])\";\n\ntype EmojiReactionBarProps = Omit<React.ComponentProps<\"div\">, \"ref\"> & { orientation?: \"horizontal\" | \"vertical\" };\n\n// React Aria's toolbar: the arrow keys move focus, Home and End go to the ends, and once focus is inside, the pointer carries it\nfunction EmojiReactionBar({ orientation = \"horizontal\", className, ...props }: EmojiReactionBarProps) {\n  const ref = React.useRef<HTMLDivElement>(null);\n  const { toolbarProps } = useToolbar({ orientation, \"aria-label\": props[\"aria-label\"], \"aria-labelledby\": props[\"aria-labelledby\"] }, ref);\n  const own: React.HTMLAttributes<HTMLDivElement> = {\n    onKeyDown(event) {\n      const buttons = event.currentTarget.querySelectorAll<HTMLElement>(BUTTONS);\n      if (event.key === \"Home\" || event.key === \"End\") buttons[event.key === \"Home\" ? 0 : buttons.length - 1]?.focus();\n      else if (!(orientation === \"horizontal\" ? [\"ArrowUp\", \"ArrowDown\"] : [\"ArrowLeft\", \"ArrowRight\"]).includes(event.key)) return;\n      event.preventDefault();\n    },\n    onPointerOver(event) {\n      const button = (event.target as Element).closest<HTMLElement>(BUTTONS);\n      const active = document.activeElement;\n      const bar = event.currentTarget;\n      if (button && button !== active && bar.contains(button) && active instanceof HTMLElement && bar.contains(active)) button.focus({ preventScroll: true });\n    },\n  };\n  return (\n    <div\n      {...mergeProps(props, toolbarProps, own)}\n      ref={ref}\n      data-slot=\"emoji-reaction-bar\"\n      data-orientation={orientation}\n      className={cn(\"flex flex-wrap items-center gap-1 data-[orientation=vertical]:flex-col\", className)}\n    />\n  );\n}\n\nexport { EmojiReactionBar };\nexport type { EmojiReactionBarProps };\n",
       "type": "registry:ui"
     }
   ],
