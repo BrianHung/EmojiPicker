@@ -86,7 +86,7 @@ export function Editor() {
 
 `useTiptapEmojiSuggestions` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
 
-```tsx title="emoji-suggestion.tsx (excerpt)"
+```tsx title="emoji-suggestions-menu.tsx (excerpt)"
 import { useTiptapEmojiSuggestions } from "@/hooks/use-emoji-tiptap";
 
 const emoji = useTiptapEmojiSuggestions(editor, {

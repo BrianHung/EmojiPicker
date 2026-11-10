@@ -274,6 +274,17 @@ describe("Root keyboard", () => {
     expect(onSelect.mock.calls.map(([s]) => s.unified)).toEqual(["1f603"]);
   });
 
+  it("keeps the parts' own data-slot over one passed in props, as the picker's lookups need", () => {
+    render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root data-slot="picker">
+          <EmojiPicker.Search data-slot="search" />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    expect(document.querySelector('[data-slot="emoji-picker"] > [data-slot="emoji-picker-search"]')).not.toBeNull();
+  });
+
   it("renders the input and SearchClear side by side in the default Search, and clears the query from it", () => {
     const onQueryChange = vi.fn();
     render(
