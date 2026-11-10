@@ -1,6 +1,6 @@
 {
   "name": "@emoji-components/data",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Emoji datasets for emoji-components in every emojibase locale and shortcode set.",
   "keywords": [
     "emoji",
@@ -38,7 +38,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@emoji-components/core": "^1.0.0-alpha.1",
+    "@emoji-components/core": "^1.0.0-alpha.2",
     "emojibase": "18.0.0",
     "emojibase-data": "18.0.0",
     "tsx": "^4.23.15",

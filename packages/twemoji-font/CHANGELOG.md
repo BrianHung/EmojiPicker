@@ -1,5 +1,11 @@
 # @emoji-components/twemoji-font
 
+## 1.0.0-alpha.2
+
+### Patch Changes
+
+- b245ab8: Every README snippet is a complete file you can paste, and the READMEs note the prerelease.
+
 ## 1.0.0-alpha.1
 
 ### Major Changes
