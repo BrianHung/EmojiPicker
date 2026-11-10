@@ -18,10 +18,10 @@ export function CustomEmojiPicker({ onSelect }: { onSelect: (selection: EmojiSel
   return (
     <EmojiProvider customEmojis={bufo}>
       <EmojiPicker onSelect={onSelect} categories={categories}>
-<EmojiPickerSearch />
-<EmojiPickerContent />
-<EmojiPickerFooter />
-</EmojiPicker>
+        <EmojiPickerSearch />
+        <EmojiPickerContent />
+        <EmojiPickerFooter />
+      </EmojiPicker>
     </EmojiProvider>
   );
 }

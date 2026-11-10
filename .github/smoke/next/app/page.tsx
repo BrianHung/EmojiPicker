@@ -8,7 +8,10 @@ export default function Page() {
       <Picker />
       <EmojiPicker.Root>
         <EmojiPicker.Search>
-          <EmojiPicker.SearchInput />
+          <EmojiPicker.SearchInputGroup>
+            <EmojiPicker.SearchInput />
+            <EmojiPicker.SearchClear />
+          </EmojiPicker.SearchInputGroup>
           <EmojiPicker.SkinTone />
         </EmojiPicker.Search>
         <EmojiPicker.Viewport>

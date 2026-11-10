@@ -115,12 +115,13 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       {search ? (
         <EmojiPicker.Search className="relative flex shrink-0 items-center px-[17.5px] pt-3.5 pb-[7px]">
           <EmojiPicker.SearchInputGroup>
-<EmojiPicker.SearchInput
-            placeholder="Search all emoji"
-            autoFocus={autoFocus}
-            className="h-9 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]" />
-<SearchClear />
-</EmojiPicker.SearchInputGroup>
+            <EmojiPicker.SearchInput
+              placeholder="Search all emoji"
+              autoFocus={autoFocus}
+              className="h-9 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-background px-3 py-1 text-[15px] text-(--slack-strong) outline-none placeholder:text-(--slack-placeholder) focus:border-transparent focus:shadow-[0_0_0_1px_var(--emoji-picker-ring),0_0_0_5px_color-mix(in_oklab,var(--emoji-picker-ring)_30%,transparent)]"
+            />
+            <SearchClear />
+          </EmojiPicker.SearchInputGroup>
         </EmojiPicker.Search>
       ) : null}
       <EmojiPicker.Viewport

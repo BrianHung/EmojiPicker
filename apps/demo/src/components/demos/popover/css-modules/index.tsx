@@ -14,14 +14,16 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
       <EmojiPopover.Portal>
         <EmojiPopover.Positioner>
           <EmojiPopover.Popup aria-label="Emoji picker" className={styles.popup}>
-            <EmojiPicker onSelect={(selection) => {
+            <EmojiPicker
+              onSelect={(selection) => {
                 setPicked(selection);
                 onSelect(selection);
-              }}>
-<EmojiPickerSearch />
-<EmojiPickerContent />
-<EmojiPickerFooter />
-</EmojiPicker>
+              }}
+            >
+              <EmojiPickerSearch />
+              <EmojiPickerContent />
+              <EmojiPickerFooter />
+            </EmojiPicker>
           </EmojiPopover.Popup>
         </EmojiPopover.Positioner>
       </EmojiPopover.Portal>

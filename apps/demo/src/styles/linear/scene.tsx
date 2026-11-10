@@ -518,9 +518,9 @@ function IconPicker({ onSelect, autoFocus = false, fluid = false, searchResults,
     >
       <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5.5px] pt-[4.5px] pb-1">
         <EmojiPicker.SearchInputGroup>
-<EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-emoji-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-subtle" />
-<SearchClear />
-</EmojiPicker.SearchInputGroup>
+          <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-emoji-picker-background py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-subtle" />
+          <SearchClear />
+        </EmojiPicker.SearchInputGroup>
       </EmojiPicker.Search>
       <EmojiPicker.Viewport className="relative min-h-0 flex-1 [scrollbar-width:thin]">
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>

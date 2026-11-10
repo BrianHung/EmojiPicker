@@ -7,11 +7,11 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
       <EmojiPicker.Search className={styles.search}>
         <EmojiPicker.SearchInputGroup className={styles.field}>
           <EmojiPicker.SearchInput className={styles.input} />
-<EmojiPicker.SearchClear className={styles.clear}>
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </EmojiPicker.SearchClear>
+          <EmojiPicker.SearchClear className={styles.clear}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </EmojiPicker.SearchClear>
         </EmojiPicker.SearchInputGroup>
         <EmojiPicker.SkinTone className={styles.skinTone}>
           <EmojiPicker.SkinToneTrigger className={styles.tone}>

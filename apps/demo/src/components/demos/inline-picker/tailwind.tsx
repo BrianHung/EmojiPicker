@@ -11,11 +11,11 @@ export function InlinePicker({ onSelect }: { onSelect?: (selection: EmojiSelecti
       <EmojiPicker.Search className="flex items-center gap-2 p-3">
         <EmojiPicker.SearchInputGroup className="relative flex-1">
           <EmojiPicker.SearchInput className="h-8 w-full rounded-md border border-emoji-picker-input-border bg-emoji-picker-input pr-8 pl-3 text-sm text-emoji-picker-foreground outline-none placeholder:text-emoji-picker-subtle focus-visible:border-emoji-picker-ring" />
-<EmojiPicker.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-emoji-picker-muted hover:bg-emoji-picker-hover">
-              <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                <path d="M18 6 6 18M6 6l12 12" />
-              </svg>
-            </EmojiPicker.SearchClear>
+          <EmojiPicker.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-emoji-picker-muted hover:bg-emoji-picker-hover">
+            <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </EmojiPicker.SearchClear>
         </EmojiPicker.SearchInputGroup>
         <EmojiPicker.SkinTone className="relative inline-flex">
           <EmojiPicker.SkinToneTrigger className={tone}>

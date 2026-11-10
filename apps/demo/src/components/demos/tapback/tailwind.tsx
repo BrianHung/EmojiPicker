@@ -21,11 +21,11 @@ export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection
         <EmojiPicker.Search className="flex items-center p-3">
           <EmojiPicker.SearchInputGroup className="relative flex-1">
             <EmojiPicker.SearchInput className="h-8 w-full rounded-md border border-emoji-picker-input-border bg-emoji-picker-input pr-8 pl-3 text-sm outline-none placeholder:text-emoji-picker-subtle" />
-<EmojiPicker.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-emoji-picker-muted hover:bg-emoji-picker-hover">
-                <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                  <path d="M18 6 6 18M6 6l12 12" />
-                </svg>
-              </EmojiPicker.SearchClear>
+            <EmojiPicker.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-emoji-picker-muted hover:bg-emoji-picker-hover">
+              <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </EmojiPicker.SearchClear>
           </EmojiPicker.SearchInputGroup>
         </EmojiPicker.Search>
         <EmojiPicker.Viewport className="relative min-h-0 flex-1">
