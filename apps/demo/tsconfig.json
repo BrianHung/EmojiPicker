@@ -16,6 +16,7 @@
     "paths": {
       "@/registry/*": ["./registry/*"],
       "@/components/ui/emoji-picker": ["./registry/emoji-picker.tsx"],
+      "@/components/ui/emoji-picker-popover": ["./registry/emoji-picker-popover.tsx"],
       "@/components/ui/emoji-reaction-bar": ["./registry/emoji-reaction-bar.tsx"],
       "@/components/ui/emoji-suggestions": ["./registry/emoji-suggestions.tsx"],
       "@/lib/emoji-prosemirror": ["./registry/emoji-prosemirror.ts"],
