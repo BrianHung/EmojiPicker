@@ -21,10 +21,11 @@ export default defineConfig({
     markdownDocs(),
     site(),
     {
-      name: "react-aria-demos",
+      // registry/aria imports shadcn/ui's React Aria base, which the site doesn't use; the contracts page tests it with stand-ins
+      name: "react-aria-registry",
       enforce: "pre",
       resolveId(source, importer) {
-        if (source === "emoji-components/floating-ui" && importer?.endsWith("?react-aria")) return this.resolve("emoji-components/react-aria", importer, { skipSelf: true });
+        if (/[/\\]registry[/\\]aria[/\\]/.test(importer ?? "") && /[/\\]src[/\\]components[/\\]ui[/\\](popover|button)$/.test(source)) return fileURLToPath(new URL("./e2e/pages/contracts/aria-ui.tsx", import.meta.url));
       },
     },
     {

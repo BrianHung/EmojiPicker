@@ -7,7 +7,7 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
     type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel() }) => void',
-    description: "Runs when the user selects an emoji. A selection shows the reaction row again and closes an enclosing `EmojiPopover`; `details.cancel()` keeps the value, the expanded picker, and the popover as they are.",
+    description: "Runs when the user selects an emoji. A selection shows the reaction row again; close an enclosing popover here. `details.cancel()` keeps the value and the expanded picker as they are.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
@@ -55,15 +55,13 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
 ]);
 
 export const search = rowsOf<EmojiPicker.Search.Props>()([
-  { name: "children", type: "ReactNode | ({ empty }) => ReactNode", default: "`SearchInputGroup` with `SearchInput` and `SearchClear`", description: "The row's contents." },
+  { name: "children", type: "ReactNode", default: "`SearchInput` and `SearchClear`", description: "`SearchInput`, `SearchClear`, and anything placed beside them, such as an icon." },
   className("{ empty }"),
 ]);
 
-export const searchInputGroup = rowsOf<EmojiPicker.SearchInputGroup.Props>()([{ name: "children", type: "ReactNode", description: "`SearchInput`, `SearchClear`, and anything placed beside them, such as an icon." }, className("{ empty }")]);
-
 export const searchInput = rowsOf<EmojiPicker.SearchInput.Props>()([
   { name: "placeholder", type: "string", default: "`labels.searchPlaceholder`" },
-  { name: "autoFocus", type: "boolean", default: "`true` inside an `EmojiPopover`" },
+  { name: "autoFocus", type: "boolean", default: "`false`", description: "Focuses the field on mount, and marks it for `emojiPickerInitialFocus`." },
   className("{ hovered, focused, focusVisible, disabled }"),
 ]);
 

@@ -1,20 +1,15 @@
 import * as React from "react";
 import type { EmojiSelection } from "emoji-components";
-import { Chips } from "./chips";
 import { CodeTabs, Preview, codeTabsOf, type CodeTab } from "./docs";
 import { usePickedEmoji } from "./picked";
 
 type Module = Record<string, React.ComponentType<{ onSelect: (selection: EmojiSelection) => void }>>;
-type Adapter = "floating-ui" | "react-aria";
 
 const DEMOS = "../demos/";
 const TAILWIND = "tailwind.tsx";
 const CSS_MODULES = "css-modules/index.tsx";
 
-const modules: Record<Adapter, Record<string, Module>> = {
-  "floating-ui": import.meta.glob("../demos/*/{tailwind.tsx,css-modules/index.tsx}", { eager: true }),
-  "react-aria": import.meta.glob("../demos/popover/{tailwind.tsx,css-modules/index.tsx}", { eager: true, query: "?react-aria" }),
-};
+const modules: Record<string, Module> = import.meta.glob("../demos/*/{tailwind.tsx,css-modules/index.tsx}", { eager: true });
 const sources = import.meta.glob<string>("../demos/*/{tailwind.tsx,css-modules/index.*}", { eager: true, query: "?raw", import: "default" });
 
 function variants(name: string): [CodeTab, string][] {
@@ -37,31 +32,17 @@ function variants(name: string): [CodeTab, string][] {
   ];
 }
 
-export function Demo({ name, className, adapters, children }: { name: string; className?: string; adapters?: boolean; children?: React.ReactNode }) {
+export function Demo({ name, className, children }: { name: string; className?: string; children?: React.ReactNode }) {
   const [, onSelect] = usePickedEmoji();
-  const [adapter, setAdapter] = React.useState<Adapter>("floating-ui");
   const files = variants(name);
   const tabs = [...files.map(([tab]) => tab), ...codeTabsOf(children)];
   const [tab, setTab] = React.useState(tabs[0]!.label);
   const file = (files.find(([t]) => t.label === tab) ?? files[0]!)[1];
-  const Component = Object.values(modules[adapter][`${DEMOS}${name}/${file}`]!)[0]!;
+  const Component = Object.values(modules[`${DEMOS}${name}/${file}`]!)[0]!;
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
         <Preview className={className}>
-          {adapters ? (
-            <div className="absolute top-3 right-3">
-              <Chips
-                label="Popover"
-                value={adapter}
-                onChange={setAdapter}
-                options={[
-                  ["floating-ui", "Floating UI"],
-                  ["react-aria", "React Aria"],
-                ]}
-              />
-            </div>
-          ) : null}
           <Component onSelect={onSelect} />
         </Preview>
       </div>

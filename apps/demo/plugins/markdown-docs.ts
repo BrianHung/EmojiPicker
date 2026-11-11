@@ -136,6 +136,7 @@ export const ROUTES: Record<string, Route> = {
 ## Docs
 
 - [Emoji Components](${SITE}/docs.md): installation, usage, anatomy, examples, and the API reference of every part.
+- [Registry](${SITE}/r/registry.json): shadcn/ui items for the picker, a popover on shadcn/ui, React Aria, or Floating UI, the suggestions menu on Floating UI, and the reaction bar.
 
 ## Examples
 

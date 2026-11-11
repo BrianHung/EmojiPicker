@@ -1,5 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
-import { hold, quiet, emojiItem, slot, SLOTS, type Viewport, visit } from "./support";
+import { hold, quiet, emojiItem, POPUP, slot, SLOTS, SUGGESTIONS, type Viewport, visit } from "./support";
 
 export type Kind = "picker" | "menu" | "bar";
 
@@ -17,16 +17,12 @@ export type Surface = {
   inline?: boolean;
 };
 
-const layer = (page: Page) =>
-  page
-    .locator(`${slot("popoverPopup")}, [data-slot="drawer-popup"]`)
-    .filter({ visible: true })
-    .last();
+const layer = (page: Page) => page.locator(`${POPUP}, [data-slot="drawer-popup"]`).filter({ visible: true }).last();
 export const listbox = (page: Page) =>
   page
     .getByRole("listbox")
     .filter({ visible: true })
-    .and(page.locator(`:not(${slot("list")}), ${slot("suggestionsPopup")} ${slot("list")}`))
+    .and(page.locator(`:not(${slot("list")}), ${SUGGESTIONS} ${slot("list")}`))
     .last();
 export const pickerIn = (scope: Locator) => scope.locator(`xpath=descendant-or-self::*[@data-slot="${SLOTS.root}" or @data-epr-part="root"]`).first();
 export const firstPicker = (page: Page) => page.locator(slot("root")).first();
@@ -192,11 +188,7 @@ function scene(s: StyleId): Surface[] {
         menu(id("comment-autocomplete"), path, (p) => sc(p).getByLabel("Leave a comment", { exact: true }), ":smi", shotCard),
       ];
     case "instagram": {
-      const bar = (p: Page) =>
-        p
-          .locator(`${slot("popoverPopup")}[aria-label="Reactions"], [role="dialog"]:has([aria-label="More reactions"])`)
-          .filter({ visible: true })
-          .last();
+      const bar = (p: Page) => p.locator(`${POPUP}[aria-label="Reactions"], ${POPUP}:has([aria-label="More reactions"])`).filter({ visible: true }).last();
       const react = (p: Page) => button(sc(p).locator("div.group").filter({ hasText: "ok who's in for the lake" }), "React");
       const openBar = async (p: Page) => {
         const message = sc(p).getByRole("button", { name: /^Maya: ok who's in/ });

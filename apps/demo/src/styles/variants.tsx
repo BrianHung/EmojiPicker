@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Emoji, EmojiReactionBar, useEmojiStore, useEmojiFrequents, type EmojiSelection, type UseEmojiSuggestionsReturnValue } from "emoji-components";
+import { Emoji, useEmojiStore, useEmojiFrequents, type EmojiSelection, type UseEmojiSuggestionsReturnValue } from "emoji-components";
 import { cn } from "@/lib/utils";
 import { PickerPopover, type PickerPopoverProps } from "@/components/picker-popover";
+import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
 import { SmilePlus } from "./icons";
 import { FitViewport, type Reaction } from "./scene-kit";
 import { OPTION, tokensOf, type Style } from "./style";
@@ -38,11 +39,11 @@ export function StyleDropdown({
       label={label}
       triggerClassName={triggerClassName}
       renderTrigger={renderTrigger}
-      picker={
+      picker={(pick) => (
         <FitViewport width={appStyle.size.width}>
-          <Picker onSelect={onSelect} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
+          <Picker onSelect={pick} search={search} autoFocus={search} className={search ? undefined : "h-auto max-h-[400px]"} />
         </FitViewport>
-      }
+      )}
     >
       {children}
     </PickerPopover>
@@ -54,7 +55,7 @@ export function StyleReactionRow({ appStyle, onSelect, count = 5, className }: {
   const frequent = useEmojiFrequents({ limit: count }).items;
   const top = appStyle.tapback.pinned ?? frequent;
   return (
-    <EmojiReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn(appStyle.tapback.className, className)} aria-label="Reactions">
+    <EmojiReactionBar data-style={appStyle.id} style={tokensOf(appStyle)} className={cn("block", appStyle.tapback.className, className)} aria-label="Reactions">
       <div className={appStyle.tapback.reactions}>
         {top.map((u) => {
           const unified = store.withSkinTone(u);

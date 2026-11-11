@@ -285,6 +285,17 @@ describe("Root keyboard", () => {
     expect(document.querySelector('[data-slot="emoji-picker"] > [data-slot="emoji-picker-search"]')).not.toBeNull();
   });
 
+  it("renders a List in a Viewport with no children", () => {
+    render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root>
+          <EmojiPicker.Viewport />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    expect(document.querySelector('[data-slot="emoji-picker-viewport"] > [data-slot="emoji-picker-list"]')).not.toBeNull();
+  });
+
   it("renders the input and SearchClear side by side in the default Search, and clears the query from it", () => {
     const onQueryChange = vi.fn();
     render(
@@ -294,7 +305,7 @@ describe("Root keyboard", () => {
         </EmojiPicker.Root>
       </EmojiProvider>,
     );
-    const group = document.querySelector('[data-slot="emoji-picker-search-input-group"]')!;
+    const group = document.querySelector('[data-slot="emoji-picker-search"]')!;
     expect([...group.children].map((el) => el.getAttribute("data-slot"))).toEqual(["emoji-picker-search-input", "emoji-picker-search-clear"]);
     React.act(() => (document.querySelector('[data-slot="emoji-picker-search-clear"]') as HTMLElement).click());
     expect(onQueryChange).toHaveBeenCalledWith("", expect.objectContaining({ reason: "clear-press" }));
@@ -306,11 +317,9 @@ describe("Root keyboard", () => {
       <EmojiProvider data={en} prepare={false}>
         <EmojiPicker.Root defaultQuery="smile">
           <EmojiPicker.Search>
-            <EmojiPicker.SearchInputGroup>
-              <EmojiPicker.SearchInput />
-            </EmojiPicker.SearchInputGroup>
-            <EmojiPicker.SearchStatus className={({ resultCount }) => `count-${resultCount}`} />
+            <EmojiPicker.SearchInput />
           </EmojiPicker.Search>
+          <EmojiPicker.SearchStatus className={({ resultCount }) => `count-${resultCount}`} />
         </EmojiPicker.Root>
       </EmojiProvider>,
     );

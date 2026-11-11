@@ -101,21 +101,21 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
         inactiveTab="text-emoji-picker-muted"
       />
       {search ? (
-        <EmojiPicker.Search className="relative flex h-[53px] shrink-0 items-center gap-3 border-b border-emoji-picker-border px-4 pb-3 [--search-icon-x:28px]">
-          <EmojiPicker.SearchInputGroup>
+        <div className="relative flex h-[53px] shrink-0 items-center gap-3 border-b border-emoji-picker-border px-4 pb-3 [--search-icon-x:28px]">
+          <EmojiPicker.Search>
             <EmojiPicker.SearchInput
               placeholder="Find the perfect emoji"
               autoFocus={autoFocus}
               className="h-10 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-emoji-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-emoji-picker-ring focus:outline-2 focus:outline-emoji-picker-ring"
             />
             <SearchClear />
-          </EmojiPicker.SearchInputGroup>
+          </EmojiPicker.Search>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-3 left-[var(--search-icon-x,12px)] translate-y-0 text-emoji-picker-muted" />
           <HandTone emoji="👏" className="flex size-[38px] items-center justify-center text-[28px] leading-none" />
           <button type="button" className="h-10 min-w-[100px] shrink-0 rounded-[8px] border border-(--discord-chip-border) bg-(--discord-chip) px-[15px] py-[7px] text-[16px] text-(--discord-strong)">
             Add Emoji
           </button>
-        </EmojiPicker.Search>
+        </div>
       ) : null}
       <div className="flex min-h-0 flex-1">
         <div className="flex w-12 shrink-0 flex-col items-center rounded-bl-lg bg-emoji-picker-panel pt-2 pb-[9px]">

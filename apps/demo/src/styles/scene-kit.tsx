@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "emoji-components";
-import { EmojiPopover } from "emoji-components/floating-ui";
+import { EmojiPopover } from "@/components/emoji-popover";
 import { avatarFor } from "@/lib/people";
 import { cn } from "@/lib/utils";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -134,15 +134,21 @@ export type ScenePickerProps = {
   sheet?: boolean;
 };
 
-export function ScenePicker({ appStyle: style, onSelect, children, label, triggerClassName, side = "bottom", align = "start", open, onOpenChange, title, pickerClassName, font, sheet }: ScenePickerProps) {
+export function ScenePicker({ appStyle: style, onSelect, children, label, triggerClassName, side = "bottom", align = "start", open: openProp, onOpenChange, title, pickerClassName, font, sheet }: ScenePickerProps) {
+  const [uncontrolled, setUncontrolled] = React.useState(false);
+  const open = openProp ?? uncontrolled;
+  const setOpen = (next: boolean) => {
+    setUncontrolled(next);
+    onOpenChange?.(next);
+  };
   if (sheet)
     return (
-      <PickerSheet appStyle={style} onSelect={onSelect} label={label} title={title} triggerClassName={triggerClassName} open={open} onOpenChange={onOpenChange} font={font}>
+      <PickerSheet appStyle={style} onSelect={onSelect} label={label} title={title} triggerClassName={triggerClassName} open={openProp} onOpenChange={onOpenChange} font={font}>
         {children}
       </PickerSheet>
     );
   return (
-    <EmojiPopover.Root open={open} onOpenChange={onOpenChange}>
+    <EmojiPopover.Root open={open} onOpenChange={setOpen}>
       <EmojiPopover.Trigger aria-label={label} title={title} className={triggerClassName}>
         {children}
       </EmojiPopover.Trigger>
@@ -150,7 +156,7 @@ export function ScenePicker({ appStyle: style, onSelect, children, label, trigge
         <EmojiPopover.Positioner side={side} align={align}>
           <EmojiPopover.Popup aria-label={`${style.label} style emoji picker`} style={{ fontFamily: font }}>
             <FitViewport width={style.size.width}>
-              <style.Picker onSelect={(s) => (onSelect(s), copyEmoji(s))} autoFocus className={pickerClassName} />
+              <style.Picker onSelect={(s) => (onSelect(s), copyEmoji(s), setOpen(false))} autoFocus className={pickerClassName} />
             </FitViewport>
           </EmojiPopover.Popup>
         </EmojiPopover.Positioner>

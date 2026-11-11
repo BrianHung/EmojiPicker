@@ -1,32 +1,35 @@
 import * as React from "react";
-import type { EmojiSelection } from "emoji-components";
-import { EmojiPopover } from "emoji-components/floating-ui";
+import { Popover } from "@base-ui/react/popover";
+import { emojiPickerInitialFocus, type EmojiSelection } from "emoji-components";
 import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
 import styles from "./index.module.css";
 
 export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
+  const [open, setOpen] = React.useState(false);
   const [picked, setPicked] = React.useState<EmojiSelection | null>(null);
+  const popup = React.useRef<HTMLDivElement>(null);
   return (
-    <EmojiPopover.Root>
-      <EmojiPopover.Trigger aria-label="Open emoji picker" className={styles.trigger}>
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger aria-label="Open emoji picker" className={styles.trigger}>
         <span className={styles.emoji}>{picked?.emoji || "🙂"}</span> Add reaction
-      </EmojiPopover.Trigger>
-      <EmojiPopover.Portal>
-        <EmojiPopover.Positioner>
-          <EmojiPopover.Popup aria-label="Emoji picker" className={styles.popup}>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="start" sideOffset={8} collisionPadding={8} positionMethod="fixed" className={styles.positioner}>
+          <Popover.Popup ref={popup} initialFocus={() => emojiPickerInitialFocus(popup.current)} aria-label="Emoji picker" className={styles.popup}>
             <EmojiPicker
               onSelect={(selection) => {
                 setPicked(selection);
                 onSelect(selection);
+                setOpen(false);
               }}
             >
-              <EmojiPickerSearch />
+              <EmojiPickerSearch autoFocus />
               <EmojiPickerContent />
               <EmojiPickerFooter />
             </EmojiPicker>
-          </EmojiPopover.Popup>
-        </EmojiPopover.Positioner>
-      </EmojiPopover.Portal>
-    </EmojiPopover.Root>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }

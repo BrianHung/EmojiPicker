@@ -89,24 +89,24 @@ function Picker({ reaction, onSelect, search = true, autoFocus = false, fluid = 
         />
       )}
       {search ? (
-        <EmojiPicker.Search
+        <div
           className={cn(
             "relative flex shrink-0 items-center gap-2 px-2 [--search-icon-x:14px] [&_[data-slot=emoji-picker-skin-tone]]:order-last",
             reaction ? "pt-2 pb-[14.5px]" : "mt-1 mb-2.5 py-1 [&_[data-slot=emoji-picker-skin-tone]]:-ml-0.5",
           )}
         >
-          <EmojiPicker.SearchInputGroup>
+          <EmojiPicker.Search>
             <EmojiPicker.SearchInput
               placeholder="Filter…"
               autoFocus={autoFocus}
               className="h-7 w-full rounded-[6px] bg-emoji-picker-input pr-1.5 pl-7 text-[14px] leading-5 shadow-[0_0_0_1px_var(--notion-edge)] outline-none placeholder:text-(--notion-placeholder) focus:shadow-[inset_0_0_0_1px_var(--emoji-picker-ring),0_0_0_1px_var(--emoji-picker-ring)]"
             />
             <SearchClear />
-          </EmojiPicker.SearchInputGroup>
+          </EmojiPicker.Search>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-1/2 left-[var(--search-icon-x,12px)] -translate-y-1/2 text-emoji-picker-subtle" />
           <HandTone className="flex size-7 items-center justify-center rounded-[6px] text-[20px] leading-none hover:bg-emoji-picker-hover" />
           {reaction ? null : <Shuffle onPick={(s) => onSelect?.(s)} />}
-        </EmojiPicker.Search>
+        </div>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:rgb(161_158_153/0.5)_transparent] [--emoji-picker-list-padding-end:-3px]", !search && "pt-[var(--emoji-picker-list-padding,8px)]")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>

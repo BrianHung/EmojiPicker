@@ -1,11 +1,11 @@
 type Rows = [string, string][];
 
 export const pickerHooks: Rows = [
-  ["useEmojiPickerActions()", "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`, as `actionsRef` gives them."],
+  ["useEmojiPickerActions()", "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, and `toggleSkinTone`, as `actionsRef` gives them."],
   ["useEmojiPickerHighlightedEmoji()", "The highlighted `EmojiRecord`, or `null`."],
   [
     "emojiPickerInitialFocus(element)",
-    "The element to focus in a picker inside `element`, for a popover this package doesn't render: Base UI's `initialFocus={() => emojiPickerInitialFocus(popup.current)}`, or Radix's `onOpenAutoFocus` with `event.preventDefault()` and `emojiPickerInitialFocus(event.currentTarget)?.focus()`.",
+    "The element to focus when a popover with a picker opens: the field with `autoFocus`, else the list. Base UI: `initialFocus={() => emojiPickerInitialFocus(popup.current)}`. Floating UI: `FloatingFocusManager`'s `initialFocus`. Radix: `onOpenAutoFocus` with `event.preventDefault()` and `emojiPickerInitialFocus(event.currentTarget)?.focus()`.",
   ],
   ["useEmojiPickerSearch()", "`{ query, resultCount }`. `resultCount` is `null` while not searching."],
   ["useEmojiPickerCategoryNavigation()", "`{ categories, activeCategory, jumpToCategory(id) }` for your own category tabs."],
@@ -17,7 +17,7 @@ export const pickerHooks: Rows = [
 export const suggestionsHooks: Rows = [
   [
     "useTextFieldEmojiSuggestions(ref, options)",
-    "Shortcode suggestions for an `<input>` or `<textarea>`. It handles the field's keys. Returns `query`, `open`, `anchor`, `suggestions`, `highlightedIndex`, `getListProps`, `getOptionProps`, `choose`, `insert`, `dismiss`, and `onKeyDown`.",
+    "Shortcode suggestions for an `<input>` or `<textarea>`. It handles the field's keys. Returns `query`, `open`, `suggestions`, `highlightedIndex`, `anchor`, `getInputProps`, `getListProps`, `getOptionProps`, `choose`, `insert`, `dismiss`, and `onKeyDown`. `anchor` is the query's box as a Floating UI virtual element: `refs.setPositionReference(anchor)`. `getInputProps()` is the field's combobox wiring, which the hook also writes onto the field while the list is open.",
   ],
   ["useEmojiSuggestions({ query, anchor, replace }, options, element)", "Shortcode suggestions for any editor. `element` is the editor's element, a ref to it, or a function that returns it."],
   ["useEmojiSuggestions(suggestions, { anchor })", "The same, around core's `createEmojiSuggestions(store, options)`, for an editor plugin that handles the keys itself, such as the ProseMirror item."],

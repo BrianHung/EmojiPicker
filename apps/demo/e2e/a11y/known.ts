@@ -18,7 +18,7 @@ const KNOWN: Known[] = [
   { rule: "scrollable-region-focusable", node: /^<div id="[^"]*-listbox" role="listbox"/ },
   { rule: "aria-input-field-name", node: /^<div contenteditable="true" role="textbox"[^>]*class="tiptap/ },
   { rule: "label-content-name-mismatch", node: /^<div [^>]*data-slot="emoji-picker-categor/ },
-  { rule: "label-content-name-mismatch", node: /^<button[^>]*aria-label="Open emoji picker"[^>]*data-slot="emoji-popover/ },
+  { rule: "label-content-name-mismatch", node: /^<button[^>]*aria-label="Open emoji picker"/ },
   { rule: "heading-order", node: /^<h4 class="pt-0\.5 font-medium">/ },
   { rule: "heading-order", node: /^<h3 class="text-\[16px\] leading-\[22px\]"><span class="font-medium"/ },
   { rule: "heading-order", node: /^<h3>Packing list<\/h3>/ },

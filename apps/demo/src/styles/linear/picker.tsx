@@ -39,12 +39,12 @@ export function LinearPicker({ onSelect, search = true, autoFocus = false, fluid
       className={cn(ROOT, "h-[321px] w-[273px] font-emoji-picker text-emoji-picker-foreground [--emoji-picker-cell-size:28px] [--emoji-picker-header-height:28px] [--emoji-picker-emoji-image-size:20px] [--emoji-picker-list-padding:9.5px] [--emoji-picker-emoji-size:19px]", POPUP, className)}
     >
       {search ? (
-        <EmojiPicker.Search className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
-          <EmojiPicker.SearchInputGroup>
+        <div className="relative flex shrink-0 items-center border-b border-(--linear-divider) px-[5px] pt-1 pb-1">
+          <EmojiPicker.Search>
             <EmojiPicker.SearchInput placeholder="Search emoji…" autoFocus={autoFocus} className="h-7 w-full rounded-[8px] bg-transparent py-1.5 pr-7 pl-[9px] text-[13px] outline-none placeholder:text-emoji-picker-muted" />
             <SearchClear />
-          </EmojiPicker.SearchInputGroup>
-        </EmojiPicker.Search>
+          </EmojiPicker.Search>
+        </div>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 overflow-x-hidden [scrollbar-color:var(--linear-thumb)_transparent] [scrollbar-width:thin]", !search && "pt-2.5")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>

@@ -107,3 +107,24 @@ it("dismisses when the editor blurs, until the query changes", () => {
   React.act(() => setQuery("fire"));
   expect(editor.textContent).toBe("fire");
 });
+
+it("wires a field that spreads getInputProps, keeps its attributes after the menu closes, and anchors at the query", () => {
+  function Field() {
+    const ref = React.useRef<HTMLInputElement>(null);
+    const { getInputProps, anchor } = useTextFieldEmojiSuggestions(ref);
+    return <input ref={ref} aria-label="Message" defaultValue=":thumbs" {...getInputProps()} data-anchored={String(anchor.contextElement === ref.current)} />;
+  }
+  const host = render(
+    <EmojiProvider data={en} prepare={false}>
+      <Field />
+    </EmojiProvider>,
+  );
+  const input = host.querySelector("input")!;
+  const wiring = () => ["role", "aria-expanded", "aria-controls"].map((name) => input.getAttribute(name));
+  input.setSelectionRange(7, 7);
+  React.act(() => input.focus());
+  expect(wiring()).toEqual(["combobox", "true", expect.stringMatching(/listbox$/)]);
+  expect(input.dataset.anchored).toBe("true");
+  React.act(() => input.blur());
+  expect(wiring()).toEqual(["combobox", "false", null]);
+});

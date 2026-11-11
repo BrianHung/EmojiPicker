@@ -1,7 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { card, clearTextField, firstPicker as picker, homePopover, show, surface } from "./surfaces";
-import { expect, frames, quiet, settle, emojiItem, slot, test, visit } from "./support";
+import { expect, frames, quiet, settle, emojiItem, POPUP, slot, test, visit } from "./support";
 
 const highlighted = (page: Page) => picker(page).locator(`${emojiItem}[data-highlighted]`);
 
@@ -106,7 +106,7 @@ for (const id of ["gallery/slack/popover-no-search", "gallery/slack/popover", "h
 test("registry card: one cell looks highlighted when results change under a resting pointer", async ({ page }) => {
   await visit(page, "/");
   await homePopover(page).click();
-  const root = page.locator(`${slot("popoverPopup")} ${slot("root")}`);
+  const root = page.locator(`${POPUP} ${slot("root")}`);
   await root.locator(emojiItem).first().waitFor();
   await root.locator(emojiItem).nth(1).hover();
   await page.keyboard.type("cat");
@@ -119,7 +119,7 @@ test("a popover's picker fits a short viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 500 });
   await visit(page, "/examples/lexical/");
   await page.getByRole("button", { name: "Insert emoji", exact: true }).click();
-  const root = page.locator(`${slot("popoverPopup")} ${slot("root")}`);
+  const root = page.locator(`${POPUP} ${slot("root")}`);
   await root.locator(emojiItem).first().waitFor();
   await quiet(page);
   const box = (await root.boundingBox())!;
@@ -213,7 +213,7 @@ test("Slack: the reaction picker fades out where it was when its hover toolbar h
   await scene.scrollIntoViewIfNeeded();
   await scene.getByText(/^yep/).hover();
   await scene.getByRole("button", { name: "Add reaction" }).last().click();
-  const positioner = page.locator(slot("popoverPositioner"));
+  const positioner = page.locator(POPUP).locator("..");
   await positioner.locator(emojiItem).first().waitFor();
   await settle(page);
   // The placed offsets, not the rect: the exit animation's own transform is fine

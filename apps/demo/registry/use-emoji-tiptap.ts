@@ -38,5 +38,5 @@ export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSe
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
     return () => void (editor.isDestroyed || editor.unregisterPlugin(key));
   }, [editor, plugin, key]);
-  return useEmojiSuggestions(suggestions, { anchor });
+  return useEmojiSuggestions(suggestions, { anchor }, () => (editor && !editor.isDestroyed ? editor.view.dom : null));
 }

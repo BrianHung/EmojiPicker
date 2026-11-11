@@ -50,17 +50,17 @@ export function InstagramPicker({ onSelect, search = true, autoFocus = false, fl
       )}
     >
       {search ? (
-        <EmojiPicker.Search className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
-          <EmojiPicker.SearchInputGroup>
+        <div className="relative flex shrink-0 items-center px-2 pt-3 pb-0 [--search-icon-x:20px]">
+          <EmojiPicker.Search>
             <EmojiPicker.SearchInput
               placeholder="Search emoji"
               autoFocus={autoFocus}
               className="h-10 w-full rounded-full border border-emoji-picker-input-border bg-emoji-picker-input pr-4 pl-[33.3px] text-[14px] text-emoji-picker-foreground outline-none placeholder:text-(--instagram-placeholder)"
             />
             <SearchClear />
-          </EmojiPicker.SearchInputGroup>
+          </EmojiPicker.Search>
           <I.Search size={16} strokeWidth={2} className="pointer-events-none absolute top-[calc(50%+6px)] left-[var(--search-icon-x,12px)] size-[14px] -translate-y-1/2 text-emoji-picker-subtle" />
-        </EmojiPicker.Search>
+        </div>
       ) : null}
       <EmojiPicker.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-width:none]", !search && "pt-[var(--emoji-picker-list-padding,8px)]")}>
         <EmojiPicker.List className="outline-none" renderEmptyState={noEmoji}>

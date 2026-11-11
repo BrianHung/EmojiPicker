@@ -5,16 +5,9 @@ import { defineConfig } from "tsup";
 // One entry per package subpath, as Base UI's package.json exports one per component
 const entries = {
   index: "src/index.ts",
-  "floating-ui": "src/floating-ui.ts",
-  "react-aria": "src/react-aria.ts",
   "picker/index": "src/picker/index.ts",
   "emoji/index": "src/emoji/index.ts",
   "provider/index": "src/provider/index.ts",
-  "reaction-bar/index": "src/reaction-bar/index.ts",
-  "popover/floating-ui/index": "src/popover/floating-ui/index.ts",
-  "popover/react-aria/index": "src/popover/react-aria/index.ts",
-  "suggestions/floating-ui/index": "src/suggestions/floating-ui/index.ts",
-  "suggestions/react-aria/index": "src/suggestions/react-aria/index.ts",
 };
 
 // One output file per source module so bundlers can drop unused parts (an <Emoji> alone doesn't load the picker)

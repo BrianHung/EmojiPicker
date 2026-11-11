@@ -71,26 +71,31 @@ export function Editor() {
 
 ## How it works
 
-`useLexicalEmojiSuggestions` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system. `EmojiSuggestions.Positioner` positions the menu at the typed `:query`.
+`useLexicalEmojiSuggestions` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system. The menu is Floating UI's: `anchor` is the `:query`'s box as a virtual element, and the hook keeps the keys, so the menu never takes focus.
 
 ```tsx title="emoji-suggestions-plugin.tsx (excerpt)"
+import { autoUpdate, flip, FloatingPortal, offset, shift, useFloating } from "@floating-ui/react";
 import { useLexicalEmojiSuggestions } from "@/hooks/use-emoji-lexical";
 
 const emoji = useLexicalEmojiSuggestions({
   node: (text, { record, shortcode }) => (record.imageUrl ? $createEmojiNode({ unified: record.unified, shortcode, text: null }) : $createTextNode(`${text} `)),
 });
 
-<EmojiSuggestions.Root open={emoji.open} onOpenChange={(open) => !open && emoji.dismiss()}>
-  <EmojiSuggestions.Portal>
-    <EmojiSuggestions.Positioner anchor={emoji.anchor}>
-      <EmojiSuggestions.Popup>
-        <ul {...emoji.getListProps()}>
-          {emoji.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.getOptionProps(i)}>:{s.shortcode}:</li>)}
-        </ul>
-      </EmojiSuggestions.Popup>
-    </EmojiSuggestions.Positioner>
-  </EmojiSuggestions.Portal>
-</EmojiSuggestions.Root>
+const { refs, floatingStyles } = useFloating({
+  open: emoji.open,
+  placement: "bottom-start",
+  whileElementsMounted: autoUpdate,
+  middleware: [offset(6), flip(), shift({ padding: 8 })],
+});
+useLayoutEffect(() => refs.setPositionReference(emoji.anchor), [refs, emoji.anchor]);
+
+emoji.open && (
+  <FloatingPortal>
+    <ul ref={refs.setFloating} style={floatingStyles} {...emoji.getListProps()}>
+      {emoji.suggestions.map((s, i) => <li key={s.shortcode} {...emoji.getOptionProps(i)}>:{s.shortcode}:</li>)}
+    </ul>
+  </FloatingPortal>
+);
 ```
 
 ## Source

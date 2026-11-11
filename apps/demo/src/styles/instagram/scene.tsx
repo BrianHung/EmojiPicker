@@ -1,6 +1,7 @@
 import * as React from "react";
-import { Emoji, EmojiReactionBar as ReactionRow, useEmojiStatus, useEmojiStore, type EmojiSelection } from "emoji-components";
-import { EmojiPopover } from "emoji-components/floating-ui";
+import { Emoji, useEmojiStatus, useEmojiStore, type EmojiSelection } from "emoji-components";
+import { EmojiPopover } from "@/components/emoji-popover";
+import { EmojiReactionBar as ReactionRow } from "@/components/ui/emoji-reaction-bar";
 import { copyEmoji } from "@/components/site/picked";
 import { cn } from "@/lib/utils";
 import { instagram } from "./picker";
@@ -282,10 +283,14 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
   const store = useEmojiStore();
   const tb = instagram.tapback;
   const first = React.useRef<HTMLButtonElement>(null);
+  const [more, setMore] = React.useState(false);
   const moreClass = cn(tb.more!.className, "cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-[#708dff]");
   return (
     <EmojiPopover.Root open={open} onOpenChange={onOpenChange}>
-      {anchor ? null : (
+      {anchor ? (
+        // Where Tab goes from the popup: the anchored bubble is no trigger
+        <EmojiPopover.Trigger nativeButton={false} render={<span hidden />} />
+      ) : (
         <EmojiPopover.Trigger aria-label="React" title="React" className="flex size-8 cursor-pointer items-center justify-center rounded-full outline-none hover:text-[#0c1014] dark:hover:text-[#f5f5f5] focus-visible:ring-2 focus-visible:ring-[#708dff]">
           <SmileIcon size={16} />
         </EmojiPopover.Trigger>
@@ -293,7 +298,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
       <EmojiPopover.Portal>
         <EmojiPopover.Positioner side="top" align={align} sideOffset={6} anchor={anchor}>
           <EmojiPopover.Popup initialFocus={anchor ? first : undefined} aria-label="Reactions">
-            <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={tb.className} aria-label="Reactions">
+            <ReactionRow data-style="instagram" style={tokensOf(instagram)} className={cn("block", tb.className)} aria-label="Reactions">
               <div className={tb.reactions}>
                 {tb.pinned!.map((u, i) => (
                   <button
@@ -315,7 +320,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
                     {tb.more!.icon}
                   </button>
                 ) : (
-                  <EmojiPopover.Root>
+                  <EmojiPopover.Root open={more} onOpenChange={setMore}>
                     <EmojiPopover.Trigger aria-label="More reactions" className={moreClass}>
                       {tb.more!.icon}
                     </EmojiPopover.Trigger>
@@ -323,7 +328,7 @@ function ReactionBar({ open, onOpenChange, onSelect, align, anchor, onMore }: Re
                       <EmojiPopover.Positioner side="top" align="center">
                         <EmojiPopover.Popup aria-label="Instagram style emoji picker">
                           <FitViewport width={instagram.size.width}>
-                            <instagram.Picker onSelect={onSelect} autoFocus />
+                            <instagram.Picker onSelect={(s) => (onSelect(s), setMore(false))} autoFocus />
                           </FitViewport>
                         </EmojiPopover.Popup>
                       </EmojiPopover.Positioner>
