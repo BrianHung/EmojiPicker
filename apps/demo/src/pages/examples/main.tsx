@@ -7,7 +7,7 @@ import { SiteShell } from "@/components/site/shell";
 import { EXAMPLES } from "@/lib/examples";
 import "@/globals.css";
 
-const ALL = { title: "All examples", href: "https://github.com/BrianHung/emoji-components/tree/main/examples", description: "A popover that stays open, search, a command palette, rendering, and cells, as source files on GitHub." };
+const ALL: { title: string; href: string; description?: string } = { title: "All examples", href: "https://github.com/BrianHung/emoji-components/tree/main/examples" };
 
 function Examples() {
   return (
@@ -19,7 +19,7 @@ function Examples() {
             <Card className="h-full bg-background transition-colors group-hover:bg-accent/50">
               <CardHeader>
                 <CardTitle>{e.title}</CardTitle>
-                <CardDescription>{e.description}</CardDescription>
+                {e.description && <CardDescription>{e.description}</CardDescription>}
                 <CardAction>
                   {e === ALL ? (
                     <ArrowUpRightIcon className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
