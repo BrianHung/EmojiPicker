@@ -299,4 +299,3 @@ test("the registry picker draws a focus ring on the skin tone button and the foc
     expect(await focused.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
   }
 });
-
