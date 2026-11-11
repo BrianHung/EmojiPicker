@@ -287,7 +287,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
         active: activeOf(sections, highlighted ?? state.hovered),
         activeSection: state.activeSection,
         variations: state.variations,
-        reactions: state.held ? state.held.reactions : reactionsOf(current.reactions),
+        reactions: state.held && typeof current.reactions === "number" ? state.held.reactions : reactionsOf(current.reactions),
         reactionsOpen: Boolean(current.reactions) && (current.reactionsOpen ?? state.reactionsOpen),
         value: tracks(current) ? (current.value === undefined ? state.value : current.value) : undefined,
         tabStop: state.tabStop,
