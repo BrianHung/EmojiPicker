@@ -4,7 +4,7 @@
   "title": "Emoji Picker Popover (Floating UI)",
   "description": "The emoji picker in a popover on Floating UI, without a shadcn/ui popover. A trigger opens it, a pick closes it, and focus returns to the trigger.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2",
+    "emoji-components@1.0.0-alpha.3",
     "@floating-ui/react"
   ],
   "registryDependencies": [
