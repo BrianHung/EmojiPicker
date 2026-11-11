@@ -94,7 +94,7 @@ To publish:
 
 1. Run the Release workflow with `version`, review the "Version packages" PR, and merge it. Wait for CI on `main`.
 2. Run the Release workflow with `publish` on `main`. `changeset publish` is not atomic; if a package fails, run it again.
-3. Check the dist-tags. Trusted publishing does not move `latest`, so during the alpha and beta, move it locally if wanted:
+3. Check the dist-tags. Publish moves `latest` to the published versions unless the `latest` input is off; the trusted publisher needs "Allow npm dist-tag". To move it by hand:
 
    ```bash
    for p in emoji-components @emoji-components/{core,data,twemoji-font}; do npm view $p dist-tags; done

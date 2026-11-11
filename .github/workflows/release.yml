@@ -8,6 +8,10 @@ on:
         type: choice
         options: [version, publish]
         default: version
+      latest:
+        description: "publish: also move the latest dist-tag to the published versions"
+        type: boolean
+        default: true
 
 run-name: Release (${{ inputs.mode }})
 
@@ -84,4 +88,10 @@ jobs:
         run: npx playwright install-deps chromium
       - run: node .github/release-steps.mjs check font smoke onboarding
       # changeset publish skips versions already on npm; pre mode publishes to the alpha dist-tag
-      - uses: changesets/action/publish@v2
+      - id: changesets
+        uses: changesets/action/publish@v2
+      # Trusted publishing manages dist-tags with npm 11.21.0 or later and "Allow npm dist-tag" on the publisher
+      - if: inputs.latest && steps.changesets.outputs.published == 'true'
+        run: jq -r '.[] | "\(.name)@\(.version)"' <<< "$PUBLISHED" | xargs -I{} npm dist-tag add {} latest
+        env:
+          PUBLISHED: ${{ steps.changesets.outputs.published-packages }}
