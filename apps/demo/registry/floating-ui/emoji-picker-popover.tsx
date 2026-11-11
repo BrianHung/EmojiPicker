@@ -15,9 +15,11 @@ type EmojiPickerPopoverProps = Omit<React.ComponentProps<typeof EmojiPicker>, "c
   className?: string;
   "aria-label"?: string;
   children: React.ReactNode;
+  picker?: React.ReactNode;
+  finalFocus?: React.RefObject<HTMLElement | null>;
 };
 
-function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange, placement = "bottom-start", onSelect, className, "aria-label": ariaLabel, children, ...props }: EmojiPickerPopoverProps) {
+function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange, placement = "bottom-start", onSelect, className, finalFocus, "aria-label": ariaLabel, children, picker, ...props }: EmojiPickerPopoverProps) {
   const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
   const open = openProp ?? uncontrolled;
   const setOpen = (next: boolean) => {
@@ -42,7 +44,7 @@ function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange,
       </button>
       {open ? (
         <FloatingPortal>
-          <FloatingFocusManager context={context} modal={false} initialFocus={initialFocus}>
+          <FloatingFocusManager context={context} modal={false} initialFocus={initialFocus} returnFocus={finalFocus ?? true}>
             <div ref={refs.setFloating} style={floatingStyles} aria-label={labels.picker} className="z-50 flex overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 outline-hidden" {...getFloatingProps()}>
               <EmojiPicker
                 {...props}
@@ -52,9 +54,13 @@ function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange,
                 }}
                 className="rounded-none border-0 shadow-none"
               >
-                <EmojiPickerSearch autoFocus />
-                <EmojiPickerContent />
-                <EmojiPickerFooter />
+                {picker ?? (
+                  <>
+                    <EmojiPickerSearch autoFocus />
+                    <EmojiPickerContent />
+                    <EmojiPickerFooter />
+                  </>
+                )}
               </EmojiPicker>
             </div>
           </FloatingFocusManager>

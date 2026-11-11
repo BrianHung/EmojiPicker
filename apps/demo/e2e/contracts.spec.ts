@@ -85,6 +85,16 @@ for (const name of ["Base UI", "React Aria", "Floating UI"])
     await expect(trigger).toBeFocused();
   });
 
+test("popover item with content and finalFocus: the given parts render, focus starts in the list, and a pick returns focus to the field", async ({ page }) => {
+  await page.getByRole("button", { name: "Insert emoji" }).click();
+  const popup = page.getByRole("dialog");
+  await expect(popup.getByRole("searchbox")).toHaveCount(0);
+  await expect(popup.locator(slot("listCell")).first()).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(popup).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "Draft" })).toBeFocused();
+});
+
 test("search failure: the empty state offers a retry, the live region gives no count, and the retry recovers", async ({ page }) => {
   const root = page.getByRole("region", { name: "Search" });
   const status = root.locator(slot("searchStatus"));
