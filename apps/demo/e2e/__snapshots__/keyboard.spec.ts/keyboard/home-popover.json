@@ -67,7 +67,7 @@
   ],
   "enter": {
     "open": false,
-    "focus": "button \"Open emoji picker\"",
+    "focus": "button \"Open emoji picker, thumbs up\"",
     "focusReturned": true,
     "toast": "👍 :+1: thumbs up"
   },

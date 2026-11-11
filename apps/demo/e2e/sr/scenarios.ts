@@ -124,12 +124,12 @@ function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
     expect(said, "entering People announces the section").toMatch(/people/);
   });
 
-  test("Enter picks: the selection is announced and focus returns to the trigger", async ({ page, sr }) => {
+  test("Enter picks: focus returns to the trigger, which names the selection", async ({ page, sr }) => {
     const trigger = homePopover(page);
     const ear = await start(page, sr, "/", trigger);
     await ear.press("Enter", SEARCH, "the search field");
     await ear.type("thumbs up", /thumbs up/, "the highlighted match");
-    await ear.press("Enter", /thumbs up/, "the pick is announced");
+    await ear.press("Enter", /open emoji picker, thumbs up/, "focus returns to the trigger, which names the pick");
     await expect(trigger).toBeFocused();
   });
 

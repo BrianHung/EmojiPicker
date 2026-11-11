@@ -10,7 +10,7 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
   const popup = React.useRef<HTMLDivElement>(null);
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
-      <Popover.Trigger aria-label="Open emoji picker" className={styles.trigger}>
+      <Popover.Trigger aria-label={picked ? `Open emoji picker, ${picked.name}` : "Open emoji picker"} className={styles.trigger}>
         <span className={styles.emoji}>{picked?.emoji || "🙂"}</span> Add reaction
       </Popover.Trigger>
       <Popover.Portal>

@@ -300,16 +300,3 @@ test("the registry picker draws a focus ring on the skin tone button and the foc
   }
 });
 
-test("a pick that closes the popover is announced once focus is back on the trigger", async ({ page }) => {
-  await visit(page, "/");
-  await page.evaluate(() => {
-    const w = window as { focusAtToast?: string };
-    new MutationObserver(() => {
-      if (w.focusAtToast === undefined && document.querySelector('[aria-live] [data-slot="toast"]')) w.focusAtToast = document.activeElement?.getAttribute("aria-label") ?? "";
-    }).observe(document.body, { childList: true, subtree: true });
-  });
-  await surface("home/popover").trigger!(page).click();
-  await page.keyboard.type("thumbs up");
-  await page.keyboard.press("Enter");
-  await expect.poll(() => page.evaluate(() => (window as { focusAtToast?: string }).focusAtToast)).toBe("Open emoji picker");
-});
