@@ -3,7 +3,10 @@ type Rows = [string, string][];
 export const pickerHooks: Rows = [
   ["useEmojiPickerSearch()", "`{ query, setQuery, clear, resultCount }`. `resultCount` is `null` while not searching. Used by `SearchStatus`. For your own input, pass it to `SearchInput`'s `render`."],
   ["useEmojiPickerCategories()", "`{ categories, activeCategory, jumpToCategory(id), collapsed, isCollapsed(id), setCollapsed(id, collapsed), toggleCollapsed(id), getItemProps(id, props) }`. Used by `CategoryNav` and `CategoryNavTab`."],
-  ["useEmojiPickerHighlight()", "`{ emoji, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord`, or `null`. For your own preview or section bar; `actionsRef` gives `highlight` and `move` outside `Root`."],
+  [
+    "useEmojiPickerHighlight()",
+    "`{ emoji, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord`, or `null`. `pick()` picks the highlighted emoji; `pick(emoji)` picks that one. For your own preview or section bar; `actionsRef` gives the same actions outside `Root`.",
+  ],
   [
     "useEmojiPickerReactions({ value, defaultValue, onValueChange })",
     "`{ reactions, open, setOpen(open), value, expandable, getItemProps(emoji, props), getExpandProps(props) }`. With a value, the items toggle, as in Base UI's `ToggleGroup`. Used by `Reactions`, `ReactionsItem`, and `ReactionsExpand`.",

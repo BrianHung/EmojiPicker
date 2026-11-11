@@ -7,7 +7,7 @@ One set of picker hooks, which the parts are built on; the selection value and t
 
 Breaking (alpha), old → new:
 
-- `useEmojiPickerActions()` → `useEmojiPickerHighlight()` for `highlight`, `move`, and `pick`, and `useEmojiPickerSearch()` for `setQuery` and `clear`. `actionsRef` is unchanged.
+- `useEmojiPickerActions()` → `useEmojiPickerHighlight()` for `highlight`, `move`, and `pick`, and `useEmojiPickerSearch()` for `setQuery` and `clear`. `pick(emoji?)` on both and on `actionsRef` picks the given emoji, or the highlighted one without it.
 - `useEmojiPickerHighlightedEmoji()` → `useEmojiPickerHighlight().emoji`.
 - `useEmojiPickerCategoryNavigation()` and `useEmojiPickerCollapsedCategories()` → `useEmojiPickerCategories()`: `{ categories, activeCategory, jumpToCategory, collapsed, isCollapsed, setCollapsed, toggleCollapsed, getItemProps }`. `toggle(id)` is now `toggleCollapsed(id)`.
 - `useEmojiPickerSearch()` returns `setQuery` and `clear` too. `EmojiPickerSearchSummary` → `UseEmojiPickerSearchReturnValue`; `EmojiPickerCategoryNavigation` and `EmojiPickerCollapsedCategories` → `UseEmojiPickerCategoriesReturnValue`.

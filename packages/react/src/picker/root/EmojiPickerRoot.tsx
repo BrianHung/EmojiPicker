@@ -199,7 +199,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const actions = React.useMemo<EmojiPickerRootActions>(
     () => ({
       move: (to) => Boolean(list.current?.move(to, IMPERATIVE)),
-      pick: () => Boolean(list.current?.pick(undefined, "imperative-action")),
+      pick: (emoji) => (emoji == null ? Boolean(list.current?.pick(undefined, "imperative-action")) : Boolean(state.pick(emoji, IMPERATIVE))),
       highlight: (emoji) => (list.current ? list.current.highlight(emoji, IMPERATIVE) : state.highlight(emoji, IMPERATIVE)),
       focusSearch() {
         searchInput.current?.focus();

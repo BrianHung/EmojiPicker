@@ -61,6 +61,8 @@ describe("Root keyboard", () => {
     React.act(() => void actions.move("left"));
     React.act(() => void actions.pick());
     expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f600" }), expect.anything());
+    React.act(() => void actions.pick("1f680"));
+    expect(onSelect).toHaveBeenLastCalledWith(expect.objectContaining({ unified: "1f680" }), expect.objectContaining({ reason: "imperative-action" }));
     expect(document.activeElement).toBe(input);
   });
 

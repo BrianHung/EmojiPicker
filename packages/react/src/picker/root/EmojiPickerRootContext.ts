@@ -11,7 +11,7 @@ export type HighlightSource = { reason?: HighlightChangeDetails["reason"]; event
 
 export interface EmojiPickerRootActions {
   move(to: EmojiGridMove): boolean;
-  pick(): boolean;
+  pick(emoji?: string): boolean;
   highlight(emoji: string | null): void;
   focusSearch(): boolean;
   clearSearch(): void;

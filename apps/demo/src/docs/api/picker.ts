@@ -43,7 +43,7 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "actionsRef",
     type: "Ref<EmojiPicker.Root.Actions>",
-    description: "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`. Inside `Root`, `useEmojiPickerHighlight()` and `useEmojiPickerSearch()` return the same actions.",
+    description: "`move`, `pick(emoji?)`, `highlight`, `focusSearch`, `clearSearch`, and `toggleSkinTone`. Inside `Root`, `useEmojiPickerHighlight()` and `useEmojiPickerSearch()` return the same actions.",
   },
   {
     name: "keyboardTarget",
