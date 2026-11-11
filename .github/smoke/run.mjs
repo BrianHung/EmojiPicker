@@ -71,7 +71,10 @@ const css = readFileSync(join(shadcn, "src/index.css"), "utf8");
 for (const file of ["tokens.css", "shadcn.css"]) if (css.split(`@import "emoji-components/${file}"`).length !== 2) throw new Error(`shadcn add should import emoji-components/${file} once`);
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
-const built = readdirSync(join(shadcn, "dist/assets")).filter((f) => f.endsWith(".css")).map((f) => readFileSync(join(shadcn, "dist/assets", f), "utf8")).join("");
+const built = readdirSync(join(shadcn, "dist/assets"))
+  .filter((f) => f.endsWith(".css"))
+  .map((f) => readFileSync(join(shadcn, "dist/assets", f), "utf8"))
+  .join("");
 assert.equal(built.match(/@font-face\{font-family:"?Emoji Components Apple/g)?.length, 1, "the built CSS declares the Apple emoji @font-face once");
 
 rmSync(tmp, { recursive: true, force: true });
