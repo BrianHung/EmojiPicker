@@ -4,7 +4,7 @@
   "title": "Emoji Suggestions",
   "description": "The shortcode suggestions menu for what useEmojiSuggestions returns, at the caret on Floating UI. It never takes focus; the hook handles the keys. The Tiptap and Lexical items render it.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2",
+    "emoji-components@1.0.0-alpha.3",
     "@floating-ui/react"
   ],
   "registryDependencies": [

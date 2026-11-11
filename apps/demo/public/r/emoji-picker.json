@@ -4,7 +4,7 @@
   "title": "Emoji Picker",
   "description": "Styled parts for an emoji picker and a reaction row that expands into it, with shortcodes, skin tones, custom emoji, and replaceable search, built on emoji-components.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2"
+    "emoji-components@1.0.0-alpha.3"
   ],
   "registryDependencies": [
     "utils"

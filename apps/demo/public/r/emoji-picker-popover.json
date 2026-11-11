@@ -4,7 +4,7 @@
   "title": "Emoji Picker Popover",
   "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, a pick closes it, and focus returns to the trigger. For --base aria, use emoji-picker-popover-react-aria.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2"
+    "emoji-components@1.0.0-alpha.3"
   ],
   "registryDependencies": [
     "button",
