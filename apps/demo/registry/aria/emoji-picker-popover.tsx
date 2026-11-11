@@ -14,10 +14,9 @@ type EmojiPickerPopoverProps = Omit<React.ComponentProps<typeof EmojiPicker>, "c
     className?: string;
     "aria-label"?: string;
     children: React.ReactNode;
-    picker?: React.ReactNode;
   };
 
-function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange, placement = "bottom start", onSelect, className, "aria-label": ariaLabel, children, picker, ...props }: EmojiPickerPopoverProps) {
+function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange, placement = "bottom start", onSelect, className, "aria-label": ariaLabel, children, ...props }: EmojiPickerPopoverProps) {
   const [uncontrolled, setUncontrolled] = React.useState(defaultOpen);
   const open = openProp ?? uncontrolled;
   const setOpen = (next: boolean) => {
@@ -39,13 +38,9 @@ function EmojiPickerPopover({ open: openProp, defaultOpen = false, onOpenChange,
           }}
           className="rounded-none border-0 shadow-none"
         >
-          {picker ?? (
-            <>
-              <EmojiPickerSearch autoFocus />
-              <EmojiPickerContent />
-              <EmojiPickerFooter />
-            </>
-          )}
+          <EmojiPickerSearch autoFocus />
+          <EmojiPickerContent />
+          <EmojiPickerFooter />
         </EmojiPicker>
       </Popover>
     </PopoverTrigger>

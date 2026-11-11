@@ -241,7 +241,7 @@ Use your own popover; the registry items above are one each for shadcn/ui, React
 - Pass `emojiPickerInitialFocus(popup)` as the popover's initial focus: the field with `autoFocus`, else the list.
 - Leave Escape to the picker: the first Escape clears the query, and an Escape with nothing to clear goes on to the popover. Radix listens for Escape before the picker does, so it closes on the first one.
 
-The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field, and every item takes `picker` for its own parts in place of the search, list, and footer.
+The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field.
 
 ```tsx title="composer-picker.tsx"
 "use client";

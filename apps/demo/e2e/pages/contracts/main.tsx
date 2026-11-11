@@ -28,7 +28,7 @@ function Draft() {
   return (
     <>
       <textarea ref={field} aria-label="Draft" />
-      <BaseUiPopover aria-label="Insert emoji" finalFocus={field} onSelect={picked} picker={<EmojiPickerContent />}>
+      <BaseUiPopover aria-label="Insert emoji" finalFocus={field} onSelect={picked}>
         🙂
       </BaseUiPopover>
     </>
