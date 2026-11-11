@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import { createRoot } from "react-dom/client";
 import en from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, lexicalSearch, type EmojiSearch } from "emoji-components";
@@ -23,7 +23,6 @@ const POPOVERS: [string, PopoverItem][] = [
 const lexical = lexicalSearch();
 const search: EmojiSearch = (query, context) => ((window as { offline?: boolean }).offline ? Promise.reject(new Error("offline")) : lexical(query, context));
 const picked = (selection: { emoji: string }) => (document.getElementById("picked")!.textContent = selection.emoji);
-
 
 createRoot(document.getElementById("root")!).render(
   <main className="flex flex-col items-start gap-8 p-6">
