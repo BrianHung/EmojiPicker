@@ -90,7 +90,8 @@ test("composer: the menu follows the query when the textarea itself scrolls, and
   const menu = page.getByRole("listbox", { name: "Emoji suggestions" });
   await field.evaluate((el) => Object.assign(el.style, { height: "80px", overflow: "auto" }));
   await field.click();
-  await page.keyboard.type("1\n2\n3\n4\n5\n6\n7 :tada");
+  await field.fill("1\n2\n3\n4\n5\n6\n7 ");
+  await page.keyboard.type(":tada");
   await expect(menu).toBeVisible();
   const top = (await menu.boundingBox())!.y;
   const scrolled = await field.evaluate((el) => {
@@ -103,14 +104,18 @@ test("composer: the menu follows the query when the textarea itself scrolls, and
   await expect(menu).toBeHidden();
 });
 
-test("popover item with finalFocus: a pick returns focus to the field", async ({ page }) => {
-  await page.getByRole("button", { name: "Insert emoji" }).click();
-  const popup = page.getByRole("dialog");
-  await expect(popup.getByRole("searchbox")).toBeFocused();
+test("composer: a pick from the popover lands at the caret in the controlled field, which sends it", async ({ page }) => {
+  const composer = page.getByRole("region", { name: "Composer" });
+  const field = composer.getByLabel("Message");
+  await field.click();
+  await page.keyboard.type("go ");
+  await composer.getByRole("button", { name: "Insert emoji" }).click();
   await page.keyboard.type("rocket");
   await page.keyboard.press("Enter");
-  await expect(popup).toHaveCount(0);
-  await expect(page.getByRole("textbox", { name: "Draft" })).toBeFocused();
+  await expect(field).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#sent")).toHaveText("go 🚀");
+  await expect(field).toHaveValue("");
 });
 
 test("search failure: the empty state offers a retry, the live region gives no count, and the retry recovers", async ({ page }) => {

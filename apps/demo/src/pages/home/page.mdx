@@ -194,39 +194,14 @@ For your own popover, the glue is three things:
 - Pass `emojiPickerInitialFocus(popup)` as the popover's initial focus: the field with `autoFocus`, else the list.
 - Leave Escape to the picker: the first Escape clears the query, and an Escape with nothing to clear goes on to the popover. Radix listens for Escape before the picker does, so it closes on the first one.
 
-The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field.
+The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field, as in the composer under [Suggesting shortcodes](#headless). To change the parts inside the popover, edit your copy of the item.
 
-```tsx title="composer-picker.tsx"
-"use client";
-
-import * as React from "react";
-import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
-
-export function ComposerPicker() {
-  const field = React.useRef<HTMLTextAreaElement>(null);
-  return (
-    <>
-      <textarea ref={field} aria-label="Message" />
-      <EmojiPickerPopover
-        aria-label="Insert emoji"
-        finalFocus={field}
-        onSelect={(selection) => {
-          const el = field.current;
-          el?.setRangeText(selection.emoji || `:${selection.shortcode}:`, el.selectionStart, el.selectionEnd, "end");
-        }}
-      >
-        🙂
-      </EmojiPickerPopover>
-    </>
-  );
-}
-```
 
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" />
 
 ### Suggesting shortcodes {#headless}
 
-The suggestions item is a menu at the caret on Floating UI; pass it what `useTextFieldEmojiSuggestions` returns:
+The suggestions item is a menu at the caret on Floating UI; pass it what `useTextFieldEmojiSuggestions` returns. The composer below also inserts from the [popover item](#popover) at the caret, and sends on Enter:
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-suggestions.json" />
 

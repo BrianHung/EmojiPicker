@@ -24,24 +24,14 @@ const lexical = lexicalSearch();
 const search: EmojiSearch = (query, context) => ((window as { offline?: boolean }).offline ? Promise.reject(new Error("offline")) : lexical(query, context));
 const picked = (selection: { emoji: string }) => (document.getElementById("picked")!.textContent = selection.emoji);
 
-function Draft() {
-  const field = React.useRef<HTMLTextAreaElement>(null);
-  return (
-    <>
-      <textarea ref={field} aria-label="Draft" />
-      <BaseUiPopover aria-label="Insert emoji" finalFocus={field} onSelect={picked}>
-        🙂
-      </BaseUiPopover>
-    </>
-  );
-}
 
 createRoot(document.getElementById("root")!).render(
   <main className="flex flex-col items-start gap-8 p-6">
     <output id="picked" />
+    <output id="sent" />
     <EmojiProvider data={en} defaultFrequents={siteFrequents}>
       <section aria-label="Composer">
-        <Composer />
+        <Composer onSend={(text) => (document.getElementById("sent")!.textContent = text)} />
       </section>
       <section aria-label="Inline">
         <InlinePicker onSelect={picked} />
@@ -56,9 +46,6 @@ createRoot(document.getElementById("root")!).render(
           </Popover>
         </section>
       ))}
-      <section aria-label="Draft">
-        <Draft />
-      </section>
     </EmojiProvider>
     <EmojiProvider data={en} defaultFrequents={siteFrequents} search={search}>
       <section aria-label="Search">
