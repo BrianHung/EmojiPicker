@@ -11,6 +11,12 @@ async function focusSearch(page: Page) {
   await page.keyboard.press("ArrowDown");
 }
 
+test("a cell's highlight can draw past the cell, as Slack's does", async ({ page }) => {
+  await visit(page, "/");
+  const cell = picker(page).locator(emojiItem).first();
+  expect(await cell.evaluate((el) => getComputedStyle(el.parentElement!).overflow)).toBe("visible");
+});
+
 test.describe("right-to-left", () => {
   test.use({ locale: "ar" });
   test("the grid mirrors and ArrowLeft moves to the next emoji", async ({ page }) => {
