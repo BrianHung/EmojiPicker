@@ -36,74 +36,7 @@ export default function App() {
 }
 ```
 
-Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. For a reaction row that expands into the picker, here drawn as a pill until it expands:
-
-```tsx title="reactions.tsx"
-<EmojiPicker
-  reactions={5}
-  onSelect={(selection) => console.log(selection.emoji)}
-  className="data-reactions-open:rounded-full data-reactions-open:shadow-lg data-reactions-open:[corner-shape:round]"
->
-  <EmojiPickerReactions />
-  <EmojiPickerPanel>
-    <EmojiPickerSearch />
-    <EmojiPickerContent />
-  </EmojiPickerPanel>
-</EmojiPicker>
-```
-
-The package renders no popovers. To open the picker from your shadcn/ui popover (Base UI or Radix base), add the popover item too:
-
-<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
-
-With the React Aria base (`--base aria`), add `emoji-picker-popover-react-aria.json` instead; on Floating UI, without a shadcn/ui popover, add `emoji-picker-popover-floating-ui.json`. Each writes `components/ui/emoji-picker-popover.tsx`, which you own.
-
-```tsx title="add-reaction.tsx"
-"use client";
-
-import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
-
-export function AddReaction({ onAdd }: { onAdd: (unified: string) => void }) {
-  return (
-    <EmojiPickerPopover aria-label="Add reaction" onSelect={(selection) => onAdd(selection.unified)}>
-      🙂
-    </EmojiPickerPopover>
-  );
-}
-```
-
-For shortcode suggestions in a text field, add the suggestions item, a menu at the caret on Floating UI, and pass it what `useTextFieldEmojiSuggestions` returns:
-
-<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-suggestions.json" />
-
-<Code title="composer.tsx" code={composer} />
-
-For the reactions under a message, `emoji-reaction-bar.json` adds `EmojiReactionBar`, React Aria's `useToolbar` around your own buttons: the arrow keys, Home, and End move focus between them, and once focus is inside, the pointer carries it.
-
-<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-reaction-bar.json" />
-
-```tsx title="reactions.tsx"
-"use client";
-
-import { Emoji } from "emoji-components";
-import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
-
-type Reaction = { unified: string; count: number; mine: boolean };
-
-export function Reactions({ reactions, onToggle }: { reactions: Reaction[]; onToggle: (unified: string) => void }) {
-  return (
-    <EmojiReactionBar aria-label="Reactions">
-      {reactions.map((r) => (
-        <button key={r.unified} type="button" aria-pressed={r.mine} onClick={() => onToggle(r.unified)}>
-          <Emoji emoji={r.unified} /> {r.count}
-        </button>
-      ))}
-    </EmojiReactionBar>
-  );
-}
-```
-
-For an editor, the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) items render the same Floating UI menu.
+Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. A popover, a suggestions menu, and a reaction bar are separate items, under [Examples](#popover).
 
 </TabPanel>
 
@@ -235,7 +168,27 @@ export function Search() {
 
 ### Opening in a popover {#popover}
 
-Use your own popover; the registry items above are one each for shadcn/ui, React Aria, and Floating UI. The glue is three things:
+The package renders no popovers. For your shadcn/ui popover (Base UI or Radix base), add the popover item:
+
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
+
+With the React Aria base (`--base aria`), add `emoji-picker-popover-react-aria.json` instead; on Floating UI, without a shadcn/ui popover, add `emoji-picker-popover-floating-ui.json`. Each writes `components/ui/emoji-picker-popover.tsx`, which you own.
+
+```tsx title="add-reaction.tsx"
+"use client";
+
+import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
+
+export function AddReaction({ onAdd }: { onAdd: (unified: string) => void }) {
+  return (
+    <EmojiPickerPopover aria-label="Add reaction" onSelect={(selection) => onAdd(selection.unified)}>
+      🙂
+    </EmojiPickerPopover>
+  );
+}
+```
+
+For your own popover, the glue is three things:
 
 - Close the popover in `onSelect`, unless `details.isCanceled`.
 - Pass `emojiPickerInitialFocus(popup)` as the popover's initial focus: the field with `autoFocus`, else the list.
@@ -273,6 +226,12 @@ export function ComposerPicker() {
 
 ### Suggesting shortcodes {#headless}
 
+The suggestions item is a menu at the caret on Floating UI; pass it what `useTextFieldEmojiSuggestions` returns:
+
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-suggestions.json" />
+
+<Code title="composer.tsx" code={composer} />
+
 For an `<input>` or `<textarea>`, use `useTextFieldEmojiSuggestions(options, ref)`. It finds the `:query` before the caret, handles the field's keys, and returns the matches, prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. A pick replaces the query with the emoji and a space, unless whitespace already follows.
 
 For any other editor, `useEmojiSuggestions({ trigger })` takes a trigger of `{ query, anchor, replace }`: the query without its colon, a function that returns the query's `DOMRect`, and a function that writes the chosen text. The space after it is up to `replace`. See the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
@@ -299,6 +258,48 @@ With `value`, the items toggle. Pressing an item that is off fires `onValueChang
 
 <Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
 
+With the registry component, here drawn as a pill until it expands:
+
+```tsx title="reactions.tsx"
+<EmojiPicker
+  reactions={5}
+  onSelect={(selection) => console.log(selection.emoji)}
+  className="data-reactions-open:rounded-full data-reactions-open:shadow-lg data-reactions-open:[corner-shape:round]"
+>
+  <EmojiPickerReactions />
+  <EmojiPickerPanel>
+    <EmojiPickerSearch />
+    <EmojiPickerContent />
+  </EmojiPickerPanel>
+</EmojiPicker>
+```
+
+For the reactions under a message, `emoji-reaction-bar.json` adds `EmojiReactionBar`, React Aria's `useToolbar` around your own buttons: the arrow keys, Home, and End move focus between them, and once focus is inside, the pointer carries it.
+
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-reaction-bar.json" />
+
+```tsx title="reactions.tsx"
+"use client";
+
+import { Emoji } from "emoji-components";
+import { EmojiReactionBar } from "@/components/ui/emoji-reaction-bar";
+
+type Reaction = { unified: string; count: number; mine: boolean };
+
+export function Reactions({ reactions, onToggle }: { reactions: Reaction[]; onToggle: (unified: string) => void }) {
+  return (
+    <EmojiReactionBar aria-label="Reactions">
+      {reactions.map((r) => (
+        <button key={r.unified} type="button" aria-pressed={r.mine} onClick={() => onToggle(r.unified)}>
+          <Emoji emoji={r.unified} /> {r.count}
+        </button>
+      ))}
+    </EmojiReactionBar>
+  );
+}
+```
+
+
 ### Adding custom emoji {#custom-emoji}
 
 `customEmojis` on `EmojiProvider` takes a list or a loader, and each `group` becomes a section; to host a pack, see the [Custom emoji](/examples/custom-emoji/) example.
@@ -307,7 +308,7 @@ With `value`, the items toggle. Pressing an item that is off fires `onValueChang
 
 ### Loading another locale {#data}
 
-`localeData(locale, { shortcodes: "cldr" })` gives the URL of a dataset with shortcodes in the locale's language. It takes any BCP 47 tag and picks the nearest dataset, such as `ja` for `ja-JP` and `zh-hant` for `zh-TW`, falling back to English.
+`locale` on `EmojiProvider` loads that locale's emoji names and keywords, from the nearest dataset, such as `ja` for `ja-JP` and `zh-hant` for `zh-TW`, falling back to English. For shortcodes in the locale's language, pass `data={localeData(locale, { shortcodes: "cldr" })}`.
 
 No translated strings ship with the package. `labels` takes plain strings and functions, so any i18n library works; `EmojiLabels` lists the keys. With react-i18next:
 

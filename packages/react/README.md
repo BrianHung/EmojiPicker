@@ -14,12 +14,6 @@ The packages are in prerelease (`1.0.0-alpha`); the API can change between alpha
 npm i emoji-components
 ```
 
-Or add the shadcn/ui component:
-
-```bash
-npx shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json
-```
-
 ## Usage
 
 ```tsx
@@ -37,7 +31,7 @@ export default function Page() {
 }
 ```
 
-Each part renders a default with no children. Hooks cover custom UI: `useEmojiPickerGrid` for your own virtualizer, `useTextFieldEmojiSuggestions` for a suggestions menu. The package renders no popovers or positioned menus; the shadcn/ui registry has them for shadcn/ui, React Aria, and Floating UI, as files you own.
+Each part renders a default with no children. Hooks cover custom UI: `useEmojiPickerGrid` for your own virtualizer, `useTextFieldEmojiSuggestions` for a suggestions menu. The package renders no popovers or positioned menus; the [shadcn/ui registry](https://emoji.brianhung.me/#installation) has a styled picker, popovers, and menus as files you own.
 
 ## Entry points
 
