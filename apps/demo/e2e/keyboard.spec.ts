@@ -288,3 +288,17 @@ test("examples/virtualizer", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);
 });
+
+test("a pick that closes the popover is announced once focus is back on the trigger", async ({ page }) => {
+  await visit(page, "/");
+  await page.evaluate(() => {
+    const w = window as { focusAtAlert?: string };
+    new MutationObserver(() => {
+      if (w.focusAtAlert === undefined && document.querySelector('[role="alert"]')) w.focusAtAlert = document.activeElement?.getAttribute("aria-label") ?? "";
+    }).observe(document.body, { childList: true, subtree: true });
+  });
+  await surface("home/popover").trigger!(page).click();
+  await page.keyboard.type("thumbs up");
+  await page.keyboard.press("Enter");
+  await expect.poll(() => page.evaluate(() => (window as { focusAtAlert?: string }).focusAtAlert)).toBe("Open emoji picker");
+});

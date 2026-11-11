@@ -10,8 +10,10 @@ export function copyEmoji(selection: EmojiSelection) {
       <Emoji emoji={selection} size={32} />
     </span>
   );
-  // High priority is announced assertively, so a pick that returns focus to its trigger is still read
-  toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, priority: "high", data: { icon } });
+  const announce = () => toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, priority: "high", data: { icon } });
+  // VoiceOver drops an alert when focus moves right after it, so a pick that closes its popup waits for focus to return to the trigger
+  const from = document.activeElement;
+  requestAnimationFrame(() => (from?.isConnected && from.closest('[role="dialog"][data-closed]') ? document.addEventListener("focusin", announce, { once: true }) : announce()));
 }
 
 export function usePickedEmoji() {
