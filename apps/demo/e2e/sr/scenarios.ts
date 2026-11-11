@@ -118,7 +118,7 @@ function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
   test("crossing into the next section speaks its name", async ({ page, sr }, info) => {
     test.fail(info.project.name === "voiceover", "VoiceOver reads a group's name on first entry only, not when focus moves into the next group; NVDA reads it");
     const ear = await start(page, sr, "/gallery/#discord", discordNoSearch(page));
-    await ear.press("Enter", /red heart/, "the first emoji (Frequently Used)");
+    await ear.press("Enter", /thumbs up/, "the first emoji (Frequently Used)");
     let said = "";
     for (let i = 0; i < 4 && !/people/.test(said); i++) said = await ear.hear(() => page.keyboard.press("ArrowDown"), /people/, 1_500);
     expect(said, "entering People announces the section").toMatch(/people/);
@@ -146,19 +146,19 @@ function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
 
   test("popover without search: the first emoji is focused and arrows speak names", async ({ page, sr }) => {
     const ear = await start(page, sr, "/gallery/#discord", discordNoSearch(page));
-    await ear.press("Enter", /red heart/, "the first emoji is announced on open");
-    await ear.press("ArrowRight", /thumbs up/, "the next emoji");
-    await ear.press("ArrowLeft", /red heart/, "and back");
+    await ear.press("Enter", /thumbs up/, "the first emoji is announced on open");
+    await ear.press("ArrowRight", /red heart/, "the next emoji");
+    await ear.press("ArrowLeft", /thumbs up/, "and back");
   });
 
   test("tapback: one tab stop, arrows speak reactions, + expands into the picker", async ({ page, sr }) => {
     const ear = await start(page, sr, "/", homeTapbackAnchor(page));
-    await ear.press("Tab", /red heart/, "Tab enters the row on its first reaction");
-    await ear.press("ArrowRight", /thumbs up/, "Right: the next reaction");
-    await ear.press("ArrowLeft", /red heart/, "Left: back");
+    await ear.press("Tab", /thumbs up/, "Tab enters the row on its first reaction");
+    await ear.press("ArrowRight", /red heart/, "Right: the next reaction");
+    await ear.press("ArrowLeft", /thumbs up/, "Left: back");
     const left = await ear.hear(() => page.keyboard.press("Tab"));
-    expect(left, "Tab leaves the row (a single tab stop)").not.toMatch(/thumbs up|thumbs down|tears of joy|more emoji/);
-    await ear.press("Shift+Tab", /red heart/, "Shift+Tab comes back to the reaction it left");
+    expect(left, "Tab leaves the row (a single tab stop)").not.toMatch(/red heart|tears of joy|party popper|more emoji/);
+    await ear.press("Shift+Tab", /thumbs up/, "Shift+Tab comes back to the reaction it left");
     await ear.press("End", /more emoji/, "End: the + button");
     const opened = await ear.press("Enter", SEARCH, "+ expands into the picker, on its search field");
     expect(opened).toMatch(FIELD);
@@ -166,7 +166,7 @@ function scenarios(test: TestType<{ page: Page; sr: Reader }, object>) {
 
   test("Discord: a section header's collapse state is spoken", async ({ page, sr }) => {
     const ear = await start(page, sr, "/gallery/#discord", discordNoSearch(page));
-    await ear.press("Enter", /red heart/, "the picker opens on its first emoji");
+    await ear.press("Enter", /thumbs up/, "the picker opens on its first emoji");
     let said = "";
     for (let i = 0; i < 4 && !/expanded/.test(said); i++) said = await ear.hear(() => page.keyboard.press("Tab"), /expanded/, 1_500);
     expect(said, "Tab reaches a section header, announced expanded").toMatch(/expanded/);

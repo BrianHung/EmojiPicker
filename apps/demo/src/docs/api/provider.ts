@@ -24,7 +24,7 @@ export const provider = rowsOf<EmojiProvider.Props>()([
   },
   { name: "imageVersion", type: "number", default: "`17`", description: "The newest Unicode emoji version your images draw." },
   { name: "frequents", type: "Record<unified, { count, lastUsed }>", description: "Frequently used emoji. `count` halves every 14 days. Controlled; uncontrolled frequents persist to `localStorage`." },
-  { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", default: "six common emoji", description: "Used while `localStorage` holds none. They can be removed like any other." },
+  { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", default: "👍 ❤️ 😂 🎉 🙏 🔥", description: "Used while `localStorage` holds none. They can be removed like any other." },
   { name: "onFrequentsChange", type: '(frequents, details: { reason: "pick" | "remove" | "clear", emoji?, cancel() }) => void' },
   { name: "skinTone", type: "SkinToneValue", description: "`0` (none) or `1` to `5`, light to dark. Controlled; an uncontrolled tone persists to `localStorage`." },
   { name: "defaultSkinTone", type: "SkinToneValue", default: "`0`" },
