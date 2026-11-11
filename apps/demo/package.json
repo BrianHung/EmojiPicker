@@ -72,6 +72,8 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.0",
     "cf": "^1.0.0-beta.27",
+    "i18next": "^27.1.1",
+    "react-i18next": "^18.0.1",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^6.0.0",
     "shadcn": "^4.23.0",

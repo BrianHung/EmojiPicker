@@ -1,3 +1,4 @@
+import type * as React from "react";
 import { createRoot } from "react-dom/client";
 import en from "@emoji-components/data/en/iamcal.json?url";
 import { EmojiProvider, lexicalSearch, type EmojiSearch } from "emoji-components";
@@ -8,8 +9,9 @@ import { Composer } from "@/docs/snippets/composer";
 import { EmojiPickerPopover as BaseUiPopover } from "@/registry/emoji-picker-popover";
 import { EmojiPickerPopover as FloatingUiPopover } from "@/registry/floating-ui/emoji-picker-popover";
 import "@/globals.css";
+import { siteFrequents } from "@/lib/frequents";
 
-type PopoverItem = typeof BaseUiPopover;
+type PopoverItem = React.ComponentType<Pick<React.ComponentProps<typeof BaseUiPopover>, "aria-label" | "onSelect" | "children">>;
 // Outside the typecheck: it imports shadcn/ui's React Aria base, which vite.config.ts stands in for
 const aria = import.meta.glob<{ EmojiPickerPopover: PopoverItem }>("../../../registry/aria/emoji-picker-popover.tsx", { eager: true });
 const POPOVERS: [string, PopoverItem][] = [
@@ -25,9 +27,10 @@ const picked = (selection: { emoji: string }) => (document.getElementById("picke
 createRoot(document.getElementById("root")!).render(
   <main className="flex flex-col items-start gap-8 p-6">
     <output id="picked" />
-    <EmojiProvider data={en}>
+    <output id="sent" />
+    <EmojiProvider data={en} defaultFrequents={siteFrequents}>
       <section aria-label="Composer">
-        <Composer />
+        <Composer onSend={(text) => (document.getElementById("sent")!.textContent = text)} />
       </section>
       <section aria-label="Inline">
         <InlinePicker onSelect={picked} />
@@ -43,7 +46,7 @@ createRoot(document.getElementById("root")!).render(
         </section>
       ))}
     </EmojiProvider>
-    <EmojiProvider data={en} search={search}>
+    <EmojiProvider data={en} defaultFrequents={siteFrequents} search={search}>
       <section aria-label="Search">
         <EmojiPicker>
           <EmojiPickerSearch />

@@ -7,10 +7,11 @@ import { useRenderer } from "@/components/site/shell";
 import { Collapsible, FitBox, Tabs } from "@/components/site/docs";
 import { STYLES, sourceOf, styleById, type Style } from "@/styles";
 import { AppleScene } from "@/styles/apple/scene";
+import { siteFrequents } from "@/lib/frequents";
 
 function StylePreview({ appStyle, renderer }: { appStyle: Style; renderer: "native" | "image" | "auto" }) {
   return (
-    <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? renderer}>
+    <EmojiProvider data={enUrl} renderer={appStyle.renderer ?? renderer} defaultFrequents={siteFrequents}>
       <FitBox width={appStyle.size.width} height={appStyle.size.height}>
         <appStyle.Picker onSelect={copyEmoji} />
       </FitBox>

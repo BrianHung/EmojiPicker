@@ -26,8 +26,6 @@ type FrequencyStoreOptions = {
 const HALF_LIFE = 14 * 864e5;
 const MAX = 64;
 
-// Real entries that were never used: remove() takes them out and any pick ranks above them
-const DEFAULTS: Frequents = Object.fromEntries(["2764-fe0f", "1f44d", "1f44e", "1f602", "203c-fe0f", "2753"].map((u, i) => [u, { count: 0, lastUsed: -i }]));
 const NONE: Frequents = {};
 
 const decayed = ({ count, lastUsed }: FrequentEntry, now: number) => count * 0.5 ** ((now - lastUsed) / HALF_LIFE);
@@ -67,7 +65,7 @@ const reduce = (state: FrequencyState, action: FrequencyAction): FrequencyState 
 
 export function createFrequencyStore({
   frequents,
-  defaultFrequents = DEFAULTS,
+  defaultFrequents = NONE,
   onFrequentsChange,
   deferStorage,
 }: FrequencyStoreOptions = {}): FrequencyStore & { control(value: Frequents | undefined, onChange: FrequencyStoreOptions["onFrequentsChange"]): void } {

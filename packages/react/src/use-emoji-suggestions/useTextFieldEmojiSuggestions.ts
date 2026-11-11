@@ -27,8 +27,10 @@ export function useTextFieldEmojiSuggestions(options: Omit<UseEmojiSuggestionsOp
           return el ? new InputRange(el, Math.min(match.from, el.value.length), Math.min(match.to, el.value.length)).getBoundingClientRect() : null;
         },
         replace(text) {
-          field()?.setSelectionRange(match.from, match.to);
-          document.execCommand("insertText", false, `${text} `);
+          const el = field();
+          if (!el) return;
+          el.setSelectionRange(match.from, match.to);
+          document.execCommand("insertText", false, /\s/.test(el.value.charAt(match.to)) ? text : `${text} `);
         },
       },
     },

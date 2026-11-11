@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "tsx --conditions=@emoji-components/source scripts/build.ts",
-    "prepare": "npm run build",
+    "prepack": "npm run build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

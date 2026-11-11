@@ -106,7 +106,7 @@ export function DiscordPicker({ onSelect, search = true, autoFocus = false, flui
             <EmojiPicker.SearchInput
               placeholder="Find the perfect emoji"
               autoFocus={autoFocus}
-              className="h-10 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-emoji-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-emoji-picker-ring focus:outline-2 focus:outline-emoji-picker-ring"
+              className="h-10 w-full rounded-[8px] border border-emoji-picker-input-border bg-emoji-picker-input pr-3 pl-[38px] text-[16px] leading-5 text-emoji-picker-foreground outline-none placeholder:text-(--discord-placeholder) focus:border-emoji-picker-ring"
             />
             <SearchClear />
           </EmojiPicker.Search>

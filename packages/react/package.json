@@ -1,7 +1,7 @@
 {
   "name": "emoji-components",
   "version": "1.0.0-alpha.2",
-  "description": "Unstyled, composable emoji components for React.",
+  "description": "Unstyled, composable emoji picker for React.",
   "keywords": [
     "react",
     "emoji",
@@ -11,7 +11,11 @@
     "tapback",
     "twemoji",
     "skin-tone",
-    "autocomplete"
+    "autocomplete",
+    "react-emoji-picker",
+    "emoji-picker-react",
+    "shadcn",
+    "headless-ui"
   ],
   "license": "MIT",
   "author": "Brian Hung",

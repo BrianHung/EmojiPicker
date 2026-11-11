@@ -9,8 +9,11 @@ process.env.E2E_BUILD = "1";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const out = fileURLToPath(new URL("../../../.github/assets/picker.svg", import.meta.url));
 const GAP = 24;
-const PAD = 32;
-const BACKGROUND = "#a1a1aa";
+const WIDTH = 1000;
+const PAD = 72;
+// GitHub's code block background, light and dark
+const BACKGROUND = "#f6f8fa";
+const BACKGROUND_DARK = "#151b23";
 const shots = [];
 const port = Number(process.env.E2E_PORT) || 5661;
 
@@ -37,8 +40,12 @@ for (const colorScheme of ["light", "dark"]) {
 await browser.close();
 await server.close();
 
-const width = (shots[0].info.width + shots[1].info.width) / 2 + GAP + PAD * 2;
+const width = WIDTH;
+const left = (WIDTH - (shots[0].info.width + shots[1].info.width) / 2 - GAP) / 2;
 const height = Math.max(...shots.map((s) => s.info.height)) / 2 + PAD * 2;
-const images = shots.map((s, i) => `<image x="${PAD + i * (shots[0].info.width / 2 + GAP)}" y="${PAD}" width="${s.info.width / 2}" height="${s.info.height / 2}" href="data:image/png;base64,${s.data.toString("base64")}"/>`);
-writeFileSync(out, `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><title>Emoji picker in light and dark mode</title><rect width="${width}" height="${height}" rx="16" fill="${BACKGROUND}"/>${images.join("")}</svg>\n`);
+const images = shots.map((s, i) => `<image x="${left + i * (shots[0].info.width / 2 + GAP)}" y="${PAD}" width="${s.info.width / 2}" height="${s.info.height / 2}" href="data:image/png;base64,${s.data.toString("base64")}"/>`);
+writeFileSync(
+  out,
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><title>Emoji picker in light and dark mode</title><style>@media (prefers-color-scheme: dark) { rect { fill: ${BACKGROUND_DARK} } }</style><rect width="${width}" height="${height}" rx="6" fill="${BACKGROUND}"/>${images.join("")}</svg>\n`,
+);
 console.log(out, statSync(out).size);

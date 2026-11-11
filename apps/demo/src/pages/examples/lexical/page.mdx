@@ -13,7 +13,7 @@ import menu from "@/registry/emoji-suggestions.tsx?raw";
 
 ## Installation
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-lexical.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-lexical.json" />
 
 Adds `hooks/use-emoji-lexical.ts`, `components/ui/emoji-suggestions.tsx`, `components/lexical/emoji-suggestions-plugin.tsx`, and `components/lexical/emoji-node.tsx`. Installs `emoji-components`, `lexical`, and `@lexical/react`.
 
@@ -41,6 +41,7 @@ function InsertEmoji() {
   return (
     <EmojiPickerPopover
       aria-label="Insert emoji"
+      finalFocus={() => editor.getRootElement()}
       onSelect={(selection) => {
         editor.focus();
         editor.update(() => {
