@@ -98,13 +98,13 @@ export function SlackPicker({ onSelect, search = true, autoFocus = false, fluid 
       )}
     >
       <div className="mt-1 flex h-[38px] shrink-0 items-center pr-[10px] pl-2 shadow-[inset_0_-1px_0_var(--emoji-picker-border)]">
-        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-emoji-picker-subtle group-has-[input:focus]:text-emoji-picker-foreground group-has-[input:focus]:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)]">
+        <span className="flex h-[38px] w-[34.3px] shrink-0 items-start rounded-t-[9.6px] pt-[3px] pl-[4.8px] text-emoji-picker-subtle [.group:has(input:focus):not(:has([data-slot=emoji-picker-list-cell][data-focused]))_&]:text-emoji-picker-foreground [.group:has(input:focus):not(:has([data-slot=emoji-picker-list-cell][data-focused]))_&]:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)]">
           <I.Search size={22} strokeWidth={2} />
         </span>
         <EmojiPicker.CategoryNav ref={nav} className="flex min-w-0 flex-1 items-center justify-between gap-0 overflow-x-auto [scrollbar-width:none]">
           {() => (
             <EmojiPicker.CategoryNavTab
-              className={cn(TAB, "relative data-active:text-emoji-picker-foreground data-active:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)] data-active:group-has-[input:focus]:text-emoji-picker-subtle data-active:group-has-[input:focus]:shadow-none")}
+              className={cn(TAB, "relative data-active:text-emoji-picker-foreground data-active:shadow-[inset_0_-2px_0_var(--emoji-picker-accent)] data-active:[.group:has(input:focus):not(:has([data-slot=emoji-picker-list-cell][data-focused]))_&]:text-emoji-picker-subtle data-active:[.group:has(input:focus):not(:has([data-slot=emoji-picker-list-cell][data-focused]))_&]:shadow-none")}
             />
           )}
         </EmojiPicker.CategoryNav>
