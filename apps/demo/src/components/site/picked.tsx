@@ -10,8 +10,8 @@ export function copyEmoji(selection: EmojiSelection) {
       <Emoji emoji={selection} size={32} />
     </span>
   );
-  const announce = () => toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, priority: "high", data: { icon } });
-  // VoiceOver drops an alert when focus moves right after it, so a pick that closes its popup waits for focus to return to the trigger
+  const announce = () => toast.add({ title: <code className="font-mono text-[13px]">{shortcode}</code>, description: selection.name, data: { icon } });
+  // VoiceOver drops an announcement that a focus move follows, so a pick that closes its popup waits for focus to return to the trigger
   const from = document.activeElement;
   requestAnimationFrame(() => (from?.isConnected && from.closest('[role="dialog"][data-closed]') ? document.addEventListener("focusin", announce, { once: true }) : announce()));
 }
