@@ -307,11 +307,13 @@ With `value`, the items toggle. Pressing an item that is off fires `onValueChang
 
 ### Loading another locale {#data}
 
-`localeData(locale, { shortcodes: "cldr" })` gives the URL of a dataset with shortcodes in the locale's language, and `labels` replaces the strings.
+`localeData(locale, { shortcodes: "cldr" })` gives the URL of a dataset with shortcodes in the locale's language. It takes any BCP 47 tag and picks the nearest dataset, such as `ja` for `ja-JP` and `zh-hant` for `zh-TW`, falling back to English.
 
-The datasets are the files of `@emoji-components/data`, which `Root` and `localeData` load from jsDelivr. To serve them yourself, for offline use or a strict CSP, install the package and bundle one, as in `data={async () => (await import("@emoji-components/data/en/iamcal.json")).default}`, or copy its `data` folder to your site and pass `localeData(locale, { baseUrl: "/emoji-data" })`.
+No translated strings ship with the package. `labels` takes plain strings and functions, so any i18n library works; `EmojiLabels` lists the keys. With react-i18next:
 
 <Code title="app/providers.tsx" code={localization} />
+
+The datasets are the files of `@emoji-components/data`, which `Root` and `localeData` load from jsDelivr. To serve them yourself, for offline use or a strict CSP, install the package and bundle one, as in `data={async () => (await import("@emoji-components/data/en/iamcal.json")).default}`, or copy its `data` folder to your site and pass `localeData(locale, { baseUrl: "/emoji-data" })`. A copy keeps the package's folder names, which `localeData` resolves the locale to.
 
 More examples, such as semantic search, custom emoji, and other virtualizers, are in [Examples](/examples/).
 
