@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { withoutTone, type ChangeDetails } from "@emoji-components/core";
-import { createChangeDetails, nameWithTone } from "@emoji-components/core/internal";
+import { createChangeDetails, isUnified, nameWithTone } from "@emoji-components/core/internal";
 import { mergePartProps } from "../../../internals/mergePartProps";
 import { useStoreSnapshot } from "../../../provider/EmojiProviderContext";
 import { useChangeState } from "../../../utils/useChangeState";
@@ -37,11 +37,13 @@ export function useEmojiPickerReactions({ value: valueProp, defaultValue, onValu
   const { store, state, labels, native } = useEmojiPickerRootContext("useEmojiPickerReactions");
   const row = React.useContext(ReactionsContext);
   useStoreSnapshot((s) => s.records());
+  // Before the data loads, on the server too, the row draws from the codes, so it keeps its size
+  const ready = store.status() === "ready";
   const reactions = (row?.reactions ?? NONE)
     .map((base) => store.withSkinTone(base))
     .filter((unified) => {
       const record = store.get(unified);
-      return record != null && native.drawable(record, unified);
+      return record ? native.drawable(record, unified) : !ready && isUnified(unified);
     });
   const probed = reactions.join(" ");
   const { request } = native;

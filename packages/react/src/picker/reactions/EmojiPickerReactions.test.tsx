@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import * as React from "react";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
@@ -29,6 +30,17 @@ describe("Reactions", () => {
       </>,
     );
     expect(host.querySelector('[data-slot="emoji-picker-reactions-expand"]')).not.toBeNull();
+  });
+
+  it("renders the row from its codes on the server, before the data loads", () => {
+    const html = renderToString(
+      <EmojiProvider data={async () => en}>
+        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>
+          <EmojiPicker.Reactions />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    expect(html.match(/data-slot="emoji-picker-reactions-item"/g)).toHaveLength(2);
   });
 
   it("returns focus to Expand when a pick collapses the Panel", () => {
