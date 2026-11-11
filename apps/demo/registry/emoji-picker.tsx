@@ -1,7 +1,7 @@
 "use client";
 
 import type * as React from "react";
-import { Emoji, EmojiPicker as EmojiPickerPrimitive, useEmojiStatus } from "emoji-components";
+import { Emoji, EmojiPicker as EmojiPickerPrimitive, useEmojiLabels, useEmojiStatus } from "emoji-components";
 import { cn } from "@/lib/utils";
 
 const button =
@@ -114,6 +114,7 @@ function EmojiPickerEmpty({ status, retry, className, children = "No emoji found
 }
 
 function EmojiPickerFooter({ className, ...props }: EmojiPickerPrimitive.Preview.Props) {
+  const labels = useEmojiLabels();
   return (
     <EmojiPickerPrimitive.Preview className={cn("flex h-10 shrink-0 items-center gap-2 border-t border-border px-3 text-xs", className)} {...props}>
       {({ emoji, unified }) =>
@@ -124,7 +125,7 @@ function EmojiPickerFooter({ className, ...props }: EmojiPickerPrimitive.Preview
             {emoji.shortcodes[0] ? <code className="ml-auto min-w-0 shrink-[1000] truncate text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>
         ) : (
-          <span className="text-muted-foreground">Pick an emoji</span>
+          <span className="text-muted-foreground">{labels.previewCaption}</span>
         )
       }
     </EmojiPickerPrimitive.Preview>

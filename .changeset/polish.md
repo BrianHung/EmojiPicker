@@ -17,3 +17,5 @@ Fixes from first-install testing.
 - `localeData` resolves a BCP 47 tag to the nearest dataset folder (`en-US` → `en`, `zh-TW` → `zh-hant`, `es-419` → `es-mx`), including with `baseUrl`.
 - Without `data`, `EmojiProvider` loads the dataset for its `locale` instead of English.
 - Frequently used starts empty; pass `defaultFrequents` to seed it. A `reactions={n}` row with no history shows `Panel` in its place. The Twemoji font's first subset no longer includes starter emoji.
+- The default `previewCaption` is "Pick an emoji".
+- A localized dataset names Smileys & People from both of its emojibase groups, such as "スマイリーと感情、人と体".
