@@ -271,7 +271,7 @@ export function createEmojiStore({
       const result = (config.search ?? defaultEngine)(text, { records: loaded().records, limit, signal, frequency: (u) => frequents.score(u), locale: loaded().locale });
       return isThenable(result) ? Promise.resolve(result).then(resolve) : resolve(result);
     },
-    completeShortcode: (prefix, limit, order) => (ready() ? index().completeShortcode(prefix, limit, order) : []),
+    completeShortcode: (prefix, limit, order) => (ready() ? index().completeShortcode(prefix, limit, order, (u) => frequents.score(u)) : []),
     replaceShortcodes: (text) => (ready() ? replaceShortcodes(text, index()) : text),
 
     skinTone: () => clampTone(tone.value()),

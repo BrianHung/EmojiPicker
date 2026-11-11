@@ -16,7 +16,7 @@ export type SearchIndex = {
   search(query: string, limit?: number): EmojiRecord[];
   vocabulary(): ReadonlyMap<string, number>;
   byShortcode(code: string): EmojiRecord | undefined;
-  completeShortcode(prefix: string, limit?: number, order?: CompletionOrder): ShortcodeCompletion[];
+  completeShortcode(prefix: string, limit?: number, order?: CompletionOrder, frequency?: (unified: string) => number): ShortcodeCompletion[];
 };
 
 export type CompletionOrder = "relevance" | "alphabetical";
@@ -102,7 +102,7 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
       return id === undefined ? undefined : records[id];
     },
 
-    completeShortcode(prefix, limit = 8, order = "relevance") {
+    completeShortcode(prefix, limit = 8, order = "relevance", frequency = () => 0) {
       const p = normalize(prefix);
       const best = new Map<number, ShortcodeCompletion & { score: number }>();
       const offer = (id: number, shortcode: string, score: number, match: [number, number] | null) => {
@@ -128,7 +128,8 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
           const id = idOf.get(record)!;
           if (record.shortcodes[0]) offer(id, normalize(record.shortcodes[0]), 3, null);
         }
-      const relevance = (a: { score: number; shortcode: string; record: EmojiRecord }, b: typeof a) => a.score - b.score || a.shortcode.length - b.shortcode.length || a.record.order - b.record.order;
+      const relevance = (a: { score: number; shortcode: string; record: EmojiRecord }, b: typeof a) =>
+        a.score - b.score || frequency(b.record.unified) - frequency(a.record.unified) || a.shortcode.length - b.shortcode.length || a.record.order - b.record.order;
       const tier = (score: number) => (score <= 1 ? score : 2);
       const alphabetical = (a: { score: number; shortcode: string }, b: typeof a) => tier(a.score) - tier(b.score) || collator.compare(a.shortcode, b.shortcode);
       return [...best.values()]

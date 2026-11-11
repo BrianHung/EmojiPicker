@@ -121,6 +121,13 @@ describe("store locale", () => {
     expect(mixed.labels()).toMatchObject({ searchPlaceholder: "Sök", searchLabel: defaultLabels.searchLabel });
     expect(mixed.labels().resultCount(1234)).toBe("1,234 results");
   });
+
+  it("puts the emoji used most first among equal shortcode matches", async () => {
+    const store = createEmojiStore({ data: dataset, frequents: { "1f389": { count: 2, lastUsed: Date.now() } } });
+    await store.load();
+    expect(store.completeShortcode("ta")[0]?.shortcode).toBe("tada");
+    expect(store.completeShortcode("smile")[0]?.shortcode).toBe("smile");
+  });
 });
 
 describe("store.query", () => {

@@ -80,6 +80,12 @@ describe("search index", () => {
     expect(glyphs(localized("ja").search("ｻﾑｽﾞｱｯﾌﾟ"))).toEqual(["👍"]);
   });
 
+  it("finds katakana words from hiragana", () => {
+    const ja = localized("ja");
+    expect(glyphs(ja.search("ねこ"))).toContain("🐱");
+    expect(glyphs(ja.search("はーと"))).toEqual(glyphs(ja.search("ハート")));
+  });
+
   it("lowercases and collates in the data's locale", () => {
     const tr = createSearchIndex(expandDataset(tiny("tr", [["1faa1", "iğne"]])), { locale: "tr" });
     expect(glyphs(tr.search("İĞNE"))).toEqual(["🪡"]);
