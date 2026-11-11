@@ -245,6 +245,8 @@ const registry = json("apps/demo/registry.json").items.map((item) => ({
   name: item.name,
   files: item.files.map((f) => {
     const target = f.target ?? `${DIRS[f.type]}/${basename(f.path)}`;
+    // shadcn/tailwind.css redefines data-selected as [data-selected="true"], and the parts set it as a present, empty attribute
+    if (read(`apps/demo/${f.path}`).includes("data-selected:")) fail(`registry ${item.name}: ${f.path} styles data-selected:, which shadcn/ui's variant never matches; use the element's aria state`);
     return { target, exports: exportedNames(`apps/demo/${f.path}`) };
   }),
 }));
