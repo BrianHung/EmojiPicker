@@ -9,7 +9,7 @@ const shown = ({ open, suggestions }: UseEmojiSuggestionsReturnValue) => (open ?
 
 function TextField({ onSelect }: { onSelect?: (selection: EmojiSelection) => void }) {
   const ref = React.useRef<HTMLInputElement>(null);
-  const suggestions = useTextFieldEmojiSuggestions(ref, { onSelect });
+  const suggestions = useTextFieldEmojiSuggestions({ onSelect }, ref);
   return (
     <>
       <input ref={ref} aria-label="Message" defaultValue=":thumbs" />
@@ -20,7 +20,7 @@ function TextField({ onSelect }: { onSelect?: (selection: EmojiSelection) => voi
 
 function Editor({ query }: { query: string }) {
   const ref = React.useRef<HTMLDivElement>(null);
-  const suggestions = useEmojiSuggestions({ query, anchor: () => null, replace: () => {} }, {}, ref);
+  const suggestions = useEmojiSuggestions({ trigger: { query, anchor: () => null, replace: () => {} }, element: ref });
   return (
     <div ref={ref} contentEditable suppressContentEditableWarning>
       {shown(suggestions)}
@@ -77,7 +77,7 @@ it("accepts with Enter and Tab, not Shift+Tab or a composing Enter", () => {
 
 it("labels the list from labels.suggestions", () => {
   function List() {
-    return <ul {...useEmojiSuggestions(null).getListProps()} />;
+    return <ul {...useEmojiSuggestions({ trigger: null }).getListProps()} />;
   }
   const host = render(
     <EmojiProvider data={en} prepare={false} labels={{ suggestions: "Sugerencias de emoji" }}>
@@ -111,8 +111,8 @@ it("dismisses when the editor blurs, until the query changes", () => {
 it("wires a field that spreads getInputProps, keeps its attributes after the menu closes, and anchors at the query", () => {
   function Field() {
     const ref = React.useRef<HTMLInputElement>(null);
-    const { getInputProps, anchor } = useTextFieldEmojiSuggestions(ref);
-    return <input ref={ref} aria-label="Message" defaultValue=":thumbs" {...getInputProps()} data-anchored={String(anchor.contextElement === ref.current)} />;
+    const { getInputProps, anchor } = useTextFieldEmojiSuggestions();
+    return <input aria-label="Message" defaultValue=":thumbs" {...getInputProps({ ref })} data-anchored={String(anchor.contextElement === ref.current)} />;
   }
   const host = render(
     <EmojiProvider data={en} prepare={false}>
@@ -127,4 +127,22 @@ it("wires a field that spreads getInputProps, keeps its attributes after the men
   expect(input.dataset.anchored).toBe("true");
   React.act(() => input.blur());
   expect(wiring()).toEqual(["combobox", "false", null]);
+});
+
+it("moves the highlight once per key, from the field's own listener or getInputProps' onKeyDown", () => {
+  const trigger = { query: "smile", anchor: () => null, replace: () => {} };
+  const Field = ({ suggestions }: { suggestions: UseEmojiSuggestionsReturnValue }) => <input aria-label="Message" defaultValue=":smile" data-index={suggestions.highlightedIndex} {...suggestions.getInputProps()} />;
+  const TextField = () => <Field suggestions={useTextFieldEmojiSuggestions()} />;
+  const Editor = () => <Field suggestions={useEmojiSuggestions({ trigger })} />;
+  for (const Hooked of [TextField, Editor]) {
+    const input = render(
+      <EmojiProvider data={en} prepare={false}>
+        <Hooked />
+      </EmojiProvider>,
+    ).querySelector("input")!;
+    input.setSelectionRange(6, 6);
+    React.act(() => input.focus());
+    expect(keydown(input, "ArrowDown")).toBe(true);
+    expect(input.dataset.index).toBe("1");
+  }
 });

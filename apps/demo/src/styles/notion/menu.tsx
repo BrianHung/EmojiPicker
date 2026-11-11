@@ -1,15 +1,6 @@
 import * as React from "react";
 import { autoUpdate, flip, FloatingPortal, offset, shift, useDismiss, useFloating, useInteractions } from "@floating-ui/react";
-import {
-  EmojiPicker,
-  useEmojiPickerHighlightedEmoji,
-  useEmojiPickerCategoryNavigation,
-  useEmojiPickerActions,
-  useEmojiStore,
-  type UseEmojiSuggestionsReturnValue,
-  type UseEmojiSuggestionsOptions,
-  type ShortcodeCompletion,
-} from "emoji-components";
+import { EmojiPicker, useEmojiPickerHighlight, useEmojiPickerCategories, useEmojiStore, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from "emoji-components";
 import * as I from "@/styles/icons";
 import { notion, NOTION_SECTIONS } from "./picker";
 import { CELL, OPTION, tokensOf } from "@/styles/style";
@@ -69,14 +60,14 @@ export function NotionEmojiMenu({ editor, className, container, ...menu }: UseEm
 
 function Sections({ suggestions }: { suggestions: readonly ShortcodeCompletion[] }) {
   const store = useEmojiStore();
-  const actions = useEmojiPickerActions();
-  const { jumpToCategory } = useEmojiPickerCategoryNavigation();
-  const active = useEmojiPickerHighlightedEmoji()?.group;
+  const { emoji, highlight } = useEmojiPickerHighlight();
+  const { jumpToCategory } = useEmojiPickerCategories();
+  const active = emoji?.group;
   const jump = (section: string) => {
     const first = suggestions.find((s) => s.record.group === section)?.record;
     if (!first) return;
     jumpToCategory(section, { instant: true });
-    actions.highlight(first.imageUrl ? first.unified : store.withSkinTone(first.unified));
+    highlight(first.imageUrl ? first.unified : store.withSkinTone(first.unified));
   };
   return (
     <div className="flex h-[51px] shrink-0 items-center gap-[3.2px] overflow-x-auto border-t border-emoji-picker-border px-3 pt-2 pb-2.5 [scrollbar-width:none]">

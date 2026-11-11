@@ -72,9 +72,9 @@ const PREVIEW: EmojiTrigger = { query: DRAFT.slice(1), anchor: () => null, repla
 function TypeaheadDemo({ appStyle }: { appStyle: Style }) {
   const ref = React.useRef<HTMLInputElement>(null);
   const [touched, setTouched] = React.useState(false);
-  const options = { insert: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) } as const;
-  const emoji = useTextFieldEmojiSuggestions(ref, { ...options, onSelect: copyEmoji });
-  const preview = useEmojiSuggestions(touched ? null : PREVIEW, options);
+  const options = { insertAs: appStyle.id === "apple" ? "emoji" : "shortcode", limit: 7, ...(appStyle.id === "discord" ? discordAutocompleteOptions : {}) } as const;
+  const emoji = useTextFieldEmojiSuggestions({ ...options, onSelect: copyEmoji }, ref);
+  const preview = useEmojiSuggestions({ ...options, trigger: touched ? null : PREVIEW });
   return (
     <div className="relative w-full max-w-[380px]">
       {touched ? (

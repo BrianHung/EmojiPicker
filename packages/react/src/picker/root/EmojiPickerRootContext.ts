@@ -1,10 +1,9 @@
 "use client";
 
 import * as React from "react";
-import type { ChangeDetails, EmojiLabels, EmojiPickerStore, EmojiRecord, EmojiSelection, EmojiStore, HighlightChangeDetails, SearchResultsMode } from "@emoji-components/core";
+import type { EmojiLabels, EmojiPickerStore, EmojiRecord, EmojiStore, HighlightChangeDetails, ReactionsOpenChangeDetails, SearchResultsMode, ValueChangeDetails } from "@emoji-components/core";
 import type { EmojiGridMove } from "@emoji-components/core/grid";
 import type { useDrawable } from "../../emoji/utils/useDrawable";
-import type { EmojiPickerCollapsedCategories } from "./utils/useEmojiPickerCollapsedCategories";
 
 export type { HighlightChangeDetails, SearchResultsMode };
 
@@ -19,10 +18,10 @@ export interface EmojiPickerRootActions {
   toggleSkinTone(): boolean;
 }
 
-export type EmojiPickerRootChangeEventReason = "item-press" | "imperative-action";
-export type EmojiPickerRootChangeEventDetails = ChangeDetails<EmojiPickerRootChangeEventReason>;
-export type EmojiPickerRootReactionsOpenChangeEventReason = "trigger-press" | "item-press" | "escape-key" | "none";
-export type EmojiPickerRootReactionsOpenChangeEventDetails = ChangeDetails<EmojiPickerRootReactionsOpenChangeEventReason>;
+export type EmojiPickerRootChangeEventReason = ValueChangeDetails["reason"];
+export type EmojiPickerRootChangeEventDetails = ValueChangeDetails;
+export type EmojiPickerRootReactionsOpenChangeEventReason = ReactionsOpenChangeDetails["reason"];
+export type EmojiPickerRootReactionsOpenChangeEventDetails = ReactionsOpenChangeDetails;
 
 export interface Overlay {
   record: EmojiRecord;
@@ -49,11 +48,7 @@ export interface EmojiPickerRootContext {
   state: EmojiPickerStore<React.ReactNode>;
   labels: EmojiLabels;
   columns?: number;
-  collapse: EmojiPickerCollapsedCategories;
   searchResults: SearchResultsMode;
-  // undefined while the Root doesn't track a value
-  value: string | null | undefined;
-  pick(unified: string, event?: Event, reason?: EmojiPickerRootChangeEventReason): EmojiSelection | undefined;
   actions: EmojiPickerRootActions;
   ownsFocus(el: Element | null): boolean;
   target(): HTMLElement | null;
@@ -78,9 +73,10 @@ export function useEmojiPickerRootContext(part = "This part"): EmojiPickerRootCo
 export interface ReactionsContextValue {
   reactions: readonly string[];
   open: boolean;
-  // Opens the Panel and moves focus into it; absent while no Panel is mounted
-  expand?: (event?: Event) => void;
-  row: React.RefObject<HTMLDivElement | null>;
+  // A Panel is mounted for Expand to open
+  expandable: boolean;
+  // The reaction buttons, for focus to land on when the row reopens
+  items: Map<string, HTMLElement>;
   panel: React.RefObject<HTMLDivElement | null>;
   panelId: string;
   registerPanel(): () => void;

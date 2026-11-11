@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import type { EmojiPickerNavCategory } from "../root/utils/useEmojiPickerCategoryNavigation";
+import type { EmojiPickerNavCategory, UseEmojiPickerCategoriesReturnValue } from "../root/utils/useEmojiPickerCategories";
 
-export type EmojiPickerCategoryNavContext = { id: string; selected: string; disabled: boolean; choose(key: string, instant: boolean): void };
+export type EmojiPickerCategoryNavContext = { id: string; disabled: boolean; getItemProps: UseEmojiPickerCategoriesReturnValue["getItemProps"] };
 
 export const EmojiPickerCategoryNavContext = React.createContext<EmojiPickerCategoryNavContext | null>(null);
 

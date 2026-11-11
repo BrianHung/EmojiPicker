@@ -40,7 +40,11 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
     type: '(open: boolean, details: { reason: "trigger-press" | "item-press" | "escape-key" | "none", cancel() }) => void',
     description: '`"item-press"` is a selection in `Panel`, which shows the row again; `details.cancel()` keeps `Panel` open.',
   },
-  { name: "actionsRef", type: "Ref<EmojiPicker.Root.Actions>", description: "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`. Inside `Root`, `useEmojiPickerActions()` returns the same." },
+  {
+    name: "actionsRef",
+    type: "Ref<EmojiPicker.Root.Actions>",
+    description: "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, `close`, and `toggleSkinTone`. Inside `Root`, `useEmojiPickerHighlight()` and `useEmojiPickerSearch()` return the same actions.",
+  },
   {
     name: "keyboardTarget",
     type: "HTMLElement | RefObject<HTMLElement | null> | null",

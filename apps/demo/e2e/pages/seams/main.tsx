@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import en from "@emoji-components/data/en/iamcal.json?url";
-import { EmojiPicker, EmojiProvider, useEmojiPickerCategoryNavigation, useEmojiLabels, useEmojiSkinTone, type SkinToneValue } from "emoji-components";
+import { EmojiPicker, EmojiProvider, useEmojiPickerCategories, useEmojiLabels, useEmojiSkinTone, type SkinToneValue } from "emoji-components";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +26,7 @@ function SkinToneMenu() {
 }
 
 function CategoryTabs() {
-  const { categories, activeCategory, jumpToCategory } = useEmojiPickerCategoryNavigation();
+  const { categories, activeCategory, jumpToCategory } = useEmojiPickerCategories();
   const { categoryNavigation } = useEmojiLabels();
   return (
     <Tabs value={activeCategory} onValueChange={(id: string) => jumpToCategory(id)}>

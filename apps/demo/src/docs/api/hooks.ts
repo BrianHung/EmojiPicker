@@ -1,26 +1,35 @@
 type Rows = [string, string][];
 
 export const pickerHooks: Rows = [
-  ["useEmojiPickerActions()", "`move`, `pick`, `highlight`, `focusSearch`, `clearSearch`, and `toggleSkinTone`, as `actionsRef` gives them."],
-  ["useEmojiPickerHighlightedEmoji()", "The highlighted `EmojiRecord`, or `null`."],
+  ["useEmojiPickerSearch()", "`{ query, setQuery, clear, resultCount }`. `resultCount` is `null` while not searching. Used by `SearchStatus`. For your own input, pass it to `SearchInput`'s `render`."],
+  ["useEmojiPickerCategories()", "`{ categories, activeCategory, jumpToCategory(id), collapsed, isCollapsed(id), setCollapsed(id, collapsed), toggleCollapsed(id), getItemProps(id, props) }`. Used by `CategoryNav` and `CategoryNavTab`."],
+  ["useEmojiPickerHighlight()", "`{ emoji, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord`, or `null`. For your own preview or section bar; `actionsRef` gives `highlight` and `move` outside `Root`."],
+  [
+    "useEmojiPickerReactions({ value, defaultValue, onValueChange })",
+    "`{ reactions, open, setOpen(open), value, expandable, getItemProps(emoji, props), getExpandProps(props) }`. With a value, the items toggle, as in Base UI's `ToggleGroup`. Used by `Reactions`, `ReactionsItem`, and `ReactionsExpand`.",
+  ],
+  ["useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "`{ rows, stickyIndexes, getGridProps, getHeaderProps, state, variations }`, for your own virtualizer. Used by `List`."],
+  ["useEmojiPickerCell(grid.state, item)", "`{ cellProps, state }` for one cell of `useEmojiPickerGrid`. Used by `ListCell`."],
   [
     "emojiPickerInitialFocus(element)",
     "The element to focus when a popover with a picker opens: the field with `autoFocus`, else the list. Base UI: `initialFocus={() => emojiPickerInitialFocus(popup.current)}`. Floating UI: `FloatingFocusManager`'s `initialFocus`. Radix: `onOpenAutoFocus` with `event.preventDefault()` and `emojiPickerInitialFocus(event.currentTarget)?.focus()`.",
   ],
-  ["useEmojiPickerSearch()", "`{ query, resultCount }`. `resultCount` is `null` while not searching."],
-  ["useEmojiPickerCategoryNavigation()", "`{ categories, activeCategory, jumpToCategory(id) }` for your own category tabs."],
-  ["useEmojiPickerCollapsedCategories()", "`{ collapsed, isCollapsed(id), toggle(id), setCollapsed(id, collapsed) }`."],
-  ["useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "In place of `List`: `rows`, `stickyIndexes`, `getGridProps`, `getHeaderProps`, `state`, and `variations`, for your own virtualizer."],
-  ["useEmojiPickerCell(grid.state, item)", "`{ cellProps, state }` for one cell of `useEmojiPickerGrid`."],
 ];
 
 export const suggestionsHooks: Rows = [
   [
-    "useTextFieldEmojiSuggestions(ref, options)",
-    "Shortcode suggestions for an `<input>` or `<textarea>`. It handles the field's keys. Returns `query`, `open`, `suggestions`, `highlightedIndex`, `anchor`, `getInputProps`, `getListProps`, `getOptionProps`, `choose`, `insert`, `dismiss`, and `onKeyDown`. `anchor` is the query's box as a Floating UI virtual element: `refs.setPositionReference(anchor)`. `getInputProps()` is the field's combobox wiring, which the hook also writes onto the field while the list is open.",
+    "useTextFieldEmojiSuggestions(options, ref)",
+    "Shortcode suggestions for an `<input>` or `<textarea>`: `ref`, or the field that spreads `getInputProps({ ref })`. It handles the field's keys. Options: `limit`, `matchBy`, `order`, `columns`, `insertAs`, `onSelect`.",
   ],
-  ["useEmojiSuggestions({ query, anchor, replace }, options, element)", "Shortcode suggestions for any editor. `element` is the editor's element, a ref to it, or a function that returns it."],
-  ["useEmojiSuggestions(suggestions, { anchor })", "The same, around core's `createEmojiSuggestions(store, options)`, for an editor plugin that handles the keys itself, such as the ProseMirror item."],
+  [
+    "useEmojiSuggestions({ trigger, element, ...options })",
+    "For any editor. `trigger` is `{ query, anchor, replace }`, or `null` while there is no query. `element` is the editor's element, a ref, or a function that returns it; a field that spreads `getInputProps()` needs none.",
+  ],
+  ["useEmojiSuggestions({ store, anchor, element })", "Around core's `createEmojiSuggestions(store, options)`, for an editor plugin that finds the query itself, such as the ProseMirror item."],
+  [
+    "Return value",
+    "`{ open, query, suggestions, highlightedIndex, anchor, highlight(index), pick(index?), insert(selection), dismiss(), onKeyDown(event), getInputProps(props), getListProps(props), getOptionProps(index, props) }`. `anchor` is the query's box as a Floating UI virtual element: `refs.setPositionReference(anchor)`. `getInputProps` gives the combobox ARIA, the field's ref, and, from `useEmojiSuggestions`, its keys. `onKeyDown` returns `true` when the menu handled the key, for an editor that routes keys through its own commands. Used by the suggestions registry item.",
+  ],
 ];
 
 export const suggestionsFunctions: Rows = [

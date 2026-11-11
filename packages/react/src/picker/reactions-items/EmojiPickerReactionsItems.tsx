@@ -8,8 +8,8 @@ import { EmojiPickerReactionsItem } from "../reactions-item/EmojiPickerReactions
 export type EmojiPickerReactionsItemsProps = { children?: (emoji: string) => React.ReactNode };
 
 export function EmojiPickerReactionsItems({ children }: EmojiPickerReactionsItemsProps) {
-  const { shown } = useEmojiPickerReactionsContext("Items");
-  return shown.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <EmojiPickerReactionsItem emoji={unified} />}</React.Fragment>);
+  const { reactions } = useEmojiPickerReactionsContext("Items");
+  return reactions.map((unified) => <React.Fragment key={unified}>{children ? children(unified) : <EmojiPickerReactionsItem emoji={unified} />}</React.Fragment>);
 }
 
 export declare namespace EmojiPickerReactionsItems {

@@ -5,7 +5,7 @@ import { $getNodeByKey, $getSelection, $isRangeSelection, $isTextNode, COMMAND_P
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { findShortcodeTrigger, useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from "emoji-components";
 
-export type LexicalEmojiSuggestionsOptions = UseEmojiSuggestionsOptions & {
+export type LexicalEmojiSuggestionsOptions = Omit<UseEmojiSuggestionsOptions, "trigger" | "element"> & {
   node?: (text: string, suggestion: ShortcodeCompletion) => LexicalNode;
 };
 
@@ -24,8 +24,10 @@ function $matchAtSelection(): Match | null {
 export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
   const [editor] = useLexicalComposerContext();
   const [match, setMatch] = React.useState<Match | null>(null);
-  const suggestions = useEmojiSuggestions(
-    match && {
+  const suggestions = useEmojiSuggestions({
+    ...options,
+    element: () => editor.getRootElement(),
+    trigger: match && {
       query: match.query,
       anchor() {
         const text = editor.getElementByKey(match.key)?.firstChild;
@@ -45,9 +47,7 @@ export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSug
           else selection.insertText(`${text} `);
         }),
     },
-    options,
-    () => editor.getRootElement(),
-  );
+  });
   const { onKeyDown } = suggestions;
   React.useEffect(
     () =>

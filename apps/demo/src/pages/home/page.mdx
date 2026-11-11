@@ -227,7 +227,7 @@ The popover returns focus to its trigger.
 
 ### Suggesting shortcodes {#headless}
 
-`useTextFieldEmojiSuggestions(ref)` finds the `:query` before the caret in an `<input>` or `<textarea>` and handles the field's keys. It returns the matches and prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. For an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+`useTextFieldEmojiSuggestions(options, ref)` finds the `:query` before the caret in an `<input>` or `<textarea>` and handles the field's keys. It returns the matches and prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. For an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
 
 <Demo name="autocomplete" className="min-h-[360px] items-end pb-14 sm:pb-14" />
 
@@ -524,11 +524,11 @@ Types: `EmojiPicker.Panel.Props`, `.State`.
 
 #### Picker hooks {#api-picker-hooks}
 
-Call them inside `Root`.
+Call them inside `Root`. The parts are built on them, so a part of your own gets the same keyboard, focus, and ARIA behavior.
 
 <DefList rows={api.pickerHooks} />
 
-Types: `EmojiPickerSearchSummary`, `EmojiPickerCategoryNavigation`, `EmojiPickerCollapsedCategories`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`, `UseEmojiPickerCellReturnValue`, `EmojiPickerGridState`.
+Types: `UseEmojiPickerSearchReturnValue`, `UseEmojiPickerCategoriesReturnValue`, `EmojiPickerNavCategory`, `UseEmojiPickerHighlightReturnValue`, `UseEmojiPickerReactionsOptions`, `UseEmojiPickerReactionsReturnValue`, `UseEmojiPickerGridOptions`, `UseEmojiPickerGridReturnValue`, `UseEmojiPickerCellReturnValue`, `EmojiPickerGridState`.
 
 ### Suggestions hooks {#api-suggestions-hooks}
 
@@ -538,7 +538,7 @@ Call them inside an `EmojiProvider`, or without one for the default store. They 
 
 <DefList rows={api.suggestionsFunctions} />
 
-Types: `UseEmojiSuggestionsOptions`, `UseEmojiSuggestionsReturnValue`, `EmojiSuggestionsAnchor`, `ShortcodeCompletion`.
+Types: `UseEmojiSuggestionsOptions`, `UseEmojiSuggestionsStoreOptions`, `UseEmojiSuggestionsReturnValue`, `EmojiSuggestionsAnchor`, `ShortcodeCompletion`.
 
 ### Emoji {#api-emoji}
 

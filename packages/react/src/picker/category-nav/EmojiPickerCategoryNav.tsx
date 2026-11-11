@@ -10,7 +10,7 @@ import type { EmojiPickerOrientation } from "../utils/types";
 import { useStore } from "../../utils/useStore";
 import { EmojiPickerCategoryNavTab } from "../category-nav-tab/EmojiPickerCategoryNavTab";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
-import { type EmojiPickerNavCategory, useEmojiPickerCategoryNavigation } from "../root/utils/useEmojiPickerCategoryNavigation";
+import { type EmojiPickerNavCategory, useEmojiPickerCategories } from "../root/utils/useEmojiPickerCategories";
 import * as EmojiPickerCategoryNavDataAttributes from "./EmojiPickerCategoryNavDataAttributes";
 import { type EmojiPickerCategoryNavContext as NavContext, EmojiPickerCategoryNavContext, EmojiPickerCategoryNavTabContext } from "./EmojiPickerCategoryNavContext";
 
@@ -25,11 +25,10 @@ export type EmojiPickerCategoryNavProps = EmojiComponentsHandlers<Omit<React.HTM
 export const EmojiPickerCategoryNav = React.forwardRef<HTMLDivElement, EmojiPickerCategoryNavProps>(function EmojiPickerCategoryNav({ orientation = "horizontal", style, children, ...props }, ref) {
   const picker = useEmojiPickerRootContext("EmojiPicker.CategoryNav");
   const disabled = useStore(picker.state, (s) => s.searching);
-  const { categories, activeCategory, jumpToCategory } = useEmojiPickerCategoryNavigation();
+  const { categories, getItemProps } = useEmojiPickerCategories();
   const id = React.useId();
   if (categories.length <= 1) return null;
-  const selected = activeCategory != null && categories.some((c) => c.id === activeCategory) ? activeCategory : categories[0]!.id;
-  const nav: NavContext = { id, selected, disabled, choose: (key, instant) => jumpToCategory(key, { instant }) };
+  const nav: NavContext = { id, disabled, getItemProps };
   const state: EmojiPickerCategoryNavState = { orientation, disabled };
   return (
     <EmojiPickerCategoryNavContext.Provider value={nav}>

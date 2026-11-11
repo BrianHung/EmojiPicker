@@ -5,11 +5,11 @@ import { createNodeFromContent, type Content, type Editor } from "@tiptap/core";
 import { useEmojiStore, useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions, type ShortcodeCompletion } from "emoji-components";
 import { emojiSuggestions } from "@/lib/emoji-prosemirror";
 
-export type TiptapEmojiSuggestionsOptions = UseEmojiSuggestionsOptions & {
+export type TiptapEmojiSuggestionsOptions = Omit<UseEmojiSuggestionsOptions, "trigger" | "element"> & {
   content?: (text: string, suggestion: ShortcodeCompletion) => Content;
 };
 
-export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSelect, insert, limit, matchBy, order, columns }: TiptapEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
+export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSelect, insertAs, limit, matchBy, order, columns }: TiptapEmojiSuggestionsOptions = {}): UseEmojiSuggestionsReturnValue {
   const store = useEmojiStore();
   const id = React.useId();
   const latest = React.useRef({ content, onSelect });
@@ -20,7 +20,7 @@ export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSe
     () =>
       emojiSuggestions(store, {
         id,
-        insert,
+        insertAs,
         limit,
         matchBy,
         order,
@@ -31,12 +31,12 @@ export function useTiptapEmojiSuggestions(editor: Editor | null, { content, onSe
           return typeof replacement === "string" ? replacement : createNodeFromContent(replacement, schema);
         },
       }),
-    [store, id, insert, limit, matchBy, order, columns],
+    [store, id, insertAs, limit, matchBy, order, columns],
   );
   React.useEffect(() => {
     if (!editor || editor.isDestroyed) return;
     editor.registerPlugin(plugin, (p, plugins) => [p, ...plugins]);
     return () => void (editor.isDestroyed || editor.unregisterPlugin(key));
   }, [editor, plugin, key]);
-  return useEmojiSuggestions(suggestions, { anchor }, () => (editor && !editor.isDestroyed ? editor.view.dom : null));
+  return useEmojiSuggestions({ store: suggestions, anchor, element: () => (editor && !editor.isDestroyed ? editor.view.dom : null) });
 }
