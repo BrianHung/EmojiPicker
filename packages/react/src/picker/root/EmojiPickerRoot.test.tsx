@@ -4,7 +4,7 @@ import { I18nProvider } from "react-aria/I18nProvider";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
-import { EmojiPicker, EmojiProvider, useEmojiPickerCell, useEmojiPickerGrid, useEmojiSkinTone, type EmojiPickerGridState, type EmojiItem } from "../..";
+import { EmojiPicker, EmojiProvider, useEmojiPickerCell, useEmojiPickerGrid, useEmojiPickerHighlight, useEmojiSkinTone, type EmojiPickerGridState, type EmojiItem } from "../..";
 
 function Cell({ state, item }: { state: EmojiPickerGridState; item: EmojiItem }) {
   return <div {...useEmojiPickerCell(state, item).cellProps} />;
@@ -66,7 +66,8 @@ describe("Root keyboard", () => {
     expect(document.activeElement).toBe(input);
   });
 
-  it("previews the highlighted emoji with its skin tone", () => {
+  it("previews the highlighted emoji with its skin tone, in Preview and useEmojiPickerHighlight", () => {
+    const Readout = () => <output>{useEmojiPickerHighlight().unified}</output>;
     const input = document.body.appendChild(document.createElement("input"));
     const host = document.body.appendChild(document.createElement("div"));
     React.act(() =>
@@ -75,6 +76,7 @@ describe("Root keyboard", () => {
           <EmojiPicker.Root frequent={false} defaultQuery="waving hand" keyboardTarget={input}>
             <Grid />
             <EmojiPicker.Preview />
+            <Readout />
           </EmojiPicker.Root>
         </EmojiProvider>,
       ),
@@ -82,6 +84,7 @@ describe("Root keyboard", () => {
     input.focus();
     press(input, "ArrowRight");
     expect(host.querySelector('[data-slot="emoji-picker-preview"]')?.textContent).toBe("👋🏿 waving hand");
+    expect(host.querySelector("output")?.textContent).toBe("1f44b-1f3ff");
   });
 
   it("clears the search field's highlight when focus leaves the picker", () => {

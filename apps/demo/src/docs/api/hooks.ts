@@ -5,7 +5,7 @@ export const pickerHooks: Rows = [
   ["useEmojiPickerCategories()", "`{ categories, activeCategory, jumpToCategory(id), collapsed, isCollapsed(id), setCollapsed(id, collapsed), toggleCollapsed(id), getItemProps(id, props) }`. Used by `CategoryNav` and `CategoryNavTab`."],
   [
     "useEmojiPickerHighlight()",
-    "`{ emoji, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord`, or `null`. `pick()` picks the highlighted emoji; `pick(emoji)` picks that one. For your own preview or section bar; `actionsRef` gives the same actions outside `Root`.",
+    "`{ emoji, unified, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord` (`unified`, `emoji`, `name`, `shortcodes`, `tags`), or `null`; `unified` is the highlighted code with its skin tone, as `Preview` shows it. `pick()` picks the highlighted emoji; `pick(emoji)` picks that one. For your own preview or section bar; `actionsRef` gives the same actions outside `Root`.",
   ],
   [
     "useEmojiPickerReactions({ value, defaultValue, onValueChange })",
