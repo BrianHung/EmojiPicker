@@ -1,6 +1,6 @@
 import { EmojiPicker, type EmojiSelection } from "emoji-components";
 
-const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-emoji-picker-hover";
+const reaction = "flex size-10 items-center justify-center rounded-full text-[26px] transition-transform hover:scale-110 hover:bg-emoji-picker-hover data-selected:bg-emoji-picker-selected data-selected:ring-1 data-selected:ring-emoji-picker-ring data-selected:ring-inset";
 
 export function ReactionBar({ onSelect }: { onSelect: (selection: EmojiSelection) => void }) {
   return (

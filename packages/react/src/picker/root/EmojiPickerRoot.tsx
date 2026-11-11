@@ -25,7 +25,7 @@ import * as EmojiPickerListCssVars from "../list/EmojiPickerListCssVars";
 import { useKeyboardTarget } from "./utils/useKeyboardTarget";
 import { useResultCount } from "./utils/useEmojiPickerSearch";
 import { usePickerEngine } from "./utils/usePickerEngine";
-import { EmojiProviderContext, useEmojiContext } from "../../provider/EmojiProviderContext";
+import { EmojiProviderContext, useEmojiContext, useHydrating } from "../../provider/EmojiProviderContext";
 import { SharedProvider } from "../../provider/EmojiProvider";
 import { mergePartProps } from "../../internals/mergePartProps";
 import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
@@ -246,9 +246,12 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     [store, state, labels, columns, searchResults, actions, ownsFocus, target, rootRef, listId, variations, registerVariations, registerStatus, native],
   );
   const panelId = React.useId();
+  // A Panel registers after mount, so the server and hydration assume one is there
+  const hydrating = useHydrating();
+  const expandable = panels > 0 || hydrating;
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
-    () => (reactions ? { reactions: view.reactions ?? [], open: view.reactionsOpen, expandable: panels > 0, items, expand, panel, panelId, registerPanel } : null),
-    [reactions, view.reactions, view.reactionsOpen, panels, items, registerPanel, panelId],
+    () => (reactions ? { reactions: view.reactions ?? [], open: view.reactionsOpen, expandable, items, expand, panel, panelId, registerPanel } : null),
+    [reactions, view.reactions, view.reactionsOpen, expandable, items, registerPanel, panelId],
   );
 
   const keys = usePickerKeyDown(onKeyDown, (e) => {

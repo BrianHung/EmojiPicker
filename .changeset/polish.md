@@ -19,3 +19,5 @@ Fixes from first-install testing.
 - Frequently used starts empty; pass `defaultFrequents` to seed it. A `reactions={n}` row with no history shows `Panel` in its place. The Twemoji font's first subset no longer includes starter emoji.
 - The default `previewCaption` is "Pick an emoji".
 - A localized dataset names Smileys & People from both of its emojibase groups, such as "スマイリーと感情、人と体".
+- `useEmojiPickerReactions()` returns `getToolbarProps(props)`, the toolbar `Reactions` uses: role, label, and arrow, Home, and End focus. `getExpandProps` types `aria-expanded` as `boolean`.
+- The reaction row server-renders `ReactionsExpand` when a `Panel` is there.

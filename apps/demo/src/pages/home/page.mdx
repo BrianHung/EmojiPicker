@@ -18,6 +18,8 @@ The packages are in prerelease (`1.0.0-alpha`), and the API can change between a
 
 <TabPanel label="Command">
 
+Run `npx shadcn@latest init` first if your project doesn't use shadcn/ui yet.
+
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
 The command adds `components/ui/emoji-picker.tsx`, installs `emoji-components`, and imports `emoji-components/tokens.css` and `emoji-components/shadcn.css` into your CSS, so the picker follows your shadcn/ui theme.
@@ -36,7 +38,7 @@ export default function App() {
 }
 ```
 
-Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. A popover, a suggestions menu, and a reaction bar are separate items, under [Examples](#popover).
+Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. Its empty, loading, and error messages are plain strings in your copy, as in shadcn/ui's `CommandEmpty`. A popover, a suggestions menu, and a reaction bar are separate items, under [Examples](#popover).
 
 </TabPanel>
 
@@ -90,7 +92,7 @@ The component uses Tailwind CSS v4, shadcn/ui's color classes, such as `bg-popov
 
 ## Usage
 
-Each part renders a sensible default with no children. The parts work without an `EmojiProvider` or CSS. `Root` loads the English dataset from jsDelivr, and `Viewport` needs a fixed height to virtualize the list. Add `EmojiProvider` to change the data, locale, search, renderer, labels, or custom emoji; without one, the parts share a default store.
+Each part renders a sensible default with no children. The parts work without an `EmojiProvider` or CSS. `Root` loads the English dataset from jsDelivr, and `Viewport` needs a fixed height to virtualize the list. Add `EmojiProvider` to change the data, locale, search, renderer, labels, or custom emoji; without one, the parts share a default store. While you type, the first result is highlighted and focus stays in the search field, which points at the highlight with `aria-activedescendant` as the arrow keys move it.
 
 ```tsx title="app/page.tsx"
 "use client";
@@ -158,7 +160,7 @@ import { Input } from "@/components/ui/input";
 
 export function Search() {
   return (
-    <EmojiPicker.Search>
+    <EmojiPicker.Search className="relative">
       <EmojiPicker.SearchInput autoFocus render={<Input />} />
       <EmojiPicker.SearchClear />
     </EmojiPicker.Search>
@@ -209,7 +211,7 @@ The suggestions item is a menu at the caret on Floating UI; pass it what `useTex
 
 For an `<input>` or `<textarea>`, use `useTextFieldEmojiSuggestions(options, ref)`. It finds the `:query` before the caret, handles the field's keys, and returns the matches, prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. A pick replaces the query with the emoji and a space, unless whitespace already follows.
 
-For any other editor, `useEmojiSuggestions({ trigger })` takes a trigger of `{ query, anchor, replace }`: the query without its colon, a function that returns the query's `DOMRect`, and a function that writes the chosen text. The space after it is up to `replace`. See the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+For an editor that finds the query itself, `useEmojiSuggestions({ trigger })` takes a trigger of `{ query, anchor, replace }`: the query without its colon, a function that returns the query's `DOMRect`, and a function that writes the chosen text. The space after it is up to `replace`. Pass a new trigger as the text or the selection changes, or `null` when there is no query; it needs no stable identity. See the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
 
 - A query starts at a colon after the start of the text, a space, an opening bracket, or a CJK character; not right after a letter, a digit, or an emoji.
 - An ASCII query needs two characters, such as `:sm`; one CJK character is enough.
@@ -220,9 +222,9 @@ For any other editor, `useEmojiSuggestions({ trigger })` takes a trigger of `{ q
 
 ### Showing a reaction row {#tapback}
 
-`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. `reactions={5}` shows the five most frequently used; before the first pick the row is empty and `Panel` shows in its place, unless `defaultFrequents` on `EmojiProvider` seeds the history. This is a picker's quick-reaction row, as in a tapback. For the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button.
+`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. `reactions={5}` shows the five most frequently used; before the first pick the row is empty and `Panel` shows in its place, unless `defaultFrequents` on `EmojiProvider` seeds the history. `Reactions` and `useEmojiPickerReactions` are a picker's quick-reaction row, as in a tapback; for the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button. A server-rendered row that must not change on hydration needs an explicit `reactions` array, since the server can't read the history. The row shows `reactions` only: an emoji picked in `Panel` joins an explicit array when your app adds it. After a pick in `Panel`, focus returns to the Expand button. Size the expanded picker through `Root`, as in `data-reactions-open:h-auto`, not on `Panel`.
 
-With `value`, the items toggle. Pressing an item that is off fires `onValueChange`, then `onSelect`; pressing one that is on fires only `onValueChange`. A pick in `Panel` fires `onSelect` even when the emoji is already in the row, so make your update idempotent.
+With `value` on `Reactions` or `useEmojiPickerReactions`, an array of codes, the items toggle. Pressing an item that is off fires `onValueChange`, then `onSelect`; pressing one that is on fires only `onValueChange`. A pick in `Panel` fires `onSelect` even when the emoji is already in the row, so make your update idempotent. A reaction counts as a pick in Frequently used, as in Slack, and removing it doesn't undo that.
 
 ```tsx title="reactions.tsx"
 <EmojiPicker.Root reactions={5}>
@@ -543,7 +545,7 @@ Types: `EmojiPicker.ReactionsItem.Props`, `.State`.
 
 #### EmojiPicker.ReactionsExpand {#api-reactions-expand}
 
-Hides the row to show `Panel`, and renders only while there is a `Panel`; Escape with an empty query brings the row back. Renders a `<button>` element.
+Hides the row to show `Panel`, and renders only while there is a `Panel`; Escape, when the search field has no text to clear, shows the row again. Renders a `<button>` element.
 
 <PartApi part="EmojiPickerReactionsExpand" props={api.reactionsExpand} />
 

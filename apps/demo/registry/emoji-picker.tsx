@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 const button =
   "flex shrink-0 items-center justify-center outline-hidden hover:bg-accent focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-primary";
 const reaction =
-  "flex size-10 items-center justify-center rounded-full text-[26px] outline-hidden transition-transform duration-150 ease-out focus-visible:bg-accent [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
+  "flex size-10 items-center justify-center rounded-full text-[26px] outline-hidden transition-transform duration-150 ease-out focus-visible:bg-accent [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97] data-selected:bg-accent data-selected:text-accent-foreground data-selected:ring-1 data-selected:ring-ring data-selected:ring-inset";
 
 function EmojiPicker({ className, ...props }: EmojiPickerPrimitive.Root.Props) {
   return (

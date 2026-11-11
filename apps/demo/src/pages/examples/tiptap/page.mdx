@@ -55,6 +55,7 @@ function TiptapEditor() {
     <>
       <EmojiPickerPopover
         aria-label="Insert emoji"
+        finalFocus={() => editor.view.dom}
         onSelect={(selection) => {
           const attrs = selection.isCustom ? emojiAttrs(store, selection.unified) : null;
           if (attrs) editor.chain().focus().insertEmoji(attrs).run();

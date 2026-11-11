@@ -8,11 +8,11 @@ export const pickerHooks: Rows = [
   ["useEmojiPickerCategories()", "`{ categories, activeCategory, jumpToCategory(id), collapsed, isCollapsed(id), setCollapsed(id, collapsed), toggleCollapsed(id), getItemProps(id, props) }`. Used by `CategoryNav` and `CategoryNavTab`."],
   [
     "useEmojiPickerHighlight()",
-    "`{ emoji, unified, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord` (`unified`, `emoji`, `name`, `shortcodes`, `tags`), or `null`; `unified` is the highlighted code with its skin tone, as `Preview` shows it. `pick()` picks the highlighted emoji; `pick(emoji)` picks that one. For your own preview or section bar; `actionsRef` gives the same actions outside `Root`.",
+    "`{ emoji, unified, highlight(emoji), move(to), pick(emoji?) }`. `emoji` is the highlighted `EmojiRecord` (`unified`, `emoji`, `name`, `shortcodes`, `tags`), or `null`; `unified` is the highlighted code with its skin tone, as `Preview` shows it; `<Emoji emoji={unified} />` draws it. `pick()` picks the highlighted emoji; `pick(emoji)` picks that one. For your own preview or section bar; `actionsRef` gives the same actions outside `Root`.",
   ],
   [
     "useEmojiPickerReactions({ value, defaultValue, onValueChange })",
-    "`{ reactions, open, setOpen(open), value, expandable, getItemProps(emoji, props), getExpandProps(props) }`. With a value, the items toggle, as in Base UI's `ToggleGroup`. Used by `Reactions`, `ReactionsItem`, and `ReactionsExpand`.",
+    "`{ reactions, open, setOpen(open), value, expandable, getToolbarProps(props), getItemProps(emoji, props), getExpandProps(props) }`. `getToolbarProps` makes the row a toolbar: the arrow keys, Home, and End move focus. With a value, the items toggle, as in Base UI's `ToggleGroup`. Used by `Reactions`, `ReactionsItem`, and `ReactionsExpand`.",
   ],
   ["useEmojiPickerGrid({ rowHeight, headerHeight, columns, scrollToIndex })", "`{ rows, stickyIndexes, getGridProps, getHeaderProps, state, variations }`, for your own virtualizer. Used by `List`."],
   ["useEmojiPickerCell(grid.state, item)", "`{ cellProps, state }` for one cell of `useEmojiPickerGrid`. Used by `ListCell`."],

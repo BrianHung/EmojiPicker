@@ -6,14 +6,24 @@ import { EmojiProvider, type EmojiLabels } from "emoji-components";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation("emoji");
-  const labels = React.useMemo<Partial<EmojiLabels>>(
+  const labels = React.useMemo<EmojiLabels>(
     () => ({
       picker: t("picker"),
       searchPlaceholder: t("searchPlaceholder"),
       searchLabel: t("searchLabel"),
       searchClear: t("searchClear"),
-      frequent: t("frequent"),
+      searchResults: t("searchResults"),
+      emojiList: t("emojiList"),
       resultCount: (count) => t("resultCount", { count }),
+      categoryNavigation: t("categoryNavigation"),
+      frequent: t("frequent"),
+      custom: t("custom"),
+      suggestions: t("suggestions"),
+      reactions: t("reactions"),
+      expandReactions: t("expandReactions"),
+      previewCaption: t("previewCaption"),
+      skinTone: t("skinTone"),
+      skinTones: [t("skinTones.0"), t("skinTones.1"), t("skinTones.2"), t("skinTones.3"), t("skinTones.4"), t("skinTones.5")],
       withSkinTone: (name, tone) => t("withSkinTone", { name, tone }),
     }),
     [t],

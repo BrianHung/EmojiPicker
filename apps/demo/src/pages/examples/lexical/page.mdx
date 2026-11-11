@@ -41,6 +41,7 @@ function InsertEmoji() {
   return (
     <EmojiPickerPopover
       aria-label="Insert emoji"
+      finalFocus={() => editor.getRootElement()}
       onSelect={(selection) => {
         editor.focus();
         editor.update(() => {

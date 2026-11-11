@@ -32,15 +32,16 @@ describe("Reactions", () => {
     expect(host.querySelector('[data-slot="emoji-picker-reactions-expand"]')).not.toBeNull();
   });
 
-  it("renders the row from its codes on the server, before the data loads", () => {
+  it("renders the row and its Expand on the server, before the data loads", () => {
     const html = renderToString(
       <EmojiProvider data={async () => en}>
         <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>
           <EmojiPicker.Reactions />
+          <EmojiPicker.Panel />
         </EmojiPicker.Root>
       </EmojiProvider>,
     );
-    expect(html.match(/data-slot="emoji-picker-reactions-item"/g)).toHaveLength(2);
+    expect(html.match(/data-slot="emoji-picker-reactions-(item|expand)"/g)).toEqual(["emoji-picker-reactions-item", "emoji-picker-reactions-item", "emoji-picker-reactions-expand"].map((s) => `data-slot="${s}"`));
   });
 
   it("returns focus to Expand when a pick collapses the Panel", () => {
@@ -98,15 +99,28 @@ describe("Reactions", () => {
     expect(picked).toEqual(["2764-fe0f"]);
   });
 
-  it("toggles a custom row built on useEmojiPickerReactions", () => {
+  it("toggles a custom row built on useEmojiPickerReactions, a toolbar the arrows move through", () => {
     function Row() {
-      const { reactions, getItemProps } = useEmojiPickerReactions({ defaultValue: ["1f44d"] });
-      return reactions.map((emoji) => <button key={emoji} {...getItemProps(emoji)} />);
+      const { reactions, getToolbarProps, getItemProps } = useEmojiPickerReactions({ defaultValue: ["1f44d"] });
+      return (
+        <div {...getToolbarProps()}>
+          {reactions.map((emoji) => (
+            <button key={emoji} {...getItemProps(emoji)} />
+          ))}
+        </div>
+      );
     }
     const host = mount(<Row />);
-    const pressed = () => [...host.querySelectorAll("button")].map((b) => b.getAttribute("aria-pressed"));
+    const buttons = host.querySelectorAll("button");
+    const pressed = () => [...buttons].map((b) => b.getAttribute("aria-pressed"));
     expect(pressed()).toEqual(["true", "false"]);
-    React.act(() => host.querySelectorAll("button")[1]!.click());
+    React.act(() => buttons[1]!.click());
     expect(pressed()).toEqual(["true", "true"]);
+    expect(host.querySelector('[role="toolbar"]')?.getAttribute("aria-label")).toBe("Reactions");
+    React.act(() => buttons[0]!.focus());
+    React.act(() => void buttons[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(buttons[1]);
+    React.act(() => void buttons[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(buttons[0]);
   });
 });
