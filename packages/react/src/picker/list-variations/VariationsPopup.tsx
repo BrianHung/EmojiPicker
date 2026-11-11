@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import type { SkinToneValue } from "@emoji-components/core";
+import type { Collection as NodeCollection, Node as CollectionNode } from "@react-types/shared";
 import { SKIN_TONE_VALUES } from "@emoji-components/core/internal";
 import { useEmojiPickerRootContext, type Overlay } from "../root/EmojiPickerRootContext";
+import { Collection } from "react-aria/Collection";
+import { CollectionBuilder, createLeafComponent } from "react-aria/CollectionBuilder";
 import { useLocale } from "react-aria/I18nProvider";
 import { ListKeyboardDelegate } from "react-aria/ListKeyboardDelegate";
 import { useCollator } from "react-aria/useCollator";
@@ -16,7 +19,6 @@ import { renderElement, resolve } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
 import { useStore } from "../../utils/useStore";
-import { Item } from "react-stately/Item";
 import { useListState } from "react-stately/useListState";
 
 import { EmojiPickerListVariationsOption } from "../list-variations-option/EmojiPickerListVariationsOption";
@@ -32,21 +34,42 @@ export const VariationsPopup = React.forwardRef<HTMLDivElement, EmojiPickerListV
   const [overlay, setOverlay] = React.useState<Overlay | null>(null);
   useLayoutEffect(() => setOverlay(open == null ? null : (list.current?.overlay() ?? null)), [open, list]);
   if (!overlay) return null;
-  return <VariationsRow {...props} key={overlay.record.unified} overlay={overlay} ref={ref} />;
+  return <VariationsCollection {...props} key={overlay.record.unified} overlay={overlay} ref={ref} />;
+});
+
+type Tone = { tone: SkinToneValue; unified: string };
+type RowProps = EmojiPickerListVariationsProps & { overlay: Overlay };
+
+const ToneItem = createLeafComponent("item", function ToneItem(_: { id: string; textValue: string }) {
+  return null;
+});
+
+const VariationsCollection = React.forwardRef<HTMLDivElement, RowProps>(function VariationsCollection(props, ref) {
+  const { labels } = useEmojiPickerRootContext();
+  const { record } = props.overlay;
+  const items = React.useMemo(() => [record.unified, ...record.tones].map((unified, i): Tone => ({ tone: SKIN_TONE_VALUES[i]!, unified })), [record]);
+  const content = React.useMemo(
+    () => (
+      <Collection items={items} dependencies={[labels]}>
+        {(item) => <ToneItem id={item.unified} textValue={labels.skinTones[item.tone]} />}
+      </Collection>
+    ),
+    [items, labels],
+  );
+  // The row mounts once the collection is built: useListState drops a focused key the collection lacks
+  return <CollectionBuilder content={content}>{(collection) => (collection.size ? <VariationsRow {...props} items={items} collection={collection} ref={ref} /> : null)}</CollectionBuilder>;
 });
 
 // React Aria's useListBox rather than RAC ListBox, which would join Root's Autocomplete as its collection
-const VariationsRow = React.forwardRef<HTMLDivElement, EmojiPickerListVariationsProps & { overlay: Overlay }>(function VariationsRow({ overlay, style, children, onKeyDown, ...props }, ref) {
+const VariationsRow = React.forwardRef<HTMLDivElement, RowProps & { items: Tone[]; collection: NodeCollection<CollectionNode<unknown>> }>(function VariationsRow({ overlay, items, collection, style, children, onKeyDown, ...props }, ref) {
   const { store, labels } = useEmojiPickerRootContext();
   const { record, close, pick } = overlay;
   const row = useObjectRef(ref);
-  const items = React.useMemo(() => [record.unified, ...record.tones].map((unified, i) => ({ tone: SKIN_TONE_VALUES[i]!, unified })), [record]);
   const current = Math.max(
     0,
     items.findIndex((item) => item.unified === store.withSkinTone(record.unified)),
   ) as SkinToneValue;
-  const option = React.useCallback((item: (typeof items)[number]) => <Item key={item.unified}>{labels.skinTones[item.tone]}</Item>, [labels]);
-  const listState = useListState({ items, children: option, selectionMode: "none" });
+  const listState = useListState({ collection, selectionMode: "none" });
   const { direction } = useLocale();
   const collator = useCollator({ usage: "search", sensitivity: "base" });
   const delegate = React.useMemo(() => new ListKeyboardDelegate({ collection: listState.collection, ref: row, collator, orientation: "horizontal", direction }), [listState.collection, row, collator, direction]);
