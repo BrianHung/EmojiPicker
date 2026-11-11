@@ -42,6 +42,7 @@ Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 
 - [ci.yml](.github/workflows/ci.yml) runs the same step groups as `release:check` from `.github/release-steps.mjs` (`check`, `smoke`, `e2e`, `a11y`), with `E2E_VISUAL=0` because visual baselines are local, plus the Twemoji font build and its Chromium, WebKit, and Firefox render test.
 - [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
+- [release.yml](.github/workflows/release.yml), run by hand, opens the version PR and publishes ([Releasing](#releasing)).
 - [upstream.yml](.github/workflows/upstream.yml), run by hand, bumps the pinned emojibase-data and Twemoji versions, rebuilds, runs the tests, and opens a PR.
 
 ## Package layout
@@ -80,31 +81,27 @@ A name belongs to the code that defines and reads it. Code only one component us
 
 ## Releasing
 
-Changes to a published package come with a changeset (`npm run changeset`). The four packages version together (`"fixed"` in `.changeset/config.json`), and `.github/version-check.mjs` checks that they do. Changesets is in prerelease mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`. The first publish sets both the `alpha` and `latest` dist-tags. Later alphas publish to `latest`, so the docs install without a tag. The Release workflow, run by hand, opens a "Version packages" PR that applies the changesets (`npm run version-packages`). The workflow does not publish. Publishing requires the owner's npm account.
+Changes to a published package come with a changeset (`npm run changeset`). The four packages version together (`"fixed"` in `.changeset/config.json`), and `.github/version-check.mjs` checks that they do. Changesets is in prerelease mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`, and `changeset publish` publishes them to the `alpha` dist-tag.
 
-The Release and Upstream workflows open their PRs with `GITHUB_TOKEN`. GitHub starts no workflow runs for events that this token causes, so CI does not run on those PRs. To run it, give the workflows a personal access token or a GitHub App token as a secret. Otherwise, run `npm run release:check` locally before you merge.
+The [Release workflow](.github/workflows/release.yml) runs only by hand, with a `mode` input:
+
+- `version` opens or updates the "Version packages" PR (`npm run version-packages`: versions, changelogs, the lockfile, and the site's `/r/` pins), committed by `github-actions[bot]`.
+- `publish`, from `main`, requires a successful CI run on the commit, runs the `check`, `font`, `smoke`, and `onboarding` groups of `.github/release-steps.mjs`, then runs `changeset publish` through `changesets/action/publish`. It publishes only versions that are not on npm yet, pushes a tag per package, and creates a GitHub Release per package from its changelog, marked as a prerelease when the version has a `-`. It authenticates with npm trusted publishing (OIDC): no npm token, and provenance is attached automatically.
+
+The workflow's PRs, and the Upstream workflow's, are opened with `GITHUB_TOKEN`, so CI does not run on them. Run `npm run release:check` locally before you merge, or give the workflows a personal access token or a GitHub App token.
 
 To publish:
 
-1. Fast-forward `main` to the release branch. Run the Release workflow, and merge the "Version packages" PR. Check that all four packages are at the same version.
-2. On the release commit, run `npm ci` and `npm run release:check` (every group in `.github/release-steps.mjs`; pass group names to run some). It runs the typecheck, Biome, the unit tests, the builds, the size budgets, publint and attw (`npm run lint:packages`), the version check, the Twemoji font build and its publint (skipped without Python 3.12; set `PYTHON`), and the packed-install smoke test (`npm run smoke`: Vite, React 18 with a server render, a Next.js App Router build, and `shadcn add`), and the onboarding check (`npm run onboarding`: docs.md's steps in apps from the Vite, Next.js, and shadcn CLIs). It then runs every e2e spec, including visual, and axe against a production build. Visual baselines are local, so this is the only run that checks them. If they are not in `apps/demo/e2e/__snapshots__`, restore them first.
-3. Publish, and push the tags. Pre mode rejects `--tag`.
-
-   ```bash
-   npm whoami
-   PYTHON=python3.12 npx changeset publish   # any Python 3.12+; add --otp <code> with 2FA
-   git push origin --follow-tags
-   ```
-
-   `changeset publish` is not atomic. If a package fails to publish, run it again: it skips versions that are already published. `prepublishOnly` builds core and the React package. The data package and the Twemoji font build when they are packed; the font needs Python 3.12 or later, so set `PYTHON` if `python3` is older (macOS ships 3.9).
-
-4. Check the dist-tags. `latest` must be the new version for all four packages.
+1. Run the Release workflow with `version`, review the "Version packages" PR, and merge it. Wait for CI on `main`.
+2. Run the Release workflow with `publish` on `main`. `changeset publish` is not atomic; if a package fails, run it again.
+3. Check the dist-tags. Publish moves `latest` to the published versions unless the `latest` input is off; the trusted publisher needs "Allow npm dist-tag". To move it by hand:
 
    ```bash
    for p in emoji-components @emoji-components/{core,data,twemoji-font}; do npm view $p dist-tags; done
-   npm dist-tag add <package>@<version> latest   # if latest is missing or behind
+   npm dist-tag add <package>@<version> latest
    ```
 
+4. Purge jsDelivr's `@latest` (`https://purge.jsdelivr.net/npm/emoji-components@latest/r/<item>.json` and `package.json`) and deploy the site ([apps/demo/README.md](apps/demo/README.md)).
 5. Check the CDN and a fresh install.
 
    ```bash
@@ -113,8 +110,12 @@ To publish:
    npm run onboarding -- --from-npm   # docs.md's steps against npm, the registry on jsDelivr, and jsDelivr data
    ```
 
+### Trusted publishing setup
+
+Once per package (`emoji-components`, `@emoji-components/core`, `@emoji-components/data`, `@emoji-components/twemoji-font`), on npmjs.com: Settings → Trusted publishing → GitHub Actions, with organization or user `BrianHung`, repository `emoji-components`, workflow filename `release.yml`, and no environment. Each package's `repository.url` must match the repository. The repository setting Actions → General → "Allow GitHub Actions to create and approve pull requests" must stay on for the version PR.
+
 ### shadcn registry
 
 `emoji-components` ships the registry items in `r/`, built by its `prepack` (`apps/demo/scripts/build-registry.mjs`). Items pin the packages to the release (`emoji-components@<version>`) and depend on each other through that release's jsDelivr URLs. The site keeps serving the same items at `/r/` for URL installs.
 
-The docs install from `https://cdn.jsdelivr.net/npm/emoji-components@latest/r/<item>.json`, which follows the `latest` dist-tag, so step 4 matters: `emoji-components@latest` was `0.0.0`, which has no `r/`. jsDelivr caches `@latest` for up to 7 days unless it is purged, and items pin their own release, so a stale cache installs an older but consistent release. A range such as `@1` excludes prereleases. The URL needs no change at 1.0.0. At 2.0.0, `latest` moves to 2.x.
+The docs install from `https://cdn.jsdelivr.net/npm/emoji-components@latest/r/<item>.json`, which follows the `latest` dist-tag, so step 3 matters: `emoji-components@latest` was `0.0.0`, which has no `r/`. jsDelivr caches `@latest` for up to 7 days unless it is purged, and items pin their own release, so a stale cache installs an older but consistent release. A range such as `@1` excludes prereleases. The URL needs no change at 1.0.0. At 2.0.0, `latest` moves to 2.x.
