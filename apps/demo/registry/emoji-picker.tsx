@@ -14,7 +14,7 @@ function EmojiPicker({ className, ...props }: EmojiPickerPrimitive.Root.Props) {
     <EmojiPickerPrimitive.Root
       className={cn(
         "relative flex h-[360px] max-h-(--available-height) w-[328px] max-w-full flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-md **:box-border [corner-shape:squircle] in-data-side:max-w-[var(--available-width,calc(100vw-24px))] in-data-placement:max-w-[calc(100vw-24px)] motion-reduce:duration-0 motion-reduce:**:duration-0 [--emoji-picker-cell-size:36px] [--emoji-picker-emoji-size:24px] [--emoji-picker-header-height:28px] [--emoji-picker-list-padding:6px]",
-        "data-reactions-open:h-auto data-reactions-open:w-fit data-reactions-open:max-w-[352px] data-reactions-open:rounded-full data-reactions-open:shadow-lg data-reactions-open:[corner-shape:round]",
+        "data-reactions-open:h-auto data-reactions-open:w-fit data-reactions-open:max-w-[352px]",
         className,
       )}
       {...props}

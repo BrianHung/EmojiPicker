@@ -36,10 +36,14 @@ export default function App() {
 }
 ```
 
-Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. For a reaction row that expands into the picker:
+Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. For a reaction row that expands into the picker, here drawn as a pill until it expands:
 
 ```tsx title="reactions.tsx"
-<EmojiPicker reactions={5} onSelect={(selection) => console.log(selection.emoji)}>
+<EmojiPicker
+  reactions={5}
+  onSelect={(selection) => console.log(selection.emoji)}
+  className="data-reactions-open:rounded-full data-reactions-open:shadow-lg data-reactions-open:[corner-shape:round]"
+>
   <EmojiPickerReactions />
   <EmojiPickerPanel>
     <EmojiPickerSearch />
