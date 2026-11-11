@@ -17,7 +17,7 @@ export type Surface = {
   inline?: boolean;
 };
 
-const layer = (page: Page) => page.locator(`${POPUP}, [data-slot="drawer-popup"]`).filter({ visible: true }).last();
+const layer = (page: Page) => page.locator(`${POPUP}:not([data-slot="toast"]), [data-slot="drawer-popup"]`).filter({ visible: true }).last();
 export const listbox = (page: Page) =>
   page
     .getByRole("listbox")

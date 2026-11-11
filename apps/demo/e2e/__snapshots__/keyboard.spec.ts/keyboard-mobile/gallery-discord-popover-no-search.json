@@ -1,6 +1,6 @@
 {
   "opened": {
-    "focus": "option \"red heart\" 2764-fe0f",
+    "focus": "option \"thumbs up\" 1f44d",
     "highlight": null
   },
   "keys": [
@@ -48,8 +48,8 @@
     },
     {
       "key": "Home",
-      "focus": "option \"red heart\" 2764-fe0f",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "focus": "option \"thumbs up\" 1f44d",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
@@ -60,8 +60,8 @@
     },
     {
       "key": "PageUp",
-      "focus": "option \"red heart\" 2764-fe0f",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "focus": "option \"thumbs up\" 1f44d",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     }
   ],
@@ -69,7 +69,7 @@
     "open": false,
     "focus": "button \"Open emoji picker\"",
     "focusReturned": true,
-    "toast": "❤️ :heart: red heart"
+    "toast": "👍 :+1: thumbs up"
   },
   "escape": [
     {

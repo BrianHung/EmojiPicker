@@ -7,13 +7,13 @@
     {
       "key": "ArrowDown",
       "focus": "searchbox \"Search Emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
       "focus": "searchbox \"Search Emoji\"",
-      "highlight": "option \"red question mark\" 2753",
+      "highlight": "option \"fire\" 1f525",
       "scrolled": 0
     },
     {
@@ -31,7 +31,7 @@
     {
       "key": "ArrowLeft",
       "focus": "searchbox \"Search Emoji\"",
-      "highlight": "option \"red question mark\" 2753",
+      "highlight": "option \"fire\" 1f525",
       "scrolled": 0
     },
     {
@@ -49,7 +49,7 @@
     {
       "key": "Home",
       "focus": "searchbox \"Search Emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
@@ -61,7 +61,7 @@
     {
       "key": "PageUp",
       "focus": "searchbox \"Search Emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     }
   ],
@@ -69,7 +69,7 @@
     "open": false,
     "focus": "body",
     "focusReturned": false,
-    "toast": "❤️ :heart: red heart"
+    "toast": null
   },
   "hover": {
     "hovered": {
@@ -92,8 +92,8 @@
     }
   ],
   "tab": {
-    "focus": "option \"red heart\" 2764-fe0f",
-    "highlight": "option \"red heart\" 2764-fe0f",
+    "focus": "option \"thumbs up\" 1f44d",
+    "highlight": "option \"thumbs up\" 1f44d",
     "open": true,
     "inside": true
   }
