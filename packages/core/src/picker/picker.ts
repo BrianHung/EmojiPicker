@@ -270,6 +270,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       const sections = searching ? resultSectionsOf(results, current.searchResults ?? "ranked", categories, labels, groupNames, tone, item) : categorySections;
       const highlighted = resolveKey(sections, current.highlight === undefined ? state.highlighted : current.highlight, state.highlighted);
       const virtual = (state.inputs > 0 || !state.mounted) && !state.domFocus;
+      const reactions = state.held && typeof current.reactions === "number" ? state.held.reactions : reactionsOf(current.reactions);
       return keep({
         query,
         searching,
@@ -287,8 +288,9 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
         active: activeOf(sections, highlighted ?? state.hovered),
         activeSection: state.activeSection,
         variations: state.variations,
-        reactions: state.held && typeof current.reactions === "number" ? state.held.reactions : reactionsOf(current.reactions),
-        reactionsOpen: Boolean(current.reactions) && (current.reactionsOpen ?? state.reactionsOpen),
+        reactions,
+        // An empty row, such as frequently used before any pick, shows the picker instead
+        reactionsOpen: Boolean(reactions?.length) && (current.reactionsOpen ?? state.reactionsOpen),
         value: tracks(current) ? (current.value === undefined ? state.value : current.value) : undefined,
         tabStop: state.tabStop,
         pressed: state.pressed,

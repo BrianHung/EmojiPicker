@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import "@/globals.css";
+import { siteFrequents } from "@/lib/frequents";
 
 function SkinToneMenu() {
   const [tone, setTone] = useEmojiSkinTone();
@@ -46,7 +47,7 @@ if (localStorage.getItem("demo:theme") === "dark") document.documentElement.clas
 createRoot(document.getElementById("root")!).render(
   <main className="mx-auto flex max-w-md flex-col gap-4 p-6">
     <h1 className="text-lg font-semibold">Swapped parts</h1>
-    <EmojiProvider data={en}>
+    <EmojiProvider data={en} defaultFrequents={siteFrequents}>
       <EmojiPicker.Root defaultCollapsedCategories={["flags"]} className="flex h-[420px] flex-col gap-2 rounded-xl border border-border bg-popover p-2 text-popover-foreground [--emoji-picker-emoji-size:24px]">
         <div className="flex items-center gap-2">
           <div className="flex-1">

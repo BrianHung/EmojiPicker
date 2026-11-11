@@ -9,10 +9,11 @@ describe("frequency store", () => {
     vi.unstubAllGlobals();
   });
 
-  it("ranks by count decayed over time, filling with defaults", () => {
+  it("starts empty, ranks by count decayed over time, and fills with defaultFrequents", () => {
     vi.useFakeTimers({ now: 0 });
-    const store = createFrequencyStore();
-    expect(store.top(2)).toEqual(["1f44d", "2764-fe0f"]);
+    expect(createFrequencyStore().top(2)).toEqual([]);
+    const store = createFrequencyStore({ defaultFrequents: { "1f44d": { count: 0, lastUsed: 0 } } });
+    expect(store.top(2)).toEqual(["1f44d"]);
     ["old", "old", "old"].forEach(store.pick);
     vi.setSystemTime(42 * DAY);
     store.pick("new");
@@ -51,7 +52,7 @@ describe("frequency store", () => {
     createFrequencyStore().pick("1f525");
     expect(createFrequencyStore().top(1)).toEqual(["1f525"]);
     const deferred = createFrequencyStore({ deferStorage: true });
-    expect(deferred.top(1)).toEqual(["1f44d"]);
+    expect(deferred.top(1)).toEqual([]);
     deferred.subscribe(() => {});
     expect(deferred.top(1)).toEqual(["1f525"]);
   });

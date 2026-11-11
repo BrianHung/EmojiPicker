@@ -245,7 +245,7 @@ For any other editor, `useEmojiSuggestions({ trigger })` takes a trigger of `{ q
 
 ### Showing a reaction row {#tapback}
 
-`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. This is a picker's quick-reaction row, as in a tapback. For the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button.
+`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. `reactions={5}` shows the five most frequently used; before the first pick the row is empty and `Panel` shows in its place, unless `defaultFrequents` on `EmojiProvider` seeds the history. This is a picker's quick-reaction row, as in a tapback. For the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button.
 
 With `value`, the items toggle. Pressing an item that is off fires `onValueChange`, then `onSelect`; pressing one that is on fires only `onValueChange`. A pick in `Panel` fires `onSelect` even when the emoji is already in the row, so make your update idempotent.
 

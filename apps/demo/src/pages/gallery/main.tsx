@@ -4,6 +4,7 @@ import { EmojiProvider } from "emoji-components";
 import { SiteShell, useRenderer } from "@/components/site/shell";
 import { GalleryPage } from "./gallery";
 import "@/globals.css";
+import { siteFrequents } from "@/lib/frequents";
 
 function Gallery() {
   const renderer = useRenderer();
@@ -15,7 +16,7 @@ function Gallery() {
           Pickers, popovers, reaction rows, and shortcode typeahead in the style of each app. The code imports this site's style modules, so use it as a reference. To copy a component, start from the registry on the home page.
         </p>
       </div>
-      <EmojiProvider data={enUrl} renderer={renderer}>
+      <EmojiProvider data={enUrl} renderer={renderer} defaultFrequents={siteFrequents}>
         <GalleryPage />
       </EmojiProvider>
     </main>

@@ -12,6 +12,7 @@ import { useTiptapEmojiSuggestions } from "@/hooks/use-emoji-tiptap";
 import { EmojiNode, emojiAttrs, emojiContent } from "@/components/tiptap/emoji-node";
 import { DiscordEmojiMenu } from "./menu";
 import { Avatar, EmojiText, ld, MobileFrame, PickerSheet, SceneFrame, ScenePicker, toggleReaction, useCompact, useFontStylesheet, useLongPress, type Reaction } from "@/styles/scene-kit";
+import { siteFrequents } from "@/lib/frequents";
 
 
 const C = {
@@ -60,7 +61,7 @@ export function DiscordScene() {
   useFontStylesheet("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap");
   const { ref, compact } = useCompact();
   return (
-    <EmojiProvider data={enUrl} renderer="image">
+    <EmojiProvider data={enUrl} renderer="image" defaultFrequents={siteFrequents}>
       <div ref={ref} className="w-full">
         {compact ? (
           <MobileFrame label="Discord style channel" appStyle={discord} style={{ background: C.chat, color: C.text, fontFamily: FONT }}>

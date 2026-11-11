@@ -64,6 +64,8 @@ describe("Reactions", () => {
 
   it("shows the most frequently used emoji without a provider above Root", async () => {
     vi.stubGlobal("fetch", async () => new Response(JSON.stringify(en)));
+    const recent = { count: 1, lastUsed: Date.now() };
+    localStorage.setItem("emoji-components:frequents", JSON.stringify({ "1f44d": recent, "2764-fe0f": recent, "1f525": recent }));
     const root = createTestRoot(document.body.appendChild(document.createElement("div")));
     await React.act(async () =>
       root.render(
