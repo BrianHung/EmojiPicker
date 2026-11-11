@@ -33,8 +33,6 @@ export function dataLocale(locale: string): string {
 export const localeData = (locale: string, { shortcodes = "iamcal", baseUrl = `${DATA_CDN}@${typeof __DATA_VERSION__ === "string" ? __DATA_VERSION__ : "latest"}/data` }: { shortcodes?: ShortcodeSet; baseUrl?: string } = {}) =>
   `${baseUrl}/${dataLocale(locale)}/${shortcodes}.json`;
 
-export const DEFAULT_DATA_URL = localeData("en");
-
 export const TWEMOJI_BASE_URL = `https://cdn.jsdelivr.net/gh/jdecked/twemoji@${config.twemoji}/assets/svg/`;
 export const TWEMOJI_EMOJI_VERSION = 17;
 

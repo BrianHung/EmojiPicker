@@ -122,6 +122,19 @@ describe("store locale", () => {
     expect(mixed.labels().resultCount(1234)).toBe("1,234 results");
   });
 
+  it("loads the locale's dataset when no data is given, and another when the locale changes", async () => {
+    const urls: string[] = [];
+    vi.stubGlobal("fetch", async (url: string) => {
+      urls.push(url);
+      return new Response(JSON.stringify({ ...dataset, locale: url.split("/").at(-2) }));
+    });
+    const store = createEmojiStore({ locale: "ja-JP" });
+    await store.load();
+    store.setOptions({ locale: "pt-BR" });
+    await store.load();
+    expect(urls.map((u) => u.split("/").slice(-2).join("/"))).toEqual(["ja/iamcal.json", "pt/iamcal.json"]);
+  });
+
   it("puts the emoji used most first among equal shortcode matches", async () => {
     const store = createEmojiStore({ data: dataset, frequents: { "1f389": { count: 2, lastUsed: Date.now() } } });
     await store.load();

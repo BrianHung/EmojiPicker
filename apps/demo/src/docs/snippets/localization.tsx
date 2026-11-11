@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useTranslation } from "react-i18next";
-import { EmojiProvider, localeData, type EmojiLabels } from "emoji-components";
+import { EmojiProvider, type EmojiLabels } from "emoji-components";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const { t, i18n } = useTranslation("emoji");
@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     [t],
   );
   return (
-    <EmojiProvider data={localeData(i18n.language, { shortcodes: "cldr" })} locale={i18n.language} labels={labels}>
+    <EmojiProvider locale={i18n.language} labels={labels}>
       {children}
     </EmojiProvider>
   );

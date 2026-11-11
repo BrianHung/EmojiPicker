@@ -16,3 +16,4 @@ Fixes from first-install testing.
 - `@emoji-components/data` builds in `prepack` instead of `prepare`.
 - A cell may draw outside its box, such as a highlight or focus ring that extends past the cell, instead of being clipped.
 - `localeData` resolves a BCP 47 tag to the nearest dataset folder (`en-US` → `en`, `zh-TW` → `zh-hant`, `es-419` → `es-mx`), including with `baseUrl`.
+- Without `data`, `EmojiProvider` loads the dataset for its `locale` instead of English.

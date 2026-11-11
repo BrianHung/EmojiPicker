@@ -3,7 +3,7 @@ import { controllable, createChangeDetails, type ChangeDetails } from "./change"
 import { customRecords, loadCustomEmojis, uniqueById, type CustomEmoji, type CustomEmojiSource } from "./custom";
 import { createFrequencyStore, persisted, readOnFirstSubscribe, type FrequencyStore, type Frequents, type FrequentsChangeDetails } from "./frequents";
 import { localizeLabels, type EmojiLabels } from "./labels";
-import { DEFAULT_DATA_URL } from "./platform";
+import { localeData } from "./platform";
 import { cached, createStore, fetchJson, memo, toError } from "./reactive";
 import type { CompletionOrder, SearchIndex, ShortcodeCompletion } from "./search/search-index";
 import { indexFor, isThenable, lexicalSearch, type EmojiSearch, type SearchHit } from "./search/search";
@@ -126,7 +126,9 @@ const inline = ({ data, customEmojis }: Source): Raw | null => (typeof data === 
 
 // A loader or list written inline is new every render: loaders count as the same source, lists by their contents
 const customKey = (source: CustomEmojiSource | undefined) => (typeof source === "function" ? "" : JSON.stringify(source ?? []));
-const sameData = (a: Source, b: Source) => a.data === b.data || (typeof a.data === "function" && typeof b.data === "function" && a.locale === b.locale);
+// Without data, the locale's dataset
+const dataOf = ({ data, locale }: Source) => data ?? localeData(locale ?? "en");
+const sameData = (a: Source, b: Source) => dataOf(a) === dataOf(b) || (typeof a.data === "function" && typeof b.data === "function" && a.locale === b.locale);
 const sameSource = (a: Source, b: Source) => sameData(a, b) && (a.customEmojis === b.customEmojis || customKey(a.customEmojis) === customKey(b.customEmojis));
 const sameItems = <T>(a: readonly T[], b: readonly T[]) => a.length === b.length && a.every((x, i) => x === b[i]);
 
@@ -206,7 +208,7 @@ export function createEmojiStore({
       const current = (controller = new AbortController());
       const { signal } = current;
       // A failed custom emoji loader runs again; the dataset it loaded with is kept
-      const dataset = raw ? Promise.resolve(raw[0]) : resolve(config.data ?? DEFAULT_DATA_URL, signal).then(toDataset);
+      const dataset = raw ? Promise.resolve(raw[0]) : resolve(dataOf(config), signal).then(toDataset);
       const pending = Promise.all([dataset, loadCustomEmojis(config.customEmojis, signal)]).then(
         (next) => {
           if (controller === current) publish(next);
