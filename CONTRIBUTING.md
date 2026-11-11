@@ -85,7 +85,7 @@ Changes to a published package come with a changeset (`npm run changeset`). The 
 
 The [Release workflow](.github/workflows/release.yml) runs only by hand, with a `mode` input:
 
-- `version` opens or updates the "Version packages" PR (`npm run version-packages`), committed by `github-actions[bot]`.
+- `version` opens or updates the "Version packages" PR (`npm run version-packages`: versions, changelogs, the lockfile, and the site's `/r/` pins), committed by `github-actions[bot]`.
 - `publish`, from `main`, requires a successful CI run on the commit, runs the `check`, `font`, `smoke`, and `onboarding` groups of `.github/release-steps.mjs`, then runs `changeset publish` through `changesets/action/publish`. It publishes only versions that are not on npm yet, pushes a tag per package, and creates a GitHub Release per package from its changelog, marked as a prerelease when the version has a `-`. It authenticates with npm trusted publishing (OIDC): no npm token, and provenance is attached automatically.
 
 The workflow's PRs, and the Upstream workflow's, are opened with `GITHUB_TOKEN`, so CI does not run on them. Run `npm run release:check` locally before you merge, or give the workflows a personal access token or a GitHub App token.
