@@ -2,7 +2,9 @@
 
 <img alt="Emoji picker in light and dark mode" src="https://raw.githubusercontent.com/BrianHung/emoji-components/main/.github/assets/picker.svg" width="680">
 
-Unstyled, composable emoji components for React: a virtualized picker, reaction rows, and shortcode suggestions, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
+Unstyled, composable emoji picker for React.
+
+A virtualized grid, reaction rows, and shortcode suggestions, built on [React Aria](https://react-spectrum.adobe.com/react-aria/).
 
 ## Installation
 
