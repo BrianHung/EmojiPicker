@@ -85,6 +85,24 @@ for (const name of ["Base UI", "React Aria", "Floating UI"])
     await expect(trigger).toBeFocused();
   });
 
+test("composer: the menu follows the query when the textarea itself scrolls, and hides once the query scrolls out", async ({ page }) => {
+  const field = page.getByRole("region", { name: "Composer" }).getByLabel("Message");
+  const menu = page.getByRole("listbox", { name: "Emoji suggestions" });
+  await field.evaluate((el) => Object.assign(el.style, { height: "80px", overflow: "auto" }));
+  await field.click();
+  await page.keyboard.type("1\n2\n3\n4\n5\n6\n7 :tada");
+  await expect(menu).toBeVisible();
+  const top = (await menu.boundingBox())!.y;
+  const scrolled = await field.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop -= 8;
+    return before - el.scrollTop;
+  });
+  await expect.poll(async () => (await menu.boundingBox())?.y).toBe(top + scrolled);
+  await field.evaluate((el) => (el.scrollTop = 0));
+  await expect(menu).toBeHidden();
+});
+
 test("popover item with content and finalFocus: the given parts render, focus starts in the list, and a pick returns focus to the field", async ({ page }) => {
   await page.getByRole("button", { name: "Insert emoji" }).click();
   const popup = page.getByRole("dialog");
