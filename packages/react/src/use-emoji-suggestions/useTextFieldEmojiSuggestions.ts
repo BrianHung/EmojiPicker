@@ -3,34 +3,41 @@
 import * as React from "react";
 import { InputRange } from "dom-input-range";
 import { findShortcodeTrigger } from "@emoji-components/core";
-import { useEmojiSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions } from "./useEmojiSuggestions";
+import { useSuggestions, type UseEmojiSuggestionsReturnValue, type UseEmojiSuggestionsOptions } from "./useEmojiSuggestions";
 
 type TextFieldElement = HTMLInputElement | HTMLTextAreaElement;
 type Match = { query: string; from: number; to: number };
 
 const EVENTS = ["selectionchange", "click", "keyup", "focus"];
 
-export function useTextFieldEmojiSuggestions(ref: React.RefObject<TextFieldElement | null>, options?: UseEmojiSuggestionsOptions): UseEmojiSuggestionsReturnValue {
+// The field is `ref`, or the element that spreads getInputProps()
+export function useTextFieldEmojiSuggestions(options: Omit<UseEmojiSuggestionsOptions, "trigger" | "element"> = {}, ref?: React.RefObject<TextFieldElement | null>): UseEmojiSuggestionsReturnValue {
   const [match, setMatch] = React.useState<Match | null>(null);
-  const suggestions = useEmojiSuggestions(
-    match && {
-      query: match.query,
-      // A controlled field re-renders inside its input event, before the match syncs to the new value
-      anchor: () => {
-        const el = ref.current;
-        return el ? new InputRange(el, Math.min(match.from, el.value.length), Math.min(match.to, el.value.length)).getBoundingClientRect() : null;
-      },
-      replace(text) {
-        ref.current?.setSelectionRange(match.from, match.to);
-        document.execCommand("insertText", false, `${text} `);
+  const own = React.useRef<HTMLElement | null>(null);
+  const field = () => (ref?.current ?? own.current) as TextFieldElement | null;
+  const suggestions = useSuggestions(
+    {
+      ...options,
+      element: field,
+      trigger: match && {
+        query: match.query,
+        // A controlled field re-renders inside its input event, before the match syncs to the new value
+        anchor: () => {
+          const el = field();
+          return el ? new InputRange(el, Math.min(match.from, el.value.length), Math.min(match.to, el.value.length)).getBoundingClientRect() : null;
+        },
+        replace(text) {
+          field()?.setSelectionRange(match.from, match.to);
+          document.execCommand("insertText", false, `${text} `);
+        },
       },
     },
-    options,
-    () => ref.current,
+    own,
+    false,
   );
   const { onKeyDown } = suggestions;
   React.useEffect(() => {
-    const el = ref.current;
+    const el = (ref?.current ?? own.current) as TextFieldElement | null;
     if (!el) return;
     const matchAt = (to: number | null) => {
       const found = to == null ? null : findShortcodeTrigger(el.value.slice(0, to));

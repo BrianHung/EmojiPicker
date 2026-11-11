@@ -4,7 +4,7 @@ import { Emoji, useTextFieldEmojiSuggestions } from "emoji-components";
 
 export function ShortcodeSuggestions() {
   const ref = React.useRef<HTMLInputElement>(null);
-  const menu = useTextFieldEmojiSuggestions(ref, { limit: 6 });
+  const menu = useTextFieldEmojiSuggestions({ limit: 6 }, ref);
   const { refs, floatingStyles, context } = useFloating({
     open: menu.open,
     onOpenChange: (open) => open || menu.dismiss(),

@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
+import type { UseEmojiPickerReactionsReturnValue } from "./utils/useEmojiPickerReactions";
 
-export type EmojiPickerReactionsContext = { shown: readonly string[]; pressed: ReadonlySet<string> | null; press(unified: string, event: Event): void };
+export type EmojiPickerReactionsContext = UseEmojiPickerReactionsReturnValue;
 export const EmojiPickerReactionsContext = React.createContext<EmojiPickerReactionsContext | null>(null);
 
 export function useEmojiPickerReactionsContext(part: string) {

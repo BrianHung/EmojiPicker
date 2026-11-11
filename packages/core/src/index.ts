@@ -18,5 +18,5 @@ export { findShortcodeTrigger, isComposingKey } from "./shortcodes";
 export { createEmojiSuggestions } from "./suggestions";
 export type { EmojiSuggestionsStore, EmojiSuggestionsOptions, EmojiTrigger, KeyLike } from "./suggestions";
 export { createEmojiPicker } from "./picker/picker";
-export type { CollapsedCategoriesChangeDetails, EmojiPickerStore, EmojiPickerOptions, EmojiPickerSnapshot, HighlightChangeDetails, QueryChangeDetails } from "./picker/picker";
+export type { CollapsedCategoriesChangeDetails, EmojiPickerStore, EmojiPickerOptions, EmojiPickerSnapshot, HighlightChangeDetails, QueryChangeDetails, ReactionsOpenChangeDetails, ValueChangeDetails } from "./picker/picker";
 export type { Category, CategoryOption, EmojiItem, EmojiSection, SearchResultsMode } from "./picker/sections";

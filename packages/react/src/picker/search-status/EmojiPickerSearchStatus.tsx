@@ -5,7 +5,7 @@ import { renderElement } from "../../internals/renderElement";
 import { SLOTS } from "../../internals/slots";
 import type { EmojiComponentsPartElementProps } from "../../internals/types";
 import { useLayoutEffect } from "../../utils/useLayoutEffect";
-import { useResultCount } from "../root/utils/useEmojiPickerSearch";
+import { useEmojiPickerSearch } from "../root/utils/useEmojiPickerSearch";
 import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 
 export type EmojiPickerSearchStatusState = { resultCount: number | null };
@@ -14,7 +14,7 @@ export type EmojiPickerSearchStatusProps = EmojiComponentsPartElementProps<Emoji
 // Base UI's Combobox.Status: the result count's live region, for placing and styling it; without one, Root renders a visually hidden one
 export const EmojiPickerSearchStatus = React.forwardRef<HTMLDivElement, EmojiPickerSearchStatusProps>(function EmojiPickerSearchStatus({ children, ...props }, ref) {
   const picker = useEmojiPickerRootContext("EmojiPicker.SearchStatus");
-  const resultCount = useResultCount(picker.state);
+  const { resultCount } = useEmojiPickerSearch();
   const register = picker.registerStatus;
   useLayoutEffect(() => register(), [register]);
   const state: EmojiPickerSearchStatusState = { resultCount };

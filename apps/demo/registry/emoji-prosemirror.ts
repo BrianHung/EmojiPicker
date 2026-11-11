@@ -5,7 +5,7 @@ import { createEmojiSuggestions, findShortcodeTrigger, type EmojiStore, type Sho
 type Node = EditorState["doc"];
 
 export type ProseMirrorEmojiSuggestionsOptions = Pick<EmojiSuggestionsOptions, "id" | "limit" | "matchBy" | "order" | "columns" | "onSelect"> & {
-  insert?: "emoji" | "shortcode";
+  insertAs?: "emoji" | "shortcode";
   content?: (text: string, suggestion: ShortcodeCompletion, schema: EditorState["schema"]) => string | Node | Node["content"] | readonly Node[];
 };
 
@@ -18,7 +18,7 @@ function matchIn({ selection: { $from, empty } }: EditorState): Match | null {
 
 const keyOf = (match: Match | null) => (match ? `${match.from}:${match.query}` : "");
 
-export function emojiSuggestions(store: EmojiStore, { insert = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiSuggestionsOptions = {}) {
+export function emojiSuggestions(store: EmojiStore, { insertAs = "emoji", content = (text) => `${text} `, ...options }: ProseMirrorEmojiSuggestionsOptions = {}) {
   let mounted: EditorView | null = null;
   const current = () => {
     const view = mounted;
@@ -32,7 +32,7 @@ export function emojiSuggestions(store: EmojiStore, { insert = "emoji", content 
       if (!at) return;
       const { view, match } = at;
       const { tr, schema } = view.state;
-      const replacement = content(suggestions.textFor(suggestion, insert), suggestion, schema);
+      const replacement = content(suggestions.textFor(suggestion, insertAs), suggestion, schema);
       view.dispatch((typeof replacement === "string" ? tr.insertText(replacement, match.from, match.to) : tr.replaceWith(match.from, match.to, replacement)).scrollIntoView());
       view.focus();
     },

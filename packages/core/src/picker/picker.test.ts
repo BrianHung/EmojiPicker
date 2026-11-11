@@ -92,4 +92,27 @@ describe("createEmojiPicker", () => {
     expect(setCategoryCollapsed(one, "flags", true)).toBe(one);
     expect(setCategoryCollapsed(one, "objects", false)).toBe(one);
   });
+
+  it("keeps the value when onSelect cancels the pick", async () => {
+    const picker = createEmojiPicker(await ready(), { frequent: false, defaultValue: null, onSelect: (_, details) => details.cancel() });
+    expect(picker.pick("1f600")).toMatchObject({ unified: "1f600" });
+    expect(picker.getSnapshot().value).toBeNull();
+    expect(createEmojiPicker(await ready()).getSnapshot().value).toBeUndefined();
+  });
+
+  it("reopens the reaction row on a pick and clears the query", async () => {
+    const reasons: string[] = [];
+    const picker = createEmojiPicker(await ready(), { frequent: false, reactions: ["1f44d"], defaultReactionsOpen: false, defaultQuery: "rocket", onReactionsOpenChange: (_, d) => reasons.push(d.reason) });
+    picker.pick("1f680");
+    expect(picker.getSnapshot()).toMatchObject({ reactionsOpen: true, query: "" });
+    expect(reasons).toEqual(["item-press"]);
+  });
+
+  it("leaves a controlled value and reactionsOpen to their owner", async () => {
+    const asked: unknown[] = [];
+    const picker = createEmojiPicker(await ready(), { value: "1f600", onValueChange: (v) => asked.push(v), reactions: ["1f44d"], reactionsOpen: false, onReactionsOpenChange: (o) => asked.push(o) });
+    picker.pick("1f680");
+    expect(asked).toEqual(["1f680", true]);
+    expect(picker.getSnapshot()).toMatchObject({ value: "1f600", reactionsOpen: false });
+  });
 });

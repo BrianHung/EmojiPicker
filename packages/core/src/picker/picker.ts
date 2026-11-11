@@ -25,6 +25,8 @@ import {
 export type HighlightChangeDetails = ChangeDetails<"keyboard" | "pointer" | "imperative-action" | "none"> & { key: string | null };
 export type QueryChangeDetails = ChangeDetails<"input-change" | "clear-press" | "escape-key" | "imperative-action" | "none">;
 export type CollapsedCategoriesChangeDetails = ChangeDetails<"trigger-press" | "none">;
+export type ValueChangeDetails = ChangeDetails<"item-press" | "imperative-action">;
+export type ReactionsOpenChangeDetails = ChangeDetails<"trigger-press" | "item-press" | "escape-key" | "none">;
 
 export interface ChangeSource<D extends ChangeDetails> {
   reason?: D["reason"];
@@ -49,8 +51,16 @@ export interface EmojiPickerOptions<Icon = unknown> {
   highlight?: string | null;
   defaultHighlight?: string | null;
   onHighlightChange?: (unified: string | null, details: HighlightChangeDetails) => void;
+  // Passing only onValueChange tracks the value too, as in Base UI's Select
+  value?: string | null;
+  defaultValue?: string | null;
+  onValueChange?: (unified: string | null, details: ValueChangeDetails) => void;
+  onSelect?: (selection: EmojiSelection, details: ValueChangeDetails) => void;
   disableVariations?: boolean;
   reactions?: readonly string[] | number;
+  reactionsOpen?: boolean;
+  defaultReactionsOpen?: boolean;
+  onReactionsOpenChange?: (open: boolean, details: ReactionsOpenChangeDetails) => void;
 }
 
 // "virtual": a search field or keyboard target keeps DOM focus and the grid follows aria-activedescendant
@@ -74,6 +84,9 @@ export interface EmojiPickerSnapshot<Icon = unknown> {
   activeSection: string | null;
   variations: string | null;
   reactions: readonly string[] | undefined;
+  reactionsOpen: boolean;
+  // undefined while the picker doesn't track a value
+  value: string | null | undefined;
   // The grid's one tab stop and the pressed cell, by item id
   tabStop: string | null;
   pressed: string | null;
@@ -95,6 +108,10 @@ export interface EmojiPickerStore<Icon = unknown> {
   setTabStop(id: string | null): void;
   press(id: string | null): void;
   choose(id?: string | null): EmojiSelection | undefined;
+  // choose, then onSelect, the value, and the reaction row, which reopens after a pick from the full picker
+  pick(id?: string | null, source?: ChangeSource<ValueChangeDetails>): EmojiSelection | undefined;
+  // Opening clears the query, as a closed popover's search resets
+  setReactionsOpen(open: boolean, source?: ChangeSource<ReactionsOpenChangeDetails>): ReactionsOpenChangeDetails | undefined;
   openVariations(id: string | null): boolean;
   closeVariations(): void;
   // A search field or keyboard target that drives the grid with virtual focus
@@ -120,6 +137,8 @@ type Ui = {
   held: Held | null;
   tabStop: string | null;
   pressed: string | null;
+  value: string | null;
+  reactionsOpen: boolean;
 };
 
 type Input<Icon> = { options: EmojiPickerOptions<Icon>; draft: readonly string[] | null };
@@ -180,6 +199,8 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       held: null,
       tabStop: null,
       pressed: null,
+      value: options.defaultValue ?? null,
+      reactionsOpen: options.defaultReactionsOpen ?? true,
     },
     patch,
   );
@@ -193,6 +214,7 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
     search.setQuery(query, limit);
   };
   let kept: Retained = { query: "" };
+  const tracks = (current: EmojiPickerOptions<Icon>) => options.defaultValue !== undefined || current.value !== undefined || current.onValueChange !== undefined;
 
   const items = memo(itemFactory);
   const categoriesOf = memo((groupNames: readonly string[], customGroups: ReadonlyMap<string, string | undefined>, categories: readonly CategoryOption<Icon>[] | undefined, labels: EmojiLabels) =>
@@ -266,6 +288,8 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
         activeSection: state.activeSection,
         variations: state.variations,
         reactions: state.held ? state.held.reactions : reactionsOf(current.reactions),
+        reactionsOpen: Boolean(current.reactions) && (current.reactionsOpen ?? state.reactionsOpen),
+        value: tracks(current) ? (current.value === undefined ? state.value : current.value) : undefined,
         tabStop: state.tabStop,
         pressed: state.pressed,
       });
@@ -306,10 +330,24 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
     write: (key) => set({ highlighted: key }),
   });
 
+  const value = controllable<string | null, ValueChangeDetails>({
+    controlled: () => opts().value,
+    own: () => ui.getSnapshot().value,
+    onChange: () => opts().onValueChange,
+    write: (unified) => set({ value: unified }),
+  });
+
+  const reactionsOpen = controllable<boolean, ReactionsOpenChangeDetails>({
+    controlled: () => opts().reactionsOpen,
+    own: () => ui.getSnapshot().reactionsOpen,
+    onChange: () => opts().onReactionsOpenChange,
+    write: (open) => set({ reactionsOpen: open }),
+  });
+
   const changeCollapsed = (id: string, value: boolean | undefined, { reason = "none", event }: ChangeSource<CollapsedCategoriesChangeDetails>) =>
     void collapsed.set(setCategoryCollapsed(collapsed.value(), id, value), createChangeDetails(reason, event));
 
-  return {
+  const self: EmojiPickerStore<Icon> = {
     getSnapshot,
     subscribe: subscribeAll(ui.subscribe, input.subscribe, store.subscribe, (listener) => store.frequents.subscribe(() => !ui.getSnapshot().held && listener()), search.subscribe),
     setOptions(next) {
@@ -345,6 +383,21 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
     setTabStop: (id) => set({ tabStop: id }),
     press: (id) => set({ pressed: id }),
     choose: (id = getSnapshot().highlighted) => (id == null ? undefined : store.select(findItem(getSnapshot().sections, id)?.unified ?? id)),
+    pick(id, { reason = "item-press", event } = {}) {
+      const selection = self.choose(id);
+      if (!selection) return undefined;
+      const details = createChangeDetails(reason, event);
+      opts().onSelect?.(selection, details);
+      if (details.isCanceled) return selection;
+      if (tracks(opts())) value.set(selection.unified, createChangeDetails(reason, event));
+      if (opts().reactions && !reactionsOpen.value()) self.setReactionsOpen(true, { reason: "item-press", event });
+      return selection;
+    },
+    setReactionsOpen(open, { reason = "none", event } = {}) {
+      const details = reactionsOpen.set(open, createChangeDetails(reason, event));
+      if (open && details && !details.isCanceled) self.setQuery("");
+      return details;
+    },
     openVariations(id) {
       const record = findItem(getSnapshot().sections, id)?.record;
       if (!record?.tones.length || record.imageUrl || opts().disableVariations) return false;
@@ -363,4 +416,5 @@ export function createEmojiPicker<Icon = unknown>(store: EmojiStore, options: Em
       set({ held: value ? { frequent: store.frequent(frequentCount()), reactions: reactionsOf(opts().reactions) } : null });
     },
   };
+  return self;
 }

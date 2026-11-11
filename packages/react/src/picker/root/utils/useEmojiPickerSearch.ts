@@ -1,13 +1,15 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import type { EmojiPickerStore } from "@emoji-components/core";
 import { useStoreSnapshot } from "../../../provider/EmojiProviderContext";
 import { useStore } from "../../../utils/useStore";
 import { useEmojiPickerRootContext } from "../EmojiPickerRootContext";
 
-export interface EmojiPickerSearchSummary {
+export interface UseEmojiPickerSearchReturnValue {
   query: string;
+  setQuery(query: string): void;
+  clear(): void;
   resultCount: number | null;
 }
 
@@ -18,7 +20,8 @@ export function useResultCount(state: EmojiPickerStore<React.ReactNode>): number
   return ready ? count : null;
 }
 
-export function useEmojiPickerSearch(): EmojiPickerSearchSummary {
-  const { state } = useEmojiPickerRootContext("useEmojiPickerSearch");
-  return { query: useStore(state, (s) => s.query), resultCount: useResultCount(state) };
+export function useEmojiPickerSearch(): UseEmojiPickerSearchReturnValue {
+  const { state, actions } = useEmojiPickerRootContext("useEmojiPickerSearch");
+  const setQuery = React.useCallback((query: string) => void state.setQuery(query, { reason: "imperative-action" }), [state]);
+  return { query: useStore(state, (s) => s.query), setQuery, clear: actions.clearSearch, resultCount: useResultCount(state) };
 }

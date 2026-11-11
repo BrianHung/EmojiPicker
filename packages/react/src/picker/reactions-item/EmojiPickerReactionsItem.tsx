@@ -2,13 +2,9 @@
 
 import * as React from "react";
 import { mergeProps } from "react-aria/mergeProps";
-import { withoutTone } from "@emoji-components/core";
-import { nameWithTone } from "@emoji-components/core/internal";
-import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { Glyph, useOverridden } from "../../emoji/Glyph";
 import { useStoreSnapshot } from "../../provider/EmojiProviderContext";
-import { mergePartProps } from "../../internals/mergePartProps";
-import { useInteraction, type Clickable } from "../../internals/useInteraction";
+import { useInteraction } from "../../internals/useInteraction";
 import { flag, renderElement, resolve } from "../../internals/renderElement";
 import type { EmojiComponentsInteractionState, EmojiComponentsPartElementProps } from "../../internals/types";
 import { SLOTS } from "../../internals/slots";
@@ -23,21 +19,16 @@ export type EmojiPickerReactionsItemProps = EmojiComponentsPartElementProps<Emoj
 };
 
 export const EmojiPickerReactionsItem = React.forwardRef<HTMLButtonElement, EmojiPickerReactionsItemProps>(function EmojiPickerReactionsItem({ emoji: unified, style, children, ...props }, ref) {
-  const picker = useEmojiPickerRootContext("EmojiPicker.ReactionsItem");
   const row = useEmojiPickerReactionsContext("Item");
   const record = useStoreSnapshot((s) => s.get(unified));
   const overridden = useOverridden(unified, record);
-  const selected = Boolean(row.pressed?.has(withoutTone(unified)));
-  const { onClick, ...own } = mergePartProps<Clickable>(props, { onClick: (e: React.MouseEvent) => row.press(unified, e.nativeEvent) });
+  const { onClick, ...item } = row.getItemProps(unified, { ...props, ref });
+  const selected = Boolean(item["aria-pressed"]);
   const interaction = useInteraction({ onClick });
   return renderElement(
     "button",
     {
-      type: "button",
-      "aria-label": nameWithTone(record?.name ?? unified, unified, picker.labels.withSkinTone),
-      "aria-pressed": row.pressed ? selected : undefined,
-      ...mergeProps(own, interaction.props),
-      ref,
+      ...mergeProps(item, interaction.props),
       "data-slot": SLOTS.reactionsItem,
       [EmojiPickerReactionsItemDataAttributes.unified]: unified,
       [EmojiPickerReactionsItemDataAttributes.overridden]: flag(overridden),

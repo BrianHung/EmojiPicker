@@ -206,7 +206,7 @@ function SlackMessage({ message, onToggle, compact }: { message: Message; onTogg
 const FORMATS = [[BoldIcon, ItalicIcon, StrikethroughIcon], [LinkIcon], [ListOrderedIcon, ListIcon], [CodeIcon, SquareCodeIcon]];
 
 function SlackComposer({ onSend, compact }: { onSend: (text: string) => void; compact: boolean }) {
-  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insert: "shortcode", onSelect: copyEmoji });
+  const { value, setText, insertAtCaret, emoji, inputProps } = useEmojiTextField<HTMLTextAreaElement>({ ...slackEmojiOptions, insertAs: "shortcode", onSelect: copyEmoji });
   const submit = () => {
     const text = value.trim();
     if (text) onSend(text);

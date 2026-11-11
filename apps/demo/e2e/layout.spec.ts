@@ -163,7 +163,7 @@ async function pressUntilFocused(page: Page, target: Locator, key: string) {
   await expect(target).toBeFocused();
 }
 
-test("swapped parts: a shadcn menu on useEmojiSkinTone and Base UI tabs on useEmojiPickerCategoryNavigation, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
+test("swapped parts: a shadcn menu on useEmojiSkinTone and Base UI tabs on useEmojiPickerCategories, named by useEmojiLabels, drive the grid and expand a collapsed section", async ({ page }) => {
   await visit(page, "/e2e/pages/seams/");
   const root = page.locator(slot("root"));
   const search = root.locator(slot("searchInput"));

@@ -51,8 +51,8 @@ type GridElementProps = React.HTMLAttributes<HTMLElement> & { ref: React.RefCall
 // The grid's behavior for both the List and useEmojiPickerGrid: the highlight, keys, pointer, virtual focus, and React Aria's listbox
 export function useGridController({ sections, geometry, orientation, listRef, ref, request, ...aria }: ControllerOptions) {
   const picker = useEmojiPickerRootContext("EmojiPicker.List");
-  const { labels, value, state: core } = picker;
-  const { searching, virtual, pending } = useStore(core, (s) => ({ searching: s.searching, virtual: s.focus === "virtual", pending: s.pending }), shallowEqual);
+  const { labels, state: core } = picker;
+  const { searching, virtual, pending, value } = useStore(core, (s) => ({ searching: s.searching, virtual: s.focus === "virtual", pending: s.pending, value: s.value }), shallowEqual);
   const { navigation } = geometry;
   const collection = React.useMemo(() => new EmojiCollection(sections), [sections]);
   const selected = React.useMemo(() => (value == null ? undefined : sections.flatMap((s) => s.items.filter((i) => withoutTone(i.unified) === withoutTone(value)).map((i) => i.id))), [value, sections]);
@@ -77,7 +77,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
   };
   const pick = (key: Key, event?: Event, reason?: EmojiPickerRootChangeEventReason) => {
     const it = latest.current.collection.emoji(key);
-    if (it) picker.pick(it.unified, event, reason);
+    if (it) core.pick(it.unified, { reason, event });
     return Boolean(it);
   };
   const focusInput = () => picker.searchInput.current;
@@ -163,7 +163,7 @@ export function useGridController({ sections, geometry, orientation, listRef, re
         style: latest.current.geometry.overlay(key, cellElement(key)),
         pick(unified, event) {
           variations.close(true);
-          picker.pick(unified, event);
+          core.pick(unified, { event });
         },
         close: variations.close,
       };
