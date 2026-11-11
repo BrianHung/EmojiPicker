@@ -85,7 +85,7 @@ export function createSearchIndex(records: readonly EmojiRecord[], { locale, tok
         for (let j = lowerBound(keys, word); j < keys.length; j++) {
           const key = keys[j]!;
           if (prefix ? !key.startsWith(word) : key !== word) break;
-          const score = kinds[j]! * 2 + (key === word ? 0 : 1);
+          const score = kinds[j]! + (key === word ? 0 : 3);
           const id = ids[j]!;
           const prev = next.get(id);
           if (prev === undefined || score < prev) next.set(id, score);
