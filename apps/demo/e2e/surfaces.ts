@@ -31,7 +31,7 @@ const button = (scope: Page | Locator, name: string) => scope.getByRole("button"
 export const card = (page: Page, title?: string) => (title ? page.locator('[data-slot="card"]').filter({ has: page.getByRole("heading", { name: title, exact: true }) }) : page.locator('[data-slot="card"]').first());
 export const example = (page: Page, id: string) => page.locator(`section:has(> h3#${id})`);
 export const preview = (page: Page, id: string) => example(page, id).locator("div.relative").first();
-export const homePopover = (page: Page) => button(example(page, "popover"), "Open emoji picker");
+export const homePopover = (page: Page) => example(page, "popover").getByRole("button", { name: /^Open emoji picker/ });
 const hero = (page: Page) => page.getByRole("tablist", { name: "App" }).locator("xpath=../following-sibling::div[1]");
 
 type Extra = Partial<Omit<Surface, "id" | "path" | "kind" | "open">>;

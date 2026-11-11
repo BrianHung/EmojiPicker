@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { type EmojiFont, loadEmojiFont } from "@/lib/emoji-fonts";
 import { cn } from "@/lib/utils";
 import { SiteHeader } from "./header";
+import { siteFrequents } from "@/lib/frequents";
 
 export type Theme = "light" | "dark";
 
@@ -77,7 +78,7 @@ export function SiteShell({ page, width = "column", children }: { page: Page; wi
   return (
     <TooltipProvider>
       <RendererContext.Provider value={providerRenderer}>
-        <EmojiProvider data={enUrl} renderer={providerRenderer}>
+        <EmojiProvider data={enUrl} renderer={providerRenderer} defaultFrequents={siteFrequents}>
           <div className="flex min-h-svh flex-col">
             <SiteHeader page={page} theme={theme} onTheme={toggleTheme} renderer={renderer} onRenderer={setRenderer} />
             <div className="flex-1">{children}</div>

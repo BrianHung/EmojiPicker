@@ -7,19 +7,19 @@
     {
       "key": "ArrowDown",
       "focus": "searchbox \"Type to search for an emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
-      "scrolled": 0
-    },
-    {
-      "key": "ArrowRight",
-      "focus": "searchbox \"Type to search for an emoji\"",
       "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
       "key": "ArrowRight",
       "focus": "searchbox \"Type to search for an emoji\"",
-      "highlight": "option \"thumbs down\" 1f44e",
+      "highlight": "option \"red heart\" 2764-fe0f",
+      "scrolled": 0
+    },
+    {
+      "key": "ArrowRight",
+      "focus": "searchbox \"Type to search for an emoji\"",
+      "highlight": "option \"face with tears of joy\" 1f602",
       "scrolled": 0
     },
     {
@@ -37,7 +37,7 @@
     {
       "key": "ArrowUp",
       "focus": "searchbox \"Type to search for an emoji\"",
-      "highlight": "option \"thumbs up\" 1f44d",
+      "highlight": "option \"red heart\" 2764-fe0f",
       "scrolled": 0
     },
     {
@@ -49,7 +49,7 @@
     {
       "key": "Home",
       "focus": "searchbox \"Type to search for an emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     },
     {
@@ -61,15 +61,15 @@
     {
       "key": "PageUp",
       "focus": "searchbox \"Type to search for an emoji\"",
-      "highlight": "option \"red heart\" 2764-fe0f",
+      "highlight": "option \"thumbs up\" 1f44d",
       "scrolled": 0
     }
   ],
   "enter": {
     "open": false,
-    "focus": "button \"Open emoji picker\"",
+    "focus": "button \"Open emoji picker, thumbs up\"",
     "focusReturned": true,
-    "toast": "❤️ :heart: red heart"
+    "toast": "👍 :+1: thumbs up"
   },
   "escape": [
     {

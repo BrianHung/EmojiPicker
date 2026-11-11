@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import * as React from "react";
+import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { createTestRoot, render } from "../../../test/render";
 import { en } from "../../../test/en";
@@ -31,8 +32,41 @@ describe("Reactions", () => {
     expect(host.querySelector('[data-slot="emoji-picker-reactions-expand"]')).not.toBeNull();
   });
 
+  it("renders the row and its Expand on the server, before the data loads", () => {
+    const html = renderToString(
+      <EmojiProvider data={async () => en}>
+        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]}>
+          <EmojiPicker.Reactions />
+          <EmojiPicker.Panel />
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    expect(html.match(/data-slot="emoji-picker-reactions-(item|expand)"/g)).toEqual(["emoji-picker-reactions-item", "emoji-picker-reactions-item", "emoji-picker-reactions-expand"].map((s) => `data-slot="${s}"`));
+  });
+
+  it("returns focus to Expand when a pick collapses the Panel", () => {
+    const actions = React.createRef<EmojiPicker.Root.Actions>();
+    const host = render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} actionsRef={actions}>
+          <EmojiPicker.Reactions />
+          <EmojiPicker.Panel>
+            <input aria-label="Search" />
+          </EmojiPicker.Panel>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    const expand = host.querySelector<HTMLButtonElement>('[data-slot="emoji-picker-reactions-expand"]')!;
+    React.act(() => expand.click());
+    React.act(() => host.querySelector("input")!.focus());
+    React.act(() => void actions.current!.pick("1f680"));
+    expect(document.activeElement?.getAttribute("data-slot")).toBe("emoji-picker-reactions-expand");
+  });
+
   it("shows the most frequently used emoji without a provider above Root", async () => {
     vi.stubGlobal("fetch", async () => new Response(JSON.stringify(en)));
+    const recent = { count: 1, lastUsed: Date.now() };
+    localStorage.setItem("emoji-components:frequents", JSON.stringify({ "1f44d": recent, "2764-fe0f": recent, "1f525": recent }));
     const root = createTestRoot(document.body.appendChild(document.createElement("div")));
     await React.act(async () =>
       root.render(
@@ -65,15 +99,28 @@ describe("Reactions", () => {
     expect(picked).toEqual(["2764-fe0f"]);
   });
 
-  it("toggles a custom row built on useEmojiPickerReactions", () => {
+  it("toggles a custom row built on useEmojiPickerReactions, a toolbar the arrows move through", () => {
     function Row() {
-      const { reactions, getItemProps } = useEmojiPickerReactions({ defaultValue: ["1f44d"] });
-      return reactions.map((emoji) => <button key={emoji} {...getItemProps(emoji)} />);
+      const { reactions, getToolbarProps, getItemProps } = useEmojiPickerReactions({ defaultValue: ["1f44d"] });
+      return (
+        <div {...getToolbarProps()}>
+          {reactions.map((emoji) => (
+            <button key={emoji} {...getItemProps(emoji)} />
+          ))}
+        </div>
+      );
     }
     const host = mount(<Row />);
-    const pressed = () => [...host.querySelectorAll("button")].map((b) => b.getAttribute("aria-pressed"));
+    const buttons = host.querySelectorAll("button");
+    const pressed = () => [...buttons].map((b) => b.getAttribute("aria-pressed"));
     expect(pressed()).toEqual(["true", "false"]);
-    React.act(() => host.querySelectorAll("button")[1]!.click());
+    React.act(() => buttons[1]!.click());
     expect(pressed()).toEqual(["true", "true"]);
+    expect(host.querySelector('[role="toolbar"]')?.getAttribute("aria-label")).toBe("Reactions");
+    React.act(() => buttons[0]!.focus());
+    React.act(() => void buttons[0]!.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(buttons[1]);
+    React.act(() => void buttons[1]!.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true, cancelable: true })));
+    expect(document.activeElement).toBe(buttons[0]);
   });
 });

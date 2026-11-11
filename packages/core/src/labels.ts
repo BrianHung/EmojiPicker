@@ -55,7 +55,7 @@ export const defaultLabels: EmojiLabels = {
   suggestions: "Emoji suggestions",
   reactions: "Reactions",
   expandReactions: "More emoji",
-  previewCaption: "What's your mood?",
+  previewCaption: "Pick an emoji",
   skinTone: "Skin tone",
   skinTones: ["Default skin tone", "Light skin tone", "Medium-light skin tone", "Medium skin tone", "Medium-dark skin tone", "Dark skin tone"],
   withSkinTone: (name, tone) => `${name}: ${TONE_SUFFIXES[tone - 1]}`,

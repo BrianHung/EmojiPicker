@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { autoUpdate, flip, FloatingPortal, offset, type Placement, shift, size, useDismiss, useFloating, useInteractions } from "@floating-ui/react";
+import { autoUpdate, flip, FloatingPortal, getOverflowAncestors, hide, offset, type Placement, shift, size, useDismiss, useFloating, useInteractions } from "@floating-ui/react";
 import { Emoji, useEmojiStore, type UseEmojiSuggestionsReturnValue } from "emoji-components";
 import { cn } from "@/lib/utils";
 
@@ -9,18 +9,30 @@ type EmojiSuggestionsProps = UseEmojiSuggestionsReturnValue & { placement?: Plac
 
 function EmojiSuggestions({ open, anchor, dismiss, suggestions, getListProps, getOptionProps, placement = "bottom-start", className }: EmojiSuggestionsProps) {
   const store = useEmojiStore();
-  const { refs, floatingStyles, context } = useFloating({
+  // Floating UI watches the field's scrolling ancestors, not the field: a textarea or editor that scrolls itself moves the query too
+  const field = anchor.contextElement;
+  const { refs, floatingStyles, context, middlewareData } = useFloating({
     open,
     onOpenChange: (next) => next || dismiss(),
     placement,
     strategy: "fixed",
     transform: false,
-    whileElementsMounted: autoUpdate,
+    whileElementsMounted: (reference, floating, update) => {
+      const stop = autoUpdate(reference, floating, update);
+      // A frame later: a text field's query is measured on a clone that syncs its scroll each frame
+      const onScroll = () => requestAnimationFrame(update);
+      field?.addEventListener("scroll", onScroll, { passive: true });
+      return () => {
+        stop();
+        field?.removeEventListener("scroll", onScroll);
+      };
+    },
     middleware: [
       offset(6),
       flip({ padding: 8, crossAxis: false }),
       shift({ padding: 8 }),
       size({ padding: 8, apply: ({ availableHeight, elements }) => void elements.floating.style.setProperty("max-height", `${Math.floor(availableHeight)}px`) }),
+      hide({ boundary: field ? [field, ...getOverflowAncestors(field).filter((el): el is Element => el instanceof Element && el !== el.ownerDocument.body)] : "clippingAncestors" }),
     ],
   });
   // The field keeps focus and handles the keys, Escape included
@@ -31,7 +43,7 @@ function EmojiSuggestions({ open, anchor, dismiss, suggestions, getListProps, ge
     <FloatingPortal>
       <ul
         ref={refs.setFloating}
-        style={floatingStyles}
+        style={{ ...floatingStyles, visibility: middlewareData.hide?.referenceHidden ? "hidden" : undefined }}
         {...getListProps(getFloatingProps())}
         data-slot="emoji-suggestions"
         className={cn("z-50 w-64 overflow-y-auto rounded-lg border border-border bg-popover p-1 text-sm text-popover-foreground shadow-lg", className)}

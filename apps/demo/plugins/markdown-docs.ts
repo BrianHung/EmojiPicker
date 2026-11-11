@@ -133,6 +133,25 @@ export const ROUTES: Record<string, Route> = {
 
 > ${docs().description.replace(/\.$/, "")} (emoji-components).
 
+## Quick start
+
+\`npm i emoji-components\`
+
+\`\`\`tsx
+"use client";
+
+import { EmojiPicker } from "emoji-components";
+
+export default function Page() {
+  return (
+    <EmojiPicker.Root onSelect={(selection) => console.log(selection.emoji)}>
+      <EmojiPicker.Search />
+      <EmojiPicker.Viewport style={{ height: 320 }} />
+    </EmojiPicker.Root>
+  );
+}
+\`\`\`
+
 ## Docs
 
 - [Emoji Components](${SITE}/docs.md): installation, usage, anatomy, examples, and the API reference of every part.

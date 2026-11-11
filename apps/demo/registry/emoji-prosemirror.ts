@@ -31,9 +31,11 @@ export function emojiSuggestions(store: EmojiStore, { insertAs = "emoji", conten
       const at = current();
       if (!at) return;
       const { view, match } = at;
-      const { tr, schema } = view.state;
+      const { tr, schema, selection } = view.state;
+      const { parent, parentOffset } = selection.$from;
       const replacement = content(suggestions.textFor(suggestion, insertAs), suggestion, schema);
-      view.dispatch((typeof replacement === "string" ? tr.insertText(replacement, match.from, match.to) : tr.replaceWith(match.from, match.to, replacement)).scrollIntoView());
+      const text = typeof replacement === "string" && /\s/.test(parent.textBetween(parentOffset, Math.min(parentOffset + 1, parent.content.size))) ? replacement.trimEnd() : replacement;
+      view.dispatch((typeof text === "string" ? tr.insertText(text, match.from, match.to) : tr.replaceWith(match.from, match.to, text)).scrollIntoView());
       view.focus();
     },
   });

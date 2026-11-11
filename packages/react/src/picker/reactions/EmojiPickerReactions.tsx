@@ -1,14 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useEmojiPickerRootContext } from "../root/EmojiPickerRootContext";
 import { SLOTS } from "../../internals/slots";
 import { EmojiPickerReactionsExpand } from "../reactions-expand/EmojiPickerReactionsExpand";
 import { EmojiPickerReactionsItems } from "../reactions-items/EmojiPickerReactionsItems";
 import { EmojiPickerReactionsContext } from "../reactions/EmojiPickerReactionsContext";
-import { BUTTONS } from "../../utils/dom";
 import type { EmojiComponentsHandlers, EmojiComponentsPartProps } from "../../internals/types";
-import { ToolbarPart } from "../utils/ToolbarPart";
+import { renderElement } from "../../internals/renderElement";
 import type { EmojiPickerOrientation } from "../utils/types";
 import { type EmojiPickerReactionsChangeEventDetails, type EmojiPickerReactionsChangeEventReason, type UseEmojiPickerReactionsOptions, useEmojiPickerReactions } from "./utils/useEmojiPickerReactions";
 
@@ -24,18 +22,7 @@ export type EmojiPickerReactionsProps = EmojiComponentsHandlers<Omit<React.HTMLA
 
 const HORIZONTAL: EmojiPickerReactionsState = { orientation: "horizontal" };
 
-// Once focus is inside, the pointer carries it from button to button
-const POINTER: React.HTMLAttributes<HTMLElement> = {
-  onPointerOver(event) {
-    const button = event.target instanceof Element ? event.target.closest<HTMLElement>(BUTTONS) : null;
-    const active = document.activeElement;
-    const row = event.currentTarget;
-    if (button && button !== active && row.contains(button) && active instanceof HTMLElement && row.contains(active)) button.focus({ preventScroll: true });
-  },
-};
-
 export const EmojiPickerReactions = React.forwardRef<HTMLDivElement, EmojiPickerReactionsProps>(function EmojiPickerReactions({ value, defaultValue, onValueChange, children, ...props }, ref) {
-  const { labels } = useEmojiPickerRootContext("EmojiPicker.Reactions");
   const reactions = useEmojiPickerReactions({ value, defaultValue, onValueChange });
   if (!reactions.open) return null;
   const content =
@@ -48,11 +35,7 @@ export const EmojiPickerReactions = React.forwardRef<HTMLDivElement, EmojiPicker
       children
     );
   return (
-    <EmojiPickerReactionsContext.Provider value={reactions}>
-      <ToolbarPart aria-label={labels.reactions} {...props} data-slot={SLOTS.reactions} toolbarRef={ref} orientation="horizontal" state={HORIZONTAL} handlers={POINTER}>
-        {content}
-      </ToolbarPart>
-    </EmojiPickerReactionsContext.Provider>
+    <EmojiPickerReactionsContext.Provider value={reactions}>{renderElement("div", { ...reactions.getToolbarProps({ ...props, ref }), "data-slot": SLOTS.reactions, children: content }, HORIZONTAL)}</EmojiPickerReactionsContext.Provider>
   );
 });
 

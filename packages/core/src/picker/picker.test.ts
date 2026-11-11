@@ -108,6 +108,26 @@ describe("createEmojiPicker", () => {
     expect(reasons).toEqual(["item-press"]);
   });
 
+  it("shows the picker in place of an empty frequents row, and the row after the first pick", async () => {
+    const picker = createEmojiPicker(await ready(), { reactions: 3 });
+    expect(picker.getSnapshot()).toMatchObject({ reactions: [], reactionsOpen: false });
+    picker.pick("1f680");
+    expect(picker.getSnapshot()).toMatchObject({ reactions: ["1f680"], reactionsOpen: true });
+  });
+
+  it("holds a frequents row while held, and always shows an owner's reactions", async () => {
+    const store = await ready();
+    store.frequents.pick("1f44d");
+    const picker = createEmojiPicker(store, { reactions: 2 });
+    picker.hold(true);
+    store.frequents.pick("1f680");
+    store.frequents.pick("1f680");
+    expect(picker.getSnapshot().reactions).toEqual(["1f44d"]);
+    picker.setOptions({ reactions: ["1f389", "1f44d"] });
+    picker.setOptions({ reactions: ["1f389", "1f680"] });
+    expect(picker.getSnapshot().reactions).toEqual(["1f389", "1f680"]);
+  });
+
   it("leaves a controlled value and reactionsOpen to their owner", async () => {
     const asked: unknown[] = [];
     const picker = createEmojiPicker(await ready(), { value: "1f600", onValueChange: (v) => asked.push(v), reactions: ["1f44d"], reactionsOpen: false, onReactionsOpenChange: (o) => asked.push(o) });

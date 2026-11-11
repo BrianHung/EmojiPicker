@@ -10,7 +10,7 @@ export function PopoverPicker({ onSelect }: { onSelect: (selection: EmojiSelecti
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
-        aria-label="Open emoji picker"
+        aria-label={picked ? `Open emoji picker, ${picked.name}` : "Open emoji picker"}
         className="inline-flex h-10 items-center gap-2 rounded-full border border-border px-4 text-sm transition-transform outline-none hover:bg-accent focus-visible:ring-2 focus-visible:ring-muted-foreground focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.97] data-popup-open:bg-accent"
       >
         <span className="text-base">{picked?.emoji || "🙂"}</span> Add reaction

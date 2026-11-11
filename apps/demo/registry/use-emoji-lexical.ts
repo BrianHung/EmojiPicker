@@ -44,7 +44,7 @@ export function useLexicalEmojiSuggestions({ node, ...options }: LexicalEmojiSug
           if (!$isTextNode(target)) return;
           const selection = target.select(match.from, match.to);
           if (node) selection.insertNodes([node(text, s)]);
-          else selection.insertText(`${text} `);
+          else selection.insertText(/\s/.test(target.getTextContent().charAt(match.to)) ? text : `${text} `);
         }),
     },
   });

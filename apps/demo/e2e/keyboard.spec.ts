@@ -288,3 +288,14 @@ test("examples/virtualizer", async ({ page }) => {
   await page.keyboard.press("Enter");
   await expect(page.locator('[data-slot="toast"]').last()).toContainText(name);
 });
+
+test("the registry picker draws a focus ring on the skin tone button and the focused emoji", async ({ page }) => {
+  await visit(page, "/");
+  await surface("home/popover").trigger!(page).click();
+  for (const name of ["Default skin tone", "thumbs up"]) {
+    await page.keyboard.press("Tab");
+    const focused = page.locator(":focus");
+    await expect(focused).toHaveAttribute("aria-label", name);
+    expect(await focused.evaluate((el) => getComputedStyle(el).outlineStyle)).toBe("solid");
+  }
+});

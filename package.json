@@ -16,6 +16,7 @@
     "dev": "npm run dev -w demo",
     "build": "npm run build -w @emoji-components/core && npm run build -w emoji-components && npm run build -w demo",
     "build:font": "npm run build -w @emoji-components/twemoji-font",
+    "prepare": "npm run build -w @emoji-components/data",
     "test": "npm test -w @emoji-components/core -w emoji-components",
     "test:e2e": "npm run test:e2e -w demo",
     "test:a11y": "npm run test:a11y -w demo",
