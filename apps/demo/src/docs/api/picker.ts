@@ -6,8 +6,8 @@ const interaction = "hovered, focused, focusVisible, pressed, disabled";
 export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
-    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel() }) => void',
-    description: "Runs when the user selects an emoji. A selection shows the reaction row again; close an enclosing popover here. `details.cancel()` keeps the value and the expanded picker as they are.",
+    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), isCanceled }) => void',
+    description: "Runs when the user selects an emoji. A selection shows the reaction row again; close an enclosing popover here, unless `details.isCanceled`. `details.cancel()` keeps the value and the expanded picker as they are.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {

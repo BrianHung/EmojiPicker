@@ -1,7 +1,10 @@
 type Rows = [string, string][];
 
 export const pickerHooks: Rows = [
-  ["useEmojiPickerSearch()", "`{ query, setQuery, clear, resultCount }`. `resultCount` is `null` while not searching. Used by `SearchStatus`. For your own input, pass it to `SearchInput`'s `render`."],
+  [
+    "useEmojiPickerSearch()",
+    "`{ query, setQuery, clear, resultCount }`. `resultCount` is `null` while not searching. Used by `SearchStatus`. To draw the field with your own input component, pass it as `SearchInput`'s `render`, such as `render={<Input />}`.",
+  ],
   ["useEmojiPickerCategories()", "`{ categories, activeCategory, jumpToCategory(id), collapsed, isCollapsed(id), setCollapsed(id, collapsed), toggleCollapsed(id), getItemProps(id, props) }`. Used by `CategoryNav` and `CategoryNavTab`."],
   [
     "useEmojiPickerHighlight()",

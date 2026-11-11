@@ -217,6 +217,22 @@ Each part takes `className` and `style` as a value or a function of its state. `
 
 <Demo name="inline-picker" />
 
+To draw the search field with your own input component, pass it as `SearchInput`'s `render`:
+
+```tsx title="search.tsx"
+import { EmojiPicker } from "emoji-components";
+import { Input } from "@/components/ui/input";
+
+export function Search() {
+  return (
+    <EmojiPicker.Search>
+      <EmojiPicker.SearchInput autoFocus render={<Input />} />
+      <EmojiPicker.SearchClear />
+    </EmojiPicker.Search>
+  );
+}
+```
+
 ### Opening in a popover {#popover}
 
 Use your own popover; the registry items above are one each for shadcn/ui, React Aria, and Floating UI. The glue is three things:
@@ -225,19 +241,54 @@ Use your own popover; the registry items above are one each for shadcn/ui, React
 - Pass `emojiPickerInitialFocus(popup)` as the popover's initial focus: the field with `autoFocus`, else the list.
 - Leave Escape to the picker: the first Escape clears the query, and an Escape with nothing to clear goes on to the popover. Radix listens for Escape before the picker does, so it closes on the first one.
 
-The popover returns focus to its trigger.
+The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field, and every item takes `picker` for its own parts in place of the search, list, and footer.
+
+```tsx title="composer-picker.tsx"
+"use client";
+
+import * as React from "react";
+import { EmojiPickerPopover } from "@/components/ui/emoji-picker-popover";
+
+export function ComposerPicker() {
+  const field = React.useRef<HTMLTextAreaElement>(null);
+  return (
+    <>
+      <textarea ref={field} aria-label="Message" />
+      <EmojiPickerPopover
+        aria-label="Insert emoji"
+        finalFocus={field}
+        onSelect={(selection) => {
+          const el = field.current;
+          el?.setRangeText(selection.emoji || `:${selection.shortcode}:`, el.selectionStart, el.selectionEnd, "end");
+        }}
+      >
+        🙂
+      </EmojiPickerPopover>
+    </>
+  );
+}
+```
 
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" />
 
 ### Suggesting shortcodes {#headless}
 
-`useTextFieldEmojiSuggestions(options, ref)` finds the `:query` before the caret in an `<input>` or `<textarea>` and handles the field's keys. It returns the matches and prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. For an editor, see the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+For an `<input>` or `<textarea>`, use `useTextFieldEmojiSuggestions(options, ref)`. It finds the `:query` before the caret, handles the field's keys, and returns the matches, prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. A pick replaces the query with the emoji and a space, unless whitespace already follows.
+
+For any other editor, `useEmojiSuggestions({ trigger })` takes a trigger of `{ query, anchor, replace }`: the query without its colon, a function that returns the query's `DOMRect`, and a function that writes the chosen text. The space after it is up to `replace`. See the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
+
+- A query starts at a colon after the start of the text, a space, an opening bracket, or a CJK character; not right after a letter, a digit, or an emoji.
+- An ASCII query needs two characters, such as `:sm`; one CJK character is enough.
+- `insert(selection)` writes a selection made elsewhere, such as in a picker opened from the menu, in place of the query.
+- Keys: `useTextFieldEmojiSuggestions` handles them on the field before React's handlers and stops the ones it takes, so an Enter that picks never reaches your Enter-to-send. An editor that routes keys through its own commands calls the returned `onKeyDown(event)` first: for a key the menu takes it prevents the default and returns `true`, so a later handler can check `event.defaultPrevented`. An `onKeyDown` you pass to `getInputProps` runs before the menu's; check `open` there.
 
 <Demo name="autocomplete" className="min-h-[360px] items-end pb-14 sm:pb-14" />
 
 ### Showing a reaction row {#tapback}
 
-`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again.
+`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. This is a picker's quick-reaction row, as in a tapback. For the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button.
+
+With `value`, the items toggle. Pressing an item that is off fires `onValueChange`, then `onSelect`; pressing one that is on fires only `onValueChange`. A pick in `Panel` fires `onSelect` even when the emoji is already in the row, so make your update idempotent.
 
 ```tsx title="reactions.tsx"
 <EmojiPicker.Root reactions={5}>
@@ -258,9 +309,11 @@ The popover returns focus to its trigger.
 
 `localeData(locale, { shortcodes: "cldr" })` gives the URL of a dataset with shortcodes in the locale's language, and `labels` replaces the strings.
 
+The datasets are the files of `@emoji-components/data`, which `Root` and `localeData` load from jsDelivr. To serve them yourself, for offline use or a strict CSP, install the package and bundle one, as in `data={async () => (await import("@emoji-components/data/en/iamcal.json")).default}`, or copy its `data` folder to your site and pass `localeData(locale, { baseUrl: "/emoji-data" })`.
+
 <Code title="app/providers.tsx" code={localization} />
 
-More examples, such as replacing the search and drawing emoji as images, are in [Examples](/examples/).
+More examples, such as semantic search, custom emoji, and other virtualizers, are in [Examples](/examples/).
 
 </Section>
 
