@@ -18,9 +18,9 @@ The packages are in prerelease (`1.0.0-alpha`), and the API can change between a
 
 <TabPanel label="Command">
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker.json" />
 
-The command adds `components/ui/emoji-picker.tsx`, installs `emoji-components`, and adds the emoji font stack and the picker's background, radius, and shadow tokens to your CSS.
+The command adds `components/ui/emoji-picker.tsx`, installs `emoji-components`, and imports `emoji-components/tokens.css` and `emoji-components/shadcn.css` into your CSS, so the picker follows your shadcn/ui theme.
 
 ```tsx title="App.tsx"
 import { EmojiPicker, EmojiPickerContent, EmojiPickerFooter, EmojiPickerSearch } from "@/components/ui/emoji-picker";
@@ -50,7 +50,7 @@ Each component in the file wraps one part and takes its props: `EmojiPicker` tak
 
 The package renders no popovers. To open the picker from your shadcn/ui popover (Base UI or Radix base), add the popover item too:
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-picker-popover.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
 
 With the React Aria base (`--base aria`), add `emoji-picker-popover-react-aria.json` instead; on Floating UI, without a shadcn/ui popover, add `emoji-picker-popover-floating-ui.json`. Each writes `components/ui/emoji-picker-popover.tsx`, which you own.
 
@@ -70,13 +70,13 @@ export function AddReaction({ onAdd }: { onAdd: (unified: string) => void }) {
 
 For shortcode suggestions in a text field, add the suggestions item, a menu at the caret on Floating UI, and pass it what `useTextFieldEmojiSuggestions` returns:
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-suggestions.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-suggestions.json" />
 
 <Code title="composer.tsx" code={composer} />
 
 For the reactions under a message, `emoji-reaction-bar.json` adds `EmojiReactionBar`, React Aria's `useToolbar` around your own buttons: the arrow keys, Home, and End move focus between them, and once focus is inside, the pointer carries it.
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-reaction-bar.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-reaction-bar.json" />
 
 ```tsx title="reactions.tsx"
 "use client";

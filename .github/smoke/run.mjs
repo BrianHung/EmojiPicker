@@ -65,10 +65,14 @@ const item = JSON.parse(readFileSync(join(packed, "emoji-picker.json"), "utf8"))
 item.dependencies = item.dependencies.map((dep) => dep.replace(/^(emoji-components|@emoji-components\/[^@]+)@.+$/, "$1"));
 writeFileSync(join(tmp, "emoji-picker.json"), JSON.stringify(item));
 run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
-// shadcn's css block has no top-level @font-face, so the item nests it in :root and shadcn hoists it into the layer
-if (!/@font-face\s*\{\s*font-family: "Emoji Components Apple"/.test(readFileSync(join(shadcn, "src/index.css"), "utf8"))) throw new Error("shadcn add did not write the Apple emoji @font-face");
+// Adding an item again (the popover items depend on the picker) must not duplicate its CSS
+run("npx", ["shadcn", "add", join(tmp, "emoji-picker.json"), "--yes", "--overwrite", "--silent"], shadcn);
+const css = readFileSync(join(shadcn, "src/index.css"), "utf8");
+for (const file of ["tokens.css", "shadcn.css"]) if (css.split(`@import "emoji-components/${file}"`).length !== 2) throw new Error(`shadcn add should import emoji-components/${file} once`);
 run("npx", ["tsc", "-p", "."], shadcn);
 run("npx", ["vite", "build", "--logLevel", "error"], shadcn);
+const built = readdirSync(join(shadcn, "dist/assets")).filter((f) => f.endsWith(".css")).map((f) => readFileSync(join(shadcn, "dist/assets", f), "utf8")).join("");
+assert.equal(built.match(/@font-face\{font-family:"?Emoji Components Apple/g)?.length, 1, "the built CSS declares the Apple emoji @font-face once");
 
 rmSync(tmp, { recursive: true, force: true });
 console.log("smoke passed");
