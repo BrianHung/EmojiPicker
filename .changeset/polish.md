@@ -14,3 +14,5 @@ Fixes from first-install testing.
 - A pick that collapses `Panel` returns focus to `ReactionsExpand`. The reaction row renders from its codes before the data loads.
 - `useEmojiPickerHighlight()` returns `unified`, the highlighted code with its skin tone.
 - `@emoji-components/data` builds in `prepack` instead of `prepare`.
+- A cell may draw outside its box, such as a highlight or focus ring that extends past the cell, instead of being clipped.
+- `localeData` resolves a BCP 47 tag to the nearest dataset folder (`en-US` → `en`, `zh-TW` → `zh-hant`, `es-419` → `es-mx`), including with `baseUrl`.
