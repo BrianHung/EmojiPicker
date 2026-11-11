@@ -5,9 +5,9 @@ import { Emoji, EmojiPicker as EmojiPickerPrimitive, useEmojiStatus } from "emoj
 import { cn } from "@/lib/utils";
 
 const button =
-  "flex shrink-0 items-center justify-center outline-none hover:bg-accent focus-visible:bg-accent focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary";
+  "flex shrink-0 items-center justify-center outline-hidden hover:bg-accent focus-visible:bg-accent focus-visible:outline-2 focus-visible:outline-solid focus-visible:-outline-offset-2 focus-visible:outline-primary";
 const reaction =
-  "flex size-10 items-center justify-center rounded-full text-[26px] outline-none transition-transform duration-150 ease-out focus-visible:bg-accent [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
+  "flex size-10 items-center justify-center rounded-full text-[26px] outline-hidden transition-transform duration-150 ease-out focus-visible:bg-accent [@media(hover:hover)_and_(pointer:fine)]:hover:scale-110 [@media(hover:hover)_and_(pointer:fine)]:hover:bg-accent active:not-disabled:scale-[0.97]";
 
 function EmojiPicker({ className, ...props }: EmojiPickerPrimitive.Root.Props) {
   return (
@@ -31,7 +31,7 @@ function EmojiPickerSearch({ className, ...props }: EmojiPickerPrimitive.SearchI
           <path d="m20 20-3.5-3.5" />
         </svg>
         <EmojiPickerPrimitive.SearchInput
-          className={cn("h-full w-full bg-transparent pr-8 pl-6 text-sm outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none", className)}
+          className={cn("h-full w-full bg-transparent pr-8 pl-6 text-sm outline-hidden placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:appearance-none", className)}
           {...props}
         />
         <EmojiPickerPrimitive.SearchClear className="absolute top-1/2 right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-muted-foreground hover:bg-accent hover:text-foreground">
@@ -72,7 +72,7 @@ function EmojiPickerContent({
 }: Omit<EmojiPickerPrimitive.Viewport.Props, "children"> & Pick<EmojiPickerPrimitive.List.Props, "renderEmptyState"> & { children?: EmojiPickerPrimitive.ListItems.Props["children"] }) {
   return (
     <EmojiPickerPrimitive.Viewport className={cn("relative min-h-0 flex-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]", className)} {...props}>
-      <EmojiPickerPrimitive.List className="outline-none" renderEmptyState={renderEmptyState}>
+      <EmojiPickerPrimitive.List className="outline-hidden" renderEmptyState={renderEmptyState}>
         {() => (
           <EmojiPickerPrimitive.ListSection>
             <EmojiPickerPrimitive.ListSectionTitle className="flex items-center bg-popover px-2 pt-2 pb-1 text-xs font-medium text-muted-foreground" />
@@ -88,7 +88,7 @@ function EmojiPickerCell({ className, ...props }: EmojiPickerPrimitive.ListCell.
   return (
     <EmojiPickerPrimitive.ListCell
       className={cn(
-        "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-none transition-colors focus-visible:bg-accent focus-visible:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground data-focus-visible:outline-2 data-focus-visible:-outline-offset-2 data-focus-visible:outline-primary forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px]",
+        "relative flex cursor-default items-center justify-center overflow-hidden rounded-md outline-hidden transition-colors focus-visible:bg-accent focus-visible:text-accent-foreground data-highlighted:bg-accent data-highlighted:text-accent-foreground data-focus-visible:outline-2 data-focus-visible:outline-solid data-focus-visible:-outline-offset-2 data-focus-visible:outline-primary forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline:2px_solid_Highlight] forced-colors:[&:is([data-highlighted],[data-focus-visible])]:[outline-offset:-2px]",
         className,
       )}
       {...props}
@@ -119,9 +119,9 @@ function EmojiPickerFooter({ className, ...props }: EmojiPickerPrimitive.Preview
       {({ emoji, unified }) =>
         emoji && unified ? (
           <>
-            <Emoji emoji={unified} aria-hidden className="text-lg" />
-            <span className="truncate font-medium">{emoji.name}</span>
-            {emoji.shortcodes[0] ? <code className="ml-auto shrink-0 text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
+            <Emoji emoji={unified} aria-hidden className="shrink-0 text-lg" />
+            <span className="min-w-0 truncate font-medium">{emoji.name}</span>
+            {emoji.shortcodes[0] ? <code className="ml-auto min-w-0 shrink-[1000] truncate text-muted-foreground">:{emoji.shortcodes[0]}:</code> : null}
           </>
         ) : (
           <span className="text-muted-foreground">Pick an emoji</span>
