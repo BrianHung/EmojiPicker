@@ -79,7 +79,7 @@ export function useEmojiPickerReactions({ value: valueProp, defaultValue, onValu
         // A disclosure for the Panel; Escape with no query collapses back to this row
         "aria-expanded": false,
         "aria-controls": row?.panelId,
-        ...mergePartProps<object>(props ?? {}, { onClick: (e: React.MouseEvent) => void state.setReactionsOpen(false, { reason: "trigger-press", event: e.nativeEvent }) }),
+        ...mergePartProps<object>(props ?? {}, { ref: row?.expand, onClick: (e: React.MouseEvent) => void state.setReactionsOpen(false, { reason: "trigger-press", event: e.nativeEvent }) }),
       }) as never,
   };
 }

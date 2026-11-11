@@ -174,11 +174,12 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   const list = React.useRef<ListHandle | null>(null);
   const searchInput = React.useRef<HTMLInputElement | null>(null);
   const panel = React.useRef<HTMLDivElement | null>(null);
+  const expand = React.useRef<HTMLElement | null>(null);
   const [items] = React.useState(() => new Map<string, HTMLElement>());
   const [panels, registerPanel] = useMounted();
   const listId = React.useId();
 
-  // Focus follows the part that hides: from the Panel to the reaction row, and from the row into the Panel
+  // Focus follows the part that hides: from the Panel back to the Expand button that opened it, and from the row into the Panel
   const shown = React.useRef(view.reactionsOpen);
   useLayoutEffect(() => {
     if (shown.current === view.reactionsOpen) return;
@@ -187,7 +188,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
     const lost = !active || active === document.body || !active.isConnected;
     if (view.reactionsOpen) {
       const first = [...items.values()].reduce<HTMLElement | null>((a, b) => (a && !(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? a : b), null);
-      if (lost || panel.current?.contains(active)) first?.focus({ preventScroll: true });
+      if (lost || panel.current?.contains(active)) (expand.current ?? first)?.focus({ preventScroll: true });
     } else if (lost) {
       if (searchInput.current) searchInput.current.focus({ preventScroll: true });
       else list.current?.focus();
@@ -246,7 +247,7 @@ const PickerRoot = React.forwardRef<HTMLElement, EmojiPickerRootProps>(function 
   );
   const panelId = React.useId();
   const reactionsContext = React.useMemo<ReactionsContextValue | null>(
-    () => (reactions ? { reactions: view.reactions ?? [], open: view.reactionsOpen, expandable: panels > 0, items, panel, panelId, registerPanel } : null),
+    () => (reactions ? { reactions: view.reactions ?? [], open: view.reactionsOpen, expandable: panels > 0, items, expand, panel, panelId, registerPanel } : null),
     [reactions, view.reactions, view.reactionsOpen, panels, items, registerPanel, panelId],
   );
 

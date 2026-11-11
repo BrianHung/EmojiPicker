@@ -31,6 +31,25 @@ describe("Reactions", () => {
     expect(host.querySelector('[data-slot="emoji-picker-reactions-expand"]')).not.toBeNull();
   });
 
+  it("returns focus to Expand when a pick collapses the Panel", () => {
+    const actions = React.createRef<EmojiPicker.Root.Actions>();
+    const host = render(
+      <EmojiProvider data={en} prepare={false}>
+        <EmojiPicker.Root reactions={["1f44d", "2764-fe0f"]} actionsRef={actions}>
+          <EmojiPicker.Reactions />
+          <EmojiPicker.Panel>
+            <input aria-label="Search" />
+          </EmojiPicker.Panel>
+        </EmojiPicker.Root>
+      </EmojiProvider>,
+    );
+    const expand = host.querySelector<HTMLButtonElement>('[data-slot="emoji-picker-reactions-expand"]')!;
+    React.act(() => expand.click());
+    React.act(() => host.querySelector("input")!.focus());
+    React.act(() => void actions.current!.pick("1f680"));
+    expect(document.activeElement?.getAttribute("data-slot")).toBe("emoji-picker-reactions-expand");
+  });
+
   it("shows the most frequently used emoji without a provider above Root", async () => {
     vi.stubGlobal("fetch", async () => new Response(JSON.stringify(en)));
     const root = createTestRoot(document.body.appendChild(document.createElement("div")));
