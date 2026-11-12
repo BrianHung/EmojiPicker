@@ -38,7 +38,7 @@ export default function App() {
 }
 ```
 
-Each component in the file wraps one part and takes its props: `EmojiPicker` takes `EmojiPicker.Root`'s, `EmojiPickerSearch` the `SearchInput`'s, and `EmojiPickerContent` the `Viewport`'s, with a function child for each cell, such as `{() => <EmojiPickerCell />}`. `EmojiPickerSkinTone`, `EmojiPickerEmpty`, `EmojiPickerReactions`, and `EmojiPickerPanel` style the rest. Its empty, loading, and error messages are plain strings in your copy, as in shadcn/ui's `CommandEmpty`. A popover, a suggestions menu, and a reaction bar are separate items, under [Examples](#popover).
+Each component wraps one part and takes its props. The file is yours to edit. A popover, a suggestions menu, and a reaction bar are separate items, under [Examples](#popover).
 
 </TabPanel>
 
@@ -92,7 +92,7 @@ The component uses Tailwind CSS v4, shadcn/ui's color classes, such as `bg-popov
 
 ## Usage
 
-Each part renders a sensible default with no children. The parts work without an `EmojiProvider` or CSS. `Root` loads the English dataset from jsDelivr, and `Viewport` needs a fixed height to virtualize the list. Add `EmojiProvider` to change the data, locale, search, renderer, labels, or custom emoji; without one, the parts share a default store. While you type, the first result is highlighted and focus stays in the search field, which points at the highlight with `aria-activedescendant` as the arrow keys move it.
+Each part renders a default with no children, and works without CSS. `Viewport` needs a height to virtualize the list.
 
 ```tsx title="app/page.tsx"
 "use client";
@@ -108,6 +108,8 @@ export default function Page() {
   );
 }
 ```
+
+`Root` loads the English dataset from jsDelivr. Wrap it in `EmojiProvider` to change the data, locale, search, labels, or custom emoji.
 
 </Section>
 
@@ -174,7 +176,7 @@ The package renders no popovers. For your shadcn/ui popover (Base UI or Radix ba
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-picker-popover.json" />
 
-With the React Aria base (`--base aria`), add `emoji-picker-popover-react-aria.json` instead; on Floating UI, without a shadcn/ui popover, add `emoji-picker-popover-floating-ui.json`. Each writes `components/ui/emoji-picker-popover.tsx`, which you own.
+For the React Aria base, add `emoji-picker-popover-react-aria.json` instead. Without shadcn/ui, add `emoji-picker-popover-floating-ui.json`.
 
 ```tsx title="add-reaction.tsx"
 "use client";
@@ -190,41 +192,40 @@ export function AddReaction({ onAdd }: { onAdd: (unified: string) => void }) {
 }
 ```
 
-For your own popover, the glue is three things:
+In your own popover:
 
-- Close the popover in `onSelect`, unless `details.isCanceled`.
-- Pass `emojiPickerInitialFocus(popup)` as the popover's initial focus: the field with `autoFocus`, else the list.
-- Leave Escape to the picker: the first Escape clears the query, and an Escape with nothing to clear goes on to the popover. Radix listens for Escape before the picker does, so it closes on the first one.
+- Close it in `onSelect`, unless `details.isCanceled`.
+- Pass `emojiPickerInitialFocus(popup)` as its initial focus.
+- Leave Escape to the picker. The first Escape clears the search; the next closes the popover.
 
-The popover returns focus to its trigger. The Base UI and Floating UI items take `finalFocus` to send it elsewhere, such as back to a message field, as in the composer under [Suggesting shortcodes](#headless). To change the parts inside the popover, edit your copy of the item.
+`finalFocus` returns focus somewhere other than the trigger, such as a message field.
 
 
 <Demo name="popover" className="min-h-[180px] flex-col gap-3" />
 
 ### Suggesting shortcodes {#headless}
 
-The suggestions item is a menu at the caret on Floating UI; pass it what `useTextFieldEmojiSuggestions` returns. The composer below also inserts from the [popover item](#popover) at the caret, and sends on Enter:
+Typing a colon and two letters, such as `:sm`, suggests emoji at the caret. The suggestions item is the menu:
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-suggestions.json" />
 
 <Code title="composer.tsx" code={composer} />
 
-For an `<input>` or `<textarea>`, use `useTextFieldEmojiSuggestions(options, ref)`. It finds the `:query` before the caret, handles the field's keys, and returns the matches, prop getters for your menu, and `anchor`, the query's box as a Floating UI virtual element, so positioning the menu is `refs.setPositionReference(anchor)`. A pick replaces the query with the emoji and a space, unless whitespace already follows.
+- `useTextFieldEmojiSuggestions(options, ref)` works with an `<input>` or `<textarea>`.
+- An Enter that picks a suggestion doesn't reach your own Enter handler.
+- For a rich text editor, pass the query yourself, as in the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples:
 
-For an editor that finds the query itself, `useEmojiSuggestions({ trigger })` takes a trigger of `{ query, anchor, replace }`: the query without its colon, a function that returns the query's `DOMRect`, and a function that writes the chosen text. The space after it is up to `replace`. Pass a new trigger as the text or the selection changes, or `null` when there is no query; it needs no stable identity. See the [Tiptap](/examples/tiptap/) and [Lexical](/examples/lexical/) examples.
-
-- A query starts at a colon after the start of the text, a space, an opening bracket, or a CJK character; not right after a letter, a digit, or an emoji.
-- An ASCII query needs two characters, such as `:sm`; one CJK character is enough.
-- `insert(selection)` writes a selection made elsewhere, such as in a picker opened from the menu, in place of the query.
-- Keys: `useTextFieldEmojiSuggestions` handles them on the field before React's handlers and stops the ones it takes, so an Enter that picks never reaches your Enter-to-send. An editor that routes keys through its own commands calls the returned `onKeyDown(event)` first: for a key the menu takes it prevents the default and returns `true`, so a later handler can check `event.defaultPrevented`. An `onKeyDown` you pass to `getInputProps` runs before the menu's; check `open` there.
+```tsx
+useEmojiSuggestions({
+  trigger: { query: "sm", anchor: () => queryRect, replace: (text) => insertText(text) }, // or null
+});
+```
 
 <Demo name="autocomplete" className="min-h-[360px] items-end pb-14 sm:pb-14" />
 
 ### Showing a reaction row {#tapback}
 
-`reactions` on `Root` shows a row of emoji in `Reactions` that expands into the picker in `Panel`. A selection in `Panel` shows the row again. `reactions={5}` shows the five most frequently used; before the first pick the row is empty and `Panel` shows in its place, unless `defaultFrequents` on `EmojiProvider` seeds the history. `Reactions` and `useEmojiPickerReactions` are a picker's quick-reaction row, as in a tapback; for the reactions under a message, with counts and who reacted, use the `emoji-reaction-bar` item with a picker popover for its add button. A server-rendered row that must not change on hydration needs an explicit `reactions` array, since the server can't read the history. The row shows `reactions` only: an emoji picked in `Panel` joins an explicit array when your app adds it. After a pick in `Panel`, focus returns to the Expand button. Size the expanded picker through `Root`, as in `data-reactions-open:h-auto`, not on `Panel`.
-
-With `value` on `Reactions` or `useEmojiPickerReactions`, an array of codes, the items toggle. Pressing an item that is off fires `onValueChange`, then `onSelect`; pressing one that is on fires only `onValueChange`. A pick in `Panel` fires `onSelect` even when the emoji is already in the row, so make your update idempotent. A reaction counts as a pick in Frequently used, as in Slack, and removing it doesn't undo that.
+A row of quick reactions, as in a tapback, that expands into the full picker.
 
 ```tsx title="reactions.tsx"
 <EmojiPicker.Root reactions={5}>
@@ -233,9 +234,12 @@ With `value` on `Reactions` or `useEmojiPickerReactions`, an array of codes, the
 </EmojiPicker.Root>
 ```
 
+- `reactions={5}` shows the five most frequently used emoji. Pass an array for a fixed row, or to render the row on the server.
+- `value` on `Reactions` makes the items toggle.
+
 <Demo name="tapback" className="min-h-[180px] items-start pt-[62px] sm:pt-[62px]" />
 
-With the registry component, here drawn as a pill until it expands:
+With the registry component, drawn as a pill until it expands:
 
 ```tsx title="reactions.tsx"
 <EmojiPicker
@@ -251,7 +255,7 @@ With the registry component, here drawn as a pill until it expands:
 </EmojiPicker>
 ```
 
-For the reactions under a message, `emoji-reaction-bar.json` adds `EmojiReactionBar`, React Aria's `useToolbar` around your own buttons: the arrow keys, Home, and End move focus between them, and once focus is inside, the pointer carries it.
+For the reactions under a message, with counts, the reaction bar item adds arrow-key navigation to your own buttons.
 
 <PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-reaction-bar.json" />
 
@@ -279,19 +283,24 @@ export function Reactions({ reactions, onToggle }: { reactions: Reaction[]; onTo
 
 ### Adding custom emoji {#custom-emoji}
 
-`customEmojis` on `EmojiProvider` takes a list or a loader, and each `group` becomes a section; to host a pack, see the [Custom emoji](/examples/custom-emoji/) example.
+`customEmojis` on `EmojiProvider` takes a list or a loader. Each `group` becomes a section. See the [Custom emoji](/examples/custom-emoji/) example.
 
 <Demo name="custom-emoji" className="flex-col gap-3" />
 
 ### Loading another locale {#data}
 
-`locale` on `EmojiProvider` loads that locale's emoji names and keywords, from the nearest dataset, such as `ja` for `ja-JP` and `zh-hant` for `zh-TW`, falling back to English. For shortcodes in the locale's language, pass `data={localeData(locale, { shortcodes: "cldr" })}`.
+`locale` on `EmojiProvider` loads emoji names and keywords in that language, falling back to English.
 
-No translated strings ship with the package. `labels` takes plain strings and functions, so any i18n library works; `EmojiLabels` lists the keys. With react-i18next:
+The interface strings are yours to translate. `labels` takes strings and functions, so any i18n library works. With react-i18next:
 
 <Code title="app/providers.tsx" code={localization} />
 
-The datasets are the files of `@emoji-components/data`, which `Root` and `localeData` load from jsDelivr. To serve them yourself, for offline use or a strict CSP, install the package and bundle one, as in `data={async () => (await import("@emoji-components/data/en/iamcal.json")).default}`, or copy its `data` folder to your site and pass `localeData(locale, { baseUrl: "/emoji-data" })`. A copy keeps the package's folder names, which `localeData` resolves the locale to.
+The data loads from jsDelivr. To serve it yourself, for offline use or a strict CSP, bundle a dataset or host the `@emoji-components/data` folder:
+
+```tsx
+<EmojiProvider data={async () => (await import("@emoji-components/data/en/iamcal.json")).default}>
+<EmojiProvider data={localeData(locale, { baseUrl: "/emoji-data" })}>
+```
 
 More examples, such as semantic search, custom emoji, and other virtualizers, are in [Examples](/examples/).
 
@@ -307,9 +316,9 @@ Every part forwards its ref, spreads other props onto its element, and takes the
 
 A handler you pass to a part runs before the part's own. Call `event.preventEmojiComponentsHandler()` to skip the part's handler.
 
-Each controllable state has three props, such as `query`, `defaultQuery`, and `onQueryChange(value, details)`. `details.cancel()` keeps the current state. Callbacks that Escape can trigger also have `details.allowPropagation()`, which lets the key event reach the page.
+Each controllable state has three props, such as `query`, `defaultQuery`, and `onQueryChange(value, details)`. `details.cancel()` keeps the current state.
 
-`EmojiPicker` is a namespace, as in Base UI, so a Server Component can render its parts. A function child can't come from a Server Component, so render parts that need one, such as `ListCell` inside `List`, in a Client Component.
+Server Components can render the parts. Parts that take a function child, such as `List`, need a Client Component.
 
 Shared types: `EmojiSelection`, `EmojiItem`, `EmojiRecord`, `CustomEmoji`, `CategoryOption`, `Dataset`, `EmojiDataInput`, `EmojiSearch`, `EmojiLabels`, `Frequents`, `SkinToneValue`, `EmojiImageUrl`, `EmojiStore`.
 
@@ -345,7 +354,7 @@ Types: `EmojiPicker.Root.Props`, `.State`, `.Actions`, `.ChangeEventDetails`, `.
 
 #### EmojiPicker.Search {#api-search}
 
-React Aria's `SearchField`, around `SearchInput` and `SearchClear`, as Base UI's `Combobox.InputGroup`. With no children, it renders both. `SearchInput` must be inside it. Renders a `<div>` element.
+Groups `SearchInput` and `SearchClear`, and renders both with no children. Renders a `<div>` element.
 
 <PartApi part="EmojiPickerSearch" props={api.search} />
 
@@ -369,7 +378,7 @@ Types: `EmojiPicker.SearchClear.Props`, `.State`.
 
 #### EmojiPicker.SearchStatus {#api-search-status}
 
-A polite live region with the result count, as Base UI's `Combobox.Status`; without it, `Root` renders a visually hidden one. Renders a `<span>` element.
+Announces the result count to screen readers. `Root` renders a hidden one if you don't. Renders a `<span>` element.
 
 <PartApi part="EmojiPickerSearchStatus" props={api.searchStatus} />
 
@@ -441,7 +450,7 @@ Types: `EmojiPicker.ListSection.Props`, `.State`.
 
 #### EmojiPicker.ListSectionTitle {#api-list-section-title}
 
-The section's title, inside the listbox, pinned to the top of a vertical list and to the start of a horizontal one. Renders a `<header>` element.
+The section's title, pinned while its section is in view. Renders a `<header>` element.
 
 <PartApi part="EmojiPickerListSectionTitle" props={api.listSectionTitle} />
 
@@ -473,7 +482,7 @@ Types: `EmojiPicker.ListCell.Props`, `.State`.
 
 #### EmojiPicker.ListVariations {#api-list-variations}
 
-An emoji's skin tones, opened by a long press or Shift+Space. `List` renders one; to style it, render it in `Viewport` beside `List`. Renders a `<div>` element.
+An emoji's skin tones, opened by a long press or Shift+Space. To style it, render it in `Viewport` beside `List`. Renders a `<div>` element.
 
 <PartApi part="EmojiPickerListVariations" props={api.listVariations} />
 
@@ -545,7 +554,7 @@ Types: `EmojiPicker.ReactionsItem.Props`, `.State`.
 
 #### EmojiPicker.ReactionsExpand {#api-reactions-expand}
 
-Hides the row to show `Panel`, and renders only while there is a `Panel`; Escape, when the search field has no text to clear, shows the row again. Renders a `<button>` element.
+Opens `Panel` in place of the row. Escape shows the row again. Renders a `<button>` element.
 
 <PartApi part="EmojiPickerReactionsExpand" props={api.reactionsExpand} />
 
@@ -561,7 +570,7 @@ Types: `EmojiPicker.Panel.Props`, `.State`.
 
 #### Picker hooks {#api-picker-hooks}
 
-Call them inside `Root`. The parts are built on them, so a part of your own gets the same keyboard, focus, and ARIA behavior.
+Call them inside `Root` to build your own parts with the same keyboard and accessibility behavior.
 
 <DefList rows={api.pickerHooks} />
 
@@ -569,7 +578,7 @@ Types: `UseEmojiPickerSearchReturnValue`, `UseEmojiPickerCategoriesReturnValue`,
 
 ### Suggestions hooks {#api-suggestions-hooks}
 
-Call them inside an `EmojiProvider`, or without one for the default store. They handle the field's keys, Escape, IME composition, and the insertion; your menu renders `suggestions` with the prop getters.
+They handle the field's keys, Escape, IME composition, and the insertion. Your menu renders `suggestions` with the prop getters.
 
 <DefList rows={api.suggestionsHooks} />
 
@@ -589,7 +598,7 @@ Types: `Emoji.Props`, `EmojiInput`, `ResolvedEmoji`.
 
 ### Design tokens {#api-tokens}
 
-Defined in `tokens.css`. Set them on `Root` or an ancestor. The defaults use `light-dark()`, so dark mode needs `color-scheme: dark`, such as `.dark { color-scheme: dark; }`. `shadcn.css` sets the tokens from shadcn/ui's theme variables instead.
+Defined in `tokens.css`. Set them on `Root` or an ancestor. For dark mode, set `color-scheme: dark`, such as `.dark { color-scheme: dark; }`. `shadcn.css` maps them to your shadcn/ui theme.
 
 <AttrTable head={["Token", "Default (light / dark)", "Description"]} rows={api.tokens} />
 
