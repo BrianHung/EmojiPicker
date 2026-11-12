@@ -1,5 +1,13 @@
 # emoji-components
 
+## 1.0.0-alpha.4
+
+### Patch Changes
+
+- 773009b: `ListVariations` builds its collection with React Aria's `CollectionBuilder`, dropping React Stately's legacy `Item` from the bundle.
+- Updated dependencies [836e734]
+  - @emoji-components/core@1.0.0-alpha.4
+
 ## 1.0.0-alpha.3
 
 ### Patch Changes

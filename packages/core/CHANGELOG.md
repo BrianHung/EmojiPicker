@@ -1,5 +1,11 @@
 # @emoji-components/core
 
+## 1.0.0-alpha.4
+
+### Patch Changes
+
+- 836e734: The checks of which emoji the device font draws persist to `localStorage` per device, so a repeat visit skips the canvas work. Each visit still draws one sample per Unicode version, and a mismatch discards the stored checks.
+
 ## 1.0.0-alpha.3
 
 ### Patch Changes

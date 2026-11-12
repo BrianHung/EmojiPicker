@@ -1,6 +1,6 @@
 {
   "name": "emoji-components",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "Unstyled, composable emoji picker for React.",
   "keywords": [
     "react",
@@ -78,7 +78,7 @@
     "react-dom": "^18.2.0 || ^19.0.0"
   },
   "dependencies": {
-    "@emoji-components/core": "1.0.0-alpha.3",
+    "@emoji-components/core": "1.0.0-alpha.4",
     "@react-types/shared": "^3.37.0",
     "dom-input-range": "^2.0.1",
     "react-aria": "^3.53.1",

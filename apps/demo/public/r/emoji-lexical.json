@@ -4,7 +4,7 @@
   "title": "Emoji Lexical",
   "description": "Shortcode suggestions for a Lexical editor: the useLexicalEmojiSuggestions hook, the EmojiSuggestionsPlugin component, and an EmojiNode for custom emoji.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.3",
+    "emoji-components@1.0.0-alpha.4",
     "lexical",
     "@lexical/react"
   ],
