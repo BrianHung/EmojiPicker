@@ -12,7 +12,7 @@ const fromNpm = process.argv.includes("--from-npm");
 const dryRun = process.argv.includes("--dry-run");
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
-const env = { ...process.env, CI: "1", NEXT_TELEMETRY_DISABLED: "1" };
+const env = { ...process.env, CI: "1", NEXT_TELEMETRY_DISABLED: "1", ...(fromNpm && { npm_config_prefer_online: "true" }) };
 const run = (cmd, args, cwd = root, stdio = "inherit") => execFileSync(cmd, args, { cwd, stdio, env, encoding: "utf8" });
 const sh = (cwd, command) => run("sh", ["-c", command], cwd);
 
@@ -138,7 +138,12 @@ async function check(url, effect) {
   page.on("response", (r) => r.status() >= 400 && problems.push(`${r.url()} ${r.status()}`));
   await page.goto(url);
   const options = page.locator(CELLS);
-  await options.first().waitFor({ timeout: 15000 });
+  await options
+    .first()
+    .waitFor({ timeout: 15000 })
+    .catch((e) => {
+      throw new Error(`${e.message}\n${problems.join("\n")}`);
+    });
   const all = await settled(page, options);
   if (all > 1000) throw new Error(`${url}: ${all} cells rendered, so the list is not virtualized: the Viewport has no height`);
   await page.getByRole("searchbox").fill("smile");
