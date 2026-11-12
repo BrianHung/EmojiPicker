@@ -117,8 +117,9 @@ test("registry card: one cell looks highlighted when results change under a rest
   await root.locator(emojiItem).nth(1).hover();
   await page.keyboard.type("cat");
   await expect(root.locator(`${emojiItem}[data-highlighted]`)).toHaveAccessibleName("cat face");
-  const filled = root.locator(emojiItem).evaluateAll((cells) => cells.filter((c) => getComputedStyle(c).backgroundColor !== "rgba(0, 0, 0, 0)").length);
-  expect(await filled).toBe(1);
+  // The previous highlight fades out over a transition
+  const filled = () => root.locator(emojiItem).evaluateAll((cells) => cells.filter((c) => getComputedStyle(c).backgroundColor !== "rgba(0, 0, 0, 0)").length);
+  await expect.poll(filled).toBe(1);
 });
 
 test("a popover's picker fits a short viewport", async ({ page }) => {
