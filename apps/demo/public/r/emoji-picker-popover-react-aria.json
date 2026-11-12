@@ -4,7 +4,7 @@
   "title": "Emoji Picker Popover (React Aria)",
   "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, a pick closes it, and focus returns to the trigger.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2"
+    "emoji-components@1.0.0-alpha.3"
   ],
   "registryDependencies": [
     "button",

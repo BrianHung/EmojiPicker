@@ -85,6 +85,39 @@ for (const name of ["Base UI", "React Aria", "Floating UI"])
     await expect(trigger).toBeFocused();
   });
 
+test("composer: the menu follows the query when the textarea itself scrolls, and hides once the query scrolls out", async ({ page }) => {
+  const field = page.getByRole("region", { name: "Composer" }).getByLabel("Message");
+  const menu = page.getByRole("listbox", { name: "Emoji suggestions" });
+  await field.evaluate((el) => Object.assign(el.style, { height: "80px", overflow: "auto" }));
+  await field.click();
+  await field.fill("1\n2\n3\n4\n5\n6\n7 ");
+  await page.keyboard.type(":tada");
+  await expect(menu).toBeVisible();
+  const top = (await menu.boundingBox())!.y;
+  const scrolled = await field.evaluate((el) => {
+    const before = el.scrollTop;
+    el.scrollTop -= 8;
+    return before - el.scrollTop;
+  });
+  await expect.poll(async () => (await menu.boundingBox())?.y).toBe(top + scrolled);
+  await field.evaluate((el) => (el.scrollTop = 0));
+  await expect(menu).toBeHidden();
+});
+
+test("composer: a pick from the popover lands at the caret in the controlled field, which sends it", async ({ page }) => {
+  const composer = page.getByRole("region", { name: "Composer" });
+  const field = composer.getByLabel("Message");
+  await field.click();
+  await page.keyboard.type("go ");
+  await composer.getByRole("button", { name: "Insert emoji" }).click();
+  await page.keyboard.type("rocket");
+  await page.keyboard.press("Enter");
+  await expect(field).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#sent")).toHaveText("go 🚀");
+  await expect(field).toHaveValue("");
+});
+
 test("search failure: the empty state offers a retry, the live region gives no count, and the retry recovers", async ({ page }) => {
   const root = page.getByRole("region", { name: "Search" });
   const status = root.locator(slot("searchStatus"));

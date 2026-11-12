@@ -6,8 +6,8 @@ const interaction = "hovered, focused, focusVisible, pressed, disabled";
 export const root = rowsOf<EmojiPicker.Root.Props>()([
   {
     name: "onSelect",
-    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel() }) => void',
-    description: "Runs when the user selects an emoji. A selection shows the reaction row again; close an enclosing popover here. `details.cancel()` keeps the value and the expanded picker as they are.",
+    type: '(selection: EmojiSelection, details: { reason: "item-press" | "imperative-action", event, cancel(), isCanceled }) => void',
+    description: "Runs when the user selects an emoji. A selection shows the reaction row again; close an enclosing popover here, unless `details.isCanceled`. `details.cancel()` keeps the value and the expanded picker as they are.",
   },
   { name: "columns", type: '"fit" | number', default: '`"fit"`', description: "Emoji per row: as many as fit the width, or exactly this many." },
   {
@@ -16,7 +16,12 @@ export const root = rowsOf<EmojiPicker.Root.Props>()([
     description:
       'The sections in order, each `{ id, name?, icon?, nav? }`. Ids are `"frequent"` (frequently used), a group id such as `"smileys-people"`, `"custom"` (custom emoji without a group), and `"custom:<group>"`. Custom sections that are not listed follow the listed ones.',
   },
-  { name: "frequent", type: "number | false | readonly string[]", default: "`16`", description: "How many frequently used emoji to show, or fixed unified codes to show in their place. `false` hides the section." },
+  {
+    name: "frequent",
+    type: "number | false | readonly string[]",
+    default: "`16`",
+    description: "How many frequently used emoji to show, or fixed unified codes to show in their place. `false` hides the section; with no history, it is hidden until the first pick or `defaultFrequents`.",
+  },
   { name: "searchResults", type: '"ranked" | "grouped"', default: '`"ranked"`', description: "Search results in one ranked list, or in their sections." },
   { name: "searchLimit", type: "number", default: "`200`", description: "The most results a search shows." },
   { name: "query", type: "string", description: "The search text. Controlled." },

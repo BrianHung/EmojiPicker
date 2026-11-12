@@ -12,7 +12,7 @@ const fromNpm = process.argv.includes("--from-npm");
 const dryRun = process.argv.includes("--dry-run");
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
-const env = { ...process.env, CI: "1", NEXT_TELEMETRY_DISABLED: "1" };
+const env = { ...process.env, CI: "1", NEXT_TELEMETRY_DISABLED: "1", ...(fromNpm && { npm_config_prefer_online: "true" }) };
 const run = (cmd, args, cwd = root, stdio = "inherit") => execFileSync(cmd, args, { cwd, stdio, env, encoding: "utf8" });
 const sh = (cwd, command) => run("sh", ["-c", command], cwd);
 
@@ -84,8 +84,8 @@ if (!fromNpm) {
   }
   registry = await serve(items, `node -e 'require("node:http").createServer((q, s) => q.url === "/" ? s.end() : require("node:fs").readFile("." + q.url, (e, b) => (e ? ((s.statusCode = 404), s.end()) : s.end(b)))).listen(${PORT})'`, PORT);
 }
-const JSDELIVR = /https:\/\/cdn\.jsdelivr\.net\/npm\/emoji-components@[^/]+\/r\//;
-const local = (command) => (fromNpm ? command : command.replace(JSDELIVR, `http://localhost:${PORT}/`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
+const REGISTRY = /https:\/\/(?:cdn\.jsdelivr\.net\/npm\/emoji-components@[^/]+|emoji\.brianhung\.me)\/r\//g;
+const local = (command) => (fromNpm ? command : command.replace(REGISTRY, `http://localhost:${PORT}/`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
 
 async function serve(cwd, command, port) {
   const child = spawn("sh", ["-c", `exec ${command}`], { cwd, env: { ...env, PORT: String(port) }, detached: true, stdio: ["ignore", "pipe", "pipe"] });
@@ -138,7 +138,12 @@ async function check(url, effect) {
   page.on("response", (r) => r.status() >= 400 && problems.push(`${r.url()} ${r.status()}`));
   await page.goto(url);
   const options = page.locator(CELLS);
-  await options.first().waitFor({ timeout: 15000 });
+  await options
+    .first()
+    .waitFor({ timeout: 15000 })
+    .catch((e) => {
+      throw new Error(`${e.message}\n${problems.join("\n")}`);
+    });
   const all = await settled(page, options);
   if (all > 1000) throw new Error(`${url}: ${all} cells rendered, so the list is not virtualized: the Viewport has no height`);
   await page.getByRole("searchbox").fill("smile");

@@ -5,7 +5,7 @@ export const provider = rowsOf<EmojiProvider.Props>()([
   {
     name: "data",
     type: "Dataset | EmojiDataInput | string | (({ signal }) => Promise<Dataset | EmojiDataInput>)",
-    default: '`localeData("en")` on jsDelivr',
+    default: "`localeData(locale)` on jsDelivr, English without a locale",
     description: "A URL, a loader, or a dataset object.",
   },
   {
@@ -24,12 +24,16 @@ export const provider = rowsOf<EmojiProvider.Props>()([
   },
   { name: "imageVersion", type: "number", default: "`17`", description: "The newest Unicode emoji version your images draw." },
   { name: "frequents", type: "Record<unified, { count, lastUsed }>", description: "Frequently used emoji. `count` halves every 14 days. Controlled; uncontrolled frequents persist to `localStorage`." },
-  { name: "defaultFrequents", type: "Record<unified, { count, lastUsed }>", default: "six common emoji", description: "Used while `localStorage` holds none. They can be removed like any other." },
+  {
+    name: "defaultFrequents",
+    type: "Record<unified, { count, lastUsed }>",
+    description: "Seeds the history while `localStorage` holds none; the entries can be removed like any other. Without it, Frequently used appears after the first pick.",
+  },
   { name: "onFrequentsChange", type: '(frequents, details: { reason: "pick" | "remove" | "clear", emoji?, cancel() }) => void' },
   { name: "skinTone", type: "SkinToneValue", description: "`0` (none) or `1` to `5`, light to dark. Controlled; an uncontrolled tone persists to `localStorage`." },
   { name: "defaultSkinTone", type: "SkinToneValue", default: "`0`" },
   { name: "onSkinToneChange", type: '(tone: SkinToneValue, details: { reason: "item-press" | "none", event, cancel() }) => void' },
-  { name: "locale", type: "string", default: "the dataset's", description: "A BCP 47 tag for search, A–Z order, result counts, and text direction." },
+  { name: "locale", type: "string", default: "the dataset's", description: "A BCP 47 tag for the dataset, search, A–Z order, result counts, and text direction." },
   { name: "labels", type: "Partial<EmojiLabels>", default: "English", description: "Every string the pickers show or announce." },
   { name: "prepare", type: "boolean", default: "`true`", description: "Loads the data and builds the search index while the browser is idle." },
 ]);

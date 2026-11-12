@@ -7,8 +7,8 @@ from fontTools.otlLib.builder import buildLigatureSubstSubtable
 from fontTools.ttLib import TTFont
 
 FE0F = 0xFE0F
-# WebKit looks up U+1F408 when it meets VS16; the rest is the picker's own UI: SkinTone's hands and the default frequents
-FIRST_SCREEN = [0x1F408, 0x270B, *range(0x1F3FB, 0x1F400), 0x2764, 0x1F44D, 0x1F44E, 0x1F602, 0x203C, 0x2753]
+# WebKit looks up U+1F408 when it meets VS16; the rest is the picker's own UI: SkinTone's hands
+FIRST_SCREEN = [0x1F408, 0x270B, *range(0x1F3FB, 0x1F400)]
 ZERO_WIDTH = {0x200D, FE0F, 0x20E3, *range(0xE0020, 0xE0080)}
 
 

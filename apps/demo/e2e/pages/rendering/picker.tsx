@@ -7,6 +7,7 @@ import { EmojiPicker, EmojiPickerContent, EmojiPickerPanel, EmojiPickerReactions
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { siteFrequents } from "@/lib/frequents";
 
 const artwork: Record<string, string> = {
   "2764-fe0f": "/reactions/heart.webp",
@@ -55,7 +56,7 @@ export function RenderingPicker({ onSelect }: { onSelect: (selection: EmojiSelec
         </Label>
       </div>
       {font === "noto" && <link rel="stylesheet" href={NOTO} precedence="default" />}
-      <EmojiProvider data={en} renderer={renderer} imageUrl={custom ? tapbacks : twemoji}>
+      <EmojiProvider data={en} renderer={renderer} imageUrl={custom ? tapbacks : twemoji} defaultFrequents={siteFrequents}>
         <div className="flex flex-col items-center gap-4">
           <EmojiPicker reactions={6} onSelect={onSelect} className={cn(FONTS[font])}>
             <EmojiPickerReactions />

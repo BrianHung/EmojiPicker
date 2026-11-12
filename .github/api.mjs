@@ -226,6 +226,8 @@ const storage = [...coreSource.matchAll(/persisted\("([^"]+)"\)/g)].map((m) => m
 const events = [...coreSource.matchAll(/new Event\("([^"]+)"\)/g)].map((m) => m[1]);
 for (const key of storage) if (!/^emoji-components:[a-z]+(-[a-z]+)*$/.test(key)) fail(`localStorage key ${key} must be emoji-components:<kebab-case>`);
 for (const type of events) if (type !== "emoji-components") fail(`change events default to new Event("emoji-components"), not "${type}"`);
+for (const dir of readdirSync(join(root, "packages")))
+  for (const script of ["preinstall", "install", "postinstall", "prepare"]) if (json(`packages/${dir}/package.json`).scripts?.[script]) fail(`packages/${dir} runs "${script}", which installs run; build in prepack or prepublishOnly`);
 
 // shadcn registry items: shadcn writes a file without a target by its type (resolveFileTargetDirectory in shadcn's resolve-file-path.ts)
 const DIRS = { "registry:ui": "components/ui", "registry:lib": "lib", "registry:hook": "hooks", "registry:component": "components", "registry:block": "components" };
@@ -243,6 +245,8 @@ const registry = json("apps/demo/registry.json").items.map((item) => ({
   name: item.name,
   files: item.files.map((f) => {
     const target = f.target ?? `${DIRS[f.type]}/${basename(f.path)}`;
+    // shadcn/tailwind.css redefines data-selected as [data-selected="true"], and the parts set it as a present, empty attribute
+    if (read(`apps/demo/${f.path}`).includes("data-selected:")) fail(`registry ${item.name}: ${f.path} styles data-selected:, which shadcn/ui's variant never matches; use the element's aria state`);
     return { target, exports: exportedNames(`apps/demo/${f.path}`) };
   }),
 }));

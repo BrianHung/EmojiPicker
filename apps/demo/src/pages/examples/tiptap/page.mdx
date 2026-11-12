@@ -18,7 +18,7 @@ import menu from "@/registry/emoji-suggestions.tsx?raw";
 
 <Step title="Add the registry item.">
 
-<PackageManagers dlx="shadcn@latest add https://cdn.jsdelivr.net/npm/emoji-components@latest/r/emoji-tiptap.json" />
+<PackageManagers dlx="shadcn@latest add https://emoji.brianhung.me/r/emoji-tiptap.json" />
 
 Adds `hooks/use-emoji-tiptap.ts`, `lib/emoji-prosemirror.ts`, `components/ui/emoji-suggestions.tsx`, `components/tiptap/emoji-suggestions-menu.tsx`, and `components/tiptap/emoji-node.tsx`. Installs `emoji-components`, `@tiptap/core`, `@tiptap/pm`, and `@tiptap/react`. For ProseMirror without Tiptap or React, add `emoji-prosemirror.json` alone.
 
@@ -55,6 +55,7 @@ function TiptapEditor() {
     <>
       <EmojiPickerPopover
         aria-label="Insert emoji"
+        finalFocus={() => editor.view.dom}
         onSelect={(selection) => {
           const attrs = selection.isCustom ? emojiAttrs(store, selection.unified) : null;
           if (attrs) editor.chain().focus().insertEmoji(attrs).run();

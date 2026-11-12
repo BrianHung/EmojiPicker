@@ -146,3 +146,15 @@ it("moves the highlight once per key, from the field's own listener or getInputP
     expect(input.dataset.index).toBe("1");
   }
 });
+
+it("adds a space after the emoji unless whitespace already follows", () => {
+  const inserted = vi.spyOn(document, "execCommand");
+  for (const value of [":thumbs", ":thumbs end"]) {
+    const { input } = mountTextField();
+    input.value = value;
+    input.setSelectionRange(7, 7);
+    React.act(() => input.focus());
+    keydown(input, "Enter");
+  }
+  expect(inserted.mock.calls.map((call) => call[2])).toEqual(["👍 ", "👍"]);
+});

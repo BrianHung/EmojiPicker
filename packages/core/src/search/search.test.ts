@@ -12,6 +12,7 @@ describe("lexical", () => {
   it("ranks whole names and shortcodes first", () => {
     expect(glyphs(run(lexicalSearch(), "fire"))[0]).toBe("🔥");
     expect(glyphs(run(lexicalSearch(), "tada"))[0]).toBe("🎉");
+    expect(glyphs(run(lexicalSearch(), "sun"))[0]).toBe("☀️");
   });
 
   it("corrects typos only when the exact search comes up short", () => {

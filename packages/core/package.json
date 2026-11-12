@@ -1,6 +1,6 @@
 {
   "name": "@emoji-components/core",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "Framework-neutral emoji data, search, frequently used emoji, skin tones, picker and suggestions state.",
   "keywords": [
     "emoji",
@@ -75,7 +75,7 @@
     }
   },
   "devDependencies": {
-    "@emoji-components/twemoji-font": "^1.0.0-alpha.2",
+    "@emoji-components/twemoji-font": "^1.0.0-alpha.3",
     "@types/node": "^22.20.5",
     "emojibase": "^18.0.0",
     "emojibase-data": "^18.0.0",

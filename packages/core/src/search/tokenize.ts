@@ -11,6 +11,9 @@ export type TokenizerOptions = {
 
 const SEPARATORS = /[\s_\-:,.()]+/;
 const NON_ASCII = /[^\x00-\x7f]/;
+const HIRAGANA = /[\u3041-\u3096\u309d\u309e]/g;
+const HIRAGANA_ONLY = /^[\p{sc=Hiragana}\u30fc]+$/u;
+const toKatakana = (text: string) => text.replace(HIRAGANA, (c) => String.fromCharCode(c.charCodeAt(0) + 0x60));
 
 export function canonicalLocale(locale: string | undefined): string | undefined {
   if (!locale) return undefined;
@@ -42,7 +45,8 @@ export function createTokenizer({ locale, segmenter }: TokenizerOptions = {}): T
         tokens.push(piece);
         continue;
       }
-      for (const { segment, isWordLike } of words.segment(piece)) if (isWordLike ?? segment.trim()) tokens.push(segment);
+      // Kana folds to katakana, so ねこ finds ネコ; all-hiragana text folds before segmenting, which splits hiragana words it doesn't know (は|ー|と)
+      for (const { segment, isWordLike } of words.segment(HIRAGANA_ONLY.test(piece) ? toKatakana(piece) : piece)) if (isWordLike ?? segment.trim()) tokens.push(toKatakana(segment));
     }
     return tokens;
   };

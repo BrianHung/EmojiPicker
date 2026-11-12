@@ -12,7 +12,8 @@ it("writes a localized dataset, with iamcal shortcodes before CLDR's", () => {
   const ja = JSON.parse(fs.readFileSync(out, "utf8")) as Dataset;
   expect(ja).toMatchObject({ format: 1, locale: "ja", emojibase: en.emojibase });
   expect(ja.groups).toHaveLength(en.groups.length);
-  expect(ja.groups[1]).toBe("動物と自然");
+  expect(ja.groups.slice(0, 2)).toEqual(["スマイリーと感情、人と体", "動物と自然"]);
+  expect(en.groups[0]).toBe("Smileys & People");
   expect(ja.emojis).toHaveLength(en.emojis.length);
   const thumbs = ja.emojis.find((e) => e[0] === "1f44d")!;
   expect(thumbs[1]).toBe("サムズアップ");

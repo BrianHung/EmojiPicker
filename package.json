@@ -16,6 +16,7 @@
     "dev": "npm run dev -w demo",
     "build": "npm run build -w @emoji-components/core && npm run build -w emoji-components && npm run build -w demo",
     "build:font": "npm run build -w @emoji-components/twemoji-font",
+    "prepare": "npm run build -w @emoji-components/data",
     "test": "npm test -w @emoji-components/core -w emoji-components",
     "test:e2e": "npm run test:e2e -w demo",
     "test:a11y": "npm run test:a11y -w demo",
@@ -30,7 +31,7 @@
     "lint:packages": "publint packages/core && publint packages/react && publint packages/data && attw --pack packages/core --profile esm-only && attw --pack packages/react --profile esm-only --exclude-entrypoints ./tokens.css ./theme.css ./shadcn.css && attw --pack packages/data --profile esm-only --entrypoints ./en/iamcal.json ./ja/cldr.json",
     "release:check": "node .github/release-steps.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version && npm install --package-lock-only"
+    "version-packages": "changeset version && npm install --package-lock-only && npm run build:registry -w demo"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",

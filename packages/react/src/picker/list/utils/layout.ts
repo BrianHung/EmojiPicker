@@ -90,6 +90,7 @@ export abstract class EmojiGridLayout extends Layout<CollectionNode, EmojiGridLa
     const cell = this.place(index, at.row, at.column);
     const info = new LayoutInfo("item", key, new Rect(cell.x, cell.y, this.metrics.cellWidth, this.metrics.cellHeight));
     info.parentKey = at.section.id;
+    info.allowOverflow = true;
     this.cellInfos.set(key, info);
     return info;
   }

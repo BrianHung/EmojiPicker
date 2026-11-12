@@ -8,6 +8,7 @@ import {
   GROUP_KEY_FOOD_DRINK,
   GROUP_KEY_OBJECTS,
   GROUP_KEY_PEOPLE_BODY,
+  GROUP_KEY_SMILEYS_EMOTION,
   GROUP_KEY_SYMBOLS,
   GROUP_KEY_TRAVEL_PLACES,
   joinShortcodesToEmoji,
@@ -53,8 +54,9 @@ const isEnglish = (locale: string) => locale.split("-")[0] === "en";
 export const defaultShortcodeSets = (locale: string) => (isEnglish(locale) ? ["iamcal"] : ["iamcal", "cldr"]);
 
 const GROUP_OF: Record<number, number> = { 0: 0, 1: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6, 9: 7 };
-const MESSAGE_KEY: Record<(typeof GROUPS)[number], GroupKey> = {
-  "smileys-people": GROUP_KEY_PEOPLE_BODY,
+// Smileys & People merges two emojibase groups, so its name lists both
+const MESSAGE_KEY: Record<(typeof GROUPS)[number], GroupKey | GroupKey[]> = {
+  "smileys-people": [GROUP_KEY_SMILEYS_EMOTION, GROUP_KEY_PEOPLE_BODY],
   "animals-nature": GROUP_KEY_ANIMALS_NATURE,
   "food-drink": GROUP_KEY_FOOD_DRINK,
   "travel-places": GROUP_KEY_TRAVEL_PLACES,
@@ -120,7 +122,9 @@ export function buildDataset({ locale, shortcodes: sets = defaultShortcodeSets(l
   }
 
   const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase(locale) + s.slice(1);
-  const groups = isEnglish(locale) ? ENGLISH_GROUPS : GROUPS.map((key) => capitalize(messages.groups.find((g) => g.key === MESSAGE_KEY[key])?.message ?? key));
+  const message = (key: GroupKey) => messages.groups.find((g) => g.key === key)?.message ?? key;
+  const list = new Intl.ListFormat(locale, { type: "conjunction" });
+  const groups = isEnglish(locale) ? ENGLISH_GROUPS : GROUPS.map((key) => capitalize(list.format(toArray(MESSAGE_KEY[key]).map(message))));
 
   return {
     dataset: { format: 1, locale, emojibase: version, groups, emojis, toneExceptions },

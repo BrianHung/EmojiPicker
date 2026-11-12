@@ -77,6 +77,7 @@ export interface ReactionsContextValue {
   expandable: boolean;
   // The reaction buttons, for focus to land on when the row reopens
   items: Map<string, HTMLElement>;
+  expand: React.RefObject<HTMLElement | null>;
   panel: React.RefObject<HTMLDivElement | null>;
   panelId: string;
   registerPanel(): () => void;

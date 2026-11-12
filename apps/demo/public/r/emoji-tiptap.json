@@ -4,7 +4,7 @@
   "title": "Emoji Tiptap",
   "description": "Shortcode suggestions for a Tiptap 3 editor: the useTiptapEmojiSuggestions hook on the ProseMirror plugin, the EmojiSuggestionsMenu component, and an EmojiNode for custom emoji.",
   "dependencies": [
-    "emoji-components@1.0.0-alpha.2",
+    "emoji-components@1.0.0-alpha.3",
     "@tiptap/core",
     "@tiptap/pm",
     "@tiptap/react"

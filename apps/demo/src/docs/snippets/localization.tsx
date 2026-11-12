@@ -1,29 +1,35 @@
 "use client";
 
-import { EmojiProvider, localeData, type EmojiLabels } from "emoji-components";
-
-const labels: Partial<EmojiLabels> = {
-  picker: "絵文字ピッカー",
-  searchPlaceholder: "検索",
-  searchLabel: "絵文字を検索",
-  searchClear: "クリア",
-  searchResults: "検索結果",
-  emojiList: "絵文字",
-  resultCount: (count) => (count ? `${count}件` : "見つかりません"),
-  categoryNavigation: "カテゴリ",
-  frequent: "よく使う絵文字",
-  custom: "カスタム",
-  reactions: "リアクション",
-  expandReactions: "その他の絵文字",
-  previewCaption: "今の気分は？",
-  skinTone: "肌の色",
-  skinTones: ["標準", "明るい肌色", "やや明るい肌色", "中間の肌色", "やや濃い肌色", "濃い肌色"],
-  withSkinTone: (name, tone) => `${name}: ${["明るい肌色", "やや明るい肌色", "中間の肌色", "やや濃い肌色", "濃い肌色"][tone - 1]}`,
-};
+import * as React from "react";
+import { useTranslation } from "react-i18next";
+import { EmojiProvider, type EmojiLabels } from "emoji-components";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const { t, i18n } = useTranslation("emoji");
+  const labels = React.useMemo<EmojiLabels>(
+    () => ({
+      picker: t("picker"),
+      searchPlaceholder: t("searchPlaceholder"),
+      searchLabel: t("searchLabel"),
+      searchClear: t("searchClear"),
+      searchResults: t("searchResults"),
+      emojiList: t("emojiList"),
+      resultCount: (count) => t("resultCount", { count }),
+      categoryNavigation: t("categoryNavigation"),
+      frequent: t("frequent"),
+      custom: t("custom"),
+      suggestions: t("suggestions"),
+      reactions: t("reactions"),
+      expandReactions: t("expandReactions"),
+      previewCaption: t("previewCaption"),
+      skinTone: t("skinTone"),
+      skinTones: [t("skinTones.0"), t("skinTones.1"), t("skinTones.2"), t("skinTones.3"), t("skinTones.4"), t("skinTones.5")],
+      withSkinTone: (name, tone) => t("withSkinTone", { name, tone }),
+    }),
+    [t],
+  );
   return (
-    <EmojiProvider data={localeData("ja", { shortcodes: "cldr" })} locale="ja" labels={labels}>
+    <EmojiProvider locale={i18n.language} labels={labels}>
       {children}
     </EmojiProvider>
   );
