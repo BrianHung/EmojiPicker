@@ -84,8 +84,8 @@ if (!fromNpm) {
   }
   registry = await serve(items, `node -e 'require("node:http").createServer((q, s) => q.url === "/" ? s.end() : require("node:fs").readFile("." + q.url, (e, b) => (e ? ((s.statusCode = 404), s.end()) : s.end(b)))).listen(${PORT})'`, PORT);
 }
-const JSDELIVR = /https:\/\/cdn\.jsdelivr\.net\/npm\/emoji-components@[^/]+\/r\//;
-const local = (command) => (fromNpm ? command : command.replace(JSDELIVR, `http://localhost:${PORT}/`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
+const REGISTRY = /https:\/\/(?:cdn\.jsdelivr\.net\/npm\/emoji-components@[^/]+|emoji\.brianhung\.me)\/r\//g;
+const local = (command) => (fromNpm ? command : command.replace(REGISTRY, `http://localhost:${PORT}/`).replace(/(?<![\w@/-])emoji-components(?![\w/@-])/, `${tarballs["emoji-components"]} ${tarballs["@emoji-components/core"]}`));
 
 async function serve(cwd, command, port) {
   const child = spawn("sh", ["-c", `exec ${command}`], { cwd, env: { ...env, PORT: String(port) }, detached: true, stdio: ["ignore", "pipe", "pipe"] });
