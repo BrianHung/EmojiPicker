@@ -1,5 +1,6 @@
 // Adapted from emoji-picker-react (MIT, see THIRD_PARTY_NOTICES.md)
 import { unifiedToNative, withoutFe0f, withoutTone, type EmojiRecord } from "./dataset";
+import { loadResults, saveResults } from "./native-cache";
 import { createStore } from "./reactive";
 
 const DEFAULT_EMOJI_FONT = '"Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "EmojiOne Color", "Android Emoji"';
@@ -26,19 +27,7 @@ export interface NativeSupport {
   countryFlags: boolean;
 }
 
-// Verdicts outlive the page per device; the version samples, drawn fresh each time, vouch for the rest
-const STORAGE_KEY = "emoji-components:native";
-type Stored = { ua: string; fonts: Record<string, Record<string, boolean>> };
-const readStored = (): Stored | null => {
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null") as Stored | null;
-    return stored?.ua === navigator.userAgent ? stored : null;
-  } catch {
-    return null;
-  }
-};
-
-type Probe = NativeProbe & { font: string; drawn: Set<string>; restore(samples: readonly string[]): void };
+type Probe = NativeProbe & { drawn: Set<string>; restore(samples: readonly string[]): void };
 
 const unquote = (family: string) => family.trim().replace(/^(["'])(.*)\1$/, "$2");
 
@@ -69,12 +58,7 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: 
     saving = true;
     setTimeout(() => {
       saving = false;
-      if (probes.get(family) !== probe) return;
-      try {
-        const stored = readStored() ?? { ua: navigator.userAgent, fonts: {} };
-        stored.fonts[family] = Object.fromEntries([...results].filter((e): e is [string, boolean] => typeof e[1] === "boolean"));
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
-      } catch {}
+      if (probes.get(family) === probe) saveResults(family, results);
     }, 1000);
   };
   const draw = (text: string, y: number, ink: string) => {
@@ -115,14 +99,14 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: 
     }
   };
   const probe: Probe = {
-    font: family,
     drawn,
+    // Saved results count only while the samples, drawn fresh, still match them
     restore(samples) {
       if (restored) return;
       restored = true;
-      const cached = readStored()?.fonts[family];
-      if (!cached || !samples.every((unified) => cached[unified] === results.get(unified))) return;
-      for (const [unified, verdict] of Object.entries(cached)) if (!results.has(unified)) results.set(unified, verdict);
+      const saved = loadResults(family);
+      if (!saved || !samples.every((unified) => saved[unified] === results.get(unified))) return;
+      for (const [unified, result] of Object.entries(saved)) if (!results.has(unified)) results.set(unified, result);
     },
     prime(unifieds) {
       const candidates: [string, string, string][] = [];
@@ -205,7 +189,7 @@ export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, s
   const checked = (unified: string) => !probe.declares(unified);
   const drawn = [FLAG_SAMPLE, ...samples.values()].filter(checked);
   probe.prime(drawn);
-  (probe as Partial<Probe>).restore?.(drawn);
+  if ("restore" in probe) (probe as Probe).restore(drawn);
   const failedVersions = new Set<number>();
   for (const [version, unified] of samples) if (checked(unified) && probe.result(unified) === false) failedVersions.add(version);
   return { probe, failedVersions, countryFlags: !checked(FLAG_SAMPLE) || probe.result(FLAG_SAMPLE) !== false };
