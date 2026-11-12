@@ -72,7 +72,7 @@ export function Editor() {
 
 ## How it works
 
-`useLexicalEmojiSuggestions` reads the `:query` before the caret, ranks the matches, and handles the keys through Lexical's command system. The menu is Floating UI's: `anchor` is the `:query`'s box as a virtual element, and the hook keeps the keys, so the menu never takes focus.
+`useLexicalEmojiSuggestions` finds the `:query` and handles the keys through Lexical's commands. Focus stays in the editor.
 
 ```tsx title="emoji-suggestions-plugin.tsx (excerpt)"
 import { autoUpdate, flip, FloatingPortal, offset, shift, useFloating } from "@floating-ui/react";

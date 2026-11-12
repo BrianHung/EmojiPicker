@@ -81,11 +81,11 @@ export function Editor() {
 }
 ```
 
-`immediatelyRender: false` renders the editor after hydration, as Tiptap requires with server rendering, and `<Suspense>` lets Next.js Cache Components prerender the page, since Tiptap calls `Math.random()` while it renders.
+With server rendering, Tiptap needs `immediatelyRender: false`. In Next.js, wrap the editor in `<Suspense>` so the page can prerender.
 
 ## How it works
 
-`useTiptapEmojiSuggestions` registers the ProseMirror plugin on the editor. The plugin finds the `:query`, ranks the matches, and handles the keys. The menu is Floating UI's: `anchor` is the `:query`'s box as a virtual element, and the hook keeps the keys, so the menu never takes focus.
+`useTiptapEmojiSuggestions` adds a ProseMirror plugin that finds the `:query` and handles the keys. Focus stays in the editor.
 
 ```tsx title="emoji-suggestions-menu.tsx (excerpt)"
 import { autoUpdate, flip, FloatingPortal, offset, shift, useFloating } from "@floating-ui/react";

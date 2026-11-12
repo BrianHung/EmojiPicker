@@ -9,7 +9,7 @@ import { BufoPicker, LoadPack } from "./demo";
 
 ## Usage
 
-Each custom emoji is an `id`, a `name`, an `imageUrl`, optional `shortcodes`, `tags`, `width`, `height`, `animated`, `stillUrl`, and `base` (a unified code whose name and tags also find it), and a `group` that becomes its own section.
+Each `group` becomes its own section.
 
 ```tsx title="picker.tsx"
 "use client";
@@ -33,9 +33,7 @@ export function Picker() {
 
 ## Host a pack
 
-A pack is a `pack.json` served as a static file and fetched at runtime. A pack served from your own origin needs no CORS headers. This site's [example pack](/packs/bufo/pack.json) references its images on all-the.bufo.zone.
-
-`customEmojis` also takes a loader, `({ signal }) => Promise<CustomEmoji[]>`, such as one that fetches through your own API. Images load as `<img>` elements and need no CORS. Under a strict Content Security Policy, self-host the images and set each emoji's `imageUrl` to your copy.
+A pack is a static `pack.json`, fetched at runtime, as in this site's [example pack](/packs/bufo/pack.json). Images load as `<img>` elements and need no CORS headers. Under a strict Content Security Policy, host the images yourself.
 
 ```json title="pack.json"
 [
