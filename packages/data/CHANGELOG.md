@@ -1,5 +1,9 @@
 # @emoji-components/data
 
+## 1.0.0-alpha.4
+
+No changes in this release.
+
 ## 1.0.0-alpha.3
 
 ### Patch Changes

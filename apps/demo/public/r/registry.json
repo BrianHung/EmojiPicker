@@ -9,7 +9,7 @@
       "title": "Emoji Picker",
       "description": "Styled parts for an emoji picker and a reaction row that expands into it, with shortcodes, skin tones, custom emoji, and replaceable search, built on emoji-components.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3"
+        "emoji-components@1.0.0-alpha.4"
       ],
       "registryDependencies": [
         "utils"
@@ -31,7 +31,7 @@
       "title": "Emoji Picker Popover",
       "description": "The emoji picker in your shadcn/ui popover, for the Base UI (default) and Radix bases. A trigger opens it, a pick closes it, and focus returns to the trigger. For --base aria, use emoji-picker-popover-react-aria.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3"
+        "emoji-components@1.0.0-alpha.4"
       ],
       "registryDependencies": [
         "button",
@@ -51,7 +51,7 @@
       "title": "Emoji Picker Popover (React Aria)",
       "description": "The emoji picker in your shadcn/ui popover, for the React Aria base (--base aria). A trigger opens it, a pick closes it, and focus returns to the trigger.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3"
+        "emoji-components@1.0.0-alpha.4"
       ],
       "registryDependencies": [
         "button",
@@ -71,7 +71,7 @@
       "title": "Emoji Picker Popover (Floating UI)",
       "description": "The emoji picker in a popover on Floating UI, without a shadcn/ui popover. A trigger opens it, a pick closes it, and focus returns to the trigger.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3",
+        "emoji-components@1.0.0-alpha.4",
         "@floating-ui/react"
       ],
       "registryDependencies": [
@@ -109,7 +109,7 @@
       "title": "Emoji ProseMirror",
       "description": "Shortcode suggestions as a ProseMirror plugin, without React. It finds the :query, handles the keys, and replaces the query with the chosen emoji.",
       "dependencies": [
-        "@emoji-components/core@1.0.0-alpha.3",
+        "@emoji-components/core@1.0.0-alpha.4",
         "prosemirror-state",
         "prosemirror-view"
       ],
@@ -126,7 +126,7 @@
       "title": "Emoji Suggestions",
       "description": "The shortcode suggestions menu for what useEmojiSuggestions returns, at the caret on Floating UI. It never takes focus; the hook handles the keys. The Tiptap and Lexical items render it.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3",
+        "emoji-components@1.0.0-alpha.4",
         "@floating-ui/react"
       ],
       "registryDependencies": [
@@ -145,7 +145,7 @@
       "title": "Emoji Tiptap",
       "description": "Shortcode suggestions for a Tiptap 3 editor: the useTiptapEmojiSuggestions hook on the ProseMirror plugin, the EmojiSuggestionsMenu component, and an EmojiNode for custom emoji.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3",
+        "emoji-components@1.0.0-alpha.4",
         "@tiptap/core",
         "@tiptap/pm",
         "@tiptap/react"
@@ -177,7 +177,7 @@
       "title": "Emoji Lexical",
       "description": "Shortcode suggestions for a Lexical editor: the useLexicalEmojiSuggestions hook, the EmojiSuggestionsPlugin component, and an EmojiNode for custom emoji.",
       "dependencies": [
-        "emoji-components@1.0.0-alpha.3",
+        "emoji-components@1.0.0-alpha.4",
         "lexical",
         "@lexical/react"
       ],
