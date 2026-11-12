@@ -42,7 +42,7 @@ Visual baselines are local. Capture them with `npm run test:baseline -w demo`.
 
 - [ci.yml](.github/workflows/ci.yml) runs the same step groups as `release:check` from `.github/release-steps.mjs` (`check`, `smoke`, `e2e`, `a11y`), with `E2E_VISUAL=0` because visual baselines are local, plus the Twemoji font build and its Chromium, WebKit, and Firefox render test.
 - [screen-readers.yml](.github/workflows/screen-readers.yml) runs VoiceOver and NVDA.
-- [release.yml](.github/workflows/release.yml), run by hand, opens the version PR and publishes ([Releasing](#releasing)).
+- [release.yaml](.github/workflows/release.yaml), run by hand, opens the version PR and publishes ([Releasing](#releasing)).
 - [upstream.yml](.github/workflows/upstream.yml), run by hand, bumps the pinned emojibase-data and Twemoji versions, rebuilds, runs the tests, and opens a PR.
 
 ## Package layout
@@ -83,7 +83,7 @@ A name belongs to the code that defines and reads it. Code only one component us
 
 Changes to a published package come with a changeset (`npm run changeset`). The four packages version together (`"fixed"` in `.changeset/config.json`), and `.github/version-check.mjs` checks that they do. Changesets is in prerelease mode (`.changeset/pre.json`, tag `alpha`), so versions are `1.0.0-alpha.N` until `npx changeset pre exit`, and `changeset publish` publishes them to the `alpha` dist-tag.
 
-The [Release workflow](.github/workflows/release.yml) runs only by hand, with a `mode` input:
+The [Release workflow](.github/workflows/release.yaml) runs only by hand, with a `mode` input:
 
 - `version` opens or updates the "Version packages" PR (`npm run version-packages`: versions, changelogs, the lockfile, and the site's `/r/` pins), committed by `github-actions[bot]`.
 - `publish`, from `main`, requires a successful CI run on the commit, runs the `check`, `font`, `smoke`, and `onboarding` groups of `.github/release-steps.mjs`, then runs `changeset publish` through `changesets/action/publish`. It publishes only versions that are not on npm yet, pushes a tag per package, and creates a GitHub Release per package from its changelog, marked as a prerelease when the version has a `-`. It authenticates with npm trusted publishing (OIDC): no npm token, and provenance is attached automatically.
@@ -112,7 +112,7 @@ To publish:
 
 ### Trusted publishing setup
 
-Once per package (`emoji-components`, `@emoji-components/core`, `@emoji-components/data`, `@emoji-components/twemoji-font`), on npmjs.com: Settings → Trusted publishing → GitHub Actions, with organization or user `BrianHung`, repository `emoji-components`, workflow filename `release.yml`, and no environment. Each package's `repository.url` must match the repository. The repository setting Actions → General → "Allow GitHub Actions to create and approve pull requests" must stay on for the version PR.
+Once per package (`emoji-components`, `@emoji-components/core`, `@emoji-components/data`, `@emoji-components/twemoji-font`), on npmjs.com: Settings → Trusted publishing → GitHub Actions, with organization or user `BrianHung`, repository `emoji-components`, workflow filename `release.yaml`, and no environment. Each package's `repository.url` must match the repository. The repository setting Actions → General → "Allow GitHub Actions to create and approve pull requests" must stay on for the version PR.
 
 ### shadcn registry
 
