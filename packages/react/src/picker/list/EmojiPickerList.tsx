@@ -128,9 +128,15 @@ const ListInner = React.forwardRef<HTMLDivElement, InnerProps>(function ListInne
   }, []);
   const contentWidth = React.useRef(0);
   const latestGrid = useLatest(grid);
+  const measuredFor = React.useRef<unknown[]>([]);
   const onRendered = React.useCallback(() => {
-    measure();
     const state = virtualizer.current?.virtualizer;
+    // A scroll moves the visible rect over cells already measured; reading styles there forces a layout per frame
+    const inputs = [measure, state?.collection, state?.visibleRect.width, state?.visibleRect.height, elements.size > 0, headers.size > 0];
+    if (inputs.some((v, i) => v !== measuredFor.current[i])) {
+      measuredFor.current = inputs;
+      measure();
+    }
     const width = state?.size.width ?? 0;
     if (width !== contentWidth.current) {
       contentWidth.current = width;
@@ -140,7 +146,7 @@ const ListInner = React.forwardRef<HTMLDivElement, InnerProps>(function ListInne
     const rect = state?.visibleRect;
     const key = rect ? layout.activeSection(rect) : null;
     latestGrid.current.afterRender({ unifieds: shown, section: key == null ? null : String(key), settled: Boolean(rect && settled(rect)) });
-  }, [measure, layout, picker.root, horizontal, settled, latestGrid]);
+  }, [measure, elements, headers, layout, picker.root, horizontal, settled, latestGrid]);
 
   // React Aria's virtualizer keeps the first renderView it gets, so this reads only the node
   const renderNode = React.useCallback((node: CollectionNode) => {
