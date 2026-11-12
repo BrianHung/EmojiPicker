@@ -46,6 +46,7 @@ const cardUsage = module(code(cli, "tsx"), "Installation › Command");
 
 const paths = [
   { name: "vite", scaffold: "npm create vite@latest app -- --template react-ts", steps: [install, ["src/App.tsx", usage], "npm run dev"], dev: true },
+  { name: "vite react 18", scaffold: "npm create vite@latest app -- --template react-ts && cd app && npm i react@18 react-dom@18 @types/react@18 @types/react-dom@18", steps: [install, ["src/App.tsx", usage], "npm run dev"] },
   { name: "next", scaffold: "npx create-next-app@latest app --yes --use-npm --disable-git", steps: [install, ["app/page.tsx", usage], "npm run dev"] },
   { name: "shadcn", scaffold: "npx shadcn@latest init -t vite -n app -b base -p nova --no-monorepo", steps: [add, ["src/App.tsx", cardUsage], "npm run dev"], dev: true },
 ];
