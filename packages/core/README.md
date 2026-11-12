@@ -26,7 +26,7 @@ input.addEventListener("keydown", (e) => suggestions.keydown(e));
 const stop = suggestions.syncCombobox(input);
 ```
 
-`data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`; `store.customEmojiErrors()` reports a custom emoji loader that failed, and `store.load()` runs it again.
+`data` defaults to the English dataset of [`@emoji-components/data`](../data/README.md) on jsDelivr, pinned to this version. Uncontrolled frequently used emoji and skin tone persist to `localStorage`, as do this device's checks of which emoji its font draws; `store.customEmojiErrors()` reports a custom emoji loader that failed, and `store.load()` runs it again.
 
 ## Entry points
 

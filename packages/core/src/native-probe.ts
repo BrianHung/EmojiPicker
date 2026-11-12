@@ -26,6 +26,20 @@ export interface NativeSupport {
   countryFlags: boolean;
 }
 
+// Verdicts outlive the page per device; the version samples, drawn fresh each time, vouch for the rest
+const STORAGE_KEY = "emoji-components:native";
+type Stored = { ua: string; fonts: Record<string, Record<string, boolean>> };
+const readStored = (): Stored | null => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "null") as Stored | null;
+    return stored?.ua === navigator.userAgent ? stored : null;
+  } catch {
+    return null;
+  }
+};
+
+type Probe = NativeProbe & { font: string; drawn: Set<string>; restore(samples: readonly string[]): void };
+
 const unquote = (family: string) => family.trim().replace(/^(["'])(.*)\1$/, "$2");
 
 const parseRange = (range: string): [number, number] => {
@@ -44,9 +58,25 @@ function declaredRanges(fontFamily: string): (unified: string) => boolean {
   return (unified) => ranges.length > 0 && [...unifiedToNative(unified)].every((c) => has(c.codePointAt(0)!));
 }
 
-function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: (unified: string) => boolean): NativeProbe {
+function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: (unified: string) => boolean, family: string): Probe {
   const results = new Map<string, boolean | null>();
+  const drawn = new Set<string>();
   const font = ctx.font;
+  let restored = false;
+  let saving = false;
+  const save = () => {
+    if (saving) return;
+    saving = true;
+    setTimeout(() => {
+      saving = false;
+      if (probes.get(family) !== probe) return;
+      try {
+        const stored = readStored() ?? { ua: navigator.userAgent, fonts: {} };
+        stored.fonts[family] = Object.fromEntries([...results].filter((e): e is [string, boolean] => typeof e[1] === "boolean"));
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+      } catch {}
+    }, 1000);
+  };
   const draw = (text: string, y: number, ink: string) => {
     ctx.save();
     ctx.beginPath();
@@ -78,12 +108,22 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: 
           difference |= words[p]! ^ words[p + CELL * height]!;
         }
         results.set(unified, alpha !== 0 && (text === comparison ? difference === 0 : difference !== 0));
+        drawn.add(unified);
       });
     } catch {
       for (const [unified] of candidates) results.set(unified, null);
     }
   };
-  return {
+  const probe: Probe = {
+    font: family,
+    drawn,
+    restore(samples) {
+      if (restored) return;
+      restored = true;
+      const cached = readStored()?.fonts[family];
+      if (!cached || !samples.every((unified) => cached[unified] === results.get(unified))) return;
+      for (const [unified, verdict] of Object.entries(cached)) if (!results.has(unified)) results.set(unified, verdict);
+    },
     prime(unifieds) {
       const candidates: [string, string, string][] = [];
       for (const unified of unifieds) {
@@ -98,24 +138,26 @@ function createProbe(ctx: CanvasRenderingContext2D, baseline: number, declares: 
         } catch {}
       }
       for (let i = 0; i < candidates.length; i += PROBE_BATCH) run(candidates.slice(i, i + PROBE_BATCH));
+      if (candidates.length) save();
     },
     result: (unified) => results.get(unified),
     probed: () => [...results.keys()],
     declares,
   };
+  return probe;
 }
 
-const probes = new Map<string, NativeProbe | null>();
+const probes = new Map<string, Probe | null>();
 const colorless = new Set<string>();
 
-function probeFor(fontFamily: string): NativeProbe | null {
+function probeFor(fontFamily: string): Probe | null {
   try {
     const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
     if (!ctx || /jsdom/i.test(navigator.userAgent)) return null;
     ctx.font = `24px ${fontFamily}`;
     ctx.textBaseline = "top";
     const baseline = ctx.measureText("😀").width;
-    const candidate = createProbe(ctx, baseline, declaredRanges(fontFamily));
+    const candidate = createProbe(ctx, baseline, declaredRanges(fontFamily), fontFamily);
     candidate.prime(["1f600"]);
     const color = Boolean(baseline) && candidate.result("1f600") === true;
     if (color) colorless.delete(fontFamily);
@@ -132,10 +174,10 @@ export function nativeProbe(fontFamily = DEFAULT_EMOJI_FONT): NativeProbe | null
   return probes.get(fontFamily)!;
 }
 
-const sameVerdicts = (before: NativeProbe | null, after: NativeProbe | null) => {
+const sameVerdicts = (before: Probe | null, after: Probe | null) => {
   if (!before || !after) return before === after;
-  after.prime(before.probed());
-  return [...before.probed()].every((unified) => before.result(unified) === after.result(unified));
+  after.prime(before.drawn);
+  return [...before.drawn].every((unified) => before.result(unified) === after.result(unified));
 };
 
 const verdicts = /* @__PURE__ */ createStore(0, (generation: number) => generation + 1);
@@ -161,7 +203,9 @@ export function onNativeSupportChange(listener: () => void): () => void {
 export function nativeSupport(probe: NativeProbe, samples: ReadonlyMap<number, string>): NativeSupport {
   // Drawing a sample the web font claims would only fetch its subset (the flags) for a known answer
   const checked = (unified: string) => !probe.declares(unified);
-  probe.prime([FLAG_SAMPLE, ...samples.values()].filter(checked));
+  const drawn = [FLAG_SAMPLE, ...samples.values()].filter(checked);
+  probe.prime(drawn);
+  (probe as Partial<Probe>).restore?.(drawn);
   const failedVersions = new Set<number>();
   for (const [version, unified] of samples) if (checked(unified) && probe.result(unified) === false) failedVersions.add(version);
   return { probe, failedVersions, countryFlags: !checked(FLAG_SAMPLE) || probe.result(FLAG_SAMPLE) !== false };
