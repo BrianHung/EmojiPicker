@@ -13,9 +13,7 @@
     "skin-tone",
     "autocomplete",
     "react-emoji-picker",
-    "emoji-picker-react",
-    "shadcn",
-    "headless-ui"
+    "shadcn"
   ],
   "license": "MIT",
   "author": "Brian Hung",
